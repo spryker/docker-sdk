@@ -84,6 +84,7 @@ function showHelp()
     echo -e " ${GREEN}run|start${NC}\t  - Run Spryker containers."
     echo -e " ${GREEN}up${NC}\t\t  - Build and run Spryker apps based on demo data."
     echo -e " ${GREEN}logs${NC}\t\t  - Tail all application exception logs."
+    echo -e " ${GREEN}wait${NC}\t\t  - Wait for requested services, e.g. \`${ITALIC}${SPRYKER_SELF_SCRIPT} wait database broker\`${NC}"
 
     echo -e ""
     echo -e "${INFO}Possible options are:${NC}"
@@ -92,10 +93,10 @@ function showHelp()
     echo -e " ${GREEN}-t${NC}\t\t  - Enable testing mode. You can set environment variable SPRYKER_TESTING_ENABLE=1 instead of using this option."
 }
 
-function showExecHelp()
+function showWaitErrorMessage()
 {
-    echo -e "${WARN}This is exec help${NC}"
-    echo -e "Example: ${SPRYKER_SELF_SCRIPT} exec -w database -w broker -w search -w scheduler -c \"ls -la; pwd; echo \\\${INTERNAL_VAR}\""
+    echo -e "${WARN}\`${SPRYKER_SELF_SCRIPT} wait\` requires at least 1 argument.${NC}"
+    echo -e "${INFO}Example of usage: ${GREEN}${SPRYKER_SELF_SCRIPT} wait service1 [service2 ...]${NC}"
 }
 
 # Global variables
@@ -356,6 +357,8 @@ function waitFor()
     local interval=${3:-3}
     local containers=$(docker ps --filter "name=${SPRYKER_DOCKER_PREFIX}_${target}_*" --format "{{ '{{' }}.Names{{ '}}' }}")
 
+    [ -z "${containers}" ] && error "${WARN}Service ${INFO}\`${1}\`${WARN} is not running. Please check the name.${NC}" && exit ${FALSE}
+
     for container in ${containers}; do
         local counter=1;
         while : ; do
@@ -553,18 +556,14 @@ function doPull()
     execDockerCompose pull --ignore-pull-failures 2> /dev/null
 }
 
-case $1 in
+command=${1}
+shift 1
+case ${command} in
   acceptance-tests)
     ;;
   functional-tests)
     ;;
-  exec)
-    ;;
-  shell)
-    ;;
   *)
-    # Starting accept arguments after $1
-    OPTIND=2
     while getopts ":xvt" opt; do
         case ${opt} in
             # x - debug, xdebug
@@ -591,12 +590,13 @@ case $1 in
                 ;;
         esac
     done
+    shift $((OPTIND -1))
 esac
 
 [ ${SPRYKER_XDEBUG_ENABLE} -eq 1 ] && enableDebuggingMode
 [ ${SPRYKER_TESTING_ENABLE} -eq 1 ] && enableTestingMode
 
-case $1 in
+case ${command} in
     build)
         doBuild
         ;;
@@ -639,80 +639,42 @@ case $1 in
         destroyAssets
         destroyImages
         ;;
-    exec|shell)
-        OPTIND=2
-        while getopts "w:c:" opt; do
-            case ${opt} in
-                # w - wait for ...
-                w)
-                    case ${OPTARG} in
-                        db|database)
-                            waitFor database
-                            ;;
-                        queue|broker)
-                            waitFor broker
-                            ;;
-                        search)
-                            waitFor search
-                            ;;
-                        scheduler|jobs)
-                            waitFor scheduler
-                            ;;
-                        key_value_store)
-                            waitFor key_value_store
-                            ;;
-                        session)
-                            waitFor session
-                            ;;
-                        all)
-                            waitFor database
-                            waitFor broker
-                            waitFor search
-                            waitFor scheduler
-                            waitFor key_value_store
-                            waitFor session
-                            ;;
-                        *)
-                            showExecHelp
-                            echo -e "\n${WARN}Unknown service "${INFO}${OPTARG}${WARN}" is requested to wait.${NC}"
-                            exit 1
-                            ;;
-                    esac
-                    ;;
-                c)
-                    verbose "Executing: ${OPTARG}"
-                    export COMMAND="${OPTARG}"
-                    ;;
-                # Unknown argument specified
-                [?])
-                    # "Unknown arguments skip silently"
-                    ;;
-            esac
+    wait)
+        if [ "$#" == 0 ];
+        then
+            showWaitErrorMessage
+            exit 1
+        fi
+
+        verbose "${INFO}Checking services...${NC}"
+        for services in "${@}"
+        do
+            waitFor ${services}
+            verbose "${OK}\`${services}\` [OK]${NC}"
         done
-        execSpryker "${COMMAND}"
         ;;
     cli)
-        doCli $2 ${@:3}
+        doCli $1 ${@:2}
         exit 0
         ;;
     console)
-        doCli console ${@:2}
+        doCli console ${@}
         ;;
     code-checks)
-        doCli console code:validation ${@:2}
+        doCli install -r sniffs
         ;;
     codecept)
         ensureTestingMode
         PS1="spryker-codecept@\u\$ " # TODO what is it?
-        doCli $2 ${@:3}
+        doCli $1 ${@:2}
         ;;
     functional-tests)
         ensureTestingMode
-        doCli console code:test:functional ${@:2}
+        doCli console code:test:functional ${@}
         ;;
     acceptance-tests)
         ensureTestingMode
-        doCli console code:test:acceptance ${@:2}
+        doCli console code:test:acceptance ${@}
         ;;
     logs)
         execSpryker "find ${SPRYKER_LOG_DIRECTORY} -type f \( -name \"exception.log\" \) -exec tail -f \"$file\" {} +"
@@ -738,7 +700,7 @@ case $1 in
         ;;
     *)
         showHelp
-        error "Unknown command \"$1\" is requested."
+        error "${WARN}Unknown command \"${command}\" is requested."
         exit 1
         ;;
 esac
