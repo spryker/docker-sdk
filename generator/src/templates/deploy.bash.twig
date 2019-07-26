@@ -679,10 +679,10 @@ case ${command} in
         fi
 
         verbose "${INFO}Checking services...${NC}"
-        for services in "${@}"
+        for service in "${@}"
         do
-            waitFor ${services}
-            verbose "${OK}\`${services}\` [OK]${NC}"
+            waitFor ${service}
+            verbose "${OK}\`${service}\` [OK]${NC}"
         done
         ;;
     cli)

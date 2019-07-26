@@ -1,19 +1,8 @@
 version: "3.5"
 
-x-volumes:
-  &app-volumes
-  volumes:
-    - logs:${SPRYKER_LOG_DIRECTORY}:rw
-    - ./${DEPLOYMENT_PATH}/context/php/php-fpm.d/worker.conf:/usr/local/etc/php-fpm.d/worker.conf:ro
-    - ./${DEPLOYMENT_PATH}/context/php/php.ini:/usr/local/etc/php.ini:ro
-{% if _mountMode != 'baked' %}
-    - ./${DEPLOYMENT_PATH}/context/php/conf.d/opcache_dev.ini:/usr/local/etc/php/conf.d/opcache.ini:ro
-{% if _mountMode == 'native' %}
-    - ./:/data
-{% else %}
-    - ${SPRYKER_DOCKER_PREFIX}_${SPRYKER_DOCKER_TAG}_data_sync:/data
-{% endif %}
-{% endif %}
+{% include "docker-volumes.yml.twig" with {
+    _mountMode: _mountMode
+} %}
 
 x-env_file:
   &test-envfile
