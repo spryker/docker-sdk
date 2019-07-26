@@ -522,6 +522,7 @@ function runApp()
 function stopApp()
 {
     verbose "${INFO}Stopping all containers${NC}"
+    stopCliContainer
     execDockerCompose down --remove-orphans
     sync stop
 }
@@ -551,6 +552,13 @@ function doPull()
 {
     docker pull ${SPRYKER_PLATFORM_IMAGE}
     execDockerCompose pull --ignore-pull-failures 2> /dev/null
+}
+
+function stopCliContainer()
+{
+  docker ps --filter "ancestor=${SPRYKER_DOCKER_PREFIX}_cli:${SPRYKER_DOCKER_TAG}" \
+      --format "{{ '{{' }}.Names{{ '}}' }}" \
+      | xargs docker rm -f > /dev/null
 }
 
 case $1 in
