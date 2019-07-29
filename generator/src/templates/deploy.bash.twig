@@ -709,9 +709,9 @@ case ${command} in
         ;;
     api-tests)
         ensureTestingMode
-        execCodecept console code:fixtures "${@:2}"
+        execCodecept console code:fixtures "${@}"
         execCodecept console queue:worker:start
-        execCodecept console code:test:api "${@:2}"
+        execCodecept console code:test:api "${@}"
         ;;
     logs)
         execSpryker "find ${SPRYKER_LOG_DIRECTORY} -type f \( -name \"exception.log\" \) -exec tail -f \"$file\" {} +"
