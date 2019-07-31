@@ -144,6 +144,10 @@ file_put_contents(
     $twig->render('docker-compose.test.yml.twig', $projectData)
 );
 file_put_contents(
+    $deploymentDir . DS . 'docker-compose.test.xdebug.yml',
+    $twig->render('docker-compose.test.xdebug.yml.twig', $projectData)
+);
+file_put_contents(
     $deploymentDir . DS . 'deploy',
     $twig->render('deploy.bash.twig', $projectData)
 );
