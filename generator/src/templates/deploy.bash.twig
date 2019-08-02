@@ -71,9 +71,6 @@ function showHelp()
     echo -e " ${GREEN}console${NC}\t  - Run Spryker console command, e.g. \`${ITALIC}${SPRYKER_SELF_SCRIPT} console code:test -vvv -g Acceptance\`${NC}."
     echo -e " ${GREEN}codecept${NC}\t  - Start a new container where you can run Codeception commands in the test environment."
     echo -e " ${GREEN}code-checks${NC}\t  - Run code-checks."
-    echo -e " ${GREEN}api-tests${NC}\t  - Run api-tests, e.g. \`${ITALIC}${SPRYKER_SELF_SCRIPT} api-tests -v -g Product\`${NC} or  \`${ITALIC}${SPRYKER_SELF_SCRIPT} api-tests -h\`${NC}."
-    echo -e " ${GREEN}acceptance-tests${NC} - Run acceptance-tests, e.g. \`${ITALIC}${SPRYKER_SELF_SCRIPT} acceptance-tests -v -g Acceptance\`${NC} or  \`${ITALIC}${SPRYKER_SELF_SCRIPT} acceptance-tests -h\`${NC}."
-    echo -e " ${GREEN}functional-tests${NC} - Run functional-tests, e.g. \`${ITALIC}${SPRYKER_SELF_SCRIPT} functional-tests -v\`${NC} or \`${ITALIC}${SPRYKER_SELF_SCRIPT} functional-tests -h\`${NC}."
     echo -e " ${GREEN}demo|demo-data${NC}   - Populate Spryker demo data."
     echo -e " ${GREEN}down|stop${NC}\t  - Stop all Spryker containers."
     echo -e " ${GREEN}jobs${NC}\t\t  - Generate and starts jobs."
@@ -590,12 +587,6 @@ function stopCliContainer()
 command=${1}
 shift 1
 case ${command} in
-  api-tests)
-    ;;
-  acceptance-tests)
-    ;;
-  functional-tests)
-    ;;
   *)
     while getopts ":xvt" opt; do
         case ${opt} in
@@ -698,21 +689,7 @@ case ${command} in
         ;;
     codecept)
         ensureTestingMode
-        execCodecept "${@:2}"
-        ;;
-    functional-tests)
-        ensureTestingMode
-        execCodecept console code:test:functional ${@}
-        ;;
-    acceptance-tests)
-        ensureTestingMode
-        execCodecept console code:test:acceptance ${@}
-        ;;
-    api-tests)
-        ensureTestingMode
-        execCodecept console code:fixtures "${@}"
-        execCodecept console queue:worker:start
-        execCodecept console code:test:api "${@}"
+        execCodecept "${@}"
         ;;
     logs)
         execSpryker "find ${SPRYKER_LOG_DIRECTORY} -type f \( -name \"exception.log\" \) -exec tail -f \"$file\" {} +"
