@@ -135,7 +135,7 @@ DOCKER_EXTRA_OPTIONS+=" -v ${SPRYKER_DOCKER_PREFIX}_${SPRYKER_DOCKER_TAG}_data_s
 
 function enableDebuggingMode()
 {
-    [ $1 != 'help' ] && echo -e "*** ${WARN}DEBUGGING MODE${NC}"
+    echo -e "*** ${WARN}DEBUGGING MODE${NC}"
     export SPRYKER_XDEBUG_HOST_IP=$(which ip >/dev/null 2>&1 && ifconfig $(ip r | grep default | awk '{print $5}') | grep "inet " | awk '{print $2}' || echo 'host.docker.internal')
     DOCKER_COMPOSE_FILES+=" -f ${DEPLOYMENT_PATH}/docker-compose.xdebug.yml"
     DOCKER_EXTRA_OPTIONS+=" -v ${DEPLOYMENT_DIR}/context/php/conf.d/xdebug.ini:/usr/local/etc/php/conf.d/01-xdebug.ini:ro"
@@ -143,7 +143,7 @@ function enableDebuggingMode()
 
 function enableTestingMode()
 {
-    [ $1 != 'help' ] && echo -e "*** ${WARN}TESTING MODE${NC}"
+    echo -e "*** ${WARN}TESTING MODE${NC}"
     DOCKER_COMPOSE_FILES+=" -f ${DEPLOYMENT_PATH}/docker-compose.test.yml"
     DOCKER_EXTRA_OPTIONS+=" --env-file=${DEPLOYMENT_PATH}/env/cli/testing.env -u spryker:spryker"
     [ ${SPRYKER_XDEBUG_ENABLE} -eq 1 ] && DOCKER_COMPOSE_FILES+=" -f ${DEPLOYMENT_PATH}/docker-compose.test.xdebug.yml" || true
@@ -623,8 +623,8 @@ case ${command} in
     shift $((OPTIND -1))
 esac
 
-[ ${SPRYKER_XDEBUG_ENABLE} -eq 1 ] && enableDebuggingMode || true
-[ ${SPRYKER_TESTING_ENABLE} -eq 1 ] && enableTestingMode || true
+[ ${SPRYKER_XDEBUG_ENABLE} -eq 1 -a $command != 'help' ] && enableDebuggingMode || true
+[ ${SPRYKER_TESTING_ENABLE} -eq 1 -a $command != 'help' ] && enableTestingMode || true
 
 case ${command} in
     build)
