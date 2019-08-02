@@ -458,8 +458,6 @@ function setExtraEnvFiles ()
 function getDefaultRunArguments()
 {
     echo -n " --network=${SPRYKER_DOCKER_PREFIX}_services"
-    echo -n " --network=${SPRYKER_DOCKER_PREFIX}_services"
-    echo -n " --network=${SPRYKER_DOCKER_PREFIX}_private"
     echo -n " ${DOCKER_EXTRA_ENV_FILES}"
     echo -n " ${DOCKER_EXTRA_OPTIONS}"
 }
