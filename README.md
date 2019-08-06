@@ -39,6 +39,8 @@ git clone https://github.com/spryker/docker-sdk.git ./docker
 1. Prepare `.dockerignore` to match the project infrastructure.
     * Find an example in [Spryker Shop Suite](https://github.com/spryker-shop/suite/tree/master/.dockerignore).
 
+More details can be found [here](https://documentation.spryker.com/installation/spryker_in_docker/integrating-docker-into-an-existing-project-201907.htm).
+
 ## Quick start
 
 1. Initialize docker setup:
@@ -58,4 +60,4 @@ docker/sdk up
 
 ## Documentation
 
-[Spryker Documentation](https://documentation.spryker.com/installation/spryker_in_docker/docker_sdk/docker-sdk-201907.htm)
+[Spryker Docker SDK Documentation](https://documentation.spryker.com/installation/spryker_in_docker/docker_sdk/docker-sdk-201907.htm)
