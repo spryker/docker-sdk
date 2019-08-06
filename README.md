@@ -47,14 +47,14 @@ git clone https://github.com/spryker/docker-sdk.git ./docker
 docker/sdk bootstrap
 ```
 
-2. Build and run spryker apps:
+2. Build and run Spryker applications:
 ```
 docker/sdk up
 ```
 
 > Note: Make sure all domains from `deploy.yml` are defined as `127.0.0.1` in the `hosts` on the local environment.
 
-3. Use the domains defined in `deploy.yml` to access the application.
+3. Use the domains defined in `deploy.yml` to access the applications.
 
 ## Documentation
 
