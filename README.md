@@ -44,9 +44,7 @@ docker/sdk up
 ## Getting Started
 
 There are two ways to start working with Spryker in Docker:
-* If you want to set up a new Spryker project in Docker, start [here](https://documentation.spryker.com/installation/spryker_in_docker/getting-started-with-docker-201907.htm).
-* If you already have a DevVM based project, procceed [here](https://documentation.spryker.com/installation/spryker_in_docker/getting-started-with-docker-201907.htm) to convert your project into a Docker based one.
-
+* If you want to set up Spryker project in Docker, start [here](https://documentation.spryker.com/installation/spryker_in_docker/docker_sdk/docker-sdk.htm).
 
 
 ## Documentation
