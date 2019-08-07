@@ -1,6 +1,6 @@
 # Spryker Commerce OS - Docker SDK
 [![Build Status](https://travis-ci.org/spryker/docker-sdk.svg)](https://travis-ci.org/spryker/docker-sdk)
-​
+
 ## Description
 
 Spryker Docker SDK helps to setup docker environment for your Spryker project.
@@ -38,14 +38,6 @@ docker/sdk bootstrap
 docker/sdk up
 ```
 
-> Note: Make sure all domains from `deploy.yml` are defined as `127.0.0.1` in the `hosts` on the local environment.
-
-
-## Getting Started
-
-To start working with Spryker in Docker, follow [the link](https://documentation.spryker.com/installation/spryker_in_docker/docker_sdk/docker-sdk.htm).
-
-
 ## Documentation
 
-[Spryker Docker SDK Documentation](https://documentation.spryker.com/installation/spryker_in_docker/docker_sdk/docker-sdk-201907.htm)
+To start working with Spryker in Docker, follow [the link](https://documentation.spryker.com/installation/spryker_in_docker/docker_sdk/docker-sdk.htm).
