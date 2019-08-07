@@ -2,7 +2,7 @@
 [![Build Status](https://travis-ci.org/spryker/docker-sdk.svg)](https://travis-ci.org/spryker/docker-sdk)
 ​
 ## Description
-​
+
 Spryker Docker SDK helps to setup docker environment for your Spryker project.
 
 This repository does not contain the specific Dockerfile or docker-compose files.
