@@ -18,46 +18,26 @@ The purposes of the tool:
 1. Simplifying the process of setting up a local demo of Spryker project.
 
 ## Installation
-
 > Note: All the commands below should be run from the root directory of Spryker project.
 
-Fetch Docker SDK tools:
+1. Fetch Docker SDK tools:
 ```bash
 git clone https://github.com/spryker/docker-sdk.git ./docker
 ```
 
 > Note: Make sure `docker 18.09.1+` and `docker-compose 1.23+` are installed in the local environment.
 
-### Preparations on project level
-
-1. Prepare the `deploy.yml` file according to the documentation.
-    * Use the `deploy*.yml` mask to find examples in [Spryker Shop Suite](https://github.com/spryker-shop/suite)
-1. Prepare configuration based on the environment name defined in `deploy.yml#environment`.
-    * Use the `config_default-docker*.php` mask to find examples in [Spryker Shop Suite](https://github.com/spryker-shop/suite/tree/master/config/Shared)
-1. Prepare a `docker.yml` installation file.
-    * Find an example in [Spryker Shop Suite](https://github.com/spryker-shop/suite/tree/master/config/install/docker.yml).
-1. Prepare `.dockerignore` to match the project infrastructure.
-    * Find an example in [Spryker Shop Suite](https://github.com/spryker-shop/suite/tree/master/.dockerignore).
-
-More details can be found [here](https://documentation.spryker.com/installation/spryker_in_docker/integrating-docker-into-an-existing-project-201907.htm).
-
-## Quick start
-
-1. Initialize docker setup:
+2. Initialize docker setup:
 
 ```bash
 docker/sdk bootstrap
 ```
 
-2. Build and run Spryker applications:
+3. Build and run Spryker applications:
 ```
 docker/sdk up
 ```
 
-> Note: Make sure all domains from `deploy.yml` are defined as `127.0.0.1` in the `hosts` on the local environment.
-
-3. Use the domains defined in `deploy.yml` to access the applications.
-
 ## Documentation
 
-[Spryker Docker SDK Documentation](https://documentation.spryker.com/installation/spryker_in_docker/docker_sdk/docker-sdk-201907.htm)
+To start working with Spryker in Docker, follow [the link](https://documentation.spryker.com/installation/spryker_in_docker/docker_sdk/docker-sdk.htm).
