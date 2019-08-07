@@ -18,14 +18,12 @@ The purposes of the tool:
 1. Simplifying the process of setting up a local demo of Spryker project.
 ​
 ## Installation
-​
 > Note: All the commands below should be run from the root directory of Spryker project.
 ​
 Fetch Docker SDK tools:
 ```bash
 git clone https://github.com/spryker/docker-sdk.git ./docker
 ```
-​
 > Note: Make sure `docker 18.09.1+` and `docker-compose 1.23+` are installed in the local environment.
 ​
 ## Getting Started
