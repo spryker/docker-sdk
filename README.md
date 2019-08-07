@@ -27,13 +27,13 @@ git clone https://github.com/spryker/docker-sdk.git ./docker
 
 > Note: Make sure `docker 18.09.1+` and `docker-compose 1.23+` are installed in the local environment.
 
-1. Initialize docker setup:
+2. Initialize docker setup:
 
 ```bash
 docker/sdk bootstrap
 ```
 
-1. Build and run Spryker applications:
+3. Build and run Spryker applications:
 ```
 docker/sdk up
 ```
