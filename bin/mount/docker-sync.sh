@@ -36,7 +36,7 @@ function sync()
         *)
             if [ $(docker ps | grep 5000 | grep ${SPRYKER_DOCKER_PREFIX}_${SPRYKER_DOCKER_TAG}_data_sync | wc -l |sed 's/^ *//') -eq 0 ]; then
                 verbose "${INFO}Start sync process for data volume${NC}"
-                pushd ${PROJECT_DIR} > /dev/null
+                pushd "${PROJECT_DIR}" > /dev/null
                 docker-sync start -c ${syncConf}
                 popd > /dev/null
             fi

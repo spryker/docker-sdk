@@ -16,7 +16,7 @@ popd > /dev/null
 
 # Internal constants
 readonly PROJECT_DIR="$( pwd )"
-readonly DEPLOYMENT_DIR="$( cd ${BASH_SOURCE%/*} >/dev/null 2>&1 && pwd )"
+readonly DEPLOYMENT_DIR=$"$( cd ${BASH_SOURCE%/*} >/dev/null 2>&1 && pwd )"
 export DEPLOYMENT_PATH="${DEPLOYMENT_DIR/$PROJECT_DIR/.}"
 export SPRYKER_REMOTE_DIR="/var/spryker"
 
@@ -110,7 +110,7 @@ DOCKER_COMPOSE_FILES="-f ${DEPLOYMENT_PATH}/docker-compose.yml"
 DOCKER_EXTRA_OPTIONS=" -v ${SPRYKER_DOCKER_PREFIX}_logs:${SPRYKER_LOG_DIRECTORY}:rw"
 if [ ! -z "${GITHUB_TOKEN}" ];
 then
-    DOCKER_EXTRA_OPTIONS+=" -e COMPOSER_AUTH={\"github-oauth\":{\"github.com\":\"${GITHUB_TOKEN}\"}}";
+    DOCKER_EXTRA_OPTIONS+=" -e COMPOSER_AUTH='{\"github-oauth\":{\"github.com\":\"${GITHUB_TOKEN}\"}}'";
     DOCKER_EXTRA_OPTIONS+=" -v $(dirname ~/.ssh)/.ssh/known_hosts:/home/spryker/.ssh/known_hosts";
 fi;
 {% if _platform == 'linux' %}
@@ -123,8 +123,9 @@ readonly USER_GID="1000"
 {% set isDevelopment = _mountMode != 'baked' %}
 {% if isDevelopment %}
 [ $1 != 'help' ] && echo -e "*** ${WARN}DEVELOPMENT MODE${NC}"
-DOCKER_EXTRA_OPTIONS+=" -v ${DEPLOYMENT_DIR}/context/php/conf.d/opcache_dev.ini:/usr/local/etc/php/conf.d/opcache.ini:ro"
-DOCKER_EXTRA_OPTIONS+=" -v ${DEPLOYMENT_DIR}/context/php/php.ini:/usr/local/etc/php/php.ini:ro"
+INLINE_DEPLOYMENT_DIR=$(echo ${DEPLOYMENT_DIR// /\\ })
+DOCKER_EXTRA_OPTIONS+=" -v ${INLINE_DEPLOYMENT_DIR}/context/php/conf.d/opcache_dev.ini:/usr/local/etc/php/conf.d/opcache.ini:ro"
+DOCKER_EXTRA_OPTIONS+=" -v ${INLINE_DEPLOYMENT_DIR}/context/php/php.ini:/usr/local/etc/php/php.ini:ro"
 DOCKER_EXTRA_OPTIONS+=" -v $(dirname ~/.composer/cache:/home/spryker/).composer/cache:rw"
 {% if _mountMode == 'native' %}
 DOCKER_EXTRA_OPTIONS+=" -v ${PROJECT_DIR}:/data -u ${USER_UID}:${USER_GID}"
@@ -137,7 +138,8 @@ function enableDebuggingMode()
 {
     echo -e "*** ${WARN}DEBUGGING MODE${NC}"
     export SPRYKER_XDEBUG_HOST_IP=$(which ip >/dev/null 2>&1 && ifconfig $(ip r | grep default | awk '{print $5}') | grep "inet " | awk '{print $2}' || echo 'host.docker.internal')
-    DOCKER_COMPOSE_FILES+=" -f ${DEPLOYMENT_PATH}/docker-compose.xdebug.yml"
+    INLINE_DEPLOYMENT_DIR=$(echo ${DEPLOYMENT_DIR// /\\ })
+    DOCKER_COMPOSE_FILES+=" -f ${INLINE_DEPLOYMENT_DIR}/docker-compose.xdebug.yml"
     DOCKER_EXTRA_OPTIONS+=" -v ${DEPLOYMENT_DIR}/context/php/conf.d/xdebug.ini:/usr/local/etc/php/conf.d/01-xdebug.ini:ro"
 }
 
@@ -226,21 +228,22 @@ function buildBaseImage()
         echo -e "${WARN}Warning: GITHUB_TOKEN is not set but may be required.${NC}"
     fi
 
-    docker build \
+    DOCKER_RUN_SCRIPT="docker build \
         -t ${SPRYKER_DOCKER_PREFIX}_app:${SPRYKER_DOCKER_TAG} \
         --progress=${PROGRESS_TYPE} \
-        -f ${DEPLOYMENT_PATH}/images/{{ isDevelopment ? 'base_dev' : 'base_app' }}/Dockerfile \
+        -f "${DEPLOYMENT_PATH}"/images/{{ isDevelopment ? 'base_dev' : 'base_app' }}/Dockerfile \
         --build-arg SPRYKER_PLATFORM_IMAGE=${SPRYKER_PLATFORM_IMAGE} \
         --build-arg SPRYKER_DOCKER_PREFIX=${SPRYKER_DOCKER_PREFIX} \
         --build-arg SPRYKER_DOCKER_TAG=${SPRYKER_DOCKER_TAG} \
         --build-arg USER_UID=${USER_UID:-1000} \
         --build-arg USER_GID=${USER_GID:-1000} \
         --build-arg GITHUB_TOKEN=${GITHUB_TOKEN} \
-        --build-arg DEPLOYMENT_PATH=${DEPLOYMENT_PATH} \
+        --build-arg DEPLOYMENT_PATH=\"${DEPLOYMENT_PATH}\" \
         --build-arg APPLICATION_ENV=${APPLICATION_ENV} \
         --build-arg SPRYKER_DB_ENGINE=${SPRYKER_DB_ENGINE} \
         --build-arg SPRYKER_LOG_DIRECTORY=${SPRYKER_LOG_DIRECTORY} \
-        .
+        ."
+    eval ${DOCKER_RUN_SCRIPT}
 
     verbose "${INFO}Building cli image (based on base application image)${NC}"
 
@@ -259,12 +262,15 @@ function runApplicationBuild()
 {
     local tty
     [ -t -0 ] && tty='t' || tty=''
-    docker run -i${tty} --rm \
-        -e COMMAND="$1" \
+
+    DOCKER_RUN_SCRIPT="docker run -i${tty} --rm \
+        -e COMMAND=\"$1\" \
         -e SPRYKER_DB_ENGINE=${SPRYKER_DB_ENGINE} \
         --restart=no \
         ${DOCKER_EXTRA_OPTIONS} \
-        ${SPRYKER_DOCKER_PREFIX}_cli:${SPRYKER_DOCKER_TAG} /usr/local/bin/execute.sh
+        ${SPRYKER_DOCKER_PREFIX}_cli:${SPRYKER_DOCKER_TAG} /usr/local/bin/execute.sh"
+
+    eval ${DOCKER_RUN_SCRIPT}
 }
 
 function buildCode()
@@ -310,7 +316,8 @@ function isSchedulerJobsCreated()
     waitFor scheduler
     verbose -n "Checking jobs are created..."
 
-    local jobsCount=$(execSpryker 'curl -sL ${SPRYKER_SCHEDULER_HOST}:${SPRYKER_SCHEDULER_PORT}/scriptText -d "script=println Jenkins.instance.projects.collect{ it.name }.size" | tail -n 1' | tr -d " \n\r" )
+    CURL_SCRIPT='curl -sL \${SPRYKER_SCHEDULER_HOST}:\${SPRYKER_SCHEDULER_PORT}/scriptText -d \"script=println Jenkins.instance.projects.collect{ it.name }.size\" | tail -n 1'
+    local jobsCount=$(execSpryker "${CURL_SCRIPT}" | tr -d " \n\r" )
     [ "${jobsCount}" -gt 0 ] && verbose "[CREATED]" && return ${__TRUE} || verbose "" && return ${__FALSE}
 }
 
@@ -332,7 +339,7 @@ function createSchedulerJobs()
         do
             export SPRYKER_STORE="${store}"
             echo -e "${INFO}Creating scheduler jobs for ${SPRYKER_STORE} store.${NC}"
-            execSpryker "vendor/bin/install -r docker -s scheduler-setup"
+            execSpryker 'vendor/bin/install -r docker -s scheduler-setup'
         done
     done
 }
@@ -468,10 +475,12 @@ function execSpryker()
 
     local tty
     [ -t -0 ] && tty='t' || tty=''
-    docker run -i${tty} --rm \
-        -e COMMAND="${1}" \
+    DOCKER_RUN_SCRIPT="docker run -i${tty} --rm \
+        -e COMMAND=\"${1}\" \
         $(getDefaultRunArguments) \
-        ${SPRYKER_DOCKER_PREFIX}_cli:${SPRYKER_DOCKER_TAG} /usr/local/bin/execute.sh
+        ${SPRYKER_DOCKER_PREFIX}_cli:${SPRYKER_DOCKER_TAG} /usr/local/bin/execute.sh"
+
+    eval ${DOCKER_RUN_SCRIPT}
 }
 
 function execCodecept()
@@ -489,7 +498,7 @@ function execCodecept()
     [ -z "${*}" ] && binary=bash
 
     execDockerCompose exec \
-        -e COMMAND="${*}" \
+        -e COMMAND=\"${*}\" \
         -e PS1="spryker@codecept\$" \
         codecept \
         ${binary}
@@ -498,9 +507,11 @@ function execCodecept()
 function execSprykerMultiString()
 {
     setExtraEnvFiles
-    docker run -i --rm \
+    DOCKER_RUN_SCRIPT="docker run -i --rm \
         $(getDefaultRunArguments) \
-        ${SPRYKER_DOCKER_PREFIX}_cli:${SPRYKER_DOCKER_TAG} bash -s${1}
+        ${SPRYKER_DOCKER_PREFIX}_cli:${SPRYKER_DOCKER_TAG} bash -s${1}"
+
+    eval ${DOCKER_RUN_SCRIPT}
 }
 
 function doBuild()
@@ -527,7 +538,7 @@ function execDockerCompose()
     SPRYKER_DOCKER_RUN_IMAGE=${SPRYKER_DOCKER_PREFIX}_cli:${SPRYKER_DOCKER_TAG} \
     SPRYKER_REMOTE_DIR=${SPRYKER_REMOTE_DIR} \
     docker-compose \
-        --project-directory ${PROJECT_DIR} \
+        --project-directory "${PROJECT_DIR}" \
         --project-name ${SPRYKER_DOCKER_PREFIX} \
         ${DOCKER_COMPOSE_FILES} \
         "$@"

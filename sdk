@@ -50,19 +50,19 @@ case $1 in
 
         # ------------
         [ -d ${DEPLOYMENT_DIR} ] && rm -rf ${DEPLOYMENT_DIR}
-        mkdir ${DEPLOYMENT_DIR}
+        mkdir "${DEPLOYMENT_DIR}"
 
         DEPLOYMENT_DIR="$( cd "${DEPLOYMENT_DIR}" >/dev/null 2>&1 && pwd )"
 
         # ------------
         . ${BASH_SOURCE%/*}/bin/boot-deployment.sh
 
-        [ -d ${DESTINATION_DIR} ] && rm -rf ${DESTINATION_DIR}/*
-        [ ! -d ${DESTINATION_DIR} ] && mkdir ${DESTINATION_DIR}
-        cp -R ${DEPLOYMENT_DIR}/. ${DESTINATION_DIR}
-        rm -rf ${DEPLOYMENT_DIR}
+        [ -d ${DESTINATION_DIR} ] && rm -rf "${DESTINATION_DIR}/*"
+        [ ! -d ${DESTINATION_DIR} ] && mkdir "${DESTINATION_DIR}"
+        cp -R "${DEPLOYMENT_DIR}/." "${DESTINATION_DIR}"
+        rm -rf "${DEPLOYMENT_DIR}"
 
-        [ ! -f .dockerignore ] && cp ${BASH_SOURCE%/*}/.dockerignore .dockerignore
+        [ ! -f .dockerignore ] && cp "${BASH_SOURCE%/*}/.dockerignore" .dockerignore
 
         echo ""
         echo -e "${INFO}Deployment is generated into ${LGRAY}${DESTINATION_DIR}${NC}"
