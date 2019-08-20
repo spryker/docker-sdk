@@ -54,6 +54,7 @@ matrix:
         - SPRYKER_PHP_VERSION=7.3
         - SPRYKER_DB_ENGINE=PGSQL
         - VALIDATION=1
+        - DEV_MODE=0
     - os: linux
       name: Acceptance tests
       env:
@@ -61,18 +62,52 @@ matrix:
         - SPRYKER_DB_ENGINE=PGSQL
         - SPRYKER_TEST_IN_BROWSER=firefox
         - TEST_GROUP=acceptance
+        - DEV_MODE=0
     - os: linux
       name: Functional tests
       env:
         - SPRYKER_PHP_VERSION=7.3
         - SPRYKER_DB_ENGINE=PGSQL
         - TEST_GROUP=functional
+        - DEV_MODE=0
     - os: linux
       name: Api tests
       env:
         - SPRYKER_PHP_VERSION=7.3
         - SPRYKER_DB_ENGINE=PGSQL
         - TEST_GROUP=api
+        - DEV_MODE=0
+
+    - stage: Dev Mode
+      os: linux
+      name: Health check
+      env:
+        - SPRYKER_PHP_VERSION=7.3
+        - SPRYKER_DB_ENGINE=PGSQL
+        - VALIDATION=1
+        - DEV_MODE=1
+    - os: linux
+      name: Acceptance tests
+      env:
+        - SPRYKER_PHP_VERSION=7.3
+        - SPRYKER_DB_ENGINE=PGSQL
+        - SPRYKER_TEST_IN_BROWSER=firefox
+        - TEST_GROUP=acceptance
+        - DEV_MODE=1
+    - os: linux
+      name: Functional tests
+      env:
+        - SPRYKER_PHP_VERSION=7.3
+        - SPRYKER_DB_ENGINE=PGSQL
+        - TEST_GROUP=functional
+        - DEV_MODE=1
+    - os: linux
+      name: Api tests
+      env:
+        - SPRYKER_PHP_VERSION=7.3
+        - SPRYKER_DB_ENGINE=PGSQL
+        - TEST_GROUP=api
+        - DEV_MODE=1
 
 script:
   - cd /home/travis/build/spryker/project/
