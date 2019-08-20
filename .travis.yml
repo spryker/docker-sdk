@@ -6,9 +6,6 @@ language: minimal
 env:
   global:
     - PROGRESS_TYPE=plain
-  matrix:
-    - DEV_MODE=0
-    - DEV_MODE=1
 cache:
   timeout: 600
 addons:
@@ -50,13 +47,13 @@ before_install:
 
 matrix:
   include:
-    - os: linux
+    - stage: Demo Mode
+      os: linux
       name: Health check
       env:
         - SPRYKER_PHP_VERSION=7.3
         - SPRYKER_DB_ENGINE=PGSQL
         - VALIDATION=1
-
     - os: linux
       name: Acceptance tests
       env:
@@ -64,14 +61,12 @@ matrix:
         - SPRYKER_DB_ENGINE=PGSQL
         - SPRYKER_TEST_IN_BROWSER=firefox
         - TEST_GROUP=acceptance
-
     - os: linux
       name: Functional tests
       env:
         - SPRYKER_PHP_VERSION=7.3
         - SPRYKER_DB_ENGINE=PGSQL
         - TEST_GROUP=functional
-
     - os: linux
       name: Api tests
       env:
