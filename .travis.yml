@@ -6,6 +6,9 @@ language: minimal
 env:
   global:
     - PROGRESS_TYPE=plain
+  matrix:
+    - DEV_MODE=0
+    - DEV_MODE=1
 cache:
   timeout: 600
 addons:
@@ -44,9 +47,6 @@ before_install:
   - git clone git@github.com:spryker/suite-nonsplit.git project
   - rm -rf project/docker
   - mv ${TRAVIS_BUILD_DIR} project/docker
-  - cd /home/travis/build/spryker/project/
-  - docker/sdk boot
-  - docker/sdk up
 
 matrix:
   include:
@@ -81,9 +81,12 @@ matrix:
 
 script:
   - cd /home/travis/build/spryker/project/
+  - - if [[ $DEV_MODE == 0 ]] ; then docker/sdk boot; fi
+  - - if [[ $DEV_MODE == 1 ]] ; then docker/sdk boot deploy.dev.yml; fi
+  - docker/sdk up
   - if [[ $VALIDATION == 1 ]] ; then chmod ugo+x docker/ci/service-health-check.sh; fi
   - if [[ $VALIDATION == 1 ]] ; then bash ./docker/ci/service-health-check.sh; fi
-  - if [[ $VALIDATION != 1 ]] ; then docker/sdk codecept codecept run -c codeception.${TEST_GROUP}.yml; fi
+  - if [[ $VALIDATION == 0 ]] ; then docker/sdk codecept codecept run -c codeception.${TEST_GROUP}.yml; fi
 
 notifications:
   email: false
