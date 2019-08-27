@@ -47,7 +47,7 @@ before_install:
   - rm -rf project/docker
   - mv ${TRAVIS_BUILD_DIR} project/docker
 
-matrix:
+jobs:
   include:
     - stage: Demo Mode
       os: linux
