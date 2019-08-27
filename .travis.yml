@@ -80,8 +80,8 @@ matrix:
         - TEST_GROUP=api
         - DEV_MODE=0
 
-    - os: linux
-      stage: Dev Mode
+    - stage: Dev Mode
+      os: linux
       name: Health check
       env:
         - SPRYKER_PHP_VERSION=7.3
