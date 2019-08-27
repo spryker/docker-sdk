@@ -6,6 +6,10 @@ language: minimal
 env:
   global:
     - PROGRESS_TYPE=plain
+    - SPRYKER_PHP_VERSION=7.3
+    - SPRYKER_DB_ENGINE=PGSQL
+    - SPRYKER_TEST_IN_BROWSER=firefox
+
 cache:
   timeout: 600
   directories:
@@ -53,61 +57,47 @@ matrix:
       os: linux
       name: Health check
       env:
-        - SPRYKER_PHP_VERSION=7.3
-        - SPRYKER_DB_ENGINE=PGSQL
         - VALIDATION=1
         - DEV_MODE=0
     - os: linux
       name: Acceptance tests
       env:
-        - SPRYKER_PHP_VERSION=7.3
-        - SPRYKER_DB_ENGINE=PGSQL
-        - SPRYKER_TEST_IN_BROWSER=firefox
         - TEST_GROUP=acceptance
         - DEV_MODE=0
     - os: linux
       name: Functional tests
       env:
-        - SPRYKER_PHP_VERSION=7.3
-        - SPRYKER_DB_ENGINE=PGSQL
         - TEST_GROUP=functional
         - DEV_MODE=0
     - os: linux
       name: Api tests
       env:
-        - SPRYKER_PHP_VERSION=7.3
-        - SPRYKER_DB_ENGINE=PGSQL
         - TEST_GROUP=api
         - DEV_MODE=0
 
     - stage: Dev Mode
+      allow_failures: true
       os: linux
       name: Health check
       env:
-        - SPRYKER_PHP_VERSION=7.3
-        - SPRYKER_DB_ENGINE=PGSQL
         - VALIDATION=1
         - DEV_MODE=1
     - os: linux
+      allow_failures: true
       name: Acceptance tests
       env:
-        - SPRYKER_PHP_VERSION=7.3
-        - SPRYKER_DB_ENGINE=PGSQL
-        - SPRYKER_TEST_IN_BROWSER=firefox
         - TEST_GROUP=acceptance
         - DEV_MODE=1
     - os: linux
+      allow_failures: true
       name: Functional tests
       env:
-        - SPRYKER_PHP_VERSION=7.3
-        - SPRYKER_DB_ENGINE=PGSQL
         - TEST_GROUP=functional
         - DEV_MODE=1
     - os: linux
+      allow_failures: true
       name: Api tests
       env:
-        - SPRYKER_PHP_VERSION=7.3
-        - SPRYKER_DB_ENGINE=PGSQL
         - TEST_GROUP=api
         - DEV_MODE=1
 
@@ -116,8 +106,8 @@ script:
   - if [[ $DEV_MODE == 0 ]] ; then docker/sdk boot; fi
   - if [[ $DEV_MODE == 1 ]] ; then docker/sdk boot deploy.dev.yml; fi
   - docker/sdk up
-  - if [[ $VALIDATION == 1 ]] ; then chmod ugo+x docker/ci/service-health-check.sh; fi
-  - if [[ $VALIDATION == 1 ]] ; then bash ./docker/ci/service-health-check.sh; fi
+  - chmod ugo+x docker/ci/service-health-check.sh
+  - bash ./docker/ci/service-health-check.sh
   - if [[ $TEST_GROUP == 'acceptance' ]] ; then docker/sdk codecept codecept run -c codeception.acceptance.yml; fi
   - if [[ $TEST_GROUP == 'functional' ]] ; then docker/sdk codecept codecept run -c codeception.functional.yml; fi
   - if [[ $TEST_GROUP == 'api' ]] ; then docker/sdk codecept codecept fixtures; fi
