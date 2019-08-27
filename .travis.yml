@@ -55,11 +55,6 @@ matrix:
   include:
     - stage: Demo Mode
       os: linux
-      name: Health check
-      env:
-        - VALIDATION=1
-        - DEV_MODE=0
-    - os: linux
       name: Acceptance tests
       env:
         - TEST_GROUP=acceptance
@@ -76,13 +71,7 @@ matrix:
         - DEV_MODE=0
 
     - stage: Dev Mode
-      allow_failures: true
       os: linux
-      name: Health check
-      env:
-        - VALIDATION=1
-        - DEV_MODE=1
-    - os: linux
       allow_failures: true
       name: Acceptance tests
       env:
