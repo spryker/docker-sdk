@@ -47,7 +47,7 @@ before_install:
   - rm -rf project/docker
   - mv ${TRAVIS_BUILD_DIR} project/docker
 
-jobs:
+matrix:
   include:
     - stage: Demo Mode
       os: linux
@@ -80,8 +80,8 @@ jobs:
         - TEST_GROUP=api
         - DEV_MODE=0
 
-    - stage: Dev Mode
-      os: linux
+    - os: linux
+      stage: Dev Mode
       name: Health check
       env:
         - SPRYKER_PHP_VERSION=7.3
