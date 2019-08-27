@@ -8,6 +8,10 @@ env:
     - PROGRESS_TYPE=plain
 cache:
   timeout: 600
+  directories:
+    - $HOME/.composer/cache/files
+    - $HOME/build/spryker/project/vendor
+
 addons:
   hosts:
     - yves.de.demo-spryker.com
@@ -39,11 +43,12 @@ before_install:
   - echo -e "Host $SERVER_IP_ADDRESS\n\tStrictHostKeyChecking no\n" >> ~/.ssh/config
   - ssh-add ./deploy_key
   - cd ${TRAVIS_BUILD_DIR}/../
-  - pwd
   - rm -rf project
   - git clone git@github.com:spryker/suite-nonsplit.git project
   - rm -rf project/docker
   - mv ${TRAVIS_BUILD_DIR} project/docker
+  - cd /home/travis/build/spryker/project/
+  - composer install
 
 matrix:
   include:
