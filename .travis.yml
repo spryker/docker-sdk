@@ -10,7 +10,6 @@ cache:
   timeout: 600
   directories:
     - $HOME/.composer/cache/files
-    - $HOME/build/spryker/project/vendor
 
 addons:
   hosts:
@@ -47,8 +46,6 @@ before_install:
   - git clone git@github.com:spryker/suite-nonsplit.git project
   - rm -rf project/docker
   - mv ${TRAVIS_BUILD_DIR} project/docker
-  - cd /home/travis/build/spryker/project/
-  - composer install
 
 matrix:
   include:
