@@ -116,7 +116,9 @@ script:
   - docker/sdk up
   - if [[ $VALIDATION == 1 ]] ; then chmod ugo+x docker/ci/service-health-check.sh; fi
   - if [[ $VALIDATION == 1 ]] ; then bash ./docker/ci/service-health-check.sh; fi
-  - if [[ $VALIDATION == 0 ]] ; then docker/sdk codecept codecept run -c codeception.${TEST_GROUP}.yml; fi
+  - if [[ $TEST_GROUP == 'acceptance']] ; then docker/sdk codecept codecept run -c codeception.acceptance.yml; fi
+  - if [[ $TEST_GROUP == 'functional']] ; then docker/sdk codecept codecept run -c codeception.functional.yml; fi
+  - if [[ $TEST_GROUP == 'api']] ; then docker/sdk codecept codecept run -c codeception.api.yml; fi
 
 notifications:
   email: false
