@@ -15,9 +15,9 @@ env:
 cache:
   timeout: 3600
   directories:
-    - /home/travis/build/spryker/project/vendor
-    - /home/travis/build/spryker/project/node_modules
-    - /home/travis/build/spryker/project/frontend/assets
+    - $HOME/build/spryker/project/vendor
+    - $HOME/build/spryker/project/node_modules
+    - $HOME/build/spryker/project/frontend/assets
 
 addons:
   hosts:
@@ -106,11 +106,12 @@ script:
   - if [[ $DEV_MODE == 0 ]] ; then docker/sdk boot; fi
   - if [[ $DEV_MODE == 1 ]] ; then docker/sdk boot deploy.dev.yml; fi
   - docker/sdk up -t
-  - chmod ugo+x docker/ci/service-health-check.sh
   - chmod ugo+x docker/ci/api-tests.sh
-  - bash ./docker/ci/service-health-check.sh
   - if [[ $TEST_GROUP != 'api' ]] ; then docker/sdk codecept codecept run${SPRYKER_CODECEPT_CONFIG}; fi
-  - if [[ $TEST_GROUP == 'api' ]] ; then ./docker/ci/api-tests.sh; fi
+  - if [[ $TEST_GROUP == 'api' ]] ; then docker/sdk codecept codecept fixtures; fi
+  - if [[ $TEST_GROUP == 'api' ]] ; then docker/sdk codecept console queue:worker:start; fi
+  - if [[ $TEST_GROUP == 'api' ]] ; sleep 90; fi
+  - if [[ $TEST_GROUP == 'api' ]] ; then docker/sdk codecept codecept run -c codeception.api.yml; fi
 
 notifications:
   email: false
