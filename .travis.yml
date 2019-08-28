@@ -110,7 +110,7 @@ script:
   - if [[ $TEST_GROUP != 'api' ]] ; then docker/sdk codecept codecept run${SPRYKER_CODECEPT_CONFIG}; fi
   - if [[ $TEST_GROUP == 'api' ]] ; then docker/sdk codecept codecept fixtures; fi
   - if [[ $TEST_GROUP == 'api' ]] ; then docker/sdk codecept console queue:worker:start; fi
-  - if [[ $TEST_GROUP == 'api' ]] ; sleep 90; fi
+  - if [[ $TEST_GROUP == 'api' ]] ; then sleep 90; fi
   - if [[ $TEST_GROUP == 'api' ]] ; then docker/sdk codecept codecept run -c codeception.api.yml; fi
 
 notifications:
