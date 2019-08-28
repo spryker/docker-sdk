@@ -3,17 +3,21 @@ sudo: required
 os:
   - linux
 language: minimal
+
 env:
   global:
     - PROGRESS_TYPE=plain
     - SPRYKER_PHP_VERSION=7.3
     - SPRYKER_DB_ENGINE=PGSQL
     - SPRYKER_TEST_IN_BROWSER=firefox
+    - SPRYKER_CODECEPT_CONFIG=
 
 cache:
-  timeout: 600
+  timeout: 3600
   directories:
-    - $HOME/.composer/cache/files
+    - /home/travis/build/spryker/project/vendor
+    - /home/travis/build/spryker/project/node_modules
+    - /home/travis/build/spryker/project/frontend/assets
 
 addons:
   hosts:
@@ -52,56 +56,62 @@ before_install:
   - mv ${TRAVIS_BUILD_DIR} project/docker
 
 matrix:
+  fast_finish: true
+  allow_failures: []
   include:
-    - stage: Demo Mode
-      os: linux
-      name: Acceptance tests
+    - name: Demo Zed Acceptance tests
       env:
         - TEST_GROUP=acceptance
         - DEV_MODE=0
-    - os: linux
-      name: Functional tests
+        - SPRYKER_CODECEPT_CONFIG=" -c codeception.acceptance.yml -o \"extensions":" config":" \SprykerTest\Shared\Testify\Helper\SuiteFilterHelper":" inclusive":" [PyzTest, Zed]\""
+    - name: Demo Yves Acceptance tests
+      env:
+        - TEST_GROUP=acceptance
+        - DEV_MODE=0
+        - SPRYKER_CODECEPT_CONFIG=" -c codeception.acceptance.yml -o \"extensions":" config":" \SprykerTest\Shared\Testify\Helper\SuiteFilterHelper":" inclusive":" [PyzTest, Yves]\""
+    - name: Demo Functional tests
       env:
         - TEST_GROUP=functional
         - DEV_MODE=0
-    - os: linux
-      name: Api tests
+        - SPRYKER_CODECEPT_CONFIG=" -c codeception.functional.yml -o \"extensions":" config":" \SprykerTest\Shared\Testify\Helper\SuiteFilterHelper":" inclusive":" [PyzTest]\" -o \"extensions":" config":" \SprykerTest\Shared\Testify\Helper\SuiteFilterHelper":" exclusive":" [Api, Glue]\""
+    - name: Demo Api tests
       env:
         - TEST_GROUP=api
+        - SPRYKER_CODECEPT_CONFIG=" -c codeception.api.yml -vvv"
         - DEV_MODE=0
 
-    - stage: Dev Mode
-      os: linux
-      allow_failures: true
-      name: Acceptance tests
+    - name: Dev Zed Acceptance tests
       env:
         - TEST_GROUP=acceptance
         - DEV_MODE=1
-    - os: linux
-      allow_failures: true
-      name: Functional tests
+        - SPRYKER_CODECEPT_CONFIG=" -c codeception.acceptance.yml -o \"extensions":" config":" \SprykerTest\Shared\Testify\Helper\SuiteFilterHelper":" inclusive":" [PyzTest, Zed]\""
+    - name: Dev Yves Acceptance tests
+      env:
+        - TEST_GROUP=acceptance
+        - DEV_MODE=1
+        - SPRYKER_CODECEPT_CONFIG=" -c codeception.acceptance.yml -o \"extensions":" config":" \SprykerTest\Shared\Testify\Helper\SuiteFilterHelper":" inclusive":" [PyzTest, Yves]\""
+    - name: Dev Functional tests
       env:
         - TEST_GROUP=functional
         - DEV_MODE=1
-    - os: linux
-      allow_failures: true
-      name: Api tests
+        - SPRYKER_CODECEPT_CONFIG=" -c codeception.functional.yml -o \"extensions":" config":" \SprykerTest\Shared\Testify\Helper\SuiteFilterHelper":" inclusive":" [PyzTest]\" -o \"extensions":" config":" \SprykerTest\Shared\Testify\Helper\SuiteFilterHelper":" exclusive":" [Api, Glue]\""
+    - name: Dev Api tests
       env:
         - TEST_GROUP=api
+        - SPRYKER_CODECEPT_CONFIG=" -c codeception.api.yml"
         - DEV_MODE=1
 
 script:
   - cd /home/travis/build/spryker/project/
   - if [[ $DEV_MODE == 0 ]] ; then docker/sdk boot; fi
   - if [[ $DEV_MODE == 1 ]] ; then docker/sdk boot deploy.dev.yml; fi
-  - docker/sdk up
+  - docker/sdk up -t
   - chmod ugo+x docker/ci/service-health-check.sh
+  - chmod ugo+x docker/ci/api-tests.sh
   - bash ./docker/ci/service-health-check.sh
-  - if [[ $TEST_GROUP == 'acceptance' ]] ; then docker/sdk codecept codecept run -c codeception.acceptance.yml; fi
-  - if [[ $TEST_GROUP == 'functional' ]] ; then docker/sdk codecept codecept run -c codeception.functional.yml; fi
-  - if [[ $TEST_GROUP == 'api' ]] ; then docker/sdk codecept codecept fixtures; fi
-  - if [[ $TEST_GROUP == 'api' ]] ; then docker/sdk codecept console queue:worker:start; fi
-  - if [[ $TEST_GROUP == 'api' ]] ; then docker/sdk codecept codecept run -c codeception.api.yml; fi
+  - if [[ $TEST_GROUP != 'api' ]] ; then docker/sdk codecept codecept run${SPRYKER_CODECEPT_CONFIG}; fi
+  - if [[ $TEST_GROUP == 'api' ]] ; then ./docker/ci/api-tests.sh; fi
 
 notifications:
   email: false
+
