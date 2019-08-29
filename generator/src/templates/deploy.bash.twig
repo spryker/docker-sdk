@@ -95,7 +95,7 @@ function showHelp()
 
     echo -e ""
     echo -e " ${GREEN}clean-data${NC}        - Remove all Spryker volumes including all storages."
-    echo -e " ${GREEN}reset${NC}             - Remove and build all Spryker containers and volumes."
+    echo -e " ${GREEN}reset${NC}             - Remove and buifld all Spryker containers and volumes."
     echo -e " ${GREEN}remove|clean${NC}      - Stop and removes all Spryker containers and volumes."
 }
 
@@ -474,7 +474,7 @@ function execSpryker()
         ${SPRYKER_DOCKER_PREFIX}_cli:${SPRYKER_DOCKER_TAG} /usr/local/bin/execute.sh
 }
 
-function execCodecept()
+function execTesting()
 {
     waitFor database
     waitFor broker
@@ -490,8 +490,8 @@ function execCodecept()
 
     execDockerCompose exec \
         -e COMMAND="${*}" \
-        -e PS1="spryker@codecept\$" \
-        codecept \
+        -e PS1="spryker@testing\$" \
+        testing \
         ${binary}
 }
 
@@ -692,7 +692,7 @@ case ${command} in
         ;;
     testing)
         ensureTestingMode
-        execCodecept "${@}"
+        execTesting "${@}"
         ;;
     logs)
         execSpryker "find ${SPRYKER_LOG_DIRECTORY} -type f \( -name \"exception.log\" \) -exec tail -f \"$file\" {} +"
