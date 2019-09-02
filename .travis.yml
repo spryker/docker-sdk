@@ -102,6 +102,7 @@ matrix:
         - DEV_MODE=1
 
 script:
+  - cd /home/travis/build/spryker/project/
   - if [[ $DEV_MODE == 0 ]] ; then docker/sdk boot; fi
   - if [[ $DEV_MODE == 1 ]] ; then docker/sdk boot deploy.dev.yml; fi
   - docker/sdk up -t
