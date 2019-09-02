@@ -9,8 +9,6 @@ env:
     - PROGRESS_TYPE=plain
     - SPRYKER_PHP_VERSION=7.3
     - SPRYKER_DB_ENGINE=PGSQL
-    - SPRYKER_TEST_IN_BROWSER=firefox
-    - SPRYKER_CODECEPT_CONFIG=
 
 cache:
   timeout: 3600
@@ -59,58 +57,19 @@ matrix:
   fast_finish: true
   allow_failures: []
   include:
-    - name: Demo Zed Acceptance tests
+    - name: Demo boot test
       env:
-        - TEST_GROUP=acceptance
         - DEV_MODE=0
-        - SPRYKER_CODECEPT_CONFIG=" -c codeception.acceptance.yml -o \"extensions":" config":" \SprykerTest\Shared\Testify\Helper\SuiteFilterHelper":" inclusive":" [PyzTest, Zed]\""
-    - name: Demo Yves Acceptance tests
+    - name: Dev boot test
       env:
-        - TEST_GROUP=acceptance
-        - DEV_MODE=0
-        - SPRYKER_CODECEPT_CONFIG=" -c codeception.acceptance.yml -o \"extensions":" config":" \SprykerTest\Shared\Testify\Helper\SuiteFilterHelper":" inclusive":" [PyzTest, Yves]\""
-    - name: Demo Functional tests
-      env:
-        - TEST_GROUP=functional
-        - DEV_MODE=0
-        - SPRYKER_CODECEPT_CONFIG=" -c codeception.functional.yml -o \"extensions":" config":" \SprykerTest\Shared\Testify\Helper\SuiteFilterHelper":" inclusive":" [PyzTest]\" -o \"extensions":" config":" \SprykerTest\Shared\Testify\Helper\SuiteFilterHelper":" exclusive":" [Api, Glue]\""
-    - name: Demo Api tests
-      env:
-        - TEST_GROUP=api
-        - SPRYKER_CODECEPT_CONFIG=" -c codeception.api.yml -vvv"
-        - DEV_MODE=0
-
-    - name: Dev Zed Acceptance tests
-      env:
-        - TEST_GROUP=acceptance
-        - DEV_MODE=1
-        - SPRYKER_CODECEPT_CONFIG=" -c codeception.acceptance.yml -o \"extensions":" config":" \SprykerTest\Shared\Testify\Helper\SuiteFilterHelper":" inclusive":" [PyzTest, Zed]\""
-    - name: Dev Yves Acceptance tests
-      env:
-        - TEST_GROUP=acceptance
-        - DEV_MODE=1
-        - SPRYKER_CODECEPT_CONFIG=" -c codeception.acceptance.yml -o \"extensions":" config":" \SprykerTest\Shared\Testify\Helper\SuiteFilterHelper":" inclusive":" [PyzTest, Yves]\""
-    - name: Dev Functional tests
-      env:
-        - TEST_GROUP=functional
-        - DEV_MODE=1
-        - SPRYKER_CODECEPT_CONFIG=" -c codeception.functional.yml -o \"extensions":" config":" \SprykerTest\Shared\Testify\Helper\SuiteFilterHelper":" inclusive":" [PyzTest]\" -o \"extensions":" config":" \SprykerTest\Shared\Testify\Helper\SuiteFilterHelper":" exclusive":" [Api, Glue]\""
-    - name: Dev Api tests
-      env:
-        - TEST_GROUP=api
-        - SPRYKER_CODECEPT_CONFIG=" -c codeception.api.yml"
         - DEV_MODE=1
 
 script:
   - cd /home/travis/build/spryker/project/
   - if [[ $DEV_MODE == 0 ]] ; then docker/sdk boot; fi
   - if [[ $DEV_MODE == 1 ]] ; then docker/sdk boot deploy.dev.yml; fi
-  - docker/sdk up -t
-  - if [[ $TEST_GROUP != 'api' ]] ; then docker/sdk codecept codecept run${SPRYKER_CODECEPT_CONFIG}; fi
-  - if [[ $TEST_GROUP == 'api' ]] ; then docker/sdk codecept codecept fixtures; fi
-  - if [[ $TEST_GROUP == 'api' ]] ; then docker/sdk codecept console queue:worker:start; fi
-  - if [[ $TEST_GROUP == 'api' ]] ; then sleep 90; fi
-  - if [[ $TEST_GROUP == 'api' ]] ; then docker/sdk codecept codecept run -c codeception.api.yml; fi
+  - chmod +x docker/check_boot.sh
+  - ./docker/check_boot.sh
 
 notifications:
   email: false
