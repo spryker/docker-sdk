@@ -58,18 +58,16 @@ matrix:
   allow_failures: []
   include:
     - name: Demo boot test
-      env:
-        - DEV_MODE=0
+      env: DEV_MODE=0
     - name: Dev boot test
-      env:
-        - DEV_MODE=1
+      env: DEV_MODE=1
 
 script:
   - cd /home/travis/build/spryker/project/
   - if [[ $DEV_MODE == 0 ]] ; then docker/sdk boot; fi
   - if [[ $DEV_MODE == 1 ]] ; then docker/sdk boot deploy.dev.yml; fi
-  - chmod +x docker/check_boot.sh
-  - ./docker/check_boot.sh
+  - chmod +x docker/ci/check_boot.sh
+  - ./docker/ci/check_boot.sh
 
 notifications:
   email: false
