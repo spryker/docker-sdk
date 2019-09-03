@@ -11,19 +11,9 @@ env:
     - SPRYKER_DB_ENGINE=PGSQL
 
 cache:
-  timeout: 3600
-  directories:
-    - $HOME/build/spryker/project/vendor
-    - $HOME/build/spryker/project/node_modules
-    - $HOME/build/spryker/project/frontend/assets
+  timeout: 60
 
 addons:
-  hosts:
-    - yves.de.demo-spryker.com
-    - zed.de.demo-spryker.com
-    - glue.de.demo-spryker.com
-    - queue.demo-spryker.com
-    - scheduler.demo-spryker.com
   apt:
     packages:
       - apache2-utils
@@ -42,16 +32,6 @@ before_install:
   - sudo apt-get install --only-upgrade docker-ce -y
   - sudo curl -L "https://github.com/docker/compose/releases/download/1.24.0/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
   - sudo chmod +x /usr/local/bin/docker-compose
-  - openssl aes-256-cbc -K $encrypted_ffb7c676c1f2_key -iv $encrypted_ffb7c676c1f2_iv -in ci/id_rsa.enc -out ./deploy_key -d
-  - eval "$(ssh-agent -s)"
-  - chmod 600 ./deploy_key
-  - echo -e "Host $SERVER_IP_ADDRESS\n\tStrictHostKeyChecking no\n" >> ~/.ssh/config
-  - ssh-add ./deploy_key
-  - cd ${TRAVIS_BUILD_DIR}/../
-  - rm -rf project
-  - git clone git@github.com:spryker/suite-nonsplit.git project
-  - rm -rf project/docker
-  - mv ${TRAVIS_BUILD_DIR} project/docker
 
 matrix:
   fast_finish: true
@@ -60,28 +40,28 @@ matrix:
     - name: Demo boot test
       env: DEV_MODE=0
       script:
-        - chmod +x docker/ci/check_boot.sh
-        - ./docker/ci/check_boot.sh
+        - chmod +x ci/check_boot.sh
+        - ./ci/check_boot.sh
     - name: Dev boot test
       env: DEV_MODE=1
       script:
-        - chmod +x docker/ci/check_boot.sh
-        - ./docker/ci/check_boot.sh
+        - chmod +x ci/check_boot.sh
+        - ./ci/check_boot.sh
     - name: Demo Bash syntax check
       env: DEV_MODE=0
       script:
-        - chmod +x docker/ci/check_bash_syntax.sh
-        - ./docker/ci/check_bash_syntax.sh
+        - chmod +x ci/check_bash_syntax.sh
+        - ./ci/check_bash_syntax.sh
     - name: Demo Bash syntax check
       env: DEV_MODE=1
       script:
-        - chmod +x docker/ci/check_bash_syntax.sh
-        - ./docker/ci/check_bash_syntax.sh
+        - chmod +x ci/check_bash_syntax.sh
+        - ./ci/check_bash_syntax.sh
 
 before_script:
-  - cd /home/travis/build/spryker/project/
-  - if [[ $DEV_MODE == 0 ]] ; then docker/sdk boot; fi
-  - if [[ $DEV_MODE == 1 ]] ; then docker/sdk boot deploy.dev.yml; fi
+  - chmod +x sdk
+  - if [[ $DEV_MODE == 0 ]] ; then ./sdk boot; fi
+  - if [[ $DEV_MODE == 1 ]] ; then ./sdk boot deploy.dev.yml; fi
 
 notifications:
   email: false
