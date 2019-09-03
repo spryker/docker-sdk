@@ -60,8 +60,8 @@ matrix:
 
 before_script:
   - chmod +x sdk
-  - if [[ $DEV_MODE == 0 ]] ; then ./sdk boot; fi
-  - if [[ $DEV_MODE == 1 ]] ; then ./sdk boot deploy.dev.yml; fi
+  - if [[ $DEV_MODE == 0 ]] ; then ./sdk boot ci/deploy.yml; fi
+  - if [[ $DEV_MODE == 1 ]] ; then ./sdk boot ci/deploy.dev.yml; fi
 
 notifications:
   email: false
