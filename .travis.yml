@@ -1,0 +1,12 @@
+dist: bionic
+sudo: required
+os:
+  - linux
+language: minimal
+
+script:
+  - echo "Hello Travis"
+
+notifications:
+  email: false
+
