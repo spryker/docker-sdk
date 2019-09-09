@@ -84,7 +84,7 @@ function showHelp()
     echo -e " ${GREEN}cli${NC} <command>     - Run a cli command, e.g. \`${ITALIC}${SPRYKER_SELF_SCRIPT} cli composer install${NC}\`."
     echo -e " ${GREEN}console${NC}           - Run a Spryker console command, e.g. \`${ITALIC}${SPRYKER_SELF_SCRIPT} console transfer:generate -vvv\`${NC}."
     echo -e " ${GREEN}testing${NC}           - Start a new container where you can run cli commands in testing environment, e.g. \`${ITALIC}codecept build${NC}\`."
-    echo -e " ${GREEN}testing${NC} <command> - Run a cli command in testing environment, e.g. \`${ITALIC}${SPRYKER_SELF_SCRIPT} codecept codecept build${NC}\`."
+    echo -e " ${GREEN}testing${NC} <command> - Run a cli command in testing environment, e.g. \`${ITALIC}${SPRYKER_SELF_SCRIPT} testing codecept build${NC}\`."
     echo -e " ${GREEN}wait${NC} <service>    - Wait for requested services, e.g. \`${ITALIC}${SPRYKER_SELF_SCRIPT} wait database broker\`${NC}."
 
     echo -e ""
@@ -474,7 +474,7 @@ function execSpryker()
         ${SPRYKER_DOCKER_PREFIX}_cli:${SPRYKER_DOCKER_TAG} /usr/local/bin/execute.sh
 }
 
-function execCodecept()
+function execTesting()
 {
     waitFor database
     waitFor broker
@@ -490,8 +490,8 @@ function execCodecept()
 
     execDockerCompose exec \
         -e COMMAND="${*}" \
-        -e PS1="spryker@codecept\$" \
-        codecept \
+        -e PS1="spryker@testing\$" \
+        testing \
         ${binary}
 }
 
@@ -690,9 +690,9 @@ case ${command} in
     console)
         doCli console ${@}
         ;;
-    codecept)
+    testing)
         ensureTestingMode
-        execCodecept "${@}"
+        execTesting "${@}"
         ;;
     logs)
         execSpryker "find ${SPRYKER_LOG_DIRECTORY} -type f \( -name \"exception.log\" \) -exec tail -f \"$file\" {} +"
