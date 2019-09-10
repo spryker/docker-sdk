@@ -9,6 +9,7 @@ x-environment:
   &xdebug-environment
   environment:
     SPRYKER_XDEBUG_HOST_IP: ${SPRYKER_XDEBUG_HOST_IP}
+    PHP_IDE_CONFIG: "serverName={{ docker['debug']['server-name'] | default('spryker') }}"
 
 services:
 {% for group in groups %}

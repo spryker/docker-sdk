@@ -40,7 +40,7 @@ services:
     command: "phantomjs --webdriver=4444 --disk-cache=true --load-images=false --webdriver-loglevel=DEBUG"
     <<: *test-links
 
-  codecept:
+  testing:
     image: ${SPRYKER_DOCKER_PREFIX}_cli:${SPRYKER_DOCKER_TAG}
     networks:
       - services
