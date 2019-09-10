@@ -429,6 +429,13 @@ function loadDemoData()
     done
 }
 
+function generateTranslationCache()
+{
+    echo -e "${INFO}Init translation cache.${NC}"
+
+    waitFor database
+    execSpryker 'vendor/bin/install -r docker -s init-translation-cache'
+}
 
 function destroyAssets()
 {
@@ -537,6 +544,7 @@ function doUp()
 {
     doBuild ${IF_NOT_PERFORMED}
     runApp
+    generateTranslationCache
     loadDemoData ${IF_NOT_PERFORMED}
     createSchedulerJobs ${IF_NOT_PERFORMED}
 }
