@@ -18,7 +18,7 @@ function checkDockerVersion()
 
     verbose -n "${INFO}Checking docker version...${NC}"
 
-    if [ $(echo "${installedVersion}" | tr -d '.') -lt $(echo "${requiredMinimalVersion}" | tr -d '.') ]
+    if [ $(echo "${installedVersion}" | tr -d '.' | sed -E 's/[^0-9]+$//g') -lt $(echo "${requiredMinimalVersion}" | tr -d '.') ]
     then
         verbose ""
         error "${WARN}Docker version ${installedVersion} is not supported. Please update docker to at least ${requiredMinimalVersion}.${NC}"
