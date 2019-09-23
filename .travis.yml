@@ -4,8 +4,64 @@ os:
   - linux
 language: minimal
 
-script:
-  - echo "Hello Travis"
+env:
+  global:
+    - PROGRESS_TYPE=plain
+    - SPRYKER_PHP_VERSION=7.3
+    - SPRYKER_DB_ENGINE=PGSQL
+
+cache:
+  timeout: 60
+
+addons:
+  apt:
+    packages:
+      - apache2-utils
+      - apt-transport-https
+      - ca-certificates
+      - curl
+      - gnupg-agent
+      - pigz
+      - software-properties-common
+    sources:
+      - sourceline: "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+        key_url: https://download.docker.com/linux/ubuntu/gpg
+
+before_install:
+  - echo eyAiZXhwZXJpbWVudGFsIiA6IHRydWUsICJmZWF0dXJlcyIgOiB7ICJidWlsZGtpdCI6IHRydWUgfSB9Cg==|base64 -d|sudo tee /etc/docker/daemon.json
+  - sudo apt-get install --only-upgrade docker-ce -y
+  - sudo curl -L "https://github.com/docker/compose/releases/download/1.24.0/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+  - sudo chmod +x /usr/local/bin/docker-compose
+
+matrix:
+  fast_finish: true
+  allow_failures: []
+  include:
+    - name: Demo boot test
+      env: DEV_MODE=0
+      script:
+        - chmod +x ci/check_boot.sh
+        - ./ci/check_boot.sh
+    - name: Dev boot test
+      env: DEV_MODE=1
+      script:
+        - chmod +x ci/check_boot.sh
+        - ./ci/check_boot.sh
+    - name: Demo Bash syntax check
+      env: DEV_MODE=0
+      script:
+        - chmod +x ci/check_bash_syntax.sh
+        - ./ci/check_bash_syntax.sh
+    - name: Demo Bash syntax check
+      env: DEV_MODE=1
+      script:
+        - chmod +x ci/check_bash_syntax.sh
+        - ./ci/check_bash_syntax.sh
+
+before_script:
+  - chmod +x sdk
+  - if [[ $DEV_MODE == 0 ]] ; then ./sdk boot ci/deploy.yml; fi
+  - if [[ $DEV_MODE == 1 ]] ; then ./sdk boot ci/deploy.dev.yml; fi
 
 notifications:
   email: false
