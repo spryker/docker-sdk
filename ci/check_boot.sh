@@ -29,6 +29,7 @@ deployment/default/env
 deployment/default/project.yml
 deployment/default/bin/boot-deployment.sh
 deployment/default/bin/check-docker.sh
+deployment/default/bin/check-docker-compose.sh
 deployment/default/bin/console.sh
 deployment/default/bin/constants.sh
 deployment/default/bin/database
@@ -39,7 +40,7 @@ deployment/default/bin/database/mysql.sh
 deployment/default/bin/database/postgres.sh
 deployment/default/bin/mount/baked.sh
 deployment/default/bin/mount/docker-sync.sh
-deployment/default/bin/mount/native.sh
+deployment/default/bin/mount/native.sh``
 deployment/default/context/cli
 deployment/default/context/mysql
 deployment/default/context/nginx
