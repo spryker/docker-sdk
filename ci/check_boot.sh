@@ -40,7 +40,7 @@ deployment/default/bin/database/mysql.sh
 deployment/default/bin/database/postgres.sh
 deployment/default/bin/mount/baked.sh
 deployment/default/bin/mount/docker-sync.sh
-deployment/default/bin/mount/native.sh``
+deployment/default/bin/mount/native.sh
 deployment/default/context/cli
 deployment/default/context/mysql
 deployment/default/context/nginx
