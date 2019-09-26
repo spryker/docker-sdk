@@ -12,6 +12,7 @@ pushd ${BASH_SOURCE%/*} > /dev/null
 
 ./bin/require.sh docker docker-compose tr awk wc sed grep
 ./bin/check-docker.sh
+./bin/check-docker-compose.sh
 popd > /dev/null
 
 # Internal constants
