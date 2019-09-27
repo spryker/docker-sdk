@@ -1,0 +1,10 @@
+  {{ serviceName }}:
+    image: swaggerapi/swagger-ui
+    networks:
+        - services
+        - private
+    environment:
+        - SPRYKER_DOCKER_SWAGGER_JSON=/swagger/swagger.json
+    restart: always
+    volumes:
+        - {{ serviceName }}-{{ serviceData['engine'] }}-data:/swagger:rw
