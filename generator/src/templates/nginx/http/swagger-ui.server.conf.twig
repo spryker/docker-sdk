@@ -3,8 +3,10 @@
 {% block location %}
     add_header Access-Control-Allow-Origin *;
     add_header Access-Control-Allow-Methods "POST, GET, PATCH, DELETE, PUT, OPTIONS";
-    add_header Access-Control-Allow-Headers "Origin, Authorization, Accept";
+    add_header Access-Control-Allow-Headers "Content-Type, api_key, Authorization";
     add_header Access-Control-Allow-Credentials true;
+    add_header Content-Type: application/yml;
+{{ parent() }}
 {% endblock location %}
 
 {% block upstream %}{{ upstream }}:8080{% endblock upstream %}

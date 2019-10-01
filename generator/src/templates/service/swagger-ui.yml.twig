@@ -4,7 +4,7 @@
         - services
         - private
     environment:
-        - SPRYKER_DOCKER_SWAGGER_JSON=/swagger/swagger.json
+        - SWAGGER_JSON=/var/specs/{{ serviceData['document']['name'] }}
     restart: always
     volumes:
-        - {{ serviceName }}-{{ serviceData['engine'] }}-data:/swagger:rw
+        - $PWD/{{ serviceData['document']['path'] }}:/var/specs
