@@ -1,10 +1,8 @@
   {{ serviceName }}:
     image: swaggerapi/swagger-ui
     networks:
-        - services
-        - private
+        - public
     environment:
-        - SWAGGER_JSON=/var/specs/{{ serviceData['document']['name'] }}
-    restart: always
+        - SWAGGER_JSON=/var/specs/spryker_rest_api.schema.yml
     volumes:
-        - $PWD/{{ serviceData['document']['path'] }}:/var/specs
+        - ./src/Generated/Glue/Specification/spryker_rest_api.schema.yml:/var/specs/spryker_rest_api.schema.yml
