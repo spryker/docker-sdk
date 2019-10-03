@@ -1,0 +1,38 @@
+sync:
+  defaults:
+    permissions:
+      defaultFileMode: "0666"
+      defaultDirectoryMode: "0777"
+    ignore:
+      vcs: true
+      paths:
+        - '.idea'
+        - '.project'
+        - 'data/*/cache'
+        - '*.log'
+        - 'docker'
+        - '.composer'
+        - '.npm'
+        - 'mutagen.*'
+        - 'docker-compose.*'
+        - '*.env'
+        - 'bin/'
+        - 'context/'
+        - 'env/'
+        - 'images/'
+  development:
+    alpha: "{{ _projectSourceDir }}"
+    beta: "docker://spryker_mutagen_sync_1/data"
+    mode: "two-way-safe"
+    ignore:
+      paths:
+        - 'public/Yves/assets'
+        - 'public/Zed/assets'
+  yvesassets:
+    alpha: "{{ _projectSourceDir }}/public/Yves/assets"
+    beta: "docker://spryker_mutagen_sync_1/data/public/Yves/assets"
+    mode: "two-way-safe"
+  zedassets:
+    alpha: "{{ _projectSourceDir }}/public/Zed/assets"
+    beta: "docker://spryker_mutagen_sync_1/data/public/Zed/assets"
+    mode: "two-way-safe"

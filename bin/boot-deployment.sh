@@ -57,6 +57,7 @@ function bootDeployment()
         -e SPRYKER_DOCKER_SDK_PROJECT_YAML="/data/deployment/project.yml" \
         -e SPRYKER_DOCKER_SDK_DEPLOYMENT_DIR="/data/deployment" \
         -e SPRYKER_DOCKER_SDK_PLATFORM="$(getPlatform)" \
+        -e SPRYKER_DOCKER_SDK_PROJECT_SOURCE_DIR="${PROJECT_DIR}" \
         -v ${DEPLOYMENT_DIR}:/data/deployment:rw \
         -u ${USER_UID}:${USER_GID} \
         spryker_docker_sdk

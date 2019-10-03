@@ -11,6 +11,7 @@ include_once __DIR__ . DS . 'vendor' . DS . 'autoload.php';
 $deploymentDir = getenv('SPRYKER_DOCKER_SDK_DEPLOYMENT_DIR') ?: '/tmp';
 $projectYaml = getenv('SPRYKER_DOCKER_SDK_PROJECT_YAML') ?: '';
 $projectName = getenv('SPRYKER_DOCKER_SDK_PROJECT_NAME') ?: '';
+$projectSourceDir = getenv('SPRYKER_DOCKER_SDK_PROJECT_SOURCE_DIR') ?: __DIR__ ;
 $platform = getenv('SPRYKER_DOCKER_SDK_PLATFORM') ?: 'linux'; // Possible values: linux windows macos
 
 $loader = new FilesystemLoader(APPLICATION_SOURCE_DIR . DS . 'templates');
@@ -20,6 +21,7 @@ $yamlParser = new Parser();
 $projectData = $yamlParser->parseFile($projectYaml);
 
 $projectData['_projectName'] = $projectName;
+$projectData['_projectSourceDir'] = $projectSourceDir;
 $projectData['tag'] = $projectData['tag'] ?? uniqid();
 $projectData['_platform'] = $platform;
 $mountMode = $projectData['_mountMode'] = retrieveMountMode($projectData, $platform);
@@ -157,6 +159,12 @@ switch ($mountMode) {
         file_put_contents(
             $deploymentDir . DS . 'docker-sync.yml',
             $twig->render('docker-sync.yml.twig', $projectData)
+        );
+        break;
+    case 'mutagen':
+        file_put_contents(
+            $deploymentDir . DS . 'mutagen.yml',
+            $twig->render('mutagen.yml.twig', $projectData)
         );
         break;
 }
