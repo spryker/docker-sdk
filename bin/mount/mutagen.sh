@@ -82,8 +82,8 @@ function checkAllSyncProcesses()
         done
     done
 
-    kill -9 ${progressPID}
-    echo "\n"
+    kill -13 ${progressPID}
+    echo " "
     echo 'All data was synced.'
 }
 
