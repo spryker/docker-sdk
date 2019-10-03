@@ -1,7 +1,7 @@
   {{ serviceName }}:
 {% if _mountMode == 'baked' %}
     build:
-        context: ${DEPLOYMENT_PATH}/images/swagger/
+        context: ./${DEPLOYMENT_PATH}/images/swagger/
         dockerfile: Dockerfile
         args:
             SPRYKER_DOCKER_PREFIX: ${SPRYKER_DOCKER_PREFIX}
