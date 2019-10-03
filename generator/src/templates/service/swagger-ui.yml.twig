@@ -1,8 +1,19 @@
   {{ serviceName }}:
+{% if _mountMode == 'baked' %}
+    build:
+        context: ${DEPLOYMENT_PATH}/images/swagger/
+        dockerfile: Dockerfile
+        args:
+            SPRYKER_DOCKER_PREFIX: ${SPRYKER_DOCKER_PREFIX}
+            SPRYKER_DOCKER_TAG: ${SPRYKER_DOCKER_TAG}
+{% else %}
     image: swaggerapi/swagger-ui
+{% endif %}
     networks:
         - public
     environment:
         - SWAGGER_JSON=/var/specs/spryker_rest_api.schema.yml
+{% if _mountMode != 'baked' %}
     volumes:
-        - ./src/Generated/Glue/Specification/spryker_rest_api.schema.yml:/var/specs/spryker_rest_api.schema.yml
+        - ./src/Generated/Glue/Specification/spryker_rest_api.schema.yml:/var/specs/spryker_rest_api.schema.yml:nocopy
+{% endif %}
