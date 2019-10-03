@@ -15,5 +15,5 @@
         - SWAGGER_JSON=/var/specs/spryker_rest_api.schema.yml
 {% if _mountMode != 'baked' %}
     volumes:
-        - ./src/Generated/Glue/Specification/spryker_rest_api.schema.yml:/var/specs/spryker_rest_api.schema.yml:nocopy
+        - ./src/Generated/Glue/Specification:/var/specs
 {% endif %}
