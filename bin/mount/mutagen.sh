@@ -96,12 +96,14 @@ function sync()
         create)
             verbose "${INFO}Creating 'data-sync' volume and sync container${NC}"
             docker volume create --name=spryker_dev_data_sync
-            [ ! "$(docker ps -a | grep spryker_mutagen_sync_1)" ] && docker run -d \
-               --name spryker_mutagen_sync_1 \
-               -v spryker_dev_data_sync:/data \
-               -u 1000:1000 \
-               spryker_cli:dev \
-               nc -l 9000
+            if [ ! "$(docker ps -a | grep spryker_mutagen_sync_1)" ]; then
+                docker run -d \
+                   --name spryker_mutagen_sync_1 \
+                   -v spryker_dev_data_sync:/data \
+                   -u 1000:1000 \
+                   spryker_cli:dev \
+                   nc -l 9000
+            fi
             ;;
 
         recreate)
@@ -121,7 +123,7 @@ function sync()
                 verbose "${INFO}Start sync process for data volume${NC}"
                 pushd ${PROJECT_DIR} > /dev/null
 
-                mutagen project start ${syncConf}
+                mutagen project start ${syncConf} || echo 'Mutagen project already running'
                 checkAllSyncProcesses
 
                 popd > /dev/null
