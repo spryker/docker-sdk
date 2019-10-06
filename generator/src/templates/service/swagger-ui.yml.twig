@@ -13,6 +13,8 @@
         - public
     environment:
         - SWAGGER_JSON=/var/specs/spryker_rest_api.schema.yml
+    env_file:
+      - ${DEPLOYMENT_PATH}/env/{{ serviceName }}.env
 {% if _mountMode != 'baked' %}
     volumes:
         - ./src/Generated/Glue/Specification:/var/specs
