@@ -131,13 +131,15 @@ file_put_contents(
     ])
 );
 
-file_put_contents(
-    $deploymentDir . DS . 'env' . DS . 'swagger.env',
-    $twig->render('env/swagger/swagger-ui.env.twig', [
-        'project' => $projectData,
-        'endpointMap' => $endpointMap,
-    ])
-);
+if (isset($projectData['services']['swagger'])) {
+    file_put_contents(
+        $deploymentDir . DS . 'env' . DS . 'swagger.env',
+        $twig->render('env/swagger/swagger-ui.env.twig', [
+            'project' => $projectData,
+            'endpointMap' => $endpointMap,
+        ])
+    );
+}
 
 file_put_contents(
     $deploymentDir . DS . 'docker-compose.yml',
