@@ -38,7 +38,8 @@ function doProductionAssets()
     local tag=$1
     local destinationPath=$( getDestinationPath $2 )
 
-    echo -e "${INFO}Assets:${NC}"
+    echo -e "${INFO}File name:\t\t\t\tPath:${NC}"
+
     for application in "${APPLICATIONS[@]}";
     do
         local assetsPath=${PROJECT_DIR}/public/${application}/assets
@@ -47,7 +48,7 @@ function doProductionAssets()
             local zipName=${application}-${tag}.zip
 
             zip -rq ${destinationPath}/${zipName} ${assetsPath}
-            echo -e ${OK}${zipName}${NC}"\t\t" ${destinationPath}/${zipName}
+            echo -e ${OK}${zipName}${NC}"\t\t\t\t"${destinationPath}/${zipName}
         fi
     done
 }
