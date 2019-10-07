@@ -9,6 +9,7 @@
     fastcgi_param SPRYKER_SESSION_BE_NAMESPACE "{{ storeServices['session']['namespace'] | default(endpointData['services']['session']['namespace']) }}";
     fastcgi_param SPRYKER_BE_HOST {{ host }};
     fastcgi_param SPRYKER_BE_PORT {{ port }};
+    fastcgi_param HTTPS {{ ssl ? 1 : 0 }};
 
 {% if project['_endpointMap'][endpointData['store']]['yves'] is not empty %}
     fastcgi_param SPRYKER_FE_HOST {{ project['_endpointMap'][endpointData['store']]['yves'] }};
