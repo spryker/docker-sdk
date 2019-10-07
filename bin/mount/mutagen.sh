@@ -67,6 +67,7 @@ function checkAllSyncProcesses()
 
     IFS=${oldIFS}
 
+    trap 'kill $progressPID; exit' INT
     progress &
     progressPID=$!
 

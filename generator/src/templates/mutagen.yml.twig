@@ -20,19 +20,55 @@ sync:
         - 'context/'
         - 'env/'
         - 'images/'
-  development:
+  project:
     alpha: "{{ _projectSourceDir }}"
     beta: "docker://spryker_mutagen_sync_1/data"
     mode: "two-way-safe"
     ignore:
       paths:
-        - 'public/Yves/assets'
-        - 'public/Zed/assets'
-  yvesassets:
+        - 'public'
+        - 'vendor'
+        - 'node_modules'
+        - 'data'
+        - 'src'
+  src:
+    alpha: "{{ _projectSourceDir }}/src"
+    beta: "docker://spryker_mutagen_sync_1/data/src"
+    mode: "two-way-safe"
+    ignore:
+      paths:
+        - 'Generated'
+  srcGenerated:
+    alpha: "{{ _projectSourceDir }}/src/Generated"
+    beta: "docker://spryker_mutagen_sync_1/data/src/Generated"
+    mode: "two-way-safe"
+  vendor:
+    alpha: "{{ _projectSourceDir }}/vendor"
+    beta: "docker://spryker_mutagen_sync_1/data/vendor"
+    mode: "two-way-safe"
+    ignore:
+      vcs: false
+  nodeModules:
+    alpha: "{{ _projectSourceDir }}/node_modules"
+    beta: "docker://spryker_mutagen_sync_1/data/node_modules"
+    mode: "two-way-safe"
+  data:
+    alpha: "{{ _projectSourceDir }}/data"
+    beta: "docker://spryker_mutagen_sync_1/data/data"
+    mode: "two-way-safe"
+  public:
+    alpha: "{{ _projectSourceDir }}/public"
+    beta: "docker://spryker_mutagen_sync_1/data/public"
+    mode: "two-way-safe"
+    ignore:
+      paths:
+        - 'Yves/assets'
+        - 'Zed/assets'
+  yvesAssets:
     alpha: "{{ _projectSourceDir }}/public/Yves/assets"
     beta: "docker://spryker_mutagen_sync_1/data/public/Yves/assets"
     mode: "two-way-safe"
-  zedassets:
+  zedAssets:
     alpha: "{{ _projectSourceDir }}/public/Zed/assets"
     beta: "docker://spryker_mutagen_sync_1/data/public/Zed/assets"
     mode: "two-way-safe"
