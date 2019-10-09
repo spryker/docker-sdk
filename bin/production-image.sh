@@ -27,7 +27,7 @@ function getDestinationPath()
     local destinationPath=${PROJECT_DIR}
 
     if isPathExist $1; then
-        destinationPath=$1
+        destinationPath=${1%/}
     fi
 
     echo ${destinationPath}
