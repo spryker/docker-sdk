@@ -6,7 +6,7 @@ set -e
 pushd ${BASH_SOURCE%/*} > /dev/null
 . ./bin/constants.sh
 . ./bin/console.sh
-. ./bin/production-helper.sh
+. ./bin/production-image.sh
 
 . ./bin/mount/{{ _mountMode }}.sh $@
 . ./bin/database/{{ services['database']['engine'] }}.sh $@
