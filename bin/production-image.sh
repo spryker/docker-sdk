@@ -22,12 +22,21 @@ function isPathExist()
     return ${__TRUE}
 }
 
+function removeTrallingSlash()
+{
+    local defaultSeparator=\/
+
+    [ "$(getPlatform)" == "windows" ] && ${defaultSeparator}=\
+
+    echo $1 | sed -e "s|${defaultSeparator}*$||g" -e "s|${defaultSeparator}${defaultSeparator}*|${defaultSeparator}|g"
+}
+
 function getDestinationPath()
 {
     local destinationPath=${PROJECT_DIR}
 
     if isPathExist $1; then
-        destinationPath=${1%/}
+        destinationPath=$(removeTrallingSlash $1)
     fi
 
     echo ${destinationPath}
