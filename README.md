@@ -13,7 +13,7 @@ The tool reads the specified Deploy file and builds a production-like Docker inf
 
 The purposes of the tool:
 
-1. Building production-ready Docker images.
+1. Building production-like Docker images.
 1. Serving as a part of development environment based on Docker.
 1. Simplifying the process of setting up a local demo of Spryker project.
 
