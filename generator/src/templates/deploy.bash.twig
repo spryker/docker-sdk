@@ -227,6 +227,8 @@ function buildBaseImage()
         echo -e "${WARN}Warning: GITHUB_TOKEN is not set but may be required.${NC}"
     fi
 
+    {{ isDevelopment ? '' : 'doProductionImages' }}
+
     docker build \
         -t ${SPRYKER_DOCKER_PREFIX}_app:${SPRYKER_DOCKER_TAG} \
         --progress=${PROGRESS_TYPE} \
@@ -718,6 +720,9 @@ case ${command} in
         ;;
     production:assets)
         doProductionAssets "${@}"
+        ;;
+    production:images)
+        doProductionImages "${@}"
         ;;
     *)
         showHelp
