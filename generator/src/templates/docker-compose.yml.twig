@@ -35,14 +35,12 @@ services:
       - ./${DEPLOYMENT_PATH}/context/nginx/vhost.d:/etc/nginx/vhost.d:ro
       - ./${DEPLOYMENT_PATH}/context/nginx/ssl:/etc/nginx/ssl:ro
       - ./public/Yves/favicon.ico:/public/favicon.ico:ro
-{% if not docker['build']['exclude']['assets'] is defined %}
 {% if _mountMode == 'baked' %}
       - assets:/assets:ro
 {% elseif _mountMode == 'native' %}
       - ./public:/data/public
 {% else %}
       - ${SPRYKER_DOCKER_PREFIX}_${SPRYKER_DOCKER_TAG}_data_sync:/data
-{% endif %}
 {% endif %}
 
   rpc_server:
@@ -90,7 +88,6 @@ volumes:
 
   logs:
     external: false
-{% if not docker['build']['exclude']['assets'] is defined %}
 {% if _mountMode == 'baked'%}
   assets:
     external: true
@@ -98,7 +95,6 @@ volumes:
 {% elseif _mountMode != 'native' %}
   {{ namespace }}_{{ tag }}_data_sync:
     external: true
-{% endif %}
 {% endif %}
 
 networks:

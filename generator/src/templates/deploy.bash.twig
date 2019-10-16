@@ -133,9 +133,6 @@ DOCKER_EXTRA_OPTIONS+=" -v ${SPRYKER_DOCKER_PREFIX}_${SPRYKER_DOCKER_TAG}_data_s
 {% endif %}
 {% endif %}
 
-# Build variables
-readonly SPRYKER_BUILD_ASSETS_EXCLUDED={{ docker['build']['exclude']['assets'] is defined }}
-
 function enableDebuggingMode()
 {
     echo -e "*** ${WARN}DEBUGGING MODE${NC}"
@@ -179,10 +176,6 @@ function areAssetsBuilt()
 
 function buildAssets()
 {
-    if [[ "$1" = ${IF_NOT_PERFORMED} && ${SPRYKER_BUILD_ASSETS_EXCLUDED} ]]; then
-        return ${__TRUE}
-    fi
-
     if [ "$1" = ${IF_NOT_PERFORMED} ] && areAssetsBuilt; then
         return ${__TRUE}
     fi
@@ -518,7 +511,6 @@ function doBuild()
     buildCode $1
 {% endif %}
     execDockerCompose build
-    buildAssets $1
 }
 
 function execDockerCompose()
@@ -543,6 +535,7 @@ function execDockerCompose()
 function doUp()
 {
     doBuild ${IF_NOT_PERFORMED}
+    buildAssets $1
     runApp
     loadDemoData ${IF_NOT_PERFORMED}
     createSchedulerJobs ${IF_NOT_PERFORMED}
@@ -635,7 +628,18 @@ esac
 
 case ${command} in
     build)
-        doBuild
+        case ${1} in
+            *)
+                doBuild
+                buildAssets
+                ;;
+            assets|asset)
+                buildAssets
+                ;;
+            images|image)
+                doBuild
+                ;;
+        esac
         ;;
     run|start)
         runApp

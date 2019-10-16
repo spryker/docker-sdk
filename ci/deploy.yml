@@ -84,9 +84,5 @@ docker:
   testing:
     store: DE
 
-  build:
-    exclude:
-      assets:
-
   mount:
     baked:
