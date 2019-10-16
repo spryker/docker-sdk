@@ -133,6 +133,9 @@ DOCKER_EXTRA_OPTIONS+=" -v ${SPRYKER_DOCKER_PREFIX}_${SPRYKER_DOCKER_TAG}_data_s
 {% endif %}
 {% endif %}
 
+# Build variables
+readonly SPRYKER_BUILD_ASSETS_EXCLUDED={{ docker['build']['exclude']['assets'] is defined }}
+
 function enableDebuggingMode()
 {
     echo -e "*** ${WARN}DEBUGGING MODE${NC}"
@@ -176,6 +179,10 @@ function areAssetsBuilt()
 
 function buildAssets()
 {
+    if [[ "$1" = ${IF_NOT_PERFORMED} && ${SPRYKER_BUILD_ASSETS_EXCLUDED} ]]; then
+        return ${__TRUE}
+    fi
+
     if [ "$1" = ${IF_NOT_PERFORMED} ] && areAssetsBuilt; then
         return ${__TRUE}
     fi
@@ -188,6 +195,7 @@ function buildAssets()
     sync stop
     runApplicationBuild "vendor/bin/install -r docker -s build-static"
 {% else %}
+
     verbose "${INFO}Generating assets${NC}"
 
     docker image tag ${SPRYKER_DOCKER_PREFIX}_app:${SPRYKER_DOCKER_TAG} spryker_app:latest
