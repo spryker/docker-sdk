@@ -36,7 +36,7 @@ services:
       - ./${DEPLOYMENT_PATH}/context/nginx/ssl:/etc/nginx/ssl:ro
       - ./public/Yves/favicon.ico:/public/favicon.ico:ro
 {% if _mountMode == 'baked' %}
-      - assets:/assets:ro
+{#      - assets:/assets:ro#}
 {% elseif _mountMode == 'native' %}
       - ./public:/data/public
 {% else %}
@@ -89,9 +89,9 @@ volumes:
   logs:
     external: false
 {% if _mountMode == 'baked'%}
-  assets:
-    external: true
-    name: "${COMPOSE_PROJECT_NAME}_assets"
+{#  assets:#}
+{#    external: true#}
+{#    name: "${COMPOSE_PROJECT_NAME}_assets"#}
 {% elseif _mountMode != 'native' %}
   {{ namespace }}_{{ tag }}_data_sync:
     external: true
