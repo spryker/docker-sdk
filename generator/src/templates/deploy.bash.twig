@@ -629,15 +629,15 @@ esac
 case ${command} in
     build)
         case ${1} in
-            *)
-                doBuild
-                buildAssets
-                ;;
             assets|asset)
                 buildAssets
                 ;;
             images|image)
                 doBuild
+                ;;
+            *)
+                doBuild
+                buildAssets
                 ;;
         esac
         ;;
