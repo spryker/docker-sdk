@@ -91,6 +91,7 @@ function showHelp()
     echo -e " ${GREEN}pull${NC}              - Pull external docker images."
     echo -e " ${GREEN}build${NC}             - Build Spryker containers."
     echo -e " ${GREEN}demo|demo-data${NC}    - Populate Spryker demo data."
+    echo -e " ${GREEN}demo <section>${NC}    - Load the demo data by running the specified section from docker installation recipe for each store."
     echo -e " ${GREEN}jobs${NC}              - Generate and starts jobs."
 
     echo -e ""
@@ -436,7 +437,7 @@ function loadDemoData()
         echo -e "${INFO}Loading demo data for ${SPRYKER_STORE} store.${NC}"
         initDatabase
 
-        local demoDataSection=${1:-demodata}
+        local demoDataSection=${2:-demodata}
         execSpryker "vendor/bin/install -r docker -s init-storages-per-region -s ${demoDataSection}"
     done
 }
@@ -659,7 +660,7 @@ case ${command} in
         ;;
     demo|demo-data)
         runApp
-        loadDemoData ${@}
+        loadDemoData "" ${1}
         ;;
     down|stop)
         stopApp

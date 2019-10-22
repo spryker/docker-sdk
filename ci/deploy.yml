@@ -23,14 +23,6 @@ regions:
                         namespace: 1
                     search:
                         namespace: de_search
-            AT:
-                services:
-                    broker:
-                        namespace: at-docker
-                    key_value_store:
-                        namespace: 2
-                    search:
-                        namespace: at_search
 groups:
     EU:
         region: EU
@@ -43,18 +35,11 @@ groups:
                         services:
                             session:
                                 namespace: 1
-                    yves.at.spryker.local:
-                        store: AT
-                        services:
-                            session:
-                                namespace: 2
             glue_eu:
                 application: glue
                 endpoints:
                     glue.de.spryker.local:
                         store: DE
-                    glue.at.spryker.local:
-                        store: AT
             zed_eu:
                 application: zed
                 endpoints:
@@ -63,21 +48,12 @@ groups:
                         services:
                             session:
                                 namespace: 3
-                    zed.at.spryker.local:
-                        store: AT
-                        services:
-                            session:
-                                namespace: 4
-
 services:
     database:
         engine: postgres
         root:
             username: "root"
             password: "secret"
-        endpoints:
-            localhost:5432:
-                protocol: tcp
     broker:
         engine: rabbitmq
         api:
@@ -89,9 +65,6 @@ services:
         engine: redis
     key_value_store:
         engine: redis
-        endpoints:
-            localhost:16379:
-                protocol: tcp
     search:
         engine: elastic
     scheduler:
