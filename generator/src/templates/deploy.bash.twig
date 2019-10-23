@@ -35,7 +35,7 @@ VERBOSE=${VERBOSE:-0}
 
 # Predefined constants
 readonly APPLICATION_ENV={{ environment | default('docker') }}
-readonly SPRYKER_PLATFORM_IMAGE={{ image | default('spryker/php:7.2') }}
+readonly SPRYKER_PLATFORM_IMAGE=${SPRYKER_PLATFORM_IMAGE:-{{ image | default('spryker/php:7.2') }}}
 export SPRYKER_DOCKER_PREFIX=${COMPOSE_PROJECT_NAME}
 export SPRYKER_DOCKER_TAG={{ tag | default('1.0') }}
 export SPRYKER_LOG_DIRECTORY={{ docker['logs']['path'] | default('/var/log/spryker') }}
