@@ -85,12 +85,11 @@ deployment/default/env/cli/testing.env
 deployment/default/images/base_app
 deployment/default/images/base_dev
 deployment/default/images/builder_assets
-deployment/default/images/demo/cli
-deployment/default/images/dev/cli
+deployment/default/images/cli/demo/Dockerfile
+deployment/default/images/cli/dev/Dockerfile
 deployment/default/images/base_app/Dockerfile
 deployment/default/images/base_dev/Dockerfile
 deployment/default/images/builder_assets/Dockerfile
-deployment/default/images/cli/Dockerfile
 )
 
 checkFiles "${bootFileCollection[@]}"

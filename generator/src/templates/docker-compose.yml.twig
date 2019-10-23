@@ -3,7 +3,6 @@ version: "3.5"
 {% include "application-volumes.yml.twig" with {
     _mountMode: _mountMode
 } %}
-{% set isDevelopment = _mountMode != 'baked' %}
 
 services:
 
