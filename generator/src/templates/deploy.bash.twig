@@ -1,15 +1,20 @@
 #!/bin/bash
 
+{% set isDevelopment = _mountMode != 'baked' %}
+{% set sprykerEnvName = isDevelopment ? 'dev' : 'demo' %}
+
 set -e
 
 # Require
 pushd ${BASH_SOURCE%/*} > /dev/null
 . ./bin/constants.sh
 . ./bin/console.sh
-. ./bin/production-image.sh
 
 . ./bin/mount/{{ _mountMode }}.sh $@
 . ./bin/database/{{ services['database']['engine'] }}.sh $@
+
+. ./bin/assets/{{ sprykerEnvName }}/builder.sh
+. ./bin/images/{{ sprykerEnvName }}/builder.sh
 
 ./bin/require.sh docker docker-compose tr awk wc sed grep
 ./bin/check-docker.sh
@@ -98,6 +103,12 @@ function showHelp()
     echo -e " ${GREEN}clean-data${NC}        - Remove all Spryker volumes including all storages."
     echo -e " ${GREEN}reset${NC}             - Remove and build all Spryker containers and volumes."
     echo -e " ${GREEN}remove|clean${NC}      - Stop and removes all Spryker containers and volumes."
+
+{% if not isDevelopment %}
+    echo -e ""
+    echo -e " ${GREEN}production:images${NC} - Build prod-like images (Yves, Zed, Glue, Cli)."
+    echo -e " ${GREEN}production:assets${NC} - Build zip with assets."
+{% endif %}
 }
 
 function showWaitErrorMessage()
@@ -121,7 +132,7 @@ readonly USER_GID=$(id -g)
 readonly USER_UID="1000"
 readonly USER_GID="1000"
 {% endif %}
-{% set isDevelopment = _mountMode != 'baked' %}
+
 {% if isDevelopment %}
 [ $1 != 'help' ] && echo -e "*** ${WARN}DEVELOPMENT MODE${NC}"
 DOCKER_EXTRA_OPTIONS+=" -v ${DEPLOYMENT_DIR}/context/php/conf.d/opcache_dev.ini:/usr/local/etc/php/conf.d/opcache.ini:ro"
@@ -157,63 +168,6 @@ function ensureTestingMode()
     runApp
 }
 
-function areAssetsBuilt()
-{
-    verbose -n "Checking assets are built..."
-
-{% if isDevelopment %}
-    [ -d public/Yves/assets ] && verbose "[BUILT]" && return ${__TRUE} || verbose "" && return ${__FALSE}
-{% else %}
-    local assetsHostFolder=$(docker volume ls --filter "name=${SPRYKER_DOCKER_PREFIX}_assets" --format "{{ '{{' }}.Mountpoint{{ '}}' }}")
-    if [ ! -z "${assetsHostFolder}" ]; then
-      local assetsFolderFilesCount=$(docker run -i --rm -v ${SPRYKER_DOCKER_PREFIX}_assets:/assets ${SPRYKER_DOCKER_PREFIX}_cli:${SPRYKER_DOCKER_TAG} ls /assets|wc -l | sed 's/^ *//')
-      [ ${assetsFolderFilesCount} -gt 0 ] && verbose "[BUILT]" && return ${__TRUE}
-    fi
-
-    verbose ""
-    return ${__FALSE}
-{% endif %}
-}
-
-function buildAssets()
-{
-    if [ "$1" = ${IF_NOT_PERFORMED} ] && areAssetsBuilt; then
-        return ${__TRUE}
-    fi
-
-    verbose "${INFO}Creating docker volume '${SPRYKER_DOCKER_PREFIX}_assets'${NC}"
-    docker volume create --name="${SPRYKER_DOCKER_PREFIX}_assets"
-
-{% if isDevelopment %}
-    sync start
-    sync stop
-    runApplicationBuild "vendor/bin/install -r docker -s build-static"
-{% else %}
-    verbose "${INFO}Generating assets${NC}"
-
-    docker image tag ${SPRYKER_DOCKER_PREFIX}_app:${SPRYKER_DOCKER_TAG} spryker_app:latest
-
-    docker build -t ${SPRYKER_DOCKER_PREFIX}_builder_assets:${SPRYKER_DOCKER_TAG} \
-        --build-arg SPRYKER_DOCKER_PREFIX=${SPRYKER_DOCKER_PREFIX} \
-        --build-arg SPRYKER_DOCKER_TAG=${SPRYKER_DOCKER_TAG} \
-        --build-arg DEPLOYMENT_PATH=${DEPLOYMENT_PATH} \
-        --progress=${PROGRESS_TYPE} \
-        -f ${DEPLOYMENT_PATH}/images/builder_assets/Dockerfile \
-        .
-
-    local tty
-    [ -t -0 ] && tty='t' || tty=''
-    docker run -i${tty} --rm \
-        -v ${SPRYKER_DOCKER_PREFIX}_assets:/assets \
-        --name=${SPRYKER_DOCKER_PREFIX}_builder_assets \
-        ${SPRYKER_DOCKER_PREFIX}_builder_assets:${SPRYKER_DOCKER_TAG} \
-        true
-
-    docker rmi spryker_app:latest
-
-{% endif %}
-}
-
 function buildBaseImage()
 {
 {% if isDevelopment %}
@@ -227,34 +181,7 @@ function buildBaseImage()
         echo -e "${WARN}Warning: GITHUB_TOKEN is not set but may be required.${NC}"
     fi
 
-    {{ isDevelopment ? '' : 'doProductionImages' }}
-
-    docker build \
-        -t ${SPRYKER_DOCKER_PREFIX}_app:${SPRYKER_DOCKER_TAG} \
-        --progress=${PROGRESS_TYPE} \
-        -f ${DEPLOYMENT_PATH}/images/{{ isDevelopment ? 'base_dev' : 'base_app' }}/Dockerfile \
-        --build-arg SPRYKER_PLATFORM_IMAGE=${SPRYKER_PLATFORM_IMAGE} \
-        --build-arg SPRYKER_DOCKER_PREFIX=${SPRYKER_DOCKER_PREFIX} \
-        --build-arg SPRYKER_DOCKER_TAG=${SPRYKER_DOCKER_TAG} \
-        --build-arg USER_UID=${USER_UID:-1000} \
-        --build-arg USER_GID=${USER_GID:-1000} \
-        --build-arg GITHUB_TOKEN=${GITHUB_TOKEN} \
-        --build-arg DEPLOYMENT_PATH=${DEPLOYMENT_PATH} \
-        --build-arg APPLICATION_ENV=${APPLICATION_ENV} \
-        --build-arg SPRYKER_DB_ENGINE=${SPRYKER_DB_ENGINE} \
-        --build-arg SPRYKER_LOG_DIRECTORY=${SPRYKER_LOG_DIRECTORY} \
-        .
-
-    verbose "${INFO}Building cli image (based on base application image)${NC}"
-
-    docker build -t ${SPRYKER_DOCKER_PREFIX}_cli:${SPRYKER_DOCKER_TAG} \
-        --build-arg SPRYKER_DOCKER_PREFIX=${SPRYKER_DOCKER_PREFIX} \
-        --build-arg SPRYKER_DOCKER_TAG=${SPRYKER_DOCKER_TAG} \
-        --build-arg DEPLOYMENT_PATH=${DEPLOYMENT_PATH} \
-        --build-arg SPRYKER_LOG_DIRECTORY=${SPRYKER_LOG_DIRECTORY} \
-        --progress=${PROGRESS_TYPE} \
-        -f ${DEPLOYMENT_PATH}/images/cli/Dockerfile \
-        .
+    doBaseImages
 }
 
 {% if isDevelopment %}
@@ -460,7 +387,8 @@ function setExtraEnvFiles ()
 
 function getDefaultRunArguments()
 {
-    echo -n " --network=${SPRYKER_DOCKER_PREFIX}_services"
+    local networkName=${SPRYKER_DOCKER_PREFIX}_services
+    docker network inspect ${networkName} > /dev/null 2>&1 && echo -n " --network=${networkName}"
     echo -n " ${DOCKER_EXTRA_ENV_FILES}"
     echo -n " ${DOCKER_EXTRA_OPTIONS}"
 }
@@ -718,12 +646,16 @@ case ${command} in
     help|'')
         showHelp
         ;;
+{% if not isDevelopment %}
     production:assets)
-        doProductionAssets "${@}"
+        doBaseImage
+        buildAssets
+        doArchiveAssets "${@}"
         ;;
     production:images)
-        doProductionImages "${@}"
+        doBaseImages "${@}"
         ;;
+{% endif %}
     *)
         showHelp
         error "${WARN}Unknown command \"${command}\" is requested.${NC}"
