@@ -85,7 +85,8 @@ deployment/default/env/cli/testing.env
 deployment/default/images/base_app
 deployment/default/images/base_dev
 deployment/default/images/builder_assets
-deployment/default/images/cli
+deployment/default/images/demo/cli
+deployment/default/images/dev/cli
 deployment/default/images/base_app/Dockerfile
 deployment/default/images/base_dev/Dockerfile
 deployment/default/images/builder_assets/Dockerfile
