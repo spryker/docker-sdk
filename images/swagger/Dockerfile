@@ -3,6 +3,9 @@ ARG SPRYKER_DOCKER_PREFIX
 ARG SPRYKER_DOCKER_TAG
 FROM ${SPRYKER_DOCKER_PREFIX}_app:${SPRYKER_DOCKER_TAG} AS spryker_app
 
+ENV DEVELOPMENT_CONSOLE_COMMANDS=1
+RUN vendor/bin/console rest-api:generate:documentation
+
 FROM swaggerapi/swagger-ui
 
 RUN apk update && apk add bash
