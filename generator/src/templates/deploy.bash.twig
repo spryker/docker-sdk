@@ -35,7 +35,7 @@ VERBOSE=${VERBOSE:-0}
 
 # Predefined constants
 readonly APPLICATION_ENV={{ environment | default('docker') }}
-readonly SPRYKER_PLATFORM_IMAGE={{ image | default('spryker/php:7.2') }}
+readonly SPRYKER_PLATFORM_IMAGE=${SPRYKER_PLATFORM_IMAGE:-{{ image | default('spryker/php:7.2') }}}
 export SPRYKER_DOCKER_PREFIX=${COMPOSE_PROJECT_NAME}
 export SPRYKER_DOCKER_TAG={{ tag | default('1.0') }}
 export SPRYKER_LOG_DIRECTORY={{ docker['logs']['path'] | default('/var/log/spryker') }}
@@ -91,6 +91,7 @@ function showHelp()
     echo -e " ${GREEN}pull${NC}              - Pull external docker images."
     echo -e " ${GREEN}build${NC}             - Build Spryker containers."
     echo -e " ${GREEN}demo|demo-data${NC}    - Populate Spryker demo data."
+    echo -e " ${GREEN}demo <section>${NC}    - Load the demo data by running the specified section from docker installation recipe for each store."
     echo -e " ${GREEN}jobs${NC}              - Generate and starts jobs."
 
     echo -e ""
@@ -122,7 +123,7 @@ readonly USER_GID="1000"
 {% endif %}
 {% set isDevelopment = _mountMode != 'baked' %}
 {% if isDevelopment %}
-[ $1 != 'help' ] && echo -e "*** ${WARN}DEVELOPMENT MODE${NC}"
+[ "$1" != 'help' ] && echo -e "*** ${WARN}DEVELOPMENT MODE${NC}"
 DOCKER_EXTRA_OPTIONS+=" -v ${DEPLOYMENT_DIR}/context/php/conf.d/opcache_dev.ini:/usr/local/etc/php/conf.d/opcache.ini:ro"
 DOCKER_EXTRA_OPTIONS+=" -v ${DEPLOYMENT_DIR}/context/php/php.ini:/usr/local/etc/php/php.ini:ro"
 DOCKER_EXTRA_OPTIONS+=" -v $(dirname ~/.composer/cache:/home/spryker/).composer/cache:rw"
@@ -174,21 +175,31 @@ function areAssetsBuilt()
 {% endif %}
 }
 
+function createAssetsVolume()
+{
+    if [ "$1" = ${IF_NOT_PERFORMED} ] && $(docker volume inspect ${SPRYKER_DOCKER_PREFIX}_assets > /dev/null 2>&1); then
+      return ${__TRUE}
+    fi
+
+    verbose "${INFO}Creating docker volume '${SPRYKER_DOCKER_PREFIX}_assets'${NC}"
+    docker volume create --name="${SPRYKER_DOCKER_PREFIX}_assets"
+}
+
 function buildAssets()
 {
     if [ "$1" = ${IF_NOT_PERFORMED} ] && areAssetsBuilt; then
         return ${__TRUE}
     fi
 
-    verbose "${INFO}Creating docker volume '${SPRYKER_DOCKER_PREFIX}_assets'${NC}"
-    docker volume create --name="${SPRYKER_DOCKER_PREFIX}_assets"
-
 {% if isDevelopment %}
     sync start
     sync stop
     runApplicationBuild "vendor/bin/install -r docker -s build-static"
 {% else %}
+
     verbose "${INFO}Generating assets${NC}"
+
+    createAssetsVolume
 
     docker image tag ${SPRYKER_DOCKER_PREFIX}_app:${SPRYKER_DOCKER_TAG} spryker_app:latest
 
@@ -425,17 +436,17 @@ function loadDemoData()
         export SPRYKER_STORE="${STORES[0]}"
         echo -e "${INFO}Loading demo data for ${SPRYKER_STORE} store.${NC}"
         initDatabase
-        execSpryker 'vendor/bin/install -r docker -s init-storages-per-region -s demodata'
+
+        local demoDataSection=${2:-demodata}
+        execSpryker "vendor/bin/install -r docker -s init-storages-per-region -s ${demoDataSection}"
     done
 }
-
 
 function destroyAssets()
 {
     verbose "${INFO}Removing assets volume${NC}"
     docker volume rm -f ${SPRYKER_DOCKER_PREFIX}_assets
 }
-
 
 function destroyImages()
 {
@@ -510,7 +521,6 @@ function doBuild()
     buildCode $1
 {% endif %}
     execDockerCompose build
-    buildAssets $1
 }
 
 function execDockerCompose()
@@ -535,6 +545,7 @@ function execDockerCompose()
 function doUp()
 {
     doBuild ${IF_NOT_PERFORMED}
+    buildAssets ${IF_NOT_PERFORMED}
     runApp
     loadDemoData ${IF_NOT_PERFORMED}
     createSchedulerJobs ${IF_NOT_PERFORMED}
@@ -543,6 +554,7 @@ function doUp()
 function runApp()
 {
     verbose "${INFO}Running Spryker containers${NC}"
+    createAssetsVolume ${IF_NOT_PERFORMED}
     execDockerCompose up -d --remove-orphans
     sync start
 }
@@ -627,7 +639,18 @@ esac
 
 case ${command} in
     build)
-        doBuild
+        case ${1} in
+            assets|asset)
+                buildAssets
+                ;;
+            images|image)
+                doBuild
+                ;;
+            *)
+                doBuild
+                buildAssets
+                ;;
+        esac
         ;;
     run|start)
         runApp
@@ -637,7 +660,7 @@ case ${command} in
         ;;
     demo|demo-data)
         runApp
-        loadDemoData
+        loadDemoData "" ${1}
         ;;
     down|stop)
         stopApp
