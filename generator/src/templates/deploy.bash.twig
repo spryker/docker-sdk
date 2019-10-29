@@ -137,7 +137,7 @@ DOCKER_EXTRA_OPTIONS+=" -v ${SPRYKER_DOCKER_PREFIX}_${SPRYKER_DOCKER_TAG}_data_s
 function enableDebuggingMode()
 {
     echo -e "*** ${WARN}DEBUGGING MODE${NC}"
-    export SPRYKER_XDEBUG_HOST_IP=$(which ip >/dev/null 2>&1 && ifconfig $(ip r | grep default | awk '{print $5}') | grep "inet " | awk '{print $2}' || echo 'host.docker.internal')
+    export SPRYKER_XDEBUG_HOST_IP=$(which ip >/dev/null 2>&1 && ip addr show dev eth0 | grep "inet " | awk '{ print $2 }' || echo 'host.docker.internal')
     DOCKER_COMPOSE_FILES+=" -f ${DEPLOYMENT_PATH}/docker-compose.xdebug.yml"
     DOCKER_EXTRA_OPTIONS+=" -e PHP_IDE_CONFIG=serverName={{ docker['debug']['server-name'] | default('spryker') }} -e SPRYKER_XDEBUG_HOST_IP=${SPRYKER_XDEBUG_HOST_IP} -v ${DEPLOYMENT_DIR}/context/php/conf.d/xdebug.ini:/usr/local/etc/php/conf.d/01-xdebug.ini:ro"
 }
