@@ -18,12 +18,11 @@ APPLICATIONS=(Glue Yves Zed)
 
 function doBaseImage()
 {
-    local tag=${1:-${SPRYKER_DOCKER_TAG}}
-    local dbEngine=${2:-${SPRYKER_DB_ENGINE}}
-    local logDirectory=${3:-${SPRYKER_LOG_DIRECTORY}}
+    local dbEngine=${1:-${SPRYKER_DB_ENGINE}}
+    local logDirectory=${2:-${SPRYKER_LOG_DIRECTORY}}
 
     docker build \
-        -t ${SPRYKER_DOCKER_PREFIX}_app:${tag} \
+        -t ${SPRYKER_DOCKER_PREFIX}_app:${SPRYKER_DOCKER_TAG} \
         --progress=${PROGRESS_TYPE} \
         -f ${DEPLOYMENT_PATH}/images/base_app/Dockerfile \
         --build-arg SPRYKER_PLATFORM_IMAGE=${SPRYKER_PLATFORM_IMAGE} \
@@ -55,30 +54,36 @@ function doCliImage()
         --progress=${PROGRESS_TYPE} \
         -f ${DEPLOYMENT_PATH}/images/cli/demo/Dockerfile \
         .
-
-    doTagByApplicationName Cli ${SPRYKER_DOCKER_PREFIX}_cli:${SPRYKER_DOCKER_TAG}
 }
 
 function doBaseImages()
 {
-    local tag=${1:-${SPRYKER_DOCKER_TAG}}
     local dbEngine=${2:-${SPRYKER_DB_ENGINE}}
     local logDirectory=${3:-${SPRYKER_LOG_DIRECTORY}}
+    local baseImageName=${SPRYKER_DOCKER_PREFIX}_app:${SPRYKER_DOCKER_TAG}
 
     if [ -z ${GITHUB_TOKEN} ];
     then
         echo -e "${WARN}Warning: GITHUB_TOKEN is not set but may be required.${NC}"
     fi
 
-    doBaseImage ${1} ${2} ${3}
+    doBaseImage ${dbEngine} ${logDirectory}
     doCliImage
+}
+
+function doProdLikeImages()
+{
+    local tag=${1:-${SPRYKER_DOCKER_TAG}}
+
+    doTagByApplicationName Cli ${SPRYKER_DOCKER_PREFIX}_cli:${tag} ${SPRYKER_DOCKER_PREFIX}_cli:${SPRYKER_DOCKER_TAG}
 
     for application in "${APPLICATIONS[@]}";
     do
-        doTagByApplicationName ${application} ${SPRYKER_DOCKER_PREFIX}_app:${tag}
+        doTagByApplicationName ${application} ${SPRYKER_DOCKER_PREFIX}_app:${tag} ${SPRYKER_DOCKER_PREFIX}_app:${SPRYKER_DOCKER_TAG}
     done
 }
 
 export doBaseImage
 export doBaseImages
 export doCliImage
+export doProdLikeImages

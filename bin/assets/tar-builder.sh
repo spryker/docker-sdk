@@ -29,12 +29,12 @@ function doTarAssets()
 
     for application in "${APPLICATIONS[@]}";
     do
-        local assetsPath=${PROJECT_DIR}/public/${application}/assets
+        local assetsPath=${PROJECT_DIR}/public/${application}/assets/
 
         if [ -d "${assetsPath}" ];
         then
             local tarName=${application}-${tag}.tar
-            tar czf ${destinationPath}/${tarName} -P ${assetsPath}
+            tar czf ${destinationPath}/${tarName} -C ${assetsPath} .
         fi
     done
 }

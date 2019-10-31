@@ -565,6 +565,7 @@ case ${command} in
         ;;
     up)
         doUp
+        doProdLikeImages
         ;;
     demo|demo-data)
         runApp
@@ -654,6 +655,7 @@ case ${command} in
         ;;
     production:images)
         doBaseImages "${@}"
+        doProdLikeImages "${@}"
         ;;
 {% endif %}
     *)
