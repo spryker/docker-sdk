@@ -1,0 +1,13 @@
+# Kibana is served by a back end server. This setting specifies the port to use.
+server.port: 5601
+server.host: "0"
+
+kibana.index: "*"
+
+xpack.monitoring.ui.container.elasticsearch.enabled: false
+xpack.security.enabled: false
+xpack.monitoring.enabled: false
+xpack.graph.enabled: false
+xpack.reporting.enabled: false
+xpack.ml.enabled: false
+xpack.watcher.enabled: false

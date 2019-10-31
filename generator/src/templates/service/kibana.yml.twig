@@ -1,0 +1,19 @@
+  {{ serviceName }}:
+     build:
+         context: ./${DEPLOYMENT_PATH}/images/kibana/
+         dockerfile: Dockerfile
+     networks:
+         - services
+         - private
+     healthcheck:
+         test: curl --cacert /usr/share/elasticsearch/config/certs/ca/ca.crt -s https://localhost:5601 >/dev/null; if [[ $$? == 52 ]]; then echo 0; else echo 1; fi
+         interval: 30s
+         timeout: 10s
+         retries: 5
+     environment:
+         - ELASTICSEARCH_URL=http://search:9200
+         - NODE_OPTIONS=--max-old-space-size=5000
+     depends_on:
+         - search
+     volumes:
+         - ./${DEPLOYMENT_PATH}/context/kibana/kibana.yml:/usr/share/kibana/config/kibana.yml:ro
