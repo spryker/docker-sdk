@@ -1,7 +1,5 @@
   {{ serviceName }}:
-     build:
-         context: ./${DEPLOYMENT_PATH}/images/kibana/
-         dockerfile: Dockerfile
+     image: spryker/kibana:5.6.16
      networks:
          - services
          - private
@@ -11,7 +9,6 @@
          timeout: 10s
          retries: 5
      environment:
-         - ELASTICSEARCH_URL=http://search:9200
          - NODE_OPTIONS=--max-old-space-size=5000
      depends_on:
          - search
