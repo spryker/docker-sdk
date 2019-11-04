@@ -14,5 +14,3 @@ xpack.graph.enabled: false
 xpack.reporting.enabled: false
 xpack.ml.enabled: false
 xpack.watcher.enabled: false
-
-
