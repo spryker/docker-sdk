@@ -13,4 +13,5 @@
      depends_on:
          - search
      volumes:
+         - {{ serviceName }}-{{ serviceData['engine'] }}-data:/usr/share/kibana/data:rw
          - ./${DEPLOYMENT_PATH}/context/kibana/kibana.yml:/usr/share/kibana/config/kibana.yml:ro
