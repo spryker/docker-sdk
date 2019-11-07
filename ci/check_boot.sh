@@ -30,6 +30,7 @@ deployment/default/project.yml
 deployment/default/bin/boot-deployment.sh
 deployment/default/bin/check-docker.sh
 deployment/default/bin/check-docker-compose.sh
+deployment/default/bin/check-project-directory.sh
 deployment/default/bin/console.sh
 deployment/default/bin/constants.sh
 deployment/default/bin/database
