@@ -7,17 +7,17 @@ pushd ${BASH_SOURCE%/*} > /dev/null
 . ./console.sh
 popd > /dev/null
 
-function checkDockerProjectDirectory()
+function checkDirectories()
 {
     local projectDirectoryPath="$( pwd )"
 
     if [ "${projectDirectoryPath}" != "${projectDirectoryPath%[[:space:]]*}" ];
     then
-        error "${WARN}Project directory contains spaces. Please remove spaces from the source directory name.${NC}"
+        error "${WARN}The SDK does not support spaces in the path. Please, move your project accordingly.${NC}"
         exit 1
     fi
 
   verbose "[OK]"
 }
 
-checkDockerProjectDirectory $@
+export -f checkDirectories

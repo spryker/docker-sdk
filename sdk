@@ -38,6 +38,8 @@ function showHelp()
     echo -e " $0 bootstrap && $0 up"
 }
 
+checkDirectories
+
 case $1 in
     boot|bootstrap)
         [ -f ${DEPLOY_SCRIPT} ] && SPRYKER_SELF_SCRIPT=$0 ${DEPLOY_SCRIPT} down > /dev/null 2>&1 && sleep 2 || true
