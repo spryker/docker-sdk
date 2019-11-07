@@ -10,7 +10,6 @@ pushd ${BASH_SOURCE%/*} > /dev/null
 ./require.sh docker
 ./check-docker.sh
 ./check-docker-compose.sh
-./check-project-directory.sh
 popd > /dev/null
 
 export DOCKER_BUILDKIT=1

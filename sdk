@@ -5,6 +5,7 @@ set -e
 pushd ${BASH_SOURCE%/*} > /dev/null
 . bin/constants.sh
 . bin/console.sh
+. bin/check-directories.sh
 popd > /dev/null
 
 PROJECT_NAME=default
