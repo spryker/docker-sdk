@@ -598,7 +598,7 @@ function stopCliContainer()
 {
   docker ps --filter "ancestor=${SPRYKER_DOCKER_PREFIX}_cli:${SPRYKER_DOCKER_TAG}" \
       --format "{{ '{{' }}.Names{{ '}}' }}" \
-      | xargs docker rm -f > /dev/null
+      | xargs -r docker rm -f > /dev/null
 }
 
 command=${1}
