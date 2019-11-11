@@ -9,15 +9,13 @@ popd > /dev/null
 
 function checkDirectories()
 {
-    local projectDirectoryPath="$( pwd )"
+    local projectDirectoryPath="${1:-$( pwd )}"
 
     if [ "${projectDirectoryPath}" != "${projectDirectoryPath%[[:space:]]*}" ];
     then
         error "${WARN}The SDK does not support spaces in the path. Please, move your project accordingly.${NC}"
         exit 1
     fi
-
-  verbose "[OK]"
 }
 
 export -f checkDirectories

@@ -18,6 +18,11 @@ do
             ;;
         p)
             PROJECT_NAME=$OPTARG
+            if [ "${PROJECT_NAME}" != "${PROJECT_NAME%[[:space:]]*}" ];
+            then
+                error "${WARN}The project name cannot contain spaces.${NC}"
+                exit 1
+            fi
             ;;
     esac
 done

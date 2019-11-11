@@ -23,14 +23,14 @@ DEPLOYMENT_DIR=${DEPLOYMENT_DIR:-''}
 # ------------------
 function validateParameters()
 {
-    [ -z ${PROJECT_NAME} ] && error "PROJECT_NAME is not set."
-    [ -z ${PROJECT_YAML} ] && error "PROJECT_YAML is not set."
-    [ -z ${SOURCE_DIR} ] && error "SOURCE_DIR is not set."
-    [ -z ${DEPLOYMENT_DIR} ] && error "DEPLOYMENT_DIR is not set."
+    [ -z "${PROJECT_NAME}" ] && error "PROJECT_NAME is not set."
+    [ -z "${PROJECT_YAML}" ] && error "PROJECT_YAML is not set."
+    [ -z "${SOURCE_DIR}" ] && error "SOURCE_DIR is not set."
+    [ -z "${DEPLOYMENT_DIR}" ] && error "DEPLOYMENT_DIR is not set."
 
-    [ ! -f ${PROJECT_YAML} ] && error "File \"${PROJECT_YAML}\" is not accessible."
-    [ ! -d ${SOURCE_DIR} ] && error "Directory \"${SOURCE_DIR}\" is not accessible."
-    [ ! -d ${DEPLOYMENT_DIR} ] && error "Directory \"${DEPLOYMENT_DIR}\" is not accessible."
+    [ ! -f "${PROJECT_YAML}" ] && error "File \"${PROJECT_YAML}\" is not accessible."
+    [ ! -d "${SOURCE_DIR}" ] && error "Directory \"${SOURCE_DIR}\" is not accessible."
+    [ ! -d "${DEPLOYMENT_DIR}" ] && error "Directory \"${DEPLOYMENT_DIR}\" is not accessible."
 
     return ${__TRUE}
 }
@@ -46,7 +46,7 @@ function bootDeployment()
     cp -rf ${SOURCE_DIR}/bin ${DEPLOYMENT_DIR}/bin
     cp -rf ${SOURCE_DIR}/context ${DEPLOYMENT_DIR}/context
     cp -rf ${SOURCE_DIR}/images ${DEPLOYMENT_DIR}/images
-    cp ${PROJECT_YAML} ${DEPLOYMENT_DIR}/project.yml
+    cp "${PROJECT_YAML}" ${DEPLOYMENT_DIR}/project.yml
 
     USER_UID=1000
     USER_GID=1000
