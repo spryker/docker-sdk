@@ -5,6 +5,7 @@ set -e
 pushd ${BASH_SOURCE%/*} > /dev/null
 . bin/constants.sh
 . bin/console.sh
+. bin/check-directories.sh
 popd > /dev/null
 
 PROJECT_NAME=default
@@ -17,6 +18,11 @@ do
             ;;
         p)
             PROJECT_NAME=$OPTARG
+            if [ "${PROJECT_NAME}" != "${PROJECT_NAME%[[:space:]]*}" ];
+            then
+                error "${WARN}The project name cannot contain spaces.${NC}"
+                exit 1
+            fi
             ;;
     esac
 done
@@ -36,6 +42,8 @@ function showHelp()
     echo -e "${INFO}Quick start:${NC}"
     echo -e " $0 bootstrap && $0 up"
 }
+
+checkDirectories
 
 case $1 in
     boot|bootstrap)
