@@ -76,8 +76,10 @@ services:
 {% endfor %}
 {% endfor %}
 {% for serviceName, serviceData in services %}
+    {% set engine = (serviceData['engine'] | lower) %}
+    {% set version = serviceData['version'] | default('default') %}
 
-{% include "service/" ~ (serviceData['engine'] | lower) ~ ".yml.twig" with {serviceName: serviceName, serviceData: serviceData} %}
+{% include "service/" ~ engine ~ "/" ~ version ~ "/" ~  engine ~ ".yml.twig" with {serviceName: serviceName, serviceData: serviceData} %}
 {% endfor %}
 
 volumes:
