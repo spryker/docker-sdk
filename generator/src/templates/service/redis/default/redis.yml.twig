@@ -1,13 +1,1 @@
-  {{ serviceName }}:
-    image: redis:5.0-alpine
-    command: 'redis-server --appendonly yes --save \"\"'
-    networks:
-      - services
-      - private
-    healthcheck:
-        test: [ "CMD", "redis-cli", "ping" ]
-        interval: 10s
-        timeout: 5s
-        retries: 5
-    volumes:
-      - {{ serviceName }}-{{ serviceData['engine'] }}-data:/data
+{% include "service/#{engine}/5.0/#{engine}.yml.twig" with _context only %}

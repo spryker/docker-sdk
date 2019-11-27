@@ -1,10 +1,1 @@
-  {{ serviceName }}:
-    restart: always
-    image: mailhog/mailhog:v1.0.0
-    networks:
-      - services
-      - private
-    environment:
-      MH_SMTP_BIND_ADDR: 0.0.0.0:1025
-    volumes:
-          - {{ serviceName }}-{{ serviceData['engine'] }}-data:/maildir
+{% include "service/#{engine}/1.0/#{engine}.yml.twig" with _context only %}
