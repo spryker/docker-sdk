@@ -27,6 +27,21 @@ git clone https://github.com/spryker/docker-sdk.git ./docker
 
 > Note: Make sure `docker 18.09.1+` and `docker-compose 1.23+` are installed in the local environment.
 
+List of services supported versions:
+
+| Service  | Engine  | Version(s)  |
+|---|---|---|
+| database  | postgres  | 9.6  |
+|   | mysql  | 5.7  |
+| broker  | rabbitmq  | 3.7  |
+| session  | redis  | 5.0  |
+| key_value_store  | redis  | 5.0  |
+| scheduler  | jenkins  | 2.176  |
+| mail_catcher  | mailhog  | 1.0  |
+| swagger  | swagger-ui  | v3.24  |
+| kibana  | kibana  | 5.6 |
+
+
 2. Initialize docker setup:
 
 ```bash
