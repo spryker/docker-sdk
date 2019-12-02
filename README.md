@@ -43,7 +43,7 @@ docker/sdk up
 
 To start working with Spryker in Docker, follow [the link](https://documentation.spryker.com/installation/spryker_in_docker/docker_sdk/docker-sdk.htm).
 
-## List of services supported versions:
+## List of services supported versions
 
 | Service  | Engine  | Version(s)  |
 |---|---|---|
