@@ -43,7 +43,7 @@ docker/sdk up
 
 To start working with Spryker in Docker, follow [the link](https://documentation.spryker.com/installation/spryker_in_docker/docker_sdk/docker-sdk.htm).
 
-## List of services supported versions
+## Supported services
 
 | Service  | Engine  | Version(s)  |
 |---|---|---|
@@ -52,7 +52,8 @@ To start working with Spryker in Docker, follow [the link](https://documentation
 | broker  | rabbitmq  | 3.7  |
 | session  | redis  | 5.0  |
 | key_value_store  | redis  | 5.0  |
-| search  | elastic  | 5.6, 6.8  |
+| search  | elastic  | 5.6  |
+|   |   | 6.8  |
 | scheduler  | jenkins  | 2.176  |
 | mail_catcher  | mailhog  | 1.0  |
 | swagger  | swagger-ui  | v3.24  |
