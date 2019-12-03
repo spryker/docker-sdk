@@ -26,6 +26,8 @@ $mountMode = $projectData['_mountMode'] = retrieveMountMode($projectData, $platf
 $projectData['_ports'] = retrieveUniquePorts($projectData);
 $defaultPort = $projectData['_defaultPort'] = getDefaultPort($projectData);
 $endpointMap = $projectData['_endpointMap'] = buildEndpointMapByStore($projectData['groups']);
+$projectData['_dockerMachine'] = getDockerMachineConfigByPlatform($projectData, $platform);
+$projectData['_dockerMachine']['endpointMap'] = implode(' ', buildEndpointMap($projectData));
 
 mkdir($deploymentDir . DS . 'env' . DS . 'cli', 0777, true);
 mkdir($deploymentDir . DS . 'context' . DS . 'nginx' . DS . 'conf.d', 0777, true);
@@ -361,4 +363,105 @@ function buildEndpointMapByStore(array $projectGroups): array
     }
 
     return $endpointMap;
+}
+
+/**
+ * @param array $projectData
+ *
+ * @param string $platform
+ *
+ * @throws \Exception
+ * @return array
+ */
+function getDockerMachineConfigByPlatform(array $projectData, string $platform): array
+{
+    $dockerMachineConfig = $projectData['docker']['docker-machine'] ?? [];
+
+    if (empty($dockerMachineConfig)) {
+        return $dockerMachineConfig;
+    }
+
+    $dockerMachineConfigByPlatform = [];
+
+    foreach ($dockerMachineConfig as $driver => $config) {
+        if (!in_array($platform, $config['platforms'])) {
+            continue;
+        }
+
+        $dockerMachineConfigByPlatform = $config;
+        $dockerMachineConfigByPlatform['driver'] = $driver;
+
+        break;
+    }
+
+    if (empty($dockerMachineConfigByPlatform)) {
+        throw new Exception('%s os isn\'t defined in Docker Machine configuration.');
+    }
+
+    $mountMode = $projectData['_mountMode'];
+    $availableMountModes = [
+        'baked',
+        'native',
+    ];
+
+    if (!isMountModeCompatibilityWithDockerMachine($mountMode, $availableMountModes)) {
+        throw new Exception(
+            sprintf(
+                'Mount mode doesn\'t compatibility with Docker-Machine configuration. ' . PHP_EOL . 'Move `%s` from `docker: mount: %s` block into `docker: mount: native`.',
+                $platform,
+                $mountMode
+            )
+        );
+    }
+
+    return $dockerMachineConfigByPlatform;
+}
+
+/**
+ * @param string $mountMode
+ * @param string[] $availableMountModes
+ *
+ * @return bool
+ */
+function isMountModeCompatibilityWithDockerMachine(string $mountMode, array $availableMountModes): bool
+{
+    if (in_array($mountMode, $availableMountModes)) {
+        return true;
+    }
+
+    return false;
+}
+
+/**
+ * @param array $projectData
+ *
+ * @return string[]
+ */
+function buildEndpointMap(array $projectData): array
+{
+    $endpointMap = [];
+    $projectEndpointMap = $projectData['_endpointMap'] ?? buildEndpointMapByStore($projectData['groups']);
+    $services = $projectData['services'] ?? [];
+
+    if (empty($projectEndpointMap) && empty($services)) {
+        return $endpointMap;
+    }
+
+    foreach ($projectEndpointMap as $storeName => $endpointMapPerStore) {
+        $endpointMap[] = array_values($endpointMapPerStore);
+    }
+
+    foreach ($services as $serviceName => $serviceConfig) {
+        if (!isset($serviceConfig['endpoints'])) {
+            continue;
+        }
+
+        foreach ($serviceConfig['endpoints'] as $endpoint => $endpointConfig) {
+            if (strpos($endpoint, 'localhost') === false) {
+                $endpointMap[] = [$endpoint];
+            }
+        }
+    }
+
+    return array_unique(array_merge(...$endpointMap));
 }

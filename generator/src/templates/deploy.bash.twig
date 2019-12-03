@@ -2,6 +2,8 @@
 
 set -e
 
+{% set isDockerMachineAvailable = not _dockerMachine is empty %}
+
 # Require
 pushd ${BASH_SOURCE%/*} > /dev/null
 . ./bin/constants.sh
@@ -9,6 +11,7 @@ pushd ${BASH_SOURCE%/*} > /dev/null
 
 . ./bin/mount/{{ _mountMode }}.sh $@
 . ./bin/database/{{ services['database']['engine'] }}.sh $@
+. ./bin/docker-machine/{{ _dockerMachine['driver']| default('docker-machine-plug') }}.sh $@
 
 ./bin/require.sh docker docker-compose tr awk wc sed grep
 ./bin/check-docker.sh
@@ -52,6 +55,10 @@ SPRYKER_TESTING_ENABLE=${SPRYKER_TESTING_ENABLE:-0}
 export SPRYKER_STORE=${SPRYKER_STORE:-${APPLICATION_STORE:-${SPRYKER_DEFAULT_STORE}}}
 readonly SPRYKER_SELF_SCRIPT=${SPRYKER_SELF_SCRIPT:-$(basename $0)}
 readonly GITHUB_TOKEN=${GITHUB_TOKEN:-''}
+
+{% if isDockerMachineAvailable %}
+export DOCKER_MACHINE_ENDPOINT_MAP="{{ _dockerMachine['endpointMap'] | default('') }}"
+{% endif %}
 
 function showHelp()
 {
@@ -544,11 +551,14 @@ function execDockerCompose()
 
 function doUp()
 {
+    exportDockerMachineConfiguration
+    startDockerMachine
     doBuild ${IF_NOT_PERFORMED}
     buildAssets ${IF_NOT_PERFORMED}
     runApp
     loadDemoData ${IF_NOT_PERFORMED}
     createSchedulerJobs ${IF_NOT_PERFORMED}
+    hostsHelper
 }
 
 function runApp()
@@ -565,6 +575,8 @@ function stopApp()
     stopCliContainer
     execDockerCompose down --remove-orphans
     sync stop
+    exportDockerMachineConfiguration
+    stopDockerMachine
 }
 
 function doCli()
@@ -726,6 +738,8 @@ case ${command} in
         docker system prune -a
         docker image prune
         docker volume prune
+        exportDockerMachineConfiguration
+        deleteDockerMachine
         ;;
     trouble)
         stopApp
