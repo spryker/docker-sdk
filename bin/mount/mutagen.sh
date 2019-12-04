@@ -78,12 +78,12 @@ function checkAllSyncProcesses()
     done
 
     for i in "${processes[@]}"; do
-        while kill -0 $i >/dev/null 2>&1; do
+        while kill -0 $i > /dev/null 2>&1; do
             sleep 1
         done
     done
 
-    kill -13 ${progressPID}
+    kill -13 ${progressPID} > /dev/null 2>&1 || true
     echo " "
     echo 'All data was synced.'
 }
