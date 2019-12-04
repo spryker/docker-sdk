@@ -6,7 +6,7 @@ pushd ${BASH_SOURCE%/*} > /dev/null
 . ../constants.sh
 . ../console.sh
 
-../require.sh docker mutagen
+../require.sh docker mutagen go
 popd > /dev/null
 
 function progress()
