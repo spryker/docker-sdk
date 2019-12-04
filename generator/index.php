@@ -367,10 +367,10 @@ function buildEndpointMapByStore(array $projectGroups): array
 
 /**
  * @param array $projectData
- *
  * @param string $platform
  *
  * @throws \Exception
+ *
  * @return array
  */
 function getDockerMachineConfigByPlatform(array $projectData, string $platform): array
