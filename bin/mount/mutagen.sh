@@ -16,10 +16,10 @@ function progress()
     local sec=0
 
     while :;do
-        ((ms++))
+        ms=$(( ms + 1 ))
 
         if [ "${ms}" == 10 ]; then
-            ((sec++))
+            sec=$((sec + 1))
             ms=0
         fi
 
