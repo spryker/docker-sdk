@@ -57,6 +57,11 @@ readonly SPRYKER_SELF_SCRIPT=${SPRYKER_SELF_SCRIPT:-$(basename $0)}
 readonly GITHUB_TOKEN=${GITHUB_TOKEN:-''}
 
 {% if isDockerMachineAvailable %}
+export DOCKER_MACHINE_NAME={{ _dockerMachine['name'] | default('') }}
+export DOCKER_MACHINE_DRIVER={{ _dockerMachine['driver'] | default('') }}
+export DOCKER_MACHINE_CPU={{ _dockerMachine['cpu'] | default('') }}
+export DOCKER_MACHINE_MEMORY={{ _dockerMachine['memory'] | default('') }}
+export DOCKER_MACHINE_DISK_SIZE={{ _dockerMachine['disk-size'] | default('') }}
 export DOCKER_MACHINE_ENDPOINT_MAP="{{ _dockerMachine['endpointMap'] | default('') }}"
 {% endif %}
 
