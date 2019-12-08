@@ -40,10 +40,11 @@ function create()
     local dockerMachineCpu=${3}
     local dockerMachineMemory=${4}
     local dockerMachineDiskSize=${5}
+    local dockerMachineSharedFolder=${6}
 
     echo -e "${INFO}Creating ${LGRAY}"${dockerMachineName}"${INFO} machine... ${NC}"
     docker-machine create --driver=${dockerMachineDriver} \
-     --${dockerMachineDriver}-share-folder="$(pwd)" \
+     --${dockerMachineDriver}-share-folder="${dockerMachineSharedFolder}" \
      --${dockerMachineDriver}-cpu-count="${dockerMachineCpu}" \
      --${dockerMachineDriver}-memory="${dockerMachineMemory}" \
      --${dockerMachineDriver}-disk-size="${dockerMachineDiskSize}" \
@@ -106,10 +107,16 @@ function startDockerMachine()
     local dockerMachineCpu=${DOCKER_MACHINE_CPU}
     local dockerMachineMemory=${DOCKER_MACHINE_MEMORY}
     local dockerMachineDiskSize=${DOCKER_MACHINE_DISK_SIZE}
+    local dockerMachineSharedFolder=${DOCKER_MACHINE_SHARED_FOLDER:-$(pwd)}
 
     if ! isDockerMachineExist ${dockerMachineName};
     then
-        create ${dockerMachineName} ${dockerMachineDriver} ${dockerMachineCpu} ${dockerMachineMemory} ${dockerMachineDiskSize}
+        create ${dockerMachineName} \
+            ${dockerMachineDriver} \
+            ${dockerMachineCpu} \
+            ${dockerMachineMemory} \
+            ${dockerMachineDiskSize} \
+            ${dockerMachineSharedFolder}
     else
         start ${dockerMachineName}
     fi
@@ -125,6 +132,7 @@ function stopDockerMachine()
     then
         echo -e "${INFO}Stopping ${LGRAY}"${dockerMachineName}"${INFO} machine... ${NC}"
         stop ${dockerMachineName}
+        eval $(docker-machine env -u)
     fi
 }
 
@@ -146,7 +154,7 @@ function hostsHelper()
 
 function envHelper()
 {
-    local dockerMachineName=${1}
+    local dockerMachineName=${DOCKER_MACHINE_NAME}
 
     if isDockerMachineRunning ${dockerMachineName};
     then

@@ -28,7 +28,12 @@ function hostsHelper()
 
 function envHelper()
 {
-    retunrn ${__TRUE}
+    return ${__TRUE}
+}
+
+function exportDockerMachineConfiguration()
+{
+    return ${__TRUE}
 }
 
 export -f startDockerMachine
@@ -36,3 +41,4 @@ export -f stopDockerMachine
 export -f deleteDockerMachine
 export -f hostsHelper
 export -f envHelper
+export -f exportDockerMachineConfiguration
