@@ -21,20 +21,20 @@ sync:
         - 'env/'
         - 'images/'
   project:
-    alpha: "{{ _projectSourceDir }}"
-    beta: "docker://spryker_mutagen_sync_1/data"
+    alpha: "../../../"
+    beta: "docker://{{ namespace }}_{{ tag }}_sync_1/data"
     mode: "two-way-safe"
     ignore:
       paths:
         - 'vendor'
         - 'node_modules'
   vendor:
-    alpha: "{{ _projectSourceDir }}/vendor"
-    beta: "docker://spryker_mutagen_sync_1/data/vendor"
+    alpha: "../../../vendor"
+    beta: "docker://{{ namespace }}_{{ tag }}_sync_1/data/vendor"
     mode: "two-way-safe"
     ignore:
       vcs: false
   nodeModules:
-    alpha: "{{ _projectSourceDir }}/node_modules"
-    beta: "docker://spryker_mutagen_sync_1/data/node_modules"
+    alpha: "../../../node_modules"
+    beta: "docker://{{ namespace }}_{{ tag }}_sync_1/data/node_modules"
     mode: "two-way-safe"

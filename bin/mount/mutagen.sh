@@ -45,10 +45,8 @@ function checkSyncByProjectName()
 
         if [ ! "${command}" == "${waitingStatus}" ]; then
             count=0
-        fi
-
-        if [ "${command}" == "${waitingStatus}" ]; then
-            ((count++))
+        else
+            count=$((count + 1))
         fi
 
         sleep 1
@@ -92,19 +90,14 @@ function sync()
 {
     export DOCKER_SYNC_SKIP_UPDATE=1
     local syncConf="${DEPLOYMENT_PATH}/mutagen.yml"
+    local volumeName=${SPRYKER_DOCKER_PREFIX}_${SPRYKER_DOCKER_TAG}_data_sync
+    local syncContainerName=${SPRYKER_DOCKER_PREFIX}_${SPRYKER_DOCKER_TAG}_sync_1
 
     case $1 in
         create)
             verbose "${INFO}Creating 'data-sync' volume and sync container${NC}"
-            docker volume create --name=spryker_dev_data_sync
-            if [ ! "$(docker ps -a | grep spryker_mutagen_sync_1)" ]; then
-                docker run -d \
-                   --name spryker_mutagen_sync_1 \
-                   -v spryker_dev_data_sync:/data \
-                   -u 1000:1000 \
-                   spryker_cli:dev \
-                   nc -l 9000
-            fi
+            docker volume create --name=${volumeName}
+            runSyncContainer ${syncContainerName} ${volumeName}
             ;;
 
         recreate)
@@ -113,17 +106,18 @@ function sync()
 
         clean)
             mutagen project flush ${syncConf}
-            docker volume rm ${SPRYKER_DOCKER_PREFIX}_${SPRYKER_DOCKER_TAG}_data_sync || true
+            docker volume rm ${volumeName} || true
             ;;
 
         stop)
             mutagen project terminate ${syncConf}
             ;;
         *)
-            if [ $(docker ps | grep 5000 | grep ${SPRYKER_DOCKER_PREFIX}_${SPRYKER_DOCKER_TAG}_data_sync | wc -l |sed 's/^ *//') -eq 0 ]; then
+            if [ $(mutagen project list ${syncConf} 2>&1 | grep 'Error: project not running' | wc -l |sed 's/^ *//') -ne 0 ]; then
                 verbose "${INFO}Start sync process for data volume${NC}"
                 pushd ${PROJECT_DIR} > /dev/null
 
+                runSyncContainer ${syncContainerName} ${volumeName}
                 mutagen project start ${syncConf} || echo 'Mutagen project already running'
                 checkAllSyncProcesses
 
@@ -131,6 +125,18 @@ function sync()
             fi
             ;;
     esac
+}
+
+function runSyncContainer()
+{
+    if [ ! "$(docker ps -a | grep ${1})" ]; then
+        docker run -d \
+           --name ${1} \
+           -v ${2}:/data \
+           -u 1000:1000 \
+           spryker_cli:dev \
+           nc -l 9000
+    fi
 }
 
 export -f sync
