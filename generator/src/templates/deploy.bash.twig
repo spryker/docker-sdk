@@ -556,15 +556,14 @@ function execDockerCompose()
 
 function doUp()
 {
-    exportDockerMachineConfiguration
-    startDockerMachine
+    startDockerMachine $(getDockerMachineArguments)
     doBuild ${IF_NOT_PERFORMED}
     buildAssets ${IF_NOT_PERFORMED}
     runApp
     loadDemoData ${IF_NOT_PERFORMED}
     createSchedulerJobs ${IF_NOT_PERFORMED}
-    hostsHelper
-    envHelper
+    hostsHelper $(getDockerMachineArguments)
+    envHelper $(getDockerMachineArguments)
 }
 
 function runApp()
@@ -581,8 +580,7 @@ function stopApp()
     stopCliContainer
     execDockerCompose down --remove-orphans
     sync stop
-    exportDockerMachineConfiguration
-    stopDockerMachine
+    stopDockerMachine $(getDockerMachineArguments)
 }
 
 function doCli()
@@ -744,8 +742,7 @@ case ${command} in
         docker system prune -a
         docker image prune
         docker volume prune
-        exportDockerMachineConfiguration
-        deleteDockerMachine
+        deleteDockerMachine $(getDockerMachineArguments)
         ;;
     trouble)
         stopApp

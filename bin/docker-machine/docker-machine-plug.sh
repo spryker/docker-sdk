@@ -31,7 +31,7 @@ function envHelper()
     return ${__TRUE}
 }
 
-function exportDockerMachineConfiguration()
+function getDockerMachineArguments()
 {
     return ${__TRUE}
 }
@@ -41,4 +41,4 @@ export -f stopDockerMachine
 export -f deleteDockerMachine
 export -f hostsHelper
 export -f envHelper
-export -f exportDockerMachineConfiguration
+export -f getDockerMachineArguments

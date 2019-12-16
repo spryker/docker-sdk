@@ -11,7 +11,7 @@ popd > /dev/null
 
 function isDockerMachineExist()
 {
-    local dockerMachineName=$1
+    local dockerMachineName=${1}
 
     if [ "$(docker-machine ls --filter "name=${dockerMachineName}" --format "{{.Name}}")" ];
     then
@@ -23,7 +23,7 @@ function isDockerMachineExist()
 
 function isDockerMachineRunning()
 {
-    local dockerMachineName=$1
+    local dockerMachineName=${1}
 
     if [ "$(docker-machine status ${dockerMachineName})" == 'Running' ];
     then
@@ -43,11 +43,12 @@ function create()
     local dockerMachineSharedFolder=${6}
 
     echo -e "${INFO}Creating ${LGRAY}"${dockerMachineName}"${INFO} machine... ${NC}"
-    docker-machine create --driver=${dockerMachineDriver} \
-     --${dockerMachineDriver}-share-folder="${dockerMachineSharedFolder}" \
-     --${dockerMachineDriver}-cpu-count="${dockerMachineCpu}" \
-     --${dockerMachineDriver}-memory="${dockerMachineMemory}" \
-     --${dockerMachineDriver}-disk-size="${dockerMachineDiskSize}" \
+
+    docker-machine create ${dockerMachineDriver} \
+     ${dockerMachineSharedFolder} \
+     ${dockerMachineCpu} \
+     ${dockerMachineMemory} \
+     ${dockerMachineDiskSize} \
      ${dockerMachineName}
 }
 
@@ -102,21 +103,11 @@ function evalEnv()
 
 function startDockerMachine()
 {
-    local dockerMachineName=${DOCKER_MACHINE_NAME}
-    local dockerMachineDriver=${DOCKER_MACHINE_DRIVER}
-    local dockerMachineCpu=${DOCKER_MACHINE_CPU}
-    local dockerMachineMemory=${DOCKER_MACHINE_MEMORY}
-    local dockerMachineDiskSize=${DOCKER_MACHINE_DISK_SIZE}
-    local dockerMachineSharedFolder=${DOCKER_MACHINE_SHARED_FOLDER:-$(pwd)}
+    local dockerMachineName=${1:-${DOCKER_MACHINE_NAME}}
 
     if ! isDockerMachineExist ${dockerMachineName};
     then
-        create ${dockerMachineName} \
-            ${dockerMachineDriver} \
-            ${dockerMachineCpu} \
-            ${dockerMachineMemory} \
-            ${dockerMachineDiskSize} \
-            ${dockerMachineSharedFolder}
+        create $(getDockerMachineArguments)
     else
         start ${dockerMachineName}
     fi
@@ -126,7 +117,7 @@ function startDockerMachine()
 
 function stopDockerMachine()
 {
-    local dockerMachineName=${DOCKER_MACHINE_NAME}
+    local dockerMachineName=${1:-${DOCKER_MACHINE_NAME}}
 
     if isDockerMachineRunning ${dockerMachineName};
     then
@@ -138,7 +129,7 @@ function stopDockerMachine()
 
 function hostsHelper()
 {
-    local dockerMachineName=${DOCKER_MACHINE_NAME}
+    local dockerMachineName=${1:-${DOCKER_MACHINE_NAME}}
     local dockerMachineEndpointMap=${DOCKER_MACHINE_ENDPOINT_MAP}
 
     if isDockerMachineRunning ${dockerMachineName};
@@ -154,7 +145,7 @@ function hostsHelper()
 
 function envHelper()
 {
-    local dockerMachineName=${DOCKER_MACHINE_NAME}
+    local dockerMachineName=${1:-${DOCKER_MACHINE_NAME}}
 
     if isDockerMachineRunning ${dockerMachineName};
     then
@@ -165,7 +156,7 @@ function envHelper()
 
 function deleteDockerMachine()
 {
-    local dockerMachineName=${DOCKER_MACHINE_NAME}
+    local dockerMachineName=${1:-${DOCKER_MACHINE_NAME}}
 
     if isDockerMachineExist ${dockerMachineName};
     then
