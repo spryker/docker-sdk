@@ -9,7 +9,7 @@ pushd ${BASH_SOURCE%/*} > /dev/null
 ../require.sh docker-machine
 popd > /dev/null
 
-function isDockerMachineExist()
+function isDockerMachineCreated()
 {
     local dockerMachineName=${1}
 
@@ -36,20 +36,10 @@ function isDockerMachineRunning()
 function create()
 {
     local dockerMachineName=${1}
-    local dockerMachineDriver=${2}
-    local dockerMachineCpu=${3}
-    local dockerMachineMemory=${4}
-    local dockerMachineDiskSize=${5}
-    local dockerMachineSharedFolder=${6}
 
     echo -e "${INFO}Creating ${LGRAY}"${dockerMachineName}"${INFO} machine... ${NC}"
 
-    docker-machine create ${dockerMachineDriver} \
-     ${dockerMachineSharedFolder} \
-     ${dockerMachineCpu} \
-     ${dockerMachineMemory} \
-     ${dockerMachineDiskSize} \
-     ${dockerMachineName}
+    docker-machine create $@
 }
 
 function start()
@@ -105,7 +95,7 @@ function startDockerMachine()
 {
     local dockerMachineName=${1:-${DOCKER_MACHINE_NAME}}
 
-    if ! isDockerMachineExist ${dockerMachineName};
+    if ! isDockerMachineCreated ${dockerMachineName};
     then
         create $(getDockerMachineArguments)
     else
@@ -158,7 +148,7 @@ function deleteDockerMachine()
 {
     local dockerMachineName=${1:-${DOCKER_MACHINE_NAME}}
 
-    if isDockerMachineExist ${dockerMachineName};
+    if isDockerMachineCreated ${dockerMachineName};
     then
         docker-machine rm ${dockerMachineName}
         eval $(docker-machine env -u)
