@@ -1,7 +1,7 @@
 {% extends "nginx/http/application.server.conf.twig" %}
 {% block host %}
   server_name {{ host }} {{ rpcServer }};
-  listen 80;
+  listen {{ port }};
 {% endblock host %}
 {% block location %}
 {{ parent() }}
