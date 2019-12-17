@@ -2,7 +2,7 @@
 
 set -e
 
-pushd ${BASH_SOURCE%/*} > /dev/null
+pushd "${BASH_SOURCE%/*}" > /dev/null
 . ./constants.sh
 . ./console.sh
 popd > /dev/null
@@ -13,7 +13,7 @@ function checkRequirements()
 {
     verbose -n "${INFO}Checking requirements...${NC}"
 
-    for binary in "$@";
+    for binary in "${@}";
     do
         case ${binary} in
             "-"*)
@@ -22,7 +22,7 @@ function checkRequirements()
                 ;;
         esac
 
-        local binPath=$(which ${binary} || true)
+        local binPath=$(command -v "${binary}" || true)
 
         if [ -z "${binPath}" ]; then
             verbose ""
@@ -34,4 +34,4 @@ function checkRequirements()
     verbose "[OK]"
 }
 
-checkRequirements $@
+checkRequirements ${@}

@@ -2,13 +2,13 @@
 
 set -e
 
-pushd ${BASH_SOURCE%/*} > /dev/null
-. ../../constants.sh
-. ../../console.sh
-. ../../platform.sh
-. ../image-builder-helper.sh
+pushd "${BASH_SOURCE%/*}" > /dev/null
+. ../constants.sh
+. ../console.sh
+. ../platform.sh
+. image-builder-helper.sh
 
-VERBOSE=0 ../../require.sh docker
+VERBOSE=0 ../require.sh docker
 popd > /dev/null
 
 PROJECT_DIR="$( pwd )"
@@ -33,7 +33,7 @@ function doCliImage()
     doTagByApplicationName Cli ${SPRYKER_DOCKER_PREFIX}_cli:${tag}
 }
 
-function doBaseImages()
+function buildBaseImages()
 {
     local tag=${1:-${SPRYKER_DOCKER_TAG}}
     local dbEngine=${3:-${SPRYKER_DB_ENGINE}}
@@ -68,5 +68,10 @@ function doBaseImages()
     done
 }
 
-export doBaseImages
-export doCliImage
+function tagProdLikeImages()
+{
+    return ${_TRUE}
+}
+
+export -f buildBaseImages
+export -f tagProdLikeImages

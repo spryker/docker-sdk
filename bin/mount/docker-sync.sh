@@ -2,7 +2,7 @@
 
 set -e
 
-pushd ${BASH_SOURCE%/*} > /dev/null
+pushd "${BASH_SOURCE%/*}" > /dev/null
 . ../constants.sh
 . ../console.sh
 
@@ -12,12 +12,14 @@ popd > /dev/null
 function sync()
 {
     export DOCKER_SYNC_SKIP_UPDATE=1
+    local command=$1
     local syncConf="${DEPLOYMENT_PATH}/docker-sync.yml"
+    local syncVolume="${SPRYKER_DOCKER_PREFIX}_${SPRYKER_DOCKER_TAG}_data_sync"
 
-    case $1 in
+    case "${command}" in
         create)
             verbose "${INFO}Creating 'data-sync' volume${NC}"
-            docker volume create --name=${SPRYKER_DOCKER_PREFIX}_${SPRYKER_DOCKER_TAG}_data_sync
+            docker volume create --name="${syncVolume}"
             ;;
 
         recreate)
@@ -26,18 +28,19 @@ function sync()
             ;;
 
         clean)
-            docker-sync clean -c ${syncConf}
-            docker volume rm ${SPRYKER_DOCKER_PREFIX}_${SPRYKER_DOCKER_TAG}_data_sync || true
+            docker-sync clean -c "${syncConf}"
+            docker volume rm "${syncVolume}" > /dev/null || true
             ;;
 
         stop)
-            docker-sync stop -c ${syncConf} -n data-sync
+            docker-sync stop -c "${syncConf}" -n data-sync
             ;;
         *)
-            if [ $(docker ps | grep 5000 | grep ${SPRYKER_DOCKER_PREFIX}_${SPRYKER_DOCKER_TAG}_data_sync | wc -l |sed 's/^ *//') -eq 0 ]; then
-                verbose "${INFO}Start sync process for data volume${NC}"
-                pushd ${PROJECT_DIR} > /dev/null
-                docker-sync start -c ${syncConf}
+            local runningSync="$(docker ps | grep 5000 | grep -c "${syncVolume}" | sed 's/^ *//')"
+            if [ "$runningSync" -eq 0 ]; then
+                verbose "${INFO}Starting sync process${NC}"
+                pushd "${PROJECT_DIR}" > /dev/null
+                docker-sync start -c "${syncConf}"
                 popd > /dev/null
             fi
             ;;

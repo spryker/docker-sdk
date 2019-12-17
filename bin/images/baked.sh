@@ -2,13 +2,13 @@
 
 set -e
 
-pushd ${BASH_SOURCE%/*} > /dev/null
-. ../../constants.sh
-. ../../console.sh
-. ../../platform.sh
-. ../image-builder-helper.sh
+pushd "${BASH_SOURCE%/*}" > /dev/null
+. ../constants.sh
+. ../console.sh
+. ../platform.sh
+. image-builder-helper.sh
 
-VERBOSE=0 ../../require.sh docker
+VERBOSE=0 ../require.sh docker
 popd > /dev/null
 
 PROJECT_DIR="$( pwd )"
@@ -56,7 +56,7 @@ function doCliImage()
         .
 }
 
-function doBaseImages()
+function buildBaseImages()
 {
     local dbEngine=${2:-${SPRYKER_DB_ENGINE}}
     local logDirectory=${3:-${SPRYKER_LOG_DIRECTORY}}
@@ -71,7 +71,7 @@ function doBaseImages()
     doCliImage
 }
 
-function doProdLikeImages()
+function tagProdLikeImages()
 {
     local tag=${1:-${SPRYKER_DOCKER_TAG}}
 
@@ -83,7 +83,5 @@ function doProdLikeImages()
     done
 }
 
-export doBaseImage
-export doBaseImages
-export doCliImage
-export doProdLikeImages
+export -f buildBaseImages
+export -f tagProdLikeImages

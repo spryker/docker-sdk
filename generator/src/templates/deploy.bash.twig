@@ -1,7 +1,7 @@
 #!/bin/bash
 
 {% set isDevelopment = _mountMode != 'baked' %}
-{% set sprykerEnvName = isDevelopment ? 'dev' : 'demo' %}
+{% set fileMode = _mountMode == 'baked' ? 'baked' : 'mount' %}
 
 set -e
 
@@ -10,11 +10,12 @@ pushd ${BASH_SOURCE%/*} > /dev/null
 . ./bin/constants.sh
 . ./bin/console.sh
 
-. ./bin/mount/{{ _mountMode }}.sh $@
-. ./bin/database/{{ services['database']['engine'] }}.sh $@
+. ./bin/mount/{{ _mountMode }}.sh ${@}
+. ./bin/database/{{ services['database']['engine'] }}.sh ${@}
 
-. ./bin/assets/{{ sprykerEnvName }}/builder.sh
-. ./bin/images/{{ sprykerEnvName }}/builder.sh
+. ./bin/build/{{ fileMode }}.sh
+. ./bin/assets/{{ fileMode }}.sh
+. ./bin/images/{{ fileMode }}.sh
 
 ./bin/require.sh docker docker-compose tr awk wc sed grep
 ./bin/check-docker.sh
@@ -26,8 +27,6 @@ readonly PROJECT_DIR="$( pwd )"
 readonly DEPLOYMENT_DIR="$( cd ${BASH_SOURCE%/*} >/dev/null 2>&1 && pwd )"
 export DEPLOYMENT_PATH="${DEPLOYMENT_DIR/$PROJECT_DIR/.}"
 export SPRYKER_REMOTE_DIR="/var/spryker"
-
-readonly IF_NOT_PERFORMED='IF_NOT_PERFORMED'
 
 export DOCKER_BUILDKIT=1
 export COMPOSE_HTTP_TIMEOUT=400
@@ -72,43 +71,43 @@ function showHelp()
 
     echo -e ""
     echo -e "${INFO}Options:${NC}"
-    echo -e " ${GREEN}-v${NC}                - Enable verbose mode. You can set environment variable VERBOSE=1 instead of using this option."
-    echo -e " ${GREEN}-x${NC}                - Enable Xdebug. You can set environment variable SPRYKER_XDEBUG_ENABLE=1 instead of using this option."
-    echo -e " ${GREEN}-t${NC}                - Enable testing mode. You can set environment variable SPRYKER_TESTING_ENABLE=1 instead of using this option."
+    echo -e " ${GREEN}-v${NC}                       - Enable verbose mode. You can set environment variable VERBOSE=1 instead of using this option."
+    echo -e " ${GREEN}-x${NC}                       - Enable Xdebug. You can set environment variable SPRYKER_XDEBUG_ENABLE=1 instead of using this option."
+    echo -e " ${GREEN}-t${NC}                       - Enable testing mode. You can set environment variable SPRYKER_TESTING_ENABLE=1 instead of using this option."
 
     echo -e ""
     echo -e "${INFO}Commands:${NC}"
-    echo -e " ${GREEN}up${NC}                - Build and run Spryker apps based on demo data."
-    echo -e " ${GREEN}run|start${NC}         - Run Spryker containers."
-    echo -e " ${GREEN}restart${NC}           - Restart Spryker containers."
-    echo -e " ${GREEN}down|stop${NC}         - Stop all Spryker containers."
-    echo -e " ${GREEN}logs${NC}              - Tail all application exception logs."
-    echo -e " ${GREEN}help${NC}              - Show help page."
+    echo -e " ${GREEN}up${NC}                       - Build and run Spryker apps based on demo data."
+    echo -e " ${GREEN}run|start${NC}                - Run Spryker containers."
+    echo -e " ${GREEN}restart${NC}                  - Restart Spryker containers."
+    echo -e " ${GREEN}down|stop${NC}                - Stop all Spryker containers."
+    echo -e " ${GREEN}logs${NC}                     - Tail all application exception logs."
+    echo -e " ${GREEN}help${NC}                     - Show help page."
 
     echo -e ""
-    echo -e " ${GREEN}cli${NC}               - Start a new container where you can run cli commands."
-    echo -e " ${GREEN}cli${NC} <command>     - Run a cli command, e.g. \`${ITALIC}${SPRYKER_SELF_SCRIPT} cli composer install${NC}\`."
-    echo -e " ${GREEN}console${NC}           - Run a Spryker console command, e.g. \`${ITALIC}${SPRYKER_SELF_SCRIPT} console transfer:generate -vvv\`${NC}."
-    echo -e " ${GREEN}testing${NC}           - Start a new container where you can run cli commands in testing environment, e.g. \`${ITALIC}codecept build${NC}\`."
-    echo -e " ${GREEN}testing${NC} <command> - Run a cli command in testing environment, e.g. \`${ITALIC}${SPRYKER_SELF_SCRIPT} testing codecept build${NC}\`."
-    echo -e " ${GREEN}wait${NC} <service>    - Wait for requested services, e.g. \`${ITALIC}${SPRYKER_SELF_SCRIPT} wait database broker\`${NC}."
+    echo -e " ${GREEN}cli${NC}                      - Start a new container where you can run cli commands."
+    echo -e " ${GREEN}cli${NC} <command>            - Run a cli command, e.g. \`${ITALIC}${SPRYKER_SELF_SCRIPT} cli composer install${NC}\`."
+    echo -e " ${GREEN}console${NC}                  - Run a Spryker console command, e.g. \`${ITALIC}${SPRYKER_SELF_SCRIPT} console transfer:generate -vvv\`${NC}."
+    echo -e " ${GREEN}testing${NC}                  - Start a new container where you can run cli commands in testing environment, e.g. \`${ITALIC}codecept build${NC}\`."
+    echo -e " ${GREEN}testing${NC} <command>        - Run a cli command in testing environment, e.g. \`${ITALIC}${SPRYKER_SELF_SCRIPT} testing codecept build${NC}\`."
+    echo -e " ${GREEN}wait${NC} <service>           - Wait for requested services, e.g. \`${ITALIC}${SPRYKER_SELF_SCRIPT} wait database broker\`${NC}."
 
     echo -e ""
-    echo -e " ${GREEN}pull${NC}              - Pull external docker images."
-    echo -e " ${GREEN}build${NC}             - Build Spryker containers."
-    echo -e " ${GREEN}demo|demo-data${NC}    - Populate Spryker demo data."
-    echo -e " ${GREEN}demo <section>${NC}    - Load the demo data by running the specified section from docker installation recipe for each store."
-    echo -e " ${GREEN}jobs${NC}              - Generate and starts jobs."
+    echo -e " ${GREEN}pull${NC}                     - Pull external docker images."
+    echo -e " ${GREEN}build${NC}                    - Build Spryker images."
+    echo -e " ${GREEN}demo|demo-data${NC}           - Populate Spryker demo data."
+    echo -e " ${GREEN}demo <section>${NC}           - Load the demo data by running the specified section from docker installation recipe for each store."
+    echo -e " ${GREEN}jobs${NC}                     - Generate and starts jobs."
 
     echo -e ""
-    echo -e " ${GREEN}clean-data${NC}        - Remove all Spryker volumes including all storages."
-    echo -e " ${GREEN}reset${NC}             - Remove and build all Spryker containers and volumes."
-    echo -e " ${GREEN}remove|clean${NC}      - Stop and removes all Spryker containers and volumes."
+    echo -e " ${GREEN}clean-data${NC}               - Remove all Spryker volumes including all storages."
+    echo -e " ${GREEN}reset${NC}                    - Remove and build all Spryker containers and volumes."
+    echo -e " ${GREEN}remove|clean${NC}             - Stop and removes all Spryker containers and volumes."
 
 {% if not isDevelopment %}
     echo -e ""
-    echo -e " ${GREEN}production:images${NC} - Build prod-like images (Yves, Zed, Glue, Cli)."
-    echo -e " ${GREEN}production:assets${NC} - Build zip with assets."
+    echo -e " ${GREEN}export images${NC} [-t TAG]   - Build prod-like images (Yves, Zed, Glue, Cli)."
+    echo -e " ${GREEN}export assets${NC} [-t TAG]   - Build assets and export as archives stored by given path."
 {% endif %}
 }
 
@@ -168,66 +167,6 @@ function ensureTestingMode()
     SPRYKER_TESTING_ENABLE=1
     runApp
 }
-
-function buildBaseImage()
-{
-{% if isDevelopment %}
-    if [ "$1" = ${IF_NOT_PERFORMED} -a "$(docker images -q ${SPRYKER_DOCKER_PREFIX}_app:${SPRYKER_DOCKER_TAG} 2> /dev/null)" != "" ]; then
-        return ${__TRUE}
-    fi
-{% endif %}
-    verbose "${INFO}Building base application image${NC}"
-
-    if [ -z ${GITHUB_TOKEN} ]; then
-        echo -e "${WARN}Warning: GITHUB_TOKEN is not set but may be required.${NC}"
-    fi
-
-    doBaseImages
-    doProdLikeImages
-}
-
-{% if isDevelopment %}
-function runApplicationBuild()
-{
-    local tty
-    [ -t -0 ] && tty='t' || tty=''
-    docker run -i${tty} --rm \
-        -e COMMAND="$1" \
-        -e SPRYKER_DB_ENGINE=${SPRYKER_DB_ENGINE} \
-        --restart=no \
-        ${DOCKER_EXTRA_OPTIONS} \
-        ${SPRYKER_DOCKER_PREFIX}_cli:${SPRYKER_DOCKER_TAG} /usr/local/bin/execute.sh
-}
-
-function buildCode()
-{
-    sync create
-    sync start
-    sync stop
-
-    [ "$1" = ${IF_NOT_PERFORMED} ] && verbose "${INFO}Checking if anything should be built${NC}"
-
-    runApplicationBuild 'chmod 600 /data/config/Zed/*.key'
-
-    local vendorDir=$(runApplicationBuild '[ ! -f /data/vendor/bin/install ] && echo 0 || echo 1 | tail -n 1' | tr -d " \n\r")
-    if [ "$1" != ${IF_NOT_PERFORMED} -o "${vendorDir}" == "0" ]; then
-        verbose "${INFO}Running composer install${NC}"
-        runApplicationBuild 'composer install --no-interaction --optimize-autoloader'
-    fi
-
-    local generatedDir=$(runApplicationBuild '[ ! -d /data/src/Generated ] && echo 0 || echo 1 | tail -n 1' | tr -d " \n\r")
-    if [ "$1" != ${IF_NOT_PERFORMED} -o "${generatedDir}" == "0" ]; then
-        verbose "${INFO}Running build${NC}"
-        runApplicationBuild 'vendor/bin/install -r docker -s build -s build-development'
-    fi
-
-{% if _platform == 'windows' %}
-    # Fix the docker-sync permission issue on windows
-   local executableFile=$(runApplicationBuild '[ ! -x $(readlink -f vendor/bin/console) ] && echo 0 || echo 1 | tail -n 1' | tr -d " \n\r")
-   [ "$1" != ${IF_NOT_PERFORMED} -o "${executableFile}" == "0" ] && runApplicationBuild 'chmod +x vendor/bin/*' || true
-{% endif %}
-}
-{% endif %}
 
 function isDemoDataLoaded()
 {
@@ -387,10 +326,11 @@ function setExtraEnvFiles ()
     export DOCKER_EXTRA_ENV_FILES="--env-file=${DEPLOYMENT_PATH}/env/cli/${store}.env"
 }
 
-function getDefaultRunArguments()
+function getDefaultRunArguments ()
 {
     local networkName=${SPRYKER_DOCKER_PREFIX}_services
-    docker network inspect ${networkName} > /dev/null 2>&1 && echo -n " --network=${networkName}"
+{#    docker network inspect ${networkName} > /dev/null 2>&1 && #}
+    echo -n " --network=${networkName}"
     echo -n " ${DOCKER_EXTRA_ENV_FILES}"
     echo -n " ${DOCKER_EXTRA_OPTIONS}"
 }
@@ -438,10 +378,11 @@ function execSprykerMultiString()
 
 function doBuild()
 {
-    buildBaseImage $1
-{% if isDevelopment %}
-    buildCode $1
-{% endif %}
+    if [ -z ${GITHUB_TOKEN} ]; then
+        echo -e "${WARN}Warning: GITHUB_TOKEN is not set but may be required.${NC}"
+    fi
+
+    buildCodeBase $1
     execDockerCompose build
 }
 
@@ -461,7 +402,7 @@ function execDockerCompose()
         --project-directory ${PROJECT_DIR} \
         --project-name ${SPRYKER_DOCKER_PREFIX} \
         ${DOCKER_COMPOSE_FILES} \
-        "$@"
+        "${@}"
 }
 
 function doUp()
@@ -476,7 +417,8 @@ function doUp()
 function runApp()
 {
     verbose "${INFO}Running Spryker containers${NC}"
-    createAssetsVolume ${IF_NOT_PERFORMED}
+    # TODO
+#    createAssetsVolume
     execDockerCompose up -d --remove-orphans
     sync start
 }
@@ -579,7 +521,6 @@ case ${command} in
         ;;
     up)
         doUp
-        doProdLikeImages
         ;;
     demo|demo-data)
         runApp
@@ -662,14 +603,50 @@ case ${command} in
         showHelp
         ;;
 {% if not isDevelopment %}
-    production:assets)
-        doBaseImage
-        buildAssets
-        doArchiveAssets "${@}"
-        ;;
-    production:images)
-        doBaseImages "${@}"
-        doProdLikeImages "${@}"
+    export)
+        subcommand=${1}
+        shift 1
+
+        while getopts "t:" opt; do
+            case ${opt} in
+            # t - tag
+            t)
+            SPRYKER_XDEBUG_ENABLE=1
+            ;;
+            # t - testing
+            t)
+            SPRYKER_TESTING_ENABLE=1
+            ;;
+            v)
+            VERBOSE=1
+            ;;
+            # Unknown argument specified
+            [?])
+            showHelp
+            echo -e "\n${WARN}Unknown argument "${INFO}-${OPTARG}${WARN}" is acquired.${NC}"
+            exit 1
+            ;;
+            # Specified argument without required value
+            :)
+            echo -e "Option ${opt} requires an argument"
+            exit 1
+            ;;
+        esac
+        done
+        shift $((OPTIND -1))
+
+        doBaseImage "${@}"
+
+        case subcommand in
+            asset|assets)
+                buildAssets
+                exportAssets "${@}"
+            ;;
+            image|images)
+                buildBaseImages "${@}"
+                tagProdLikeImages "${@}"
+                ;;
+        esac
         ;;
 {% endif %}
     *)
