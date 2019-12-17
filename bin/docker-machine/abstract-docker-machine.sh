@@ -50,17 +50,22 @@ function start()
     then
         echo -e "${INFO}Starting ${LGRAY}"${dockerMachineName}"${INFO} machine... ${NC}"
 
-        docker-machine start ${dockerMachineName} > /dev/null 2>&1 || true
+        local dockerMachineStartCommandResult=$(docker-machine start ${dockerMachineName} 2>&1)
+        local dockerMachineStatus=$(docker-machine ls --filter "name=${dockerMachineName}" --format "{{.Error}}")
+
+        if [ ! -z "${dockerMachineStartCommandResult}" ] && [ -z "${dockerMachineStatus}" ]
+        then
+            echo -e "${WARN}${dockerMachineStartCommandResult}${NC}" && exit 1
+        fi
 
         local counter=1;
         local maxCount=60;
         local interval=1;
 
         while : ; do
-            local status=$(docker-machine ls --filter "name=${dockerMachineName}" --format "{{.Error}}")
-
-            [ -z "${status}" ] && echo -en "${CLEAR}\r" && break
-            [ ${counter} == ${maxCount} ] && echo -e "\r${WARN}${status}${NC}" && exit 1
+            dockerMachineStatus=$(docker-machine ls --filter "name=${dockerMachineName}" --format "{{.Error}}")
+            [ -z "${dockerMachineStatus}" ] && echo -en "${CLEAR}\r" && return ${__TRUE}
+            [ ${counter} == ${maxCount} ] && echo -e "\r${WARN}${dockerMachineStatus}${NC}" && exit 1
 
             counter=$((counter+1))
             sleep ${interval}
