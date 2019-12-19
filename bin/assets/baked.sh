@@ -63,7 +63,7 @@ function buildAssets()
     fi
 
     local volumeName=${SPRYKER_DOCKER_PREFIX}_assets
-    local imageName=${SPRYKER_DOCKER_PREFIX}_builder_asset
+    local imageName=${SPRYKER_DOCKER_PREFIX}_builder_assets
 
     verbose "${INFO}Creating docker volume '${SPRYKER_DOCKER_PREFIX}_assets'${NC}"
     docker volume rm "${volumeName}" > /dev/null || true

@@ -9,6 +9,7 @@ set -e
 pushd ${BASH_SOURCE%/*} > /dev/null
 . ./bin/constants.sh
 . ./bin/console.sh
+. ./bin/export-helper.sh
 
 . ./bin/mount/{{ _mountMode }}.sh ${@}
 . ./bin/database/{{ services['database']['engine'] }}.sh ${@}
@@ -604,49 +605,7 @@ case ${command} in
         ;;
 {% if not isDevelopment %}
     export)
-        subcommand=${1}
-        shift 1
-
-        while getopts "t:" opt; do
-            case ${opt} in
-            # t - tag
-            t)
-            SPRYKER_XDEBUG_ENABLE=1
-            ;;
-            # t - testing
-            t)
-            SPRYKER_TESTING_ENABLE=1
-            ;;
-            v)
-            VERBOSE=1
-            ;;
-            # Unknown argument specified
-            [?])
-            showHelp
-            echo -e "\n${WARN}Unknown argument "${INFO}-${OPTARG}${WARN}" is acquired.${NC}"
-            exit 1
-            ;;
-            # Specified argument without required value
-            :)
-            echo -e "Option ${opt} requires an argument"
-            exit 1
-            ;;
-        esac
-        done
-        shift $((OPTIND -1))
-
-        doBaseImage "${@}"
-
-        case subcommand in
-            asset|assets)
-                buildAssets
-                exportAssets "${@}"
-            ;;
-            image|images)
-                buildBaseImages "${@}"
-                tagProdLikeImages "${@}"
-                ;;
-        esac
+        doExport "${@}"
         ;;
 {% endif %}
     *)
