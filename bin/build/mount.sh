@@ -57,10 +57,6 @@ function buildCode()
 
 function buildCodeBase()
 {
-    if [ "$1" = "${IF_NOT_PERFORMED}" ] || [ "$(docker images -q "${SPRYKER_DOCKER_PREFIX}_app:${SPRYKER_DOCKER_TAG}" 2> /dev/null)" != "" ]; then
-        return ${__TRUE}
-    fi
-
     verbose "${INFO}Building base application image${NC}"
 
     buildBaseImages
