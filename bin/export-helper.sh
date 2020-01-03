@@ -7,7 +7,7 @@ popd > /dev/null
 function assertDestinationDirectory() {
     if [ ! -d ${1} ];
     then
-        error "${WARN}'${1}' path doesn\`t exist. Please, create target folder before run export command.${NC}"
+        error "${WARN}Directory '${1}' is not accessible. Please, make sure it does exist and has appropriate permissions.${NC}"
         exit 1
     fi
 }
