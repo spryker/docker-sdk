@@ -5,7 +5,7 @@ pushd "${BASH_SOURCE%/*}" > /dev/null
 popd > /dev/null
 
 function assertDestinationDirectory() {
-    if [ ! -d ${1} ];
+    if [ ! -d ${1} ] || [ ! -w ${1} ];
     then
         error "${WARN}Directory '${1}' is not accessible. Please, make sure it does exist and has appropriate permissions.${NC}"
         exit 1
