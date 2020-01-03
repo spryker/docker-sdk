@@ -4,7 +4,7 @@ pushd "${BASH_SOURCE%/*}" > /dev/null
 . ./console.sh
 popd > /dev/null
 
-function isDestinationPathExist() {
+function assertDestinationDirectory() {
     if [ ! -d ${1} ];
     then
         error "${WARN}'${1}' path doesn\`t exist. Please, create target folder before run export command.${NC}"
@@ -33,7 +33,7 @@ function doExport()
 
     case ${subCommand} in
         asset|assets)
-            isDestinationPathExist ${destinationPath}
+            assertDestinationDirectory ${destinationPath}
             doBaseImage
             buildAssets
             exportAssets ${tag} ${destinationPath}
