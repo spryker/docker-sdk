@@ -27,7 +27,7 @@ function exportAssets()
         "${SPRYKER_DOCKER_PREFIX}_builder_assets:${SPRYKER_DOCKER_TAG}" \
         bash -c "./docker/bin/assets/tar-builder.sh ${tag} /data/${dockerAssetsTmpDirectory}"
 
-    echo -e "${INFO}File name:\t\t\t\tPath:${NC}"
+    echo -e "${INFO}File name:              Path:${NC}"
 
     for filePath in "${projectDockerAssetsTmpDirectory}"*;
     do
@@ -35,7 +35,7 @@ function exportAssets()
 
         mv "${filePath}" "${destinationPath}"
 
-        echo -e "${OK}${fileName}${NC}\t\t\t\t${destinationPath}/${fileName}"
+        echo -e "${OK}${fileName}${NC}          ${destinationPath}/${fileName}"
     done
 
     rm -rf "${projectDockerAssetsTmpDirectory}"

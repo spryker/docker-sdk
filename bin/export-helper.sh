@@ -1,4 +1,16 @@
-#!/usr/bin/env bash
+#!/bin/bash
+
+pushd "${BASH_SOURCE%/*}" > /dev/null
+. ./console.sh
+popd > /dev/null
+
+function assertDestinationDirectory() {
+    if [ ! -d ${1} ] || [ ! -w ${1} ];
+    then
+        error "${WARN}Directory '${1}' is not accessible. Please, make sure it does exist and has appropriate permissions.${NC}"
+        exit 1
+    fi
+}
 
 function doExport()
 {
@@ -21,6 +33,7 @@ function doExport()
 
     case ${subCommand} in
         asset|assets)
+            assertDestinationDirectory ${destinationPath}
             doBaseImage
             buildAssets
             exportAssets ${tag} ${destinationPath}
