@@ -2,7 +2,7 @@
 
 set -e
 
-pushd ${BASH_SOURCE%/*} > /dev/null
+pushd "${BASH_SOURCE%/*}" > /dev/null
 . ./constants.sh
 . ./console.sh
 popd > /dev/null

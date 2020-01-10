@@ -2,9 +2,10 @@
 
 set -e
 
-pushd ${BASH_SOURCE%/*} > /dev/null
-. ../../constants.sh
-. ../../console.sh
+pushd "${BASH_SOURCE%/*}" > /dev/null
+. ../constants.sh
+. ../console.sh
+. ../build/mount.sh
 popd > /dev/null
 
 function areAssetsBuilt()
@@ -21,8 +22,10 @@ function buildAssets()
         return ${__TRUE}
     fi
 
-    verbose "${INFO}Creating docker volume '${SPRYKER_DOCKER_PREFIX}_assets'${NC}"
-    docker volume create --name="${SPRYKER_DOCKER_PREFIX}_assets"
+    local volumeName=${SPRYKER_DOCKER_PREFIX}_assets
+
+    verbose "${INFO}Creating docker volume '${volumeName}'${NC}"
+    docker volume create --name="${volumeName}"
 
     sync start
     sync stop
@@ -30,4 +33,4 @@ function buildAssets()
     runApplicationBuild "vendor/bin/install -r docker -s build-static"
 }
 
-export buildAssets
+export -f buildAssets

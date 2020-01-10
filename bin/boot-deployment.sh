@@ -2,7 +2,7 @@
 
 set -e
 
-pushd ${BASH_SOURCE%/*} > /dev/null
+pushd "${BASH_SOURCE%/*}" > /dev/null
 . ./constants.sh
 . ./console.sh
 . ./platform.sh
@@ -14,7 +14,6 @@ popd > /dev/null
 
 export DOCKER_BUILDKIT=1
 
-PROJECT_DIR="$( pwd )"
 PROJECT_NAME=${PROJECT_NAME:-''}
 PROJECT_YAML=${PROJECT_YAML:-''}
 SOURCE_DIR=${SOURCE_DIR:-''}
@@ -43,10 +42,10 @@ function bootDeployment()
         -f "${SOURCE_DIR}/generator/Dockerfile" \
         "${SOURCE_DIR}/generator"
 
-    cp -rf ${SOURCE_DIR}/bin ${DEPLOYMENT_DIR}/bin
-    cp -rf ${SOURCE_DIR}/context ${DEPLOYMENT_DIR}/context
-    cp -rf ${SOURCE_DIR}/images ${DEPLOYMENT_DIR}/images
-    cp "${PROJECT_YAML}" ${DEPLOYMENT_DIR}/project.yml
+    cp -rf "${SOURCE_DIR}/bin" "${DEPLOYMENT_DIR}/bin"
+    cp -rf "${SOURCE_DIR}/context" "${DEPLOYMENT_DIR}/context"
+    cp -rf "${SOURCE_DIR}/images" "${DEPLOYMENT_DIR}/images"
+    cp "${PROJECT_YAML}" "${DEPLOYMENT_DIR}/project.yml"
 
     USER_UID=1000
     USER_GID=1000
@@ -54,16 +53,16 @@ function bootDeployment()
 
     verbose "${INFO}Running generator${NC}"
     docker run -i --rm \
-        -e SPRYKER_DOCKER_SDK_PROJECT_NAME=${PROJECT_NAME} \
+        -e SPRYKER_DOCKER_SDK_PROJECT_NAME="${PROJECT_NAME}" \
         -e SPRYKER_DOCKER_SDK_PROJECT_YAML="/data/deployment/project.yml" \
         -e SPRYKER_DOCKER_SDK_DEPLOYMENT_DIR="/data/deployment" \
         -e SPRYKER_DOCKER_SDK_PLATFORM="$(getPlatform)" \
-        -v ${DEPLOYMENT_DIR}:/data/deployment:rw \
-        -u ${USER_UID}:${USER_GID} \
+        -v "${DEPLOYMENT_DIR}":/data/deployment:rw \
+        -u "${USER_UID}":"${USER_GID}" \
         spryker_docker_sdk
 
-    chmod +x ${DEPLOYMENT_DIR}/deploy
+    chmod +x "${DEPLOYMENT_DIR}/deploy"
 }
 
-validateParameters
-bootDeployment
+export validateParameters
+export bootDeployment

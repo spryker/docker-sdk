@@ -2,7 +2,7 @@
 
 function checkFiles()
 {
-    arr=("$@")
+    arr=("${@}")
     result=0
     for file in "${arr[@]}"; do
         if [[ ! -e "$file" ]]; then

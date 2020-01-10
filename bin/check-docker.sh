@@ -2,7 +2,7 @@
 
 set -e
 
-pushd ${BASH_SOURCE%/*} > /dev/null
+pushd "${BASH_SOURCE%/*}" > /dev/null
 . ./constants.sh
 . ./console.sh
 
@@ -14,11 +14,11 @@ function checkDockerVersion()
 {
     local requiredMinimalVersion=${1:-'18.09.1'}
     # TODO check if docker is not running
-    local installedVersion=$(which docker > /dev/null; test $? -eq 0 && docker version --format '{{.Server.Version}}' || echo 0;)
+    local installedVersion=$(command -v docker > /dev/null; test $? -eq 0 && docker version --format '{{.Server.Version}}' || echo 0;)
 
     verbose -n "${INFO}Checking docker version...${NC}"
 
-    if [ $(echo "${installedVersion}" | tr -d '.' | sed -E 's/[^0-9]+$//g') -lt $(echo "${requiredMinimalVersion}" | tr -d '.') ]
+    if [ "$(echo "${installedVersion}" | tr -d '.' | sed -E 's/[^0-9]+$//g')" -lt "$(echo "${requiredMinimalVersion}" | tr -d '.')" ]
     then
         verbose ""
         error "${WARN}Docker version ${installedVersion} is not supported. Please update docker to at least ${requiredMinimalVersion}.${NC}"
@@ -28,4 +28,4 @@ function checkDockerVersion()
     verbose "[OK]"
 }
 
-checkDockerVersion $@
+checkDockerVersion ${@}
