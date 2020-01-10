@@ -1,0 +1,19 @@
+  {{ serviceName }}:
+{% if _mountMode == 'baked' %}
+    build:
+        context: ./${DEPLOYMENT_PATH}/images/swagger/
+        dockerfile: Dockerfile
+        args:
+            SPRYKER_DOCKER_PREFIX: ${SPRYKER_DOCKER_PREFIX}
+            SPRYKER_DOCKER_TAG: ${SPRYKER_DOCKER_TAG}
+{% else %}
+    image: swaggerapi/swagger-ui:v3.24.3
+{% endif %}
+    networks:
+        - public
+    env_file:
+        - ${DEPLOYMENT_PATH}/env/{{ serviceName }}.env
+{% if _mountMode != 'baked' %}
+    volumes:
+        - ./src/Generated/Glue/Specification:/var/specs
+{% endif %}

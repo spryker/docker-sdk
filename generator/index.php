@@ -132,6 +132,14 @@ file_put_contents(
 );
 
 file_put_contents(
+    $deploymentDir . DS . 'env' . DS . 'swagger.env',
+    $twig->render('env/swagger/swagger-ui.env.twig', [
+        'project' => $projectData,
+        'endpointMap' => $endpointMap,
+    ])
+);
+
+file_put_contents(
     $deploymentDir . DS . 'docker-compose.yml',
     $twig->render('docker-compose.yml.twig', $projectData)
 );
@@ -206,9 +214,7 @@ function retrieveMountMode(array $projectData, string $platform): string
  */
 function retrieveUniquePorts(array $projectData)
 {
-    $ports = [
-        80 => 80,
-    ];
+    $ports = [];
 
     foreach (retrieveEndpoints($projectData) as $endpoint => $endpointData) {
         $port = explode(':', $endpoint)[1];
