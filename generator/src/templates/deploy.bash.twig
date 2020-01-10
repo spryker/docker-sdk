@@ -89,15 +89,15 @@ function showHelp()
 
     echo -e ""
     echo -e " ${GREEN}pull${NC}              - Pull external docker images."
-    echo -e " ${GREEN}build${NC}             - Build Spryker containers."
+    echo -e " ${GREEN}build${NC}             - Build Spryker images."
     echo -e " ${GREEN}demo|demo-data${NC}    - Populate Spryker demo data."
     echo -e " ${GREEN}demo <section>${NC}    - Load the demo data by running the specified section from docker installation recipe for each store."
     echo -e " ${GREEN}jobs${NC}              - Generate and starts jobs."
 
     echo -e ""
     echo -e " ${GREEN}clean-data${NC}        - Remove all Spryker volumes including all storages."
-    echo -e " ${GREEN}reset${NC}             - Remove and build all Spryker containers and volumes."
-    echo -e " ${GREEN}remove|clean${NC}      - Stop and removes all Spryker containers and volumes."
+    echo -e " ${GREEN}reset${NC}             - Remove and build all Spryker images and volumes."
+    echo -e " ${GREEN}remove|clean${NC}      - Stop all Spryker containers and remove images and volumes."
 }
 
 function showWaitErrorMessage()
