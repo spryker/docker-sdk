@@ -10,7 +10,7 @@ services:
     image: nginx:alpine
     ports:
 {% for port in _ports %}
-      - "0.0.0.0:{{ port }}:{{ port }}"
+      - "{{ port }}:{{ port }}"
 {% endfor %}
     networks:
       - services
