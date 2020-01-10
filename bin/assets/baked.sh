@@ -10,10 +10,12 @@ popd > /dev/null
 function exportAssets()
 {
     local tag=${1:-${SPRYKER_DOCKER_TAG}}
-    local destinationPath=${2%/}
+    local destinationPath=${2:-${PROJECT_DIR}}
 
     local dockerAssetsTmpDirectory=/docker/bin/assets/_tmp/
     local projectDockerAssetsTmpDirectory=${PROJECT_DIR}${dockerAssetsTmpDirectory}
+
+    destinationPath=${destinationPath%/}
 
     mkdir -p "${projectDockerAssetsTmpDirectory}"
 
