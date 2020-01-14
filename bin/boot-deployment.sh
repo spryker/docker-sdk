@@ -6,6 +6,7 @@ pushd "${BASH_SOURCE%/*}" > /dev/null
 . ./constants.sh
 . ./console.sh
 . ./platform.sh
+. ./check-docker-machine.sh
 
 ./require.sh docker
 ./check-docker.sh
@@ -49,7 +50,8 @@ function bootDeployment()
 
     USER_UID=1000
     USER_GID=1000
-    [ "$(getPlatform)" == "linux" ] && USER_UID=$(id -u) && USER_GID=$(id -g)
+
+    [ "$(getPlatform)" == "linux" ] && ! $(isDockerMachineAvailable) && USER_UID=$(id -u) && USER_GID=$(id -g)
 
     verbose "${INFO}Running generator${NC}"
     docker run -i --rm \
