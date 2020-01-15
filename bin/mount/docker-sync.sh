@@ -33,6 +33,20 @@ function sync()
         stop)
             docker-sync stop -c ${syncConf} -n data-sync
             ;;
+        init)
+            isRunning=$(docker ps -a --filter 'status=running' --filter 'name='${SPRYKER_DOCKER_PREFIX}_${SPRYKER_DOCKER_TAG}_data_sync --format "{{.Names}}")
+            isExist=$(docker ps -a --filter 'status=exited' --filter 'name='${SPRYKER_DOCKER_PREFIX}_${SPRYKER_DOCKER_TAG}_data_sync --format "{{.Names}}")
+
+            if [ ! ${isRunning} ] && [ ${isExist} ];
+            then
+                docker rm ${SPRYKER_DOCKER_PREFIX}_${SPRYKER_DOCKER_TAG}_data_sync
+            fi
+
+            verbose "${INFO}Start sync process for data volume${NC}"
+            pushd ${PROJECT_DIR} > /dev/null
+            docker-sync start -c ${syncConf}
+            popd > /dev/null
+            ;;
         *)
             if [ $(docker ps | grep 5000 | grep ${SPRYKER_DOCKER_PREFIX}_${SPRYKER_DOCKER_TAG}_data_sync | wc -l |sed 's/^ *//') -eq 0 ]; then
                 verbose "${INFO}Start sync process for data volume${NC}"
