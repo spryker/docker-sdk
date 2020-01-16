@@ -2,10 +2,11 @@
 
 set -e
 
-pushd ${BASH_SOURCE%/*} > /dev/null
+pushd "${BASH_SOURCE%/*}" > /dev/null
 . bin/constants.sh
 . bin/console.sh
 . bin/check-directories.sh
+. bin/boot-deployment.sh
 popd > /dev/null
 
 PROJECT_NAME=default
@@ -24,6 +25,8 @@ do
                 exit 1
             fi
             ;;
+        *)
+          ;;
     esac
 done
 shift $((OPTIND -1))
@@ -45,44 +48,47 @@ function showHelp()
 
 checkDirectories
 
-case $1 in
+command=$1
+shift
+
+case "${command}" in
     boot|bootstrap)
-        [ -f ${DEPLOY_SCRIPT} ] && SPRYKER_SELF_SCRIPT=$0 ${DEPLOY_SCRIPT} down > /dev/null 2>&1 && sleep 2 || true
+        [ -f "${DEPLOY_SCRIPT}" ] && SPRYKER_SELF_SCRIPT=$0 ${DEPLOY_SCRIPT} down > /dev/null 2>&1 && sleep 2 || true
 
         # ------------
         SOURCE_DIR=${BASH_SOURCE%/*}
 
         # ------------
-        shift
         PROJECT_YAML=${1:-deploy.yml}
 
         # ------------
-        [ -d ${DEPLOYMENT_DIR} ] && rm -rf ${DEPLOYMENT_DIR}
-        mkdir ${DEPLOYMENT_DIR}
+        [ -d "${DEPLOYMENT_DIR}" ] && rm -rf "${DEPLOYMENT_DIR}"
+        mkdir "${DEPLOYMENT_DIR}"
 
         DEPLOYMENT_DIR="$( cd "${DEPLOYMENT_DIR}" >/dev/null 2>&1 && pwd )"
 
         # ------------
-        . ${BASH_SOURCE%/*}/bin/boot-deployment.sh
+        validateParameters
+        bootDeployment
 
-        [ -d ${DESTINATION_DIR} ] && rm -rf ${DESTINATION_DIR}/*
-        [ ! -d ${DESTINATION_DIR} ] && mkdir ${DESTINATION_DIR}
-        cp -R ${DEPLOYMENT_DIR}/. ${DESTINATION_DIR}
-        rm -rf ${DEPLOYMENT_DIR}
+        [ -d "${DESTINATION_DIR}" ] && rm -rf "${DESTINATION_DIR:?}/*"
+        [ ! -d "${DESTINATION_DIR}" ] && mkdir "${DESTINATION_DIR}"
+        cp -R "${DEPLOYMENT_DIR}/." "${DESTINATION_DIR}"
+        rm -rf "${DEPLOYMENT_DIR}"
 
-        [ ! -f .dockerignore ] && cp ${BASH_SOURCE%/*}/.dockerignore .dockerignore
+        [ ! -f .dockerignore ] && cp "${BASH_SOURCE%/*}/.dockerignore.default" .dockerignore
 
         echo ""
         echo -e "${INFO}Deployment is generated into ${LGRAY}${DESTINATION_DIR}${NC}"
-        echo -e "Use ${OK}docker/sdk$([ ${PROJECT_NAME} != 'default' ] && echo -n " -p ${PROJECT_NAME}") up${NC} to start the application."
+        echo -e "Use ${OK}docker/sdk$([ "${PROJECT_NAME}" != 'default' ] && echo -n " -p ${PROJECT_NAME}") up${NC} to start the application."
 
         ;;
     help|'')
         showHelp
-        [ -f ${DEPLOY_SCRIPT} ] && SPRYKER_SELF_SCRIPT=$0 ${DEPLOY_SCRIPT} $@
+        [ -f "${DEPLOY_SCRIPT}" ] && SPRYKER_SELF_SCRIPT=$0 ${DEPLOY_SCRIPT} help ${@}
         ;;
     *)
-        [ ! -f ${DEPLOY_SCRIPT} ] && showHelp && error "${WARN}The project is not initialized yet. Run ${YELLOW}$0 boot${WARN} before.${NC}" && exit 1
-        SPRYKER_SELF_SCRIPT=$0 ${DEPLOY_SCRIPT} $@
+        [ ! -f "${DEPLOY_SCRIPT}" ] && showHelp && error "${WARN}The project is not initialized yet. Run ${YELLOW}$0 boot${WARN} before.${NC}" && exit 1
+        SPRYKER_SELF_SCRIPT=$0 ${DEPLOY_SCRIPT} "${command}" ${@}
         ;;
 esac
