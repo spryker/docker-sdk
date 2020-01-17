@@ -58,6 +58,8 @@ function buildBaseImages()
         --build-arg APPLICATION_ENV=${APPLICATION_ENV} \
         --build-arg SPRYKER_DB_ENGINE=${dbEngine} \
         --build-arg SPRYKER_LOG_DIRECTORY=${logDirectory} \
+        --build-arg SPRYKER_COMPOSER_MODE=${SPRYKER_COMPOSER_MODE} \
+        --build-arg SPRYKER_COMPOSER_AUTHOLOAD=${SPRYKER_COMPOSER_AUTOLOAD} \
         .
 
     doCliImage
