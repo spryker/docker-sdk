@@ -9,6 +9,7 @@
 
     fastcgi_param SPRYKER_API_HOST {{ host }};
     fastcgi_param SPRYKER_API_PORT {{ port }};
+    fastcgi_param SPRYKER_GLUE_APPLICATION_CORS_ALLOW_ORIGIN *;
 
     root /data/public/Glue;
 {% endblock location %}

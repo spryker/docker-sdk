@@ -1,0 +1,4 @@
+cluster.name: "docker-cluster"
+http.host: 0.0.0.0
+
+path.repo: ["/usr/share/elasticsearch/data/snapshots"]

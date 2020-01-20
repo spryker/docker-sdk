@@ -2,7 +2,7 @@
 
 set -e
 
-pushd ${BASH_SOURCE%/*} > /dev/null
+pushd "${BASH_SOURCE%/*}" > /dev/null
 . ./constants.sh
 popd > /dev/null
 
@@ -24,7 +24,7 @@ function error()
 export -f error
 
 # ------------------
-if [ $(tput colors) -gt 0 ]; then
+if [ "$(tput colors)" -gt 0 ]; then
   RED="\033[1;31m"
   BLUE="\033[1;34m"
   CYAN="\033[1;36m"

@@ -10,7 +10,7 @@ services:
     image: nginx:alpine
     ports:
 {% for port in _ports %}
-      - "0.0.0.0:{{ port }}:{{ port }}"
+      - "{{ port }}:{{ port }}"
 {% endfor %}
     networks:
       - services
@@ -76,8 +76,10 @@ services:
 {% endfor %}
 {% endfor %}
 {% for serviceName, serviceData in services %}
+    {% set engine = serviceData['engine'] | lower %}
+    {% set version = serviceData['version'] | default('default') %}
 
-{% include "service/" ~ (serviceData['engine'] | lower) ~ ".yml.twig" with {serviceName: serviceName, serviceData: serviceData} %}
+{% include "service/" ~ engine ~ "/" ~ version ~ "/" ~  engine ~ ".yml.twig" with { serviceName: serviceName, serviceData: serviceData, engine: engine, version: version } only %}
 {% endfor %}
 
 volumes:
