@@ -40,17 +40,19 @@ readonly PROGRESS_TYPE=${PROGRESS_TYPE:-tty}
 VERBOSE=${VERBOSE:-0}
 
 # Predefined constants
-readonly APPLICATION_ENV={{ environment | default('docker') }}
+readonly APPLICATION_ENV="{{ environment | default('docker') }}"
 readonly SPRYKER_PLATFORM_IMAGE=${SPRYKER_PLATFORM_IMAGE:-{{ image | default('spryker/php:7.2') }}}
 export SPRYKER_DOCKER_PREFIX=${COMPOSE_PROJECT_NAME}
-export SPRYKER_DOCKER_TAG={{ tag | default('1.0') }}
-export SPRYKER_LOG_DIRECTORY={{ docker['logs']['path'] | default('/var/log/spryker') }}
-readonly SPRYKER_DB_ENGINE={{ services['database']['engine'] == 'mysql' ? 'mysql' : 'pgsql' }}
+export SPRYKER_DOCKER_TAG="{{ tag | default('1.0') }}"
+export SPRYKER_COMPOSER_MODE="{{ composer.mode | default('--dev') }}"
+export SPRYKER_COMPOSER_AUTOLOAD="{{ composer.autoload is defined ? composer.autoload : '--optimize' }}"
+export SPRYKER_LOG_DIRECTORY="{{ docker['logs']['path'] | default('/var/log/spryker') }}"
+readonly SPRYKER_DB_ENGINE="{{ services['database']['engine'] == 'mysql' ? 'mysql' : 'pgsql' }}"
 readonly SPRYKER_STORES=({{ regions | map((regionData, region) => "'STORES=(" ~ (regionData['stores'] | keys | join(' ')) ~ ")'") | join(' ') | raw }})
 readonly SPRYKER_DEFAULT_STORE={{ (regions | first)['stores'] | keys | first }}
 readonly SPRYKER_BROKER_VIRTUAL_HOSTS='{{ regions | map(regionData => regionData['stores'] | map((storeData, store) => storeData['services']['broker']['namespace']) | join(' ')) | join(' ') }}';
 {# TODO get specific username, add user #}
-readonly SPRYKER_BROKER_USERNAME={{ services['broker']['api']['username'] }}
+readonly SPRYKER_BROKER_USERNAME="{{ services['broker']['api']['username'] }}"
 
 # Variables from environment
 SPRYKER_XDEBUG_ENABLE=${SPRYKER_XDEBUG_ENABLE:-0}
@@ -212,7 +214,7 @@ function buildCode()
     local vendorDir=$(runApplicationBuild '[ ! -f /data/vendor/bin/install ] && echo 0 || echo 1 | tail -n 1' | tr -d " \n\r")
     if [ "$1" != ${IF_NOT_PERFORMED} -o "${vendorDir}" == "0" ]; then
         verbose "${INFO}Running composer install${NC}"
-        runApplicationBuild 'composer install --no-interaction --optimize-autoloader'
+        runApplicationBuild "composer install --no-interaction ${SPRYKER_COMPOSER_MODE} && composer dump-autoload ${SPRYKER_COMPOSER_AUTOLOAD}"
     fi
 
     local generatedDir=$(runApplicationBuild '[ ! -d /data/src/Generated ] && echo 0 || echo 1 | tail -n 1' | tr -d " \n\r")

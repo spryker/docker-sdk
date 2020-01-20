@@ -20,9 +20,10 @@ USER spryker
 # Install composer modules for Spryker
 COPY --chown=spryker:spryker composer.json composer.lock ${srcRoot}/
 ARG GITHUB_TOKEN
+ARG SPRYKER_COMPOSER_MODE
 RUN --mount=type=cache,target=/home/spryker/.composer/cache,from=composer_cache,source=/cache \
   bash -c 'if [ ! -z $GITHUB_TOKEN ]; then export COMPOSER_AUTH="{\"github-oauth\": {\"github.com\": \"${GITHUB_TOKEN}\"}}"; fi; \
-    composer install --no-interaction --optimize-autoloader --no-dev'
+    composer install --no-interaction ${SPRYKER_COMPOSER_MODE}'
 
 ### Intermediate container - with dependencies, PHP code and configs
 FROM spryker_app_dependencies AS spryker_app_base
@@ -49,7 +50,8 @@ COPY --chown=spryker:spryker public ${srcRoot}/public
 COPY --chown=spryker:spryker frontend ${srcRoot}/frontend
 COPY --chown=spryker:spryker .* *.* LICENSE ${srcRoot}/
 
-RUN composer dump-autoload -o
+ARG SPRYKER_COMPOSER_AUTOLOAD
+RUN composer dump-autoload ${SPRYKER_COMPOSER_AUTOLOAD}
 
 RUN rm -rf /var/run/opcache/*
 
