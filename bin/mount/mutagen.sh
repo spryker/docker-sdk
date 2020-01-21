@@ -86,6 +86,17 @@ function checkAllSyncProcesses()
     echo 'All data was synced.'
 }
 
+function isMutagenProjectRunning()
+{
+    local syncConf="${1:-${DEPLOYMENT_PATH}/mutagen.yml}"
+
+    if [ $(mutagen project list ${syncConf} 2>&1 | grep 'Error: project not running' | wc -l |sed 's/^ *//') -ne 0 ]; then
+        return ${__FALSE}
+    fi
+
+    return ${__TRUE}
+}
+
 function sync()
 {
     export DOCKER_SYNC_SKIP_UPDATE=1
@@ -105,15 +116,21 @@ function sync()
             ;;
 
         clean)
-            mutagen project flush ${syncConf}
+            if isMutagenProjectRunning; then
+                mutagen project flush ${syncConf}
+            fi
             docker volume rm ${volumeName} || true
             ;;
 
         stop)
-            mutagen project terminate ${syncConf}
+            if isMutagenProjectRunning; then
+                mutagen project terminate ${syncConf}
+            fi
+            ;;
+        init)
             ;;
         *)
-            if [ $(mutagen project list ${syncConf} 2>&1 | grep 'Error: project not running' | wc -l |sed 's/^ *//') -ne 0 ]; then
+            if ! isMutagenProjectRunning; then
                 verbose "${INFO}Start sync process for data volume${NC}"
                 pushd ${PROJECT_DIR} > /dev/null
 
