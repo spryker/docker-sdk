@@ -216,9 +216,7 @@ function retrieveMountMode(array $projectData, string $platform): string
  */
 function retrieveUniquePorts(array $projectData)
 {
-    $ports = [
-        80 => 80,
-    ];
+    $ports = [];
 
     foreach (retrieveEndpoints($projectData) as $endpoint => $endpointData) {
         $port = explode(':', $endpoint)[1];
