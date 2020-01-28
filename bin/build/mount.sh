@@ -60,7 +60,7 @@ function buildCodeBase()
     verbose "${INFO}Building base application image${NC}"
 
     buildBaseImages
-    buildCode $1
+#    buildCode $1
 }
 
 export -f runApplicationBuild

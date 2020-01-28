@@ -9,6 +9,10 @@ ARG SPRYKER_LOG_DIRECTORY=/var/log/spryker
 ENV PATH=/data/vendor/bin:$PATH
 
 RUN apk update && apk add \
+  zsh \
+  inotify-tools \
+  lsyncd \
+  rsync \
   nodejs \
   npm \
   netcat-openbsd \
@@ -16,11 +20,15 @@ RUN apk update && apk add \
 
 RUN mkdir -p ${SPRYKER_LOG_DIRECTORY}
 RUN chown spryker:spryker ${SPRYKER_LOG_DIRECTORY}
+RUN mkdir -p /sync
+RUN chown spryker:spryker /sync
 WORKDIR /data
 
 ARG DEPLOYMENT_PATH
 ENV DEPLOYMENT_PATH=${DEPLOYMENT_PATH}
 
+COPY ${DEPLOYMENT_PATH}/context/cli/.zshrc /home/spryker/.zshrc
+COPY ${DEPLOYMENT_PATH}/context/cli/lsyncd.lua /home/spryker/lsyncd.lua
 COPY ${DEPLOYMENT_PATH}/context/cli/execute.sh /usr/local/bin/execute.sh
 RUN chmod +x /usr/local/bin/execute.sh
 

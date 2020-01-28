@@ -11,7 +11,7 @@ popd > /dev/null
 
 function progress()
 {
-    local message='Data is syncing'
+    local message='Syncing files'
     local ms=0
     local sec=0
 
@@ -83,7 +83,7 @@ function checkAllSyncProcesses()
 
     kill -13 ${progressPID} > /dev/null 2>&1 || true
     echo " "
-    echo 'All data was synced.'
+    echo 'All files has been synced.'
 }
 
 function isMutagenProjectRunning()
@@ -102,7 +102,7 @@ function sync()
     export DOCKER_SYNC_SKIP_UPDATE=1
     local syncConf="${DEPLOYMENT_PATH}/mutagen.yml"
     local volumeName=${SPRYKER_DOCKER_PREFIX}_${SPRYKER_DOCKER_TAG}_data_sync
-    local syncContainerName=${SPRYKER_DOCKER_PREFIX}_${SPRYKER_DOCKER_TAG}_sync_1
+    local syncContainerName=${SPRYKER_DOCKER_PREFIX}_${SPRYKER_DOCKER_TAG}_sync
 
     case $1 in
         create)
@@ -146,7 +146,8 @@ function sync()
 
 function runSyncContainer()
 {
-    if [ ! "$(docker ps -a | grep ${1})" ]; then
+    if [ ! "$(docker ps | grep ${1})" ]; then
+        docker rm ${1} || true
         docker run -d \
            --name ${1} \
            -v ${2}:/data \

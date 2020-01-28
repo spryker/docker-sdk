@@ -281,7 +281,7 @@ function setupBroker()
             -e SPRYKER_BROKER_VIRTUAL_HOSTS="${SPRYKER_BROKER_VIRTUAL_HOSTS}" \
             -e SPRYKER_BROKER_USERNAME=${SPRYKER_BROKER_USERNAME} \
             ${brokerContainer} \
-            bash -c 'for host in $(echo ${SPRYKER_BROKER_VIRTUAL_HOSTS}); do rabbitmqctl add_vhost ${host}; rabbitmqctl set_permissions -p ${host} ${SPRYKER_BROKER_USERNAME} ".*" ".*" ".*"; done' /
+            zsh -c 'for host in $(echo ${SPRYKER_BROKER_VIRTUAL_HOSTS}); do rabbitmqctl add_vhost ${host}; rabbitmqctl set_permissions -p ${host} ${SPRYKER_BROKER_USERNAME} ".*" ".*" ".*"; done' /
         )
         verbose "${output}"
     done
@@ -378,7 +378,7 @@ function execTesting()
     [ -t -0 ] && tty='' || tty='-T'
 
     local binary=/usr/local/bin/execute.sh
-    [ -z "${*}" ] && binary=bash
+    [ -z "${*}" ] && binary=zsh
 
     execDockerCompose exec \
         -e COMMAND="${*}" \
@@ -392,7 +392,7 @@ function execSprykerMultiString()
     setExtraEnvFiles
     docker run -i --rm \
         $(getDefaultRunArguments) \
-        ${SPRYKER_DOCKER_PREFIX}_cli:${SPRYKER_DOCKER_TAG} bash -s${1}
+        ${SPRYKER_DOCKER_PREFIX}_cli:${SPRYKER_DOCKER_TAG} zsh -s${1}
 }
 
 function doBuild()
@@ -427,10 +427,10 @@ function execDockerCompose()
 function doUp()
 {
     doBuild ${IF_NOT_PERFORMED}
-    buildAssets ${IF_NOT_PERFORMED}
+{#    buildAssets ${IF_NOT_PERFORMED}#}
     runApp
-    loadDemoData ${IF_NOT_PERFORMED}
-    createSchedulerJobs ${IF_NOT_PERFORMED}
+{#    loadDemoData ${IF_NOT_PERFORMED}#}
+{#    createSchedulerJobs ${IF_NOT_PERFORMED}#}
 }
 
 function runApp()
@@ -438,6 +438,7 @@ function runApp()
     verbose "${INFO}Running Spryker containers${NC}"
     createAssetsVolume ${IF_NOT_PERFORMED}
     execDockerCompose up -d --remove-orphans
+    sync create
     sync start
 }
 
@@ -476,7 +477,7 @@ function doCli()
         --name ${SPRYKER_DOCKER_PREFIX}_cli \
         $(getDefaultRunArguments) \
         ${SPRYKER_DOCKER_PREFIX}_cli:${SPRYKER_DOCKER_TAG} \
-        bash
+        zsh
     docker start -ai  ${SPRYKER_DOCKER_PREFIX}_cli
 }
 

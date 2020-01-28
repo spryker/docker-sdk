@@ -6,35 +6,19 @@ sync:
     ignore:
       vcs: true
       paths:
+        - '/mutagen.*'
+        - '/.unison'
+        - '/.docker-sync'
         - '.idea'
         - '.project'
-        - 'data/*/cache'
-        - '*.log'
-        - 'docker'
         - '.composer'
         - '.npm'
-        - 'mutagen.*'
-        - 'docker-compose.*'
-        - '*.env'
-        - 'bin/'
-        - 'context/'
-        - 'env/'
-        - 'images/'
+        - '/data/*/cache'
+        - '/docker'
   project:
     alpha: "../../../"
-    beta: "docker://{{ namespace }}_{{ tag }}_sync_1/data"
-    mode: "two-way-safe"
-    ignore:
-      paths:
-        - 'vendor'
-        - 'node_modules'
-  vendor:
-    alpha: "../../../vendor"
-    beta: "docker://{{ namespace }}_{{ tag }}_sync_1/data/vendor"
-    mode: "two-way-safe"
-    ignore:
-      vcs: false
-  nodeModules:
-    alpha: "../../../node_modules"
-    beta: "docker://{{ namespace }}_{{ tag }}_sync_1/data/node_modules"
-    mode: "two-way-safe"
+    beta: "docker://{{ namespace }}_{{ tag }}_sync/data"
+    mode: "one-way-replica"
+    configurationBeta:
+      watch:
+          mode: "no-watch"
