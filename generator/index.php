@@ -19,12 +19,7 @@ $yamlParser = new Parser();
 
 $projectData = $yamlParser->parseFile($projectYaml);
 
-$knownHostsYaml = $deploymentDir . DS . 'known-hosts.yml';
-$projectData = buildKnownHosts(
-    $projectData,
-    $knownHostsYaml,
-    $yamlParser
-);
+$projectData['_knownHosts'] = buildKnownHosts($deploymentDir);
 
 $projectData['_projectName'] = $projectName;
 $projectData['tag'] = $projectData['tag'] ?? uniqid();
@@ -369,22 +364,23 @@ function buildEndpointMapByStore(array $projectGroups): array
 }
 
 /**
- * @param string[] $projectData
- * @param string $knownHostsFilePath
- * @param \Symfony\Component\Yaml\Parser $yamlParser
+ * @param string $deploymentDir
  *
- * @return string[]
+ * @return string
  */
-function buildKnownHosts(array $projectData, string $knownHostsFilePath, Parser $yamlParser): array
+function buildKnownHosts(string $deploymentDir): string
 {
-    if (!file_exists($knownHostsFilePath)) {
-        return $projectData;
+    $knownHostsYamlPath = $deploymentDir . DS . '.known_hosts';
+
+    if (!file_exists($knownHostsYamlPath)) {
+        return '';
     }
 
-    $projectData['_knownHosts'] = implode(
-        ' ',
-        $yamlParser->parseFile($knownHostsFilePath)
-    );
+    $knownHosts = file_get_contents($knownHostsYamlPath);
 
-    return $projectData;
+    if (!$knownHosts) {
+        return '';
+    }
+
+    return $knownHosts;
 }
