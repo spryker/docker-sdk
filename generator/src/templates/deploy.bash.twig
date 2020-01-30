@@ -62,7 +62,7 @@ readonly SPRYKER_SELF_SCRIPT=${SPRYKER_SELF_SCRIPT:-$(basename $0)}
 readonly GITHUB_TOKEN=${GITHUB_TOKEN:-''}
 
 {% if _knownHosts is defined %}
-export KNOWN_HOSTS="{{ _knownHosts }}"
+export KNOWN_HOSTS="{{ _knownHosts | default("") }}"
 {% endif %}
 
 function showHelp()

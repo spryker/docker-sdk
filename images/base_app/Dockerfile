@@ -22,11 +22,10 @@ COPY --chown=spryker:spryker composer.json composer.lock ${srcRoot}/
 ARG GITHUB_TOKEN
 ARG SPRYKER_COMPOSER_MODE
 ARG KNOWN_HOSTS
-RUN bash -c '[ ! -z "${KNOWN_HOSTS}" ] && \
-        mkdir -p /home/spryker/.ssh && \
-        chmod 0700 /home/spryker/.ssh && \
-        ssh-keyscan -t rsa ${KNOWN_HOSTS} >> /home/spryker/.ssh/known_hosts && \
-        chown -R spryker:spryker /home/spryker/.ssh'
+RUN mkdir -p /home/spryker/.ssh
+RUN chmod 0700 /home/spryker/.ssh
+RUN bash -c '[ ! -z "${KNOWN_HOSTS}" ] && ssh-keyscan -t rsa ${KNOWN_HOSTS} >> /home/spryker/.ssh/known_hosts || true'
+RUN chown -R spryker:spryker /home/spryker/.ssh
 RUN --mount=type=cache,target=/home/spryker/.composer/cache,from=composer_cache,source=/cache \
   bash -c 'if [ ! -z $GITHUB_TOKEN ]; then export COMPOSER_AUTH="{\"github-oauth\": {\"github.com\": \"${GITHUB_TOKEN}\"}}"; fi; \
     composer install --no-interaction ${SPRYKER_COMPOSER_MODE}'

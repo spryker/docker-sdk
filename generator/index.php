@@ -376,11 +376,85 @@ function buildKnownHosts(string $deploymentDir): string
         return '';
     }
 
+    return implode(
+        ' ',
+        getKnownHosts($knownHostsYamlPath)
+    );
+}
+
+/**
+ * @param string $knownHostsYamlPath
+ *
+ * @return array
+ */
+function getKnownHosts(string $knownHostsYamlPath): array
+{
     $knownHosts = file_get_contents($knownHostsYamlPath);
 
     if (!$knownHosts) {
-        return '';
+        return [];
     }
 
-    return $knownHosts;
+    $knownHosts = array_filter(preg_split('/[\s]+/', $knownHosts));
+    $filteredKnownHosts = [];
+
+    foreach ($knownHosts as $knownHost) {
+        if (isHostValid($knownHost)) {
+            $filteredKnownHosts[] = $knownHost;
+        }
+    }
+
+    return $filteredKnownHosts;
+}
+
+/**
+ * @param string $knownHost
+ *
+ * @return bool
+ */
+function isHostValid(string $knownHost): bool
+{
+    if (!isIp($knownHost) && !isHost($knownHost)) {
+        return false;
+    }
+
+    return true;
+}
+
+/**
+ * @param string $knownHost
+ *
+ * @return bool
+ */
+function isIp(string $knownHost): bool
+{
+    $validIpAddressPattern = "/^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$/";
+
+    if (!preg_match($validIpAddressPattern, $knownHost)) {
+        return false;
+    }
+
+    return true;
+}
+
+/**
+ * @param string $knownHost
+ *
+ * @return bool
+ */
+function isHost(string $knownHost): bool
+{
+    $validHostnamePattern = "/^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\-]*[A-Za-z0-9])$/";
+
+    if (!preg_match($validHostnamePattern, $knownHost)) {
+        return false;
+    }
+
+    $ipAddress = gethostbyname($knownHost);
+
+    if ($ipAddress === $knownHost) {
+        return false;
+    }
+
+    return true;
 }

@@ -17,11 +17,10 @@ ENV PATH=/data/vendor/bin:$PATH
 RUN usermod -u ${USER_UID} spryker
 
 RUN mkdir -p ${SPRYKER_LOG_DIRECTORY}
-RUN bash -c '[ ! -z "${KNOWN_HOSTS}" ] && \
-        mkdir -p /home/spryker/.ssh && \
-        chmod 0700 /home/spryker/.ssh && \
-        ssh-keyscan -t rsa ${KNOWN_HOSTS} >> /home/spryker/.ssh/known_hosts && \
-        chown -R spryker:spryker /home/spryker/.ssh'
+RUN mkdir -p /home/spryker/.ssh
+RUN chmod 0700 /home/spryker/.ssh
+RUN bash -c '[ ! -z "${KNOWN_HOSTS}" ] && ssh-keyscan -t rsa ${KNOWN_HOSTS} >> /home/spryker/.ssh/known_hosts || true'
+RUN chown -R spryker:spryker /home/spryker/.ssh
 RUN chown -R spryker:spryker /data
 RUN chown -R spryker:spryker /home/spryker
 RUN chown spryker:spryker ${SPRYKER_LOG_DIRECTORY}
