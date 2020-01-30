@@ -370,15 +370,15 @@ function buildEndpointMapByStore(array $projectGroups): array
  */
 function buildKnownHosts(string $deploymentDir): string
 {
-    $knownHostsYamlPath = $deploymentDir . DS . '.known_hosts';
+    $knownHostsPath = $deploymentDir . DS . '.known_hosts';
 
-    if (!file_exists($knownHostsYamlPath)) {
+    if (!file_exists($knownHostsPath)) {
         return '';
     }
 
     return implode(
         ' ',
-        getKnownHosts($knownHostsYamlPath)
+        getKnownHosts($knownHostsPath)
     );
 }
 
@@ -395,16 +395,12 @@ function getKnownHosts(string $knownHostsYamlPath): array
         return [];
     }
 
-    $knownHosts = array_filter(preg_split('/[\s]+/', $knownHosts));
-    $filteredKnownHosts = [];
-
-    foreach ($knownHosts as $knownHost) {
-        if (isHostValid($knownHost)) {
-            $filteredKnownHosts[] = $knownHost;
+    return array_filter(
+        preg_split('/[\s]+/', $knownHosts),
+        function($knownHost) {
+            return $knownHost && isHostValid($knownHost);
         }
-    }
-
-    return $filteredKnownHosts;
+    );
 }
 
 /**
@@ -414,11 +410,7 @@ function getKnownHosts(string $knownHostsYamlPath): array
  */
 function isHostValid(string $knownHost): bool
 {
-    if (!isIp($knownHost) && !isHost($knownHost)) {
-        return false;
-    }
-
-    return true;
+    return isIp($knownHost) || isHost($knownHost);
 }
 
 /**
