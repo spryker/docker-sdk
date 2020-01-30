@@ -438,6 +438,7 @@ function runApp()
     verbose "${INFO}Running Spryker containers${NC}"
     createAssetsVolume ${IF_NOT_PERFORMED}
     execDockerCompose up -d --remove-orphans
+    sync create
     sync start
 }
 
