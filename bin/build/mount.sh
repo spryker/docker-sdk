@@ -35,7 +35,7 @@ function buildCode()
     local vendorDirExist=$(runApplicationBuild '[ ! -f /data/vendor/bin/install ] && echo 0 || echo 1 | tail -n 1' | tr -d " \n\r")
     if [ "$1" != "${IF_NOT_PERFORMED}" ] || [ "${vendorDirExist}" == "0" ]; then
         verbose "${INFO}Running composer install${NC}"
-        runApplicationBuild "composer install --no-interaction ${SPRYKER_COMPOSER_MODE} && composer dump-autoload ${SPRYKER_COMPOSER_AUTOLOAD}"
+        runApplicationBuild "composer install --no-interaction ${SPRYKER_COMPOSER_MODE} --optimize-autoloader"
     fi
 
     local generatedDir=$(runApplicationBuild '[ ! -d /data/src/Generated ] && echo 0 || echo 1 | tail -n 1' | tr -d " \n\r")
@@ -43,6 +43,8 @@ function buildCode()
         verbose "${INFO}Running build${NC}"
         runApplicationBuild 'vendor/bin/install -r docker -s build -s build-development'
     fi
+
+    runApplicationBuild "composer dump-autoload ${SPRYKER_COMPOSER_AUTOLOAD}"
 
     if [ "$(getPlatform)" == 'windows' ];
     then

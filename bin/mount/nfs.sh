@@ -17,7 +17,7 @@ function sync()
         create)
             verbose "${INFO}Creating 'data-sync' volume${NC}"
             docker volume create --driver local --opt type=nfs \
-                --opt o=addr=host.docker.internal,rw,nolock,fsc,ac,noatime,async,nointr,nfsvers=3 \
+                --opt o=addr=host.docker.internal,rw,nolock,fsc,ac,hard,noatime,nointr,nfsvers=3 \
                 --opt device=":${PROJECT_DIR}" \
                 --name="${volumeName}" \
                 > /dev/null
