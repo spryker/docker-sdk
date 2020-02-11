@@ -140,7 +140,6 @@ readonly USER_GID="1000"
 [ "$1" != 'help' ] && echo -e "*** ${WARN}DEVELOPMENT MODE${NC}"
 DOCKER_EXTRA_OPTIONS+=" -v ${DEPLOYMENT_DIR}/context/php/conf.d/opcache_dev.ini:/usr/local/etc/php/conf.d/opcache.ini:ro"
 DOCKER_EXTRA_OPTIONS+=" -v ${DEPLOYMENT_DIR}/context/php/php.ini:/usr/local/etc/php/php.ini:ro"
-DOCKER_EXTRA_OPTIONS+=" -v $(dirname ~/.composer/cache:/home/spryker/).composer/cache:rw"
 {% if _mountMode == 'native' %}
 DOCKER_EXTRA_OPTIONS+=" -v ${PROJECT_DIR}:/data -u ${USER_UID}:${USER_GID}"
 {% else %}
@@ -186,50 +185,6 @@ function buildBaseImage()
 
     doBaseImages
 }
-
-{% if isDevelopment %}
-function runApplicationBuild()
-{
-    local tty
-    [ -t -0 ] && tty='t' || tty=''
-    docker run -i${tty} --rm \
-        -e COMMAND="$1" \
-        -e SPRYKER_DB_ENGINE=${SPRYKER_DB_ENGINE} \
-        --restart=no \
-        ${DOCKER_EXTRA_OPTIONS} \
-        ${SPRYKER_DOCKER_PREFIX}_cli:${SPRYKER_DOCKER_TAG} /usr/local/bin/execute.sh
-}
-
-function buildCode()
-{
-    sync create
-    sync init
-    sync start
-    sync stop
-
-    [ "$1" = ${IF_NOT_PERFORMED} ] && verbose "${INFO}Checking if anything should be built${NC}"
-
-    runApplicationBuild 'chmod 600 /data/config/Zed/*.key'
-
-    local vendorDir=$(runApplicationBuild '[ ! -f /data/vendor/bin/install ] && echo 0 || echo 1 | tail -n 1' | tr -d " \n\r")
-    if [ "$1" != ${IF_NOT_PERFORMED} -o "${vendorDir}" == "0" ]; then
-        verbose "${INFO}Running composer install${NC}"
-        runApplicationBuild "composer install --no-interaction ${SPRYKER_COMPOSER_MODE} && composer dump-autoload ${SPRYKER_COMPOSER_AUTOLOAD}"
-    fi
-
-    local generatedDir=$(runApplicationBuild '[ ! -d /data/src/Generated ] && echo 0 || echo 1 | tail -n 1' | tr -d " \n\r")
-    if [ "$1" != ${IF_NOT_PERFORMED} -o "${generatedDir}" == "0" ]; then
-        verbose "${INFO}Running build${NC}"
-        runApplicationBuild 'vendor/bin/install -r docker -s build -s build-development'
-    fi
-
-{% if _platform == 'windows' %}
-    # Fix the docker-sync permission issue on windows
-   local executableFile=$(runApplicationBuild '[ ! -x $(readlink -f vendor/bin/console) ] && echo 0 || echo 1 | tail -n 1' | tr -d " \n\r")
-   [ "$1" != ${IF_NOT_PERFORMED} -o "${executableFile}" == "0" ] && runApplicationBuild 'chmod +x vendor/bin/*' || true
-{% endif %}
-}
-{% endif %}
 
 function isDemoDataLoaded()
 {
