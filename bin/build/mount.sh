@@ -30,7 +30,8 @@ function buildCode()
 
     [ "$1" = "${IF_NOT_PERFORMED}" ] && verbose "${INFO}Checking if anything should be built${NC}"
 
-    runApplicationBuild 'chmod 600 /data/config/Zed/*.key'
+    runApplicationBuild 'chmod 600 /data/config/Zed/*.key' || true
+    runApplicationBuild 'chmod +x vendor/bin/*' || true
 
     local vendorDirExist=$(runApplicationBuild '[ ! -f /data/vendor/bin/install ] && echo 0 || echo 1 | tail -n 1' | tr -d " \n\r")
     if [ "$1" != "${IF_NOT_PERFORMED}" ] || [ "${vendorDirExist}" == "0" ]; then
@@ -42,16 +43,6 @@ function buildCode()
     if [ "$1" != "${IF_NOT_PERFORMED}" ] || [ "${generatedDir}" == "0" ]; then
         verbose "${INFO}Running build${NC}"
         runApplicationBuild 'vendor/bin/install -r docker -s build -s build-development'
-    fi
-
-    if [ "$(getPlatform)" == 'windows' ];
-    then
-        # Fix the docker-sync permission issue on windows
-        local executableFile=$(runApplicationBuild '[ ! -x $(readlink -f vendor/bin/console) ] && echo 0 || echo 1 | tail -n 1' | tr -d " \n\r")
-        if [ "$1" != "${IF_NOT_PERFORMED}" ] || [ "${executableFile}" == "0" ];
-        then
-            runApplicationBuild 'chmod +x vendor/bin/*'
-        fi
     fi
 }
 

@@ -41,6 +41,7 @@ function bootDeployment()
     verbose "${INFO}Building generator${NC}"
     docker build -t spryker_docker_sdk \
         -f "${SOURCE_DIR}/generator/Dockerfile" \
+        --progress="${PROGRESS_TYPE:-tty}" \
         "${SOURCE_DIR}/generator"
 
     cp -rf "${SOURCE_DIR}/bin" "${DEPLOYMENT_DIR}/bin"
