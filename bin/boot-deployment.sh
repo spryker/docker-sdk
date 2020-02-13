@@ -38,7 +38,7 @@ function validateParameters()
 # ------------------
 function bootDeployment()
 {
-    local knownHostsYamlPath="${SOURCE_DIR}/.known_hosts"
+    local knownHostsYamlPath=".known_hosts"
 
     echo ${knownHostsYamlPath}
 

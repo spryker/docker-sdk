@@ -397,8 +397,7 @@ function getKnownHosts(string $knownHostsYamlPath): array
 
     return array_filter(
         preg_split('/[\s]+/', $knownHosts),
-        function($knownHost)
-        {
+        function ($knownHost) {
             return $knownHost && isHostValid($knownHost);
         }
     );
