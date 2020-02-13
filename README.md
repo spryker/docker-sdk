@@ -58,3 +58,4 @@ To start working with Spryker in Docker, follow [the link](https://documentation
 | mail_catcher  | mailhog  | 1.0  |
 | swagger  | swagger-ui  | v3.24  |
 | kibana  | kibana  | 5.6 |
+|   |   | 6.8 |
