@@ -38,7 +38,9 @@ function validateParameters()
 # ------------------
 function bootDeployment()
 {
-    local knownHostsYamlPath='.known_hosts'
+    local knownHostsYamlPath="${SOURCE_DIR}/.known_hosts"
+
+    echo ${knownHostsYamlPath}
 
     verbose "${INFO}Building generator${NC}"
     docker build -t spryker_docker_sdk \
