@@ -11,12 +11,17 @@ ENV PATH=/data/vendor/bin:$PATH
 RUN apk update && apk add \
   nodejs \
   npm \
+  inotify-tools \
+  redis \
   netcat-openbsd \
   git
 
 RUN mkdir -p ${SPRYKER_LOG_DIRECTORY}
 RUN chown spryker:spryker ${SPRYKER_LOG_DIRECTORY}
 WORKDIR /data
+
+RUN mkdir -p /host
+RUN chown spryker:spryker /host
 
 ARG DEPLOYMENT_PATH
 ENV DEPLOYMENT_PATH=${DEPLOYMENT_PATH}
@@ -25,3 +30,5 @@ COPY ${DEPLOYMENT_PATH}/context/cli/execute.sh /usr/local/bin/execute.sh
 RUN chmod +x /usr/local/bin/execute.sh
 
 USER spryker
+
+RUN composer global require sprymiker/autoload-cache:0.2.4
