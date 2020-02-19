@@ -370,13 +370,13 @@ function buildEndpointMapByStore(array $projectGroups): array
  */
 function isAutoloadCacheEnabled(array $projectData, string $mountMode): bool
 {
+    if ($projectData['composer']['autoload'] === '--optimize') {
+        return false;
+    }
+
     if (isset($projectData['docker']['cache']['autoload']['enabled'])) {
         return $projectData['docker']['cache']['autoload']['enabled'];
     }
-
-    if ($mountMode === 'nfs') {
-        return true;
-    }
-
-    return false;
+    
+    return $mountMode === 'nfs';
 }

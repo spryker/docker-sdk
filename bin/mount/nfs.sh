@@ -14,24 +14,12 @@ function getProjectPath()
     local projectPath=${PROJECT_DIR:-$(pwd)}
     local mountPathPrefixForCatalinaOS="/System/Volumes/Data"
 
-    if $(isCatalinaOSVolumeDataDirectoryExist) && [ -z "${projectPath//\/Users\/*/}" ];
+    if [ -d ${mountPathPrefixForCatalinaOS}${projectPath} ];
     then
         projectPath="${mountPathPrefixForCatalinaOS}${projectPath}"
     fi;
 
     echo ${projectPath}
-}
-
-function isCatalinaOSVolumeDataDirectoryExist()
-{
-    local catalinaOSVolumeDataDirectoryPath="/System/Volumes/Data"
-
-    if [ -d ${catalinaOSVolumeDataDirectoryPath} ];
-    then
-        return ${__TRUE}
-    fi
-
-    return ${__FALSE}
 }
 
 function sync()
