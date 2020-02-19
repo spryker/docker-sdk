@@ -370,7 +370,7 @@ function buildEndpointMapByStore(array $projectGroups): array
  */
 function isAutoloadCacheEnabled(array $projectData): bool
 {
-    if ($projectData['composer']['autoload'] === '') {
+    if ($projectData['composer']['autoload'] !== '') {
         return false;
     }
 
