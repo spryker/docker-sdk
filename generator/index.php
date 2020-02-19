@@ -373,7 +373,7 @@ function isAutoloadCacheEnabled(array $projectData): bool
     $composerPossibleAutoloadParams = [
         '--optimize',
         '-a',
-        '-0',
+        '-o',
     ];
     if (in_array($projectData['composer']['autoload'], $composerPossibleAutoloadParams)) {
         return false;
