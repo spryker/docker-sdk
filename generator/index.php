@@ -26,6 +26,7 @@ $mountMode = $projectData['_mountMode'] = retrieveMountMode($projectData, $platf
 $projectData['_ports'] = retrieveUniquePorts($projectData);
 $defaultPort = $projectData['_defaultPort'] = getDefaultPort($projectData);
 $endpointMap = $projectData['_endpointMap'] = buildEndpointMapByStore($projectData['groups']);
+$projectData['composer']['autoload'] = buildComposerAutoloadConfig($projectData);
 $isAutoloadCacheEnabled = $projectData['_isAutoloadCacheEnabled'] = isAutoloadCacheEnabled($projectData, $mountMode);
 
 mkdir($deploymentDir . DS . 'env' . DS . 'cli', 0777, true);
@@ -377,6 +378,16 @@ function isAutoloadCacheEnabled(array $projectData, string $mountMode): bool
     if (isset($projectData['docker']['cache']['autoload']['enabled'])) {
         return $projectData['docker']['cache']['autoload']['enabled'];
     }
-    
+
     return $mountMode === 'nfs';
+}
+
+/**
+ * @param array $projectData
+ *
+ * @return string
+ */
+function buildComposerAutoloadConfig(array $projectData): string
+{
+    return $projectData['composer']['autoload'] ?? '--optimize';
 }

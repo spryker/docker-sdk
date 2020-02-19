@@ -45,7 +45,7 @@ readonly SPRYKER_PLATFORM_IMAGE=${SPRYKER_PLATFORM_IMAGE:-{{ image | default('sp
 export SPRYKER_DOCKER_PREFIX=${COMPOSE_PROJECT_NAME}
 export SPRYKER_DOCKER_TAG="{{ tag | default('1.0') }}"
 export SPRYKER_COMPOSER_MODE="{{ composer.mode | default('--dev') }}"
-export SPRYKER_COMPOSER_AUTOLOAD="{{ composer.autoload is defined ? composer.autoload : '--optimize' }}"
+export SPRYKER_COMPOSER_AUTOLOAD="{{ composer.autoload }}"
 export SPRYKER_LOG_DIRECTORY="{{ docker['logs']['path'] | default('/var/log/spryker') }}"
 readonly SPRYKER_DB_ENGINE="{{ services['database']['engine'] == 'mysql' ? 'mysql' : 'pgsql' }}"
 readonly SPRYKER_STORES=({{ regions | map((regionData, region) => "'STORES=(" ~ (regionData['stores'] | keys | join(' ')) ~ ")'") | join(' ') | raw }})
