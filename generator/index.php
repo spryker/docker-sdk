@@ -26,6 +26,7 @@ $mountMode = $projectData['_mountMode'] = retrieveMountMode($projectData, $platf
 $projectData['_ports'] = retrieveUniquePorts($projectData);
 $defaultPort = $projectData['_defaultPort'] = getDefaultPort($projectData);
 $endpointMap = $projectData['_endpointMap'] = buildEndpointMapByStore($projectData['groups']);
+$isAutoloadCacheEnabled = $projectData['_isAutoloadCacheEnabled'] = isAutoloadCacheEnabled($projectData, $mountMode);
 
 mkdir($deploymentDir . DS . 'env' . DS . 'cli', 0777, true);
 mkdir($deploymentDir . DS . 'context' . DS . 'nginx' . DS . 'conf.d', 0777, true);
@@ -359,4 +360,23 @@ function buildEndpointMapByStore(array $projectGroups): array
     }
 
     return $endpointMap;
+}
+
+/**
+ * @param array $projectData
+ * @param string $mountMode
+ *
+ * @return bool
+ */
+function isAutoloadCacheEnabled(array $projectData, string $mountMode): bool
+{
+    if (isset($projectData['docker']['cache']['autoload']['enabled'])) {
+        return $projectData['docker']['cache']['autoload']['enabled'];
+    }
+
+    if ($mountMode === 'nfs') {
+        return true;
+    }
+
+    return false;
 }
