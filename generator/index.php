@@ -370,7 +370,12 @@ function buildEndpointMapByStore(array $projectGroups): array
  */
 function isAutoloadCacheEnabled(array $projectData): bool
 {
-    if ($projectData['composer']['autoload'] === '--optimize') {
+    $composerPossibleAutoloadParams = [
+        '--optimize',
+        '-a',
+        '-0',
+    ];
+    if (in_array($projectData['composer']['autoload'], $composerPossibleAutoloadParams)) {
         return false;
     }
 
@@ -384,5 +389,5 @@ function isAutoloadCacheEnabled(array $projectData): bool
  */
 function buildComposerAutoloadConfig(array $projectData): string
 {
-    return $projectData['composer']['autoload'] ?? '--optimize';
+    return trim($projectData['composer']['autoload'] ?? '--optimize');
 }
