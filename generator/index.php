@@ -28,6 +28,7 @@ $defaultPort = $projectData['_defaultPort'] = getDefaultPort($projectData);
 $endpointMap = $projectData['_endpointMap'] = buildEndpointMapByStore($projectData['groups']);
 $projectData['composer']['autoload'] = buildComposerAutoloadConfig($projectData);
 $isAutoloadCacheEnabled = $projectData['_isAutoloadCacheEnabled'] = isAutoloadCacheEnabled($projectData);
+$projectData['_requirementAnalyzerData'] = buildDataForRequirementAnalyzer($projectData);
 
 mkdir($deploymentDir . DS . 'env' . DS . 'cli', 0777, true);
 mkdir($deploymentDir . DS . 'context' . DS . 'nginx' . DS . 'conf.d', 0777, true);
@@ -385,4 +386,49 @@ function isAutoloadCacheEnabled(array $projectData): bool
 function buildComposerAutoloadConfig(array $projectData): string
 {
     return trim($projectData['composer']['autoload'] ?? '--optimize');
+}
+
+/**
+ * @param array $projectData
+ *
+ * @return array
+ */
+function buildUniqueEndpointMap(array $projectData): array
+{
+    $endpointMap = [];
+    $projectEndpointMap = $projectData['_endpointMap'] ?? buildEndpointMapByStore($projectData['groups']);
+    $services = $projectData['services'] ?? [];
+
+    if (empty($projectEndpointMap) && empty($services)) {
+        return $endpointMap;
+    }
+
+    foreach ($projectEndpointMap as $storeName => $endpointMapPerStore) {
+        $endpointMap[] = array_values($endpointMapPerStore);
+    }
+
+    foreach ($services as $serviceName => $serviceConfig) {
+        if (!isset($serviceConfig['endpoints'])) {
+            continue;
+        }
+
+        foreach ($serviceConfig['endpoints'] as $endpoint => $endpointConfig) {
+            if (strpos($endpoint, 'localhost') === false) {
+                $endpointMap[] = [$endpoint];
+            }
+        }
+    }
+
+    return array_unique(array_merge(...$endpointMap));
+}
+
+function buildDataForRequirementAnalyzer(array $projectData): array
+{
+    $endpointMap = buildUniqueEndpointMap($projectData);
+    sort($endpointMap);
+
+    return [
+        'hosts' => implode(' ', $endpointMap),
+        'ipAddress' => '127.0.0.1',
+    ];
 }

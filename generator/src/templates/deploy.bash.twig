@@ -10,6 +10,8 @@ pushd ${BASH_SOURCE%/*} > /dev/null
 . ./bin/constants.sh
 . ./bin/console.sh
 . ./bin/export-helper.sh
+. ./bin/nfs/get-project-path.sh
+. ./bin/install.sh
 
 . ./bin/mount/{{ _mountMode }}.sh ${@}
 . ./bin/database/{{ services['database']['engine'] }}.sh ${@}
@@ -492,6 +494,27 @@ function stopCliContainer()
       | xargs docker rm -f > /dev/null
 }
 
+function install()
+{
+    set -x
+    local resultHostAnalyze=$(analyzeHosts "{{ _requirementAnalyzerData.ipAddress }}" "{{ _requirementAnalyzerData.hosts }}")
+{% if _mountMode is same as('nfs') %}
+    local resultNfsAnalyze=$(analyzeNfs $(id -u) $(id -g) $(getProjectPath) 'localhost')
+
+    if [ ! -z "${resultHostAnalyze}" ] || [ ! -z "${resultNfsAnalyze}" ];
+    then
+        echo -e "${INFO}Run next commands for configuration:${LGRAY}${DESTINATION_DIR}${NC}"
+        [ ! -z "${resultHostAnalyze}" ] && echo -e " * ${OK}${resultHostAnalyze}${NC} "
+        [ ! -z "${resultNfsAnalyze}" ] && echo -e " * ${OK}${resultNfsAnalyze}${NC} "
+{% else %}
+    if [ !  -z "${resultHostAnalyze}" ];
+    then
+        echo -e "${INFO}Run next commands for configuration:${LGRAY}${DESTINATION_DIR}${NC}"
+        [ ! -z "${resultHostAnalyze}" ] && echo -e " * ${OK}${resultHostAnalyze}${NC} "
+{% endif %}
+    fi
+}
+
 command=${1}
 shift 1
 case ${command} in
@@ -625,6 +648,9 @@ case ${command} in
     sync)
         sync create
         sync start
+        ;;
+    install)
+        install
         ;;
     help|'')
         showHelp
