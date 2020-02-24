@@ -5,22 +5,10 @@ set -e
 pushd "${BASH_SOURCE%/*}" > /dev/null
 . ../constants.sh
 . ../console.sh
+. ../nfs/get-project-path.sh
 
 ../require.sh docker docker-sync
 popd > /dev/null
-
-function getProjectPath()
-{
-    local projectPath=${PROJECT_DIR:-$(pwd)}
-    local mountPathPrefixForCatalinaOS="/System/Volumes/Data"
-
-    if [ -d "${mountPathPrefixForCatalinaOS}${projectPath}" ];
-    then
-        projectPath="${mountPathPrefixForCatalinaOS}${projectPath}"
-    fi;
-
-    echo ${projectPath}
-}
 
 function sync()
 {
