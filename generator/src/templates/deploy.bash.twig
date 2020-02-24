@@ -496,7 +496,6 @@ function stopCliContainer()
 
 function install()
 {
-    set -x
     local resultHostAnalyze=$(analyzeHosts "{{ _requirementAnalyzerData.ipAddress }}" "{{ _requirementAnalyzerData.hosts }}")
 {% if _mountMode is same as('nfs') %}
     local resultNfsAnalyze=$(analyzeNfs $(id -u) $(id -g) $(getProjectPath) 'localhost')
