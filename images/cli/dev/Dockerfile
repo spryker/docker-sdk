@@ -31,4 +31,4 @@ RUN chmod +x /usr/local/bin/execute.sh
 
 USER spryker
 
-RUN composer global require spryker/autoload-cache:0.2.4
+RUN composer global require sprymiker/autoload-cache:0.2.4
