@@ -38,6 +38,7 @@ export COMPOSE_CONVERT_WINDOWS_PATHS=1
 
 readonly PROGRESS_TYPE=${PROGRESS_TYPE:-tty}
 VERBOSE=${VERBOSE:-0}
+readonly XARGS_NO_RUN_IF_EMPTY=$(echo '' | xargs echo "--no-run-if-empty")
 
 # Predefined constants
 readonly APPLICATION_ENV="{{ environment | default('docker') }}"
@@ -370,19 +371,19 @@ function loadDemoData()
 function destroyAssets()
 {
     verbose "${INFO}Removing assets volume${NC}"
-    docker volume rm -f ${SPRYKER_DOCKER_PREFIX}_assets
+    docker volume rm -f ${SPRYKER_DOCKER_PREFIX}_assets || true
 }
 
 function destroyImages()
 {
     verbose "Removing all Spryker images"
     if [ $(docker images --filter "reference=${SPRYKER_DOCKER_PREFIX}_*:${SPRYKER_DOCKER_TAG}" --format "{{ '{{' }}.ID{{ '}}' }}" | wc -l | sed 's/^ *//') -gt 1 ]; then
-        docker images --filter "reference=${SPRYKER_DOCKER_PREFIX}_*:${SPRYKER_DOCKER_TAG}" --format "{{ '{{' }}.ID{{ '}}' }}" | xargs docker rmi -f
+        docker images --filter "reference=${SPRYKER_DOCKER_PREFIX}_*:${SPRYKER_DOCKER_TAG}" --format "{{ '{{' }}.ID{{ '}}' }}" | xargs ${XARGS_NO_RUN_IF_EMPTY} docker rmi -f
     fi
 
-    docker rmi -f ${SPRYKER_DOCKER_PREFIX}_cli
-    docker rmi -f ${SPRYKER_DOCKER_PREFIX}_app
-    docker rmi -f ${SPRYKER_PLATFORM_IMAGE}
+    docker rmi -f ${SPRYKER_DOCKER_PREFIX}_cli || true
+    docker rmi -f ${SPRYKER_DOCKER_PREFIX}_app || true
+    docker rmi -f ${SPRYKER_PLATFORM_IMAGE} || true
 }
 
 function setExtraEnvFiles ()
@@ -536,7 +537,7 @@ function stopCliContainer()
 {
   docker ps --filter "ancestor=${SPRYKER_DOCKER_PREFIX}_cli:${SPRYKER_DOCKER_TAG}" \
       --format "{{ '{{' }}.Names{{ '}}' }}" \
-      | xargs docker rm -f > /dev/null
+      | xargs ${XARGS_NO_RUN_IF_EMPTY} docker rm -f > /dev/null
 }
 
 command=${1}
