@@ -25,6 +25,7 @@ FROM ${SPRYKER_PLATFORM_IMAGE} AS spryker_node_dependencies
 RUN apk update && apk add \
   nodejs \
   npm \
+  coreutils \
   git
 
 COPY package.json package-lock.json ${srcRoot}/

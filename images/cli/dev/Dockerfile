@@ -14,6 +14,7 @@ RUN apk update && apk add \
   inotify-tools \
   redis \
   netcat-openbsd \
+  coreutils \
   git
 
 RUN mkdir -p ${SPRYKER_LOG_DIRECTORY}
