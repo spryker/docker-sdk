@@ -17,7 +17,7 @@ function analyzeHosts()
 
     if [ -f "/etc/hosts" ] && [ -z "$(cat "/etc/hosts" | grep "${ipAddress}    ${hosts}")" ];
     then
-        echo -e "echo \"echo '${ipAddress}    ${hosts}' >> /etc/hosts\" | sudo bash"
+        echo -e " * echo \"echo '${ipAddress}    ${hosts}' >> /etc/hosts\" | sudo bash"
     fi
 }
 
@@ -35,9 +35,23 @@ function analyzeNfs()
 
     if [ -z "$(cat /etc/exports | grep "${projectPath} -alldirs -mapall=${userId}:${groupId} ${host}")" ];
     then
-       echo -e "echo \"echo \\\"${projectPath}\\\" -alldirs -mapall=${userId}:${groupId} ${host} >> /etc/exports && nfsd restart\" | sudo bash"
+       echo -e " * echo \"echo \\\"${projectPath}\\\" -alldirs -mapall=${userId}:${groupId} ${host} >> /etc/exports && nfsd restart\" | sudo bash"
+    fi
+}
+
+function analyzeNfsConfig()
+{
+    if [ ! -f "/etc/nfs.conf" ];
+    then
+        echo -e " * sudo touch /etc/nfs.conf"
+    fi
+
+    if [ -z "$(cat "/etc/nfs.conf" | grep "nfs.server.mount.require_resv_port = 0")" ];
+    then
+       echo -e " * echo \"echo 'nfs.server.mount.require_resv_port = 0' >> /etc/nfs.conf\" | sudo bash"
     fi
 }
 
 export -f analyzeHosts
 export -f analyzeNfs
+export -f analyzeNfsConfig

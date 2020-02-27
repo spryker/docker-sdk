@@ -499,17 +499,19 @@ function install()
     local resultHostAnalyze=$(analyzeHosts "{{ _requirementAnalyzerData.ipAddress }}" "{{ _requirementAnalyzerData.hosts }}")
 {% if _mountMode is same as('nfs') %}
     local resultNfsAnalyze=$(analyzeNfs $(id -u) $(id -g) $(getProjectPath) 'localhost')
+    local resultNfsConfigAnalyze=$(analyzeNfsConfig)
 
-    if [ ! -z "${resultHostAnalyze}" ] || [ ! -z "${resultNfsAnalyze}" ];
+    if [ ! -z "${resultHostAnalyze}" ] || [ ! -z "${resultNfsConfigAnalyze}" ] || [ ! -z "${resultNfsAnalyze}" ];
     then
         echo -e "${INFO}Run next commands for configuration:${LGRAY}${DESTINATION_DIR}${NC}"
-        [ ! -z "${resultHostAnalyze}" ] && echo -e " * ${OK}${resultHostAnalyze}${NC} "
-        [ ! -z "${resultNfsAnalyze}" ] && echo -e " * ${OK}${resultNfsAnalyze}${NC} "
+        [ ! -z "${resultHostAnalyze}" ] && echo -e "${OK}${resultHostAnalyze}${NC} "
+        [ ! -z "${resultNfsConfigAnalyze}" ] && echo -e "${OK}${resultNfsConfigAnalyze}${NC} "
+        [ ! -z "${resultNfsAnalyze}" ] && echo -e "${OK}${resultNfsAnalyze}${NC} "
 {% else %}
     if [ !  -z "${resultHostAnalyze}" ];
     then
         echo -e "${INFO}Run next commands for configuration:${LGRAY}${DESTINATION_DIR}${NC}"
-        [ ! -z "${resultHostAnalyze}" ] && echo -e " * ${OK}${resultHostAnalyze}${NC} "
+        [ ! -z "${resultHostAnalyze}" ] && echo -e "${OK}${resultHostAnalyze}${NC} "
 {% endif %}
     fi
 }
