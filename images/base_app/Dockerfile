@@ -14,6 +14,12 @@ ENV SPRYKER_LOG_DIRECTORY=${SPRYKER_LOG_DIRECTORY}
 RUN mkdir -p ${SPRYKER_LOG_DIRECTORY} && \
     chown spryker:spryker ${SPRYKER_LOG_DIRECTORY}
 
+# Creates the list of known hosts
+ARG KNOWN_HOSTS
+RUN mkdir -p /home/spryker/.ssh && chmod 0700 /home/spryker/.ssh
+RUN bash -c '[ ! -z "${KNOWN_HOSTS}" ] && ssh-keyscan -t rsa ${KNOWN_HOSTS} >> /home/spryker/.ssh/known_hosts || true'
+RUN chown spryker:spryker -R /home/spryker/.ssh
+
 WORKDIR /data
 USER spryker
 

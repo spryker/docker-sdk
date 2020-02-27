@@ -61,6 +61,10 @@ export SPRYKER_STORE=${SPRYKER_STORE:-${APPLICATION_STORE:-${SPRYKER_DEFAULT_STO
 readonly SPRYKER_SELF_SCRIPT=${SPRYKER_SELF_SCRIPT:-$(basename $0)}
 readonly GITHUB_TOKEN=${GITHUB_TOKEN:-''}
 
+{% if _knownHosts is defined %}
+export KNOWN_HOSTS="{{ _knownHosts | default("") }}"
+{% endif %}
+
 function showHelp()
 {
     echo -e ""
@@ -126,7 +130,6 @@ DOCKER_EXTRA_OPTIONS=" -v ${SPRYKER_DOCKER_PREFIX}_logs:${SPRYKER_LOG_DIRECTORY}
 if [ ! -z "${GITHUB_TOKEN}" ];
 then
     DOCKER_EXTRA_OPTIONS+=" -e COMPOSER_AUTH={\"github-oauth\":{\"github.com\":\"${GITHUB_TOKEN}\"}}";
-    DOCKER_EXTRA_OPTIONS+=" -v $(dirname ~/.ssh)/.ssh/known_hosts:/home/spryker/.ssh/known_hosts";
 fi;
 {% if _platform == 'linux' %}
 readonly USER_UID=$(id -u)
@@ -140,7 +143,6 @@ readonly USER_GID="1000"
 [ "$1" != 'help' ] && echo -e "*** ${WARN}DEVELOPMENT MODE${NC}"
 DOCKER_EXTRA_OPTIONS+=" -v ${DEPLOYMENT_DIR}/context/php/conf.d/opcache_dev.ini:/usr/local/etc/php/conf.d/opcache.ini:ro"
 DOCKER_EXTRA_OPTIONS+=" -v ${DEPLOYMENT_DIR}/context/php/php.ini:/usr/local/etc/php/php.ini:ro"
-DOCKER_EXTRA_OPTIONS+=" -v $(dirname ~/.composer/cache:/home/spryker/).composer/cache:rw"
 {% if _mountMode == 'native' %}
 DOCKER_EXTRA_OPTIONS+=" -v ${PROJECT_DIR}:/data -u ${USER_UID}:${USER_GID}"
 {% else %}

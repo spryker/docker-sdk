@@ -9,6 +9,6 @@ x-volumes:
 {% if _mountMode == 'native' %}
     - ./:/data
 {% else %}
-    - ${SPRYKER_DOCKER_PREFIX}_${SPRYKER_DOCKER_TAG}_data_sync:/data
+    - ${SPRYKER_DOCKER_PREFIX}_${SPRYKER_DOCKER_TAG}_data_sync:/data:nocopy
 {% endif %}
 {% endif %}

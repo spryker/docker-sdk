@@ -38,15 +38,22 @@ function validateParameters()
 # ------------------
 function bootDeployment()
 {
+    local knownHostsYamlPath=".known_hosts"
+
+    echo ${knownHostsYamlPath}
+
     verbose "${INFO}Building generator${NC}"
     docker build -t spryker_docker_sdk \
         -f "${SOURCE_DIR}/generator/Dockerfile" \
+        --progress="${PROGRESS_TYPE:-tty}" \
         "${SOURCE_DIR}/generator"
 
     cp -rf "${SOURCE_DIR}/bin" "${DEPLOYMENT_DIR}/bin"
     cp -rf "${SOURCE_DIR}/context" "${DEPLOYMENT_DIR}/context"
     cp -rf "${SOURCE_DIR}/images" "${DEPLOYMENT_DIR}/images"
     cp "${PROJECT_YAML}" "${DEPLOYMENT_DIR}/project.yml"
+
+    [ -f "${knownHostsYamlPath}" ] && cp "${knownHostsYamlPath}" "${DEPLOYMENT_DIR}/.known_hosts"
 
     USER_UID=1000
     USER_GID=1000
