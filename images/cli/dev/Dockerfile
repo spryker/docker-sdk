@@ -8,14 +8,14 @@ ARG SPRYKER_LOG_DIRECTORY=/var/log/spryker
 
 ENV PATH=/data/vendor/bin:$PATH
 
-RUN apk update && apk add \
+RUN apt-get update && apt-get install \
   nodejs \
   npm \
   inotify-tools \
   redis \
   netcat-openbsd \
   coreutils \
-  git
+  git -y
 
 RUN mkdir -p ${SPRYKER_LOG_DIRECTORY}
 RUN chown spryker:spryker ${SPRYKER_LOG_DIRECTORY}
