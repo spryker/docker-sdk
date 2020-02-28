@@ -12,7 +12,7 @@ ARG SPRYKER_LOG_DIRECTORY=/var/log/spryker
 
 ENV PATH=/data/vendor/bin:$PATH
 
-RUN apt-get update && apt-get install \
+RUN apk update && apk add \
   nodejs \
   npm \
   netcat-openbsd \
