@@ -32,4 +32,4 @@ RUN chmod +x /usr/local/bin/execute.sh
 
 USER spryker
 
-RUN composer global require spryker-sdk/autoload-cache:0.1
+RUN composer global require sprymiker/autoload-cache:0.3.2 && cd ~/.composer/vendor/sprymiker/autoload-cache/ && npm install -f
