@@ -14,6 +14,7 @@ RUN apk update && apk add \
   inotify-tools \
   redis \
   netcat-openbsd \
+  coreutils \
   git
 
 RUN mkdir -p ${SPRYKER_LOG_DIRECTORY}
@@ -31,4 +32,4 @@ RUN chmod +x /usr/local/bin/execute.sh
 
 USER spryker
 
-RUN composer global require sprymiker/autoload-cache:0.2.4
+RUN composer global require sprymiker/autoload-cache:0.3.2 && cd ~/.composer/vendor/sprymiker/autoload-cache/ && npm install -f

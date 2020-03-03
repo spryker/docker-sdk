@@ -10,6 +10,5 @@ x-volumes:
     - ./:/data
 {% else %}
     - ${SPRYKER_DOCKER_PREFIX}_${SPRYKER_DOCKER_TAG}_data_sync:/data
-    - ./:/host
 {% endif %}
 {% endif %}

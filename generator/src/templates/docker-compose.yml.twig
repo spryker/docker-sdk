@@ -64,24 +64,21 @@ services:
       - ./${DEPLOYMENT_PATH}/context/nginx/conf.d/zed-rpc.default.conf:/etc/nginx/conf.d/default.conf:ro
       - ./${DEPLOYMENT_PATH}/context/nginx/vhost.d:/etc/nginx/vhost.d:ro
 
-  autoload:
+{% if _mountMode == 'nfs' %}
+  anticache:
+    restart: always
     image: ${SPRYKER_DOCKER_PREFIX}_cli:${SPRYKER_DOCKER_TAG}
+    ports:
+        - "8998:8998"
     networks:
       - services
       - private
-    depends_on:
-      - session
     <<: *app-volumes
-    healthcheck:
-      test: 'bash -c "[ -f /tmp/.autoload_healthy ]"'
-      interval: 1s
-      timeout: 1s
     command:
-      - "/home/spryker/.composer/vendor/bin/autoload-watch.sh"
-      - "-w /host"
-      - "-h session"
-      - "-p 6379"
-      - "-n 10"
+      - "node"
+      - "/home/spryker/.composer/vendor/sprymiker/autoload-cache/anticache"
+      - "-v"
+{% endif %}
 
 {% for group in groups %}
 {% for applicationName, applicationData in group['applications'] %}
