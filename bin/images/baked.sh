@@ -31,6 +31,7 @@ function doBaseImage()
         --build-arg USER_UID=${USER_UID:-1000} \
         --build-arg USER_GID=${USER_GID:-1000} \
         --build-arg GITHUB_TOKEN=${GITHUB_TOKEN} \
+        --build-arg KNOWN_HOSTS="${KNOWN_HOSTS}" \
         --build-arg DEPLOYMENT_PATH=${DEPLOYMENT_PATH} \
         --build-arg APPLICATION_ENV=${APPLICATION_ENV} \
         --build-arg SPRYKER_DB_ENGINE=${dbEngine} \

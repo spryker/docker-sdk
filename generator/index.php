@@ -19,6 +19,8 @@ $yamlParser = new Parser();
 
 $projectData = $yamlParser->parseFile($projectYaml);
 
+$projectData['_knownHosts'] = buildKnownHosts($deploymentDir);
+
 $projectData['_projectName'] = $projectName;
 $projectData['tag'] = $projectData['tag'] ?? uniqid();
 $projectData['_platform'] = $platform;
@@ -26,6 +28,9 @@ $mountMode = $projectData['_mountMode'] = retrieveMountMode($projectData, $platf
 $projectData['_ports'] = retrieveUniquePorts($projectData);
 $defaultPort = $projectData['_defaultPort'] = getDefaultPort($projectData);
 $endpointMap = $projectData['_endpointMap'] = buildEndpointMapByStore($projectData['groups']);
+$projectData['composer']['autoload'] = buildComposerAutoloadConfig($projectData);
+$isAutoloadCacheEnabled = $projectData['_isAutoloadCacheEnabled'] = isAutoloadCacheEnabled($projectData);
+$projectData['_requirementAnalyzerData'] = buildDataForRequirementAnalyzer($projectData);
 
 mkdir($deploymentDir . DS . 'env' . DS . 'cli', 0777, true);
 mkdir($deploymentDir . DS . 'context' . DS . 'nginx' . DS . 'conf.d', 0777, true);
@@ -359,4 +364,161 @@ function buildEndpointMapByStore(array $projectGroups): array
     }
 
     return $endpointMap;
+}
+
+/**
+ * @param string $deploymentDir
+ *
+ * @return string
+ */
+function buildKnownHosts(string $deploymentDir): string
+{
+    $knownHostsPath = $deploymentDir . DS . '.known_hosts';
+
+    if (!file_exists($knownHostsPath)) {
+        return '';
+    }
+
+    return implode(
+        ' ',
+        getKnownHosts($knownHostsPath)
+    );
+}
+
+/**
+ * @param string $knownHostsYamlPath
+ *
+ * @return array
+ */
+function getKnownHosts(string $knownHostsYamlPath): array
+{
+    $knownHosts = file_get_contents($knownHostsYamlPath);
+
+    if (!$knownHosts) {
+        return [];
+    }
+
+    return array_filter(
+        preg_split('/[\s]+/', $knownHosts),
+        function ($knownHost) {
+            return $knownHost && isHostValid($knownHost);
+        }
+    );
+}
+
+/**
+ * @param string $knownHost
+ *
+ * @return bool
+ */
+function isHostValid(string $knownHost): bool
+{
+    return isIp($knownHost) || isHost($knownHost);
+}
+
+/**
+ * @param string $knownHost
+ *
+ * @return bool
+ */
+function isIp(string $knownHost): bool
+{
+    $validIpAddressPattern = "/^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$/";
+
+    if (!preg_match($validIpAddressPattern, $knownHost)) {
+        return false;
+    }
+
+    return true;
+}
+
+/**
+ * @param string $knownHost
+ *
+ * @return bool
+ */
+function isHost(string $knownHost): bool
+{
+    $validHostnamePattern = "/^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\-]*[A-Za-z0-9])$/";
+
+    if (!preg_match($validHostnamePattern, $knownHost)) {
+        return false;
+    }
+
+    $ipAddress = gethostbyname($knownHost);
+
+    if ($ipAddress === $knownHost) {
+        return false;
+    }
+
+    return true;
+}
+
+/**
+ * @param array $projectData
+ *
+ * @return bool
+ */
+function isAutoloadCacheEnabled(array $projectData): bool
+{
+    if ($projectData['composer']['autoload'] !== '') {
+        return false;
+    }
+
+    return $projectData['docker']['cache']['autoload']['enabled'] ?? false;
+}
+
+/**
+ * @param array $projectData
+ *
+ * @return string
+ */
+function buildComposerAutoloadConfig(array $projectData): string
+{
+    return trim($projectData['composer']['autoload'] ?? '--optimize');
+}
+
+/**
+ * @param array $projectData
+ *
+ * @return array
+ */
+function buildUniqueEndpointMap(array $projectData): array
+{
+    $endpointMap = [];
+    $projectEndpointMap = $projectData['_endpointMap'] ?? buildEndpointMapByStore($projectData['groups']);
+    $services = $projectData['services'] ?? [];
+
+    if (empty($projectEndpointMap) && empty($services)) {
+        return $endpointMap;
+    }
+
+    foreach ($projectEndpointMap as $storeName => $endpointMapPerStore) {
+        $endpointMap[] = array_values($endpointMapPerStore);
+    }
+
+    foreach ($services as $serviceName => $serviceConfig) {
+        if (!isset($serviceConfig['endpoints'])) {
+            continue;
+        }
+
+        foreach ($serviceConfig['endpoints'] as $endpoint => $endpointConfig) {
+            if (strpos($endpoint, 'localhost') === false) {
+                $endpointMap[] = [$endpoint];
+            }
+        }
+    }
+
+    return array_unique(array_merge(...$endpointMap));
+}
+
+function buildDataForRequirementAnalyzer(array $projectData): array
+{
+    $endpointMap = buildUniqueEndpointMap($projectData);
+    sort($endpointMap);
+
+    return [
+        'hosts' => implode(' ', $endpointMap),
+        'ipAddress' => '127.0.0.1',
+    ];
 }
