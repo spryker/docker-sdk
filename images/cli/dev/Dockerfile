@@ -11,8 +11,6 @@ ENV PATH=/data/vendor/bin:$PATH
 RUN bash -c '[ ! -z "$(which apt)" ] && apt-get update && apt-get install \
      nodejs \
      npm \
-     inotify-tools \
-     redis \
      netcat-openbsd \
      coreutils \
      git -y || true'
@@ -21,8 +19,6 @@ RUN bash -c '[ ! -z "$(which apt)" ] && npm install npm@latest -g || true'
 RUN bash -c '[ ! -z "$(which apk)" ] && apk update && apk add \
      nodejs \
      npm \
-     inotify-tools \
-     redis \
      netcat-openbsd \
      coreutils \
      git || true'
