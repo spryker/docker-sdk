@@ -23,18 +23,22 @@ ARG SPRYKER_DOCKER_PREFIX
 # Intermediate container - project dependencies
 FROM ${SPRYKER_PLATFORM_IMAGE} AS spryker_node_dependencies
 
-RUN bash -c '[ ! -z "$(which apt)" ] && apt-get update && apt-get install \
-    nodejs \
-    npm \
-    coreutils \
-    git -y || true'
+RUN bash -c '[ ! -z "$(which apt)" ] && apt-get update && apt-get install -y \
+     nodejs \
+     npm \
+     netcat-openbsd \
+     git \
+     || true'
+# Debian contains outdated NPM package
 RUN bash -c '[ ! -z "$(which apt)" ] && npm install npm@latest -g || true'
 
 RUN bash -c '[ ! -z "$(which apk)" ] && apk update && apk add \
-    nodejs \
-    npm \
-    coreutils \
-    git -y || true'
+     nodejs \
+     npm \
+     netcat-openbsd \
+     coreutils \
+     git \
+     || true'
 
 COPY package.json package-lock.json ${srcRoot}/
 # See comment #1, extracted from installer/build-static/dependencies-install
