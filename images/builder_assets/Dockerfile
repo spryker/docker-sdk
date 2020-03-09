@@ -10,6 +10,7 @@
 #   on vendor/, public/, frontend/, tsconfig.json and packages.json/packages.lock, we don't need
 #   to pass full spryker code as context. This will allow to build frontend and PHP code in parallel
 #   by buildkit, when we combine Dockerfiles
+# 
 #
 # Comment #3: we should actually mount from container spryker_app_dependencies, in order to avoid
 #   building frontend in someting in src/,config/,public/,tests/ changes. We don't have access to
