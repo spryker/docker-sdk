@@ -25,12 +25,13 @@ FROM ${SPRYKER_PLATFORM_IMAGE} AS spryker_node_dependencies
 RUN apk update && apk add \
   nodejs \
   npm \
+  yarn \
   git
 
 COPY package.json package-lock.json ${srcRoot}/
 # See comment #1, extracted from installer/build-static/dependencies-install
 RUN --mount=type=cache,target=/root/.npm \
-    npm install
+    yarn install
 
 # Intermediate container - frontend build
 FROM spryker_node_dependencies AS builder_assets
@@ -52,10 +53,10 @@ RUN --mount=type=cache,target=/root/.npm \
     --mount=type=bind,from=spryker_app,source=/data/config,target=/data/config,readonly \
     find vendor -name package.json | while read file; do ( \
         cd $(dirname $file); \
-        npm install \
+        yarn install \
     ); done && \
-    npm run yves && \
-    npm run zed && \
+    yarn run yves && \
+    yarn run zed && \
     chown -R spryker:spryker /assets
 
 VOLUME [ "/assets" ]
