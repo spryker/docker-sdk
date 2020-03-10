@@ -59,8 +59,6 @@ COPY --chown=spryker:spryker .* *.* LICENSE ${srcRoot}/
 ARG SPRYKER_COMPOSER_AUTOLOAD
 RUN composer dump-autoload ${SPRYKER_COMPOSER_AUTOLOAD}
 
-RUN rm -rf /var/run/opcache/*
-
 ARG DEPLOYMENT_PATH
 ENV DEPLOYMENT_PATH=${DEPLOYMENT_PATH}
 
@@ -72,6 +70,7 @@ COPY ${DEPLOYMENT_PATH}/context/php/conf.d/opcache.ini /usr/local/etc/php/conf.d
 
 # Run FPM as default command
 USER root
+RUN rm -rf /var/run/opcache/*
 RUN chown -R spryker:spryker /home/spryker
 
 CMD [ "php-fpm", "--nodaemonize" ]
