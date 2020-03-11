@@ -25,12 +25,13 @@ FROM ${SPRYKER_PLATFORM_IMAGE} AS spryker_node_dependencies
 RUN apk update && apk add \
   nodejs \
   npm \
+  yarn \
   git
 
 COPY package.json package-lock.json ${srcRoot}/
 # See comment #1, extracted from installer/build-static/dependencies-install
-RUN --mount=type=cache,target=/root/.npm \
-    npm install
+RUN --mount=type=cache,target=/usr/local/share/.cache/yarn \
+    yarn install --no-lockfile --no-progress
 
 # Intermediate container - frontend build
 FROM spryker_node_dependencies AS builder_assets
@@ -46,16 +47,16 @@ RUN mkdir -p /assets/Zed \
 # See comment #1, extracted from installer/build-static/{yves-install-dependencies,zed-install-dependencies,yves-build-frontend,zed-build-frontend}
 # See comment #2
 # See comment #3
-RUN --mount=type=cache,target=/root/.npm \
+RUN --mount=type=cache,target=/usr/local/share/.cache/yarn \
     --mount=type=bind,from=spryker_app,source=/data/vendor,target=/data/vendor,readwrite \
     --mount=type=bind,from=spryker_app,source=/data/src,target=/data/src,readwrite \
     --mount=type=bind,from=spryker_app,source=/data/config,target=/data/config,readonly \
     find vendor -name package.json | while read file; do ( \
         cd $(dirname $file); \
-        npm install \
+        yarn install --no-lockfile --no-progress \
     ); done && \
-    npm run yves && \
-    npm run zed && \
+    yarn run yves && \
+    yarn run zed && \
     chown -R spryker:spryker /assets
 
 VOLUME [ "/assets" ]
