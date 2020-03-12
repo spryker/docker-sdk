@@ -78,9 +78,9 @@ function tagProdLikeImages()
 {
     local tag=${1:-${SPRYKER_DOCKER_TAG}}
 
-    doTagByApplicationName Cli ${SPRYKER_DOCKER_PREFIX}_cli:${tag} ${SPRYKER_DOCKER_PREFIX}_cli:${SPRYKER_DOCKER_TAG}
-
     echo -e "${INFO}The following images have been prepared${NC}:" > /dev/stderr
+
+    doTagByApplicationName Cli ${SPRYKER_DOCKER_PREFIX}_cli:${tag} ${SPRYKER_DOCKER_PREFIX}_cli:${SPRYKER_DOCKER_TAG}
 
     for application in "${APPLICATIONS[@]}";
     do
