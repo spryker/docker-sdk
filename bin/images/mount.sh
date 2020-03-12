@@ -30,7 +30,7 @@ function doCliImage()
         -f ${DEPLOYMENT_PATH}/images/cli/dev/Dockerfile \
         .
 
-    doTagByApplicationName Cli ${SPRYKER_DOCKER_PREFIX}_cli:${tag}
+    doTagByApplicationName Cli ${SPRYKER_DOCKER_PREFIX}_cli:${tag} > /dev/null
 }
 
 function buildBaseImages()
@@ -67,7 +67,7 @@ function buildBaseImages()
 
     for application in "${APPLICATIONS[@]}";
     do
-        doTagByApplicationName ${application} ${SPRYKER_DOCKER_PREFIX}_app:${tag}
+        doTagByApplicationName ${application} ${SPRYKER_DOCKER_PREFIX}_app:${tag} > /dev/null
     done
 }
 

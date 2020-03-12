@@ -38,7 +38,7 @@ function doBaseImage()
         --build-arg SPRYKER_LOG_DIRECTORY=${logDirectory} \
         --build-arg SPRYKER_COMPOSER_MODE=${SPRYKER_COMPOSER_MODE} \
         --build-arg SPRYKER_COMPOSER_AUTOLOAD=${SPRYKER_COMPOSER_AUTOLOAD} \
-        .
+        . 1>&2
 }
 
 function doCliImage()
@@ -79,6 +79,8 @@ function tagProdLikeImages()
     local tag=${1:-${SPRYKER_DOCKER_TAG}}
 
     doTagByApplicationName Cli ${SPRYKER_DOCKER_PREFIX}_cli:${tag} ${SPRYKER_DOCKER_PREFIX}_cli:${SPRYKER_DOCKER_TAG}
+
+    echo -e "${INFO}The following images have been prepared${NC}:" > /dev/stderr
 
     for application in "${APPLICATIONS[@]}";
     do

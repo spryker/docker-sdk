@@ -42,6 +42,7 @@ readonly XARGS_NO_RUN_IF_EMPTY=$(echo '' | xargs echo "--no-run-if-empty")
 
 # Predefined constants
 readonly APPLICATION_ENV="{{ environment | default('docker') }}"
+declare -a -r SPRYKER_APPLICATIONS=(Glue Yves Zed)
 readonly SPRYKER_PLATFORM_IMAGE=${SPRYKER_PLATFORM_IMAGE:-{{ image | default('spryker/php:7.2') }}}
 export SPRYKER_DOCKER_PREFIX=${COMPOSE_PROJECT_NAME}
 export SPRYKER_DOCKER_TAG="{{ tag | default('1.0') }}"
@@ -580,14 +581,14 @@ case ${command} in
     build)
         case ${1} in
             assets|asset)
-                buildAssets
+                buildAssets "" ${@}
                 ;;
             images|image)
-                doBuild
+                doBuild "" ${@}
                 ;;
             *)
-                doBuild
-                buildAssets
+                doBuild "" ${@}
+                buildAssets "" ${@}
                 ;;
         esac
         ;;
