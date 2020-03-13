@@ -7,10 +7,20 @@ RUN mkdir -p /cache && chmod 0777 /cache
 
 FROM ${SPRYKER_DOCKER_PREFIX}_app:${SPRYKER_DOCKER_TAG} AS builder
 
-RUN apk update && apk add --no-cache \
-  nodejs \
-  npm \
-  git
+RUN bash -c '[ ! -z "$(which apt)" ] && apt-get update && apt-get install -y \
+     nodejs \
+     npm \
+     git \
+     && apt-get clean \
+     || true'
+# Debian contains outdated NPM package
+RUN bash -c '[ ! -z "$(which apt)" ] && npm install npm@latest -g || true'
+
+RUN bash -c '[ ! -z "$(which apk)" ] && apk update && apk add --no-cache \
+     nodejs \
+     npm \
+     git \
+     || true'
 
 RUN mkdir -p /assets && chmod 0777 /assets
 

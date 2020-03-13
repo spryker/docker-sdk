@@ -87,6 +87,7 @@ function buildAssets()
     verbose "${INFO}Generating assets${NC}"
 
     docker build -t "${imageName}:${SPRYKER_DOCKER_TAG}" \
+        --build-arg SPRYKER_PLATFORM_IMAGE="${SPRYKER_PLATFORM_IMAGE}" \
         --build-arg SPRYKER_DOCKER_PREFIX="${SPRYKER_DOCKER_PREFIX}" \
         --build-arg SPRYKER_DOCKER_TAG="${SPRYKER_DOCKER_TAG}" \
         --build-arg DEPLOYMENT_PATH="${DEPLOYMENT_PATH}" \
