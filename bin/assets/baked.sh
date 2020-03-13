@@ -77,6 +77,7 @@ function buildAssets()
         return ${__TRUE}
     fi
 
+    local mode=${2:-development}
     local volumeName=${SPRYKER_DOCKER_PREFIX}_assets
     local imageName=${SPRYKER_DOCKER_PREFIX}_builder_assets
 
@@ -84,7 +85,7 @@ function buildAssets()
     docker volume rm "${volumeName}" > /dev/null || true
     docker volume create --name="${volumeName}"
 
-    verbose "${INFO}Generating assets${NC}"
+    verbose "${INFO}Generating assets in ${mode} mode...${NC}"
 
     docker build -t "${imageName}:${SPRYKER_DOCKER_TAG}" \
         --build-arg SPRYKER_PLATFORM_IMAGE="${SPRYKER_PLATFORM_IMAGE}" \
@@ -92,7 +93,7 @@ function buildAssets()
         --build-arg SPRYKER_DOCKER_TAG="${SPRYKER_DOCKER_TAG}" \
         --build-arg DEPLOYMENT_PATH="${DEPLOYMENT_PATH}" \
         --build-arg SPRYKER_PLATFORM_IMAGE="${SPRYKER_PLATFORM_IMAGE}" \
-        --build-arg MODE="${2:-development}" \
+        --build-arg MODE="${mode}" \
         --progress="${PROGRESS_TYPE}" \
         -f "${DEPLOYMENT_PATH}/images/builder_assets/Dockerfile" \
         .

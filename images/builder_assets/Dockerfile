@@ -34,14 +34,10 @@ RUN mkdir -p /assets/Zed \
     && mkdir -p public/Zed \
     && mkdir -p public/Yves \
     && ln -s /assets/Zed public/Zed/assets \
-    && ln -s /assets/Yves public/Yves/assets \
-    && mkdir -p /assets/Glue
+    && ln -s /assets/Yves public/Yves/assets
 
 ARG MODE='development'
 ENV MODE=${MODE}
-
-RUN --mount=type=cache,target=/home/spryker/.npm,from=npm_cache,source=/cache \
-    ls -al /home/spryker/.npm
 
 RUN --mount=type=cache,target=/home/spryker/.npm,from=npm_cache,source=/cache \
     BUILD_COMMAND=$([ "${MODE}" == "production" ] && echo -n ':production' || true) \
@@ -50,10 +46,6 @@ RUN --mount=type=cache,target=/home/spryker/.npm,from=npm_cache,source=/cache \
     && npm run "yves${BUILD_COMMAND}" \
     && vendor/bin/console frontend:zed:install-dependencies -v \
     && npm run "zed${BUILD_COMMAND}"
-
-COPY --chown=spryker:spryker public/Yves/favicon* /assets/Yves
-COPY --chown=spryker:spryker public/Zed/favicon* /assets/Zed
-COPY --chown=spryker:spryker public/Glue/favicon* /assets/Glue
 
 FROM alpine
 RUN mkdir -p /assets && chmod 0777 /assets

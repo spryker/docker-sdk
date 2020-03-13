@@ -542,7 +542,7 @@ function stopCliContainer()
 }
 
 command=${1}
-shift 1
+shift 1 || true
 case ${command} in
   *)
     while getopts ":xvt" opt; do
@@ -579,7 +579,9 @@ esac
 
 case ${command} in
     build)
-        case ${1} in
+        subCommand=${1}
+        shift 1 || true
+        case ${subCommand} in
             assets|asset)
                 buildAssets "" ${@}
                 ;;
