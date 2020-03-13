@@ -33,6 +33,8 @@ RUN mkdir -p /assets/Zed \
     && mkdir -p /assets/Yves \
     && mkdir -p public/Zed \
     && mkdir -p public/Yves \
+    && rm -rf public/Zed/assets \
+    && rm -rf public/Yves/assets \
     && ln -s /assets/Zed public/Zed/assets \
     && ln -s /assets/Yves public/Yves/assets
 
