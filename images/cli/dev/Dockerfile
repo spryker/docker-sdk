@@ -8,11 +8,22 @@ ARG SPRYKER_LOG_DIRECTORY=/var/log/spryker
 
 ENV PATH=/data/vendor/bin:$PATH
 
-RUN apk update && apk add \
-  nodejs \
-  npm \
-  netcat-openbsd \
-  git
+RUN bash -c '[ ! -z "$(which apt)" ] && apt-get update && apt-get install -y \
+     nodejs \
+     npm \
+     netcat-openbsd \
+     git \
+     || true'
+# Debian contains outdated NPM package
+RUN bash -c '[ ! -z "$(which apt)" ] && npm install npm@latest -g || true'
+
+RUN bash -c '[ ! -z "$(which apk)" ] && apk update && apk add \
+     nodejs \
+     npm \
+     netcat-openbsd \
+     coreutils \
+     git \
+     || true'
 
 RUN mkdir -p ${SPRYKER_LOG_DIRECTORY}
 RUN chown spryker:spryker ${SPRYKER_LOG_DIRECTORY}
