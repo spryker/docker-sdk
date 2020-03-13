@@ -14,7 +14,7 @@ node_modules
 /newrelic.ini
 
 /docker
-!/docker/deployment/*/context
+!/docker/deployment/
 
 /src/Orm/Zed/*/Persistence/Base
 /src/Orm/Zed/*/Persistence/Map
