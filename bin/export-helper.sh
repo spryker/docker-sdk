@@ -15,7 +15,7 @@ function assertDestinationDirectory() {
 function doExport()
 {
     local subCommand=${1}
-    shift 1
+    shift 1 || true
 
     local tag=${SPRYKER_DOCKER_TAG}
     local destinationPath=${PROJECT_DIR}
@@ -31,6 +31,7 @@ function doExport()
             *) ;;
         esac
     done
+    shift $((OPTIND -1))
 
     case ${subCommand} in
         asset|assets)

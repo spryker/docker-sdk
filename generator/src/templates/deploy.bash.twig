@@ -580,17 +580,20 @@ esac
 case ${command} in
     build)
         subCommand=${1}
-        shift 1 || true
         case ${subCommand} in
             assets|asset)
-                buildAssets "" ${@}
+                buildAssets "" ${@:2}
                 ;;
             images|image)
-                doBuild "" ${@}
+                doBuild "" ${@:2}
                 ;;
-            *)
+            "")
                 doBuild "" ${@}
                 buildAssets "" ${@}
+                ;;
+            *)
+                echo -e "${WARN}Unknown build target '${subCommand}' is occured. No action.${NC}" > /dev/stderr
+                exit 1
                 ;;
         esac
         ;;
