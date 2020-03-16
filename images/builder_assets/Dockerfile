@@ -34,8 +34,10 @@ RUN mkdir -p /assets/Zed \
     && mkdir -p /assets/Driver \
     && mkdir -p public/Zed \
     && mkdir -p public/Yves \
+    && mkdir -p public/Driver \
     && rm -rf public/Zed/assets \
     && rm -rf public/Yves/assets \
+    && rm -rf public/Driver/assets \
     && ln -s /assets/Zed public/Zed/assets \
     && ln -s /assets/Yves public/Yves/assets \
     && ln -s /assets/Driver public/Driver/assets
