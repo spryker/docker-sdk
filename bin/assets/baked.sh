@@ -9,33 +9,45 @@ popd > /dev/null
 
 function exportAssets()
 {
-    local tag=${1:-${SPRYKER_DOCKER_TAG}}
-    local destinationPath=${2:-${PROJECT_DIR}}
+    local tag=${1}
+    local destinationPath=${2%/}
 
-    local dockerAssetsTmpDirectory=/docker/bin/assets/_tmp/
-    local projectDockerAssetsTmpDirectory=${PROJECT_DIR}${dockerAssetsTmpDirectory}
+    local dockerAssetsTmpDirectory="/_tmp"
+    local projectDockerAssetsTmpDirectory=${DEPLOYMENT_DIR}${dockerAssetsTmpDirectory}
 
-    destinationPath=${destinationPath%/}
-
+    rm -rf "${projectDockerAssetsTmpDirectory}"
     mkdir -p "${projectDockerAssetsTmpDirectory}"
+
+    local command="true"
+
+    for application in "${SPRYKER_APPLICATIONS[@]}";
+    do
+        command="${command} && \$([ -d '/assets/${application}' ] && tar czf '/data${dockerAssetsTmpDirectory}/assets-${application}-${tag}.tar' -C '/assets/${application}' . || true)"
+    done
+
+    echo -e "Preparing assets archives..." > /dev/stderr
 
     docker run --rm \
         -e PROJECT_DIR='/data' \
-        -v "${SPRYKER_DOCKER_PREFIX}_assets":/assets \
-        -v "${PROJECT_DIR}/docker":/data/docker \
+        -v "${DEPLOYMENT_DIR}/bin:/data/standalone" \
+        -v "${projectDockerAssetsTmpDirectory}:/data${dockerAssetsTmpDirectory}" \
         --name="${SPRYKER_DOCKER_PREFIX}_builder_assets" \
         "${SPRYKER_DOCKER_PREFIX}_builder_assets:${SPRYKER_DOCKER_TAG}" \
-        bash -c "./docker/bin/assets/tar-builder.sh ${tag} /data/${dockerAssetsTmpDirectory}"
+        sh -c "${command}" 2>&1
 
-    echo -e "${INFO}File name:              Path:${NC}"
+    echo -e "${INFO}The following assets archives have been prepared${NC}:" > /dev/stderr
 
-    for filePath in "${projectDockerAssetsTmpDirectory}"*;
+    for application in "${SPRYKER_APPLICATIONS[@]}";
     do
-        local fileName="$(basename -- ${filePath})"
+        local fileName="assets-${application}-${tag}.tar"
+        if [ ! -f "${projectDockerAssetsTmpDirectory}/${fileName}" ]; then
+            continue
+        fi
 
-        mv "${filePath}" "${destinationPath}"
+        rm -f "${destinationPath}/${fileName}"
+        mv "${projectDockerAssetsTmpDirectory}/${fileName}" "${destinationPath}"
 
-        echo -e "${OK}${fileName}${NC}          ${destinationPath}/${fileName}"
+        echo "${application} ${destinationPath}/${fileName}"
     done
 
     rm -rf "${projectDockerAssetsTmpDirectory}"
@@ -61,9 +73,11 @@ function buildAssets()
 {
     if [ "$1" = ${IF_NOT_PERFORMED} ] && areAssetsBuilt;
     then
+        # TODO consider compiling assets always. Separating base image (composer install + everything else) would help.
         return ${__TRUE}
     fi
 
+    local mode=${2:-development}
     local volumeName=${SPRYKER_DOCKER_PREFIX}_assets
     local imageName=${SPRYKER_DOCKER_PREFIX}_builder_assets
 
@@ -71,15 +85,15 @@ function buildAssets()
     docker volume rm "${volumeName}" > /dev/null || true
     docker volume create --name="${volumeName}"
 
-    verbose "${INFO}Generating assets${NC}"
-
-    docker image tag "${SPRYKER_DOCKER_PREFIX}_app:${SPRYKER_DOCKER_TAG}" spryker_app:latest
+    verbose "${INFO}Generating assets in ${mode} mode...${NC}"
 
     docker build -t "${imageName}:${SPRYKER_DOCKER_TAG}" \
         --build-arg SPRYKER_PLATFORM_IMAGE="${SPRYKER_PLATFORM_IMAGE}" \
         --build-arg SPRYKER_DOCKER_PREFIX="${SPRYKER_DOCKER_PREFIX}" \
         --build-arg SPRYKER_DOCKER_TAG="${SPRYKER_DOCKER_TAG}" \
         --build-arg DEPLOYMENT_PATH="${DEPLOYMENT_PATH}" \
+        --build-arg SPRYKER_PLATFORM_IMAGE="${SPRYKER_PLATFORM_IMAGE}" \
+        --build-arg MODE="${mode}" \
         --progress="${PROGRESS_TYPE}" \
         -f "${DEPLOYMENT_PATH}/images/builder_assets/Dockerfile" \
         .
@@ -91,8 +105,6 @@ function buildAssets()
         --name="${imageName}" \
         "${imageName}:${SPRYKER_DOCKER_TAG}" \
         true
-
-    docker rmi spryker_app:latest
 }
 
 export -f buildAssets

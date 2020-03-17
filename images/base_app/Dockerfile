@@ -38,7 +38,8 @@ COPY --chown=spryker:spryker config ${srcRoot}/config
 COPY --chown=spryker:spryker *.php ${srcRoot}/
 RUN chmod 600 ${srcRoot}/config/Zed/*.key
 
-RUN composer dump-autoload -o
+RUN --mount=type=cache,target=/home/spryker/.composer/cache,from=composer_cache,source=/cache \
+  composer dump-autoload -o
 
 ARG APPLICATION_ENV
 ARG SPRYKER_DB_ENGINE
@@ -57,7 +58,8 @@ COPY --chown=spryker:spryker frontend ${srcRoot}/frontend
 COPY --chown=spryker:spryker .* *.* LICENSE ${srcRoot}/
 
 ARG SPRYKER_COMPOSER_AUTOLOAD
-RUN composer dump-autoload ${SPRYKER_COMPOSER_AUTOLOAD}
+RUN --mount=type=cache,target=/home/spryker/.composer/cache,from=composer_cache,source=/cache \
+  composer dump-autoload ${SPRYKER_COMPOSER_AUTOLOAD}
 
 ARG DEPLOYMENT_PATH
 ENV DEPLOYMENT_PATH=${DEPLOYMENT_PATH}

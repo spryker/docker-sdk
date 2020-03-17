@@ -42,6 +42,7 @@ readonly XARGS_NO_RUN_IF_EMPTY=$(echo '' | xargs echo "--no-run-if-empty")
 
 # Predefined constants
 readonly APPLICATION_ENV="{{ environment | default('docker') }}"
+declare -a -r SPRYKER_APPLICATIONS=(Glue Yves Zed)
 readonly SPRYKER_PLATFORM_IMAGE=${SPRYKER_PLATFORM_IMAGE:-{{ image | default('spryker/php:7.2') }}}
 export SPRYKER_DOCKER_PREFIX=${COMPOSE_PROJECT_NAME}
 export SPRYKER_DOCKER_TAG="{{ tag | default('1.0') }}"
@@ -541,7 +542,7 @@ function stopCliContainer()
 }
 
 command=${1}
-shift 1
+shift 1 || true
 case ${command} in
   *)
     while getopts ":xvt" opt; do
@@ -578,16 +579,21 @@ esac
 
 case ${command} in
     build)
-        case ${1} in
+        subCommand=${1}
+        case ${subCommand} in
             assets|asset)
-                buildAssets
+                buildAssets "" ${@:2}
                 ;;
             images|image)
-                doBuild
+                doBuild "" ${@:2}
+                ;;
+            "")
+                doBuild "" ${@}
+                buildAssets "" ${@}
                 ;;
             *)
-                doBuild
-                buildAssets
+                echo -e "${WARN}Unknown build target '${subCommand}' is occured. No action.${NC}" > /dev/stderr
+                exit 1
                 ;;
         esac
         ;;
