@@ -52,8 +52,7 @@ RUN --mount=type=cache,target=/home/spryker/.npm,from=npm_cache,source=/cache \
     && npm run "yves${BUILD_COMMAND}" \
     && vendor/bin/console frontend:zed:install-dependencies -v \
     && npm run "zed${BUILD_COMMAND}" \
-    && sed -i 's/\/assets\/\//\/assets\//g' public/Zed/assets/css/spryker-zed-gui-commons.css \
-    && cp frontend/assets/sw/driver_default.sw.js /assets/Driver/driver_default.sw.js
+    && sed -i 's/\/assets\/\//\/assets\//g' public/Zed/assets/css/spryker-zed-gui-commons.css
 
 FROM alpine
 RUN mkdir -p /assets && chmod 0777 /assets
