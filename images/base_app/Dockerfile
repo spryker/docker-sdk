@@ -57,9 +57,8 @@ COPY --chown=spryker:spryker .* *.* LICENSE ${srcRoot}/
 
 RUN vendor/bin/install -r docker -s build
 
-ARG SPRYKER_COMPOSER_AUTOLOAD
 RUN --mount=type=cache,target=/home/spryker/.composer/cache,from=composer_cache,source=/cache \
-  composer dump-autoload ${SPRYKER_COMPOSER_AUTOLOAD}
+  composer dump-autoload -o
 
 ARG DEPLOYMENT_PATH
 ENV DEPLOYMENT_PATH=${DEPLOYMENT_PATH}
