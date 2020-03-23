@@ -5,6 +5,27 @@ version: "3.5"
 } %}
 
 services:
+{% if _blackfire['enabled'] %}
+  blackfire:
+    image: blackfire/blackfire
+    environment:
+      # Exposes BLACKFIRE_SERVER_* environment variables from the host
+      - BLACKFIRE_SERVER_ID
+      - BLACKFIRE_SERVER_TOKEN
+      - BLACKFIRE_CLIENT_ID
+      - BLACKFIRE_CLIENT_TOKEN
+    networks:
+      - services
+      - public
+    links:
+{% for group in groups %}
+{% for applicationName, applicationData in group['applications'] %}
+{% for endpoint, endpointData in applicationData['endpoints'] %}
+      - frontend:{{ endpoint | split(':') | first }}
+{% endfor %}
+{% endfor %}
+{% endfor %}
+{% endif %}
 
   frontend:
     image: nginx:alpine

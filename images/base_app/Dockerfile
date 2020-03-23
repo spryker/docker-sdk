@@ -7,6 +7,8 @@ RUN mkdir -p /cache && chmod 0777 /cache
 
 # Intermediate container - base for app, with composer deps
 FROM ${SPRYKER_PLATFORM_IMAGE} AS spryker_app_dependencies
+# todo: env
+RUN mv /usr/local/etc/php/conf.d/blackfire.ini.dist /usr/local/etc/php/conf.d/blackfire.ini
 
 # Create log directory
 ARG SPRYKER_LOG_DIRECTORY
