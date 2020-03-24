@@ -153,11 +153,11 @@ DOCKER_EXTRA_OPTIONS+=" -v ${SPRYKER_DOCKER_PREFIX}_${SPRYKER_DOCKER_TAG}_data_s
 {% endif %}
 
 {% if _blackfire['enabled'] %}
-export BLACKFIRE_ENABLED={{ _blackfire['enabled'] ? 0 : 1 }}
-export BLACKFIRE_SERVER_ID=${BLACKFIRE_SERVER_ID:-{{ _blackfire['server-id'] }}}
-export BLACKFIRE_SERVER_TOKEN=${BLACKFIRE_SERVER_TOKEN:-{{ _blackfire['server-token'] }}}
-export BLACKFIRE_CLIENT_ID=${BLACKFIRE_CLIENT_ID:-{{ _blackfire['client-id'] }}}
-export BLACKFIRE_CLIENT_TOKEN=${BLACKFIRE_CLIENT_TOKEN:-{{ _blackfire['client-token'] }}}
+readonly BLACKFIRE_ENABLED="{{ _blackfire['enabled'] ? 1 : "" }}"
+export BLACKFIRE_SERVER_ID="${BLACKFIRE_SERVER_ID:-"{{ _blackfire['server-id'] }}"}"
+export BLACKFIRE_SERVER_TOKEN="${BLACKFIRE_SERVER_TOKEN:-"{{ _blackfire['server-token'] }}"}"
+export BLACKFIRE_CLIENT_ID="${BLACKFIRE_CLIENT_ID:-"{{ _blackfire['client-id'] }}"}"
+export BLACKFIRE_CLIENT_TOKEN="${BLACKFIRE_CLIENT_TOKEN:-"{{ _blackfire['client-token'] }}"}"
 
 function setBlackfireEnvVariables()
 {
@@ -534,9 +534,10 @@ function doCli()
     local binFile=$1
     local binFileArgument=${@:2}
 
-{% if _blackfire['enabled'] %}
-    setBlackfireEnvVariables
-{% endif %}
+    if [ -n "${BLACKFIRE_ENABLED}" ];
+    then
+        setBlackfireEnvVariables
+    fi;
     if [ ! -z ${binFile} ];
     then
         execSpryker "${binFile} ${binFileArgument}"

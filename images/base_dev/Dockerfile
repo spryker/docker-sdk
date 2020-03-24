@@ -15,8 +15,7 @@ ENV DEVELOPMENT_CONSOLE_COMMANDS=1
 ENV PATH=/data/vendor/bin:$PATH
 
 ARG BLACKFIRE_ENABLED
-ENV BLACKFIRE_ENABLED=${BLACKFIRE_ENABLED}
-RUN bash -c '[ ${BLACKFIRE_ENABLED} -eq 0 ] && mv /usr/local/etc/php/conf.d/blackfire.ini.dist /usr/local/etc/php/conf.d/blackfire.ini || true'
+RUN bash -c '[ "${BLACKFIRE_ENABLED}" == "1" ] && mv /usr/local/etc/php/conf.d/blackfire.ini.dist /usr/local/etc/php/conf.d/blackfire.ini || true'
 
 RUN usermod -u ${USER_UID} spryker
 
