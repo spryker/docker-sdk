@@ -463,36 +463,10 @@ function buildBlackfireConfiguration(array $projectData): array
         return [];
     }
 
-    validateBlackfireConfig($blackfireConfig);
-
     return $blackfireConfig;
 }
 
 function isBlackFireEnabled(array $blackfireConfig): bool
 {
     return $blackfireConfig['enabled'] ?? false;
-}
-
-function validateBlackfireConfig(array $blackfireConfig): bool
-{
-    $missedParams = [];
-    $requireParams = [
-        'server-id',
-        'server-token',
-    ];
-
-    foreach ($requireParams as $requireParam) {
-        if (!isset($blackfireConfig[$requireParam])) {
-            $missedParams[] = $requireParam;
-        }
-    }
-
-    if (empty($missedParams)) {
-        return true;
-    }
-
-    throw new Exception(
-        'Blackfire configuration should contains next fields: ' . PHP_EOL . ' * '
-        . implode(PHP_EOL . ' * ', $missedParams) . PHP_EOL
-    );
 }
