@@ -459,14 +459,14 @@ function buildBlackfireConfiguration(array $projectData): array
 
     $blackfireConfig = $projectData['docker']['blackfire'];
 
-    if (!isBlackFireEnabled($blackfireConfig)) {
+    if (!isBlackfireEnabled($blackfireConfig)) {
         return [];
     }
 
     return $blackfireConfig;
 }
 
-function isBlackFireEnabled(array $blackfireConfig): bool
+function isBlackfireEnabled(array $blackfireConfig): bool
 {
     return $blackfireConfig['enabled'] ?? false;
 }
