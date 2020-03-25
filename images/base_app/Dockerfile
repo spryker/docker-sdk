@@ -8,9 +8,6 @@ RUN mkdir -p /cache && chmod 0777 /cache
 # Intermediate container - base for app, with composer deps
 FROM ${SPRYKER_PLATFORM_IMAGE} AS spryker_app_dependencies
 
-ARG BLACKFIRE_ENABLED
-RUN bash -c '[ "${BLACKFIRE_ENABLED}" == "1" ] && mv /usr/local/etc/php/conf.d/blackfire.ini.dist /usr/local/etc/php/conf.d/blackfire.ini || true'
-
 # Create log directory
 ARG SPRYKER_LOG_DIRECTORY
 ENV SPRYKER_LOG_DIRECTORY=${SPRYKER_LOG_DIRECTORY}
@@ -32,7 +29,7 @@ ARG GITHUB_TOKEN
 ARG SPRYKER_COMPOSER_MODE
 RUN --mount=type=cache,target=/home/spryker/.composer/cache,from=composer_cache,source=/cache \
   bash -c 'if [ ! -z $GITHUB_TOKEN ]; then export COMPOSER_AUTH="{\"github-oauth\": {\"github.com\": \"${GITHUB_TOKEN}\"}}"; fi; \
-    composer install --no-interaction ${SPRYKER_COMPOSER_MODE}'
+    composer install --no-scripts --no-interaction ${SPRYKER_COMPOSER_MODE}'
 
 ### Intermediate container - with dependencies, PHP code and configs
 FROM spryker_app_dependencies AS spryker_app_base
@@ -75,6 +72,12 @@ COPY ${DEPLOYMENT_PATH}/context/php/conf.d/opcache.ini /usr/local/etc/php/conf.d
 
 # Run FPM as default command
 USER root
+
+ARG BLACKFIRE_ENABLED
+RUN bash -c '[ "${BLACKFIRE_ENABLED}" == "1" ] && mv /usr/local/etc/php/disabled/blackfire.ini /usr/local/etc/php/conf.d/blackfire.ini || true'
+ARG NEWRELIC_ENABLED=1
+RUN bash -c '[ "${NEWRELIC_ENABLED}" == "1" ] && mv /usr/local/etc/php/disabled/newrelic.ini /usr/local/etc/php/conf.d/newrelic.ini || true'
+
 RUN rm -rf /var/run/opcache/*
 RUN chown -R spryker:spryker /home/spryker
 
