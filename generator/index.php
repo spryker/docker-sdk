@@ -451,6 +451,11 @@ function isHost(string $knownHost): bool
     return true;
 }
 
+/**
+ * @param array $projectData
+ *
+ * @return array
+ */
 function buildBlackfireConfiguration(array $projectData): array
 {
     if (!isset($projectData['docker']['blackfire'])) {
@@ -466,6 +471,11 @@ function buildBlackfireConfiguration(array $projectData): array
     return $blackfireConfig;
 }
 
+/**
+ * @param array $blackfireConfig
+ *
+ * @return bool
+ */
 function isBlackfireEnabled(array $blackfireConfig): bool
 {
     return $blackfireConfig['enabled'] ?? false;
