@@ -556,8 +556,8 @@ function doCli()
 
 function doPull()
 {
-    docker pull ${SPRYKER_PLATFORM_IMAGE}
-    execDockerCompose pull --ignore-pull-failures 2> /dev/null
+    docker pull ${SPRYKER_PLATFORM_IMAGE} || true
+    execDockerCompose pull --ignore-pull-failures 2> /dev/null || true
 }
 
 function stopCliContainer()
