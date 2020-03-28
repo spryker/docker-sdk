@@ -30,7 +30,7 @@ function buildAssets()
     sync start
     sync stop
 
-    runApplicationBuild "vendor/bin/install -r docker -s build-static"
+    runApplicationBuild "vendor/bin/install -r docker -s build-static -s build-static-development"
 }
 
 export -f buildAssets

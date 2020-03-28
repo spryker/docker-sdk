@@ -42,12 +42,7 @@ ARG MODE='development'
 ENV MODE=${MODE}
 
 RUN --mount=type=cache,target=/home/spryker/.npm,from=npm_cache,source=/cache \
-    BUILD_COMMAND=$([ "${MODE}" == "production" ] && echo -n ':production' || true) \
-    && vendor/bin/console frontend:project:install-dependencies -v \
-    && vendor/bin/console frontend:yves:install-dependencies -v \
-    && npm run "yves${BUILD_COMMAND}" \
-    && vendor/bin/console frontend:zed:install-dependencies -v \
-    && npm run "zed${BUILD_COMMAND}"
+    vendor/bin/install -r docker -s build-static -s "build-static-${MODE}"
 
 FROM alpine
 RUN mkdir -p /assets && chmod 0777 /assets
