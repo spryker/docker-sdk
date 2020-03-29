@@ -12,10 +12,10 @@ server {
 {% endblock host %}
   access_log /var/log/nginx/access.log vhost;
 
+{% block locations %}
   location / {
-{% block location %}
     proxy_pass http://{% block upstream %}{{ upstream }}{% endblock upstream %};
-{% endblock location %}
   }
+{% endblock locations %}
 {% endblock server %}
 }

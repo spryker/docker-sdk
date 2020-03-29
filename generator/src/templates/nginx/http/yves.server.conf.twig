@@ -11,5 +11,5 @@
     fastcgi_param SPRYKER_FE_HOST {{ host }};
     fastcgi_param SPRYKER_FE_PORT {{ port }};
 
-    root /data/public/Yves;
+    root /data/public/{{ endpointData['entry-point'] }};
 {% endblock location %}

@@ -57,9 +57,9 @@ services:
       - ./${DEPLOYMENT_PATH}/context/nginx/ssl:/etc/nginx/ssl:ro
       - ./public/Yves/favicon.ico:/public/favicon.ico:ro
 {% if _mountMode == 'baked' %}
-      - assets:/assets:ro
+      - assets:/data/public:ro
 {% elseif _mountMode == 'native' %}
-      - ./public:/data/public
+      - ./public:/data/public:ro
 {% else %}
       - ${SPRYKER_DOCKER_PREFIX}_${SPRYKER_DOCKER_TAG}_data_sync:/data
 {% endif %}
