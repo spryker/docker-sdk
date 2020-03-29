@@ -22,6 +22,7 @@ RUN chown spryker:spryker -R /home/spryker/.ssh
 
 WORKDIR /data
 USER spryker
+ENV SPRYKER_IN_DOCKER=1
 
 # Install composer modules for Spryker
 COPY --chown=spryker:spryker composer.json composer.lock ${srcRoot}/
@@ -29,7 +30,7 @@ ARG GITHUB_TOKEN
 ARG SPRYKER_COMPOSER_MODE
 RUN --mount=type=cache,target=/home/spryker/.composer/cache,from=composer_cache,source=/cache \
   bash -c 'if [ ! -z $GITHUB_TOKEN ]; then export COMPOSER_AUTH="{\"github-oauth\": {\"github.com\": \"${GITHUB_TOKEN}\"}}"; fi; \
-    composer install --no-scripts --no-interaction ${SPRYKER_COMPOSER_MODE}'
+    composer install --no-interaction ${SPRYKER_COMPOSER_MODE}'
 
 ### Intermediate container - with dependencies, PHP code and configs
 FROM spryker_app_dependencies AS spryker_app_base
@@ -46,7 +47,7 @@ ARG SPRYKER_DB_ENGINE
 ENV APPLICATION_ENV=${APPLICATION_ENV}
 ENV SPRYKER_DB_ENGINE=${SPRYKER_DB_ENGINE}
 
-RUN vendor/bin/install -r docker -s build
+RUN vendor/bin/install -r docker -s build -s build-production
 
 ### Final container, with testing tools, public directory and data
 FROM spryker_app_base AS spryker_app

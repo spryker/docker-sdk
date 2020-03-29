@@ -42,6 +42,8 @@ ARG DEPLOYMENT_PATH
 ENV DEPLOYMENT_PATH=${DEPLOYMENT_PATH}
 
 USER spryker
+ENV SPRYKER_IN_DOCKER=1
+
 # Install composer modules for Spryker
 COPY --chown=spryker:spryker composer.json composer.lock ${srcRoot}/
 ARG GITHUB_TOKEN

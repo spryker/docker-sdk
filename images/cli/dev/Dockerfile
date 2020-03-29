@@ -41,5 +41,6 @@ COPY ${DEPLOYMENT_PATH}/context/cli/execute.sh /usr/local/bin/execute.sh
 RUN chmod +x /usr/local/bin/execute.sh
 
 USER spryker
+ENV SPRYKER_IN_DOCKER=1
 
 ENV NEWRELIC_ENABLED=false
