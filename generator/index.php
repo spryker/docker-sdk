@@ -34,34 +34,7 @@ mkdir($deploymentDir . DS . 'context' . DS . 'nginx' . DS . 'conf.d', 0777, true
 mkdir($deploymentDir . DS . 'context' . DS . 'nginx' . DS . 'vhost.d', 0777, true);
 mkdir($deploymentDir . DS . 'context' . DS . 'nginx' . DS . 'stream.d', 0777, true);
 
-file_put_contents(
-    $deploymentDir . DS . 'context' . DS . 'nginx' . DS . 'conf.d' . DS . 'front-end.default.conf',
-    $twig->render('nginx/conf.d/front-end.default.conf.twig', $projectData)
-);
-file_put_contents(
-    $deploymentDir . DS . 'context' . DS . 'nginx' . DS . 'stream.d' . DS . 'front-end.default.conf',
-    $twig->render('nginx/stream.d/front-end.default.conf.twig', $projectData)
-);
-file_put_contents(
-    $deploymentDir . DS . 'context' . DS . 'nginx' . DS . 'vhost.d' . DS . 'zed.default.conf',
-    $twig->render('nginx/vhost.d/zed.default.conf.twig', $projectData)
-);
-file_put_contents(
-    $deploymentDir . DS . 'context' . DS . 'nginx' . DS . 'vhost.d' . DS . 'yves.default.conf',
-    $twig->render('nginx/vhost.d/yves.default.conf.twig', $projectData)
-);
-file_put_contents(
-    $deploymentDir . DS . 'context' . DS . 'nginx' . DS . 'vhost.d' . DS . 'glue.default.conf',
-    $twig->render('nginx/vhost.d/glue.default.conf.twig', $projectData)
-);
-file_put_contents(
-    $deploymentDir . DS . 'context' . DS . 'nginx' . DS . 'vhost.d' . DS . 'ssl.default.conf',
-    $twig->render('nginx/vhost.d/ssl.default.conf.twig', $projectData)
-);
-file_put_contents(
-    $deploymentDir . DS . 'context' . DS . 'nginx' . DS . 'conf.d' . DS . 'zed-rpc.default.conf',
-    $twig->render('nginx/conf.d/zed-rpc.default.conf.twig', $projectData)
-);
+$rpcServers = [];
 foreach ($projectData['groups'] ?? [] as $groupName => $groupData) {
     foreach ($groupData['applications'] ?? [] as $applicationName => $applicationData) {
         file_put_contents(
@@ -76,8 +49,21 @@ foreach ($projectData['groups'] ?? [] as $groupName => $groupData) {
             ])
         );
 
+        foreach ($applicationData['endpoints'] ?? [] as $endpoint => $endpointData) {
+            $entryPoint = $endpointData['entry-point'] ?? ucfirst(strtolower($applicationData['application']));
+            $projectData['groups'][$groupName]['applications'][$applicationName]['endpoints'][$endpoint]['entry-point'] = $entryPoint;
+        }
+
         if ($applicationData['application'] === 'zed') {
             foreach ($applicationData['endpoints'] ?? [] as $endpoint => $endpointData) {
+
+                if (!array_key_exists($endpointData['store'], $rpcServers) || !empty($endpointData['primal'])) {
+                    $rpcServers[$endpointData['store']] = function (&$projectData) use ($groupName, $applicationName, $endpoint) {
+                        $projectData['groups'][$groupName]['applications'][$applicationName]['endpoints'][$endpoint]['primal'] = true;
+                    };
+                }
+                $projectData['groups'][$groupName]['applications'][$applicationName]['endpoints'][$endpoint]['primal'] = false;
+
                 file_put_contents(
                     $deploymentDir . DS . 'env' . DS . 'cli' . DS . strtolower($endpointData['store']) . '.env',
                     $twig->render('env/cli/store.env.twig', [
@@ -126,6 +112,40 @@ foreach ($projectData['groups'] ?? [] as $groupName => $groupData) {
         }
     }
 }
+
+foreach ($rpcServers as $callback) {
+    $callback($projectData);
+}
+
+file_put_contents(
+    $deploymentDir . DS . 'context' . DS . 'nginx' . DS . 'conf.d' . DS . 'front-end.default.conf',
+    $twig->render('nginx/conf.d/front-end.default.conf.twig', $projectData)
+);
+file_put_contents(
+    $deploymentDir . DS . 'context' . DS . 'nginx' . DS . 'stream.d' . DS . 'front-end.default.conf',
+    $twig->render('nginx/stream.d/front-end.default.conf.twig', $projectData)
+);
+file_put_contents(
+    $deploymentDir . DS . 'context' . DS . 'nginx' . DS . 'vhost.d' . DS . 'zed.default.conf',
+    $twig->render('nginx/vhost.d/zed.default.conf.twig', $projectData)
+);
+file_put_contents(
+    $deploymentDir . DS . 'context' . DS . 'nginx' . DS . 'vhost.d' . DS . 'yves.default.conf',
+    $twig->render('nginx/vhost.d/yves.default.conf.twig', $projectData)
+);
+file_put_contents(
+    $deploymentDir . DS . 'context' . DS . 'nginx' . DS . 'vhost.d' . DS . 'glue.default.conf',
+    $twig->render('nginx/vhost.d/glue.default.conf.twig', $projectData)
+);
+file_put_contents(
+    $deploymentDir . DS . 'context' . DS . 'nginx' . DS . 'vhost.d' . DS . 'ssl.default.conf',
+    $twig->render('nginx/vhost.d/ssl.default.conf.twig', $projectData)
+);
+file_put_contents(
+    $deploymentDir . DS . 'context' . DS . 'nginx' . DS . 'conf.d' . DS . 'zed-rpc.default.conf',
+    $twig->render('nginx/conf.d/zed-rpc.default.conf.twig', $projectData)
+);
+
 file_put_contents(
     $deploymentDir . DS . 'env' . DS . 'testing.env',
     $twig->render('env/testing.env.twig', [

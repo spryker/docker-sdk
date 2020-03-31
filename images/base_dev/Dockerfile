@@ -20,6 +20,11 @@ RUN bash -c '[ "${BLACKFIRE_ENABLED}" == "1" ] && mv /usr/local/etc/php/disabled
 ARG NEWRELIC_ENABLED
 RUN bash -c '[ "${NEWRELIC_ENABLED}" == "1" ] && mv /usr/local/etc/php/disabled/newrelic.ini /usr/local/etc/php/conf.d/newrelic.ini || true'
 
+# PHP configuration
+COPY ${DEPLOYMENT_PATH}/context/php/php-fpm.d/worker.conf /usr/local/etc/php-fpm.d/worker.conf
+COPY ${DEPLOYMENT_PATH}/context/php/php.ini /usr/local/etc/php/
+COPY ${DEPLOYMENT_PATH}/context/php/conf.d/opcache_dev.ini /usr/local/etc/php/conf.d/
+
 RUN usermod -u ${USER_UID} spryker
 
 RUN mkdir -p ${SPRYKER_LOG_DIRECTORY}

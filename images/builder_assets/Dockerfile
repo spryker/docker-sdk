@@ -29,14 +29,7 @@ USER spryker
 COPY package.json package-lock.json ${srcRoot}/
 COPY frontend ${srcRoot}/frontend
 COPY tsconfig.json ${srcRoot}/
-RUN mkdir -p /assets/Zed \
-    && mkdir -p /assets/Yves \
-    && mkdir -p public/Zed \
-    && mkdir -p public/Yves \
-    && rm -rf public/Zed/assets \
-    && rm -rf public/Yves/assets \
-    && ln -s /assets/Zed public/Zed/assets \
-    && ln -s /assets/Yves public/Yves/assets
+COPY config/Yves ${srcRoot}/config/Yves
 
 ARG MODE='development'
 ENV MODE=${MODE}
@@ -46,6 +39,7 @@ RUN --mount=type=cache,target=/home/spryker/.npm,from=npm_cache,source=/cache \
 
 FROM alpine
 RUN mkdir -p /assets && chmod 0777 /assets
-COPY --from=builder /assets /assets
+COPY --from=builder /data/public /assets
+RUN find . -name "*.php" -type f -delete
 
 VOLUME [ "/assets" ]

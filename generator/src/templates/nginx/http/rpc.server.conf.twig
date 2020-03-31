@@ -1,6 +1,6 @@
 {% extends "nginx/http/application.server.conf.twig" %}
 {% block host %}
-  server_name {{ host }} {{ rpcServer }};
+  server_name {{ host }}{% if endpointData['primal'] %} {{rpcServer }}{% endif %};
   listen 80;
 {% endblock host %}
 {% block location %}
@@ -21,5 +21,5 @@
     fastcgi_param SPRYKER_API_PORT {{ (project['_endpointMap'][endpointData['store']]['glue'] | split(':'))[1] | default(80) }};
 {% endif %}
 
-    root /data/public/Zed;
+    root /data/public/{{ endpointData['entry-point'] }};
 {% endblock location %}

@@ -144,8 +144,6 @@ readonly USER_GID="1000"
 
 {% if isDevelopment %}
 [ "$1" != 'help' ] && echo -e "*** ${WARN}DEVELOPMENT MODE${NC}"
-DOCKER_EXTRA_OPTIONS+=" -v ${DEPLOYMENT_DIR}/context/php/conf.d/opcache_dev.ini:/usr/local/etc/php/conf.d/opcache.ini:ro"
-DOCKER_EXTRA_OPTIONS+=" -v ${DEPLOYMENT_DIR}/context/php/php.ini:/usr/local/etc/php/php.ini:ro"
 {% if _mountMode == 'native' %}
 DOCKER_EXTRA_OPTIONS+=" -v ${PROJECT_DIR}:/data -u ${USER_UID}:${USER_GID}"
 {% else %}
@@ -229,8 +227,8 @@ function runApplicationBuild()
 
 function buildCode()
 {
-    sync create
     sync init
+    sync create
     sync start
     sync stop
 
@@ -510,6 +508,7 @@ function runApp()
     createAssetsVolume ${IF_NOT_PERFORMED}
     execDockerCompose up -d --remove-orphans
     sync start
+    execDockerCompose restart frontend
 }
 
 function createAssetsVolume()
@@ -626,6 +625,9 @@ case ${command} in
         ;;
     run|start)
         runApp
+        waitFor database
+        waitFor search
+        waitFor key_value_store
         ;;
     up)
         doUp
@@ -640,6 +642,9 @@ case ${command} in
     restart)
         stopApp
         runApp
+        waitFor database
+        waitFor search
+        waitFor key_value_store
         ;;
     pull)
         doPull
@@ -704,8 +709,15 @@ case ${command} in
         sync clean
         ;;
     sync)
-        sync create
-        sync start
+        case ${1} in
+            '')
+                sync create
+                sync start
+                ;;
+            *)
+                sync ${1}
+                ;;
+        esac
         ;;
     help|'')
         showHelp

@@ -29,7 +29,7 @@ function sync()
 
         clean)
             docker-sync clean -c "${syncConf}"
-            docker volume rm "${syncVolume}" > /dev/null || true
+            docker volume rm "${syncVolume}" > /dev/null 2>&1  || true
             ;;
 
         stop)
@@ -37,13 +37,18 @@ function sync()
             ;;
         init)
             isRunning=$(docker ps -a --filter 'status=running' --filter 'name='${SPRYKER_DOCKER_PREFIX}_${SPRYKER_DOCKER_TAG}_data_sync --format "{{.Names}}")
-            isExist=$(docker ps -a --filter 'status=exited' --filter 'name='${SPRYKER_DOCKER_PREFIX}_${SPRYKER_DOCKER_TAG}_data_sync --format "{{.Names}}")
+            isExited=$(docker ps -a --filter 'status=exited' --filter 'name='${SPRYKER_DOCKER_PREFIX}_${SPRYKER_DOCKER_TAG}_data_sync --format "{{.Names}}")
 
-            if [ ! ${isRunning} ] && [ ${isExist} ];
+            if [ -z "${isRunning}" ] && [ -n "${isExited}" ];
             then
-                docker rm ${SPRYKER_DOCKER_PREFIX}_${SPRYKER_DOCKER_TAG}_data_sync
+                docker rm -f ${SPRYKER_DOCKER_PREFIX}_${SPRYKER_DOCKER_TAG}_data_sync
             fi
             ;;
+
+        logs|log)
+            docker-sync logs -c "${syncConf}" -f
+        ;;
+
         *)
             local runningSync="$(docker ps | grep 5000 | grep -c "${syncVolume}" | sed 's/^ *//')"
             if [ "$runningSync" -eq 0 ]; then
