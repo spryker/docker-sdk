@@ -40,8 +40,6 @@ function bootDeployment()
 {
     local knownHostsYamlPath=".known_hosts"
 
-    echo ${knownHostsYamlPath}
-
     verbose "${INFO}Building generator${NC}"
     docker build -t spryker_docker_sdk \
         -f "${SOURCE_DIR}/generator/Dockerfile" \

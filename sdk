@@ -7,6 +7,8 @@ pushd "${BASH_SOURCE%/*}" > /dev/null
 . bin/console.sh
 . bin/check-directories.sh
 . bin/boot-deployment.sh
+
+GIT_HASH=$(git rev-parse --verify HEAD || true)
 popd > /dev/null
 
 PROJECT_NAME=default
@@ -53,13 +55,56 @@ shift 1 || true
 
 case "${command}" in
     boot|bootstrap)
-        [ -f "${DEPLOY_SCRIPT}" ] && SPRYKER_SELF_SCRIPT=$0 ${DEPLOY_SCRIPT} down > /dev/null 2>&1 && sleep 2 || true
+
+        while getopts ":vs" opt; do
+            case ${opt} in
+                v)
+                    export VERBOSE=1
+                    ;;
+                # Skip booting if same repo has same hash
+                s)
+                    SKIP_BOOTSTRAP_IF_DONE=1
+                    ;;
+                # Unknown argument specified
+                \?)
+                    Registry::printHelp
+                    Console::error "Unknown argument ${INFO}-${OPTARG}${WARN} is acquired."
+                    exit 1
+                    ;;
+                # Specified argument without required value
+                :)
+                    Registry::printHelp
+                    Console::error "Option ${INFO}-${OPTARG}${WARN} requires an argument."
+                    exit 1
+                    ;;
+            esac
+        done
+        shift $((OPTIND - 1))
 
         # ------------
         SOURCE_DIR=${BASH_SOURCE%/*}
 
         # ------------
         PROJECT_YAML=${1:-deploy.yml}
+
+        if [ -n "${SKIP_BOOTSTRAP_IF_DONE}" ] && [ -f "${DESTINATION_DIR}/project.yml" ];
+        then
+
+            if cmp -s "${DESTINATION_DIR}/project.yml" "${PROJECT_YAML}"; then
+                if [ "$(cat "${DESTINATION_DIR}/_git" 2>/dev/null || true)" == "${GIT_HASH}" ];
+                then
+                    echo -e "${CYAN}Bootstrap is skipped as the branch is still the same.${NC}" > /dev/stderr
+                    echo -e "${DGRAY}Do not use ${LGRAY}-s${DGRAY} option to bootstrap anyway.${NC}" > /dev/stderr
+                    exit 0
+                fi
+            fi
+        fi
+
+        if [ -f "${DEPLOY_SCRIPT}" ] && [ -z "${BOOT_IN_DEVELOPMENT}" ]; then
+            echo -e -n "Stopping environment..." > /dev/stderr
+            ${DEPLOY_SCRIPT} down >/dev/null 2>&1 && sleep 1 || true
+            echo -e '[DONE]'
+        fi
 
         # ------------
         [ -d "${DEPLOYMENT_DIR}" ] && rm -rf "${DEPLOYMENT_DIR}"
@@ -75,6 +120,8 @@ case "${command}" in
         [ ! -d "${DESTINATION_DIR}" ] && mkdir "${DESTINATION_DIR}"
         cp -R "${DEPLOYMENT_DIR}/." "${DESTINATION_DIR}"
         rm -rf "${DEPLOYMENT_DIR}"
+
+        echo -n "${GIT_HASH}" > "${DESTINATION_DIR}/_git"
 
         [ ! -f .dockerignore ] && cp "${BASH_SOURCE%/*}/.dockerignore.default" .dockerignore
 
