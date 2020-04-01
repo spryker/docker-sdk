@@ -38,7 +38,7 @@ function doBaseImage()
         --build-arg SPRYKER_LOG_DIRECTORY=${logDirectory} \
         --build-arg SPRYKER_COMPOSER_MODE=${SPRYKER_COMPOSER_MODE} \
         --build-arg SPRYKER_COMPOSER_AUTOLOAD=${SPRYKER_COMPOSER_AUTOLOAD} \
-        --build-arg BLACKFIRE_ENABLED=${BLACKFIRE_ENABLED:-""} \
+        --build-arg ENABLED_PHP_EXTENSIONS="${ENABLED_PHP_EXTENSIONS}" \
         . 1>&2
 }
 

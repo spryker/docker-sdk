@@ -43,7 +43,7 @@ readonly XARGS_NO_RUN_IF_EMPTY=$(echo '' | xargs echo "--no-run-if-empty")
 # Predefined constants
 readonly APPLICATION_ENV="{{ environment | default('docker') }}"
 declare -a -r SPRYKER_APPLICATIONS=(Glue Yves Zed)
-readonly SPRYKER_PLATFORM_IMAGE=${SPRYKER_PLATFORM_IMAGE:-{{ image | default('spryker/php:7.2') }}}
+readonly SPRYKER_PLATFORM_IMAGE=${SPRYKER_PLATFORM_IMAGE:-{{ image['tag'] | default('spryker/php:7.2') }}}
 export SPRYKER_DOCKER_PREFIX=${COMPOSE_PROJECT_NAME}
 export SPRYKER_DOCKER_TAG="{{ tag | default('1.0') }}"
 export SPRYKER_COMPOSER_MODE="{{ composer.mode | default('--dev') }}"
@@ -65,6 +65,9 @@ readonly GITHUB_TOKEN=${GITHUB_TOKEN:-''}
 
 {% if _knownHosts is defined %}
 export KNOWN_HOSTS="{{ _knownHosts | default("") }}"
+{% endif %}
+{% if _phpExtensions is defined and _phpExtensions is not empty %}
+readonly ENABLED_PHP_EXTENSIONS="{{ _phpExtensions | join(' ')}}"
 {% endif %}
 
 function showHelp()
@@ -152,12 +155,17 @@ DOCKER_EXTRA_OPTIONS+=" -v ${SPRYKER_DOCKER_PREFIX}_${SPRYKER_DOCKER_TAG}_data_s
 {% endif %}
 {% endif %}
 
-{% if _blackfire['enabled'] %}
-readonly BLACKFIRE_ENABLED="{{ _blackfire['enabled'] ? 1 : "" }}"
-export BLACKFIRE_SERVER_ID="${BLACKFIRE_SERVER_ID:-"{{ _blackfire['server-id'] }}"}"
-export BLACKFIRE_SERVER_TOKEN="${BLACKFIRE_SERVER_TOKEN:-"{{ _blackfire['server-token'] }}"}"
-export BLACKFIRE_CLIENT_ID="${BLACKFIRE_CLIENT_ID:-"{{ _blackfire['client-id'] }}"}"
-export BLACKFIRE_CLIENT_TOKEN="${BLACKFIRE_CLIENT_TOKEN:-"{{ _blackfire['client-token'] }}"}"
+{% for envName, envValue in _envs %}
+export {{ envName }}="{{ "${%s:-%s}" | format(envName, envValue) }}"
+DOCKER_EXTRA_OPTIONS+=" -e {{ envName }}={{ envValue }}"
+{% endfor %}
+
+{% if services['blackfire'] %}
+readonly BLACKFIRE_ENABLED=1
+export BLACKFIRE_SERVER_ID="${BLACKFIRE_SERVER_ID:-"{{ services['blackfire']['server-id'] }}"}"
+export BLACKFIRE_SERVER_TOKEN="${BLACKFIRE_SERVER_TOKEN:-"{{ services['blackfire']['server-token'] }}"}"
+export BLACKFIRE_CLIENT_ID="${BLACKFIRE_CLIENT_ID:-"{{ services['blackfire']['client-id'] }}"}"
+export BLACKFIRE_CLIENT_TOKEN="${BLACKFIRE_CLIENT_TOKEN:-"{{ services['blackfire']['client-token'] }}"}"
 
 function setBlackfireEnvVariables()
 {
@@ -171,7 +179,6 @@ DOCKER_EXTRA_OPTIONS+=" --link frontend:{{ endpoint | split(':') | first }}"
 DOCKER_EXTRA_OPTIONS+=" -e BLACKFIRE_CLIENT_TOKEN=${BLACKFIRE_CLIENT_TOKEN}"
 DOCKER_EXTRA_OPTIONS+=" -e BLACKFIRE_CLIENT_ID=${BLACKFIRE_CLIENT_ID}"
 }
-
 {% endif %}
 
 function enableDebuggingMode()
