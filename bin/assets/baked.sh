@@ -81,10 +81,6 @@ function buildAssets()
     local volumeName=${SPRYKER_DOCKER_PREFIX}_assets
     local imageName=${SPRYKER_DOCKER_PREFIX}_builder_assets
 
-    verbose "${INFO}Creating docker volume '${SPRYKER_DOCKER_PREFIX}_assets'${NC}"
-    docker volume rm "${volumeName}" > /dev/null || true
-    docker volume create --name="${volumeName}"
-
     verbose "${INFO}Generating assets in ${mode} mode...${NC}"
 
     docker build -t "${imageName}:${SPRYKER_DOCKER_TAG}" \
@@ -98,13 +94,16 @@ function buildAssets()
         -f "${DEPLOYMENT_PATH}/images/builder_assets/Dockerfile" \
         .
 
+    verbose "${INFO}Creating docker volume '${SPRYKER_DOCKER_PREFIX}_assets'${NC}"
+    docker volume create --name="${volumeName}" > /dev/null 2>&1
+
     local tty
     [ -t -0 ] && tty='t' || tty=''
     docker run -i${tty} --rm \
-        -v "${volumeName}":/assets \
+        -v "${volumeName}":/tmp/assets:nocopy \
         --name="${imageName}" \
         "${imageName}:${SPRYKER_DOCKER_TAG}" \
-        true
+        sh -c "rm -rf /tmp/assets/* && cp -r /assets/* /tmp/assets"
 }
 
 export -f buildAssets
