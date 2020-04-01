@@ -495,10 +495,31 @@ function execDockerCompose()
 
 function doUp()
 {
-    doBuild ${IF_NOT_PERFORMED}
-    buildAssets ${IF_NOT_PERFORMED}
+    local doBuild="${IF_NOT_PERFORMED}"
+    local doAssets="${IF_NOT_PERFORMED}"
+    local doData="${IF_NOT_PERFORMED}"
+
+    for arg in "${@}"; do
+        case "${arg}" in
+            '--build')
+                doBuild=""
+                ;;
+            '--assets')
+                doAssets=""
+                ;;
+            '--data')
+                doData=""
+                ;;
+            *)
+                echo -e "\n${WARN}Unknown argument "${INFO}-${arg}${WARN}" is acquired.${NC}"
+                exit 1
+        esac
+    done
+
+    doBuild ${doBuild}
+    buildAssets ${doAssets}
     runApp
-    loadDemoData ${IF_NOT_PERFORMED}
+    loadDemoData ${doData}
     createSchedulerJobs ${IF_NOT_PERFORMED}
 }
 
@@ -586,6 +607,12 @@ case ${command} in
                 ;;
             # Unknown argument specified
             [?])
+                if [ "${OPTARG}" == '-' ];
+                then
+                    # Stop reading global arguments if `--` appeared
+                    break
+                fi
+
                 showHelp
                 echo -e "\n${WARN}Unknown argument "${INFO}-${OPTARG}${WARN}" is acquired.${NC}"
                 exit 1
@@ -630,7 +657,7 @@ case ${command} in
         waitFor key_value_store
         ;;
     up)
-        doUp
+        doUp "${@}"
         ;;
     demo|demo-data)
         runApp
