@@ -1,0 +1,2 @@
+      APPLICATION_ENV = {{ project['environment'] | env_var }}
+      SPRYKER_DEBUG_ENABLED = {{ (project['docker']['debug']['enabled'] ? 1 : 0) | env_var }}

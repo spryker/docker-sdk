@@ -47,7 +47,7 @@ ARG SPRYKER_DB_ENGINE
 ENV APPLICATION_ENV=${APPLICATION_ENV}
 ENV SPRYKER_DB_ENGINE=${SPRYKER_DB_ENGINE}
 
-RUN vendor/bin/install -r docker -s build -s build-production
+RUN vendor/bin/install -r docker -s build -s build-production -vvv
 
 ### Final container, with testing tools, public directory and data
 FROM spryker_app_base AS spryker_app

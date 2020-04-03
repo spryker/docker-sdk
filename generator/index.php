@@ -15,6 +15,28 @@ $platform = getenv('SPRYKER_DOCKER_SDK_PLATFORM') ?: 'linux'; // Possible values
 
 $loader = new FilesystemLoader(APPLICATION_SOURCE_DIR . DS . 'templates');
 $twig = new Environment($loader);
+$envVarEncoder = new class() {
+    private $isActive = false;
+
+    public function encode($value)
+    {
+
+        if ($this->isActive) {
+            return json_encode((string)$value);
+        }
+
+        return $value;
+    }
+
+    /**
+     * @param bool $isActive
+     */
+    public function setIsActive(bool $isActive): void
+    {
+        $this->isActive = $isActive;
+    }
+};
+$twig->addFilter(new \Twig\TwigFilter('env_var', [$envVarEncoder, 'encode'], ['is_safe' => ['all']]));
 $yamlParser = new Parser();
 
 $projectData = $yamlParser->parseFile($projectYaml);
@@ -30,10 +52,22 @@ $endpointMap = $projectData['_endpointMap'] = buildEndpointMapByStore($projectDa
 $blackfireConfig = $projectData['_blackfire'] = buildBlackfireConfiguration($projectData);
 
 mkdir($deploymentDir . DS . 'env' . DS . 'cli', 0777, true);
+mkdir($deploymentDir . DS . 'terraform', 0777, true);
+mkdir($deploymentDir . DS . 'terraform' . DS . 'cli', 0777, true);
 mkdir($deploymentDir . DS . 'context' . DS . 'nginx' . DS . 'conf.d', 0777, true);
 mkdir($deploymentDir . DS . 'context' . DS . 'nginx' . DS . 'vhost.d', 0777, true);
 mkdir($deploymentDir . DS . 'context' . DS . 'nginx' . DS . 'stream.d', 0777, true);
 
+foreach ($projectData['groups'] ?? [] as $groupName => $groupData) {
+    foreach ($groupData['applications'] ?? [] as $applicationName => $applicationData) {
+        foreach ($applicationData['endpoints'] ?? [] as $endpoint => $endpointData) {
+            $entryPoint = $endpointData['entry-point'] ?? ucfirst(strtolower($applicationData['application']));
+            $projectData['groups'][$groupName]['applications'][$applicationName]['endpoints'][$endpoint]['entry-point'] = $entryPoint;
+        }
+    }
+}
+
+$frontend = [];
 $rpcServers = [];
 foreach ($projectData['groups'] ?? [] as $groupName => $groupData) {
     foreach ($groupData['applications'] ?? [] as $applicationName => $applicationData) {
@@ -64,6 +98,11 @@ foreach ($projectData['groups'] ?? [] as $groupName => $groupData) {
                 }
                 $projectData['groups'][$groupName]['applications'][$applicationName]['endpoints'][$endpoint]['primal'] = false;
 
+                $services = array_replace_recursive(
+                    $projectData['regions'][$groupData['region']]['stores'][$endpointData['store']]['services'],
+                    $endpointData['services'] ?? []
+                );
+
                 file_put_contents(
                     $deploymentDir . DS . 'env' . DS . 'cli' . DS . strtolower($endpointData['store']) . '.env',
                     $twig->render('env/cli/store.env.twig', [
@@ -74,40 +113,89 @@ foreach ($projectData['groups'] ?? [] as $groupName => $groupData) {
                         'regionData' => $projectData['regions'][$groupData['region']],
                         'brokerConnections' => getBrokerConnections($projectData),
                         'storeName' => $endpointData['store'],
-                        'services' => array_replace_recursive(
-                            $projectData['regions'][$groupData['region']]['stores'][$endpointData['store']]['services'],
-                            $endpointData['services'] ?? []
-                        ),
+                        'services' => $services,
                         'endpointMap' => $endpointMap,
                     ])
                 );
+
+                $envVarEncoder->setIsActive(true);
+                file_put_contents(
+                    $deploymentDir . DS . 'terraform' . DS . 'cli' . DS . strtolower($endpointData['store']) . '.env',
+                    $twig->render('terraform/store.env.twig', [
+                        'applicationName' => $applicationName,
+                        'applicationData' => $applicationData,
+                        'project' => $projectData,
+                        'regionName' => $groupData['region'],
+                        'regionData' => $projectData['regions'][$groupData['region']],
+                        'brokerConnections' => getBrokerConnections($projectData),
+                        'storeName' => $endpointData['store'],
+                        'services' => $services,
+                        'endpointMap' => $endpointMap,
+                    ])
+                );
+                $envVarEncoder->setIsActive(false);
+
+                $host = strtok($endpoint, ':');
+                $frontend[$host] = [
+                    'type' => $applicationName,
+                    'document_root' => '/data/public/' . $endpointData['entry-point'],
+                    'environment' => [
+                        'APPLICATION_STORE' => $endpointData['store'],
+                        'SPRYKER_SEARCH_NAMESPACE' => $services['search']['namespace'],
+                        'SPRYKER_KEY_VALUE_STORE_NAMESPACE' => $services['key_value_store']['namespace'],
+                        'SPRYKER_BROKER_NAMESPACE' => $services['broker']['namespace'],
+                        'SPRYKER_SESSION_BE_NAMESPACE' => $services['session']['namespace'],
+                        'SPRYKER_FE_HOST' => strtok($endpointMap[$endpointData['store']]['yves'] ?? '', ':'),
+                        'SPRYKER_SSL_ENABLE' => ($projectData['docker']['ssl']['enabled'] ?? false) ? 1 : 0,
+                        'HTTPS' => ($projectData['docker']['ssl']['enabled'] ?? false) ? 1 : 0,
+                        'SPRYKER_BE_HOST' => $host
+                    ]
+                ];
             }
         }
 
         if ($applicationData['application'] === 'yves') {
             foreach ($applicationData['endpoints'] ?? [] as $endpoint => $endpointData) {
-                if ($endpointData['store'] !== ($projectData['docker']['testing']['store'] ?? '')) {
-                    continue;
-                }
-                file_put_contents(
-                    $deploymentDir . DS . 'env' . DS . 'cli' . DS . 'testing.env',
-                    $twig->render('env/cli/testing.env.twig', [
-                        'applicationName' => $applicationName,
-                        'applicationData' => $applicationData,
-                        'project' => $projectData,
-                        'host' => strtok($endpoint, ':'),
-                        'port' => strtok($endpoint) ?: $defaultPort,
-                        'regionName' => $groupData['region'],
-                        'regionData' => $projectData['regions'][$groupData['region']],
-                        'brokerConnections' => getBrokerConnections($projectData),
-                        'storeName' => $endpointData['store'],
-                        'services' => array_replace_recursive(
-                            $projectData['regions'][$groupData['region']]['stores'][$endpointData['store']]['services'],
-                            $endpointData['services'] ?? []
-                        ),
-                        'endpointMap' => $endpointMap,
-                    ])
+
+                $services = array_replace_recursive(
+                    $projectData['regions'][$groupData['region']]['stores'][$endpointData['store']]['services'],
+                    $endpointData['services'] ?? []
                 );
+
+                if ($endpointData['store'] === ($projectData['docker']['testing']['store'] ?? '')) {
+                    file_put_contents(
+                        $deploymentDir . DS . 'env' . DS . 'cli' . DS . 'testing.env',
+                        $twig->render('env/cli/testing.env.twig', [
+                            'applicationName' => $applicationName,
+                            'applicationData' => $applicationData,
+                            'project' => $projectData,
+                            'host' => strtok($endpoint, ':'),
+                            'port' => strtok($endpoint) ?: $defaultPort,
+                            'regionName' => $groupData['region'],
+                            'regionData' => $projectData['regions'][$groupData['region']],
+                            'brokerConnections' => getBrokerConnections($projectData),
+                            'storeName' => $endpointData['store'],
+                            'services' => $services,
+                            'endpointMap' => $endpointMap,
+                        ])
+                    );
+                }
+
+                $host = strtok($endpoint, ':');
+                $frontend[$host] = [
+                    'type' => $applicationName,
+                    'document_root' => '/data/public/' . $endpointData['entry-point'],
+                    'environment' => [
+                        'APPLICATION_STORE' => $endpointData['store'],
+                        'SPRYKER_SEARCH_NAMESPACE' => $services['search']['namespace'],
+                        'SPRYKER_KEY_VALUE_STORE_NAMESPACE' => $services['key_value_store']['namespace'],
+                        'SPRYKER_SESSION_FE_NAMESPACE' => $services['session']['namespace'],
+                        'SPRYKER_ZED_HOST' => strtok($endpointMap[$endpointData['store']]['zed'] ?? '', ':'),
+                        'SPRYKER_SSL_ENABLE' => ($projectData['docker']['ssl']['enabled'] ?? false) ? 1 : 0,
+                        'HTTPS' => ($projectData['docker']['ssl']['enabled'] ?? false) ? 1 : 0,
+                        'SPRYKER_FE_HOST' => $host
+                    ]
+                ];
             }
         }
     }
@@ -159,6 +247,20 @@ file_put_contents(
         'project' => $projectData,
         'endpointMap' => $endpointMap,
     ])
+);
+
+$envVarEncoder->setIsActive(true);
+file_put_contents(
+    $deploymentDir . DS . 'terraform/environment.tf',
+    $twig->render('terraform/environment.tf.twig', [
+        'brokerConnections' => getBrokerConnections($projectData),
+        'project' => $projectData,
+    ])
+);
+$envVarEncoder->setIsActive(false);
+file_put_contents(
+    $deploymentDir . DS . 'terraform/frontend.json',
+    json_encode($frontend, JSON_PRETTY_PRINT)
 );
 
 file_put_contents(
@@ -344,13 +446,13 @@ function getBrokerConnections(array $projectData): string
         foreach ($regionData['stores'] ?? [] as $storeName => $storeData) {
             $localServiceData = array_replace($brokerServiceData, $storeData['services']['broker']);
             $connections[$storeName] = [
-                'RABBITMQ_CONNECTION_NAME' => $storeName . '-connection',
-                'RABBITMQ_HOST' => 'broker',
-                'RABBITMQ_PORT' => $localServiceData['port'] ?? 5672,
-                'RABBITMQ_USERNAME' => $localServiceData['api']['username'],
-                'RABBITMQ_PASSWORD' => $localServiceData['api']['password'],
+//                'RABBITMQ_CONNECTION_NAME' => $storeName . '-connection',
+//                'RABBITMQ_HOST' => 'broker',
+//                'RABBITMQ_PORT' => $localServiceData['port'] ?? 5672,
+//                'RABBITMQ_USERNAME' => $localServiceData['api']['username'],
+//                'RABBITMQ_PASSWORD' => $localServiceData['api']['password'],
                 'RABBITMQ_VIRTUAL_HOST' => $localServiceData['namespace'],
-                'RABBITMQ_STORE_NAMES' => [$storeName], // check if connection is shared
+//                'RABBITMQ_STORE_NAMES' => [$storeName], // check if connection is shared
             ];
         }
     }
@@ -375,7 +477,9 @@ function buildEndpointMapByStore(array $projectGroups): array
 
             foreach ($application['endpoints'] as $endpoint => $endpointData) {
                 $storeName = $endpointData['store'];
-                $endpointMap[$storeName][$applicationName] = $endpoint;
+                if (!isset($endpointMap[$storeName][$applicationName])) {
+                    $endpointMap[$storeName][$applicationName] = $endpoint;
+                }
             }
         }
     }
