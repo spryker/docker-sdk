@@ -1,4 +1,4 @@
-  {{ applicationName }}:
+  {{ applicationName | lower }}:
     image: ${SPRYKER_DOCKER_PREFIX}_app:${SPRYKER_DOCKER_TAG}-{{ applicationData['application']}}
     depends_on:
       - rpc_server

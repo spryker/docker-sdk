@@ -9,7 +9,7 @@ services:
 {% for group in groups %}
 {% for applicationName, applicationData in group['applications'] %}
 
-  {{ applicationName }}:
+  {{ applicationName | lower }}:
     <<: *xdebug-volumes
 {% endfor %}
 {% endfor %}

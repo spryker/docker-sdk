@@ -39,7 +39,7 @@ services:
     depends_on:
 {% for group in groups %}
 {% for applicationName, applicationData in group['applications'] %}
-      - {{ applicationName }}
+      - {{ applicationName | lower }}
 {% endfor %}
 {% endfor %}
 {% for serviceName, serviceData in services %}
@@ -68,7 +68,7 @@ services:
 {% for group in groups %}
 {% for applicationName, applicationData in group['applications'] %}
 {% if applicationData['application'] == 'zed' %}
-      - {{ applicationName }}
+      - {{ applicationName | lower }}
 {% endif %}
 {% endfor %}
 {% endfor %}

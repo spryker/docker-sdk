@@ -11,8 +11,8 @@ server {
 {% for applicationName, applicationData in groupData['applications'] %}
 {% if applicationData['application'] == 'zed' %}
 
-upstream {{ applicationName }} {
-    server {{ applicationName }}:9000;
+upstream {{ applicationName | lower }} {
+    server {{ applicationName | lower }}:9000;
 }
 
 {% for endpoint, endpointData in applicationData['endpoints'] %}
@@ -20,6 +20,7 @@ upstream {{ applicationName }} {
 {% include "nginx/http/rpc.server.conf.twig" with {
     endpoint: endpoint,
     endpointData: endpointData,
+    storeServices: regions[groupData['region']]['stores'][endpointData['store']]['services'] | default([]),
     upstream: applicationName,
     project: _context
 } %}
