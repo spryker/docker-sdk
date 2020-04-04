@@ -14,5 +14,5 @@
     environment:
       SPRYKER_XDEBUG_HOST_IP: ${SPRYKER_XDEBUG_HOST_IP}
     env_file:
-      - ${DEPLOYMENT_PATH}/env/{{ applicationData['application'] }}.env
+      - ${DEPLOYMENT_PATH}/env/{{ applicationName }}.env
     <<: *app-volumes
