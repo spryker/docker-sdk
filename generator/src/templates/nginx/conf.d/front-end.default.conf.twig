@@ -21,7 +21,7 @@ server {
 
 {% for groupData in groups %}
 {% for applicationName, applicationData in groupData['applications'] %}
-upstream {{ applicationName }} {
+upstream {{ applicationName | lower }} {
     server {{ applicationData['application'] == 'zed' ? 'rpc_server' : applicationName }}:9000;
 }
 
@@ -30,6 +30,7 @@ upstream {{ applicationName }} {
     ssl: docker['ssl']['enabled'] | default(false),
     endpoint: endpoint,
     endpointData: endpointData,
+    storeServices: regions[groupData['region']]['stores'][endpointData['store']]['services'] | default([]),
     upstream: applicationName,
     project: _context
 } %}
@@ -45,6 +46,7 @@ upstream {{ applicationName }} {
     ssl: docker['ssl']['enabled'] | default(false),
     endpoint: endpoint,
     endpointData: endpointData,
+    storeServices: regions[groupData['region']]['stores'][endpointData['store']]['services'] | default([]),
     upstream: serviceName ~ (serviceData['web-port'] ? ':' ~ serviceData['proxy-port'] : ''),
     project: _context
 } %}

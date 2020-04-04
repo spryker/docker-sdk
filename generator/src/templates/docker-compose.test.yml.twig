@@ -24,7 +24,7 @@ services:
 {% for group in groups %}
 {% for applicationName, applicationData in group['applications'] %}
 
-  {{ applicationName }}:
+  {{ applicationName | lower }}:
     <<: *test-envfile
 {% endfor %}
 {% endfor %}

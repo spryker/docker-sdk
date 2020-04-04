@@ -37,7 +37,7 @@ function doExport()
         asset|assets)
             assertDestinationDirectory "${destinationPath}" 1>&2
             doBaseImage 1>&2
-            buildAssets "" "production" 1>&2
+            buildAssets 1>&2
             exportAssets "${tag}" "${destinationPath}"
         ;;
         image|images)

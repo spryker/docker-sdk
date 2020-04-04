@@ -77,7 +77,7 @@ function buildAssets()
         return ${__TRUE}
     fi
 
-    local mode=${2:-development}
+    local mode=${SPRYKER_ASSETS_MODE}
     local volumeName=${SPRYKER_DOCKER_PREFIX}_assets
     local imageName=${SPRYKER_DOCKER_PREFIX}_builder_assets
 

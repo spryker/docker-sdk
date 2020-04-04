@@ -1,4 +1,4 @@
-  {{ applicationName }}:
+  {{ applicationName | lower }}:
     image: ${SPRYKER_DOCKER_PREFIX}_app:${SPRYKER_DOCKER_TAG}-{{ applicationData['application']}}
     depends_on:
       - rpc_server
@@ -13,5 +13,5 @@
     environment:
       SPRYKER_XDEBUG_HOST_IP: ${SPRYKER_XDEBUG_HOST_IP}
     env_file:
-      - ${DEPLOYMENT_PATH}/env/{{ applicationName }}.env
+      - ${DEPLOYMENT_PATH}/env/{{ applicationData['application'] }}.env
     <<: *app-volumes
