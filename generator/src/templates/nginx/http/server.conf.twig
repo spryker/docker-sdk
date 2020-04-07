@@ -6,14 +6,18 @@ server {
     server_name {{ host }};
     listen {{ port }} {{ ssl ? 'ssl http2' }};
 {% if ssl %}
+
 {% include "nginx/vhost.d/ssl.default.conf.twig" with _context %}
+
 {% endif %}
 {% block auth %}
 {% if endpointData['auth']['engine'] is not empty %}
+
 {% include "nginx/auth/#{endpointData['auth']['engine']}.conf.twig" with {
   endpointData: endpointData,
   host: host,
 } %}
+
 {% endif %}
 {% endblock auth %}
 {% endblock host %}

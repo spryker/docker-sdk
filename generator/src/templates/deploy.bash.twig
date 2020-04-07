@@ -530,6 +530,7 @@ function runApp()
     createAssetsVolume ${IF_NOT_PERFORMED}
     execDockerCompose up -d --remove-orphans
     sync start
+    execDockerCompose restart frontend
 }
 
 function createAssetsVolume()

@@ -1,3 +1,10 @@
+server {
+    server_name _ default; # This is just an invalid value which will never trigger on a real hostname.
+    listen 80;
+    access_log off;
+    return 200;
+}
+
 {% for groupData in groups %}
 {% for applicationName, applicationData in groupData['applications'] %}
 {% for endpoint, endpointData in applicationData['endpoints'] %}

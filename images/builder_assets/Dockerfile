@@ -37,8 +37,7 @@ RUN --mount=type=cache,target=/home/spryker/.npm,from=npm_cache,source=/cache \
 
 FROM nginx:1.17.9-alpine
 RUN mkdir -p /data/public && chmod 0777 /data/public
-COPY --from=builder /data/public /data/public
-RUN find . -name "*.php" -type f -delete
+COPY --from=builder --chown=root:root /data/public /data/public
 
 ARG DEPLOYMENT_PATH
 

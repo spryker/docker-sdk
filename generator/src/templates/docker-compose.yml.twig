@@ -50,10 +50,12 @@ services:
     environment:
       DHPARAM_BITS: 1024
       DHPARAM_GENERATION: "false"
+      ALLOWED_IP: "127.0.0.1"
     volumes:
       - ./${DEPLOYMENT_PATH}/context/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
       - ./${DEPLOYMENT_PATH}/context/nginx/conf.d/front-end.default.conf:/etc/nginx/conf.d/default.conf:ro
       - ./${DEPLOYMENT_PATH}/context/nginx/stream.d/front-end.default.conf:/etc/nginx/stream.d/default.conf:ro
+      - ./${DEPLOYMENT_PATH}/context/nginx/auth:/etc/nginx/auth:ro
       - ./${DEPLOYMENT_PATH}/context/nginx/ssl:/etc/nginx/ssl:ro
 {% if _mountMode == 'baked' %}
       - assets:/data/public:ro
@@ -79,6 +81,7 @@ services:
     environment:
       DHPARAM_BITS: 1024
       DHPARAM_GENERATION: "false"
+      ALLOWED_IP: "127.0.0.1"
     volumes:
       - ./${DEPLOYMENT_PATH}/context/nginx/conf.d/zed-rpc.default.conf:/etc/nginx/conf.d/default.conf:ro
       - ./${DEPLOYMENT_PATH}/context/nginx/vhost.d:/etc/nginx/vhost.d:ro

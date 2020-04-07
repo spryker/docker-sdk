@@ -9,4 +9,6 @@
     location @proxy {
         return 404;
     }
+
+    root /data/public/{{ endpointData['entry-point'] }};
 {% endblock locations %}

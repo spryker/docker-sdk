@@ -55,7 +55,7 @@ mkdir($deploymentDir . DS . 'env' . DS . 'cli', 0777, true);
 mkdir($deploymentDir . DS . 'terraform', 0777, true);
 mkdir($deploymentDir . DS . 'terraform' . DS . 'cli', 0777, true);
 mkdir($deploymentDir . DS . 'context' . DS . 'nginx' . DS . 'conf.d', 0777, true);
-mkdir($deploymentDir . DS . 'context' . DS . 'nginx' . DS . 'vhost.d', 0777, true);
+mkdir($authFolder = $deploymentDir . DS . 'context' . DS . 'nginx' . DS . 'auth', 0777, true);
 mkdir($deploymentDir . DS . 'context' . DS . 'nginx' . DS . 'stream.d', 0777, true);
 mkdir($deploymentDir . DS . 'context' . DS . 'nginx' . DS . 'frontend', 0777, true);
 
@@ -68,6 +68,7 @@ foreach ($projectData['groups'] ?? [] as $groupName => $groupData) {
     }
 }
 
+$projectData['_storeSpecific']  = getStoreSpecific($projectData);
 $projectData['_applications'] = [];
 $frontend = [];
 $rpcServers = [];
@@ -100,6 +101,15 @@ foreach ($projectData['groups'] ?? [] as $groupName => $groupData) {
             $frontend[$host] = [
                 'type' => $applicationName,
             ];
+
+            $authEngine = $endpointData['auth']['engine'] ?? 'none';
+            if ($authEngine === 'basic') {
+                file_put_contents(
+                    $authFolder . DS . $host . '.htpasswd',
+                    generateHtPassword($endpointData['auth']['username'], $endpointData['auth']['password']),
+                    FILE_APPEND
+                );
+            }
 
             if ($applicationData['application'] === 'zed') {
                 if (!array_key_exists($endpointData['store'], $rpcServers) || !empty($endpointData['primal'])) {
@@ -188,22 +198,6 @@ file_put_contents(
 file_put_contents(
     $deploymentDir . DS . 'context' . DS . 'nginx' . DS . 'stream.d' . DS . 'front-end.default.conf',
     $twig->render('nginx/stream.d/front-end.default.conf.twig', $projectData)
-);
-file_put_contents(
-    $deploymentDir . DS . 'context' . DS . 'nginx' . DS . 'vhost.d' . DS . 'zed.default.conf',
-    $twig->render('nginx/vhost.d/zed.default.conf.twig', $projectData)
-);
-file_put_contents(
-    $deploymentDir . DS . 'context' . DS . 'nginx' . DS . 'vhost.d' . DS . 'yves.default.conf',
-    $twig->render('nginx/vhost.d/yves.default.conf.twig', $projectData)
-);
-file_put_contents(
-    $deploymentDir . DS . 'context' . DS . 'nginx' . DS . 'vhost.d' . DS . 'glue.default.conf',
-    $twig->render('nginx/vhost.d/glue.default.conf.twig', $projectData)
-);
-file_put_contents(
-    $deploymentDir . DS . 'context' . DS . 'nginx' . DS . 'vhost.d' . DS . 'ssl.default.conf',
-    $twig->render('nginx/vhost.d/ssl.default.conf.twig', $projectData)
 );
 file_put_contents(
     $deploymentDir . DS . 'context' . DS . 'nginx' . DS . 'conf.d' . DS . 'zed-rpc.default.conf',
@@ -445,6 +439,31 @@ function getBrokerConnections(array $projectData): string
 }
 
 /**
+ * @param array $projectData
+ *
+ * @return string
+ */
+function getStoreSpecific(array $projectData): string
+{
+    $storeSpecific = [];
+    foreach ($projectData['regions'] as $regionName => $regionData) {
+        foreach ($regionData['stores'] ?? [] as $storeName => $storeData) {
+
+            $services = $storeData['services'];
+            $storeSpecific[$storeName] = [
+                'APPLICATION_STORE' => $storeName,
+                'SPRYKER_SEARCH_NAMESPACE' => $services['search']['namespace'],
+                'SPRYKER_KEY_VALUE_STORE_NAMESPACE' => $services['key_value_store']['namespace'],
+                'SPRYKER_BROKER_NAMESPACE' => $services['broker']['namespace'],
+                'SPRYKER_SESSION_BE_NAMESPACE' => $services['session']['namespace'],
+            ];
+        }
+    }
+
+    return json_encode($storeSpecific);
+}
+
+/**
  * @param array $projectGroups
  *
  * @return string[]
@@ -603,4 +622,24 @@ function validateBlackfireConfig(array $blackfireConfig): bool
         'Blackfire configuration should contains next fields: ' . PHP_EOL . ' * '
         . implode(PHP_EOL . ' * ', $missedParams) . PHP_EOL
     );
+}
+
+function generateSalt($length = 16)
+{
+    if (@is_readable('/dev/urandom')) {
+        $f = fopen('/dev/urandom', 'rb');
+        $salt = fread($f, $length);
+        fclose($f);
+
+        return $salt;
+    }
+
+    return random_bytes($length);
+}
+
+function generateHtPassword($username, $password)
+{
+    $salt = generateSalt();
+
+    return sprintf('%s:{SSHA}%s', $username, base64_encode(sha1($password . $salt, true) . $salt));
 }
