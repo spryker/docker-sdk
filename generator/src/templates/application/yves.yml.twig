@@ -7,10 +7,6 @@
       - search
     networks:
       - services
-    links:
-{% for storeName, storeData in project['regions'][regionName]['stores'] %}
-      - rpc_server:rpc_server_{{ storeName | lower }}
-{% endfor %}
     environment:
       SPRYKER_XDEBUG_HOST_IP: ${SPRYKER_XDEBUG_HOST_IP}
     env_file:

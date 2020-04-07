@@ -8,8 +8,10 @@ x-volumes:
 services:
 {% for group in groups %}
 {% for applicationName, applicationData in group['applications'] %}
+{% if applicationData['application'] != 'static' %}
 
   {{ applicationName | lower }}:
     <<: *xdebug-volumes
+{% endif %}
 {% endfor %}
 {% endfor %}

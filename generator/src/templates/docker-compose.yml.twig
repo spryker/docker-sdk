@@ -17,14 +17,6 @@ services:
     networks:
       - services
       - public
-    links:
-{% for group in groups %}
-{% for applicationName, applicationData in group['applications'] %}
-{% for endpoint, endpointData in applicationData['endpoints'] %}
-      - frontend:{{ endpoint | split(':') | first }}
-{% endfor %}
-{% endfor %}
-{% endfor %}
 {% endif %}
 
   frontend:
@@ -34,8 +26,14 @@ services:
       - "{{ port }}:{{ port }}"
 {% endfor %}
     networks:
-      - services
-      - public
+      services:
+        aliases:
+{% for host in _hosts %}
+{% if host != 'localhost' %}
+          - {{ host }}
+{% endif %}
+{% endfor %}
+      public:
     depends_on:
 {% for group in groups %}
 {% for applicationName, applicationData in group['applications'] %}
@@ -76,8 +74,14 @@ services:
 {% endfor %}
 {% endfor %}
     networks:
-      - services
-      - private
+      services:
+        aliases:
+{% for region in regions %}
+{% for storeName, storeData in region['stores'] %}
+          - rpc_server_{{ storeName | lower }}
+{% endfor %}
+{% endfor %}
+      private:
     environment:
       DHPARAM_BITS: 1024
       DHPARAM_GENERATION: "false"

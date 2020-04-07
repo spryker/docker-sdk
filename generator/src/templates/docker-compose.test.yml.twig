@@ -9,23 +9,14 @@ x-env_file:
   env_file:
     - ${DEPLOYMENT_PATH}/env/testing.env
 
-x-links:
-  &test-links
-  links:
-{% for group in groups %}
-{% for applicationName, applicationData in group['applications'] %}
-{% for endpoint, endpointData in applicationData['endpoints'] %}
-      - frontend:{{ endpoint | split(':') | first }}
-{% endfor %}
-{% endfor %}
-{% endfor %}
-
 services:
 {% for group in groups %}
 {% for applicationName, applicationData in group['applications'] %}
+{% if applicationData['application'] != 'static' %}
 
   {{ applicationName | lower }}:
     <<: *test-envfile
+{% endif %}
 {% endfor %}
 {% endfor %}
 
@@ -38,7 +29,6 @@ services:
     ports:
       - 4444:4444
     command: "phantomjs --webdriver=4444 --disk-cache=true --load-images=false --webdriver-loglevel=DEBUG"
-    <<: *test-links
 
   testing:
     image: ${SPRYKER_DOCKER_PREFIX}_cli:${SPRYKER_DOCKER_TAG}
@@ -56,7 +46,6 @@ services:
       - ${DEPLOYMENT_PATH}/env/cli/{{ docker['testing']['store'] | lower }}.env
       - ${DEPLOYMENT_PATH}/env/cli/testing.env
     <<: *app-volumes
-    <<: *test-links
     tty: true
     command:
       - "nc"

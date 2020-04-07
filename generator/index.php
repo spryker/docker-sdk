@@ -48,6 +48,7 @@ $projectData['_platform'] = $platform;
 $mountMode = $projectData['_mountMode'] = retrieveMountMode($projectData, $platform);
 $projectData['_ports'] = retrieveUniquePorts($projectData);
 $defaultPort = $projectData['_defaultPort'] = getDefaultPort($projectData);
+$hosts = $projectData['_hosts'] = retrieveHostNames($projectData);
 $blackfireConfig = $projectData['_blackfire'] = buildBlackfireConfiguration($projectData);
 
 mkdir($deploymentDir . DS . 'env' . DS . 'cli', 0777, true);
@@ -279,7 +280,7 @@ echo shell_exec(sprintf(
     'PFX_PASSWORD="%s" DESTINATION=%s ./openssl/generate.sh %s',
     addslashes($projectData['docker']['ssl']['pfx-password'] ?? 'secret'),
     $sslDir,
-    implode(' ', retrieveHostNames($projectData))
+    implode(' ', $hosts)
 ));
 
 copy($sslDir . DS . 'ca.pfx', $deploymentDir . DS . 'spryker.pfx');
