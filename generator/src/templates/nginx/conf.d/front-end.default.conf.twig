@@ -6,7 +6,7 @@ server {
     access_log /var/log/nginx/access.log vhost;
     return 502;
 {% if docker['ssl']['enabled'] %}
-    include /etc/nginx/vhost.d/ssl.default.conf;
+    {% include "nginx/vhost.d/ssl.default.conf.twig" with _context %}
 {% endif %}
 }
 

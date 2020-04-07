@@ -1,5 +1,5 @@
 #!/bin/sh
-{% set envVariables = [] %}
+{% set envVariables = ["\$ALLOWED_IP"] %}
 {% for groupData in groups %}
 {% for applicationName, applicationData in groupData['applications'] %}
 {% if applicationData['application'] != 'static' %}

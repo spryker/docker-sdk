@@ -3,19 +3,27 @@
 server {
 {% block server %}
 {% block host %}
-  server_name {{ host }};
-  listen {{ port }} {{ ssl ? 'ssl http2' }};
+    server_name {{ host }};
+    listen {{ port }} {{ ssl ? 'ssl http2' }};
 {% if ssl %}
-  include /etc/nginx/vhost.d/ssl.default.conf;
+{% include "nginx/vhost.d/ssl.default.conf.twig" with _context %}
 {% endif %}
+{% block auth %}
+{% if endpointData['auth']['engine'] is not empty %}
+{% include "nginx/auth/#{endpointData['auth']['engine']}.conf.twig" with {
+  endpointData: endpointData,
+  host: host,
+} %}
+{% endif %}
+{% endblock auth %}
 {% endblock host %}
-  access_log /dev/stdout combined;
-  error_log /dev/stderr;
+    access_log /dev/stdout combined;
+    error_log /dev/stderr;
 
 {% block locations %}
-  location / {
-    proxy_pass http://{% block upstream %}{{ upstream }}{% endblock upstream %};
-  }
+    location / {
+        proxy_pass http://{% block upstream %}{{ upstream }}{% endblock upstream %};
+    }
 {% endblock locations %}
 {% endblock server %}
 }

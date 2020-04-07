@@ -2,7 +2,7 @@
 {% block server %}
 {{ parent() }}
 
-  include /etc/nginx/vhost.d/glue.default.conf;
+{% include "nginx/vhost.d/glue.default.conf.twig" with _context %}
 {% endblock server %}
 {% block location %}
 {{ parent() }}

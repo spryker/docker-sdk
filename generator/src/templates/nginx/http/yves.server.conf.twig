@@ -2,7 +2,7 @@
 {% block server %}
 {{ parent() }}
 
-  include /etc/nginx/vhost.d/yves.default.conf;
+{% include "nginx/vhost.d/yves.default.conf.twig" with _context %}
 {% endblock server %}
 {% block location %}
 {{ parent() }}
