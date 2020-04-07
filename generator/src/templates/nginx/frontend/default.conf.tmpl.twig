@@ -13,6 +13,7 @@ server {
     ssl: false,
     endpoint: endpoint,
     endpointData: endpointData,
+    auth: endpointData['auth'] | default([]),
     storeServices: regions[groupData['region']]['stores'][endpointData['store']]['services'] | default([]),
     upstream: "${SPRYKER_NGINX_CGI_HOST_" ~ (applicationName | upper) ~ "}" ~ ":9000",
     rpcServer: null,

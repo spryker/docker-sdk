@@ -27,6 +27,7 @@ server {
     ssl: docker['ssl']['enabled'] | default(false),
     endpoint: endpoint,
     endpointData: endpointData,
+    auth: endpointData['auth'] | default([]),
     storeServices: regions[groupData['region']]['stores'][endpointData['store']]['services'] | default([]),
     upstream: (applicationData['application'] == 'zed' ? 'rpc_server' : applicationName | lower) ~ ":9000",
     rpcServer: "rpc_server_" ~ ( endpointData['store'] | lower ),

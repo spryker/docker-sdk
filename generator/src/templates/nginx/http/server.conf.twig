@@ -10,8 +10,9 @@ server {
 {% include "nginx/vhost.d/ssl.default.conf.twig" with _context %}
 
 {% endif %}
+{% endblock host %}
 {% block auth %}
-{% if endpointData['auth']['engine'] is not empty %}
+{% if auth['engine'] is not empty %}
 
 {% include "nginx/auth/#{endpointData['auth']['engine']}.conf.twig" with {
   endpointData: endpointData,
@@ -20,7 +21,6 @@ server {
 
 {% endif %}
 {% endblock auth %}
-{% endblock host %}
     access_log /dev/stdout combined;
     error_log /dev/stderr;
 

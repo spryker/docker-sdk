@@ -42,10 +42,10 @@ COPY --from=builder --chown=root:root /data/public /data/public
 ARG DEPLOYMENT_PATH
 
 RUN mkdir -p /etc/nginx/template/ && chmod 0777 /etc/nginx/template/
-COPY ${DEPLOYMENT_PATH}/context/nginx/frontend/default.conf.tmpl /etc/nginx/template/
-COPY ${DEPLOYMENT_PATH}/context/nginx/frontend/entrypoint.sh /
+COPY --chown=root:root ${DEPLOYMENT_PATH}/context/nginx/frontend/default.conf.tmpl /etc/nginx/template/
+COPY --chown=root:root ${DEPLOYMENT_PATH}/context/nginx/auth /etc/nginx/auth
+COPY --chown=root:root ${DEPLOYMENT_PATH}/context/nginx/frontend/entrypoint.sh /
 RUN chmod +x /entrypoint.sh
 
 ENTRYPOINT [ "/entrypoint.sh" ]
 CMD ["nginx", "-g", "daemon off;"]
-VOLUME [ "/data/public" ]

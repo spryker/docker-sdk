@@ -48,7 +48,6 @@ $projectData['_platform'] = $platform;
 $mountMode = $projectData['_mountMode'] = retrieveMountMode($projectData, $platform);
 $projectData['_ports'] = retrieveUniquePorts($projectData);
 $defaultPort = $projectData['_defaultPort'] = getDefaultPort($projectData);
-$endpointMap = $projectData['_endpointMap'] = buildEndpointMapByStore($projectData['groups']);
 $blackfireConfig = $projectData['_blackfire'] = buildBlackfireConfiguration($projectData);
 
 mkdir($deploymentDir . DS . 'env' . DS . 'cli', 0777, true);
@@ -59,19 +58,37 @@ mkdir($authFolder = $deploymentDir . DS . 'context' . DS . 'nginx' . DS . 'auth'
 mkdir($deploymentDir . DS . 'context' . DS . 'nginx' . DS . 'stream.d', 0777, true);
 mkdir($deploymentDir . DS . 'context' . DS . 'nginx' . DS . 'frontend', 0777, true);
 
+$primal = [];
 foreach ($projectData['groups'] ?? [] as $groupName => $groupData) {
     foreach ($groupData['applications'] ?? [] as $applicationName => $applicationData) {
         foreach ($applicationData['endpoints'] ?? [] as $endpoint => $endpointData) {
             $entryPoint = $endpointData['entry-point'] ?? ucfirst(strtolower($applicationData['application']));
             $projectData['groups'][$groupName]['applications'][$applicationName]['endpoints'][$endpoint]['entry-point'] = $entryPoint;
+
+            $application = $applicationData['application'];
+            $store = $endpointData['store'] ?? null;
+            $isPrimal = $store && (!empty($endpointData['primal']) || !array_key_exists($store, $primal));
+            if ($isPrimal) {
+                $primal[$store][$application] = function (&$projectData) use ($groupName, $applicationName, $application, $endpoint, $store) {
+                    $projectData['_endpointMap'][$store][$application] = $endpoint;
+                    $projectData['groups'][$groupName]['applications'][$applicationName]['endpoints'][$endpoint]['primal'] = true;
+                };
+            }
+            $projectData['groups'][$groupName]['applications'][$applicationName]['endpoints'][$endpoint]['primal'] = false;
         }
     }
 }
 
+foreach ($primal as $callbacks) {
+    foreach ($callbacks as $callback) {
+        $callback($projectData);
+    }
+}
+
+$endpointMap = $projectData['_endpointMap'];
 $projectData['_storeSpecific']  = getStoreSpecific($projectData);
 $projectData['_applications'] = [];
 $frontend = [];
-$rpcServers = [];
 foreach ($projectData['groups'] ?? [] as $groupName => $groupData) {
     foreach ($groupData['applications'] ?? [] as $applicationName => $applicationData) {
         if ($applicationData['application'] !== 'static') {
@@ -91,11 +108,6 @@ foreach ($projectData['groups'] ?? [] as $groupName => $groupData) {
         }
 
         foreach ($applicationData['endpoints'] ?? [] as $endpoint => $endpointData) {
-            $entryPoint = $endpointData['entry-point'] ?? ucfirst(strtolower($applicationData['application']));
-            $projectData['groups'][$groupName]['applications'][$applicationName]['endpoints'][$endpoint]['entry-point'] = $entryPoint;
-        }
-
-        foreach ($applicationData['endpoints'] ?? [] as $endpoint => $endpointData) {
 
             $host = strtok($endpoint, ':');
             $frontend[$host] = [
@@ -112,12 +124,6 @@ foreach ($projectData['groups'] ?? [] as $groupName => $groupData) {
             }
 
             if ($applicationData['application'] === 'zed') {
-                if (!array_key_exists($endpointData['store'], $rpcServers) || !empty($endpointData['primal'])) {
-                    $rpcServers[$endpointData['store']] = function (&$projectData) use ($groupName, $applicationName, $endpoint) {
-                        $projectData['groups'][$groupName]['applications'][$applicationName]['endpoints'][$endpoint]['primal'] = true;
-                    };
-                }
-                $projectData['groups'][$groupName]['applications'][$applicationName]['endpoints'][$endpoint]['primal'] = false;
 
                 $services = array_replace_recursive(
                     $projectData['regions'][$groupData['region']]['stores'][$endpointData['store']]['services'],
@@ -185,10 +191,6 @@ foreach ($projectData['groups'] ?? [] as $groupName => $groupData) {
             }
         }
     }
-}
-
-foreach ($rpcServers as $callback) {
-    $callback($projectData);
 }
 
 file_put_contents(
@@ -461,33 +463,6 @@ function getStoreSpecific(array $projectData): string
     }
 
     return json_encode($storeSpecific);
-}
-
-/**
- * @param array $projectGroups
- *
- * @return string[]
- */
-function buildEndpointMapByStore(array $projectGroups): array
-{
-    $endpointMap = [];
-
-    foreach ($projectGroups as $projectGroup) {
-        $applicationsPerRegion = $projectGroup['applications'];
-
-        foreach ($applicationsPerRegion as $application) {
-            $applicationName = $application['application'];
-
-            foreach ($application['endpoints'] as $endpoint => $endpointData) {
-                $storeName = $endpointData['store'] ?? null;
-                if ($storeName && !isset($endpointMap[$storeName][$applicationName])) {
-                    $endpointMap[$storeName][$applicationName] = $endpoint;
-                }
-            }
-        }
-    }
-
-    return $endpointMap;
 }
 
 /**
