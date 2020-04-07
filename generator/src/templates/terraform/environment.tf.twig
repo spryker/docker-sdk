@@ -2,6 +2,7 @@ locals {
   spryker_environment = {
 {% for groupName, groupData in project.groups %}
 {% for applicationName, applicationData in groupData['applications'] %}
+{% if applicationData['application'] != 'static' %}
     {{ applicationName }} = {
 {% include "terraform/application/" ~ (applicationData['application'] | lower) ~ ".tf.twig" with {
     applicationName: applicationName,
@@ -11,6 +12,7 @@ locals {
     project: project
 } %}
     }
+{% endif %}
 {% endfor %}
 {% endfor %}
   }

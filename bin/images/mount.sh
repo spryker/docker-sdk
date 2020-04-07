@@ -14,7 +14,6 @@ popd > /dev/null
 PROJECT_DIR="$( pwd )"
 DEPLOYMENT_DIR="$( cd ${BASH_SOURCE%/*} >/dev/null 2>&1 && pwd )"
 DEPLOYMENT_PATH="${DEPLOYMENT_DIR/$PROJECT_DIR/.}"
-APPLICATIONS=(Glue Yves Zed)
 
 function doCliImage()
 {
@@ -66,7 +65,7 @@ function buildBaseImages()
 
     doCliImage
 
-    for application in "${APPLICATIONS[@]}";
+    for application in "${SPRYKER_APPLICATIONS[@]}";
     do
         doTagByApplicationName ${application} ${SPRYKER_DOCKER_PREFIX}_app:${tag} > /dev/null
     done

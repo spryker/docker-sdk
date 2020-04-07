@@ -34,14 +34,15 @@ function doExport()
     shift $((OPTIND -1))
 
     case ${subCommand} in
-        asset|assets)
-            assertDestinationDirectory "${destinationPath}" 1>&2
-            doBaseImage 1>&2
-            buildAssets 1>&2
-            exportAssets "${tag}" "${destinationPath}"
-        ;;
+#        asset|assets)
+#            assertDestinationDirectory "${destinationPath}" 1>&2
+#            doBaseImage 1>&2
+#            buildAssets 1>&2
+#            exportAssets "${tag}" "${destinationPath}"
+#        ;;
         image|images)
-            buildBaseImages 1>&2
+            buildBaseImages --skip-cli 1>&2
+            buildFrontend 1>&2
             tagProdLikeImages "${tag}"
         ;;
         *)

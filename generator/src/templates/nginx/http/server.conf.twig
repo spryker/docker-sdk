@@ -1,4 +1,3 @@
-{% set ssl = project['docker']['ssl']['enabled'] | default(false) %}
 {% set port = (endpoint | split(':'))[1] | default(ssl ? 443 :80) %}
 {% set host = endpoint | split(':') | first %}
 server {
@@ -10,7 +9,8 @@ server {
   include /etc/nginx/vhost.d/ssl.default.conf;
 {% endif %}
 {% endblock host %}
-  access_log /var/log/nginx/access.log vhost;
+  access_log /dev/stdout combined;
+  error_log /dev/stderr;
 
 {% block locations %}
   location / {

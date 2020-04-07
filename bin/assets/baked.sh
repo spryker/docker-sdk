@@ -7,51 +7,51 @@ pushd "${BASH_SOURCE%/*}" > /dev/null
 . ../console.sh
 popd > /dev/null
 
-function exportAssets()
-{
-    local tag=${1}
-    local destinationPath=${2%/}
-
-    local dockerAssetsTmpDirectory="/_tmp"
-    local projectDockerAssetsTmpDirectory=${DEPLOYMENT_DIR}${dockerAssetsTmpDirectory}
-
-    rm -rf "${projectDockerAssetsTmpDirectory}"
-    mkdir -p "${projectDockerAssetsTmpDirectory}"
-
-    local command="true"
-
-    for application in "${SPRYKER_APPLICATIONS[@]}";
-    do
-        command="${command} && \$([ -d '/assets/${application}' ] && tar czf '/data${dockerAssetsTmpDirectory}/assets-${application}-${tag}.tar' -C '/assets/${application}' . || true)"
-    done
-
-    echo -e "Preparing assets archives..." > /dev/stderr
-
-    docker run --rm \
-        -e PROJECT_DIR='/data' \
-        -v "${DEPLOYMENT_DIR}/bin:/data/standalone" \
-        -v "${projectDockerAssetsTmpDirectory}:/data${dockerAssetsTmpDirectory}" \
-        --name="${SPRYKER_DOCKER_PREFIX}_builder_assets" \
-        "${SPRYKER_DOCKER_PREFIX}_builder_assets:${SPRYKER_DOCKER_TAG}" \
-        sh -c "${command}" 2>&1
-
-    echo -e "${INFO}The following assets archives have been prepared${NC}:" > /dev/stderr
-
-    for application in "${SPRYKER_APPLICATIONS[@]}";
-    do
-        local fileName="assets-${application}-${tag}.tar"
-        if [ ! -f "${projectDockerAssetsTmpDirectory}/${fileName}" ]; then
-            continue
-        fi
-
-        rm -f "${destinationPath}/${fileName}"
-        mv "${projectDockerAssetsTmpDirectory}/${fileName}" "${destinationPath}"
-
-        echo "${application} ${destinationPath}/${fileName}"
-    done
-
-    rm -rf "${projectDockerAssetsTmpDirectory}"
-}
+#function exportAssets()
+#{
+#    local tag=${1}
+#    local destinationPath=${2%/}
+#
+#    local dockerAssetsTmpDirectory="/_tmp"
+#    local projectDockerAssetsTmpDirectory=${DEPLOYMENT_DIR}${dockerAssetsTmpDirectory}
+#
+#    rm -rf "${projectDockerAssetsTmpDirectory}"
+#    mkdir -p "${projectDockerAssetsTmpDirectory}"
+#
+#    local command="true"
+#
+#    for application in "${SPRYKER_APPLICATIONS[@]}";
+#    do
+#        command="${command} && \$([ -d '/assets/${application}' ] && tar czf '/data${dockerAssetsTmpDirectory}/assets-${application}-${tag}.tar' -C '/assets/${application}' . || true)"
+#    done
+#
+#    echo -e "Preparing assets archives..." > /dev/stderr
+#
+#    docker run --rm \
+#        -e PROJECT_DIR='/data' \
+#        -v "${DEPLOYMENT_DIR}/bin:/data/standalone" \
+#        -v "${projectDockerAssetsTmpDirectory}:/data${dockerAssetsTmpDirectory}" \
+#        --name="${SPRYKER_DOCKER_PREFIX}_builder_assets" \
+#        "${SPRYKER_DOCKER_PREFIX}_builder_assets:${SPRYKER_DOCKER_TAG}" \
+#        sh -c "${command}" 2>&1
+#
+#    echo -e "${INFO}The following assets archives have been prepared${NC}:" > /dev/stderr
+#
+#    for application in "${SPRYKER_APPLICATIONS[@]}";
+#    do
+#        local fileName="assets-${application}-${tag}.tar"
+#        if [ ! -f "${projectDockerAssetsTmpDirectory}/${fileName}" ]; then
+#            continue
+#        fi
+#
+#        rm -f "${destinationPath}/${fileName}"
+#        mv "${projectDockerAssetsTmpDirectory}/${fileName}" "${destinationPath}"
+#
+#        echo "${application} ${destinationPath}/${fileName}"
+#    done
+#
+#    rm -rf "${projectDockerAssetsTmpDirectory}"
+#}
 
 function areAssetsBuilt()
 {
@@ -61,7 +61,7 @@ function areAssetsBuilt()
 
     if [ ! -z "${assetsHostFolder}" ];
     then
-      local assetsFolderFilesCount=$(docker run -i --rm -v ${SPRYKER_DOCKER_PREFIX}_assets:/assets ${SPRYKER_DOCKER_PREFIX}_cli:${SPRYKER_DOCKER_TAG} ls /assets|wc -l | sed 's/^ *//')
+      local assetsFolderFilesCount=$(docker run -i --rm -v ${SPRYKER_DOCKER_PREFIX}_assets:/data/public ${SPRYKER_DOCKER_PREFIX}_cli:${SPRYKER_DOCKER_TAG} ls /data/public|wc -l | sed 's/^ *//')
       [ ${assetsFolderFilesCount} -gt 0 ] && verbose "[BUILT]" && return ${__TRUE}
     fi
 
@@ -103,8 +103,8 @@ function buildAssets()
         -v "${volumeName}":/tmp/assets:nocopy \
         --name="${imageName}" \
         "${imageName}:${SPRYKER_DOCKER_TAG}" \
-        sh -c "rm -rf /tmp/assets/* && cp -r /assets/* /tmp/assets"
+        sh -c "rm -rf /tmp/assets/* && cp -r /data/public/* /tmp/assets"
 }
 
 export -f buildAssets
-export -f exportAssets
+#export -f exportAssets

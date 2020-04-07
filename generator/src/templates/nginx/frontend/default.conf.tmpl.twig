@@ -1,0 +1,17 @@
+{% for groupData in groups %}
+{% for applicationName, applicationData in groupData['applications'] %}
+{% for endpoint, endpointData in applicationData['endpoints'] %}
+{% set applicationType = applicationData['application'] == 'zed' ? 'rpc' : applicationData['application'] %}
+{% include "nginx/http/#{applicationType}.server.conf.twig" with {
+    ssl: false,
+    endpoint: endpoint,
+    endpointData: endpointData,
+    storeServices: regions[groupData['region']]['stores'][endpointData['store']]['services'] | default([]),
+    upstream: "${SPRYKER_NGINX_CGI_HOST_" ~ (applicationName | upper) ~ "}" ~ ":9000",
+    rpcServer: null,
+    zedHost: _endpointMap[endpointData['store']]['zed'] | default(''),
+    project: _context
+} %}
+{% endfor %}
+{% endfor %}
+{% endfor %}

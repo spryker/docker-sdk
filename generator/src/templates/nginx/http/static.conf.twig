@@ -1,17 +1,20 @@
     location /assets/ {
         root /data/public/{{ endpointData['entry-point'] }};
         access_log  off;
-        expires     30d;
+        expires     7d;
         add_header  Pragma public;
         add_header  Cache-Control "public, must-revalidate, proxy-revalidate";
+        etag on;
         try_files   $uri =404;
     }
 
     location / {
+        {{ index is not empty ? 'index ' ~ index : '' }}
         root /data/public/{{ endpointData['entry-point'] }};
         access_log  off;
-        expires     30d;
+        expires     7d;
         add_header  Pragma public;
         add_header  Cache-Control "public, must-revalidate, proxy-revalidate";
-        try_files   $uri @proxy;
+        etag on;
+        try_files   $uri $uri/ @proxy;
     }

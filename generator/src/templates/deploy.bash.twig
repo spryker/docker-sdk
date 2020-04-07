@@ -42,7 +42,7 @@ readonly XARGS_NO_RUN_IF_EMPTY=$(echo '' | xargs echo "--no-run-if-empty")
 
 # Predefined constants
 readonly APPLICATION_ENV="{{ environment | default('docker') }}"
-declare -a -r SPRYKER_APPLICATIONS=(Glue Yves Zed)
+declare -a -r SPRYKER_APPLICATIONS=({{ _applications | join(' ') | raw }})
 readonly SPRYKER_PLATFORM_IMAGE=${SPRYKER_PLATFORM_IMAGE:-{{ image | default('spryker/php:7.2') }}}
 export SPRYKER_DOCKER_PREFIX=${COMPOSE_PROJECT_NAME}
 export SPRYKER_DOCKER_TAG="{{ tag | default('1.0') }}"
@@ -387,7 +387,7 @@ function loadDemoData()
         initDatabase
 
         local demoDataSection=${2:-demodata}
-        execSpryker "vendor/bin/install -r docker -s init-storages-per-region -s ${demoDataSection}"
+        execSpryker "vendor/bin/install -r docker -s clean-storage -s init-storage -s init-storages-per-region -s ${demoDataSection}"
     done
 }
 
@@ -530,7 +530,6 @@ function runApp()
     createAssetsVolume ${IF_NOT_PERFORMED}
     execDockerCompose up -d --remove-orphans
     sync start
-    execDockerCompose restart frontend
 }
 
 function createAssetsVolume()

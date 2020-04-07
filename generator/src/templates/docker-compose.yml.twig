@@ -39,7 +39,9 @@ services:
     depends_on:
 {% for group in groups %}
 {% for applicationName, applicationData in group['applications'] %}
+{% if applicationData['application'] != 'static' %}
       - {{ applicationName | lower }}
+{% endif %}
 {% endfor %}
 {% endfor %}
 {% for serviceName, serviceData in services %}
@@ -84,6 +86,7 @@ services:
 
 {% for group in groups %}
 {% for applicationName, applicationData in group['applications'] %}
+{% if applicationData['application'] != 'static' %}
 
 {% include "application/" ~ (applicationData['application'] | lower) ~ ".yml.twig" with {
     applicationName: applicationName,
@@ -91,6 +94,7 @@ services:
     regionName: group['region'],
     project: _context
 } %}
+{% endif %}
 {% endfor %}
 {% endfor %}
 {% for serviceName, serviceData in services %}

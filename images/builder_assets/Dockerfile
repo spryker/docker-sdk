@@ -22,8 +22,6 @@ RUN bash -c '[ ! -z "$(which apk)" ] && apk update && apk add --no-cache \
      git \
      || true'
 
-RUN mkdir -p /assets && chmod 0777 /assets
-
 USER spryker
 
 COPY package.json package-lock.json ${srcRoot}/
@@ -37,9 +35,18 @@ ENV MODE=${MODE}
 RUN --mount=type=cache,target=/home/spryker/.npm,from=npm_cache,source=/cache \
     vendor/bin/install -r docker -s build-static -s "build-static-${MODE}"
 
-FROM alpine
-RUN mkdir -p /assets && chmod 0777 /assets
-COPY --from=builder /data/public /assets
+FROM nginx:1.17.9-alpine
+RUN mkdir -p /data/public && chmod 0777 /data/public
+COPY --from=builder /data/public /data/public
 RUN find . -name "*.php" -type f -delete
 
-VOLUME [ "/assets" ]
+ARG DEPLOYMENT_PATH
+
+RUN mkdir -p /etc/nginx/template/ && chmod 0777 /etc/nginx/template/
+COPY ${DEPLOYMENT_PATH}/context/nginx/frontend/default.conf.tmpl /etc/nginx/template/
+COPY ${DEPLOYMENT_PATH}/context/nginx/frontend/entrypoint.sh /
+RUN chmod +x /entrypoint.sh
+
+ENTRYPOINT [ "/entrypoint.sh" ]
+CMD ["nginx", "-g", "daemon off;"]
+VOLUME [ "/data/public" ]

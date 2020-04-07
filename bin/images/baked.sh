@@ -14,7 +14,6 @@ popd > /dev/null
 PROJECT_DIR="$( pwd )"
 DEPLOYMENT_DIR="$( cd ${BASH_SOURCE%/*} >/dev/null 2>&1 && pwd )"
 DEPLOYMENT_PATH="${DEPLOYMENT_DIR/$PROJECT_DIR/.}"
-APPLICATIONS=(Glue Yves Zed)
 
 function doBaseImage()
 {
@@ -72,7 +71,14 @@ function buildBaseImages()
     fi
 
     doBaseImage ${dbEngine} ${logDirectory}
-    doCliImage
+    if [ "${1}" != '--skip-cli' ]; then
+        doCliImage
+    fi
+}
+
+function buildFrontend()
+{
+    buildAssets
 }
 
 function tagProdLikeImages()
@@ -81,9 +87,10 @@ function tagProdLikeImages()
 
     echo -e "${INFO}The following images have been prepared${NC}:" > /dev/stderr
 
-    doTagByApplicationName Cli ${SPRYKER_DOCKER_PREFIX}_cli:${tag} ${SPRYKER_DOCKER_PREFIX}_cli:${SPRYKER_DOCKER_TAG}
+    #doTagByApplicationName Cli ${SPRYKER_DOCKER_PREFIX}_cli:${tag} ${SPRYKER_DOCKER_PREFIX}_cli:${SPRYKER_DOCKER_TAG}
+    doTagByApplicationName frontend ${SPRYKER_DOCKER_PREFIX}_frontend:${tag} ${SPRYKER_DOCKER_PREFIX}_builder_assets:${SPRYKER_DOCKER_TAG}
 
-    for application in "${APPLICATIONS[@]}";
+    for application in "${SPRYKER_APPLICATIONS[@]}";
     do
         doTagByApplicationName ${application} ${SPRYKER_DOCKER_PREFIX}_app:${tag} ${SPRYKER_DOCKER_PREFIX}_app:${SPRYKER_DOCKER_TAG}
     done

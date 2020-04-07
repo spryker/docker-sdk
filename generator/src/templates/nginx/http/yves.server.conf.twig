@@ -7,9 +7,9 @@
 {% block location %}
 {{ parent() }}
 
-    fastcgi_param SPRYKER_SESSION_FE_NAMESPACE "{{ storeServices['session']['namespace'] | default(endpointData['services']['session']['namespace']) }}";
-    fastcgi_param SPRYKER_FE_HOST {{ host }};
-    fastcgi_param SPRYKER_FE_PORT {{ port }};
+        fastcgi_param SPRYKER_SESSION_FE_NAMESPACE "{{ storeServices['session']['namespace'] | default(endpointData['services']['session']['namespace']) }}";
+        fastcgi_param SPRYKER_FE_HOST {{ host }};
+        fastcgi_param SPRYKER_FE_PORT {{ port }};
 
-    root /data/public/{{ endpointData['entry-point'] }};
+        root /data/public/{{ endpointData['entry-point'] }};
 {% endblock location %}

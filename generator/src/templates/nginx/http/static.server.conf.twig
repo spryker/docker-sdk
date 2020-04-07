@@ -1,0 +1,12 @@
+{% extends "nginx/http/server.conf.twig" %}
+{% block locations %}
+
+{% include "nginx/http/static.conf.twig" with {
+    endpointData: endpointData,
+    index: "index.html",
+} %}
+
+    location @proxy {
+        return 404;
+    }
+{% endblock locations %}
