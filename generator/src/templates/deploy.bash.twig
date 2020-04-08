@@ -53,9 +53,6 @@ readonly SPRYKER_ASSETS_MODE="{{ assets['mode'] | default('development') }}"
 readonly SPRYKER_DB_ENGINE="{{ services['database']['engine'] == 'mysql' ? 'mysql' : 'pgsql' }}"
 readonly SPRYKER_STORES=({{ regions | map((regionData, region) => "'STORES=(" ~ (regionData['stores'] | keys | join(' ')) ~ ")'") | join(' ') | raw }})
 readonly SPRYKER_DEFAULT_STORE={{ (regions | first)['stores'] | keys | first }}
-readonly SPRYKER_BROKER_VIRTUAL_HOSTS='{{ regions | map(regionData => regionData['stores'] | map((storeData, store) => storeData['services']['broker']['namespace']) | join(' ')) | join(' ') }}';
-{# TODO get specific username, add user #}
-readonly SPRYKER_BROKER_USERNAME="{{ services['broker']['api']['username'] }}"
 
 # Variables from environment
 SPRYKER_XDEBUG_ENABLE=${SPRYKER_XDEBUG_ENABLE:-0}
@@ -314,32 +311,15 @@ function waitFor()
     done
 }
 
-function setupBroker()
-{
-    waitFor broker
-    local brokerContainers=$(docker ps --filter "name=${SPRYKER_DOCKER_PREFIX}_broker*" --format "{{ '{{' }}.Names{{ '}}' }}")
-
-    for brokerContainer in ${brokerContainers};
-    do
-        verbose "${INFO}Setup broker${NC}"
-        local output=$(docker exec \
-            -e SPRYKER_BROKER_VIRTUAL_HOSTS="${SPRYKER_BROKER_VIRTUAL_HOSTS}" \
-            -e SPRYKER_BROKER_USERNAME=${SPRYKER_BROKER_USERNAME} \
-            ${brokerContainer} \
-            bash -c 'for host in $(echo ${SPRYKER_BROKER_VIRTUAL_HOSTS}); do rabbitmqctl add_vhost ${host}; rabbitmqctl set_permissions -p ${host} ${SPRYKER_BROKER_USERNAME} ".*" ".*" ".*"; done' /
-        )
-        verbose "${output}"
-    done
-}
-
 function loadDemoData()
 {
-    setupBroker
-
     waitFor database
     waitFor broker
     waitFor search
     waitFor key_value_store
+    waitFor scheduler
+
+    createSchedulerJobs stop
 
     for region in "${SPRYKER_STORES[@]}";
     do
