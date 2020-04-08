@@ -43,7 +43,8 @@ function doExport()
         image|images)
             buildBaseImages --skip-cli 1>&2
             buildFrontend 1>&2
-            tagProdLikeImages "${tag}"
+            tagProdLikeImages "${tag}" --skip-cli
+            tagProdLikeFrontendImage "${tag}"
         ;;
         *)
             error "${WARN}Unknown command '${subCommand}' is occured. No action.${NC}" > /dev/stderr

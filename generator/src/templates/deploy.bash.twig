@@ -319,7 +319,7 @@ function loadDemoData()
     waitFor key_value_store
     waitFor scheduler
 
-    createSchedulerJobs stop
+    local schedulerStopped=""
 
     for region in "${SPRYKER_STORES[@]}";
     do
@@ -330,10 +330,16 @@ function loadDemoData()
             continue
         fi
 
+        if [ -z "${schedulerStopped}" ]; then
+            createSchedulerJobs stop
+            schedulerStopped="1"
+        fi
+
         for store in "${STORES[@]}";
         do
             export SPRYKER_STORE="${store}"
             echo -e "${INFO}Init storages for ${SPRYKER_STORE} store.${NC}"
+            # Depprecated
             execSpryker 'vendor/bin/install -r docker -s init-storages-per-store'
         done
 

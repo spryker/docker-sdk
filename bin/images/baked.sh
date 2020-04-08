@@ -87,8 +87,9 @@ function tagProdLikeImages()
 
     echo -e "${INFO}The following images have been prepared${NC}:" > /dev/stderr
 
-    #doTagByApplicationName Cli ${SPRYKER_DOCKER_PREFIX}_cli:${tag} ${SPRYKER_DOCKER_PREFIX}_cli:${SPRYKER_DOCKER_TAG}
-    doTagByApplicationName frontend ${SPRYKER_DOCKER_PREFIX}_frontend:${tag} ${SPRYKER_DOCKER_PREFIX}_builder_assets:${SPRYKER_DOCKER_TAG}
+    if [ "${2}" != '--skip-cli' ]; then
+        doTagByApplicationName Cli ${SPRYKER_DOCKER_PREFIX}_cli:${tag} ${SPRYKER_DOCKER_PREFIX}_cli:${SPRYKER_DOCKER_TAG}
+    fi
 
     for application in "${SPRYKER_APPLICATIONS[@]}";
     do
@@ -96,5 +97,14 @@ function tagProdLikeImages()
     done
 }
 
+function tagProdLikeFrontendImage()
+{
+    local tag=${1:-${SPRYKER_DOCKER_TAG}}
+
+    doTagByApplicationName frontend ${SPRYKER_DOCKER_PREFIX}_frontend:${tag} ${SPRYKER_DOCKER_PREFIX}_builder_assets:${SPRYKER_DOCKER_TAG}
+}
+
 export -f buildBaseImages
+export -f buildFrontend
 export -f tagProdLikeImages
+export -f tagProdLikeFrontendImage

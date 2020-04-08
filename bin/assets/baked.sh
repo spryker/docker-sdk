@@ -102,6 +102,7 @@ function buildAssets()
     docker run -i${tty} --rm \
         -v "${volumeName}":/tmp/assets:nocopy \
         --name="${imageName}" \
+        --entrypoint='' \
         "${imageName}:${SPRYKER_DOCKER_TAG}" \
         sh -c "rm -rf /tmp/assets/* && cp -r /data/public/* /tmp/assets"
 }
