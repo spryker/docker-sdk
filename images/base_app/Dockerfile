@@ -71,6 +71,11 @@ COPY ${DEPLOYMENT_PATH}/context/php/php.ini /usr/local/etc/php/
 # TODO use opcache before composer somehow
 COPY ${DEPLOYMENT_PATH}/context/php/conf.d/opcache.ini /usr/local/etc/php/conf.d/
 
+ARG SPRYKER_BUILD_HASH='stage'
+ENV SPRYKER_BUILD_HASH=${SPRYKER_BUILD_HASH}
+ARG SPRYKER_BUILD_STAMP=''
+ENV SPRYKER_BUILD_STAMP=${SPRYKER_BUILD_STAMP}
+
 # Run FPM as default command
 USER root
 
