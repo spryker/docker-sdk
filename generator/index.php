@@ -50,6 +50,7 @@ $projectData['_ports'] = retrieveUniquePorts($projectData);
 $defaultPort = $projectData['_defaultPort'] = getDefaultPort($projectData);
 $hosts = $projectData['_hosts'] = retrieveHostNames($projectData);
 $blackfireConfig = $projectData['_blackfire'] = buildBlackfireConfiguration($projectData);
+$projectData['_yves_token'] = generateToken();
 
 mkdir($deploymentDir . DS . 'env' . DS . 'cli', 0777, true);
 mkdir($deploymentDir . DS . 'terraform', 0777, true);
@@ -618,4 +619,12 @@ function generateHtPassword($username, $password)
     $salt = generateSalt();
 
     return sprintf('%s:{SSHA}%s', $username, base64_encode(sha1($password . $salt, true) . $salt));
+}
+
+function generateToken($length = 80)
+{
+    return substr(str_shuffle(str_repeat(
+        $x='0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ',
+        ceil($length/strlen($x)) )),1,$length
+    );
 }
