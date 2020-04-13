@@ -1,12 +1,2 @@
-{% extends "nginx/http/application.server.conf.twig" %}
-{% block location %}
-        proxy_pass http://rpc_server;
-{% endblock location %}
-{% block server %}
-{{ parent() }}
-
-    proxy_set_header Host $host;
-    proxy_set_header X-Forwarded-Proto $scheme;
-
-{% include "nginx/vhost.d/zed.default.conf.twig" with _context %}
-{% endblock server %}
+{% extends "nginx/http/server.conf.twig" %}
+{% block upstream %}rpc_server:80{% endblock upstream %}
