@@ -1,5 +1,4 @@
     location /assets/ {
-        root /data/public/{{ endpointData['entry-point'] }};
         access_log  off;
         expires     7d;
         add_header  Pragma public;
@@ -9,7 +8,6 @@
     }
 
     location / {
-        root /data/public/{{ endpointData['entry-point'] }};
         access_log  off;
         expires     7d;
         add_header  Pragma public;

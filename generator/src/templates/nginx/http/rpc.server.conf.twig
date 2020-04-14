@@ -1,4 +1,9 @@
 {% extends "nginx/http/application.server.conf.twig" %}
+{% block server %}
+{{ parent() }}
+
+{% include "nginx/vhost.d/zed.default.conf.twig" with _context %}
+{% endblock server %}
 {% block host %}
     server_name {{ host }}{% if endpointData['primal'] and rpcServer is not empty %} {{ rpcServer }}{% endif %};
     listen 80;
@@ -22,6 +27,4 @@
         fastcgi_param SPRYKER_API_HOST {{ project['_endpointMap'][endpointData['store']]['glue'] }};
         fastcgi_param SPRYKER_API_PORT {{ (project['_endpointMap'][endpointData['store']]['glue'] | split(':'))[1] | default(80) }};
 {% endif %}
-
-        root /data/public/{{ endpointData['entry-point'] }};
 {% endblock location %}

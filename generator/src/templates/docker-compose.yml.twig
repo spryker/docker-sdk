@@ -88,7 +88,13 @@ services:
       ALLOWED_IP: "127.0.0.1"
     volumes:
       - ./${DEPLOYMENT_PATH}/context/nginx/conf.d/zed-rpc.default.conf:/etc/nginx/conf.d/default.conf:ro
-      - ./${DEPLOYMENT_PATH}/context/nginx/vhost.d:/etc/nginx/vhost.d:ro
+{% if _mountMode == 'baked' %}
+      - assets:/data/public:ro
+{% elseif _mountMode == 'native' %}
+      - ./public:/data/public:ro
+{% else %}
+      - ${SPRYKER_DOCKER_PREFIX}_${SPRYKER_DOCKER_TAG}_data_sync:/data
+{% endif %}
 
 {% for group in groups %}
 {% for applicationName, applicationData in group['applications'] %}
