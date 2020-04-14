@@ -87,7 +87,7 @@ foreach ($primal as $callbacks) {
 }
 
 $endpointMap = $projectData['_endpointMap'];
-$projectData['_storeSpecific']  = getStoreSpecific($projectData);
+$projectData['_storeSpecific'] = getStoreSpecific($projectData);
 $projectData['_applications'] = [];
 $frontend = [];
 foreach ($projectData['groups'] ?? [] as $groupName => $groupData) {
@@ -117,9 +117,14 @@ foreach ($projectData['groups'] ?? [] as $groupName => $groupData) {
 
             $authEngine = $endpointData['auth']['engine'] ?? 'none';
             if ($authEngine === 'basic') {
+
+                if (!is_array($endpointData['auth']['users'])) {
+                    throw new Exception('Basic auth demands user list to be applied.');
+                }
+
                 file_put_contents(
                     $authFolder . DS . $host . '.htpasswd',
-                    generateHtPassword($endpointData['auth']['username'], $endpointData['auth']['password']),
+                    generatePasswords($endpointData['auth']['users']),
                     FILE_APPEND
                 );
             }
@@ -600,7 +605,13 @@ function validateBlackfireConfig(array $blackfireConfig): bool
     );
 }
 
-function generateSalt($length = 16)
+/**
+ * @param int $length
+ *
+ * @throws \Exception
+ * @return string
+ */
+function generateSalt(int $length = 16): string
 {
     if (@is_readable('/dev/urandom')) {
         $f = fopen('/dev/urandom', 'rb');
@@ -613,9 +624,40 @@ function generateSalt($length = 16)
     return random_bytes($length);
 }
 
-function generateHtPassword($username, $password)
+/**
+ * @param $username
+ * @param $password
+ *
+ * @throws \Exception
+ * @return string
+ */
+function generateHtPassword(string $username, string $password): string
 {
     $salt = generateSalt();
 
     return sprintf('%s:{SSHA}%s', $username, base64_encode(sha1($password . $salt, true) . $salt));
+}
+
+/**
+ * @param array $users
+ *
+ * @return string
+ */
+function generatePasswords(array $users): string
+{
+    return implode(PHP_EOL, array_map(
+        static function ($user) {
+
+            if (empty($user['username'])) {
+                throw new Exception('`username` is not set for basic auth.');
+            }
+
+            if (empty($user['password'])) {
+                throw new Exception('`username` is not set for basic auth.');
+            }
+
+            return generateHtPassword($user['username'], $user['password']);
+        },
+        $users
+    ));
 }
