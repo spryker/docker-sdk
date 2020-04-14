@@ -653,7 +653,7 @@ function generatePasswords(array $users): string
             }
 
             if (empty($user['password'])) {
-                throw new Exception('`username` is not set for basic auth.');
+                throw new Exception('`password` is not set for basic auth.');
             }
 
             return generateHtPassword($user['username'], $user['password']);
