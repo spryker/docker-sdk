@@ -85,10 +85,10 @@ services:
 
 docker:
 
-    blackfire:
-        enabled: true
-        server-id: "111"
-        server-token: "222"
+  blackfire:
+    enabled: true
+    server-id: "111"
+    server-token: "222"
 
   ssl:
     enabled: false
