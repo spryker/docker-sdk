@@ -2,6 +2,7 @@ server {
     server_name _ default; # This is just an invalid value which will never trigger on a real hostname.
     listen 80;
     access_log off;
+    add_header Content-Type text/plain;
     return 200;
 }
 
@@ -23,3 +24,13 @@ server {
 {% endfor %}
 {% endfor %}
 {% endfor %}
+
+{% if assets['compression'] is not empty %}
+{% for compressionEngine, compressionData in assets['compression'] %}
+
+{% include "nginx/modules/compression/#{compressionEngine}.conf.twig"  with {
+    compressionData: compressionData,
+} %}
+
+{% endfor %}
+{% endif %}
