@@ -37,6 +37,9 @@ $envVarEncoder = new class() {
     }
 };
 $twig->addFilter(new \Twig\TwigFilter('env_var', [$envVarEncoder, 'encode'], ['is_safe' => ['all']]));
+$twig->addFilter(new \Twig\TwigFilter('unique', function ($array) {
+    return array_unique($array);
+}, ['is_safe' => ['all']]));
 $yamlParser = new Parser();
 
 $projectData = $yamlParser->parseFile($projectYaml);
