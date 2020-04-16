@@ -12,9 +12,19 @@ server {
 {% endif %}
 {% endblock host %}
 {% block auth %}
+{% if endpointData['real-ip'] is not empty %}
+
+{% include "nginx/modules/real-ip.conf.twig"  with {
+    realIp: endpointData['real-ip'] | default({}),
+    endpointData: endpointData,
+    host: host,
+} %}
+
+{% endif %}
 {% if auth['engine'] is not empty %}
 
 {% include "nginx/auth/#{endpointData['auth']['engine']}.conf.twig" with {
+  auth: endpointData['auth'] | default({}),
   endpointData: endpointData,
   host: host,
 } %}
