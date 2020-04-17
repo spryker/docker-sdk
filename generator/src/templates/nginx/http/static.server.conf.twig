@@ -1,6 +1,10 @@
 {% extends "nginx/http/server.conf.twig" %}
 {% block locations %}
 
+{% if endpointData['redirect'] is not empty %}
+    return {{ endpointData['redirect']['code'] | default(302) }} "${scheme}://{{ endpointData['redirect']['url'] }}";
+{% else %}
+
     location / {
         index index.html;
         access_log  off;
@@ -12,4 +16,5 @@
     }
 
     root /data/public/{{ endpointData['entry-point'] }};
+{% endif %}
 {% endblock locations %}
