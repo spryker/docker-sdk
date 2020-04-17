@@ -5,6 +5,7 @@ server {
 {% block host %}
     server_name {{ host }};
     listen {{ port }} {{ ssl ? 'ssl http2' }};
+{% include "nginx/http/error.conf.twig" with _context %}
 {% if ssl %}
 
 {% include "nginx/vhost.d/ssl.default.conf.twig" with _context %}
