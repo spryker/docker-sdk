@@ -1,5 +1,5 @@
   {{ applicationName | lower }}:
-    image: ${SPRYKER_DOCKER_PREFIX}_app:${SPRYKER_DOCKER_TAG}-{{ applicationData['application']}}
+    image: ${SPRYKER_DOCKER_PREFIX}_app:${SPRYKER_DOCKER_TAG}-{{ applicationName }}
     depends_on:
       - rpc_server
       - key_value_store
