@@ -1,5 +1,5 @@
   {{ applicationName | lower }}:
-    image: ${SPRYKER_DOCKER_PREFIX}_app:${SPRYKER_DOCKER_TAG}-{{ applicationName }}
+    image: ${SPRYKER_DOCKER_PREFIX}_app:${SPRYKER_DOCKER_TAG}-{{ applicationName | lower }}
     depends_on:
       - database
       - broker
