@@ -149,6 +149,8 @@ DOCKER_EXTRA_OPTIONS+=" -v ${SPRYKER_DOCKER_PREFIX}_${SPRYKER_DOCKER_TAG}_data_s
 {% endif %}
 {% endif %}
 
+readonly NEWRELIC_ENABLED="{{ docker['newrelic']['enabled'] ? 1 : "" }}"
+
 {% if _blackfire['enabled'] %}
 readonly BLACKFIRE_ENABLED="{{ _blackfire['enabled'] ? 1 : "" }}"
 export BLACKFIRE_SERVER_ID="${BLACKFIRE_SERVER_ID:-"{{ _blackfire['server-id'] }}"}"

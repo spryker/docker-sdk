@@ -37,7 +37,8 @@ function doBaseImage()
         --build-arg SPRYKER_LOG_DIRECTORY=${logDirectory} \
         --build-arg SPRYKER_COMPOSER_MODE=${SPRYKER_COMPOSER_MODE} \
         --build-arg SPRYKER_COMPOSER_AUTOLOAD=${SPRYKER_COMPOSER_AUTOLOAD} \
-        --build-arg BLACKFIRE_ENABLED=${BLACKFIRE_ENABLED:-""} \
+        --build-arg BLACKFIRE_ENABLED="${BLACKFIRE_ENABLED:-""}" \
+        --build-arg NEWRELIC_ENABLED="${NEWRELIC_ENABLED:-""}" \
         --build-arg SPRYKER_BUILD_HASH="${SPRYKER_BUILD_HASH:-""}" \
         --build-arg SPRYKER_BUILD_STAMP="${SPRYKER_BUILD_STAMP:-""}" \
         . 1>&2
