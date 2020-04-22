@@ -54,6 +54,7 @@ To start working with Spryker in Docker, follow [the link](https://documentation
 | key_value_store  | redis  | 5.0  |
 | search  | elastic  | 5.6  |
 |   |   | 6.8  |
+|   |   | 7.6.2  |
 | scheduler  | jenkins  | 2.176  |
 | mail_catcher  | mailhog  | 1.0  |
 | swagger  | swagger-ui  | v3.24  |
