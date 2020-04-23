@@ -81,7 +81,7 @@ USER root
 
 ARG BLACKFIRE_ENABLED
 RUN bash -c '[ "${BLACKFIRE_ENABLED}" == "1" ] && mv /usr/local/etc/php/disabled/blackfire.ini /usr/local/etc/php/conf.d/blackfire.ini || true'
-ARG NEWRELIC_ENABLED=1
+ARG NEWRELIC_ENABLED
 RUN bash -c '[ "${NEWRELIC_ENABLED}" == "1" ] && mv /usr/local/etc/php/disabled/newrelic.ini /usr/local/etc/php/conf.d/newrelic.ini || true'
 
 RUN rm -rf /var/run/opcache/*

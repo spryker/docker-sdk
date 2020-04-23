@@ -52,7 +52,7 @@ $mountMode = $projectData['_mountMode'] = retrieveMountMode($projectData, $platf
 $projectData['_ports'] = retrieveUniquePorts($projectData);
 $defaultPort = $projectData['_defaultPort'] = getDefaultPort($projectData);
 $hosts = $projectData['_hosts'] = retrieveHostNames($projectData);
-$blackfireConfig = $projectData['_blackfire'] = buildBlackfireConfiguration($projectData);
+$projectData['_blackfire'] = buildBlackfireConfiguration($projectData);
 
 mkdir($deploymentDir . DS . 'env' . DS . 'cli', 0777, true);
 mkdir($deploymentDir . DS . 'terraform', 0777, true);
@@ -574,38 +574,12 @@ function buildBlackfireConfiguration(array $projectData): array
         return [];
     }
 
-    validateBlackfireConfig($blackfireConfig);
-
     return $blackfireConfig;
 }
 
 function isBlackFireEnabled(array $blackfireConfig): bool
 {
     return $blackfireConfig['enabled'] ?? false;
-}
-
-function validateBlackfireConfig(array $blackfireConfig): bool
-{
-    $missedParams = [];
-    $requireParams = [
-        'server-id',
-        'server-token',
-    ];
-
-    foreach ($requireParams as $requireParam) {
-        if (!isset($blackfireConfig[$requireParam])) {
-            $missedParams[] = $requireParam;
-        }
-    }
-
-    if (empty($missedParams)) {
-        return true;
-    }
-
-    throw new Exception(
-        'Blackfire configuration should contains next fields: ' . PHP_EOL . ' * '
-        . implode(PHP_EOL . ' * ', $missedParams) . PHP_EOL
-    );
 }
 
 /**

@@ -90,6 +90,9 @@ docker:
     server-id: "111"
     server-token: "222"
 
+  newrelic:
+    enabled: true
+
   ssl:
     enabled: false
 
