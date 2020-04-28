@@ -73,7 +73,13 @@ foreach ($projectData['groups'] ?? [] as $groupName => $groupData) {
             $store = $endpointData['store'] ?? null;
             $isPrimal = $store && (!empty($endpointData['primal']) || !array_key_exists($store, $primal));
             if ($isPrimal) {
-                $primal[$store][$application] = function (&$projectData) use ($groupName, $applicationName, $application, $endpoint, $store) {
+                $primal[$store][$application] = function (&$projectData) use (
+                    $groupName,
+                    $applicationName,
+                    $application,
+                    $endpoint,
+                    $store
+                ) {
                     $projectData['_endpointMap'][$store][$application] = $endpoint;
                     $projectData['groups'][$groupName]['applications'][$applicationName]['endpoints'][$endpoint]['primal'] = true;
                 };
@@ -116,6 +122,7 @@ foreach ($projectData['groups'] ?? [] as $groupName => $groupData) {
             $host = strtok($endpoint, ':');
             $frontend[$host] = [
                 'type' => $applicationName,
+                'internal' => (bool)($endpointData['internal'] ?? false),
             ];
 
             $authEngine = $endpointData['auth']['engine'] ?? 'none';

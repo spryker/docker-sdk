@@ -50,6 +50,10 @@ groups:
       zed_eu:
         application: zed
         endpoints:
+          gateway.de.spryker.internal:
+            store: DE
+            primal: true
+            internal: true
           zed.de.spryker.local:
             store: DE
             services:
