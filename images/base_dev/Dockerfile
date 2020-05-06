@@ -14,8 +14,8 @@ ENV DEVELOPMENT_CONSOLE_COMMANDS=1
 
 ENV PATH=/data/vendor/bin:$PATH
 
-ARG BLACKFIRE_ENABLED
-RUN bash -c '[ "${BLACKFIRE_ENABLED}" == "1" ] && mv /usr/local/etc/php/disabled/blackfire.ini /usr/local/etc/php/conf.d/blackfire.ini || true'
+ARG ENABLED_PHP_EXTENSIONS
+RUN bash -c 'for extention in $ENABLED_PHP_EXTENSIONS; do mv /usr/local/etc/php/disabled/${extention}.ini /usr/local/etc/php/conf.d/${extention}.ini; done'
 
 RUN usermod -u ${USER_UID} spryker
 

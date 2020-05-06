@@ -8,8 +8,8 @@ RUN mkdir -p /cache && chmod 0777 /cache
 # Intermediate container - base for app, with composer deps
 FROM ${SPRYKER_PLATFORM_IMAGE} AS spryker_app_dependencies
 
-ARG BLACKFIRE_ENABLED
-RUN bash -c '[ "${BLACKFIRE_ENABLED}" == "1" ] && mv /usr/local/etc/php/disabled/blackfire.ini /usr/local/etc/php/conf.d/blackfire.ini || true'
+ARG ENABLED_PHP_EXTENSIONS
+RUN bash -c 'for extention in $ENABLED_PHP_EXTENSIONS; do mv /usr/local/etc/php/disabled/${extention}.ini /usr/local/etc/php/conf.d/${extention}.ini; done'
 
 # Create log directory
 ARG SPRYKER_LOG_DIRECTORY
@@ -72,6 +72,7 @@ COPY ${DEPLOYMENT_PATH}/context/php/php-fpm.d/worker.conf /usr/local/etc/php-fpm
 COPY ${DEPLOYMENT_PATH}/context/php/php.ini /usr/local/etc/php/
 # TODO use opcache before composer somehow
 COPY ${DEPLOYMENT_PATH}/context/php/conf.d/opcache.ini /usr/local/etc/php/conf.d/
+COPY ${DEPLOYMENT_PATH}/context/php/conf.d/99-from-deploy-yaml-php.ini /usr/local/etc/php/conf.d/
 
 # Run FPM as default command
 USER root
