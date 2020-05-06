@@ -13,6 +13,7 @@ RUN bash -c '[ ! -z "$(which apt)" ] && apt-get update && apt-get install -y \
      npm \
      netcat-openbsd \
      git \
+     redis-tools \
      || true'
 # Debian contains outdated NPM package
 RUN bash -c '[ ! -z "$(which apt)" ] && npm install npm@latest -g || true'
@@ -23,6 +24,7 @@ RUN bash -c '[ ! -z "$(which apk)" ] && apk update && apk add \
      netcat-openbsd \
      coreutils \
      git \
+     redis \
      || true'
 
 RUN mkdir -p ${SPRYKER_LOG_DIRECTORY}
