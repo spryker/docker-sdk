@@ -18,7 +18,6 @@ $twig = new Environment($loader);
 $yamlParser = new Parser();
 
 $projectData = $yamlParser->parseFile($projectYaml);
-
 $projectData['_knownHosts'] = buildKnownHosts($deploymentDir);
 
 $projectData['_projectName'] = $projectName;
@@ -28,6 +27,12 @@ $mountMode = $projectData['_mountMode'] = retrieveMountMode($projectData, $platf
 $projectData['_ports'] = retrieveUniquePorts($projectData);
 $defaultPort = $projectData['_defaultPort'] = getDefaultPort($projectData);
 $endpointMap = $projectData['_endpointMap'] = buildEndpointMapByStore($projectData['groups']);
+$projectData['_phpExtensions'] = buildPhpExtensionList($projectData);
+$projectData['_phpIni'] = buildPhpIniAdditionalConfig($projectData);
+$projectData['_envs'] = array_merge(
+    getAdditionalEnvVariables($projectData),
+    buildNewrelicConfig($projectData)
+);
 
 mkdir($deploymentDir . DS . 'env' . DS . 'cli', 0777, true);
 mkdir($deploymentDir . DS . 'context' . DS . 'nginx' . DS . 'conf.d', 0777, true);
@@ -61,6 +66,10 @@ file_put_contents(
 file_put_contents(
     $deploymentDir . DS . 'context' . DS . 'nginx' . DS . 'conf.d' . DS . 'zed-rpc.default.conf',
     $twig->render('nginx/conf.d/zed-rpc.default.conf.twig', $projectData)
+);
+file_put_contents(
+    $deploymentDir . DS . 'context' . DS . 'php' . DS . 'conf.d' . DS . '99-from-deploy-yaml-php.ini',
+    $twig->render('php/conf.d/99-from-deploy-yaml-php.ini.twig', $projectData)
 );
 foreach ($projectData['groups'] ?? [] as $groupName => $groupData) {
     foreach ($groupData['applications'] ?? [] as $applicationName => $applicationData) {
@@ -449,4 +458,56 @@ function isHost(string $knownHost): bool
     }
 
     return true;
+}
+
+/**
+ * @param array $projectData
+ *
+ * @return array
+ */
+function buildNewrelicConfig(array $projectData): array
+{
+    $newrelicEnvVariables = [
+        'NEWRELIC_LICENSE' => '',
+    ];
+
+    if (empty($projectData['docker']['newrelic'])) {
+        return $newrelicEnvVariables;
+    }
+
+    foreach ($projectData['docker']['newrelic'] as $key => $value) {
+        $newrelicEnvVariables['NEWRELIC_' . strtoupper($key)] = $value;
+    }
+
+    return $newrelicEnvVariables;
+}
+
+/**
+ * @param array $projectData
+ *
+ * @return array
+ */
+function buildPhpIniAdditionalConfig(array $projectData): array
+{
+    return $projectData['image']['php']['ini'] ?? [];
+}
+
+/**
+ * @param array $projectData
+ *
+ * @return array
+ */
+function buildPhpExtensionList(array $projectData): array
+{
+    return $projectData['image']['php']['enabled-extensions'] ?? [];
+}
+
+/**
+ * @param array $projectData
+ *
+ * @return array
+ */
+function getAdditionalEnvVariables(array $projectData): array
+{
+    return $projectData['image']['environment'] ?? [];
 }
