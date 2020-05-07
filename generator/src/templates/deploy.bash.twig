@@ -43,7 +43,7 @@ readonly XARGS_NO_RUN_IF_EMPTY=$(echo '' | xargs echo "--no-run-if-empty")
 # Predefined constants
 readonly APPLICATION_ENV="{{ environment | default('docker') }}"
 declare -a -r SPRYKER_APPLICATIONS=(Glue Yves Zed)
-readonly SPRYKER_PLATFORM_IMAGE=${SPRYKER_PLATFORM_IMAGE:-{{ image['tag'] | default('spryker/php:7.2') }}}
+readonly SPRYKER_PLATFORM_IMAGE=${SPRYKER_PLATFORM_IMAGE:-{{ image is iterable ? image['tag'] : image | default('spryker/php:7.2') }}}
 export SPRYKER_DOCKER_PREFIX=${COMPOSE_PROJECT_NAME}
 export SPRYKER_DOCKER_TAG="{{ tag | default('1.0') }}"
 export SPRYKER_COMPOSER_MODE="{{ composer.mode | default('--dev') }}"
