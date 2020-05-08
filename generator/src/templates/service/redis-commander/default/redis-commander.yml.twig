@@ -1,0 +1,12 @@
+  {{ serviceName }}:
+    image: rediscommander/redis-commander:latest
+    networks:
+        - services
+        - private
+    restart: always
+    environment:
+        - REDIS_HOST="{{ serviceData['data']['host'] | default('key_value_store') }}"
+        - REDIS_PORT="{{ serviceData['data']['port'] | default(6379) }}"
+        - REDIS_DB="{{ serviceData['data']['db'] | default(1) }}"
+    depends_on:
+        - key_value_store
