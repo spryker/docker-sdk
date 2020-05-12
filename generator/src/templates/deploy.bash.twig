@@ -519,12 +519,16 @@ function doCli()
     fi
 
     setExtraEnvFiles
+
+    docker volume create --name="${SPRYKER_DOCKER_PREFIX}_history"
     docker create -it --rm \
         -e PS1=${PS1:-"spryker-${SPRYKER_STORE}-cli@\u\$ "} \
         --name ${SPRYKER_DOCKER_PREFIX}_cli \
         $(getDefaultRunArguments) \
+        -v ${SPRYKER_DOCKER_PREFIX}_history:/home/spryker/history:rw \
+        -e HISTFILE=/home/spryker/history/.zsh_history \
         ${SPRYKER_DOCKER_PREFIX}_cli:${SPRYKER_DOCKER_TAG} \
-        bash
+        zsh
     docker start -ai  ${SPRYKER_DOCKER_PREFIX}_cli
 }
 

@@ -36,3 +36,10 @@ COPY ${DEPLOYMENT_PATH}/context/cli/execute.sh /usr/local/bin/execute.sh
 RUN chmod +x /usr/local/bin/execute.sh
 
 USER spryker
+
+RUN mkdir -p /home/spryker/history
+RUN chown spryker:spryker /home/spryker/history
+
+ENV TERM=xterm
+RUN wget https://github.com/robbyrussell/oh-my-zsh/raw/master/tools/install.sh -O - | zsh || true
+COPY --chown=spryker:spryker ${DEPLOYMENT_PATH}/context/cli/shell/zsh/.zshrc /home/spryker/.zshrc
