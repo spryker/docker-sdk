@@ -292,6 +292,7 @@ function destroyAppVolumesAndImages()
 {
     verbose "${INFO}Stopping and removing all Spryker containers and volumes${NC}"
     execDockerCompose down -v --remove-orphans --rmi all
+    docker volume rm ${SPRYKER_DOCKER_PREFIX}_history
     sync clean
 }
 
