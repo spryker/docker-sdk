@@ -1,13 +1,10 @@
 {% set static = compressionData['static'] | default(true) %}
-gzip {{ static is same as('only') ? 'off' : 'on' }};
-gzip_static {{ static ? 'on' : 'off' }};
-gzip_comp_level {{ compressionData['level'] | default(5) }};
-gzip_proxied any;
-gzip_vary on;
-gzip_disable "msie6";
-gzip_min_length 50;
-# For the option gzip_types, the mime-type text/html is always included by default.
-gzip_types {{ compressionData['types'] | default([]) | merge([
+brotli {{ static is same as('only') ? 'off' : 'on' }};
+brotli_static {{ static ? 'on' : 'off' }};
+brotli_comp_level {{ compressionData['level'] | default(5) }};
+brotli_min_length 50;
+# For the option brotli_types, the mime-type text/html is always included by default.
+brotli_types {{ compressionData['types'] | default([]) | merge([
     'text/richtext',
     'text/plain',
     'text/css',

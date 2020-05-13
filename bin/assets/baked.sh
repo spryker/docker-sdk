@@ -89,6 +89,7 @@ function buildAssets()
         --build-arg SPRYKER_DOCKER_TAG="${SPRYKER_DOCKER_TAG}" \
         --build-arg DEPLOYMENT_PATH="${DEPLOYMENT_PATH}" \
         --build-arg SPRYKER_PLATFORM_IMAGE="${SPRYKER_PLATFORM_IMAGE}" \
+        --build-arg SPRYKER_FRONTEND_IMAGE="${SPRYKER_FRONTEND_IMAGE}" \
         --build-arg MODE="${mode}" \
         --progress="${PROGRESS_TYPE}" \
         -f "${DEPLOYMENT_PATH}/images/builder_assets/Dockerfile" \

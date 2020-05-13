@@ -46,6 +46,7 @@ declare -a -r SPRYKER_APPLICATIONS=({{ _applications | join(' ') | raw }})
 readonly SPRYKER_PLATFORM_IMAGE=${SPRYKER_PLATFORM_IMAGE:-{{ image | default('spryker/php:7.2') }}}
 export SPRYKER_DOCKER_PREFIX=${COMPOSE_PROJECT_NAME}
 export SPRYKER_DOCKER_TAG="{{ tag | default('1.0') }}"
+export SPRYKER_FRONTEND_IMAGE="{{ assets['image'] | default('nginx:latest') }}"
 export SPRYKER_COMPOSER_MODE="{{ composer.mode | default('--dev') }}"
 export SPRYKER_COMPOSER_AUTOLOAD="{{ composer.autoload is defined ? composer.autoload : '--optimize' }}"
 export SPRYKER_LOG_DIRECTORY="{{ docker['logs']['path'] | default('/var/log/spryker') }}"

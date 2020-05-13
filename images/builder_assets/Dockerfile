@@ -1,6 +1,8 @@
 # syntax = docker/dockerfile:experimental
 ARG SPRYKER_DOCKER_TAG
 ARG SPRYKER_DOCKER_PREFIX
+# For brotli support you can use something like fholzer/nginx-brotli:v1.18.0
+ARG SPRYKER_FRONTEND_IMAGE=nginx:latest
 
 FROM alpine AS npm_cache
 RUN mkdir -p /cache && chmod 0777 /cache
@@ -35,7 +37,7 @@ ENV MODE=${MODE}
 RUN --mount=type=cache,target=/home/spryker/.npm,from=npm_cache,source=/cache \
     vendor/bin/install -r docker -s build-static -s "build-static-${MODE}"
 
-FROM nginx:1.17.9-alpine
+FROM ${SPRYKER_FRONTEND_IMAGE} as frontend
 RUN mkdir -p /data/public && chmod 0777 /data/public
 COPY --from=builder --chown=root:root /data/public /data/public
 
