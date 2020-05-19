@@ -509,5 +509,5 @@ function buildPhpExtensionList(array $projectData): array
  */
 function getAdditionalEnvVariables(array $projectData): array
 {
-    return $projectData['image']['environment'] ?? [];
+    return $projectData['image']['php']['environment'] ?? [];
 }
