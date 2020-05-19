@@ -20,7 +20,7 @@ services:
 {% endif %}
 
   frontend:
-    image: {{ assets['image'] | default('nginx:latest') }}
+    image: {{ assets['image'] | default('nginx:alpine') }}
     ports:
 {% for port in _ports %}
       - "{{ port }}:{{ port }}"
@@ -64,7 +64,7 @@ services:
 {% endif %}
 
   rpc_server:
-    image: {{ assets['image'] | default('nginx:latest') }}
+    image: {{ assets['image'] | default('nginx:alpine') }}
     depends_on:
 {% for group in groups %}
 {% for applicationName, applicationData in group['applications'] %}
@@ -87,7 +87,7 @@ services:
       DHPARAM_GENERATION: "false"
       ALLOWED_IP: "127.0.0.1"
     volumes:
-      - ./${DEPLOYMENT_PATH}/context/nginx/nginx.rpc.conf:/etc/nginx/nginx.conf:ro
+      - ./${DEPLOYMENT_PATH}/context/nginx/nginx.original.conf:/etc/nginx/nginx.conf:ro
       - ./${DEPLOYMENT_PATH}/context/nginx/conf.d/zed-rpc.default.conf:/etc/nginx/conf.d/default.conf:ro
 {% if _mountMode == 'baked' %}
       - assets:/data/public:ro

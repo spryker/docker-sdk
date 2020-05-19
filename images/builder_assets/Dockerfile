@@ -2,7 +2,7 @@
 ARG SPRYKER_DOCKER_TAG
 ARG SPRYKER_DOCKER_PREFIX
 # For brotli support you can use something like fholzer/nginx-brotli:v1.18.0
-ARG SPRYKER_FRONTEND_IMAGE=nginx:latest
+ARG SPRYKER_FRONTEND_IMAGE=nginx:alpine
 
 FROM alpine AS npm_cache
 RUN mkdir -p /cache && chmod 0777 /cache
@@ -44,6 +44,7 @@ COPY --from=builder --chown=root:root /data/public /data/public
 ARG DEPLOYMENT_PATH
 
 RUN mkdir -p /etc/nginx/template/ && chmod 0777 /etc/nginx/template/
+COPY --chown=root:root ${DEPLOYMENT_PATH}/context/nginx/nginx.original.conf /etc/nginx/nginx.conf
 COPY --chown=root:root ${DEPLOYMENT_PATH}/context/nginx/frontend/default.conf.tmpl /etc/nginx/template/
 COPY --chown=root:root ${DEPLOYMENT_PATH}/context/nginx/auth /etc/nginx/auth
 COPY --chown=root:root ${DEPLOYMENT_PATH}/context/nginx/frontend/entrypoint.sh /
