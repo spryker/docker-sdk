@@ -28,10 +28,13 @@ $projectData['_ports'] = retrieveUniquePorts($projectData);
 $defaultPort = $projectData['_defaultPort'] = getDefaultPort($projectData);
 $endpointMap = $projectData['_endpointMap'] = buildEndpointMapByStore($projectData['groups']);
 $projectData['_phpExtensions'] = buildPhpExtensionList($projectData);
-$projectData['_phpIni'] = buildPhpIniAdditionalConfig($projectData);
+$projectData['_phpIni'] = array_merge(
+    buildPhpIniAdditionalConfig($projectData),
+    buildNewrelicPhpIniConfig($projectData)
+);
 $projectData['_envs'] = array_merge(
     getAdditionalEnvVariables($projectData),
-    buildNewrelicConfig($projectData)
+    buildNewrelicEnvVariables($projectData)
 );
 
 mkdir($deploymentDir . DS . 'env' . DS . 'cli', 0777, true);
@@ -460,14 +463,14 @@ function isHost(string $knownHost): bool
     return true;
 }
 
-/**
- * @param array $projectData
- *
- * @return array
- */
-function buildNewrelicConfig(array $projectData): array
+function buildNewrelicEnvVariables(array $projectData)
 {
+    if (!in_array('newrelic', $projectData['_phpExtensions'])) {
+        return [];
+    }
+
     $newrelicEnvVariables = [
+        'NEWRELIC_ENABLED' => 1,
         'NEWRELIC_LICENSE' => '',
     ];
 
@@ -482,6 +485,17 @@ function buildNewrelicConfig(array $projectData): array
     return $newrelicEnvVariables;
 }
 
+function buildNewrelicPhpIniConfig(array $projectData): array
+{
+    if (!in_array('newrelic', $projectData['_phpExtensions'])) {
+        return [];
+    }
+
+    return [
+        'newrelic.enabled = true',
+    ];
+}
+
 /**
  * @param array $projectData
  *
@@ -489,7 +503,23 @@ function buildNewrelicConfig(array $projectData): array
  */
 function buildPhpIniAdditionalConfig(array $projectData): array
 {
-    return $projectData['image']['php']['ini'] ?? [];
+    $additionalPhpConfiguration = $projectData['image']['php']['ini'] ?? [];
+
+    if (!$additionalPhpConfiguration) {
+        return $additionalPhpConfiguration;
+    }
+
+    $formattedAdditionalPhpConfiguration = [];
+
+    foreach ($additionalPhpConfiguration as $key => $value) {
+        $formattedAdditionalPhpConfiguration[] = sprintf(
+            '%s = %s',
+            $key,
+            toString($value)
+        );
+    }
+
+    return $formattedAdditionalPhpConfiguration;
 }
 
 /**
@@ -509,5 +539,14 @@ function buildPhpExtensionList(array $projectData): array
  */
 function getAdditionalEnvVariables(array $projectData): array
 {
-    return $projectData['image']['php']['environment'] ?? [];
+    return $projectData['image']['environment'] ?? [];
+}
+
+function toString($value): string
+{
+    if (!is_bool($value)) {
+        return (string)$value;
+    }
+
+    return $value ? 'true' : 'false';
 }
