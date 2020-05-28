@@ -9,10 +9,6 @@
     networks:
       - services
       - private
-    environment:
-{% for envName, envValue in _envs %}
-      {{ envName }}: {{ "${%s}" | format(envName) }}
-{% endfor %}
     env_file:
       - ${DEPLOYMENT_PATH}/env/{{ applicationName }}.env
     <<: *app-volumes

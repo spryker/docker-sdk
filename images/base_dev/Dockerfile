@@ -14,9 +14,6 @@ ENV DEVELOPMENT_CONSOLE_COMMANDS=1
 
 ENV PATH=/data/vendor/bin:$PATH
 
-ARG ENABLED_PHP_EXTENSIONS
-RUN bash -c 'for extention in $ENABLED_PHP_EXTENSIONS; do mv /usr/local/etc/php/disabled/${extention}.ini /usr/local/etc/php/conf.d/${extention}.ini; done'
-
 RUN usermod -u ${USER_UID} spryker
 
 RUN mkdir -p ${SPRYKER_LOG_DIRECTORY}

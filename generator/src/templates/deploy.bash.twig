@@ -66,9 +66,6 @@ readonly GITHUB_TOKEN=${GITHUB_TOKEN:-''}
 {% if _knownHosts is defined %}
 export KNOWN_HOSTS="{{ _knownHosts | default("") }}"
 {% endif %}
-{% if _phpExtensions is defined and _phpExtensions is not empty %}
-readonly ENABLED_PHP_EXTENSIONS="{{ _phpExtensions | join(' ')}}"
-{% endif %}
 
 function showHelp()
 {
@@ -155,11 +152,6 @@ DOCKER_EXTRA_OPTIONS+=" -v ${PROJECT_DIR}:/data -u ${USER_UID}:${USER_GID}"
 DOCKER_EXTRA_OPTIONS+=" -v ${SPRYKER_DOCKER_PREFIX}_${SPRYKER_DOCKER_TAG}_data_sync:/data -u ${USER_UID}:${USER_GID}"
 {% endif %}
 {% endif %}
-
-{% for envName, envValue in _envs %}
-export {{ envName }}="{{ "${%s:-%s}" | format(envName, envValue) }}"
-DOCKER_EXTRA_OPTIONS+=" -e {{ envName }}={{ envValue }}"
-{% endfor %}
 
 {% if services['blackfire'] %}
 readonly BLACKFIRE_ENABLED=1
