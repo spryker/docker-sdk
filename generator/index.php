@@ -41,7 +41,12 @@ mkdir($deploymentDir . DS . 'env' . DS . 'cli', 0777, true);
 mkdir($deploymentDir . DS . 'context' . DS . 'nginx' . DS . 'conf.d', 0777, true);
 mkdir($deploymentDir . DS . 'context' . DS . 'nginx' . DS . 'vhost.d', 0777, true);
 mkdir($deploymentDir . DS . 'context' . DS . 'nginx' . DS . 'stream.d', 0777, true);
+mkdir($deploymentDir . DS . 'images' . DS. 'main', 0777, true);
 
+file_put_contents(
+    $deploymentDir . DS . 'images' . DS. 'main' . DS .  'Dockerfile',
+    $twig->render('images/main/Dockerfile.twig', $projectData)
+);
 file_put_contents(
     $deploymentDir . DS . 'context' . DS . 'nginx' . DS . 'conf.d' . DS . 'front-end.default.conf',
     $twig->render('nginx/conf.d/front-end.default.conf.twig', $projectData)

@@ -1,0 +1,15 @@
+# syntax = docker/dockerfile:experimental
+ARG SPRYKER_PLATFORM_IMAGE=spryker/php:7.2
+FROM ${SPRYKER_PLATFORM_IMAGE} AS spryker_app_dependencies
+
+{% for envName, envValue in _envs %}
+ENV {{ envName }}='{{ envValue }}'
+{% endfor %}
+
+{% if _phpExtensions is defined and _phpExtensions is not empty %}
+{% for phpExtention in _phpExtensions %}
+RUN mv /usr/local/etc/php/disabled/{{phpExtention}}.ini /usr/local/etc/php/conf.d/{{phpExtention}}.ini
+{% endfor %}
+{% endif %}
+
+COPY conf.d/99-from-deploy-yaml-php.ini /usr/local/etc/php/conf.d/
