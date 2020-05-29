@@ -8,7 +8,7 @@ ENV {{ envName }}='{{ envValue }}'
 
 {% if _phpExtensions is defined and _phpExtensions is not empty %}
 {% for phpExtention in _phpExtensions %}
-RUN mv /usr/local/etc/php/disabled/{{phpExtention}}.ini /usr/local/etc/php/conf.d/{{phpExtention}}.ini
+RUN mv /usr/local/etc/php/disabled/{{phpExtention}}.ini /usr/local/etc/php/conf.d/90-{{phpExtention}}.ini
 {% endfor %}
 {% endif %}
 

@@ -28,10 +28,7 @@ $projectData['_ports'] = retrieveUniquePorts($projectData);
 $defaultPort = $projectData['_defaultPort'] = getDefaultPort($projectData);
 $endpointMap = $projectData['_endpointMap'] = buildEndpointMapByStore($projectData['groups']);
 $projectData['_phpExtensions'] = buildPhpExtensionList($projectData);
-$projectData['_phpIni'] = array_merge(
-    buildPhpIniAdditionalConfig($projectData),
-    buildNewrelicPhpIniConfig($projectData)
-);
+$projectData['_phpIni'] = buildPhpIniAdditionalConfig($projectData);
 $projectData['_envs'] = array_merge(
     getAdditionalEnvVariables($projectData),
     buildNewrelicEnvVariables($projectData)
@@ -468,7 +465,12 @@ function isHost(string $knownHost): bool
     return true;
 }
 
-function buildNewrelicEnvVariables(array $projectData)
+/**
+ * @param array $projectData
+ *
+ * @return string[]
+ */
+function buildNewrelicEnvVariables(array $projectData): array
 {
     if (!in_array('newrelic', $projectData['_phpExtensions'])) {
         return [];
@@ -488,17 +490,6 @@ function buildNewrelicEnvVariables(array $projectData)
     }
 
     return $newrelicEnvVariables;
-}
-
-function buildNewrelicPhpIniConfig(array $projectData): array
-{
-    if (!in_array('newrelic', $projectData['_phpExtensions'])) {
-        return [];
-    }
-
-    return [
-        'newrelic.enabled = true',
-    ];
 }
 
 /**
@@ -547,6 +538,11 @@ function getAdditionalEnvVariables(array $projectData): array
     return $projectData['image']['environment'] ?? [];
 }
 
+/**
+ * @param $value
+ *
+ * @return string
+ */
 function toString($value): string
 {
     if (!is_bool($value)) {
