@@ -33,6 +33,7 @@ $projectData['_envs'] = array_merge(
     getAdditionalEnvVariables($projectData),
     buildNewrelicEnvVariables($projectData)
 );
+$projectData['storageData'] = retrieveStorageData($projectData);
 
 mkdir($deploymentDir . DS . 'env' . DS . 'cli', 0777, true);
 mkdir($deploymentDir . DS . 'context' . DS . 'nginx' . DS . 'conf.d', 0777, true);
@@ -550,4 +551,87 @@ function toString($value): string
     }
 
     return $value ? 'true' : 'false';
+}
+
+/**
+ * @param array $projectData
+ *
+ * @return array
+ */
+function retrieveStorageData(array $projectData): array
+{
+    $storageServices = retrieveStorageServices($projectData['services']);
+    $regionsStorageHosts = retrieveRegionsStorageHosts($projectData['regions'], $storageServices);
+    $groupsStorageHosts = retrieveGroupsStorageHosts($projectData['groups'], $storageServices);
+
+    return [
+        'hosts' => array_merge($regionsStorageHosts, $groupsStorageHosts),
+        'services' => $storageServices,
+    ];
+}
+
+/**
+ * @param array $services
+ * @param string $engine
+ *
+ * @return string[]
+ */
+function retrieveStorageServices(array $services, string $engine = 'redis'): array
+{
+    $storageServices = [];
+    foreach ($services as $serviceName => $serviceData) {
+        if ($serviceData['engine'] === $engine) {
+            $storageServices[] = $serviceName;
+        }
+    }
+
+    return $storageServices;
+}
+
+/**
+ * @param array $regions
+ * @param string[] $storageServices
+ * @param int $defaultPort
+ *
+ * @return array
+ */
+function retrieveRegionsStorageHosts(array $regions, array $storageServices, int $defaultPort = 6379): array
+{
+    $regionsStorageHosts = [];
+    foreach ($regions ?? [] as $regionName => $regionData) {
+        foreach ($regionData['stores'] as $storeData) {
+            foreach ($storeData['services'] ?? [] as $serviceName => $serviceNamespace) {
+                if (in_array($serviceName, $storageServices)) {
+                    $regionsStorageHosts[] = sprintf('%s:%s:%s:%s', $serviceName, $serviceName, $defaultPort, $serviceNamespace['namespace']);
+                }
+            }
+        }
+    }
+
+    return $regionsStorageHosts;
+}
+
+/**
+ * @param array $groups
+ * @param string[] $storageServices
+ * @param int $defaultPort
+ *
+ * @return array
+ */
+function retrieveGroupsStorageHosts(array $groups, array $storageServices, int $defaultPort = 6379): array
+{
+    $groupsStorageHosts = [];
+    foreach ($groups ?? [] as $groupName => $groupData) {
+        foreach ($groupData['applications'] as $application) {
+            foreach ($application['endpoints'] as $endpoint => $endpointData) {
+                foreach ($endpointData['services'] ?? [] as $serviceName => $serviceData) {
+                    if (in_array($serviceName, $storageServices)) {
+                        $groupsStorageHosts[] = sprintf('%s:%s:%s:%s', $serviceName, $serviceName, $defaultPort, $serviceData['namespace']);
+                    }
+                }
+            }
+        }
+    }
+
+    return $groupsStorageHosts;
 }
