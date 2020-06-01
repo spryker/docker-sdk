@@ -43,7 +43,7 @@ readonly XARGS_NO_RUN_IF_EMPTY=$(echo '' | xargs echo "--no-run-if-empty")
 # Predefined constants
 readonly APPLICATION_ENV="{{ environment | default('docker') }}"
 declare -a -r SPRYKER_APPLICATIONS=(Glue Yves Zed)
-readonly SPRYKER_PLATFORM_IMAGE=${SPRYKER_PLATFORM_IMAGE:-{{ image | default('spryker/php:7.2') }}}
+readonly SPRYKER_PLATFORM_IMAGE=${SPRYKER_PLATFORM_IMAGE:-{{ image is iterable ? image['tag'] : image | default('spryker/php:7.2') }}}
 export SPRYKER_DOCKER_PREFIX=${COMPOSE_PROJECT_NAME}
 export SPRYKER_DOCKER_TAG="{{ tag | default('1.0') }}"
 export SPRYKER_COMPOSER_MODE="{{ composer.mode | default('--dev') }}"
@@ -150,6 +150,27 @@ DOCKER_EXTRA_OPTIONS+=" -v ${PROJECT_DIR}:/data -u ${USER_UID}:${USER_GID}"
 {% else %}
 DOCKER_EXTRA_OPTIONS+=" -v ${SPRYKER_DOCKER_PREFIX}_${SPRYKER_DOCKER_TAG}_data_sync:/data -u ${USER_UID}:${USER_GID}"
 {% endif %}
+{% endif %}
+
+{% if services['blackfire'] %}
+readonly BLACKFIRE_ENABLED=1
+export BLACKFIRE_SERVER_ID="${BLACKFIRE_SERVER_ID:-"{{ services['blackfire']['server-id'] }}"}"
+export BLACKFIRE_SERVER_TOKEN="${BLACKFIRE_SERVER_TOKEN:-"{{ services['blackfire']['server-token'] }}"}"
+export BLACKFIRE_CLIENT_ID="${BLACKFIRE_CLIENT_ID:-"{{ services['blackfire']['client-id'] }}"}"
+export BLACKFIRE_CLIENT_TOKEN="${BLACKFIRE_CLIENT_TOKEN:-"{{ services['blackfire']['client-token'] }}"}"
+
+function setBlackfireEnvVariables()
+{
+{% for group in groups %}
+{% for applicationName, applicationData in group['applications'] %}
+{% for endpoint, endpointData in applicationData['endpoints'] %}
+DOCKER_EXTRA_OPTIONS+=" --link frontend:{{ endpoint | split(':') | first }}"
+{% endfor %}
+{% endfor %}
+{% endfor %}
+DOCKER_EXTRA_OPTIONS+=" -e BLACKFIRE_CLIENT_TOKEN=${BLACKFIRE_CLIENT_TOKEN}"
+DOCKER_EXTRA_OPTIONS+=" -e BLACKFIRE_CLIENT_ID=${BLACKFIRE_CLIENT_ID}"
+}
 {% endif %}
 
 function enableDebuggingMode()
@@ -512,6 +533,10 @@ function doCli()
     local binFile=$1
     local binFileArgument=${@:2}
 
+    if [ -n "${BLACKFIRE_ENABLED}" ];
+    then
+        setBlackfireEnvVariables
+    fi;
     if [ ! -z ${binFile} ];
     then
         execSpryker "${binFile} ${binFileArgument}"

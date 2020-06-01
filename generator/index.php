@@ -18,7 +18,6 @@ $twig = new Environment($loader);
 $yamlParser = new Parser();
 
 $projectData = $yamlParser->parseFile($projectYaml);
-
 $projectData['_knownHosts'] = buildKnownHosts($deploymentDir);
 
 $projectData['_projectName'] = $projectName;
@@ -28,13 +27,24 @@ $mountMode = $projectData['_mountMode'] = retrieveMountMode($projectData, $platf
 $projectData['_ports'] = retrieveUniquePorts($projectData);
 $defaultPort = $projectData['_defaultPort'] = getDefaultPort($projectData);
 $endpointMap = $projectData['_endpointMap'] = buildEndpointMapByStore($projectData['groups']);
+$projectData['_phpExtensions'] = buildPhpExtensionList($projectData);
+$projectData['_phpIni'] = buildPhpIniAdditionalConfig($projectData);
+$projectData['_envs'] = array_merge(
+    getAdditionalEnvVariables($projectData),
+    buildNewrelicEnvVariables($projectData)
+);
 $projectData['storageData'] = retrieveStorageData($projectData);
 
 mkdir($deploymentDir . DS . 'env' . DS . 'cli', 0777, true);
 mkdir($deploymentDir . DS . 'context' . DS . 'nginx' . DS . 'conf.d', 0777, true);
 mkdir($deploymentDir . DS . 'context' . DS . 'nginx' . DS . 'vhost.d', 0777, true);
 mkdir($deploymentDir . DS . 'context' . DS . 'nginx' . DS . 'stream.d', 0777, true);
+mkdir($deploymentDir . DS . 'images' . DS. 'main', 0777, true);
 
+file_put_contents(
+    $deploymentDir . DS . 'images' . DS. 'main' . DS .  'Dockerfile',
+    $twig->render('images/main/Dockerfile.twig', $projectData)
+);
 file_put_contents(
     $deploymentDir . DS . 'context' . DS . 'nginx' . DS . 'conf.d' . DS . 'front-end.default.conf',
     $twig->render('nginx/conf.d/front-end.default.conf.twig', $projectData)
@@ -63,6 +73,10 @@ file_put_contents(
     $deploymentDir . DS . 'context' . DS . 'nginx' . DS . 'conf.d' . DS . 'zed-rpc.default.conf',
     $twig->render('nginx/conf.d/zed-rpc.default.conf.twig', $projectData)
 );
+file_put_contents(
+    $deploymentDir . DS . 'context' . DS . 'php' . DS . 'conf.d' . DS . '99-from-deploy-yaml-php.ini',
+    $twig->render('php/conf.d/99-from-deploy-yaml-php.ini.twig', $projectData)
+);
 foreach ($projectData['groups'] ?? [] as $groupName => $groupData) {
     foreach ($groupData['applications'] ?? [] as $applicationName => $applicationData) {
         file_put_contents(
@@ -76,7 +90,6 @@ foreach ($projectData['groups'] ?? [] as $groupName => $groupData) {
                 'brokerConnections' => getBrokerConnections($projectData),
             ])
         );
-
 
         if ($applicationData['application'] === 'zed') {
             foreach ($applicationData['endpoints'] ?? [] as $endpoint => $endpointData) {
@@ -451,6 +464,93 @@ function isHost(string $knownHost): bool
     }
 
     return true;
+}
+
+/**
+ * @param array $projectData
+ *
+ * @return string[]
+ */
+function buildNewrelicEnvVariables(array $projectData): array
+{
+    if (!in_array('newrelic', $projectData['_phpExtensions'])) {
+        return [];
+    }
+
+    $newrelicEnvVariables = [
+        'NEWRELIC_ENABLED' => 1,
+        'NEWRELIC_LICENSE' => '',
+    ];
+
+    if (empty($projectData['docker']['newrelic'])) {
+        return $newrelicEnvVariables;
+    }
+
+    foreach ($projectData['docker']['newrelic'] as $key => $value) {
+        $newrelicEnvVariables['NEWRELIC_' . strtoupper($key)] = $value;
+    }
+
+    return $newrelicEnvVariables;
+}
+
+/**
+ * @param array $projectData
+ *
+ * @return array
+ */
+function buildPhpIniAdditionalConfig(array $projectData): array
+{
+    $additionalPhpConfiguration = $projectData['image']['php']['ini'] ?? [];
+
+    if (!$additionalPhpConfiguration) {
+        return $additionalPhpConfiguration;
+    }
+
+    $formattedAdditionalPhpConfiguration = [];
+
+    foreach ($additionalPhpConfiguration as $key => $value) {
+        $formattedAdditionalPhpConfiguration[] = sprintf(
+            '%s = %s',
+            $key,
+            toString($value)
+        );
+    }
+
+    return $formattedAdditionalPhpConfiguration;
+}
+
+/**
+ * @param array $projectData
+ *
+ * @return array
+ */
+function buildPhpExtensionList(array $projectData): array
+{
+    return $projectData['image']['php']['enabled-extensions'] ?? [];
+}
+
+/**
+ * @param array $projectData
+ *
+ * @return array
+ */
+function getAdditionalEnvVariables(array $projectData): array
+{
+    return $projectData['image']['environment'] ?? [];
+}
+
+/**
+ * @param $value
+ *
+ * @return string
+ */
+function toString($value): string
+{
+    if (!is_bool($value)) {
+        return (string)$value;
+    }
+
+    return $value ? 'true' : 'false';
 }
 
 /**

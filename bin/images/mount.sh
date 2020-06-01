@@ -48,7 +48,7 @@ function buildBaseImages()
         -t ${SPRYKER_DOCKER_PREFIX}_app:${tag} \
         --progress=${PROGRESS_TYPE} \
         -f ${DEPLOYMENT_PATH}/images/base_dev/Dockerfile \
-        --build-arg SPRYKER_PLATFORM_IMAGE=${SPRYKER_PLATFORM_IMAGE} \
+        --build-arg SPRYKER_PLATFORM_IMAGE=${SPRYKER_DOCKER_PREFIX}_main_app:${SPRYKER_DOCKER_TAG} \
         --build-arg SPRYKER_DOCKER_PREFIX=${SPRYKER_DOCKER_PREFIX} \
         --build-arg SPRYKER_DOCKER_TAG=${SPRYKER_DOCKER_TAG} \
         --build-arg USER_UID=${USER_UID:-1000} \
