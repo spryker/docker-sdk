@@ -47,7 +47,10 @@ To start working with Spryker in Docker, follow [the link](https://documentation
 
 | Service  | Engine  | Version(s)  |
 |---|---|---|
-| database  | postgres  | 9.6  |
+| database  | postgres  | 9.6*  |
+|   |   | 10  |
+|   |   | 11  |
+|   |   | 12  |
 |   | mysql  | 5.7*  |
 |   | mysql  | mariadb-10.2  |
 |   | mysql  | mariadb-10.3  |
