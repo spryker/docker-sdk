@@ -46,6 +46,8 @@ ARG SPRYKER_DB_ENGINE
 ENV APPLICATION_ENV=${APPLICATION_ENV}
 ENV SPRYKER_DB_ENGINE=${SPRYKER_DB_ENGINE}
 
+RUN vendor/bin/install -r docker -s build
+
 ### Final container, with testing tools, public directory and data
 FROM spryker_app_base AS spryker_app
 
@@ -54,8 +56,6 @@ COPY --chown=spryker:spryker data ${srcRoot}/data
 COPY --chown=spryker:spryker public ${srcRoot}/public
 COPY --chown=spryker:spryker frontend ${srcRoot}/frontend
 COPY --chown=spryker:spryker .* *.* LICENSE ${srcRoot}/
-
-RUN vendor/bin/install -r docker -s build
 
 ARG SPRYKER_COMPOSER_AUTOLOAD
 RUN --mount=type=cache,target=/home/spryker/.composer/cache,from=composer_cache,source=/cache \
