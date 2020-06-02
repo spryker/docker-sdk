@@ -51,7 +51,10 @@ To start working with Spryker in Docker, follow [the link](https://documentation
 |   |   | 10  |
 |   |   | 11  |
 |   |   | 12  |
-|   | mysql  | 5.7  |
+|   | mysql  | 5.7*  |
+|   | mysql  | mariadb-10.2  |
+|   | mysql  | mariadb-10.3  |
+|   | mysql  | mariadb-10.4  |
 | broker  | rabbitmq  | 3.7  |
 | session  | redis  | 5.0  |
 | key_value_store  | redis  | 5.0  |
