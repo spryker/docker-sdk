@@ -40,10 +40,12 @@ export COMPOSE_CONVERT_WINDOWS_PATHS=1
 
 readonly PROGRESS_TYPE=${PROGRESS_TYPE:-tty}
 VERBOSE=${VERBOSE:-0}
+readonly XARGS_NO_RUN_IF_EMPTY=$(echo '' | xargs echo "--no-run-if-empty")
 
 # Predefined constants
 readonly APPLICATION_ENV="{{ environment | default('docker') }}"
-readonly SPRYKER_PLATFORM_IMAGE=${SPRYKER_PLATFORM_IMAGE:-{{ image | default('spryker/php:7.2') }}}
+declare -a -r SPRYKER_APPLICATIONS=(Glue Yves Zed)
+readonly SPRYKER_PLATFORM_IMAGE=${SPRYKER_PLATFORM_IMAGE:-{{ image is iterable ? image['tag'] : image | default('spryker/php:7.2') }}}
 export SPRYKER_DOCKER_PREFIX=${COMPOSE_PROJECT_NAME}
 export SPRYKER_DOCKER_TAG="{{ tag | default('1.0') }}"
 export SPRYKER_COMPOSER_MODE="{{ composer.mode | default('--dev') }}"
@@ -152,6 +154,27 @@ DOCKER_EXTRA_OPTIONS+=" -v ${SPRYKER_DOCKER_PREFIX}_${SPRYKER_DOCKER_TAG}_data_s
 {% endif %}
 {% endif %}
 
+{% if services['blackfire'] %}
+readonly BLACKFIRE_ENABLED=1
+export BLACKFIRE_SERVER_ID="${BLACKFIRE_SERVER_ID:-"{{ services['blackfire']['server-id'] }}"}"
+export BLACKFIRE_SERVER_TOKEN="${BLACKFIRE_SERVER_TOKEN:-"{{ services['blackfire']['server-token'] }}"}"
+export BLACKFIRE_CLIENT_ID="${BLACKFIRE_CLIENT_ID:-"{{ services['blackfire']['client-id'] }}"}"
+export BLACKFIRE_CLIENT_TOKEN="${BLACKFIRE_CLIENT_TOKEN:-"{{ services['blackfire']['client-token'] }}"}"
+
+function setBlackfireEnvVariables()
+{
+{% for group in groups %}
+{% for applicationName, applicationData in group['applications'] %}
+{% for endpoint, endpointData in applicationData['endpoints'] %}
+DOCKER_EXTRA_OPTIONS+=" --link frontend:{{ endpoint | split(':') | first }}"
+{% endfor %}
+{% endfor %}
+{% endfor %}
+DOCKER_EXTRA_OPTIONS+=" -e BLACKFIRE_CLIENT_TOKEN=${BLACKFIRE_CLIENT_TOKEN}"
+DOCKER_EXTRA_OPTIONS+=" -e BLACKFIRE_CLIENT_ID=${BLACKFIRE_CLIENT_ID}"
+}
+{% endif %}
+
 function enableDebuggingMode()
 {
     echo -e "*** ${WARN}DEBUGGING MODE${NC}"
@@ -254,7 +277,7 @@ function destroyAppVolumesAndImages()
 function waitFor()
 {
     local target=${1}
-    local retries=${2:-20}
+    local retries=${2:-60}
     local interval=${3:-3}
     local containers=$(docker ps --filter "name=${SPRYKER_DOCKER_PREFIX}_${target}_*" --format "{{ '{{' }}.Names{{ '}}' }}")
 
@@ -328,19 +351,19 @@ function loadDemoData()
 function destroyAssets()
 {
     verbose "${INFO}Removing assets volume${NC}"
-    docker volume rm -f ${SPRYKER_DOCKER_PREFIX}_assets
+    docker volume rm -f ${SPRYKER_DOCKER_PREFIX}_assets || true
 }
 
 function destroyImages()
 {
     verbose "Removing all Spryker images"
     if [ $(docker images --filter "reference=${SPRYKER_DOCKER_PREFIX}_*:${SPRYKER_DOCKER_TAG}" --format "{{ '{{' }}.ID{{ '}}' }}" | wc -l | sed 's/^ *//') -gt 1 ]; then
-        docker images --filter "reference=${SPRYKER_DOCKER_PREFIX}_*:${SPRYKER_DOCKER_TAG}" --format "{{ '{{' }}.ID{{ '}}' }}" | xargs docker rmi -f
+        docker images --filter "reference=${SPRYKER_DOCKER_PREFIX}_*:${SPRYKER_DOCKER_TAG}" --format "{{ '{{' }}.ID{{ '}}' }}" | xargs ${XARGS_NO_RUN_IF_EMPTY} docker rmi -f
     fi
 
-    docker rmi -f ${SPRYKER_DOCKER_PREFIX}_cli
-    docker rmi -f ${SPRYKER_DOCKER_PREFIX}_app
-    docker rmi -f ${SPRYKER_PLATFORM_IMAGE}
+    docker rmi -f ${SPRYKER_DOCKER_PREFIX}_cli || true
+    docker rmi -f ${SPRYKER_DOCKER_PREFIX}_app || true
+    docker rmi -f ${SPRYKER_PLATFORM_IMAGE} || true
 }
 
 function setExtraEnvFiles ()
@@ -468,6 +491,10 @@ function doCli()
     local binFile=$1
     local binFileArgument=${@:2}
 
+    if [ -n "${BLACKFIRE_ENABLED}" ];
+    then
+        setBlackfireEnvVariables
+    fi;
     if [ ! -z ${binFile} ];
     then
         execSpryker "${binFile} ${binFileArgument}"
@@ -494,7 +521,7 @@ function stopCliContainer()
 {
   docker ps --filter "ancestor=${SPRYKER_DOCKER_PREFIX}_cli:${SPRYKER_DOCKER_TAG}" \
       --format "{{ '{{' }}.Names{{ '}}' }}" \
-      | xargs docker rm -f > /dev/null
+      | xargs ${XARGS_NO_RUN_IF_EMPTY} docker rm -f > /dev/null
 }
 
 function install()
@@ -520,7 +547,7 @@ function install()
 }
 
 command=${1}
-shift 1
+shift 1 || true
 case ${command} in
   *)
     while getopts ":xvt" opt; do
@@ -557,16 +584,21 @@ esac
 
 case ${command} in
     build)
-        case ${1} in
+        subCommand=${1}
+        case ${subCommand} in
             assets|asset)
-                buildAssets
+                buildAssets "" ${@:2}
                 ;;
             images|image)
-                doBuild
+                doBuild "" ${@:2}
+                ;;
+            "")
+                doBuild "" ${@}
+                buildAssets "" ${@}
                 ;;
             *)
-                doBuild
-                buildAssets
+                echo -e "${WARN}Unknown build target '${subCommand}' is occured. No action.${NC}" > /dev/stderr
+                exit 1
                 ;;
         esac
         ;;

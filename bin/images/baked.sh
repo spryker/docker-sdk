@@ -25,7 +25,7 @@ function doBaseImage()
         -t ${SPRYKER_DOCKER_PREFIX}_app:${SPRYKER_DOCKER_TAG} \
         --progress=${PROGRESS_TYPE} \
         -f ${DEPLOYMENT_PATH}/images/base_app/Dockerfile \
-        --build-arg SPRYKER_PLATFORM_IMAGE=${SPRYKER_PLATFORM_IMAGE} \
+        --build-arg SPRYKER_PLATFORM_IMAGE=${SPRYKER_DOCKER_PREFIX}_main_app:${SPRYKER_DOCKER_TAG} \
         --build-arg SPRYKER_DOCKER_PREFIX=${SPRYKER_DOCKER_PREFIX} \
         --build-arg SPRYKER_DOCKER_TAG=${SPRYKER_DOCKER_TAG} \
         --build-arg USER_UID=${USER_UID:-1000} \
@@ -38,7 +38,7 @@ function doBaseImage()
         --build-arg SPRYKER_LOG_DIRECTORY=${logDirectory} \
         --build-arg SPRYKER_COMPOSER_MODE=${SPRYKER_COMPOSER_MODE} \
         --build-arg SPRYKER_COMPOSER_AUTOLOAD=${SPRYKER_COMPOSER_AUTOLOAD} \
-        .
+        . 1>&2
 }
 
 function doCliImage()
@@ -77,6 +77,8 @@ function buildBaseImages()
 function tagProdLikeImages()
 {
     local tag=${1:-${SPRYKER_DOCKER_TAG}}
+
+    echo -e "${INFO}The following images have been prepared${NC}:" > /dev/stderr
 
     doTagByApplicationName Cli ${SPRYKER_DOCKER_PREFIX}_cli:${tag} ${SPRYKER_DOCKER_PREFIX}_cli:${SPRYKER_DOCKER_TAG}
 

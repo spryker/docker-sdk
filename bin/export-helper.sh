@@ -5,9 +5,9 @@ pushd "${BASH_SOURCE%/*}" > /dev/null
 popd > /dev/null
 
 function assertDestinationDirectory() {
-    if [ ! -d ${1} ] || [ ! -w ${1} ];
+    if [ ! -d "${1}" ] || [ ! -w "${1}" ];
     then
-        error "${WARN}Directory '${1}' is not accessible. Please, make sure it does exist and has appropriate permissions.${NC}"
+        error "${WARN}Directory '${1}' is not accessible. Please, make sure it does exist and has appropriate permissions.${NC}" > /dev/stderr
         exit 1
     fi
 }
@@ -15,10 +15,10 @@ function assertDestinationDirectory() {
 function doExport()
 {
     local subCommand=${1}
-    shift 1
+    shift 1 || true
 
-    local tag=''
-    local destinationPath=''
+    local tag=${SPRYKER_DOCKER_TAG}
+    local destinationPath=${PROJECT_DIR}
 
     while getopts "t:p:" opt; do
         case ${opt} in
@@ -28,20 +28,26 @@ function doExport()
             p)
                 destinationPath=${OPTARG}
             ;;
+            *) ;;
         esac
     done
+    shift $((OPTIND -1))
 
     case ${subCommand} in
         asset|assets)
-            assertDestinationDirectory ${destinationPath}
-            doBaseImage
-            buildAssets
-            exportAssets ${tag} ${destinationPath}
+            assertDestinationDirectory "${destinationPath}" 1>&2
+            doBaseImage 1>&2
+            buildAssets "" "production" 1>&2
+            exportAssets "${tag}" "${destinationPath}"
         ;;
         image|images)
-            buildBaseImages ${tag}
-            tagProdLikeImages ${tag}
+            buildBaseImages 1>&2
+            tagProdLikeImages "${tag}"
         ;;
+        *)
+            error "${WARN}Unknown command '${subCommand}' is occured. No action.${NC}" > /dev/stderr
+            exit 1
+            ;;
     esac
 }
 

@@ -20,7 +20,6 @@ $yamlParser = new Parser();
 $projectData = $yamlParser->parseFile($projectYaml);
 
 $projectData['_knownHosts'] = buildKnownHosts($deploymentDir);
-
 $projectData['_projectName'] = $projectName;
 $projectData['tag'] = $projectData['tag'] ?? uniqid();
 $projectData['_platform'] = $platform;
@@ -28,6 +27,13 @@ $mountMode = $projectData['_mountMode'] = retrieveMountMode($projectData, $platf
 $projectData['_ports'] = retrieveUniquePorts($projectData);
 $defaultPort = $projectData['_defaultPort'] = getDefaultPort($projectData);
 $endpointMap = $projectData['_endpointMap'] = buildEndpointMapByStore($projectData['groups']);
+$projectData['_phpExtensions'] = buildPhpExtensionList($projectData);
+$projectData['_phpIni'] = buildPhpIniAdditionalConfig($projectData);
+$projectData['_envs'] = array_merge(
+    getAdditionalEnvVariables($projectData),
+    buildNewrelicEnvVariables($projectData)
+);
+$projectData['storageData'] = retrieveStorageData($projectData);
 $projectData['composer']['autoload'] = buildComposerAutoloadConfig($projectData);
 $isAutoloadCacheEnabled = $projectData['_isAutoloadCacheEnabled'] = isAutoloadCacheEnabled($projectData);
 $projectData['_requirementAnalyzerData'] = buildDataForRequirementAnalyzer($projectData);
@@ -36,7 +42,12 @@ mkdir($deploymentDir . DS . 'env' . DS . 'cli', 0777, true);
 mkdir($deploymentDir . DS . 'context' . DS . 'nginx' . DS . 'conf.d', 0777, true);
 mkdir($deploymentDir . DS . 'context' . DS . 'nginx' . DS . 'vhost.d', 0777, true);
 mkdir($deploymentDir . DS . 'context' . DS . 'nginx' . DS . 'stream.d', 0777, true);
+mkdir($deploymentDir . DS . 'images' . DS. 'main', 0777, true);
 
+file_put_contents(
+    $deploymentDir . DS . 'images' . DS. 'main' . DS .  'Dockerfile',
+    $twig->render('images/main/Dockerfile.twig', $projectData)
+);
 file_put_contents(
     $deploymentDir . DS . 'context' . DS . 'nginx' . DS . 'conf.d' . DS . 'front-end.default.conf',
     $twig->render('nginx/conf.d/front-end.default.conf.twig', $projectData)
@@ -64,6 +75,10 @@ file_put_contents(
 file_put_contents(
     $deploymentDir . DS . 'context' . DS . 'nginx' . DS . 'conf.d' . DS . 'zed-rpc.default.conf',
     $twig->render('nginx/conf.d/zed-rpc.default.conf.twig', $projectData)
+);
+file_put_contents(
+    $deploymentDir . DS . 'context' . DS . 'php' . DS . 'conf.d' . DS . '99-from-deploy-yaml-php.ini',
+    $twig->render('php/conf.d/99-from-deploy-yaml-php.ini.twig', $projectData)
 );
 foreach ($projectData['groups'] ?? [] as $groupName => $groupData) {
     foreach ($groupData['applications'] ?? [] as $applicationName => $applicationData) {
@@ -452,6 +467,176 @@ function isHost(string $knownHost): bool
     }
 
     return true;
+}
+
+/**
+ * @param array $projectData
+ *
+ * @return string[]
+ */
+function buildNewrelicEnvVariables(array $projectData): array
+{
+    if (!in_array('newrelic', $projectData['_phpExtensions'])) {
+        return [];
+    }
+
+    $newrelicEnvVariables = [
+        'NEWRELIC_ENABLED' => 1,
+        'NEWRELIC_LICENSE' => '',
+    ];
+
+    if (empty($projectData['docker']['newrelic'])) {
+        return $newrelicEnvVariables;
+    }
+
+    foreach ($projectData['docker']['newrelic'] as $key => $value) {
+        $newrelicEnvVariables['NEWRELIC_' . strtoupper($key)] = $value;
+    }
+
+    return $newrelicEnvVariables;
+}
+
+/**
+ * @param array $projectData
+ *
+ * @return array
+ */
+function buildPhpIniAdditionalConfig(array $projectData): array
+{
+    $additionalPhpConfiguration = $projectData['image']['php']['ini'] ?? [];
+
+    if (!$additionalPhpConfiguration) {
+        return $additionalPhpConfiguration;
+    }
+
+    $formattedAdditionalPhpConfiguration = [];
+
+    foreach ($additionalPhpConfiguration as $key => $value) {
+        $formattedAdditionalPhpConfiguration[] = sprintf(
+            '%s = %s',
+            $key,
+            toString($value)
+        );
+    }
+
+    return $formattedAdditionalPhpConfiguration;
+}
+
+/**
+ * @param array $projectData
+ *
+ * @return array
+ */
+function buildPhpExtensionList(array $projectData): array
+{
+    return $projectData['image']['php']['enabled-extensions'] ?? [];
+}
+
+/**
+ * @param array $projectData
+ *
+ * @return array
+ */
+function getAdditionalEnvVariables(array $projectData): array
+{
+    return $projectData['image']['environment'] ?? [];
+}
+
+/**
+ * @param $value
+ *
+ * @return string
+ */
+function toString($value): string
+{
+    if (!is_bool($value)) {
+        return (string)$value;
+    }
+
+    return $value ? 'true' : 'false';
+}
+
+/**
+ * @param array $projectData
+ *
+ * @return array
+ */
+function retrieveStorageData(array $projectData): array
+{
+    $storageServices = retrieveStorageServices($projectData['services']);
+    $regionsStorageHosts = retrieveRegionsStorageHosts($projectData['regions'], $storageServices);
+    $groupsStorageHosts = retrieveGroupsStorageHosts($projectData['groups'], $storageServices);
+
+    return [
+        'hosts' => array_merge($regionsStorageHosts, $groupsStorageHosts),
+        'services' => $storageServices,
+    ];
+}
+
+/**
+ * @param array $services
+ * @param string $engine
+ *
+ * @return string[]
+ */
+function retrieveStorageServices(array $services, string $engine = 'redis'): array
+{
+    $storageServices = [];
+    foreach ($services as $serviceName => $serviceData) {
+        if ($serviceData['engine'] === $engine) {
+            $storageServices[] = $serviceName;
+        }
+    }
+
+    return $storageServices;
+}
+
+/**
+ * @param array $regions
+ * @param string[] $storageServices
+ * @param int $defaultPort
+ *
+ * @return array
+ */
+function retrieveRegionsStorageHosts(array $regions, array $storageServices, int $defaultPort = 6379): array
+{
+    $regionsStorageHosts = [];
+    foreach ($regions ?? [] as $regionName => $regionData) {
+        foreach ($regionData['stores'] as $storeData) {
+            foreach ($storeData['services'] ?? [] as $serviceName => $serviceNamespace) {
+                if (in_array($serviceName, $storageServices)) {
+                    $regionsStorageHosts[] = sprintf('%s:%s:%s:%s', $serviceName, $serviceName, $defaultPort, $serviceNamespace['namespace']);
+                }
+            }
+        }
+    }
+
+    return $regionsStorageHosts;
+}
+
+/**
+ * @param array $groups
+ * @param string[] $storageServices
+ * @param int $defaultPort
+ *
+ * @return array
+ */
+function retrieveGroupsStorageHosts(array $groups, array $storageServices, int $defaultPort = 6379): array
+{
+    $groupsStorageHosts = [];
+    foreach ($groups ?? [] as $groupName => $groupData) {
+        foreach ($groupData['applications'] as $application) {
+            foreach ($application['endpoints'] as $endpoint => $endpointData) {
+                foreach ($endpointData['services'] ?? [] as $serviceName => $serviceData) {
+                    if (in_array($serviceName, $storageServices)) {
+                        $groupsStorageHosts[] = sprintf('%s:%s:%s:%s', $serviceName, $serviceName, $defaultPort, $serviceData['namespace']);
+                    }
+                }
+            }
+        }
+    }
+
+    return $groupsStorageHosts;
 }
 
 /**

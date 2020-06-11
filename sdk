@@ -49,7 +49,7 @@ function showHelp()
 checkDirectories
 
 command=$1
-shift
+shift 1 || true
 
 case "${command}" in
     boot|bootstrap)

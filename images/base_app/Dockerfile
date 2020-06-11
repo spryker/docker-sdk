@@ -38,28 +38,28 @@ COPY --chown=spryker:spryker config ${srcRoot}/config
 COPY --chown=spryker:spryker *.php ${srcRoot}/
 RUN chmod 600 ${srcRoot}/config/Zed/*.key
 
-RUN composer dump-autoload -o
+RUN --mount=type=cache,target=/home/spryker/.composer/cache,from=composer_cache,source=/cache \
+  composer dump-autoload -o
 
 ARG APPLICATION_ENV
 ARG SPRYKER_DB_ENGINE
 ENV APPLICATION_ENV=${APPLICATION_ENV}
 ENV SPRYKER_DB_ENGINE=${SPRYKER_DB_ENGINE}
 
+COPY --chown=spryker:spryker data ${srcRoot}/data
 RUN vendor/bin/install -r docker -s build
 
 ### Final container, with testing tools, public directory and data
 FROM spryker_app_base AS spryker_app
 
 # Add remaining Spryker files/directories
-COPY --chown=spryker:spryker data ${srcRoot}/data
 COPY --chown=spryker:spryker public ${srcRoot}/public
 COPY --chown=spryker:spryker frontend ${srcRoot}/frontend
 COPY --chown=spryker:spryker .* *.* LICENSE ${srcRoot}/
 
 ARG SPRYKER_COMPOSER_AUTOLOAD
-RUN composer dump-autoload ${SPRYKER_COMPOSER_AUTOLOAD}
-
-RUN rm -rf /var/run/opcache/*
+RUN --mount=type=cache,target=/home/spryker/.composer/cache,from=composer_cache,source=/cache \
+  composer dump-autoload ${SPRYKER_COMPOSER_AUTOLOAD}
 
 ARG DEPLOYMENT_PATH
 ENV DEPLOYMENT_PATH=${DEPLOYMENT_PATH}
@@ -72,6 +72,7 @@ COPY ${DEPLOYMENT_PATH}/context/php/conf.d/opcache.ini /usr/local/etc/php/conf.d
 
 # Run FPM as default command
 USER root
+RUN rm -rf /var/run/opcache/*
 RUN chown -R spryker:spryker /home/spryker
 
 CMD [ "php-fpm", "--nodaemonize" ]

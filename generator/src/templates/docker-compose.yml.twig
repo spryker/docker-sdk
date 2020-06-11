@@ -5,7 +5,6 @@ version: "3.5"
 } %}
 
 services:
-
   frontend:
     image: nginx:alpine
     ports:
@@ -95,7 +94,7 @@ services:
     {% set engine = serviceData['engine'] | lower %}
     {% set version = serviceData['version'] | default('default') %}
 
-{% include "service/" ~ engine ~ "/" ~ version ~ "/" ~  engine ~ ".yml.twig" with { serviceName: serviceName, serviceData: serviceData, engine: engine, version: version } only %}
+{% include "service/" ~ engine ~ "/" ~ version ~ "/" ~  engine ~ ".yml.twig" with { project: _context, serviceName: serviceName, serviceData: serviceData, engine: engine, version: version } only %}
 {% endfor %}
 
 volumes:

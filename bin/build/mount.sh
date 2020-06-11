@@ -6,6 +6,7 @@ pushd "${BASH_SOURCE%/*}" > /dev/null
 . ../constants.sh
 . ../console.sh
 . ../platform.sh
+. ../images/main.sh
 . ../images/mount.sh
 popd > /dev/null
 
@@ -50,6 +51,7 @@ function buildCodeBase()
 {
     verbose "${INFO}Building base application image${NC}"
 
+    buildMainImage
     buildBaseImages
     buildCode $1
 }
