@@ -49,3 +49,5 @@ openssl verify \
     -verbose \
     -CAfile ${DESTINATION}/ca.crt \
     ${DESTINATION}/ssl.crt
+
+cp ${DESTINATION}/ca.crt ${DEPLOYMENT_DIR}/spryker_ca.crt

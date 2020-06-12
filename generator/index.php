@@ -192,9 +192,10 @@ switch ($mountMode) {
 $sslDir = $deploymentDir . DS . 'context' . DS . 'nginx' . DS . 'ssl';
 mkdir($sslDir);
 echo shell_exec(sprintf(
-    'PFX_PASSWORD="%s" DESTINATION=%s ./openssl/generate.sh %s',
+    'PFX_PASSWORD="%s" DESTINATION=%s DEPLOYMENT_DIR=%s ./openssl/generate.sh %s',
     addslashes($projectData['docker']['ssl']['pfx-password'] ?? 'secret'),
     $sslDir,
+    $deploymentDir,
     implode(' ', retrieveHostNames($projectData))
 ));
 
