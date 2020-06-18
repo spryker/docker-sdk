@@ -1,7 +1,5 @@
 #!/bin/bash
 
-require node npm
-
 function Installer::vcs() {
 
     if [ -z "${GITHUB_TOKEN}" ]; then
