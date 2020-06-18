@@ -1,14 +1,36 @@
 {% extends "nginx/http/server.conf.twig" %}
-{% set rpcServer = "rpc_server_" ~ ( endpointData['store'] | lower ) %}
+{% block host %}
+{{ parent() }}
+{% include "nginx/http/error.conf.twig" with _context %}
+{% endblock host %}
+{% block locations %}
+    root /data/public/{{ endpointData['entry-point'] }};
+    index index.php;
+
+    if ($request_uri ~* "^(.*/)index\.php(.*)$") {
+        return 301 $1;
+    }
+
+{% include "nginx/http/static.conf.twig" with _context %}
+
+    location ~ \.php$ {
+        include fastcgi.conf;
+        fastcgi_pass {{ upstream }};
+        fastcgi_intercept_errors off;
+        try_files $fastcgi_script_name @proxy;
+    }
+
+    location @proxy {
 {% block location %}
-    include fastcgi.conf;
-    fastcgi_pass {{ upstream }};
+        include fastcgi.conf;
+        fastcgi_pass "{{ upstream }}";
 
 {% include "nginx/http/default.location.conf.twig" with _context %}
 
 {% include "nginx/http/store.params.conf.twig" with _context %}
 
-    fastcgi_param SPRYKER_ZED_HOST {{ rpcServer }};
-    fastcgi_param SPRYKER_ZED_PORT 80;
-    fastcgi_param SPRYKER_SSL_ENABLE {{ ssl ? 1 : 0 }};
+        fastcgi_param SPRYKER_SSL_ENABLE {{ (project['docker']['ssl']['enabled'] | default(false)) ? 1 : 0 }};
+        fastcgi_param HTTPS {{ (project['docker']['ssl']['enabled'] | default(false)) ? 'on' : 'off' }};
 {% endblock location %}
+    }
+{% endblock locations %}

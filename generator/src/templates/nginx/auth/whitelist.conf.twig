@@ -1,0 +1,5 @@
+    allow 127.0.0.1;
+{% for ip in (auth['include'] | default([])) %}
+    allow {{ ip | raw }};
+{% endfor %}
+    deny  all;

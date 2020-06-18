@@ -2,31 +2,61 @@
 
 use Symfony\Component\Yaml\Parser;
 use Twig\Environment;
+use Twig\Loader\ChainLoader;
 use Twig\Loader\FilesystemLoader;
 
 define('DS', DIRECTORY_SEPARATOR);
 define('APPLICATION_SOURCE_DIR', __DIR__ . DS . 'src');
 include_once __DIR__ . DS . 'vendor' . DS . 'autoload.php';
 
-$deploymentDir = getenv('SPRYKER_DOCKER_SDK_DEPLOYMENT_DIR') ?: '/tmp';
-$projectYaml = getenv('SPRYKER_DOCKER_SDK_PROJECT_YAML') ?: '';
-$projectName = getenv('SPRYKER_DOCKER_SDK_PROJECT_NAME') ?: '';
+$deploymentDir = '/data/deployment';
+$projectYaml = $deploymentDir . '/project.yml';
+$defaultDeploymentDir = getenv('SPRYKER_DOCKER_SDK_DEPLOYMENT_DIR') ?: './';
 $platform = getenv('SPRYKER_DOCKER_SDK_PLATFORM') ?: 'linux'; // Possible values: linux windows macos
 
-$loader = new FilesystemLoader(APPLICATION_SOURCE_DIR . DS . 'templates');
-$twig = new Environment($loader);
+$loaders = new ChainLoader([
+    new FilesystemLoader(APPLICATION_SOURCE_DIR . DS . 'templates'),
+    new FilesystemLoader($deploymentDir),
+]);
+$twig = new Environment($loaders);
+$envVarEncoder = new class() {
+    private $isActive = false;
+
+    public function encode($value)
+    {
+        if ($this->isActive) {
+            return json_encode((string)$value);
+        }
+
+        return $value;
+    }
+
+    /**
+     * @param bool $isActive
+     */
+    public function setIsActive(bool $isActive): void
+    {
+        $this->isActive = $isActive;
+    }
+};
+$twig->addFilter(new \Twig\TwigFilter('env_var', [$envVarEncoder, 'encode'], ['is_safe' => ['all']]));
+$twig->addFilter(new \Twig\TwigFilter('unique', function ($array) {
+    return array_unique($array);
+}, ['is_safe' => ['all']]));
 $yamlParser = new Parser();
 
 $projectData = $yamlParser->parseFile($projectYaml);
 
 $projectData['_knownHosts'] = buildKnownHosts($deploymentDir);
-$projectData['_projectName'] = $projectName;
+$projectData['_defaultDeploymentDir'] = $defaultDeploymentDir;
 $projectData['tag'] = $projectData['tag'] ?? uniqid();
 $projectData['_platform'] = $platform;
 $mountMode = $projectData['_mountMode'] = retrieveMountMode($projectData, $platform);
+$projectData['_isDevelopment'] = $mountMode !== 'baked';
+$projectData['_fileMode'] = $mountMode === 'baked' ? 'baked' : 'mount';
 $projectData['_ports'] = retrieveUniquePorts($projectData);
 $defaultPort = $projectData['_defaultPort'] = getDefaultPort($projectData);
-$endpointMap = $projectData['_endpointMap'] = buildEndpointMapByStore($projectData['groups']);
+$hosts = $projectData['_hosts'] = retrieveHostNames($projectData);
 $projectData['_phpExtensions'] = buildPhpExtensionList($projectData);
 $projectData['_phpIni'] = buildPhpIniAdditionalConfig($projectData);
 $projectData['_envs'] = array_merge(
@@ -38,64 +68,103 @@ $projectData['composer']['autoload'] = buildComposerAutoloadConfig($projectData)
 $isAutoloadCacheEnabled = $projectData['_isAutoloadCacheEnabled'] = isAutoloadCacheEnabled($projectData);
 $projectData['_requirementAnalyzerData'] = buildDataForRequirementAnalyzer($projectData);
 
-mkdir($deploymentDir . DS . 'env' . DS . 'cli', 0777, true);
-mkdir($deploymentDir . DS . 'context' . DS . 'nginx' . DS . 'conf.d', 0777, true);
-mkdir($deploymentDir . DS . 'context' . DS . 'nginx' . DS . 'vhost.d', 0777, true);
-mkdir($deploymentDir . DS . 'context' . DS . 'nginx' . DS . 'stream.d', 0777, true);
-mkdir($deploymentDir . DS . 'images' . DS. 'main', 0777, true);
+verbose('Generating NGINX configuration... [DONE]');
 
-file_put_contents(
-    $deploymentDir . DS . 'images' . DS. 'main' . DS .  'Dockerfile',
-    $twig->render('images/main/Dockerfile.twig', $projectData)
-);
-file_put_contents(
-    $deploymentDir . DS . 'context' . DS . 'nginx' . DS . 'conf.d' . DS . 'front-end.default.conf',
-    $twig->render('nginx/conf.d/front-end.default.conf.twig', $projectData)
-);
-file_put_contents(
-    $deploymentDir . DS . 'context' . DS . 'nginx' . DS . 'stream.d' . DS . 'front-end.default.conf',
-    $twig->render('nginx/stream.d/front-end.default.conf.twig', $projectData)
-);
-file_put_contents(
-    $deploymentDir . DS . 'context' . DS . 'nginx' . DS . 'vhost.d' . DS . 'zed.default.conf',
-    $twig->render('nginx/vhost.d/zed.default.conf.twig', $projectData)
-);
-file_put_contents(
-    $deploymentDir . DS . 'context' . DS . 'nginx' . DS . 'vhost.d' . DS . 'yves.default.conf',
-    $twig->render('nginx/vhost.d/yves.default.conf.twig', $projectData)
-);
-file_put_contents(
-    $deploymentDir . DS . 'context' . DS . 'nginx' . DS . 'vhost.d' . DS . 'glue.default.conf',
-    $twig->render('nginx/vhost.d/glue.default.conf.twig', $projectData)
-);
-file_put_contents(
-    $deploymentDir . DS . 'context' . DS . 'nginx' . DS . 'vhost.d' . DS . 'ssl.default.conf',
-    $twig->render('nginx/vhost.d/ssl.default.conf.twig', $projectData)
-);
-file_put_contents(
-    $deploymentDir . DS . 'context' . DS . 'nginx' . DS . 'conf.d' . DS . 'zed-rpc.default.conf',
-    $twig->render('nginx/conf.d/zed-rpc.default.conf.twig', $projectData)
-);
-file_put_contents(
-    $deploymentDir . DS . 'context' . DS . 'php' . DS . 'conf.d' . DS . '99-from-deploy-yaml-php.ini',
-    $twig->render('php/conf.d/99-from-deploy-yaml-php.ini.twig', $projectData)
-);
+@mkdir($deploymentDir . DS . 'env' . DS . 'cli', 0777, true);
+@mkdir($deploymentDir . DS . 'terraform', 0777, true);
+@mkdir($deploymentDir . DS . 'terraform' . DS . 'cli', 0777, true);
+@mkdir($deploymentDir . DS . 'context' . DS . 'nginx' . DS . 'conf.d', 0777, true);
+@mkdir($authFolder = $deploymentDir . DS . 'context' . DS . 'nginx' . DS . 'auth', 0777, true);
+@mkdir($deploymentDir . DS . 'context' . DS . 'nginx' . DS . 'stream.d', 0777, true);
+@mkdir($deploymentDir . DS . 'context' . DS . 'nginx' . DS . 'frontend', 0777, true);
+
+$primal = [];
+
+verbose('Generating ENV files... [DONE]');
+
 foreach ($projectData['groups'] ?? [] as $groupName => $groupData) {
     foreach ($groupData['applications'] ?? [] as $applicationName => $applicationData) {
-        file_put_contents(
-            $deploymentDir . DS . 'env' . DS . $applicationName . '.env',
-            $twig->render(sprintf('env/application/%s.env.twig', $applicationData['application']), [
-                'applicationName' => $applicationName,
-                'applicationData' => $applicationData,
-                'project' => $projectData,
-                'regionName' => $groupData['region'],
-                'regionData' => $projectData['regions'][$groupData['region']],
-                'brokerConnections' => getBrokerConnections($projectData),
-            ])
-        );
+        foreach ($applicationData['endpoints'] ?? [] as $endpoint => $endpointData) {
+            $entryPoint = $endpointData['entry-point'] ?? ucfirst(strtolower($applicationData['application']));
+            $projectData['groups'][$groupName]['applications'][$applicationName]['endpoints'][$endpoint]['entry-point'] = $entryPoint;
 
-        if ($applicationData['application'] === 'zed') {
-            foreach ($applicationData['endpoints'] ?? [] as $endpoint => $endpointData) {
+            $application = $applicationData['application'];
+            $store = $endpointData['store'] ?? null;
+            $isPrimal = $store && (!empty($endpointData['primal']) || !array_key_exists($store, $primal));
+            if ($isPrimal) {
+                $primal[$store][$application] = function (&$projectData) use (
+                    $groupName,
+                    $applicationName,
+                    $application,
+                    $endpoint,
+                    $store
+                ) {
+                    $projectData['_endpointMap'][$store][$application] = $endpoint;
+                    $projectData['groups'][$groupName]['applications'][$applicationName]['endpoints'][$endpoint]['primal'] = true;
+                };
+            }
+            $projectData['groups'][$groupName]['applications'][$applicationName]['endpoints'][$endpoint]['primal'] = false;
+        }
+    }
+}
+
+foreach ($primal as $callbacks) {
+    foreach ($callbacks as $callback) {
+        $callback($projectData);
+    }
+}
+
+$endpointMap = $projectData['_endpointMap'];
+$projectData['_applications'] = [];
+$frontend = [];
+foreach ($projectData['groups'] ?? [] as $groupName => $groupData) {
+    foreach ($groupData['applications'] ?? [] as $applicationName => $applicationData) {
+        if ($applicationData['application'] !== 'static') {
+            $projectData['_applications'][] = $applicationName;
+
+            file_put_contents(
+                $deploymentDir . DS . 'env' . DS . $applicationName . '.env',
+                $twig->render(sprintf('env/application/%s.env.twig', $applicationData['application']), [
+                    'applicationName' => $applicationName,
+                    'applicationData' => $applicationData,
+                    'project' => $projectData,
+                    'regionName' => $groupData['region'],
+                    'regionData' => $projectData['regions'][$groupData['region']],
+                    'brokerConnections' => getBrokerConnections($projectData),
+                ])
+            );
+        }
+
+        foreach ($applicationData['endpoints'] ?? [] as $endpoint => $endpointData) {
+
+            $host = strtok($endpoint, ':');
+            $frontend[$host] = [
+                'type' => $applicationName,
+                'internal' => (bool)($endpointData['internal'] ?? false),
+            ];
+
+            $authEngine = $endpointData['auth']['engine'] ?? 'none';
+            if ($authEngine === 'basic') {
+
+                if (!is_array($endpointData['auth']['users'])) {
+                    throw new Exception('Basic auth demands user list to be applied.');
+                }
+
+                file_put_contents(
+                    $authFolder . DS . $host . '.htpasswd',
+                    generatePasswords($endpointData['auth']['users']),
+                    FILE_APPEND
+                );
+            }
+
+            if ($applicationData['application'] === 'zed') {
+
+                $services = array_replace_recursive(
+                    $projectData['regions'][$groupData['region']]['stores'][$endpointData['store']]['services'],
+                    $endpointData['services'] ?? []
+                );
+
+                $envVarEncoder->setIsActive(true);
                 file_put_contents(
                     $deploymentDir . DS . 'env' . DS . 'cli' . DS . strtolower($endpointData['store']) . '.env',
                     $twig->render('env/cli/store.env.twig', [
@@ -106,44 +175,86 @@ foreach ($projectData['groups'] ?? [] as $groupName => $groupData) {
                         'regionData' => $projectData['regions'][$groupData['region']],
                         'brokerConnections' => getBrokerConnections($projectData),
                         'storeName' => $endpointData['store'],
-                        'services' => array_replace_recursive(
-                            $projectData['regions'][$groupData['region']]['stores'][$endpointData['store']]['services'],
-                            $endpointData['services'] ?? []
-                        ),
+                        'services' => $services,
                         'endpointMap' => $endpointMap,
                     ])
                 );
-            }
-        }
 
-        if ($applicationData['application'] === 'yves') {
-            foreach ($applicationData['endpoints'] ?? [] as $endpoint => $endpointData) {
-                if ($endpointData['store'] !== ($projectData['docker']['testing']['store'] ?? '')) {
-                    continue;
-                }
                 file_put_contents(
-                    $deploymentDir . DS . 'env' . DS . 'cli' . DS . 'testing.env',
-                    $twig->render('env/cli/testing.env.twig', [
+                    $deploymentDir . DS . 'terraform' . DS . 'cli' . DS . strtolower($endpointData['store']) . '.env',
+                    $twig->render('terraform/store.env.twig', [
                         'applicationName' => $applicationName,
                         'applicationData' => $applicationData,
                         'project' => $projectData,
-                        'host' => strtok($endpoint, ':'),
-                        'port' => strtok($endpoint) ?: $defaultPort,
                         'regionName' => $groupData['region'],
                         'regionData' => $projectData['regions'][$groupData['region']],
                         'brokerConnections' => getBrokerConnections($projectData),
                         'storeName' => $endpointData['store'],
-                        'services' => array_replace_recursive(
-                            $projectData['regions'][$groupData['region']]['stores'][$endpointData['store']]['services'],
-                            $endpointData['services'] ?? []
-                        ),
+                        'services' => $services,
                         'endpointMap' => $endpointMap,
                     ])
                 );
+                $envVarEncoder->setIsActive(false);
+            }
+
+            if ($applicationData['application'] === 'yves') {
+
+                $services = array_replace_recursive(
+                    $projectData['regions'][$groupData['region']]['stores'][$endpointData['store']]['services'],
+                    $endpointData['services'] ?? []
+                );
+
+                if ($endpointData['store'] === ($projectData['docker']['testing']['store'] ?? '')) {
+                    $envVarEncoder->setIsActive(true);
+                    file_put_contents(
+                        $deploymentDir . DS . 'env' . DS . 'cli' . DS . 'testing.env',
+                        $twig->render('env/cli/testing.env.twig', [
+                            'applicationName' => $applicationName,
+                            'applicationData' => $applicationData,
+                            'project' => $projectData,
+                            'host' => strtok($endpoint, ':'),
+                            'port' => strtok($endpoint) ?: $defaultPort,
+                            'regionName' => $groupData['region'],
+                            'regionData' => $projectData['regions'][$groupData['region']],
+                            'brokerConnections' => getBrokerConnections($projectData),
+                            'storeName' => $endpointData['store'],
+                            'services' => $services,
+                            'endpointMap' => $endpointMap,
+                        ])
+                    );
+                    $envVarEncoder->setIsActive(false);
+                }
             }
         }
     }
 }
+
+file_put_contents(
+    $deploymentDir . DS . 'context' . DS . 'nginx' . DS . 'conf.d' . DS . 'front-end.default.conf',
+    $twig->render('nginx/conf.d/front-end.default.conf.twig', $projectData)
+);
+file_put_contents(
+    $deploymentDir . DS . 'context' . DS . 'nginx' . DS . 'stream.d' . DS . 'front-end.default.conf',
+    $twig->render('nginx/stream.d/front-end.default.conf.twig', $projectData)
+);
+file_put_contents(
+    $deploymentDir . DS . 'context' . DS . 'nginx' . DS . 'conf.d' . DS . 'zed-rpc.default.conf',
+    $twig->render('nginx/conf.d/zed-rpc.default.conf.twig', $projectData)
+);
+file_put_contents(
+    $deploymentDir . DS . 'context' . DS . 'nginx' . DS . 'frontend' . DS . 'default.conf.tmpl',
+    $twig->render('nginx/frontend/default.conf.tmpl.twig', $projectData)
+);
+file_put_contents(
+    $deploymentDir . DS . 'context' . DS . 'nginx' . DS . 'frontend' . DS . 'entrypoint.sh',
+    $twig->render('nginx/frontend/entrypoint.sh.twig', $projectData)
+);
+
+file_put_contents(
+    $deploymentDir . DS . 'context' . DS . 'php' . DS . 'conf.d' . DS . '99-from-deploy-yaml-php.ini',
+    $twig->render('php/conf.d/99-from-deploy-yaml-php.ini.twig', $projectData)
+);
+
 file_put_contents(
     $deploymentDir . DS . 'env' . DS . 'testing.env',
     $twig->render('env/testing.env.twig', [
@@ -159,25 +270,45 @@ file_put_contents(
     ])
 );
 
+$envVarEncoder->setIsActive(true);
+file_put_contents(
+    $deploymentDir . DS . 'terraform/environment.tf',
+    $twig->render('terraform/environment.tf.twig', [
+        'brokerConnections' => getBrokerConnections($projectData),
+        'project' => $projectData,
+    ])
+);
+$envVarEncoder->setIsActive(false);
+file_put_contents(
+    $deploymentDir . DS . 'terraform/frontend.json',
+    json_encode($frontend, JSON_PRETTY_PRINT)
+);
+
+file_put_contents(
+    $deploymentDir . DS . 'images' . DS. 'common' . DS . 'base' . DS .  'Dockerfile',
+    $twig->render('images' . DS. 'common' . DS . 'base' . DS .  'Dockerfile.twig', $projectData)
+);
+unlink($deploymentDir . DS . 'images' . DS. 'common' . DS . 'base' . DS .  'Dockerfile.twig');
+
 file_put_contents(
     $deploymentDir . DS . 'docker-compose.yml',
     $twig->render('docker-compose.yml.twig', $projectData)
 );
 file_put_contents(
-    $deploymentDir . DS . 'docker-compose.xdebug.yml',
-    $twig->render('docker-compose.xdebug.yml.twig', $projectData)
-);
-file_put_contents(
     $deploymentDir . DS . 'docker-compose.test.yml',
     $twig->render('docker-compose.test.yml.twig', $projectData)
 );
-file_put_contents(
-    $deploymentDir . DS . 'docker-compose.test.xdebug.yml',
-    $twig->render('docker-compose.test.xdebug.yml.twig', $projectData)
-);
+
+verbose('Generating scripts... [DONE]');
+
 file_put_contents(
     $deploymentDir . DS . 'deploy',
     $twig->render('deploy.bash.twig', $projectData)
+);
+
+file_put_contents(
+    $deploymentDir . DS . '.env',
+    $twig->render('.env.twig', $projectData)
 );
 
 switch ($mountMode) {
@@ -189,17 +320,23 @@ switch ($mountMode) {
         break;
 }
 
+verbose('Generating SSL certificates...');
+
 $sslDir = $deploymentDir . DS . 'context' . DS . 'nginx' . DS . 'ssl';
-mkdir($sslDir);
-echo shell_exec(sprintf(
-    'PFX_PASSWORD="%s" DESTINATION=%s DEPLOYMENT_DIR=%s ./openssl/generate.sh %s',
+@mkdir($sslDir);
+exec(sprintf(
+    'PFX_PASSWORD="%s" DESTINATION=%s DEPLOYMENT_DIR=%s ./openssl/generate.sh %s 2>&1',
     addslashes($projectData['docker']['ssl']['pfx-password'] ?? 'secret'),
     $sslDir,
     $deploymentDir,
-    implode(' ', retrieveHostNames($projectData))
-));
+    implode(' ', $hosts)
+), $output, $returnCode);
 
-copy($sslDir . DS . 'ca.pfx', $deploymentDir . DS . 'spryker.pfx');
+if ($returnCode > 0) {
+    exit($returnCode);
+}
+
+verbose(implode(PHP_EOL, $output));
 
 // -------------------------
 /**
@@ -241,6 +378,10 @@ function retrieveUniquePorts(array $projectData)
         $port = explode(':', $endpoint)[1];
         $ports[$port] = $port;
     }
+
+//    if (array_key_exists(getDefaultPort($projectData), $ports) && !empty($projectData['docker']['ssl']['redirect'])) {
+//        $ports[80] = 80;
+//    }
 
     return $ports;
 }
@@ -314,6 +455,8 @@ function retrieveHostNames(array $projectData): array
         $hosts[$host] = $host;
     }
 
+    ksort($hosts);
+
     return $hosts;
 }
 
@@ -355,31 +498,6 @@ function getBrokerConnections(array $projectData): string
     }
 
     return json_encode($connections);
-}
-
-/**
- * @param array $projectGroups
- *
- * @return string[]
- */
-function buildEndpointMapByStore(array $projectGroups): array
-{
-    $endpointMap = [];
-
-    foreach ($projectGroups as $projectGroup) {
-        $applicationsPerRegion = $projectGroup['applications'];
-
-        foreach ($applicationsPerRegion as $application) {
-            $applicationName = $application['application'];
-
-            foreach ($application['endpoints'] as $endpoint => $endpointData) {
-                $storeName = $endpointData['store'];
-                $endpointMap[$storeName][$applicationName] = $endpoint;
-            }
-        }
-    }
-
-    return $endpointMap;
 }
 
 /**
@@ -463,11 +581,7 @@ function isHost(string $knownHost): bool
 
     $ipAddress = gethostbyname($knownHost);
 
-    if ($ipAddress === $knownHost) {
-        return false;
-    }
-
-    return true;
+    return $ipAddress !== $knownHost;
 }
 
 /**
@@ -477,7 +591,7 @@ function isHost(string $knownHost): bool
  */
 function buildNewrelicEnvVariables(array $projectData): array
 {
-    if (!in_array('newrelic', $projectData['_phpExtensions'])) {
+    if (!in_array('newrelic', $projectData['_phpExtensions'], true)) {
         return [];
     }
 
@@ -574,6 +688,13 @@ function retrieveStorageData(array $projectData): array
     ];
 }
 
+function verbose($output)
+{
+    if (getenv('VERBOSE')) {
+        echo $output . PHP_EOL;
+    }
+}
+
 /**
  * @param array $services
  * @param string $engine
@@ -605,7 +726,7 @@ function retrieveRegionsStorageHosts(array $regions, array $storageServices, int
     foreach ($regions ?? [] as $regionName => $regionData) {
         foreach ($regionData['stores'] as $storeData) {
             foreach ($storeData['services'] ?? [] as $serviceName => $serviceNamespace) {
-                if (in_array($serviceName, $storageServices)) {
+                if (in_array($serviceName, $storageServices, true)) {
                     $regionsStorageHosts[] = sprintf('%s:%s:%s:%s', $serviceName, $serviceName, $defaultPort, $serviceNamespace['namespace']);
                 }
             }
@@ -629,7 +750,7 @@ function retrieveGroupsStorageHosts(array $groups, array $storageServices, int $
         foreach ($groupData['applications'] as $application) {
             foreach ($application['endpoints'] as $endpoint => $endpointData) {
                 foreach ($endpointData['services'] ?? [] as $serviceName => $serviceData) {
-                    if (in_array($serviceName, $storageServices)) {
+                    if (in_array($serviceName, $storageServices, true)) {
                         $groupsStorageHosts[] = sprintf('%s:%s:%s:%s', $serviceName, $serviceName, $defaultPort, $serviceData['namespace']);
                     }
                 }
@@ -664,47 +785,68 @@ function buildComposerAutoloadConfig(array $projectData): string
     return trim($projectData['composer']['autoload'] ?? '--optimize');
 }
 
-/**
- * @param array $projectData
- *
- * @return array
- */
-function buildUniqueEndpointMap(array $projectData): array
-{
-    $endpointMap = [];
-    $projectEndpointMap = $projectData['_endpointMap'] ?? buildEndpointMapByStore($projectData['groups']);
-    $services = $projectData['services'] ?? [];
-
-    if (empty($projectEndpointMap) && empty($services)) {
-        return $endpointMap;
-    }
-
-    foreach ($projectEndpointMap as $storeName => $endpointMapPerStore) {
-        $endpointMap[] = array_values($endpointMapPerStore);
-    }
-
-    foreach ($services as $serviceName => $serviceConfig) {
-        if (!isset($serviceConfig['endpoints'])) {
-            continue;
-        }
-
-        foreach ($serviceConfig['endpoints'] as $endpoint => $endpointConfig) {
-            if (strpos($endpoint, 'localhost') === false) {
-                $endpointMap[] = [$endpoint];
-            }
-        }
-    }
-
-    return array_unique(array_merge(...$endpointMap));
-}
-
 function buildDataForRequirementAnalyzer(array $projectData): array
 {
-    $endpointMap = buildUniqueEndpointMap($projectData);
-    sort($endpointMap);
-
+    $hosts = $projectData['_hosts'];
+    unset($hosts['localhost']);
     return [
-        'hosts' => implode(' ', $endpointMap),
-        'ipAddress' => '127.0.0.1',
+        'hosts' => implode(' ', $hosts),
     ];
+}
+
+/**
+ * @param int $length
+ *
+ * @throws \Exception
+ * @return string
+ */
+function generateSalt(int $length = 16): string
+{
+    if (@is_readable('/dev/urandom')) {
+        $f = fopen('/dev/urandom', 'rb');
+        $salt = fread($f, $length);
+        fclose($f);
+
+        return $salt;
+    }
+
+    return random_bytes($length);
+}
+
+/**
+ * @param $username
+ * @param $password
+ *
+ * @throws \Exception
+ * @return string
+ */
+function generateHtPassword(string $username, string $password): string
+{
+    $salt = generateSalt();
+
+    return sprintf('%s:{SSHA}%s', $username, base64_encode(sha1($password . $salt, true) . $salt));
+}
+
+/**
+ * @param array $users
+ *
+ * @return string
+ */
+function generatePasswords(array $users): string
+{
+    return implode(PHP_EOL, array_map(
+        static function ($user) {
+
+            if (empty($user['username'])) {
+                throw new Exception('`username` is not set for basic auth.');
+            }
+
+            if (empty($user['password'])) {
+                throw new Exception('`password` is not set for basic auth.');
+            }
+
+            return generateHtPassword($user['username'], $user['password']);
+        },
+        $users
+    ));
 }

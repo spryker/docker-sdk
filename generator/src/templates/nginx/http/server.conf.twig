@@ -1,21 +1,43 @@
-{% set ssl = project['docker']['ssl']['enabled'] | default(false) %}
 {% set port = (endpoint | split(':'))[1] | default(ssl ? 443 :80) %}
 {% set host = endpoint | split(':') | first %}
 server {
 {% block server %}
 {% block host %}
-  server_name {{ host }};
-  listen {{ port }} {{ ssl ? 'ssl http2' }};
+    server_name {{ host }};
+    listen {{ port }} {{ ssl ? 'ssl http2' }};
 {% if ssl %}
-  include /etc/nginx/vhost.d/ssl.default.conf;
+
+{% include "nginx/vhost.d/ssl.default.conf.twig" with _context %}
+
 {% endif %}
 {% endblock host %}
-  access_log /var/log/nginx/access.log vhost;
+{% block auth %}
+{% if endpointData['real-ip'] is not empty %}
 
-  location / {
-{% block location %}
-    proxy_pass http://{% block upstream %}{{ upstream }}{% endblock upstream %};
-{% endblock location %}
-  }
+{% include "nginx/modules/real-ip.conf.twig"  with {
+    realIp: endpointData['real-ip'] | default({}),
+    endpointData: endpointData,
+    host: host,
+} %}
+
+{% endif %}
+{% if auth['engine'] is not empty %}
+
+{% include "nginx/auth/#{endpointData['auth']['engine']}.conf.twig" with {
+  auth: endpointData['auth'] | default({}),
+  endpointData: endpointData,
+  host: host,
+} %}
+
+{% endif %}
+{% endblock auth %}
+    access_log /dev/stdout combined;
+    error_log /dev/stderr;
+
+{% block locations %}
+    location / {
+        proxy_pass http://{% block upstream %}{{ upstream }}{% endblock upstream %};
+    }
+{% endblock locations %}
 {% endblock server %}
 }

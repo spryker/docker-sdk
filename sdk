@@ -2,94 +2,73 @@
 
 set -e
 
-pushd "${BASH_SOURCE%/*}" > /dev/null
-. bin/constants.sh
-. bin/console.sh
-. bin/check-directories.sh
-. bin/boot-deployment.sh
-popd > /dev/null
+export SELF_SCRIPT=$0
+SOURCE_DIR="${BASH_SOURCE%/*}"
 
-PROJECT_NAME=default
+pushd "${BASH_SOURCE%/*}" >/dev/null
+. ./bin/framework.sh
+popd >/dev/null
 
-while getopts "vp:" opt;
-do
+Registry::Help::section 'Basic usage:'
+Registry::Help::command -s -e "SPRYKER_PROJECT_NAME=<project-name>" -a "<command> [args...]" "Runs the command for the specified ${HELP_HIGH}<project-name>${HELP_DESC}."
+Registry::Help::command -s -c "${HELP_ENV}[-p <project-name>]${NC}" -a "<command> [args...]" "Runs the command for the specified ${HELP_HIGH}<project-name>${HELP_DESC}."
+
+import environment/cross-platform.sh
+import environment/check-directories.sh
+import command/install/bootstrap.sh
+
+SPRYKER_PROJECT_NAME=${SPRYKER_PROJECT_NAME:-default}
+
+while getopts ":p:" opt; do
     case ${opt} in
-        v)
-            VERBOSE=1
-            ;;
         p)
-            PROJECT_NAME=$OPTARG
-            if [ "${PROJECT_NAME}" != "${PROJECT_NAME%[[:space:]]*}" ];
-            then
-                error "${WARN}The project name cannot contain spaces.${NC}"
+            SPRYKER_PROJECT_NAME=$OPTARG
+            if [ "${SPRYKER_PROJECT_NAME}" != "${SPRYKER_PROJECT_NAME%[[:space:]]*}" ]; then
+                Console::error "${WARN}The project name cannot contain spaces.${NC}"
                 exit 1
             fi
             ;;
-        *)
-          ;;
+        # Unknown option specified
+        \?)
+            Registry::printHelp
+            Console::error "\nUnknown option ${INFO}-${OPTARG}${WARN} is acquired."
+            exit 1
+            ;;
+        # Specified argument without required value
+        :)
+            Registry::printHelp
+            Console::error "Option ${INFO}-${OPTARG}${WARN} requires an argument."
+            exit 1
+            ;;
     esac
 done
-shift $((OPTIND -1))
+shift $((OPTIND - 1))
 
-DESTINATION_DIR=${DESTINATION_DIR:-"${BASH_SOURCE%/*}/deployment/${PROJECT_NAME}"}
-DEPLOYMENT_DIR="${BASH_SOURCE%/*}/deployment/_tmp"
+System::Bootstrap
+
+readonly DESTINATION_DIR="${SOURCE_DIR}/deployment/${SPRYKER_PROJECT_NAME}"
 readonly DEPLOY_SCRIPT=${DESTINATION_DIR}/deploy
 
-function showHelp()
-{
-    echo -e ""
-    echo -e "${INFO}Installation:${NC}"
-    echo -e " $0 [-v] [-p <project-name=default>] bootstrap [<project-yml-file=deploy.yml>]"
-
-    echo -e ""
-    echo -e "${INFO}Quick start:${NC}"
-    echo -e " $0 bootstrap && $0 up"
-}
-
-checkDirectories
+Registry::Help::section 'Quick start:'
+Registry::Help::row "${SELF_SCRIPT} bootstrap && ${SELF_SCRIPT} up"
 
 command=$1
-shift 1 || true
+shift || true
 
 case "${command}" in
-    boot|bootstrap)
-        [ -f "${DEPLOY_SCRIPT}" ] && SPRYKER_SELF_SCRIPT=$0 ${DEPLOY_SCRIPT} down > /dev/null 2>&1 && sleep 2 || true
-
-        # ------------
-        SOURCE_DIR=${BASH_SOURCE%/*}
-
-        # ------------
-        PROJECT_YAML=${1:-deploy.yml}
-
-        # ------------
-        [ -d "${DEPLOYMENT_DIR}" ] && rm -rf "${DEPLOYMENT_DIR}"
-        mkdir "${DEPLOYMENT_DIR}"
-
-        DEPLOYMENT_DIR="$( cd "${DEPLOYMENT_DIR}" >/dev/null 2>&1 && pwd )"
-
-        # ------------
-        validateParameters
-        bootDeployment
-
-        [ -d "${DESTINATION_DIR}" ] && rm -rf "${DESTINATION_DIR:?}/*"
-        [ ! -d "${DESTINATION_DIR}" ] && mkdir "${DESTINATION_DIR}"
-        cp -R "${DEPLOYMENT_DIR}/." "${DESTINATION_DIR}"
-        rm -rf "${DEPLOYMENT_DIR}"
-
-        [ ! -f .dockerignore ] && cp "${BASH_SOURCE%/*}/.dockerignore.default" .dockerignore
-        SPRYKER_SELF_SCRIPT=$0 ${DEPLOY_SCRIPT} install
-
-        echo ""
-        echo -e "${INFO}Deployment is generated into ${LGRAY}${DESTINATION_DIR}${NC}"
-        echo -e "Use ${OK}docker/sdk$([ "${PROJECT_NAME}" != 'default' ] && echo -n " -p ${PROJECT_NAME}") up${NC} to start the application."
-
+    boot | bootstrap)
+        Command::bootstrap "${@}"
         ;;
-    help|'')
-        showHelp
-        [ -f "${DEPLOY_SCRIPT}" ] && SPRYKER_SELF_SCRIPT=$0 ${DEPLOY_SCRIPT} help ${@}
+    help | '')
+        Registry::printHelp
+        [ -f "${DEPLOY_SCRIPT}" ] && ${DEPLOY_SCRIPT} help "${@}"
         ;;
     *)
-        [ ! -f "${DEPLOY_SCRIPT}" ] && showHelp && error "${WARN}The project is not initialized yet. Run ${YELLOW}$0 boot${WARN} before.${NC}" && exit 1
-        SPRYKER_SELF_SCRIPT=$0 ${DEPLOY_SCRIPT} "${command}" ${@}
+        if [ ! -f "${DEPLOY_SCRIPT}" ]; then
+            Registry::printHelp
+            Console::error "${WARN}The project is not initialized yet. Run ${YELLOW}${SELF_SCRIPT} bootstrap${WARN} before any command.${NC}"
+            exit 1
+        fi
+        ${DEPLOY_SCRIPT} "${command}" "${@}"
         ;;
 esac

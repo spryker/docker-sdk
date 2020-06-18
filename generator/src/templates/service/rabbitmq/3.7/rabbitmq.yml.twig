@@ -8,7 +8,7 @@
       test: [ "CMD", "nc", "-z", "localhost", "5672" ]
       interval: 10s
       timeout: 5s
-      retries: 5
+      retries: 10
     environment:
       RABBITMQ_DEFAULT_USER: "{{ serviceData['api']['username'] }}"
       RABBITMQ_DEFAULT_PASS: "{{ serviceData['api']['password'] }}"

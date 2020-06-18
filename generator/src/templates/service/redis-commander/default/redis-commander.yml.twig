@@ -3,7 +3,6 @@
     networks:
       - services
       - private
-    restart: always
     environment:
       REDIS_HOSTS: "{{ project.storageData.hosts | merge(serviceData.data.hosts | default([])) | default("") | join(',') }}"
     depends_on:

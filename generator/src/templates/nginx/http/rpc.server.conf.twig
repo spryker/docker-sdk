@@ -1,25 +1,36 @@
 {% extends "nginx/http/application.server.conf.twig" %}
-{% block host %}
-  server_name {{ host }} {{ rpcServer }};
-  listen 80;
-{% endblock host %}
-{% block location %}
+{% block server %}
 {{ parent() }}
 
-    fastcgi_param SPRYKER_SESSION_BE_NAMESPACE "{{ storeServices['session']['namespace'] | default(endpointData['services']['session']['namespace']) }}";
-    fastcgi_param SPRYKER_BE_HOST {{ host }};
-    fastcgi_param SPRYKER_BE_PORT {{ port }};
-    fastcgi_param HTTPS {{ ssl ? 1 : 0 }};
+{% include "nginx/vhost.d/zed.default.conf.twig" with _context %}
+{% endblock server %}
+{% block host %}
+    server_name {{ host }}{% if endpointData['primal'] and rpcServer is not empty %} {{ rpcServer }} {{ rpcServer }}_xdebug{% endif %};
+    listen 80;
+{% endblock host %}
+{% block location %}
+{% if endpointData['primal'] and rpcServer is not empty %}
+    if ( $host = '{{ rpcServer }}_xdebug' ) {
+        set $xdebug_mode '_xdebug';
+        set $xdebug_port '9001';
+    }
+{% endif %}
+{{ parent() }}
+
+        fastcgi_param SPRYKER_ZED_HOST "{{ zedHost }}";
+        fastcgi_param SPRYKER_ZED_PORT "{{ port }}";
+
+        fastcgi_param SPRYKER_SESSION_BE_NAMESPACE "{{ storeServices['session']['namespace'] | default(endpointData['services']['session']['namespace']) }}";
+        fastcgi_param SPRYKER_BE_HOST "{{ host }}";
+        fastcgi_param SPRYKER_BE_PORT "{{ port }}";
 
 {% if project['_endpointMap'][endpointData['store']]['yves'] is not empty %}
-    fastcgi_param SPRYKER_FE_HOST {{ project['_endpointMap'][endpointData['store']]['yves'] }};
-    fastcgi_param SPRYKER_FE_PORT {{ (project['_endpointMap'][endpointData['store']]['yves'] | split(':'))[1] | default(80) }};
+        fastcgi_param SPRYKER_FE_HOST "{{ project['_endpointMap'][endpointData['store']]['yves'] }}";
+        fastcgi_param SPRYKER_FE_PORT "{{ (project['_endpointMap'][endpointData['store']]['yves'] | split(':'))[1] | default(80) }}";
 {% endif %}
 
 {% if project['_endpointMap'][endpointData['store']]['glue'] is not empty %}
-    fastcgi_param SPRYKER_API_HOST {{ project['_endpointMap'][endpointData['store']]['glue'] }};
-    fastcgi_param SPRYKER_API_PORT {{ (project['_endpointMap'][endpointData['store']]['glue'] | split(':'))[1] | default(80) }};
+        fastcgi_param SPRYKER_API_HOST "{{ project['_endpointMap'][endpointData['store']]['glue'] }}";
+        fastcgi_param SPRYKER_API_PORT "{{ (project['_endpointMap'][endpointData['store']]['glue'] | split(':'))[1] | default(80) }}";
 {% endif %}
-
-    root /data/public/Zed;
 {% endblock location %}

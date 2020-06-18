@@ -1,0 +1,5 @@
+readonly BLACKFIRE_ENABLED=1
+export BLACKFIRE_SERVER_ID="${BLACKFIRE_SERVER_ID:-"{{ services['blackfire']['server-id'] }}"}"
+export BLACKFIRE_SERVER_TOKEN="${BLACKFIRE_SERVER_TOKEN:-"{{ services['blackfire']['server-token'] }}"}"
+export BLACKFIRE_CLIENT_ID="${BLACKFIRE_CLIENT_ID:-"{{ services['blackfire']['client-id'] }}"}"
+export BLACKFIRE_CLIENT_TOKEN="${BLACKFIRE_CLIENT_TOKEN:-"{{ services['blackfire']['client-token'] }}"}"

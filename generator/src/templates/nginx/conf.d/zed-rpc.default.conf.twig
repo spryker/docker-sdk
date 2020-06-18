@@ -1,5 +1,15 @@
 {% include "nginx/conf.d/common.conf.twig" with _context %}
 
+map $cookie_XDEBUG_SESSION $xdebug_mode {
+    ""      "";
+    default "_xdebug";
+}
+
+map $cookie_XDEBUG_SESSION $xdebug_port {
+    ""      "9000";
+    default "9001";
+}
+
 server {
     server_name _; # This is just an invalid value which will never trigger on a real hostname.
     listen 80;
@@ -11,16 +21,15 @@ server {
 {% for applicationName, applicationData in groupData['applications'] %}
 {% if applicationData['application'] == 'zed' %}
 
-upstream {{ applicationName }} {
-    server {{ applicationName }}:9000;
-}
-
 {% for endpoint, endpointData in applicationData['endpoints'] %}
 {# Ignoring custom port and SSL within internal networn #}
 {% include "nginx/http/rpc.server.conf.twig" with {
     endpoint: endpoint,
     endpointData: endpointData,
-    upstream: applicationName,
+    storeServices: regions[groupData['region']]['stores'][endpointData['store']]['services'] | default([]),
+    upstream: (applicationName | lower) ~ ":$xdebug_port",
+    rpcServer: "rpc_server_" ~ ( endpointData['store'] | lower ),
+    zedHost: (endpoint | split(':') | first) ~ '$xdebug_mode',
     project: _context
 } %}
 

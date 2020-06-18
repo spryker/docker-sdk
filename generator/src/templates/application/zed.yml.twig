@@ -1,5 +1,5 @@
-  {{ applicationName }}:
-    image: ${SPRYKER_DOCKER_PREFIX}_app:${SPRYKER_DOCKER_TAG}-{{ applicationData['application']}}
+  {{ applicationName | lower }}:
+    image: ${SPRYKER_DOCKER_PREFIX}_run_app:${SPRYKER_DOCKER_TAG}-{{ applicationName | lower }}
     depends_on:
       - database
       - broker
@@ -11,4 +11,6 @@
       - private
     env_file:
       - ${DEPLOYMENT_PATH}/env/{{ applicationName }}.env
+    environment:
+      SPRYKER_XDEBUG_HOST_IP: ${SPRYKER_XDEBUG_HOST_IP}
     <<: *app-volumes

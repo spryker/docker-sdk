@@ -1,6 +1,0 @@
-#!/bin/bash
-
-__TRUE=0
-__FALSE=1
-
-IF_NOT_PERFORMED='IF_NOT_PERFORMED'
