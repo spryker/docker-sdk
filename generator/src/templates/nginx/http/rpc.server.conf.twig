@@ -7,6 +7,7 @@
 {% block host %}
     server_name {{ host }}{% if endpointData['primal'] and rpcServer is not empty %} {{ rpcServer }} {{ rpcServer }}_xdebug{% endif %};
     listen 80;
+{% include "nginx/http/error.conf.twig" with _context %}
 {% endblock host %}
 {% block location %}
 {% if endpointData['primal'] and rpcServer is not empty %}
