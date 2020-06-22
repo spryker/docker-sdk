@@ -8,7 +8,7 @@ RUN --mount=type=cache,id=aptlib,sharing=locked,target=/var/lib/apt \
      supervisor \
      ; fi'
 
-RUN --mount=type=cache,id=apk,sharing=locked,target=/var/cache/apk ln -vs /var/cache/apk /etc/apk/cache && \
+RUN --mount=type=cache,id=apk,sharing=locked,target=/var/cache/apk ln -vsf /var/cache/apk /etc/apk/cache && \
   bash -c 'if [ ! -z "$(which apk)" ]; then apk update && apk add \
      supervisor \
      ; fi'
