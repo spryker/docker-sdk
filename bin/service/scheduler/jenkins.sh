@@ -52,7 +52,7 @@ function Service::Scheduler::_run() {
         for store in "${STORES[@]}"; do
             SPRYKER_CURRENT_STORE="${store}"
             Console::info "${2} scheduler jobs for ${SPRYKER_CURRENT_STORE} store."
-            Compose::exec "vendor/bin/install -r docker -s scheduler-${1}"
+            Compose::exec "vendor/bin/install -r ${SPRYKER_PIPELINE} -s scheduler-${1}"
         done
     done
 }

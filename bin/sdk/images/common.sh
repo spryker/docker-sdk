@@ -30,6 +30,7 @@ function Images::buildApp() {
         --progress="${PROGRESS_TYPE}" \
         --build-arg "SPRYKER_PLATFORM_IMAGE=${SPRYKER_PLATFORM_IMAGE}" \
         --build-arg "SPRYKER_LOG_DIRECTORY=${SPRYKER_LOG_DIRECTORY}" \
+        --build-arg "SPRYKER_PIPELINE=${SPRYKER_PIPELINE}" \
         --build-arg "APPLICATION_ENV=${APPLICATION_ENV}" \
         --build-arg "SPRYKER_DB_ENGINE=${SPRYKER_DB_ENGINE}" \
         --build-arg "KNOWN_HOSTS=${KNOWN_HOSTS}" \
@@ -48,6 +49,7 @@ function Images::buildApp() {
         --build-arg "USER_UID=${USER_FULL_ID%%:*}" \
         --build-arg "COMPOSER_AUTH=${COMPOSER_AUTH}" \
         --build-arg "DEPLOYMENT_PATH=${DEPLOYMENT_PATH}" \
+        --build-arg "SPRYKER_PIPELINE=${SPRYKER_PIPELINE}" \
         --build-arg "APPLICATION_ENV=${APPLICATION_ENV}" \
         --build-arg "SPRYKER_DB_ENGINE=${SPRYKER_DB_ENGINE}" \
         --build-arg "SPRYKER_COMPOSER_MODE=${SPRYKER_COMPOSER_MODE}" \
@@ -76,6 +78,7 @@ function Images::buildCli() {
         --build-arg "SPRYKER_APPLICATION_IMAGE=${runtimeImage}" \
         --build-arg "DEPLOYMENT_PATH=${DEPLOYMENT_PATH}" \
         --build-arg "COMPOSER_AUTH=${COMPOSER_AUTH}" \
+        --build-arg "SPRYKER_PIPELINE=${SPRYKER_PIPELINE}" \
         --build-arg "SPRYKER_BUILD_HASH=${SPRYKER_BUILD_HASH:-"current"}" \
         --build-arg "SPRYKER_BUILD_STAMP=${SPRYKER_BUILD_STAMP:-""}" \
         --no-cache \
@@ -95,10 +98,18 @@ function Images::tagByApp() {
 function Images::tagAll() {
     local tag=${1:-${SPRYKER_DOCKER_TAG}}
 
-    Images::tagByApp Cli "${SPRYKER_DOCKER_PREFIX}_cli:${tag}" "${SPRYKER_DOCKER_PREFIX}_cli:${SPRYKER_DOCKER_TAG}"
-
     for application in "${SPRYKER_APPLICATIONS[@]}"; do
         Images::tagByApp "${application}" "${SPRYKER_DOCKER_PREFIX}_app:${tag}" "${SPRYKER_DOCKER_PREFIX}_app:${SPRYKER_DOCKER_TAG}"
         Images::tagByApp "${application}" "${SPRYKER_DOCKER_PREFIX}_run_app:${tag}" "${SPRYKER_DOCKER_PREFIX}_run_app:${SPRYKER_DOCKER_TAG}"
     done
+}
+
+function Images::printAll() {
+    local tag=${1:-${SPRYKER_DOCKER_TAG}}
+
+    for application in "${SPRYKER_APPLICATIONS[@]}"; do
+        printf "%s %s_app:%s\n" "${application}" "${SPRYKER_DOCKER_PREFIX}" "${tag}"
+    done
+
+    printf "%s %s_frontend:%s\n" "frontend" "${SPRYKER_DOCKER_PREFIX}" "${tag}"
 }

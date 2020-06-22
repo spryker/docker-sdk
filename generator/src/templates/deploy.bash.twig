@@ -101,6 +101,7 @@ VERBOSE=${VERBOSE:-0}
 readonly APPLICATION_ENV="{{ environment | default('docker') }}"
 declare -a -r SPRYKER_APPLICATIONS=({{ _applications | join(' ') | raw }})
 readonly COMPOSE_PROJECT_NAME={{ namespace | default('spryker') }}
+readonly SPRYKER_PIPELINE=${SPRYKER_PIPELINE:-{{ pipeline | default('docker') }}}
 readonly SPRYKER_PLATFORM_IMAGE=${SPRYKER_PLATFORM_IMAGE:-{{ image is iterable ? image['tag'] : image | default('spryker/php:7.2') }}}
 readonly SPRYKER_DOCKER_PREFIX=${COMPOSE_PROJECT_NAME}
 readonly SPRYKER_DOCKER_TAG="{{ tag | default('1.0') }}"

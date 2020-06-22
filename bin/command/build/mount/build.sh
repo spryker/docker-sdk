@@ -12,6 +12,8 @@ function Command::build() {
     case ${subCommand} in
         images | image)
             Images::build --force
+            # Codebase building is deprecated here. It is left for BC reasons.
+            Codebase::build --force
             ;;
         codebase | code)
             Codebase::build --force
@@ -25,7 +27,7 @@ function Command::build() {
             Assets::build --force
             ;;
         *)
-            Console::error "Unknown build target '${subCommand}' is occured. No action." > /dev/stderr
+            Console::error "Unknown build target '${subCommand}' is occurred. No action." > /dev/stderr
             exit 1
             ;;
     esac

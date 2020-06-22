@@ -79,6 +79,7 @@ verbose('Generating NGINX configuration... [DONE]');
 @mkdir($deploymentDir . DS . 'context' . DS . 'nginx' . DS . 'frontend', 0777, true);
 
 $primal = [];
+$projectData['_endpointMap'] = [];
 
 verbose('Generating ENV files... [DONE]');
 
@@ -90,20 +91,24 @@ foreach ($projectData['groups'] ?? [] as $groupName => $groupData) {
 
             $application = $applicationData['application'];
             $store = $endpointData['store'] ?? null;
-            $isPrimal = $store && (!empty($endpointData['primal']) || !array_key_exists($store, $primal));
-            if ($isPrimal) {
-                $primal[$store][$application] = function (&$projectData) use (
-                    $groupName,
-                    $applicationName,
-                    $application,
-                    $endpoint,
-                    $store
-                ) {
-                    $projectData['_endpointMap'][$store][$application] = $endpoint;
-                    $projectData['groups'][$groupName]['applications'][$applicationName]['endpoints'][$endpoint]['primal'] = true;
-                };
-            }
             $projectData['groups'][$groupName]['applications'][$applicationName]['endpoints'][$endpoint]['primal'] = false;
+
+            if ($store) {
+                # primal is true, or the first one
+                $isPrimal = !empty($endpointData['primal']) || empty($primal[$store][$application]);
+                if ($isPrimal) {
+                    $primal[$store][$application] = function (&$projectData) use (
+                        $groupName,
+                        $applicationName,
+                        $application,
+                        $endpoint,
+                        $store
+                    ) {
+                        $projectData['_endpointMap'][$store][$application] = $endpoint;
+                        $projectData['groups'][$groupName]['applications'][$applicationName]['endpoints'][$endpoint]['primal'] = true;
+                    };
+                }
+            }
         }
     }
 }
@@ -285,10 +290,10 @@ file_put_contents(
 );
 
 file_put_contents(
-    $deploymentDir . DS . 'images' . DS. 'common' . DS . 'base' . DS .  'Dockerfile',
-    $twig->render('images' . DS. 'common' . DS . 'base' . DS .  'Dockerfile.twig', $projectData)
+    $deploymentDir . DS . 'images' . DS . 'common' . DS . 'base' . DS . 'Dockerfile',
+    $twig->render('images' . DS . 'common' . DS . 'base' . DS . 'Dockerfile.twig', $projectData)
 );
-unlink($deploymentDir . DS . 'images' . DS. 'common' . DS . 'base' . DS .  'Dockerfile.twig');
+unlink($deploymentDir . DS . 'images' . DS . 'common' . DS . 'base' . DS . 'Dockerfile.twig');
 
 file_put_contents(
     $deploymentDir . DS . 'docker-compose.yml',
@@ -343,9 +348,9 @@ verbose(implode(PHP_EOL, $output));
  * @param array $projectData
  * @param string $platform
  *
+ * @return string
  * @throws \Exception
  *
- * @return string
  */
 function retrieveMountMode(array $projectData, string $platform): string
 {
@@ -389,9 +394,9 @@ function retrieveUniquePorts(array $projectData)
 /**
  * @param array $projectData
  *
+ * @return array[]
  * @throws \Exception
  *
- * @return array[]
  */
 function retrieveEndpoints(array $projectData): array
 {
@@ -727,7 +732,8 @@ function retrieveRegionsStorageHosts(array $regions, array $storageServices, int
         foreach ($regionData['stores'] as $storeData) {
             foreach ($storeData['services'] ?? [] as $serviceName => $serviceNamespace) {
                 if (in_array($serviceName, $storageServices, true)) {
-                    $regionsStorageHosts[] = sprintf('%s:%s:%s:%s', $serviceName, $serviceName, $defaultPort, $serviceNamespace['namespace']);
+                    $regionsStorageHosts[] = sprintf('%s:%s:%s:%s', $serviceName, $serviceName, $defaultPort,
+                        $serviceNamespace['namespace']);
                 }
             }
         }
@@ -751,7 +757,8 @@ function retrieveGroupsStorageHosts(array $groups, array $storageServices, int $
             foreach ($application['endpoints'] as $endpoint => $endpointData) {
                 foreach ($endpointData['services'] ?? [] as $serviceName => $serviceData) {
                     if (in_array($serviceName, $storageServices, true)) {
-                        $groupsStorageHosts[] = sprintf('%s:%s:%s:%s', $serviceName, $serviceName, $defaultPort, $serviceData['namespace']);
+                        $groupsStorageHosts[] = sprintf('%s:%s:%s:%s', $serviceName, $serviceName, $defaultPort,
+                            $serviceData['namespace']);
                     }
                 }
             }
@@ -789,6 +796,7 @@ function buildDataForRequirementAnalyzer(array $projectData): array
 {
     $hosts = $projectData['_hosts'];
     unset($hosts['localhost']);
+
     return [
         'hosts' => implode(' ', $hosts),
     ];
@@ -797,8 +805,8 @@ function buildDataForRequirementAnalyzer(array $projectData): array
 /**
  * @param int $length
  *
- * @throws \Exception
  * @return string
+ * @throws \Exception
  */
 function generateSalt(int $length = 16): string
 {
@@ -817,8 +825,8 @@ function generateSalt(int $length = 16): string
  * @param $username
  * @param $password
  *
- * @throws \Exception
  * @return string
+ * @throws \Exception
  */
 function generateHtPassword(string $username, string $password): string
 {

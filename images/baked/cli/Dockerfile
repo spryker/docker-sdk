@@ -55,8 +55,10 @@ USER root
 # Tests contain transfer declaration
 COPY --chown=spryker:spryker tests ${srcRoot}/tests
 
+ARG SPRYKER_PIPELINE
+ENV SPRYKER_PIPELINE=${SPRYKER_PIPELINE}
 ENV DEVELOPMENT_CONSOLE_COMMANDS=1
-RUN vendor/bin/install -r docker -s build-development
+RUN vendor/bin/install -r ${SPRYKER_PIPELINE} -s build-development
 
 ARG DEPLOYMENT_PATH
 ENV DEPLOYMENT_PATH=${DEPLOYMENT_PATH}

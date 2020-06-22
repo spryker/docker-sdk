@@ -20,12 +20,13 @@ bootFileCollection=(
     deployment/default/env/
     deployment/default/images/
     deployment/default/deploy
+    deployment/default/.env
+    deployment/default/_git
     deployment/default/spryker.pfx
+    deployment/default/spryker_ca.crt
     deployment/default/project.yml
     deployment/default/docker-compose.yml
     deployment/default/docker-compose.test.yml
-    deployment/default/docker-compose.xdebug.yml
-    deployment/default/docker-compose.test.xdebug.yml
 )
 
 checkFiles "${bootFileCollection[@]}"

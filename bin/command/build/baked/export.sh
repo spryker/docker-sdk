@@ -2,8 +2,8 @@
 
 Registry::addCommand "export" "Command::export"
 
-Registry::Help::command -c "export images" -a "[-t <tag>]" "Builds prod-like images (Yves, Zed, Glue, Cli)."
-Registry::Help::command -c "export assets" -a "[-t <tag>] [-p <path>]" "Builds assets and export as archives stored by given path."
+Registry::Help::command -c "export images" -a "[-t <tag>]" "Builds prod-like images (Yves, Zed, Glue, Frontend)."
+Registry::Help::command -c "export assets" -a "[-t <tag>] [-p <path>]" "[DEPRECATED] Builds assets and export as archives stored by given path."
 
 function _assertDestinationDirectory() {
     if [ ! -d "${1}" ] || [ ! -w "${1}" ]; then
@@ -13,34 +13,59 @@ function _assertDestinationDirectory() {
 }
 
 function Command::export() {
-    local subCommand=${1}
+    local subCommand=''
+    local tag=${SPRYKER_DOCKER_TAG}
+    local destinationPath='./'
+
+    subCommand=${1}
     shift 1
 
-    local tag=''
-    local destinationPath=''
-
     while getopts "t:p:" opt; do
-        case ${opt} in
+        case "${opt}" in
             t)
                 tag=${OPTARG}
                 ;;
             p)
+                # Deprecated
                 destinationPath=${OPTARG}
                 ;;
-            *) ;;
+            # Unknown option specified
+            \?)
+                Registry::printHelp
+                Console::error "\nUnknown option ${INFO}-${OPTARG}${WARN} is acquired."
+                exit 1
+                ;;
+            # Specified argument without required value
+            :)
+                Registry::printHelp
+                Console::error "Option ${INFO}-${OPTARG}${WARN} requires an argument."
+                exit 1
+                ;;
+            *)
+                echo ${opt}
+                ;;
         esac
     done
+    shift $((OPTIND - 1))
 
     case ${subCommand} in
         asset | assets)
-            _assertDestinationDirectory ${destinationPath}
+            Console::warn 'This command is DEPRECATED. Please, use just "export".'
+            _assertDestinationDirectory "${destinationPath}"
             Images::build
-            Assets::build
-            Assets::export ${tag} ${destinationPath}
+            Assets::build --force
+            Assets::export "${tag}" "${destinationPath}"
             ;;
         image | images)
             Images::build
-            Images::tagAll ${tag}
+            Assets::build --force
+            Images::tagAll "${tag}"
+            Images::tagByApp Frontend "${SPRYKER_DOCKER_PREFIX}_frontend:${tag}" "${SPRYKER_DOCKER_PREFIX}_frontend:${SPRYKER_DOCKER_TAG}"
+            Images::printAll "${tag}"
+            ;;
+        *)
+            Console::error "Unknown export '${subCommand}' is occurred. No action." > /dev/stderr
+            exit 1
             ;;
     esac
 }

@@ -20,6 +20,6 @@ function Codebase::build() {
     local generatedDir=$(Compose::exec '[ ! -d /data/src/Generated ] && echo 0 || echo 1 | tail -n 1' | tr -d " \n\r")
     if [ "$1" = "--force" ] || [ "${generatedDir}" == "0" ]; then
         Console::verbose "${INFO}Running build${NC}"
-        Compose::exec 'vendor/bin/install -r docker -s build -s build-development'
+        Compose::exec "vendor/bin/install -r ${SPRYKER_PIPELINE} -s build -s build-development"
     fi
 }

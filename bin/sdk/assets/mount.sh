@@ -41,5 +41,5 @@ function Assets::build() {
 
     Compose::ensureCliRunning
 
-    Compose::exec "vendor/bin/install -r docker -s build-static -s build-static-${SPRYKER_ASSETS_MODE:-development}"
+    Compose::exec "vendor/bin/install -r ${SPRYKER_PIPELINE} -s build-static -s build-static-${SPRYKER_ASSETS_MODE:-development}"
 }

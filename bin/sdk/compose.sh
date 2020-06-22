@@ -49,6 +49,7 @@ function Compose::exec() {
         -e COMMAND="${*}" \
         -e APPLICATION_STORE="${SPRYKER_CURRENT_STORE}" \
         -e SPRYKER_CURRENT_REGION="${SPRYKER_CURRENT_REGION}" \
+        -e SPRYKER_PIPELINE="${SPRYKER_PIPELINE}" \
         -e SPRYKER_XDEBUG_ENABLE_FOR_CLI="${SPRYKER_XDEBUG_ENABLE_FOR_CLI}" \
         -e SPRYKER_TESTING_ENABLE_FOR_CLI="$([ "${SPRYKER_TESTING_ENABLE}" -eq 1 ] && echo '1' || echo '')" \
         -e COMPOSER_AUTH="${COMPOSER_AUTH}" \
@@ -113,8 +114,8 @@ function Compose::up() {
                 noCache="--no-cache"
                 ;;
             *)
-                Console::error "\nUnknown option "${INFO}-${arg}${WARN}" is acquired."
-                exit 1
+                Console::verbose "\nUnknown option ${INFO}${arg}${WARN} is acquired."
+                ;;
         esac
     done
 

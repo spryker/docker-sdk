@@ -44,7 +44,7 @@ function Data::load() {
             for store in "${STORES[@]}"; do
                 SPRYKER_CURRENT_STORE="${store}"
                 Console::info "Init storages for ${SPRYKER_CURRENT_STORE} store."
-                Compose::exec "vendor/bin/install${verboseOption} -r docker -s init-storages-per-store"
+                Compose::exec "vendor/bin/install${verboseOption} -r ${SPRYKER_PIPELINE} -s init-storages-per-store"
             done
 
             SPRYKER_CURRENT_STORE="${STORES[0]}"
@@ -52,7 +52,7 @@ function Data::load() {
             Database::init
 
             local demoDataSection=${1:-demodata}
-            Compose::exec "vendor/bin/install${verboseOption} -r docker -s clean-storage -s init-storage -s init-storages-per-region -s ${demoDataSection}"
+            Compose::exec "vendor/bin/install${verboseOption} -r ${SPRYKER_PIPELINE} -s clean-storage -s init-storage -s init-storages-per-region -s ${demoDataSection}"
         done
 
         Service::Scheduler::unpause
