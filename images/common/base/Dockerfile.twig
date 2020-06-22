@@ -4,7 +4,7 @@ FROM ${SPRYKER_PLATFORM_IMAGE} AS spryker_app_dependencies
 
 ENV SPRYKER_IN_DOCKER=1
 {% for envName, envValue in _envs %}
-    ENV {{ envName }}='{{ envValue }}'
+ENV {{ envName }}='{{ envValue }}'
 {% endfor %}
 
 WORKDIR /data
