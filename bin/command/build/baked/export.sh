@@ -18,7 +18,7 @@ function Command::export() {
     local destinationPath='./'
 
     subCommand=${1}
-    shift 1
+    shift || true
 
     while getopts "t:p:" opt; do
         case "${opt}" in
@@ -64,7 +64,7 @@ function Command::export() {
             Images::printAll "${tag}"
             ;;
         *)
-            Console::error "Unknown export '${subCommand}' is occurred. No action." > /dev/stderr
+            Console::error "Unknown export '${subCommand}' is occurred. No action. Usage: ${HELP_SCR}${SELF_SCRIPT} images [-t <tag>]" > /dev/stderr
             exit 1
             ;;
     esac

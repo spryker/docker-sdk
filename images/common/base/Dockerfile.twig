@@ -22,9 +22,9 @@ RUN bash -c '[ ! -z "${KNOWN_HOSTS}" ] && ssh-keyscan -t rsa ${KNOWN_HOSTS} >> /
 RUN chown spryker:spryker -R /home/spryker/.ssh
 
 # PHP configuration
-COPY php-fpm.d/worker.conf /usr/local/etc/php-fpm.d/worker.conf
-COPY php.ini /usr/local/etc/php/
-COPY conf.d/70-opcache.ini /usr/local/etc/php/conf.d
+COPY php/php-fpm.d/worker.conf /usr/local/etc/php-fpm.d/worker.conf
+COPY php/php.ini /usr/local/etc/php/
+COPY php/conf.d/70-opcache.ini /usr/local/etc/php/conf.d
 
 {% if _phpExtensions is defined and _phpExtensions is not empty %}
 {% for phpExtention in _phpExtensions %}
@@ -32,4 +32,7 @@ RUN mv /usr/local/etc/php/disabled/{{phpExtention}}.ini /usr/local/etc/php/conf.
 {% endfor %}
 {% endif %}
 
-COPY conf.d/99-from-deploy-yaml-php.ini /usr/local/etc/php/conf.d/
+COPY php/conf.d/99-from-deploy-yaml-php.ini /usr/local/etc/php/conf.d/
+
+# Jenkins
+COPY --chown=spryker:spryker jenkins/jenkins.docker.xml.twig /home/spryker/jenkins.docker.xml.twig

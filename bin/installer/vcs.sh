@@ -3,7 +3,7 @@
 function Installer::vcs() {
 
     if [ -z "${GITHUB_TOKEN}" ]; then
-        Console::error "${WARN}Warning: GITHUB_TOKEN is not set but may be required.${NC}"
+        Console::error "Warning: GITHUB_TOKEN is not set but may be required."
         return "${FALSE}"
     fi
 

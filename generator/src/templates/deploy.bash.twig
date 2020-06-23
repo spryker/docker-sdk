@@ -63,6 +63,9 @@ import command/internal/prune.sh
 
 # Installers
 import installer/vcs.sh
+{% if services['scheduler']['engine'] is defined and services['scheduler']['engine'] == 'jenkins' %}
+import installer/jenkins-template.sh
+{% endif %}
 {% if _requirementAnalyzerData.hosts is not empty %}
 import installer/hosts.sh "{{ _requirementAnalyzerData.hosts }}"
 {% endif %}

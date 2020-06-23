@@ -20,7 +20,6 @@ bootFileCollection=(
     deployment/default/env/
     deployment/default/images/
     deployment/default/deploy
-    deployment/default/.env
     deployment/default/_git
     deployment/default/spryker.pfx
     deployment/default/spryker_ca.crt

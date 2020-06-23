@@ -518,7 +518,7 @@ function getStoreSpecific(array $projectData): array
                 'SPRYKER_SEARCH_NAMESPACE' => $services['search']['namespace'],
                 'SPRYKER_KEY_VALUE_STORE_NAMESPACE' => $services['key_value_store']['namespace'],
                 'SPRYKER_BROKER_NAMESPACE' => $services['broker']['namespace'],
-                'SPRYKER_SESSION_BE_NAMESPACE' => $services['session']['namespace'],
+                'SPRYKER_SESSION_BE_NAMESPACE' => $services['session']['namespace'] ?? 1, # TODO SESSION should not be used in CLI
             ];
         }
     }

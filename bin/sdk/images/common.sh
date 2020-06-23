@@ -36,7 +36,7 @@ function Images::buildApp() {
         --build-arg "KNOWN_HOSTS=${KNOWN_HOSTS}" \
         --build-arg "SPRYKER_BUILD_HASH=${SPRYKER_BUILD_HASH:-"current"}" \
         --build-arg "SPRYKER_BUILD_STAMP=${SPRYKER_BUILD_STAMP:-""}" \
-        "${DEPLOYMENT_PATH}/context/php" 1>&2
+        "${DEPLOYMENT_PATH}/context" 1>&2
 
     docker build \
         -t "${appImage}" \
