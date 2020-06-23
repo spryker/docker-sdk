@@ -34,7 +34,7 @@ function Compose::ensureRunning() {
 }
 
 function Compose::ensureCliRunning() {
-    local isCliRunning=$(docker ps --filter 'status=running' --filter "name=${SPRYKER_DOCKER_PREFIX}_cli_*" --format "{{.Names}}")
+    local isCliRunning=$(docker ps --filter 'status=running' --filter "ancestor=${SPRYKER_DOCKER_PREFIX}_cli:${SPRYKER_DOCKER_TAG}" --filter "name=${SPRYKER_DOCKER_PREFIX}_cli_*" --format "{{.Names}}")
     if [ -z "${isCliRunning}" ]; then
         Compose::run --no-deps cli
     fi
