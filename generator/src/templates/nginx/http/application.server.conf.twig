@@ -13,6 +13,8 @@
 
 {% include "nginx/http/static.conf.twig" with _context %}
 
+{% include "nginx/http/build.conf.twig" with _context %}
+
     location ~ \.php$ {
         include fastcgi.conf;
         fastcgi_pass {{ upstream }};

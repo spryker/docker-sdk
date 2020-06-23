@@ -36,3 +36,6 @@ COPY php/conf.d/99-from-deploy-yaml-php.ini /usr/local/etc/php/conf.d/
 
 # Jenkins
 COPY --chown=spryker:spryker jenkins/jenkins.docker.xml.twig /home/spryker/jenkins.docker.xml.twig
+
+# Build info
+COPY --chown=spryker:spryker php/build.php /home/spryker/build.php

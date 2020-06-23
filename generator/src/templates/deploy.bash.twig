@@ -161,12 +161,11 @@ while getopts ":xvt" opt; do
                 break
             fi
 
-            showHelp
-            Console::error "\nUnknown option '${INFO}-${OPTARG}${WARN}' is acquired."
+            Console::error "\nUnknown option ${INFO}-${OPTARG}${WARN} is acquired."
             exit 1
             ;;
         :)
-            Console::error "Option '${INFO}-${opt}${WARN}' requires an argument."
+            Console::error "Option ${INFO}-${opt}${WARN} requires an argument."
             exit 1
             ;;
     esac

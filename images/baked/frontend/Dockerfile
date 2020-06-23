@@ -37,10 +37,15 @@ COPY --chown=root:root ${DEPLOYMENT_PATH}/context/nginx/auth /etc/nginx/auth
 COPY --chown=root:root ${DEPLOYMENT_PATH}/context/nginx/frontend/entrypoint.sh /
 RUN chmod +x /entrypoint.sh
 
+# Build info
 ARG SPRYKER_BUILD_HASH='current'
 ENV SPRYKER_BUILD_HASH=${SPRYKER_BUILD_HASH}
 ARG SPRYKER_BUILD_STAMP=''
 ENV SPRYKER_BUILD_STAMP=${SPRYKER_BUILD_STAMP}
+COPY --chown=root:root ${DEPLOYMENT_PATH}/context/nginx/build.json /tmp/build.json
+RUN mkdir -p /usr/share/nginx/ \
+  && envsubst '${SPRYKER_BUILD_HASH} ${SPRYKER_BUILD_STAMP}' < /tmp/build.json > /usr/share/nginx/build.json /
+  && rm -f /tmp/build.json
 
 ENTRYPOINT [ "/entrypoint.sh" ]
 CMD ["nginx", "-g", "daemon off;"]
