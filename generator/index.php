@@ -311,11 +311,6 @@ file_put_contents(
     $twig->render('deploy.bash.twig', $projectData)
 );
 
-file_put_contents(
-    $deploymentDir . DS . '.env',
-    $twig->render('.env.twig', $projectData)
-);
-
 switch ($mountMode) {
     case 'docker-sync':
         file_put_contents(

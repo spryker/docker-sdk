@@ -57,9 +57,11 @@ shift || true
 
 case "${command}" in
     boot | bootstrap)
+        bash "${FRAMEWORK_CWD}/standalone/logo/spryker-sdk.sh" > /dev/stderr
         Command::bootstrap "${@}"
         ;;
     help | '')
+        bash "${FRAMEWORK_CWD}/standalone/logo/spryker-sdk.sh" > /dev/stderr
         Registry::printHelp
         [ -f "${DEPLOY_SCRIPT}" ] && ${DEPLOY_SCRIPT} help "${@}"
         ;;

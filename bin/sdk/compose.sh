@@ -79,7 +79,6 @@ function Compose::command() {
     IFS=' ' read -r -a composeFiles <<< "$(Compose::getComposeFiles)"
 
     docker-compose \
-        --env-file "${DEPLOYMENT_PATH}/.env" \
         --project-directory "${PROJECT_DIR}" \
         --project-name "${SPRYKER_DOCKER_PREFIX}" \
         "${composeFiles[@]}" \
