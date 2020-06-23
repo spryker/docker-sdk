@@ -7,7 +7,7 @@ function Assets::init() {
     fi
 
     Console::verbose "${INFO}Creating docker volume '${SPRYKER_DOCKER_PREFIX}_assets'${NC}"
-    docker volume create --name="${SPRYKER_DOCKER_PREFIX}_assets"
+    docker volume create --name="${SPRYKER_DOCKER_PREFIX}_assets" >/dev/null
 }
 
 function Assets::destroy() {
@@ -25,7 +25,7 @@ function Assets::export() {
     rm -rf "${projectDockerAssetsTmpDirectory}"
     mkdir -p "${projectDockerAssetsTmpDirectory}"
 
-    echo -e "Preparing assets archives..." > /dev/stderr
+    echo -e "Preparing assets archives..." >/dev/stderr
 
     docker run --rm \
         -e PROJECT_DIR='/data' \
@@ -102,7 +102,7 @@ function Assets::build() {
 
     # TODO I assume this is unnecessary if assets are baked into image
     Console::verbose "${INFO}Creating docker volume '${SPRYKER_DOCKER_PREFIX}_assets'${NC}"
-    docker volume create --name="${volumeName}" > /dev/null 2>&1
+    docker volume create --name="${volumeName}" >/dev/null 2>&1
 
     local tty
     [ -t -0 ] && tty='t' || tty=''

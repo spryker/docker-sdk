@@ -280,7 +280,7 @@ $envVarEncoder->setIsActive(true);
 file_put_contents(
     $deploymentDir . DS . 'terraform/environment.tf',
     $twig->render('terraform/environment.tf.twig', [
-        'brokerConnections' => getBrokerConnections($projectData),
+        'brokerConnections' => getCloudBrokerConnections($projectData),
         'project' => $projectData,
     ])
 );
@@ -494,6 +494,28 @@ function getBrokerConnections(array $projectData): string
                 'RABBITMQ_PASSWORD' => $localServiceData['api']['password'],
                 'RABBITMQ_VIRTUAL_HOST' => $localServiceData['namespace'],
                 'RABBITMQ_STORE_NAMES' => [$storeName], // check if connection is shared
+            ];
+        }
+    }
+
+    return json_encode($connections);
+}
+
+/**
+ * @param array $projectData
+ *
+ * @return string
+ */
+function getCloudBrokerConnections(array $projectData): string
+{
+    $brokerServiceData = $projectData['services']['broker'];
+
+    $connections = [];
+    foreach ($projectData['regions'] as $regionName => $regionData) {
+        foreach ($regionData['stores'] ?? [] as $storeName => $storeData) {
+            $localServiceData = array_replace($brokerServiceData, $storeData['services']['broker']);
+            $connections[$storeName] = [
+                'RABBITMQ_VIRTUAL_HOST' => $localServiceData['namespace'],
             ];
         }
     }
