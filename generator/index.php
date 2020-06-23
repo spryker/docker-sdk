@@ -80,6 +80,7 @@ verbose('Generating NGINX configuration... [DONE]');
 
 $primal = [];
 $projectData['_endpointMap'] = [];
+$projectData['_storeSpecific'] = getStoreSpecific($projectData);
 
 verbose('Generating ENV files... [DONE]');
 
@@ -498,6 +499,31 @@ function getBrokerConnections(array $projectData): string
     }
 
     return json_encode($connections);
+}
+
+/**
+ * @param array $projectData
+ *
+ * @return array
+ */
+function getStoreSpecific(array $projectData): array
+{
+    $storeSpecific = [];
+    foreach ($projectData['regions'] as $regionName => $regionData) {
+        foreach ($regionData['stores'] ?? [] as $storeName => $storeData) {
+
+            $services = $storeData['services'];
+            $storeSpecific[$storeName] = [
+                'APPLICATION_STORE' => $storeName,
+                'SPRYKER_SEARCH_NAMESPACE' => $services['search']['namespace'],
+                'SPRYKER_KEY_VALUE_STORE_NAMESPACE' => $services['key_value_store']['namespace'],
+                'SPRYKER_BROKER_NAMESPACE' => $services['broker']['namespace'],
+                'SPRYKER_SESSION_BE_NAMESPACE' => $services['session']['namespace'],
+            ];
+        }
+    }
+
+    return $storeSpecific;
 }
 
 /**
