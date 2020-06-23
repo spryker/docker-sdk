@@ -16,7 +16,7 @@ function Command::sync() {
             sync logs
             ;;
         *)
-            Console::error "Unknown subcomand ${INFO}${command}${WARN} is occurred."
+            Console::error "Unknown command ${INFO}${command}${WARN} is occurred."
             exit 1
             ;;
     esac

@@ -14,7 +14,7 @@ function Command::jobs() {
 
     case ${command} in
         ''|start)
-            Service::Scheduler::start
+            Service::Scheduler::start --force
             ;;
         stop)
             Service::Scheduler::stop
@@ -23,7 +23,7 @@ function Command::jobs() {
             Service::Scheduler::clean
             ;;
         *)
-            Console::error "Unknown subcomand ${INFO}${command}${WARN} is occurred."
+            Console::error "Unknown command ${INFO}${command}${WARN} is occurred."
             exit 1
             ;;
     esac
