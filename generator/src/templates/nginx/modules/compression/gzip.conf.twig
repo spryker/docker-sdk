@@ -1,4 +1,4 @@
-{% set static = compressionData['static'] | default(true) %}
+{% set static = compressionData['static'] is defined ? compressionData['static'] : true %}
 gzip {{ static is same as('only') ? 'off' : 'on' }};
 gzip_static {{ static ? 'on' : 'off' }};
 gzip_comp_level {{ compressionData['level'] | default(5) }};

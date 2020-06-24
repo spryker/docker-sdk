@@ -1,4 +1,4 @@
-{% set static = compressionData['static'] | default(true) %}
+{% set static = compressionData['static'] is defined ? compressionData['static'] : true %}
 brotli {{ static is same as('only') ? 'off' : 'on' }};
 brotli_static {{ static ? 'on' : 'off' }};
 brotli_comp_level {{ compressionData['level'] | default(5) }};
