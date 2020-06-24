@@ -29,15 +29,15 @@ function Assets::export() {
 
     docker run --rm \
         -e PROJECT_DIR='/data' \
-        -v "${DEPLOYMENT_DIR}/bin:/data/bin" \
+        --entrypoint='' \
         -v "${projectDockerAssetsTmpDirectory}:/data${dockerAssetsTmpDirectory}" \
         --name="${SPRYKER_DOCKER_PREFIX}_builder_assets" \
         "${SPRYKER_DOCKER_PREFIX}_builder_assets:${SPRYKER_DOCKER_TAG}" \
-        bash -c "/data/bin/standalone/assets/tar-builder.sh ${tag} /data/${dockerAssetsTmpDirectory}"
+        bash -c "/tar-builder.sh ${tag} /data${dockerAssetsTmpDirectory}"
 
     echo -e "${INFO}File name:              Path:${NC}"
 
-    for filePath in "${projectDockerAssetsTmpDirectory}"*; do
+    for filePath in "${projectDockerAssetsTmpDirectory}"/*; do
         local fileName="$(basename -- "${filePath}")"
 
         rm -f "${destinationPath}/${fileName}"
@@ -112,4 +112,12 @@ function Assets::build() {
         --entrypoint='' \
         "${imageName}:${SPRYKER_DOCKER_TAG}" \
         sh -c "rm -rf /tmp/assets/* && cp -r /data/public/* /tmp/assets"
+
+    docker build -t "${imageName}:${SPRYKER_DOCKER_TAG}" \
+        --build-arg SPRYKER_ASSETS_MODE="${mode}" \
+        --build-arg "DEPLOYMENT_PATH=${DEPLOYMENT_PATH}" \
+        --build-arg "FRONTEND_IMAGE_NAME=${SPRYKER_DOCKER_PREFIX}_frontend:${SPRYKER_DOCKER_TAG}" \
+        --progress="${PROGRESS_TYPE}" \
+        -f "${DEPLOYMENT_PATH}/images/baked/assets/Dockerfile" \
+        .
 }
