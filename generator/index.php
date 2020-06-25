@@ -164,6 +164,8 @@ foreach ($projectData['groups'] ?? [] as $groupName => $groupData) {
                     throw new Exception('Basic auth demands user list to be applied.');
                 }
 
+                $authFolder = $deploymentDir . DS . 'context' . DS . 'nginx' . DS . 'auth';
+
                 file_put_contents(
                     $authFolder . DS . $host . '.htpasswd',
                     generatePasswords($endpointData['auth']['users']),
