@@ -25,25 +25,36 @@ function Assets::export() {
     rm -rf "${projectDockerAssetsTmpDirectory}"
     mkdir -p "${projectDockerAssetsTmpDirectory}"
 
-    echo -e "Preparing assets archives..." >/dev/stderr
+    local command="true"
+    for entrypoint in "${SPRYKER_ENTRYPOINTS[@]}";
+    do
+        command="${command} && \$([ -d '/data/public/${entrypoint}/assets' ] && tar czf '/data${dockerAssetsTmpDirectory}/assets-${entrypoint}-${tag}.tar' -C '/data/public/${entrypoint}/assets' . || true)"
+    done
+
+    echo -e "Preparing assets archives..." > /dev/stderr
 
     docker run --rm \
         -e PROJECT_DIR='/data' \
-        --entrypoint='' \
+        -v "${DEPLOYMENT_DIR}/bin:/data/standalone" \
         -v "${projectDockerAssetsTmpDirectory}:/data${dockerAssetsTmpDirectory}" \
+        --entrypoint='' \
         --name="${SPRYKER_DOCKER_PREFIX}_builder_assets" \
         "${SPRYKER_DOCKER_PREFIX}_builder_assets:${SPRYKER_DOCKER_TAG}" \
-        bash -c "/tar-builder.sh ${tag} /data${dockerAssetsTmpDirectory}"
+        sh -c "${command}" 2>&1
 
-    echo -e "${INFO}File name:              Path:${NC}"
+    echo -e "${INFO}The following assets archives have been prepared${NC}:" > /dev/stderr
 
-    for filePath in "${projectDockerAssetsTmpDirectory}"/*; do
-        local fileName="$(basename -- "${filePath}")"
+    for entrypoint in "${SPRYKER_ENTRYPOINTS[@]}";
+    do
+        local fileName="assets-${entrypoint}-${tag}.tar"
+        if [ ! -f "${projectDockerAssetsTmpDirectory}/${fileName}" ]; then
+            continue
+        fi
 
         rm -f "${destinationPath}/${fileName}"
         mv "${projectDockerAssetsTmpDirectory}/${fileName}" "${destinationPath}"
 
-        echo -e "${OK}${fileName}${NC}          ${destinationPath}/${fileName}"
+        echo "${application} ${destinationPath}/${fileName}"
     done
 
     rm -rf "${projectDockerAssetsTmpDirectory}"
@@ -112,12 +123,4 @@ function Assets::build() {
         --entrypoint='' \
         "${imageName}:${SPRYKER_DOCKER_TAG}" \
         sh -c "rm -rf /tmp/assets/* && cp -r /data/public/* /tmp/assets"
-
-    docker build -t "${imageName}:${SPRYKER_DOCKER_TAG}" \
-        --build-arg SPRYKER_ASSETS_MODE="${mode}" \
-        --build-arg "DEPLOYMENT_PATH=${DEPLOYMENT_PATH}" \
-        --build-arg "FRONTEND_IMAGE_NAME=${SPRYKER_DOCKER_PREFIX}_frontend:${SPRYKER_DOCKER_TAG}" \
-        --progress="${PROGRESS_TYPE}" \
-        -f "${DEPLOYMENT_PATH}/images/baked/assets/Dockerfile" \
-        .
 }
