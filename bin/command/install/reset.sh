@@ -7,8 +7,7 @@ Registry::Help::command -c "reset" "Removes and builds all Spryker images and vo
 function Command::reset() {
     Compose::down
     Compose::cleanVolumes
-    Assets::destroy
-    Compose::up
+    Compose::up --build --assets --data --jobs
 
     return "${TRUE}"
 }

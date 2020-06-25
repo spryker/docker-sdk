@@ -6,8 +6,8 @@
 {% endblock server %}
 {% block location %}
 {{ parent() }}
-        fastcgi_param SPRYKER_ZED_HOST "{{ zedHost }}";
-        fastcgi_param SPRYKER_ZED_PORT "80";
+        fastcgi_param SPRYKER_ZED_HOST "{{ zedHost | split(':') | first }}";
+        fastcgi_param SPRYKER_ZED_PORT "{{ (zedHost | split(':'))[1] | default(project['_defaultPort']) }}";
 
         fastcgi_param SPRYKER_API_HOST "{{ host }}";
         fastcgi_param SPRYKER_API_PORT "{{ port }}";

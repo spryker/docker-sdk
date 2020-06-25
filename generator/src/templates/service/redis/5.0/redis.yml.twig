@@ -2,7 +2,6 @@
     image: redis:5.0-alpine
     command: 'redis-server --appendonly yes --save \"\"'
     networks:
-      - services
       - private
     healthcheck:
         test: [ "CMD", "redis-cli", "ping" ]

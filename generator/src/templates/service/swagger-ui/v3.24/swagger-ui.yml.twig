@@ -10,7 +10,7 @@
     image: swaggerapi/swagger-ui:v3.24.3
 {% endif %}
     networks:
-        - public
+        - private
     env_file:
         - ${DEPLOYMENT_PATH}/env/{{ serviceName }}.env
     healthcheck:

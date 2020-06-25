@@ -1,7 +1,7 @@
 # syntax = docker/dockerfile:experimental
-ARG SPRYKER_PLATFORM_IMAGE
+ARG SPRYKER_PARENT_IMAGE
 
-FROM ${SPRYKER_PLATFORM_IMAGE} AS spryker_app_dependencies
+FROM ${SPRYKER_PARENT_IMAGE} AS application-production-dependecies
 
 USER spryker
 
@@ -10,16 +10,16 @@ COPY --chown=spryker:spryker composer.json composer.lock ${srcRoot}/
 ARG COMPOSER_AUTH
 ARG SPRYKER_COMPOSER_MODE
 RUN --mount=type=cache,id=composer,sharing=locked,target=/home/spryker/.composer/cache,uid=1000 \
-    COMPOSER_AUTH="${COMPOSER_AUTH}" composer install --no-interaction ${SPRYKER_COMPOSER_MODE}
+    COMPOSER_AUTH="${COMPOSER_AUTH}" composer install --no-scripts --no-interaction ${SPRYKER_COMPOSER_MODE}
 
-### Intermediate container - with dependencies, PHP code and configs
-FROM spryker_app_dependencies AS spryker_app_base
+FROM application-production-dependecies AS application-production-codebase
+
 COPY --chown=spryker:spryker src ${srcRoot}/src
 COPY --chown=spryker:spryker config ${srcRoot}/config
 COPY --chown=spryker:spryker *.php ${srcRoot}/
-# translations in /data are needed for build below
+# TODO: Move codebase related stuff from data folder to src. In ideal: translations in /data are needed for build below
 COPY --chown=spryker:spryker data ${srcRoot}/data
-RUN chmod 600 ${srcRoot}/config/Zed/*.key
+RUN chmod 600 ${srcRoot}/config/Zed/*.key 2>/dev/null || true
 
 RUN --mount=type=cache,id=composer,sharing=locked,target=/home/spryker/.composer/cache,uid=1000 \
   composer dump-autoload -o
@@ -38,15 +38,12 @@ ARG SPRYKER_COMPOSER_AUTOLOAD
 RUN --mount=type=cache,id=composer,sharing=locked,target=/home/spryker/.composer/cache,uid=1000 \
   composer dump-autoload ${SPRYKER_COMPOSER_AUTOLOAD}
 
-### Final container with public directory and data
-FROM spryker_app_base AS spryker_app
+FROM application-production-codebase AS application-production
 
-# Add remaining Spryker files/directories
 COPY --chown=spryker:spryker public ${srcRoot}/public
 COPY --chown=spryker:spryker frontend ${srcRoot}/frontend
 COPY --chown=spryker:spryker .* *.* LICENSE ${srcRoot}/
 
-# Run FPM as default command
 USER root
 RUN rm -rf /var/run/opcache/*
 RUN chown -R spryker:spryker /home/spryker

@@ -110,7 +110,6 @@ readonly SPRYKER_PLATFORM_IMAGE=${SPRYKER_PLATFORM_IMAGE:-{{ image is iterable ?
 readonly SPRYKER_DOCKER_PREFIX=${COMPOSE_PROJECT_NAME}
 readonly SPRYKER_DOCKER_TAG="{{ tag | default('1.0') }}"
 readonly SPRYKER_FRONTEND_IMAGE="{{ assets['image'] | default('nginx:alpine') }}"
-readonly SPRYKER_DOCKER_RUN_IMAGE=${SPRYKER_DOCKER_PREFIX}_cli:${SPRYKER_DOCKER_TAG}
 readonly SPRYKER_COMPOSER_MODE="{{ composer.mode | default('') }}"
 readonly SPRYKER_COMPOSER_AUTOLOAD="{{ composer.autoload | default('') }}"
 readonly SPRYKER_LOG_DIRECTORY="{{ docker['logs']['path'] | default('/var/log/spryker') }}"
@@ -121,6 +120,9 @@ readonly SPRYKER_DEFAULT_STORE={{ (regions | first)['stores'] | keys | first }}
 readonly SPRYKER_FILE_MODE="{{ _fileMode }}"
 readonly DOCKER_COMPOSE_FILES_EXTRA="{{ docker['compose']['yamls'] | default([]) | join(' ') }}"
 readonly KNOWN_HOSTS="{{ _knownHosts | default("") }}"
+readonly SPRYKER_BUILD_HASH="${SPRYKER_BUILD_HASH}"
+readonly SPRYKER_BUILD_DATE="${SPRYKER_BUILD_DATE}"
+readonly SPRYKER_REPOSITORY_HASH="${SPRYKER_BUILD_HASH:-"$(git rev-parse --verify HEAD 2>/dev/null || echo "head")"}"
 
 # Specific variables
 {% for serviceName, serviceData in services %}
@@ -179,8 +181,9 @@ export SPRYKER_XDEBUG_HOST_IP
 export COMPOSE_PROJECT_NAME
 export SPRYKER_DOCKER_PREFIX
 export SPRYKER_DOCKER_TAG
-export SPRYKER_DOCKER_RUN_IMAGE
 export SPRYKER_LOG_DIRECTORY
+export SPRYKER_BUILD_HASH
+export SPRYKER_BUILD_DATE
 export BLACKFIRE_SERVER_ID=${BLACKFIRE_SERVER_ID}
 export BLACKFIRE_SERVER_TOKEN=${BLACKFIRE_SERVER_TOKEN}
 export BLACKFIRE_CLIENT_ID=${BLACKFIRE_CLIENT_ID}

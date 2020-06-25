@@ -1,7 +1,6 @@
   {{ serviceName }}:
     image: spryker/jenkins:2.176
     networks:
-      - services
       - private
     healthcheck:
       test: [ "CMD", "nc", "-z", "localhost", "8080" ]

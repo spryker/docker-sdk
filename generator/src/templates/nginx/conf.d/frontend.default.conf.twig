@@ -1,3 +1,13 @@
+{% if assets['compression'] is not empty %}
+{% for compressionEngine, compressionData in assets['compression'] %}
+
+{% include "nginx/modules/compression/#{compressionEngine}.conf.twig"  with {
+    compressionData: compressionData,
+} %}
+
+{% endfor %}
+{% endif %}
+
 server {
     server_name _ default; # This is just an invalid value which will never trigger on a real hostname.
     listen 80;
@@ -9,28 +19,15 @@ server {
 {% for groupData in groups %}
 {% for applicationName, applicationData in groupData['applications'] %}
 {% for endpoint, endpointData in applicationData['endpoints'] %}
-{% set applicationType = applicationData['application'] == 'zed' ? 'rpc' : applicationData['application'] %}
-{% include "nginx/http/#{applicationType}.server.conf.twig" with {
-    ssl: false,
+{% include "nginx/http/#{applicationData['application']}.server.conf.twig" with {
     endpoint: endpoint,
     endpointData: endpointData,
     auth: endpointData['auth'] | default([]),
     storeServices: regions[groupData['region']]['stores'][endpointData['store']]['services'] | default([]),
     upstream: "${SPRYKER_NGINX_CGI_HOST_" ~ (applicationName | upper) ~ "}" ~ ":9000",
-    rpcServer: null,
     zedHost: _endpointMap[endpointData['store']]['zed'] | default(''),
     project: _context
 } %}
 {% endfor %}
 {% endfor %}
 {% endfor %}
-
-{% if assets['compression'] is not empty %}
-{% for compressionEngine, compressionData in assets['compression'] %}
-
-{% include "nginx/modules/compression/#{compressionEngine}.conf.twig"  with {
-    compressionData: compressionData,
-} %}
-
-{% endfor %}
-{% endif %}

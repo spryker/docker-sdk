@@ -1,6 +1,6 @@
 # syntax = docker/dockerfile:experimental
-ARG SPRYKER_APPLICATION_IMAGE
-FROM ${SPRYKER_APPLICATION_IMAGE}
+ARG SPRYKER_PARENT_IMAGE
+FROM ${SPRYKER_PARENT_IMAGE}
 
 RUN --mount=type=cache,id=aptlib,sharing=locked,target=/var/lib/apt \
     --mount=type=cache,id=aptcache,sharing=locked,target=/var/cache/apt \
@@ -14,9 +14,13 @@ RUN --mount=type=cache,id=apk,sharing=locked,target=/var/cache/apk mkdir -p /etc
      ; fi'
 
 RUN /usr/bin/install -d -m 777 /var/run/opcache/debug
-COPY debug/etc/ /usr/local/etc/
-COPY debug/supervisord.conf /etc/supervisor/supervisord.conf
+COPY php/debug/etc/ /usr/local/etc/
+COPY php/debug/supervisord.conf /etc/supervisor/supervisord.conf
 RUN mkdir -p /var/log/supervisor
+
+# Make self-signed certificate to be trusted locally
+COPY nginx/ssl/ca.crt /usr/local/share/ca-certificates
+RUN update-ca-certificates
 
 CMD [ "/usr/bin/supervisord", "-c", "/etc/supervisor/supervisord.conf" ]
 EXPOSE 9000 9001

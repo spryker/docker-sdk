@@ -34,7 +34,7 @@ function Compose::ensureRunning() {
 }
 
 function Compose::ensureCliRunning() {
-    local isCliRunning=$(docker ps --filter 'status=running' --filter "ancestor=${SPRYKER_DOCKER_PREFIX}_cli:${SPRYKER_DOCKER_TAG}" --filter "name=${SPRYKER_DOCKER_PREFIX}_cli_*" --format "{{.Names}}")
+    local isCliRunning=$(docker ps --filter 'status=running' --filter "ancestor=${SPRYKER_DOCKER_PREFIX}_run_cli:${SPRYKER_DOCKER_TAG}" --filter "name=${SPRYKER_DOCKER_PREFIX}_cli_*" --format "{{.Names}}")
     if [ -z "${isCliRunning}" ]; then
         Compose::run --no-deps cli
     fi
@@ -118,11 +118,12 @@ function Compose::up() {
         esac
     done
 
-    Images::build ${noCache} ${doBuild}
+    Images::buildApplication ${noCache} ${doBuild}
     Codebase::build ${noCache} ${doBuild}
     Assets::build ${noCache} ${doAssets}
+    Images::buildFrontend ${noCache} ${doBuild}
     Compose::run --build
-    Compose::command restart frontend rpc_server
+    Compose::command restart frontend gateway
     Data::load ${noCache} ${doData}
     Service::Scheduler::start ${noCache} ${doJobs}
 }
@@ -131,7 +132,6 @@ function Compose::run() {
     Registry::Flow::runBeforeRun
 
     Console::verbose "${INFO}Running Spryker containers${NC}"
-    Assets::init
     sync start
     Compose::command up -d --remove-orphans "${@}"
 }

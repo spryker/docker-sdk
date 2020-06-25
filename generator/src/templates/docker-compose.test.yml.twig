@@ -18,9 +18,7 @@ services:
   webdriver:
     image: wernight/phantomjs:latest
     networks:
-      - services
       - public
-      - private
     ports:
       - 4444:4444
     expose:

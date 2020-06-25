@@ -4,6 +4,7 @@ use Symfony\Component\Yaml\Parser;
 use Twig\Environment;
 use Twig\Loader\ChainLoader;
 use Twig\Loader\FilesystemLoader;
+use Twig\TwigFilter;
 
 define('DS', DIRECTORY_SEPARATOR);
 define('APPLICATION_SOURCE_DIR', __DIR__ . DS . 'src');
@@ -39,8 +40,11 @@ $envVarEncoder = new class() {
         $this->isActive = $isActive;
     }
 };
-$twig->addFilter(new \Twig\TwigFilter('env_var', [$envVarEncoder, 'encode'], ['is_safe' => ['all']]));
-$twig->addFilter(new \Twig\TwigFilter('unique', function ($array) {
+$twig->addFilter(new TwigFilter('env_var', [$envVarEncoder, 'encode'], ['is_safe' => ['all']]));
+$twig->addFilter(new TwigFilter('normalize_endpoint', static function ($string) {
+    return str_replace(['.', ':'], ['dot', '_'], $string);
+}, ['is_safe' => ['all']]));
+$twig->addFilter(new TwigFilter('unique', static function ($array) {
     return array_unique($array);
 }, ['is_safe' => ['all']]));
 $yamlParser = new Parser();
@@ -73,15 +77,13 @@ verbose('Generating NGINX configuration... [DONE]');
 @mkdir($deploymentDir . DS . 'env' . DS . 'cli', 0777, true);
 @mkdir($deploymentDir . DS . 'terraform', 0777, true);
 @mkdir($deploymentDir . DS . 'terraform' . DS . 'cli', 0777, true);
-@mkdir($deploymentDir . DS . 'context' . DS . 'nginx' . DS . 'conf.d', 0777, true);
-@mkdir($authFolder = $deploymentDir . DS . 'context' . DS . 'nginx' . DS . 'auth', 0777, true);
-@mkdir($deploymentDir . DS . 'context' . DS . 'nginx' . DS . 'stream.d', 0777, true);
-@mkdir($deploymentDir . DS . 'context' . DS . 'nginx' . DS . 'frontend', 0777, true);
 
 $primal = [];
 $projectData['_entryPoints'] = [];
 $projectData['_endpointMap'] = [];
 $projectData['_storeSpecific'] = getStoreSpecific($projectData);
+$debugPortIndex = 10000;
+$projectData['_endpointDebugMap'] = [];
 
 verbose('Generating ENV files... [DONE]');
 
@@ -95,6 +97,10 @@ foreach ($projectData['groups'] ?? [] as $groupName => $groupData) {
             $application = $applicationData['application'];
             $store = $endpointData['store'] ?? null;
             $projectData['groups'][$groupName]['applications'][$applicationName]['endpoints'][$endpoint]['primal'] = false;
+            while (!empty($projectData['_ports'][$debugPortIndex])) {
+                $debugPortIndex++;
+            }
+            $projectData['_endpointDebugMap'][$endpoint] = $debugPortIndex++;
 
             if ($store) {
                 # primal is true, or the first one
@@ -238,24 +244,24 @@ foreach ($projectData['groups'] ?? [] as $groupName => $groupData) {
 }
 
 file_put_contents(
-    $deploymentDir . DS . 'context' . DS . 'nginx' . DS . 'conf.d' . DS . 'front-end.default.conf',
-    $twig->render('nginx/conf.d/front-end.default.conf.twig', $projectData)
+    $deploymentDir . DS . 'context' . DS . 'nginx' . DS . 'conf.d' . DS . 'frontend.default.conf.tmpl',
+    $twig->render('nginx/conf.d/frontend.default.conf.twig', $projectData)
 );
 file_put_contents(
-    $deploymentDir . DS . 'context' . DS . 'nginx' . DS . 'stream.d' . DS . 'front-end.default.conf',
-    $twig->render('nginx/stream.d/front-end.default.conf.twig', $projectData)
+    $deploymentDir . DS . 'context' . DS . 'nginx' . DS . 'conf.d' . DS . 'gateway.default.conf',
+    $twig->render('nginx/conf.d/gateway.default.conf.twig', $projectData)
 );
 file_put_contents(
-    $deploymentDir . DS . 'context' . DS . 'nginx' . DS . 'conf.d' . DS . 'zed-rpc.default.conf',
-    $twig->render('nginx/conf.d/zed-rpc.default.conf.twig', $projectData)
+    $deploymentDir . DS . 'context' . DS . 'nginx' . DS . 'stream.d' . DS . 'gateway.default.conf',
+    $twig->render('nginx/stream.d/gateway.default.conf.twig', $projectData)
 );
 file_put_contents(
-    $deploymentDir . DS . 'context' . DS . 'nginx' . DS . 'frontend' . DS . 'default.conf.tmpl',
-    $twig->render('nginx/frontend/default.conf.tmpl.twig', $projectData)
+    $deploymentDir . DS . 'context' . DS . 'nginx' . DS . 'conf.d' . DS . 'debug.default.conf',
+    $twig->render('nginx/conf.d/debug.default.conf.twig', $projectData)
 );
 file_put_contents(
-    $deploymentDir . DS . 'context' . DS . 'nginx' . DS . 'frontend' . DS . 'entrypoint.sh',
-    $twig->render('nginx/frontend/entrypoint.sh.twig', $projectData)
+    $deploymentDir . DS . 'context' . DS . 'nginx' . DS . 'entrypoint.sh',
+    $twig->render('nginx/entrypoint.sh.twig', $projectData)
 );
 
 file_put_contents(
@@ -293,10 +299,10 @@ file_put_contents(
 );
 
 file_put_contents(
-    $deploymentDir . DS . 'images' . DS . 'common' . DS . 'base' . DS . 'Dockerfile',
-    $twig->render('images' . DS . 'common' . DS . 'base' . DS . 'Dockerfile.twig', $projectData)
+    $deploymentDir . DS . 'images' . DS . 'common' . DS . 'application' . DS . 'Dockerfile',
+    $twig->render('images' . DS . 'common' . DS . 'application' . DS . 'Dockerfile.twig', $projectData)
 );
-unlink($deploymentDir . DS . 'images' . DS . 'common' . DS . 'base' . DS . 'Dockerfile.twig');
+unlink($deploymentDir . DS . 'images' . DS . 'common' . DS . 'application' . DS . 'Dockerfile.twig');
 
 file_put_contents(
     $deploymentDir . DS . 'docker-compose.yml',
@@ -326,7 +332,6 @@ switch ($mountMode) {
 verbose('Generating SSL certificates...');
 
 $sslDir = $deploymentDir . DS . 'context' . DS . 'nginx' . DS . 'ssl';
-@mkdir($sslDir);
 exec(sprintf(
     'PFX_PASSWORD="%s" DESTINATION=%s DEPLOYMENT_DIR=%s ./openssl/generate.sh %s 2>&1',
     addslashes($projectData['docker']['ssl']['pfx-password'] ?? 'secret'),
@@ -382,9 +387,10 @@ function retrieveUniquePorts(array $projectData)
         $ports[$port] = $port;
     }
 
-//    if (array_key_exists(getDefaultPort($projectData), $ports) && !empty($projectData['docker']['ssl']['redirect'])) {
-//        $ports[80] = 80;
-//    }
+    if (array_key_exists(getDefaultPort($projectData), $ports) && !empty($projectData['docker']['ssl']['redirect'])) {
+        $otherPort = getSSLRedirectPort($projectData);
+        $ports[$otherPort] = $otherPort;
+    }
 
     return $ports;
 }
@@ -478,6 +484,18 @@ function getDefaultPort(array $projectData): int
 /**
  * @param array $projectData
  *
+ * @return int
+ */
+function getSSLRedirectPort(array $projectData): int
+{
+    $sslEnabled = $projectData['docker']['ssl']['enabled'] ?? false;
+
+    return $sslEnabled ? 80 : 443;
+}
+
+/**
+ * @param array $projectData
+ *
  * @return string
  */
 function getBrokerConnections(array $projectData): string
@@ -542,7 +560,8 @@ function getStoreSpecific(array $projectData): array
                 'SPRYKER_SEARCH_NAMESPACE' => $services['search']['namespace'],
                 'SPRYKER_KEY_VALUE_STORE_NAMESPACE' => $services['key_value_store']['namespace'],
                 'SPRYKER_BROKER_NAMESPACE' => $services['broker']['namespace'],
-                'SPRYKER_SESSION_BE_NAMESPACE' => $services['session']['namespace'] ?? 1, # TODO SESSION should not be used in CLI
+                'SPRYKER_SESSION_BE_NAMESPACE' => $services['session']['namespace'] ?? 1,
+                # TODO SESSION should not be used in CLI
             ];
         }
     }

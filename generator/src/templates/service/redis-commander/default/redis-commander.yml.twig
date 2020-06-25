@@ -1,7 +1,6 @@
   {{ serviceName }}:
     image: rediscommander/redis-commander:latest
     networks:
-      - services
       - private
     environment:
       REDIS_HOSTS: "{{ project.storageData.hosts | merge(serviceData.data.hosts | default([])) | default("") | join(',') }}"

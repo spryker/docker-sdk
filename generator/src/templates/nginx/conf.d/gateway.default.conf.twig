@@ -1,0 +1,77 @@
+{% set ssl = (docker['ssl']['enabled'] | default(false)) ? true : false %}
+
+# Important for proxy server. E.g. to pass gzip correctly.
+proxy_http_version 1.1;
+server_names_hash_bucket_size 128;
+
+map $cookie_XDEBUG_SESSION $xdebug_mode {
+    ""      "";
+    default "_xdebug";
+}
+
+server {
+    server_name _ default_ssl; # This is just an invalid value which will never trigger on a real hostname.
+    listen 443 ssl http2;
+    error_page 497 https://$host:$server_port$request_uri;
+    include /etc/nginx/vhost.d/ssl.default.conf;
+    return 502;
+}
+
+server {
+    server_name _ default; # This is just an invalid value which will never trigger on a real hostname.
+    listen 80;
+    error_page 497 http://$host:$server_port$request_uri;
+    return 502;
+}
+
+# APPLICATIONS
+{% for groupData in groups %}
+{% for applicationName, applicationData in groupData['applications'] %}
+
+{% for endpoint, endpointData in applicationData['endpoints'] %}
+{% set upstream = endpoint | normalize_endpoint %}
+{% set debugPort = _endpointDebugMap[endpoint] %}
+{% set port = (endpoint | split(':'))[1] | default(80) %}
+{% set host = endpoint | split(':') | first %}
+upstream {{ upstream }} {
+    server frontend:{{ port }};
+}
+upstream {{ upstream }}_xdebug {
+    server frontend:{{ debugPort }};
+}
+{% include "nginx/http/gateway/server.conf.twig" with {
+    ssl: ssl,
+    endpoint: endpoint,
+    endpointData: endpointData,
+    upstream: upstream ~ '$xdebug_mode',
+    project: _context
+} %}
+
+# Debug: {{ endpoint }}
+{% include "nginx/http/gateway/server.conf.twig" with {
+    portToListen: debugPort,
+    ssl: ssl,
+    endpoint: endpoint,
+    endpointData: endpointData,
+    upstream: upstream ~ '_xdebug',
+    project: _context
+} %}
+{% endfor %}
+{% endfor %}
+{% endfor %}
+
+# LOCAL SERVICES
+{% for serviceName, serviceData in services %}
+{% for endpoint, endpointData in serviceData['endpoints'] %}
+{% set protocol = endpointData['protocol'] | default('http') %}
+{% if protocol is same as ('http') %}
+{% include "nginx/http/gateway/#{serviceData['engine']}.server.conf.twig" with {
+    ssl: ssl,
+    endpoint: endpoint,
+    endpointData: endpointData,
+    upstream: serviceName ~ (serviceData['web-port'] ? ':' ~ serviceData['proxy-port'] : ''),
+    project: _context
+} %}
+{% endif %}
+{% endfor %}
+{% endfor %}

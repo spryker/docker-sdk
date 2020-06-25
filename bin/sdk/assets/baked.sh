@@ -1,24 +1,11 @@
 #!/bin/bash
 
-function Assets::init() {
-    # TODO investigate why do we need it. Probably we won't need it having frontend server assets inside
-    if docker volume inspect "${SPRYKER_DOCKER_PREFIX}_assets" >/dev/null 2>&1; then
-        return "${TRUE}"
-    fi
-
-    Console::verbose "${INFO}Creating docker volume '${SPRYKER_DOCKER_PREFIX}_assets'${NC}"
-    docker volume create --name="${SPRYKER_DOCKER_PREFIX}_assets" >/dev/null
-}
-
-function Assets::destroy() {
-    Console::verbose "${INFO}Removing assets volume${NC}"
-    docker volume rm -f "${SPRYKER_DOCKER_PREFIX}_assets" || true
-}
-
 function Assets::export() {
+    # deprecated
     local tag=${1}
     local destinationPath=${2%/}
 
+    local builderAssetsImage=$(Assets::getImageTag)
     local dockerAssetsTmpDirectory="/_tmp"
     local projectDockerAssetsTmpDirectory=${DEPLOYMENT_DIR}${dockerAssetsTmpDirectory}
 
@@ -26,12 +13,11 @@ function Assets::export() {
     mkdir -p "${projectDockerAssetsTmpDirectory}"
 
     local command="true"
-    for entrypoint in "${SPRYKER_ENTRYPOINTS[@]}";
-    do
+    for entrypoint in "${SPRYKER_ENTRYPOINTS[@]}"; do
         command="${command} && \$([ -d '/data/public/${entrypoint}/assets' ] && tar czf '/data${dockerAssetsTmpDirectory}/assets-${entrypoint}-${tag}.tar' -C '/data/public/${entrypoint}/assets' . || true)"
     done
 
-    echo -e "Preparing assets archives..." > /dev/stderr
+    Console::start "Preparing assets archives..."
 
     docker run --rm \
         -e PROJECT_DIR='/data' \
@@ -39,13 +25,12 @@ function Assets::export() {
         -v "${projectDockerAssetsTmpDirectory}:/data${dockerAssetsTmpDirectory}" \
         --entrypoint='' \
         --name="${SPRYKER_DOCKER_PREFIX}_builder_assets" \
-        "${SPRYKER_DOCKER_PREFIX}_builder_assets:${SPRYKER_DOCKER_TAG}" \
+        "${builderAssetsImage}" \
         sh -c "${command}" 2>&1
 
-    echo -e "${INFO}The following assets archives have been prepared${NC}:" > /dev/stderr
+    Console::log "The following assets archives have been prepared:"
 
-    for entrypoint in "${SPRYKER_ENTRYPOINTS[@]}";
-    do
+    for entrypoint in "${SPRYKER_ENTRYPOINTS[@]}"; do
         local fileName="assets-${entrypoint}-${tag}.tar"
         if [ ! -f "${projectDockerAssetsTmpDirectory}/${fileName}" ]; then
             continue
@@ -54,23 +39,24 @@ function Assets::export() {
         rm -f "${destinationPath}/${fileName}"
         mv "${projectDockerAssetsTmpDirectory}/${fileName}" "${destinationPath}"
 
-        echo "${application} ${destinationPath}/${fileName}"
+        echo "${entrypoint} ${destinationPath}/${fileName}"
     done
 
     rm -rf "${projectDockerAssetsTmpDirectory}"
 }
 
+function Assets::getImageTag() {
+    echo -n "${SPRYKER_DOCKER_PREFIX}_builder_assets:${SPRYKER_DOCKER_TAG}-${SPRYKER_REPOSITORY_HASH}"
+}
+
 function Assets::areBuilt() {
     Console::start "Checking assets are built..."
 
-    local assetsHostFolder=$(docker volume ls --filter "name=${SPRYKER_DOCKER_PREFIX}_assets" --format "{{ .Mountpoint }}")
+    local builderAssetsImage=$(Assets::getImageTag)
 
-    if [ -n "${assetsHostFolder}" ]; then
-        local assetsFolderFilesCount=$(docker run -i --rm -v "${SPRYKER_DOCKER_PREFIX}_assets:/assets" "${SPRYKER_DOCKER_PREFIX}_cli:${SPRYKER_DOCKER_TAG}" ls /assets | wc -l | sed 's/^ *//')
-        if [ "${assetsFolderFilesCount}" -gt 0 ]; then
-            Console::verbose "[BUILT]"
-            return "${TRUE}"
-        fi
+    if docker image inspect "${builderAssetsImage}" >/dev/null 2>&1; then
+        Console::end "[BUILT]"
+        return "${TRUE}"
     fi
 
     return "${FALSE}"
@@ -84,43 +70,31 @@ function Assets::build() {
         shift || true
     fi
 
-    # TODO consider compiling assets always. Separating base image (composer install + everything else) would help.
     if [ -z "${force}" ] && Assets::areBuilt; then
         return "${TRUE}"
     fi
 
+    Console::start "Cleaning old assets..."
+
+    docker images --filter "reference=${SPRYKER_DOCKER_PREFIX}_builder_assets:${SPRYKER_DOCKER_TAG}*" --format "{{.ID}}" | xargs docker rmi -f
+
+    Console::end "[DONE]"
+    Console::start "Building assets..."
+
+    local builderAssetsImage=$(Assets::getImageTag)
+    local cliImage="${SPRYKER_DOCKER_PREFIX}_cli:${SPRYKER_DOCKER_TAG}"
     local mode=${SPRYKER_ASSETS_MODE:-development}
-    local volumeName=${SPRYKER_DOCKER_PREFIX}_assets
-    local imageName=${SPRYKER_DOCKER_PREFIX}_builder_assets
 
-    Console::verbose "${INFO}Generating assets in ${mode} mode...${NC}"
-
-    docker build -t "${imageName}:${SPRYKER_DOCKER_TAG}" \
-        -t "${SPRYKER_DOCKER_PREFIX}_frontend:${SPRYKER_DOCKER_TAG}" \
-        --build-arg "SPRYKER_PLATFORM_IMAGE=${SPRYKER_PLATFORM_IMAGE}" \
-        --build-arg "SPRYKER_DOCKER_PREFIX=${SPRYKER_DOCKER_PREFIX}" \
-        --build-arg "SPRYKER_DOCKER_TAG=${SPRYKER_DOCKER_TAG}" \
-        --build-arg "DEPLOYMENT_PATH=${DEPLOYMENT_PATH}" \
-        --build-arg "SPRYKER_PLATFORM_IMAGE=${SPRYKER_PLATFORM_IMAGE}" \
-        --build-arg "SPRYKER_FRONTEND_IMAGE=${SPRYKER_FRONTEND_IMAGE}" \
+    docker build \
+        -t "${builderAssetsImage}" \
+        -f "${DEPLOYMENT_PATH}/images/baked/assets/Dockerfile" \
+        --progress="${PROGRESS_TYPE}" \
+        --build-arg "SPRYKER_PARENT_IMAGE=${cliImage}" \
+        --build-arg "SPRYKER_ASSETS_MODE=${mode}" \
         --build-arg "SPRYKER_PIPELINE=${SPRYKER_PIPELINE}" \
         --build-arg "SPRYKER_BUILD_HASH=${SPRYKER_BUILD_HASH:-"current"}" \
         --build-arg "SPRYKER_BUILD_STAMP=${SPRYKER_BUILD_STAMP:-""}" \
-        --build-arg SPRYKER_ASSETS_MODE="${mode}" \
-        --progress="${PROGRESS_TYPE}" \
-        -f "${DEPLOYMENT_PATH}/images/baked/frontend/Dockerfile" \
-        .
+        . 1>&2
 
-    # TODO I assume this is unnecessary if assets are baked into image
-    Console::verbose "${INFO}Creating docker volume '${SPRYKER_DOCKER_PREFIX}_assets'${NC}"
-    docker volume create --name="${volumeName}" >/dev/null 2>&1
-
-    local tty
-    [ -t -0 ] && tty='t' || tty=''
-    docker run -i${tty} --rm \
-        -v "${volumeName}":/tmp/assets:nocopy \
-        --name="${imageName}" \
-        --entrypoint='' \
-        "${imageName}:${SPRYKER_DOCKER_TAG}" \
-        sh -c "rm -rf /tmp/assets/* && cp -r /data/public/* /tmp/assets"
+    Console::end "[DONE]"
 }

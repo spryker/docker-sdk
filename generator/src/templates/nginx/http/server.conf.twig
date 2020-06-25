@@ -1,15 +1,10 @@
-{% set port = (endpoint | split(':'))[1] | default(ssl ? 443 :80) %}
+{% set port = (endpoint | split(':'))[1] | default(80) %}
 {% set host = endpoint | split(':') | first %}
 server {
 {% block server %}
 {% block host %}
     server_name {{ host }};
-    listen {{ port }} {{ ssl ? 'ssl http2' }};
-{% if ssl %}
-
-{% include "nginx/vhost.d/ssl.default.conf.twig" with _context %}
-
-{% endif %}
+    listen {{ portToListen | default(port) }};
 {% endblock host %}
 {% block auth %}
 {% if endpointData['real-ip'] is not empty %}

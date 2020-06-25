@@ -1,12 +1,11 @@
   {{ applicationName | lower }}:
     image: ${SPRYKER_DOCKER_PREFIX}_run_app:${SPRYKER_DOCKER_TAG}-{{ applicationName | lower }}
     depends_on:
-      - rpc_server
       - key_value_store
       - session
       - search
     networks:
-      - services
+      - private
     env_file:
       - ${DEPLOYMENT_PATH}/env/{{ applicationName }}.env
     environment:

@@ -1,51 +1,10 @@
 # syntax = docker/dockerfile:experimental
-ARG SPRYKER_DOCKER_TAG
-ARG SPRYKER_DOCKER_PREFIX
-# For brotli support you can use something like fholzer/nginx-brotli:v1.18.0
-ARG SPRYKER_FRONTEND_IMAGE=nginx:alpine
+ARG SPRYKER_PARENT_IMAGE
+ARG SPRYKER_ASSETS_BUILDER_IMAGE
 
-FROM ${SPRYKER_DOCKER_PREFIX}_cli:${SPRYKER_DOCKER_TAG} AS builder
+FROM ${SPRYKER_ASSETS_BUILDER_IMAGE} as assets-builder
 
-USER spryker
-
-COPY package.json package-lock.json ${srcRoot}/
-COPY frontend ${srcRoot}/frontend
-COPY tsconfig.json ${srcRoot}/
-COPY config/Yves ${srcRoot}/config/Yves
-
-ARG SPRYKER_ASSETS_MODE='development'
-ENV SPRYKER_ASSETS_MODE=${SPRYKER_ASSETS_MODE}
-ARG SPRYKER_PIPELINE
-ENV SPRYKER_PIPELINE=${SPRYKER_PIPELINE}
-
-RUN --mount=type=cache,id=npm,sharing=locked,target=/root/.npm \
-    echo "BUILD HASH: ${SPRYKER_BUILD_HASH}" \
-    && echo "MODE: ${SPRYKER_ASSETS_MODE}" \
-    && vendor/bin/install -r ${SPRYKER_PIPELINE} -s build-static -s build-static-${SPRYKER_ASSETS_MODE} -vvv
-
-FROM ${SPRYKER_FRONTEND_IMAGE} as frontend
+FROM ${SPRYKER_PARENT_IMAGE} as frontend-production
 
 RUN mkdir -p /data/public && chmod 0777 /data/public
-COPY --from=builder --chown=root:root /data/public /data/public
-
-ARG DEPLOYMENT_PATH
-
-RUN mkdir -p /etc/nginx/template/ && chmod 0777 /etc/nginx/template/
-COPY --chown=root:root ${DEPLOYMENT_PATH}/context/nginx/nginx.original.conf /etc/nginx/nginx.conf
-COPY --chown=root:root ${DEPLOYMENT_PATH}/context/nginx/frontend/default.conf.tmpl /etc/nginx/template/
-COPY --chown=root:root ${DEPLOYMENT_PATH}/context/nginx/auth /etc/nginx/auth
-COPY --chown=root:root ${DEPLOYMENT_PATH}/context/nginx/frontend/entrypoint.sh /
-RUN chmod +x /entrypoint.sh
-
-# Build info
-ARG SPRYKER_BUILD_HASH='current'
-ENV SPRYKER_BUILD_HASH=${SPRYKER_BUILD_HASH}
-ARG SPRYKER_BUILD_STAMP=''
-ENV SPRYKER_BUILD_STAMP=${SPRYKER_BUILD_STAMP}
-COPY --chown=root:root ${DEPLOYMENT_PATH}/context/nginx/build.json /tmp/build.json
-RUN mkdir -p /usr/share/nginx/ \
-  && envsubst '${SPRYKER_BUILD_HASH} ${SPRYKER_BUILD_STAMP}' < /tmp/build.json > /usr/share/nginx/build.json \
-  && rm -f /tmp/build.json
-
-ENTRYPOINT [ "/entrypoint.sh" ]
-CMD ["nginx", "-g", "daemon off;"]
+COPY --from=assets-builder --chown=root:root /data/public /data/public

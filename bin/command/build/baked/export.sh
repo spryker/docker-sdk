@@ -52,15 +52,17 @@ function Command::export() {
         asset | assets)
             Console::warn 'This command is DEPRECATED. Please, use just "export".'
             _assertDestinationDirectory "${destinationPath}"
-            Images::build
+            Images::buildApplication --force
             Assets::build --force
+            Images::buildFrontend --force
             Assets::export "${tag}" "${destinationPath}"
             ;;
         image | images)
-            Images::build
+            Images::buildApplication --force
+            Images::tagApplications "${tag}"
             Assets::build --force
-            Images::tagAll "${tag}"
-            Images::tagByApp Frontend "${SPRYKER_DOCKER_PREFIX}_frontend:${tag}" "${SPRYKER_DOCKER_PREFIX}_frontend:${SPRYKER_DOCKER_TAG}"
+            Images::buildFrontend --force
+            Images::tagFrontend "${tag}"
             Images::printAll "${tag}"
             ;;
         *)
