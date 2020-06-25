@@ -9,7 +9,9 @@ function Images::pull() {
 function Images::destroy() {
     Console::verbose "Removing all Spryker images"
 
-    docker images --filter "reference=${SPRYKER_DOCKER_PREFIX}_*:${SPRYKER_DOCKER_TAG}" --format "{{.ID}}" | xargs "${XARGS_NO_RUN_IF_EMPTY}" docker rmi -f
+    # ${XARGS_NO_RUN_IF_EMPTY} must be without quotes
+    # shellcheck disable=SC2086
+    docker images --filter "reference=${SPRYKER_DOCKER_PREFIX}_*:${SPRYKER_DOCKER_TAG}" --format "{{.ID}}" | xargs ${XARGS_NO_RUN_IF_EMPTY} docker rmi -f
 
     docker rmi -f "${SPRYKER_DOCKER_PREFIX}_cli" || true
     docker rmi -f "${SPRYKER_DOCKER_PREFIX}_app" || true
@@ -68,7 +70,7 @@ function Images::_buildApp() {
 
 function Images::_buildCli() {
     local folder=${1}
-    local baseAppImage="${SPRYKER_DOCKER_PREFIX}_base_app:${SPRYKER_DOCKER_TAG}"
+    local appImage="${SPRYKER_DOCKER_PREFIX}_app:${SPRYKER_DOCKER_TAG}"
     local appImage="${SPRYKER_DOCKER_PREFIX}_app:${SPRYKER_DOCKER_TAG}"
     local baseCliImage="${SPRYKER_DOCKER_PREFIX}_base_cli:${SPRYKER_DOCKER_TAG}"
     local cliImage="${SPRYKER_DOCKER_PREFIX}_cli:${SPRYKER_DOCKER_TAG}"
@@ -80,7 +82,7 @@ function Images::_buildCli() {
         -t "${baseCliImage}" \
         -f "${DEPLOYMENT_PATH}/images/common/cli/Dockerfile" \
         --progress="${PROGRESS_TYPE}" \
-        --build-arg "SPRYKER_PARENT_IMAGE=${baseAppImage}" \
+        --build-arg "SPRYKER_PARENT_IMAGE=${appImage}" \
         "${DEPLOYMENT_PATH}/context" 1>&2
 
     docker build \

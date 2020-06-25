@@ -76,7 +76,9 @@ function Assets::build() {
 
     Console::start "Cleaning old assets..."
 
-    docker images --filter "reference=${SPRYKER_DOCKER_PREFIX}_builder_assets:${SPRYKER_DOCKER_TAG}*" --format "{{.ID}}" | xargs "${XARGS_NO_RUN_IF_EMPTY}" docker rmi -f
+    # ${XARGS_NO_RUN_IF_EMPTY} must be without quotes
+    # shellcheck disable=SC2086
+    docker images --filter "reference=${SPRYKER_DOCKER_PREFIX}_builder_assets:${SPRYKER_DOCKER_TAG}*" --format "{{.ID}}" | xargs ${XARGS_NO_RUN_IF_EMPTY} docker rmi -f
 
     Console::end "[DONE]"
     Console::start "Building assets..."
