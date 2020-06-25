@@ -12,11 +12,38 @@ function Service::Scheduler::isInstalled() {
 }
 
 Service::Scheduler::pause() {
-    Compose::command pause scheduler 2>/dev/null || true
+    [ "${SPRYKER_TESTING_ENABLE}" -eq 1 ] && return "${TRUE}"
+
+    Runtime::waitFor scheduler
+    Console::start -n "Suspending scheduler..."
+
+    # shellcheck disable=SC2016
+    Compose::exec 'curl -sLI -X POST ${SPRYKER_SCHEDULER_HOST}:${SPRYKER_SCHEDULER_PORT}/quietDown' >/dev/null || true
+
+    # TODO Send SIGTERM in cli-rpc.js
+    local counter=1
+    local interval=2
+    local waitFor=60
+    while :; do
+        # shellcheck disable=SC2016
+        local runningJobsCount=$(Compose::exec 'curl -sL ${SPRYKER_SCHEDULER_HOST}:${SPRYKER_SCHEDULER_PORT}/computer/api/xml?xpath=*/busyExecutors/text\(\) | tail -n 1' | tr -d " \n\r")
+        [ "${runningJobsCount}" -eq 0 ] && break
+        [ "${counter}" -ge "${waitFor}" ] && break
+        counter=$((counter + interval))
+        sleep "${interval}"
+    done
+
+    Console::end "[DONE]"
 }
 
 Service::Scheduler::unpause() {
-    Compose::command unpause scheduler 2>/dev/null || true
+    [ "${SPRYKER_TESTING_ENABLE}" -eq 1 ] && return "${TRUE}"
+
+    Runtime::waitFor scheduler
+    Console::start -n "Suspending scheduler..."
+
+    # shellcheck disable=SC2016
+    Compose::exec 'curl -sLI -X POST ${SPRYKER_SCHEDULER_HOST}:${SPRYKER_SCHEDULER_PORT}/cancelQuietDown' >/dev/null || true
 }
 
 function Service::Scheduler::start() {

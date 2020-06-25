@@ -8,10 +8,8 @@ function Data::isLoaded() {
 function Data::load() {
 
     local brokerInstalled=""
+    local schedulerSuspended=""
     local verboseOption=$([ "${VERBOSE}" == "1" ] && echo -n " -vvv" || echo -n '')
-
-    Service::Scheduler::pause
-    trap 'Service::Scheduler::unpause' SIGINT SIGQUIT SIGTSTP EXIT
 
     Runtime::waitFor database
     Runtime::waitFor broker
@@ -40,6 +38,11 @@ function Data::load() {
             brokerInstalled=1
         fi
 
+        if [ -z "${schedulerSuspended}" ]; then
+            Service::Scheduler::pause
+            trap 'Service::Scheduler::unpause' SIGINT SIGQUIT SIGTSTP EXIT
+        fi
+
         for store in "${STORES[@]}"; do
             SPRYKER_CURRENT_STORE="${store}"
             Console::info "Init storages for ${SPRYKER_CURRENT_STORE} store."
@@ -54,7 +57,8 @@ function Data::load() {
         Compose::exec "vendor/bin/install${verboseOption} -r ${SPRYKER_PIPELINE} -s clean-storage -s init-storage -s init-storages-per-region -s ${demoDataSection}"
     done
 
-    Service::Scheduler::unpause
-
-    trap - SIGINT SIGQUIT SIGTSTP EXIT
+    if [ -n "${schedulerSuspended}" ]; then
+        trap - SIGINT SIGQUIT SIGTSTP EXIT
+        Service::Scheduler::unpause
+    fi
 }
