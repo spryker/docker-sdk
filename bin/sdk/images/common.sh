@@ -9,7 +9,7 @@ function Images::pull() {
 function Images::destroy() {
     Console::verbose "Removing all Spryker images"
 
-    docker images --filter "reference=${SPRYKER_DOCKER_PREFIX}_*:${SPRYKER_DOCKER_TAG}" --format "{{.ID}}" | xargs docker rmi -f
+    docker images --filter "reference=${SPRYKER_DOCKER_PREFIX}_*:${SPRYKER_DOCKER_TAG}" --format "{{.ID}}" | xargs "${XARGS_NO_RUN_IF_EMPTY}" docker rmi -f
 
     docker rmi -f "${SPRYKER_DOCKER_PREFIX}_cli" || true
     docker rmi -f "${SPRYKER_DOCKER_PREFIX}_app" || true
