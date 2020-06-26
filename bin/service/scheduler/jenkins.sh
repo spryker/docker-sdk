@@ -40,7 +40,7 @@ Service::Scheduler::unpause() {
     [ "${SPRYKER_TESTING_ENABLE}" -eq 1 ] && return "${TRUE}"
 
     Runtime::waitFor scheduler
-    Console::start -n "Suspending scheduler..."
+    Console::start -n "Resuming scheduler..."
 
     # shellcheck disable=SC2016
     Compose::exec 'curl -sLI -X POST ${SPRYKER_SCHEDULER_HOST}:${SPRYKER_SCHEDULER_PORT}/cancelQuietDown' >/dev/null || true

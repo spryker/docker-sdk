@@ -40,7 +40,7 @@ function Data::load() {
 
         if [ -z "${schedulerSuspended}" ]; then
             Service::Scheduler::pause
-            trap 'Service::Scheduler::unpause' SIGINT SIGQUIT SIGTSTP EXIT
+            trap 'Service::Scheduler::unpause > /dev/null' SIGINT SIGQUIT SIGTSTP EXIT
         fi
 
         for store in "${STORES[@]}"; do
