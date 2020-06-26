@@ -41,7 +41,7 @@ function Command::bootstrap() {
     done
     shift $((OPTIND - 1))
 
-    local gitHash=$(git rev-parse --verify HEAD || true)
+    local gitHash=$(git rev-parse --verify HEAD 2>/dev/null || true)
     local tmpDeploymentDir="${SOURCE_DIR}/deployment/_tmp"
     local defaultProjectYaml=$([ -f "./deploy.local.yml" ] && echo -n "./deploy.local.yml" || echo -n "./deploy.yml")
     local projectYaml=${1:-${defaultProjectYaml}}
@@ -96,7 +96,13 @@ function Command::bootstrap() {
     Console::end "[DONE]"
 
     Console::info "${INFO}Running generator${NC}"
-    docker run -i --rm \
+
+    # To support root user
+    local userToRun=("-u" "${USER_FULL_ID}")
+    if [ "${USER_FULL_ID%%:*}" != '0' ]; then
+        userToRun=()
+    fi
+    docker run -i --rm "${userToRun[@]}" \
         -e SPRYKER_DOCKER_SDK_PLATFORM="${_PLATFORM}" \
         -e SPRYKER_DOCKER_SDK_DEPLOYMENT_DIR="${DESTINATION_DIR}" \
         -e VERBOSE="${VERBOSE}" \

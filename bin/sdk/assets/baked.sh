@@ -19,7 +19,12 @@ function Assets::export() {
 
     Console::start "Preparing assets archives..."
 
-    docker run --rm \
+    # To support root user
+    local userToRun=("-u" "${USER_FULL_ID}")
+    if [ "${USER_FULL_ID%%:*}" != '0' ]; then
+        userToRun=()
+    fi
+    docker run -i --rm "${userToRun[@]}" \
         -e PROJECT_DIR='/data' \
         -v "${DEPLOYMENT_DIR}/bin:/data/standalone" \
         -v "${projectDockerAssetsTmpDirectory}:/data${dockerAssetsTmpDirectory}" \
