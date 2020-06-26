@@ -12,7 +12,7 @@ ENV SPRYKER_DB_ENGINE=${SPRYKER_DB_ENGINE}
 ENV PATH=/data/vendor/bin:$PATH
 
 ARG USER_UID
-RUN usermod -u ${USER_UID} spryker && find / -user 1000 -exec chown -h spryker {} \;
+RUN usermod -u ${USER_UID} spryker && find / -user 1000 -exec chown -h spryker {} \ || true;
 
 COPY ${DEPLOYMENT_PATH}/context/php/conf.d/71-opcache-dev.ini /usr/local/etc/php/conf.d
 

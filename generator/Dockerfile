@@ -21,7 +21,7 @@ RUN chmod 755 ${srcRoot}/openssl/generate.sh
 USER root
 
 ARG USER_UID
-RUN usermod -u ${USER_UID} spryker && find / -user 1000 -exec chown -h spryker {} \;
+RUN usermod -u ${USER_UID} spryker && find / -user 1000 -exec chown -h spryker {} \ || true;
 
 USER spryker
 
