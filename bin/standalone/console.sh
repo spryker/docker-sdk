@@ -59,7 +59,7 @@ function Console::error() {
 # ------------------
 # shellcheck disable=SC2034
 function Console::setColors() {
-    if tty >/dev/null && [ "$(command -v tput >/dev/null 2>&1 && tput colors 2>&1 || echo 0)" -gt 0 ]; then
+    if tty >/dev/null && [ "$(command -v tput >/dev/null 2>&1 && tput colors 2>/dev/null || echo 0)" -gt 0 ]; then
 
         WHITE="\033[30m"
         RED="\033[31m"
