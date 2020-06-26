@@ -7,7 +7,7 @@ popd >/dev/null
 
 function printLogo() {
 
-    if [ "$(command -v tput >/dev/null 2>&1 && tput colors >/dev/null 2>&1 || echo 0)" -gt 0 ]; then
+    if [ "$(command -v tput >/dev/null 2>&1 && tput colors 2>&1 || echo 0)" -gt 0 ]; then
         local GREEN="\033[1;32m"
         local RED="\033[1;31m"
         local NC="\033[0m" # No Color
