@@ -9,6 +9,7 @@ function Command::prune() {
     docker image prune
     docker volume prune
     docker system prune -a
+    docker builder prune -a
 
     return "${TRUE}"
 }

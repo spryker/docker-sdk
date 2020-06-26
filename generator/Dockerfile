@@ -5,9 +5,6 @@ FROM spryker/php:${SPRYKER_PHP_VERSION}
 
 RUN apk add --no-cache openssl
 
-ARG USER_UID
-RUN usermod -u ${USER_UID} spryker && find / -user 1000 -exec chown -h spryker {} \;
-
 WORKDIR /data
 USER spryker
 
@@ -20,5 +17,12 @@ COPY --chown=spryker:spryker openssl ${srcRoot}/openssl
 COPY --chown=spryker:spryker index.php ${srcRoot}
 
 RUN chmod 755 ${srcRoot}/openssl/generate.sh
+
+USER root
+
+ARG USER_UID
+RUN usermod -u ${USER_UID} spryker && find / -user 1000 -exec chown -h spryker {} \;
+
+USER spryker
 
 CMD [ "php", "index.php" ]
