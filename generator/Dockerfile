@@ -6,7 +6,7 @@ FROM spryker/php:${SPRYKER_PHP_VERSION}
 RUN apk add --no-cache openssl
 
 ARG USER_UID
-RUN usermod -u ${USER_UID} spryker && chown -R spryker:spryker /data && chown -R spryker:spryker /home/spryker
+RUN usermod -u ${USER_UID} spryker && find / -user 1000 -exec chown -h spryker {} \;
 
 WORKDIR /data
 USER spryker
