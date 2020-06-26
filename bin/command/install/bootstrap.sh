@@ -73,10 +73,13 @@ function Command::bootstrap() {
 
     Console::info "Using ${projectYaml}"
 
+    local USER_FULL_ID=$(Environment::getFullUserId)
+
     Console::verbose::start "Building generator..."
     docker build -t spryker_docker_sdk \
         -f "${SOURCE_DIR}/generator/Dockerfile" \
         --progress="${PROGRESS_TYPE:-auto}" \
+        --build-arg="USER_UID=${USER_FULL_ID%%:*}" \
         -q \
         "${SOURCE_DIR}/generator" >/dev/null
     Console::end "[DONE]"
@@ -97,7 +100,6 @@ function Command::bootstrap() {
         -e SPRYKER_DOCKER_SDK_PLATFORM="${_PLATFORM}" \
         -e SPRYKER_DOCKER_SDK_DEPLOYMENT_DIR="${DESTINATION_DIR}" \
         -e VERBOSE="${VERBOSE}" \
-        -u "$(Environment::getFullUserId)" \
         -v "${tmpDeploymentDir}":/data/deployment:rw \
         spryker_docker_sdk
 

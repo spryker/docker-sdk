@@ -5,6 +5,9 @@ FROM spryker/php:${SPRYKER_PHP_VERSION}
 
 RUN apk add --no-cache openssl
 
+ARG USER_UID
+RUN usermod -u ${USER_UID} spryker
+
 WORKDIR /data
 USER spryker
 
