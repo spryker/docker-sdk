@@ -1,0 +1,8 @@
+  {{ serviceName }}:
+    build:
+      context: ./${DEPLOYMENT_PATH}/images/tideways/
+      dockerfile: Dockerfile
+      args:
+        TIDEWAYS_ENVIRONMENT_DEFAULT: "{{ serviceData.environment | default('production') }}"
+    networks:
+      - private
