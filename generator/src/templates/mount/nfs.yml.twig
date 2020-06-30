@@ -1,0 +1,18 @@
+{% set enabled = docker['mount'][_mountMode]['anticache']['enabled'] is defined ? docker['mount'][_mountMode]['anticache']['enabled'] : 1 %}
+{% set port = docker['mount'][_mountMode]['anticache']['port'] | default(8998) %}
+{% if enabled is not empty %}
+  anticache:
+    image: ${SPRYKER_DOCKER_PREFIX}_cli:${SPRYKER_DOCKER_TAG}
+    ports:
+      - "{{ port }}:8998"
+    healthcheck:
+      test: [ "CMD", "nc", "-z", "localhost", "8998" ]
+      interval: 2s
+      timeout: 2s
+      retries: 10
+    <<: *app-volumes
+    expose:
+      - "8998"
+    command:
+      - "fs-anticache"
+{% endif %}

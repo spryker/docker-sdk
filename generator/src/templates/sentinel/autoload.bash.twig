@@ -1,0 +1,3 @@
+readonly SPRYKER_AUTOLOAD_PROXY_ENABLED="{{ (docker['mount'][_mountMode]['anticache']['port']['enabled'] is defined ? docker['mount'][_mountMode]['anticache']['port']['enabled'] : true) ? 1 : '' }}"
+readonly SPRYKER_AUTOLOAD_PROXY_PORT="{{ docker['mount'][_mountMode]['anticache']['port'] | default(8998) }}"
+readonly SPRYKER_AUTOLOAD_VERBOSE="{{ (docker['sentinel']['autoload']['verbose'] is defined ? docker['sentinel']['autoload']['verbose'] : true) ? 1 : '' }}"

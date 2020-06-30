@@ -1,7 +1,6 @@
   {{ serviceName }}:
      image: spryker/kibana:5.6.16
      networks:
-         - services
          - private
      healthcheck:
          test: curl --cacert /usr/share/elasticsearch/config/certs/ca/ca.crt -s https://localhost:5601 >/dev/null; if [[ $$? == 52 ]]; then echo 0; else echo 1; fi

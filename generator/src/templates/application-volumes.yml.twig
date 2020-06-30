@@ -1,14 +1,8 @@
-x-volumes:
-  &app-volumes
-  volumes:
-    - logs:${SPRYKER_LOG_DIRECTORY}:rw
-    - ./${DEPLOYMENT_PATH}/context/php/php-fpm.d/worker.conf:/usr/local/etc/php-fpm.d/worker.conf:ro
-    - ./${DEPLOYMENT_PATH}/context/php/php.ini:/usr/local/etc/php/php.ini:ro
+      - logs:${SPRYKER_LOG_DIRECTORY}:rw
 {% if _mountMode != 'baked' %}
-    - ./${DEPLOYMENT_PATH}/context/php/conf.d/opcache_dev.ini:/usr/local/etc/php/conf.d/opcache.ini:ro
 {% if _mountMode == 'native' %}
-    - ./:/data
+      - ./:/data
 {% else %}
-    - ${SPRYKER_DOCKER_PREFIX}_${SPRYKER_DOCKER_TAG}_data_sync:/data:nocopy
+      - ${SPRYKER_DOCKER_PREFIX}_${SPRYKER_DOCKER_TAG}_data_sync:/data:nocopy
 {% endif %}
 {% endif %}

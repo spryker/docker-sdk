@@ -10,16 +10,17 @@ syncs:
     src: '.'
     sync_strategy: {{ strategy }}
     sync_excludes:
-      - '.docker-sync'
-      - '/.git'
-      - '.idea'
-      - '.project'
-      - 'data/*/cache'
-      - '*.log'
-      - 'node_modules'
-      - 'docker'
-      - '.composer'
-      - '.npm'
+      - 'Path .git'
+      - 'Path docker'
+      - 'Path data/*/cache'
+      - 'Name .docker-sync'
+      - 'Name .idea'
+      - 'Name .project'
+      - 'Name *.log'
+      - 'Name node_modules'
+      - 'Name .composer'
+      - 'Name .npm'
+    sync_excludes_type: 'none'
 {%  if _platform == 'macos' %}
     host_disk_mount_mode: 'cached'
 {% endif %}

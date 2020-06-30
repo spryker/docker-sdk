@@ -1,0 +1,11 @@
+    location =/build.json {
+        root /usr/share/nginx/;
+        try_files $uri =404;
+    }
+
+    location =/build.php {
+        root /home/spryker;
+        include fastcgi.conf;
+        fastcgi_pass {{ upstream }};
+        fastcgi_intercept_errors off;
+    }

@@ -1,7 +1,6 @@
   {{ serviceName }}:
     image: spryker/jenkins:2.176
     networks:
-      - services
       - private
     healthcheck:
       test: [ "CMD", "nc", "-z", "localhost", "8080" ]
@@ -9,22 +8,7 @@
       timeout: 5s
       retries: 5
     environment:
-      SPRYKER_DOCKER_RUN_ARGUMENTS: ${SPRYKER_DOCKER_RUN_ARGUMENTS}
-      SPRYKER_DOCKER_RUN_IMAGE: ${SPRYKER_DOCKER_RUN_IMAGE}
-      SPRYKER_REMOTE_DIR: ${SPRYKER_REMOTE_DIR}
-      DOCKER_HOST: tcp://relay_{{ serviceName }}:2375
-    depends_on:
-      - relay_{{ serviceName }}
+      SPRYKER_CLI_CONTAINER: "${COMPOSE_PROJECT_NAME}_cli_1"
     volumes:
       - {{ serviceName }}-{{ serviceData['engine'] }}-data:/var/jenkins_home:rw
-      - ./${DEPLOYMENT_PATH}/env:${SPRYKER_REMOTE_DIR}/env:ro
-
-  relay_{{ serviceName }}:
-    image: bpack/socat
-    command: TCP4-LISTEN:2375,fork,reuseaddr UNIX-CONNECT:/var/run/docker.sock
-    networks:
-      - private
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-    expose:
-      - "2375"
+      - ${DEPLOYMENT_PATH}/context/jenkins/spryker.sh:/usr/bin/spryker.sh:rw

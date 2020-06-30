@@ -2,7 +2,6 @@
     image: mariadb:10.4
     networks:
       - private
-      - services
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "--silent"]
       interval: 10s

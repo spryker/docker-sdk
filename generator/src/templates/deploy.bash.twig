@@ -1,721 +1,202 @@
 #!/bin/bash
 
-{% set isDevelopment = _mountMode != 'baked' %}
-{% set fileMode = _mountMode == 'baked' ? 'baked' : 'mount' %}
-
+# shellcheck disable=SC2034
 set -e
 
-# Require
-pushd ${BASH_SOURCE%/*} > /dev/null
-. ./bin/constants.sh
-. ./bin/console.sh
-. ./bin/export-helper.sh
+SELF_SCRIPT=${SELF_SCRIPT:-$0}
 
-. ./bin/mount/{{ _mountMode }}.sh ${@}
-. ./bin/database/{{ services['database']['engine'] }}.sh ${@}
+pushd "${BASH_SOURCE%/*}" >/dev/null
+. ./bin/framework.sh
+popd >/dev/null
 
-. ./bin/build/{{ fileMode }}.sh
-. ./bin/assets/{{ fileMode }}.sh
-. ./bin/images/{{ fileMode }}.sh
+import environment/cross-platform.sh
+import environment/docker.sh
+import environment/docker-compose.sh
 
-./bin/require.sh docker docker-compose tr awk wc sed grep
-./bin/check-docker.sh
-./bin/check-docker-compose.sh
-popd > /dev/null
+# Help intro
+import command/deploy.sh
 
-# Internal constants
-readonly PROJECT_DIR="$( pwd )"
-readonly DEPLOYMENT_DIR="$( cd ${BASH_SOURCE%/*} >/dev/null 2>&1 && pwd )"
-export DEPLOYMENT_PATH="${DEPLOYMENT_DIR/$PROJECT_DIR/.}"
-export SPRYKER_REMOTE_DIR="/var/spryker"
+# Commands
+Registry::Help::section "Commands:"
+import command/uknown.sh
+import command/help.sh
 
-export DOCKER_BUILDKIT=1
-export COMPOSE_HTTP_TIMEOUT=400
-export COMPOSE_PROJECT_NAME={{ namespace | default('spryker') }}
-{% if _platform == 'windows' %}
-export COMPOSE_CONVERT_WINDOWS_PATHS=1
+# Compose
+Registry::Help::row ''
+import command/compose/up.sh
+import command/compose/run.sh
+import command/compose/ps.sh
+import command/compose/restart.sh
+import command/compose/stop.sh
+import command/compose/down.sh
+
+# CLI
+Registry::Help::row ''
+import command/cli/cli.sh
+import command/cli/console.sh
+import command/cli/testing.sh
+
+# Runtime
+Registry::Help::row ''
+import command/runtime/wait.sh
+import command/runtime/demo.sh
+import command/runtime/clean-data.sh
+import command/runtime/jobs.sh
+import command/runtime/logs.sh
+
+# Building
+Registry::Help::row ''
+import command/build/pull.sh
+import command/build/{{ _fileMode }}/build.sh
+import command/build/{{ _fileMode }}/export.sh
+
+# Installation
+Registry::Help::row ''
+import command/install/install.sh
+import command/install/clean.sh
+import command/install/reset.sh
+
+# Commands for internal use
+import command/internal/trouble.sh
+import command/internal/sync.sh
+import command/internal/prune.sh
+
+# Installers
+import installer/vcs.sh
+{% if services['scheduler']['engine'] is defined and services['scheduler']['engine'] == 'jenkins' %}
+import installer/jenkins-template.sh
+{% endif %}
+{% if _requirementAnalyzerData.hosts is not empty %}
+import installer/hosts.sh "{{ _requirementAnalyzerData.hosts }}"
+{% endif %}
+{% if _mountMode == 'nfs' %}
+import installer/nfs.sh
+{% endif %}
+{% if _isAutoloadCacheEnabled %}
+import installer/autoload-cache.sh
 {% endif %}
 
+# Services
+import service/database/{{ services['database']['engine'] }}.sh
+import service/broker/{{ services['broker']['engine'] }}.sh
+import service/scheduler/{{ services['scheduler']['engine'] }}.sh
+
+# Implementation
+import sdk/compose.sh
+import sdk/data/demo.sh
+import sdk/runtime/wait.sh
+import sdk/mount/{{ _mountMode }}.sh
+import sdk/images/{{ _fileMode }}.sh
+import sdk/assets/{{ _fileMode }}.sh
+import sdk/codebase/{{ _fileMode }}.sh
+
+# Go!
+System::Bootstrap
+
+# Internal constants
+readonly PROJECT_DIR="$(pwd)"
+readonly DEPLOYMENT_DIR="$(cd "${BASH_SOURCE%/*}" >/dev/null 2>&1 && pwd)"
+readonly DEPLOYMENT_PATH="${DEPLOYMENT_DIR/$PROJECT_DIR/.}"
 readonly PROGRESS_TYPE=${PROGRESS_TYPE:-tty}
 VERBOSE=${VERBOSE:-0}
-readonly XARGS_NO_RUN_IF_EMPTY=$(echo '' | xargs echo "--no-run-if-empty")
 
 # Predefined constants
 readonly APPLICATION_ENV="{{ environment | default('docker') }}"
-declare -a -r SPRYKER_APPLICATIONS=(Glue Yves Zed)
+declare -a -r SPRYKER_APPLICATIONS=({{ _applications | join(' ') | raw }})
+declare -a -r SPRYKER_ENTRYPOINTS=({{ _entryPoints | join(' ') | raw }})
+readonly COMPOSE_PROJECT_NAME={{ namespace | default('spryker') }}
+readonly SPRYKER_PIPELINE=${SPRYKER_PIPELINE:-{{ pipeline | default('docker') }}}
 readonly SPRYKER_PLATFORM_IMAGE=${SPRYKER_PLATFORM_IMAGE:-{{ image is iterable ? image['tag'] : image | default('spryker/php:7.2') }}}
-export SPRYKER_DOCKER_PREFIX=${COMPOSE_PROJECT_NAME}
-export SPRYKER_DOCKER_TAG="{{ tag | default('1.0') }}"
-export SPRYKER_COMPOSER_MODE="{{ composer.mode | default('--dev') }}"
-export SPRYKER_COMPOSER_AUTOLOAD="{{ composer.autoload is defined ? composer.autoload : '--optimize' }}"
-export SPRYKER_LOG_DIRECTORY="{{ docker['logs']['path'] | default('/var/log/spryker') }}"
+readonly SPRYKER_DOCKER_PREFIX=${COMPOSE_PROJECT_NAME}
+readonly SPRYKER_DOCKER_TAG="{{ tag | default('1.0') }}"
+readonly SPRYKER_FRONTEND_IMAGE="{{ assets['image'] | default('nginx:alpine') }}"
+readonly SPRYKER_COMPOSER_MODE="{{ composer.mode | default('') }}"
+readonly SPRYKER_COMPOSER_AUTOLOAD="{{ composer.autoload | default('') }}"
+readonly SPRYKER_LOG_DIRECTORY="{{ docker['logs']['path'] | default('/var/log/spryker') }}"
+readonly SPRYKER_ASSETS_MODE="{{ assets['mode'] | default('development') }}"
 readonly SPRYKER_DB_ENGINE="{{ services['database']['engine'] == 'mysql' ? 'mysql' : 'pgsql' }}"
-readonly SPRYKER_STORES=({{ regions | map((regionData, region) => "'STORES=(" ~ (regionData['stores'] | keys | join(' ')) ~ ")'") | join(' ') | raw }})
+readonly SPRYKER_STORES=({{ regions | map((regionData, region) => "'local REGION=" ~ '"' ~ region ~ '"' ~ "; local STORES=(" ~ (regionData['stores'] | keys | join(' ')) ~ ")'") | join(' ') | raw }})
 readonly SPRYKER_DEFAULT_STORE={{ (regions | first)['stores'] | keys | first }}
-readonly SPRYKER_BROKER_VIRTUAL_HOSTS='{{ regions | map(regionData => regionData['stores'] | map((storeData, store) => storeData['services']['broker']['namespace']) | join(' ')) | join(' ') }}';
-{# TODO get specific username, add user #}
-readonly SPRYKER_BROKER_USERNAME="{{ services['broker']['api']['username'] }}"
+readonly SPRYKER_FILE_MODE="{{ _fileMode }}"
+readonly DOCKER_COMPOSE_FILES_EXTRA="{{ docker['compose']['yamls'] | default([]) | join(' ') }}"
+readonly KNOWN_HOSTS="{{ _knownHosts | default("") }}"
+readonly SPRYKER_BUILD_HASH="${SPRYKER_BUILD_HASH}"
+readonly SPRYKER_BUILD_DATE="${SPRYKER_BUILD_DATE}"
+readonly SPRYKER_REPOSITORY_HASH="${SPRYKER_BUILD_HASH:-"$(git rev-parse --verify HEAD 2>/dev/null || echo "head")"}"
+
+# Specific variables
+{% for serviceName, serviceData in services %}
+{% set engine = serviceData['engine'] | lower %}
+{% include "service/" ~ engine ~ "/" ~ serviceName ~ ".bash.twig" ignore missing with _context %}
+{% endfor %}
 
 # Variables from environment
 SPRYKER_XDEBUG_ENABLE=${SPRYKER_XDEBUG_ENABLE:-0}
 SPRYKER_TESTING_ENABLE=${SPRYKER_TESTING_ENABLE:-0}
-export SPRYKER_STORE=${SPRYKER_STORE:-${APPLICATION_STORE:-${SPRYKER_DEFAULT_STORE}}}
-readonly SPRYKER_SELF_SCRIPT=${SPRYKER_SELF_SCRIPT:-$(basename $0)}
+SPRYKER_CURRENT_STORE=${SPRYKER_STORE:-${APPLICATION_STORE:-${SPRYKER_DEFAULT_STORE}}}
 readonly GITHUB_TOKEN=${GITHUB_TOKEN:-''}
-
-{% if _knownHosts is defined %}
-export KNOWN_HOSTS="{{ _knownHosts | default("") }}"
-{% endif %}
-
-function showHelp()
-{
-    echo -e ""
-    echo -e "${INFO}Usage:${NC}"
-    echo -e " ${SPRYKER_SELF_SCRIPT} <command> [-vxt]"
-    echo -e " ${SPRYKER_SELF_SCRIPT} cli [-vxt]"
-    echo -e " ${SPRYKER_SELF_SCRIPT} cli [-vxt] <command>"
-    echo -e " ${SPRYKER_SELF_SCRIPT} console [-vxt] <console-command>"
-    echo -e " ${SPRYKER_SELF_SCRIPT} testing [-vxt]"
-    echo -e " ${SPRYKER_SELF_SCRIPT} testing [-vxt] <command>"
-
-    echo -e ""
-    echo -e "${INFO}Options:${NC}"
-    echo -e " ${GREEN}-v${NC}                       - Enable verbose mode. You can set environment variable VERBOSE=1 instead of using this option."
-    echo -e " ${GREEN}-x${NC}                       - Enable Xdebug. You can set environment variable SPRYKER_XDEBUG_ENABLE=1 instead of using this option."
-    echo -e " ${GREEN}-t${NC}                       - Enable testing mode. You can set environment variable SPRYKER_TESTING_ENABLE=1 instead of using this option."
-
-    echo -e ""
-    echo -e "${INFO}Commands:${NC}"
-    echo -e " ${GREEN}up${NC}                       - Build and run Spryker apps based on demo data."
-    echo -e " ${GREEN}run|start${NC}                - Run Spryker containers."
-    echo -e " ${GREEN}restart${NC}                  - Restart Spryker containers."
-    echo -e " ${GREEN}down|stop${NC}                - Stop all Spryker containers."
-    echo -e " ${GREEN}logs${NC}                     - Tail all application exception logs."
-    echo -e " ${GREEN}help${NC}                     - Show help page."
-
-    echo -e ""
-    echo -e " ${GREEN}cli${NC}                      - Start a new container where you can run cli commands."
-    echo -e " ${GREEN}cli${NC} <command>            - Run a cli command, e.g. \`${ITALIC}${SPRYKER_SELF_SCRIPT} cli composer install${NC}\`."
-    echo -e " ${GREEN}console${NC}                  - Run a Spryker console command, e.g. \`${ITALIC}${SPRYKER_SELF_SCRIPT} console transfer:generate -vvv\`${NC}."
-    echo -e " ${GREEN}testing${NC}                  - Start a new container where you can run cli commands in testing environment, e.g. \`${ITALIC}codecept build${NC}\`."
-    echo -e " ${GREEN}testing${NC} <command>        - Run a cli command in testing environment, e.g. \`${ITALIC}${SPRYKER_SELF_SCRIPT} testing codecept build${NC}\`."
-    echo -e " ${GREEN}wait${NC} <service>           - Wait for requested services, e.g. \`${ITALIC}${SPRYKER_SELF_SCRIPT} wait database broker\`${NC}."
-
-    echo -e ""
-    echo -e " ${GREEN}pull${NC}              - Pull external docker images."
-    echo -e " ${GREEN}build${NC}             - Build Spryker images."
-    echo -e " ${GREEN}demo|demo-data${NC}    - Populate Spryker demo data."
-    echo -e " ${GREEN}demo <section>${NC}    - Load the demo data by running the specified section from docker installation recipe for each store."
-    echo -e " ${GREEN}jobs${NC}              - Generate and starts jobs."
-
-    echo -e ""
-    echo -e " ${GREEN}clean-data${NC}        - Remove all Spryker volumes including all storages."
-    echo -e " ${GREEN}reset${NC}             - Remove and build all Spryker images and volumes."
-    echo -e " ${GREEN}remove|clean${NC}      - Stop all Spryker containers and remove images and volumes."
-
-{% if not isDevelopment %}
-    echo -e ""
-    echo -e " ${GREEN}export images${NC} [-t TAG]   - Build prod-like images (Yves, Zed, Glue, Cli)."
-    echo -e " ${GREEN}export assets${NC} [-t TAG]   - Build assets and export as archives stored by given path."
-{% endif %}
-}
-
-function showWaitErrorMessage()
-{
-    echo -e "${WARN}\`${SPRYKER_SELF_SCRIPT} wait\` requires at least 1 argument.${NC}"
-    echo -e "${INFO}Example of usage: ${GREEN}${SPRYKER_SELF_SCRIPT} wait service1 [service2 ...]${NC}"
-}
+if [ -n "${GITHUB_TOKEN}" ]; then
+    readonly TOKEN_BASED_COMPOSER_AUTH="{\"github-oauth\":{\"github.com\":\"${GITHUB_TOKEN}\"}}"
+fi
+readonly COMPOSER_AUTH=${COMPOSER_AUTH:-${TOKEN_BASED_COMPOSER_AUTH}}
 
 # Global variables
-DOCKER_COMPOSE_FILES="-f ${DEPLOYMENT_PATH}/docker-compose.yml"
-DOCKER_EXTRA_OPTIONS=" -v ${SPRYKER_DOCKER_PREFIX}_logs:${SPRYKER_LOG_DIRECTORY}:rw"
-if [ ! -z "${GITHUB_TOKEN}" ];
-then
-    DOCKER_EXTRA_OPTIONS+=" -e COMPOSER_AUTH={\"github-oauth\":{\"github.com\":\"${GITHUB_TOKEN}\"}}";
-fi;
-{% if _platform == 'linux' %}
-readonly USER_UID=$(id -u)
-readonly USER_GID=$(id -g)
-{% else %}
-readonly USER_UID="1000"
-readonly USER_GID="1000"
-{% endif %}
-
-{% if isDevelopment %}
-[ "$1" != 'help' ] && echo -e "*** ${WARN}DEVELOPMENT MODE${NC}"
-DOCKER_EXTRA_OPTIONS+=" -v ${DEPLOYMENT_DIR}/context/php/conf.d/opcache_dev.ini:/usr/local/etc/php/conf.d/opcache.ini:ro"
-DOCKER_EXTRA_OPTIONS+=" -v ${DEPLOYMENT_DIR}/context/php/php.ini:/usr/local/etc/php/php.ini:ro"
-{% if _mountMode == 'native' %}
-DOCKER_EXTRA_OPTIONS+=" -v ${PROJECT_DIR}:/data -u ${USER_UID}:${USER_GID}"
-{% else %}
-DOCKER_EXTRA_OPTIONS+=" -v ${SPRYKER_DOCKER_PREFIX}_${SPRYKER_DOCKER_TAG}_data_sync:/data -u ${USER_UID}:${USER_GID}"
-{% endif %}
-{% endif %}
-
-{% if services['blackfire'] %}
-readonly BLACKFIRE_ENABLED=1
-export BLACKFIRE_SERVER_ID="${BLACKFIRE_SERVER_ID:-"{{ services['blackfire']['server-id'] }}"}"
-export BLACKFIRE_SERVER_TOKEN="${BLACKFIRE_SERVER_TOKEN:-"{{ services['blackfire']['server-token'] }}"}"
-export BLACKFIRE_CLIENT_ID="${BLACKFIRE_CLIENT_ID:-"{{ services['blackfire']['client-id'] }}"}"
-export BLACKFIRE_CLIENT_TOKEN="${BLACKFIRE_CLIENT_TOKEN:-"{{ services['blackfire']['client-token'] }}"}"
-
-function setBlackfireEnvVariables()
-{
-{% for group in groups %}
-{% for applicationName, applicationData in group['applications'] %}
-{% for endpoint, endpointData in applicationData['endpoints'] %}
-DOCKER_EXTRA_OPTIONS+=" --link frontend:{{ endpoint | split(':') | first }}"
-{% endfor %}
-{% endfor %}
-{% endfor %}
-DOCKER_EXTRA_OPTIONS+=" -e BLACKFIRE_CLIENT_TOKEN=${BLACKFIRE_CLIENT_TOKEN}"
-DOCKER_EXTRA_OPTIONS+=" -e BLACKFIRE_CLIENT_ID=${BLACKFIRE_CLIENT_ID}"
-}
-{% endif %}
-
-function enableDebuggingMode()
-{
-    echo -e "*** ${WARN}DEBUGGING MODE${NC}"
-    export SPRYKER_XDEBUG_HOST_IP=$(which ip >/dev/null 2>&1 && ifconfig $(ip r | grep default | awk '{print $5}') | grep "inet " | awk '{print $2}' || echo 'host.docker.internal')
-    DOCKER_COMPOSE_FILES+=" -f ${DEPLOYMENT_PATH}/docker-compose.xdebug.yml"
-    DOCKER_EXTRA_OPTIONS+=" -e PHP_IDE_CONFIG=serverName={{ docker['debug']['server-name'] | default('spryker') }} -e SPRYKER_XDEBUG_HOST_IP=${SPRYKER_XDEBUG_HOST_IP} -v ${DEPLOYMENT_DIR}/context/php/conf.d/xdebug.ini:/usr/local/etc/php/conf.d/01-xdebug.ini:ro"
-}
-
-function enableTestingMode()
-{
-    echo -e "*** ${WARN}TESTING MODE${NC}"
-    DOCKER_COMPOSE_FILES+=" -f ${DEPLOYMENT_PATH}/docker-compose.test.yml"
-    DOCKER_EXTRA_OPTIONS+=" --env-file=${DEPLOYMENT_PATH}/env/cli/testing.env -u spryker:spryker"
-    [ ${SPRYKER_XDEBUG_ENABLE} -eq 1 ] && DOCKER_COMPOSE_FILES+=" -f ${DEPLOYMENT_PATH}/docker-compose.test.xdebug.yml" || true
-}
-
-function ensureTestingMode()
-{
-    [ ${SPRYKER_TESTING_ENABLE} -ne 1 ] && enableTestingMode
-    SPRYKER_TESTING_ENABLE=1
-    runApp
-}
-
-function buildBaseImage()
-{
-{% if isDevelopment %}
-    if [ "$1" = ${IF_NOT_PERFORMED} -a "$(docker images -q ${SPRYKER_DOCKER_PREFIX}_app:${SPRYKER_DOCKER_TAG} 2> /dev/null)" != "" ]; then
-        return ${__TRUE}
-    fi
-{% endif %}
-    verbose "${INFO}Building base application image${NC}"
-
-    if [ -z ${GITHUB_TOKEN} ]; then
-        echo -e "${WARN}Warning: GITHUB_TOKEN is not set but may be required.${NC}"
-    fi
-
-    doBaseImages
-}
-
-{% if isDevelopment %}
-function runApplicationBuild()
-{
-    local tty
-    [ -t -0 ] && tty='t' || tty=''
-    docker run -i${tty} --rm \
-        -e COMMAND="$1" \
-        -e SPRYKER_DB_ENGINE=${SPRYKER_DB_ENGINE} \
-        --restart=no \
-        ${DOCKER_EXTRA_OPTIONS} \
-        ${SPRYKER_DOCKER_PREFIX}_cli:${SPRYKER_DOCKER_TAG} /usr/local/bin/execute.sh
-}
-
-function buildCode()
-{
-    sync create
-    sync init
-    sync start
-    sync stop
-
-    [ "$1" = ${IF_NOT_PERFORMED} ] && verbose "${INFO}Checking if anything should be built${NC}"
-
-    runApplicationBuild 'chmod 600 /data/config/Zed/*.key'
-
-    local vendorDir=$(runApplicationBuild '[ ! -f /data/vendor/bin/install ] && echo 0 || echo 1 | tail -n 1' | tr -d " \n\r")
-    if [ "$1" != ${IF_NOT_PERFORMED} -o "${vendorDir}" == "0" ]; then
-        verbose "${INFO}Running composer install${NC}"
-        runApplicationBuild "composer install --no-interaction ${SPRYKER_COMPOSER_MODE} && composer dump-autoload ${SPRYKER_COMPOSER_AUTOLOAD}"
-    fi
-
-    local generatedDir=$(runApplicationBuild '[ ! -d /data/src/Generated ] && echo 0 || echo 1 | tail -n 1' | tr -d " \n\r")
-    if [ "$1" != ${IF_NOT_PERFORMED} -o "${generatedDir}" == "0" ]; then
-        verbose "${INFO}Running build${NC}"
-        runApplicationBuild 'vendor/bin/install -r docker -s build -s build-development'
-    fi
-
-{% if _platform == 'windows' %}
-    # Fix the docker-sync permission issue on windows
-   local executableFile=$(runApplicationBuild '[ ! -x $(readlink -f vendor/bin/console) ] && echo 0 || echo 1 | tail -n 1' | tr -d " \n\r")
-   [ "$1" != ${IF_NOT_PERFORMED} -o "${executableFile}" == "0" ] && runApplicationBuild 'chmod +x vendor/bin/*' || true
-{% endif %}
-}
-{% endif %}
-
-function isDemoDataLoaded()
-{
-    verbose -n "Checking is demo data loaded for ${SPRYKER_STORE}... "
-    doesDatabaseHaveTables && verbose "[LOADED]" && return ${__TRUE} || verbose "" && return ${__FALSE}
-}
-
-function isSchedulerJobsCreated()
-{
-    [ ${SPRYKER_TESTING_ENABLE} -eq 1 ] && return 0
-
-    waitFor scheduler
-    verbose -n "Checking jobs are created..."
-
-    local jobsCount=$(execSpryker 'curl -sL ${SPRYKER_SCHEDULER_HOST}:${SPRYKER_SCHEDULER_PORT}/scriptText -d "script=println Jenkins.instance.projects.collect{ it.name }.size" | tail -n 1' | tr -d " \n\r" )
-    [ "${jobsCount}" -gt 0 ] && verbose "[CREATED]" && return ${__TRUE} || verbose "" && return ${__FALSE}
-}
-
-
-function createSchedulerJobs()
-{
-    [ ${SPRYKER_TESTING_ENABLE} -eq 1 ] && return ${__TRUE}
-
-    if [ "$1" = ${IF_NOT_PERFORMED} ] && isSchedulerJobsCreated; then
-        return ${__TRUE}
-    fi
-
-    waitFor scheduler
-
-    for region in "${SPRYKER_STORES[@]}";
-    do
-        eval ${region};
-        for store in "${STORES[@]}";
-        do
-            export SPRYKER_STORE="${store}"
-            echo -e "${INFO}Creating scheduler jobs for ${SPRYKER_STORE} store.${NC}"
-            execSpryker "vendor/bin/install -r docker -s scheduler-setup"
-        done
-    done
-}
-
-function destroyAppAndVolumes()
-{
-    verbose "${INFO}Stopping and removing all Spryker containers and volumes${NC}"
-    execDockerCompose down -v --remove-orphans
-    sync clean
-}
-
-function destroyAppVolumes()
-{
-    verbose "${INFO}Removing Spryker data volumes${NC}"
-    execDockerCompose down -v
-}
-
-function destroyAppVolumesAndImages()
-{
-    verbose "${INFO}Stopping and removing all Spryker containers and volumes${NC}"
-    execDockerCompose down -v --remove-orphans --rmi all
-    sync clean
-}
-
-function waitFor()
-{
-    local target=${1}
-    local retries=${2:-60}
-    local interval=${3:-3}
-    local containers=$(docker ps --filter "name=${SPRYKER_DOCKER_PREFIX}_${target}_*" --format "{{ '{{' }}.Names{{ '}}' }}")
-
-    [ -z "${containers}" ] && error "${WARN}Service ${INFO}\`${1}\`${WARN} is not running. Please check the name.${NC}" && exit ${FALSE}
-
-    for container in ${containers}; do
-        local counter=1;
-        while : ; do
-            [ "${counter}" -gt 1 ] && echo -en "\r${ITALIC}Waiting for ${container} [${counter}/${retries}]...${NC}" || echo -en ""
-            local status=$(docker inspect --format="{{ '{{' }}json .State.Health.Status{{ '}}' }}" ${container})
-            [ "${status}" = "\"healthy\"" ] && echo -en "${CLEAR}\r" && break
-            [ "${counter}" -ge "${retries}" ] && echo -e "\r${WARN}Could not wait for ${container} anymore.${NC} Container status: ${INFO}${status}${NC}" && exit 1
-            counter=$((counter+1))
-            sleep ${interval}
-        done
-    done
-}
-
-function setupBroker()
-{
-    waitFor broker
-    local brokerContainers=$(docker ps --filter "name=${SPRYKER_DOCKER_PREFIX}_broker*" --format "{{ '{{' }}.Names{{ '}}' }}")
-
-    for brokerContainer in ${brokerContainers};
-    do
-        verbose "${INFO}Setup broker${NC}"
-        local output=$(docker exec \
-            -e SPRYKER_BROKER_VIRTUAL_HOSTS="${SPRYKER_BROKER_VIRTUAL_HOSTS}" \
-            -e SPRYKER_BROKER_USERNAME=${SPRYKER_BROKER_USERNAME} \
-            ${brokerContainer} \
-            bash -c 'for host in $(echo ${SPRYKER_BROKER_VIRTUAL_HOSTS}); do rabbitmqctl add_vhost ${host}; rabbitmqctl set_permissions -p ${host} ${SPRYKER_BROKER_USERNAME} ".*" ".*" ".*"; done' /
-        )
-        verbose "${output}"
-    done
-}
-
-function loadDemoData()
-{
-    setupBroker
-
-    waitFor database
-    waitFor broker
-    waitFor search
-    waitFor key_value_store
-
-    for region in "${SPRYKER_STORES[@]}";
-    do
-        eval ${region};
-        export SPRYKER_STORE="${STORES[0]}"
-
-        if [ "$1" = ${IF_NOT_PERFORMED} ] && isDemoDataLoaded; then
-            continue
-        fi
-
-        for store in "${STORES[@]}";
-        do
-            export SPRYKER_STORE="${store}"
-            echo -e "${INFO}Init storages for ${SPRYKER_STORE} store.${NC}"
-            execSpryker 'vendor/bin/install -r docker -s init-storages-per-store'
-        done
-
-        export SPRYKER_STORE="${STORES[0]}"
-        echo -e "${INFO}Loading demo data for ${SPRYKER_STORE} store.${NC}"
-        initDatabase
-
-        local demoDataSection=${2:-demodata}
-        execSpryker "vendor/bin/install -r docker -s init-storages-per-region -s ${demoDataSection}"
-    done
-}
-
-function destroyAssets()
-{
-    verbose "${INFO}Removing assets volume${NC}"
-    docker volume rm -f ${SPRYKER_DOCKER_PREFIX}_assets || true
-}
-
-function destroyImages()
-{
-    verbose "Removing all Spryker images"
-    if [ $(docker images --filter "reference=${SPRYKER_DOCKER_PREFIX}_*:${SPRYKER_DOCKER_TAG}" --format "{{ '{{' }}.ID{{ '}}' }}" | wc -l | sed 's/^ *//') -gt 1 ]; then
-        docker images --filter "reference=${SPRYKER_DOCKER_PREFIX}_*:${SPRYKER_DOCKER_TAG}" --format "{{ '{{' }}.ID{{ '}}' }}" | xargs ${XARGS_NO_RUN_IF_EMPTY} docker rmi -f
-    fi
-
-    docker rmi -f ${SPRYKER_DOCKER_PREFIX}_cli || true
-    docker rmi -f ${SPRYKER_DOCKER_PREFIX}_app || true
-    docker rmi -f ${SPRYKER_PLATFORM_IMAGE} || true
-}
-
-function setExtraEnvFiles ()
-{
-    local store=$(echo ${SPRYKER_STORE} |tr '[:upper:]' '[:lower:]')
-    export DOCKER_EXTRA_ENV_FILES="--env-file=${DEPLOYMENT_PATH}/env/cli/${store}.env"
-}
-
-function getDefaultRunArguments ()
-{
-    local networkName=${SPRYKER_DOCKER_PREFIX}_services
-{#    docker network inspect ${networkName} > /dev/null 2>&1 && #}
-    echo -n " --network=${networkName}"
-    echo -n " ${DOCKER_EXTRA_ENV_FILES}"
-    echo -n " ${DOCKER_EXTRA_OPTIONS}"
-}
-
-function execSpryker()
-{
-    setExtraEnvFiles
-
-    local tty
-    [ -t -0 ] && tty='t' || tty=''
-    docker run -i${tty} --rm \
-        -e COMMAND="${1}" \
-        $(getDefaultRunArguments) \
-        ${SPRYKER_DOCKER_PREFIX}_cli:${SPRYKER_DOCKER_TAG} /usr/local/bin/execute.sh
-}
-
-function execTesting()
-{
-    waitFor database
-    waitFor broker
-    waitFor search
-    waitFor key_value_store
-    waitFor session
-
-    local tty
-    [ -t -0 ] && tty='' || tty='-T'
-
-    local binary=/usr/local/bin/execute.sh
-    [ -z "${*}" ] && binary=bash
-
-    execDockerCompose exec \
-        -e COMMAND="${*}" \
-        -e PS1="spryker@testing\$" \
-        testing \
-        ${binary}
-}
-
-function execSprykerMultiString()
-{
-    setExtraEnvFiles
-    docker run -i --rm \
-        $(getDefaultRunArguments) \
-        ${SPRYKER_DOCKER_PREFIX}_cli:${SPRYKER_DOCKER_TAG} bash -s${1}
-}
-
-function doBuild()
-{
-    if [ -z ${GITHUB_TOKEN} ]; then
-        echo -e "${WARN}Warning: GITHUB_TOKEN is not set but may be required.${NC}"
-    fi
-
-    buildCodeBase $1
-    execDockerCompose build
-}
-
-function execDockerCompose()
-{
-    local runArguments="$(getDefaultRunArguments)"
-    runArguments="${runArguments/${DEPLOYMENT_PATH}/${SPRYKER_REMOTE_DIR}}"
-
-    DEPLOYMENT_PATH=${DEPLOYMENT_PATH} \
-    SPRYKER_LOG_DIRECTORY=${SPRYKER_LOG_DIRECTORY} \
-    SPRYKER_DOCKER_PREFIX=${SPRYKER_DOCKER_PREFIX} \
-    SPRYKER_DOCKER_TAG=${SPRYKER_DOCKER_TAG} \
-    SPRYKER_DOCKER_RUN_ARGUMENTS="${runArguments}"\
-    SPRYKER_DOCKER_RUN_IMAGE=${SPRYKER_DOCKER_PREFIX}_cli:${SPRYKER_DOCKER_TAG} \
-    SPRYKER_REMOTE_DIR=${SPRYKER_REMOTE_DIR} \
-    docker-compose \
-        --project-directory ${PROJECT_DIR} \
-        --project-name ${SPRYKER_DOCKER_PREFIX} \
-        ${DOCKER_COMPOSE_FILES} \
-        "${@}"
-}
-
-function doUp()
-{
-    doBuild ${IF_NOT_PERFORMED}
-    buildAssets ${IF_NOT_PERFORMED}
-    runApp
-    loadDemoData ${IF_NOT_PERFORMED}
-    createSchedulerJobs ${IF_NOT_PERFORMED}
-}
-
-function runApp()
-{
-    verbose "${INFO}Running Spryker containers${NC}"
-    createAssetsVolume ${IF_NOT_PERFORMED}
-    execDockerCompose up -d --remove-orphans
-    sync start
-}
-
-function createAssetsVolume()
-{
-    if [ "$1" = ${IF_NOT_PERFORMED} ] && $(docker volume inspect ${SPRYKER_DOCKER_PREFIX}_assets > /dev/null 2>&1); then
-      return ${__TRUE}
-    fi
-
-    verbose "${INFO}Creating docker volume '${SPRYKER_DOCKER_PREFIX}_assets'${NC}"
-    docker volume create --name="${SPRYKER_DOCKER_PREFIX}_assets"
-}
-
-function stopApp()
-{
-    verbose "${INFO}Stopping all containers${NC}"
-    stopCliContainer
-    execDockerCompose down --remove-orphans
-    sync stop
-}
-
-function doCli()
-{
-    local binFile=$1
-    local binFileArgument=${@:2}
-
-    if [ -n "${BLACKFIRE_ENABLED}" ];
-    then
-        setBlackfireEnvVariables
-    fi;
-    if [ ! -z ${binFile} ];
-    then
-        execSpryker "${binFile} ${binFileArgument}"
-        return ${__TRUE}
-    fi
-
-    setExtraEnvFiles
-    docker create -it --rm \
-        -e PS1=${PS1:-"spryker-${SPRYKER_STORE}-cli@\u\$ "} \
-        --name ${SPRYKER_DOCKER_PREFIX}_cli \
-        $(getDefaultRunArguments) \
-        ${SPRYKER_DOCKER_PREFIX}_cli:${SPRYKER_DOCKER_TAG} \
-        bash
-    docker start -ai  ${SPRYKER_DOCKER_PREFIX}_cli
-}
-
-function doPull()
-{
-    docker pull ${SPRYKER_PLATFORM_IMAGE}
-    execDockerCompose pull --ignore-pull-failures 2> /dev/null
-}
-
-function stopCliContainer()
-{
-  docker ps --filter "ancestor=${SPRYKER_DOCKER_PREFIX}_cli:${SPRYKER_DOCKER_TAG}" \
-      --format "{{ '{{' }}.Names{{ '}}' }}" \
-      | xargs ${XARGS_NO_RUN_IF_EMPTY} docker rm -f > /dev/null
-}
+readonly USER_FULL_ID=$(Environment::getFullUserId)
+readonly SPRYKER_XDEBUG_HOST_IP=$(Environment::getHostIp)
 
 command=${1}
-shift 1 || true
-case ${command} in
-  *)
-    while getopts ":xvt" opt; do
-        case ${opt} in
-            # x - debug, xdebug
-            x)
-                SPRYKER_XDEBUG_ENABLE=1
-                ;;
-            # t - testing
-            t)
-                SPRYKER_TESTING_ENABLE=1
-                ;;
-            v)
-                VERBOSE=1
-                ;;
-            # Unknown argument specified
-            [?])
-                showHelp
-                echo -e "\n${WARN}Unknown argument "${INFO}-${OPTARG}${WARN}" is acquired.${NC}"
-                exit 1
-                ;;
-            # Specified argument without required value
-            :)
-                echo -e "Option ${opt} requires an argument"
-                exit 1
-                ;;
-        esac
-    done
-    shift $((OPTIND -1))
-esac
+shift || true
 
-[ ${SPRYKER_XDEBUG_ENABLE} -eq 1 -a $command != 'help' ] && enableDebuggingMode || true
-[ ${SPRYKER_TESTING_ENABLE} -eq 1 -a $command != 'help' ] && enableTestingMode || true
+while getopts ":xvt" opt; do
+    case ${opt} in
+        x)
+            SPRYKER_XDEBUG_ENABLE=1
+            ;;
+        t)
+            SPRYKER_TESTING_ENABLE=1
+            ;;
+        v)
+            VERBOSE=1
+            ;;
+        [?])
+            if [ "${OPTARG}" == '-' ]; then
+                # Stop reading global arguments if `--` appeared
+                break
+            fi
 
-case ${command} in
-    build)
-        subCommand=${1}
-        case ${subCommand} in
-            assets|asset)
-                buildAssets "" ${@:2}
-                ;;
-            images|image)
-                doBuild "" ${@:2}
-                ;;
-            "")
-                doBuild "" ${@}
-                buildAssets "" ${@}
-                ;;
-            *)
-                echo -e "${WARN}Unknown build target '${subCommand}' is occured. No action.${NC}" > /dev/stderr
-                exit 1
-                ;;
-        esac
-        ;;
-    run|start)
-        runApp
-        ;;
-    up)
-        doUp
-        ;;
-    demo|demo-data)
-        runApp
-        loadDemoData "" ${1}
-        ;;
-    down|stop)
-        stopApp
-        ;;
-    restart)
-        stopApp
-        runApp
-        ;;
-    pull)
-        doPull
-        ;;
-    jobs)
-        runApp
-        createSchedulerJobs
-        ;;
-    clean-data)
-        stopApp
-        destroyAppVolumes
-        ;;
-    reset)
-        stopApp
-        destroyAppAndVolumes
-        destroyAssets
-        doUp
-        ;;
-    remove|clean)
-        destroyAppVolumesAndImages
-        destroyAssets
-        destroyImages
-        ;;
-    wait)
-        if [ "$#" == 0 ];
-        then
-            showWaitErrorMessage
+            Console::error "\nUnknown option ${INFO}-${OPTARG}${WARN} is acquired."
             exit 1
-        fi
+            ;;
+        :)
+            Console::error "Option ${INFO}-${opt}${WARN} requires an argument."
+            exit 1
+            ;;
+    esac
+done
+shift $((OPTIND - 1))
 
-        verbose "${INFO}Checking services...${NC}"
-        for service in "${@}"
-        do
-            waitFor ${service}
-            verbose "${OK}\`${service}\` [OK]${NC}"
-        done
-        ;;
-    cli)
-        doCli $1 ${@:2}
-        exit 0
-        ;;
-    console)
-        doCli console ${@}
-        ;;
-    testing)
-        ensureTestingMode
-        execTesting "${@}"
-        ;;
-    logs)
-        execSpryker "find ${SPRYKER_LOG_DIRECTORY} -type f \( -name \"exception.log\" \) -exec tail -f \"$file\" {} +"
-        ;;
-    prune)
-        stopApp
-        sync clean
-        echo -e "${WARN}This will delete ALL docker images and volumes on the host.${NC}"
-        docker system prune -a
-        docker image prune
-        docker volume prune
-        ;;
-    trouble)
-        stopApp
-        sync clean
-        ;;
-    sync)
-        sync create
-        sync start
-        ;;
-    help|'')
-        showHelp
-        ;;
-{% if not isDevelopment %}
-    export)
-        doExport "${@}"
-        ;;
-{% endif %}
-    *)
-        showHelp
-        error "${WARN}Unknown command \"${command}\" is requested.${NC}"
-        exit 1
-        ;;
-esac
+# Exporting for docker-compose
+export DEPLOYMENT_PATH
+export SPRYKER_XDEBUG_HOST_IP
+export COMPOSE_PROJECT_NAME
+export SPRYKER_DOCKER_PREFIX
+export SPRYKER_DOCKER_TAG
+export SPRYKER_LOG_DIRECTORY
+export SPRYKER_BUILD_HASH
+export SPRYKER_BUILD_DATE
+export BLACKFIRE_SERVER_ID=${BLACKFIRE_SERVER_ID}
+export BLACKFIRE_SERVER_TOKEN=${BLACKFIRE_SERVER_TOKEN}
+export BLACKFIRE_CLIENT_ID=${BLACKFIRE_CLIENT_ID}
+export BLACKFIRE_CLIENT_TOKEN=${BLACKFIRE_CLIENT_TOKEN}
+
+Registry::Flow::runBoot
+
+# Running command
+func=$(Registry::findCommand "${command}")
+
+if [ -z "${func}" ]; then
+    Command::unknown "${command}" "${@}"
+    exit 1
+fi
+
+${func} "${@}"

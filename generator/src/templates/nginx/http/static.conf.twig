@@ -1,0 +1,17 @@
+    location /assets/ {
+        access_log  off;
+        expires     7d;
+        add_header  Pragma public;
+        add_header  Cache-Control "public, must-revalidate, proxy-revalidate";
+        etag on;
+        try_files   $uri =404;
+    }
+
+    location / {
+        access_log  off;
+        expires     7d;
+        add_header  Pragma public;
+        add_header  Cache-Control "public, must-revalidate, proxy-revalidate";
+        etag on;
+        try_files   $uri @proxy;
+    }
