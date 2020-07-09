@@ -1,0 +1,15 @@
+#!/bin/sh
+{% set envVariables = ["\$ALLOWED_IP"] %}
+{% for groupData in groups %}
+{% for applicationName, applicationData in groupData['applications'] %}
+{% if applicationData['application'] != 'static' %}
+{% set envVariables = envVariables | merge(["\$SPRYKER_NGINX_CGI_HOST_" ~ (applicationName | upper)]) %}
+{% endif %}
+{% endfor %}
+{% endfor %}
+
+envsubst '{{ envVariables | join(' ') }}' < /etc/nginx/template/default.conf.tmpl > /etc/nginx/conf.d/default.conf
+
+cat /etc/nginx/conf.d/default.conf
+
+exec "$@"

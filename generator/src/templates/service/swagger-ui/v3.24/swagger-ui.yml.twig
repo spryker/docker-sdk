@@ -10,9 +10,14 @@
     image: swaggerapi/swagger-ui:v3.24.3
 {% endif %}
     networks:
-        - public
+        - private
     env_file:
         - ${DEPLOYMENT_PATH}/env/{{ serviceName }}.env
+    healthcheck:
+        test: [ "CMD", "nc", "-z", "localhost", "8080" ]
+        interval: 5s
+        timeout: 5s
+        retries: 5
 {% if _mountMode != 'baked' %}
     volumes:
         - ./src/Generated/Glue/Specification:/var/specs

@@ -1,0 +1,9 @@
+    satisfy any;
+    allow 127.0.0.1;
+{% for ip in (auth['exclude'] | default([])) %}
+    allow {{ ip | raw }};
+{% endfor %}
+    deny all;
+
+    auth_basic "Protected Area";
+    auth_basic_user_file /etc/nginx/auth/{{ host }}.htpasswd;

@@ -1,67 +1,34 @@
 version: "3.5"
 
-{% include "application-volumes.yml.twig" with {
-    _mountMode: _mountMode
-} %}
-
 x-env_file:
   &test-envfile
   env_file:
     - ${DEPLOYMENT_PATH}/env/testing.env
 
-x-links:
-  &test-links
-  links:
-{% for group in groups %}
-{% for applicationName, applicationData in group['applications'] %}
-{% for endpoint, endpointData in applicationData['endpoints'] %}
-      - frontend:{{ endpoint | split(':') | first }}
-{% endfor %}
-{% endfor %}
-{% endfor %}
-
 services:
 {% for group in groups %}
 {% for applicationName, applicationData in group['applications'] %}
-
-  {{ applicationName }}:
+{% if applicationData['application'] != 'static' %}
+  {{ applicationName | lower }}:
     <<: *test-envfile
+{% endif %}
 {% endfor %}
 {% endfor %}
 
   webdriver:
     image: wernight/phantomjs:latest
     networks:
-      - services
       - public
-      - private
     ports:
       - 4444:4444
-    command: "phantomjs --webdriver=4444 --disk-cache=true --load-images=false --webdriver-loglevel=DEBUG"
-    <<: *test-links
-
-  testing:
-    image: ${SPRYKER_DOCKER_PREFIX}_cli:${SPRYKER_DOCKER_TAG}
-    networks:
-      - services
-      - public
-      - private
-    depends_on:
-      - database
-      - broker
-      - key_value_store
-      - session
-      - search
-    env_file:
-      - ${DEPLOYMENT_PATH}/env/cli/{{ docker['testing']['store'] | lower }}.env
-      - ${DEPLOYMENT_PATH}/env/cli/testing.env
-    <<: *app-volumes
-    <<: *test-links
-    tty: true
-    command:
-      - "nc"
-      - "-l"
-      - "9000"
+    expose:
+      - "4444"
+    healthcheck:
+      test: [ "CMD", "bash", "-c", "(echo >/dev/tcp/localhost/4444) &>/dev/null" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    command: "phantomjs --webdriver=4444 --ignore-ssl-errors=true --disk-cache=true --load-images=false --webdriver-loglevel=DEBUG"
 
   scheduler:
     image: nginx:alpine

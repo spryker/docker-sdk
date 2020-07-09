@@ -1,71 +1,93 @@
 version: "3.5"
 
-{% include "application-volumes.yml.twig" with {
-    _mountMode: _mountMode
-} %}
+x-volumes:
+  &app-volumes
+  volumes:
+{% include "application-volumes.yml.twig" with _context %}
 
 services:
 
+  cli:
+    image: ${SPRYKER_DOCKER_PREFIX}_run_cli:${SPRYKER_DOCKER_TAG}
+    networks:
+      - public
+      - private
+    volumes:
+      - cli_history:/home/spryker/history:rw
+      - ./${DEPLOYMENT_PATH}/env/cli:/home/spryker/env:ro
+{% include "application-volumes.yml.twig" with _context %}
+    tty: true
+    environment:
+      SPRYKER_XDEBUG_HOST_IP: ${SPRYKER_XDEBUG_HOST_IP}
+      BLACKFIRE_SERVER_ID: ${BLACKFIRE_SERVER_ID}
+      BLACKFIRE_SERVER_TOKEN: ${BLACKFIRE_SERVER_TOKEN}
+      BLACKFIRE_CLIENT_ID: ${BLACKFIRE_CLIENT_ID}
+      BLACKFIRE_CLIENT_TOKEN: ${BLACKFIRE_CLIENT_TOKEN}
+    command:
+      - "node"
+      - "/home/spryker/bin/cli-rpc.js"
+
   frontend:
-    image: nginx:alpine
+    image: ${SPRYKER_DOCKER_PREFIX}_run_frontend:${SPRYKER_DOCKER_TAG}
+    networks:
+        - private
+    depends_on:
+{% for group in groups %}
+{% for applicationName, applicationData in group['applications'] %}
+{% if applicationData['application'] != 'static' %}
+      - {{ applicationName | lower }}
+{% endif %}
+{% endfor %}
+{% endfor %}
+    environment:
+      # TODO reconsider to use default in entrypoint
+      ALLOWED_IP: "127.0.0.1"
+{% for group in groups %}
+{% for applicationName, applicationData in group['applications'] %}
+{% if applicationData['application'] != 'static' %}
+      SPRYKER_NGINX_CGI_HOST_{{ applicationName | upper }}: {{ applicationName | lower }}
+{% endif %}
+{% endfor %}
+{% endfor %}
+{% if _mountMode != 'baked' %}
+    volumes:
+{% if _mountMode == 'native' %}
+      - ./public:/data/public:ro
+{% else %}
+      - ${SPRYKER_DOCKER_PREFIX}_${SPRYKER_DOCKER_TAG}_data_sync:/data
+{% endif %}
+{% endif %}
+
+  gateway:
+    image: ${SPRYKER_DOCKER_PREFIX}_gateway:${SPRYKER_DOCKER_TAG}
     ports:
 {% for port in _ports %}
       - "{{ port }}:{{ port }}"
 {% endfor %}
-    networks:
-      - services
-      - public
     depends_on:
-{% for group in groups %}
-{% for applicationName, applicationData in group['applications'] %}
-      - {{ applicationName }}
-{% endfor %}
-{% endfor %}
+      - frontend
 {% for serviceName, serviceData in services %}
       - {{ serviceName }}
 {% endfor %}
-    environment:
-      DHPARAM_BITS: 1024
-      DHPARAM_GENERATION: "false"
-    volumes:
-      - /var/run/docker.sock:/tmp/docker.sock:ro
-      - ./${DEPLOYMENT_PATH}/context/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-      - ./${DEPLOYMENT_PATH}/context/nginx/conf.d/front-end.default.conf:/etc/nginx/conf.d/default.conf:ro
-      - ./${DEPLOYMENT_PATH}/context/nginx/stream.d/front-end.default.conf:/etc/nginx/stream.d/default.conf:ro
-      - ./${DEPLOYMENT_PATH}/context/nginx/vhost.d:/etc/nginx/vhost.d:ro
-      - ./${DEPLOYMENT_PATH}/context/nginx/ssl:/etc/nginx/ssl:ro
-      - ./public/Yves/favicon.ico:/public/favicon.ico:ro
-{% if _mountMode == 'baked' %}
-      - assets:/assets:ro
-{% elseif _mountMode == 'native' %}
-      - ./public:/data/public
-{% else %}
-      - ${SPRYKER_DOCKER_PREFIX}_${SPRYKER_DOCKER_TAG}_data_sync:/data
-{% endif %}
-
-  rpc_server:
-    image: nginx:alpine
-    depends_on:
-{% for group in groups %}
-{% for applicationName, applicationData in group['applications'] %}
-{% if applicationData['application'] == 'zed' %}
-      - {{ applicationName }}
-{% endif %}
-{% endfor %}
-{% endfor %}
     networks:
-      - services
-      - private
-    environment:
-      DHPARAM_BITS: 1024
-      DHPARAM_GENERATION: "false"
-    volumes:
-      - /var/run/docker.sock:/tmp/docker.sock:ro
-      - ./${DEPLOYMENT_PATH}/context/nginx/conf.d/zed-rpc.default.conf:/etc/nginx/conf.d/default.conf:ro
-      - ./${DEPLOYMENT_PATH}/context/nginx/vhost.d:/etc/nginx/vhost.d:ro
+      private:
+        aliases:
+{% for host in _hosts %}
+{% if host != 'localhost' %}
+          - {{ host }}
+{% endif %}
+{% endfor %}
+      public:
+        aliases:
+{% for host in _hosts %}
+{% if host != 'localhost' %}
+          - {{ host }}
+{% endif %}
+{% endfor %}
 
 {% for group in groups %}
 {% for applicationName, applicationData in group['applications'] %}
+{% if applicationData['application'] != 'static' %}
 
 {% include "application/" ~ (applicationData['application'] | lower) ~ ".yml.twig" with {
     applicationName: applicationName,
@@ -73,14 +95,17 @@ services:
     regionName: group['region'],
     project: _context
 } %}
+{% endif %}
 {% endfor %}
 {% endfor %}
 {% for serviceName, serviceData in services %}
     {% set engine = serviceData['engine'] | lower %}
     {% set version = serviceData['version'] | default('default') %}
 
-{% include "service/" ~ engine ~ "/" ~ version ~ "/" ~  engine ~ ".yml.twig" with { serviceName: serviceName, serviceData: serviceData, engine: engine, version: version } only %}
+{% include "service/" ~ engine ~ "/" ~ version ~ "/" ~  engine ~ ".yml.twig" with { project: _context, serviceName: serviceName, serviceData: serviceData, engine: engine, version: version } only %}
 {% endfor %}
+
+{% include "mount/" ~ _mountMode ~ ".yml.twig" ignore missing with _context %}
 
 volumes:
 {% for service, serviceData in services %}
@@ -90,16 +115,13 @@ volumes:
 
   logs:
     external: false
-{% if _mountMode == 'baked' %}
-  assets:
-    external: true
-    name: "${COMPOSE_PROJECT_NAME}_assets"
-{% elseif _mountMode != 'native' %}
+  cli_history:
+    external: false
+{% if  _mountMode != 'baked' and _mountMode != 'native' %}
   {{ namespace }}_{{ tag }}_data_sync:
     external: true
 {% endif %}
 
 networks:
   public:
-  services:
   private:

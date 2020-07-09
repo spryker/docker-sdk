@@ -1,13 +1,12 @@
   {{ serviceName }}:
     image: docker.elastic.co/elasticsearch/elasticsearch:6.8.4
     networks:
-        - services
         - private
     healthcheck:
         test: ["CMD", "curl", "-f", "localhost:9200/_cat/health"]
         interval: 10s
         timeout: 5s
-        retries: 5
+        retries: 10
     ulimits:
         memlock:
             soft: -1

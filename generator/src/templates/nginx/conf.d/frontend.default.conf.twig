@@ -1,0 +1,33 @@
+{% if assets['compression'] is not empty %}
+{% for compressionEngine, compressionData in assets['compression'] %}
+
+{% include "nginx/modules/compression/#{compressionEngine}.conf.twig"  with {
+    compressionData: compressionData,
+} %}
+
+{% endfor %}
+{% endif %}
+
+server {
+    server_name _ default; # This is just an invalid value which will never trigger on a real hostname.
+    listen 80;
+    access_log off;
+    add_header Content-Type text/plain;
+    return 200;
+}
+
+{% for groupData in groups %}
+{% for applicationName, applicationData in groupData['applications'] %}
+{% for endpoint, endpointData in applicationData['endpoints'] %}
+{% include "nginx/http/#{applicationData['application']}.server.conf.twig" with {
+    endpoint: endpoint,
+    endpointData: endpointData,
+    auth: endpointData['auth'] | default([]),
+    storeServices: regions[groupData['region']]['stores'][endpointData['store']]['services'] | default([]),
+    upstream: "${SPRYKER_NGINX_CGI_HOST_" ~ (applicationName | upper) ~ "}" ~ ":9000",
+    zedHost: _endpointMap[endpointData['store']]['zed'] | default(''),
+    project: _context
+} %}
+{% endfor %}
+{% endfor %}
+{% endfor %}
