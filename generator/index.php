@@ -153,6 +153,7 @@ foreach ($projectData['groups'] ?? [] as $groupName => $groupData) {
 
             $host = strtok($endpoint, ':');
             $frontend[$host] = [
+                'zone' => getFrontendZoneByDomainLevel($host),
                 'type' => $applicationName,
                 'internal' => (bool)($endpointData['internal'] ?? false),
             ];
@@ -923,4 +924,15 @@ function generatePasswords(array $users): string
         },
         $users
     ));
+}
+
+/**
+ * @param string $host
+ * @param int $level
+ *
+ * @return string
+ */
+function getFrontendZoneByDomainLevel(string $host, int $level = 2): string
+{
+    return implode('.', array_slice(explode('.', $host), -$level, $level, true));
 }
