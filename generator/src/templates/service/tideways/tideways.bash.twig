@@ -1,0 +1,3 @@
+export TIDEWAYS_APIKEY="${TIDEWAYS_APIKEY:-"{{ services['tideways']['apikey'] | default('') }}"}"
+export TIDEWAYS_CLI_ENABLED="${TIDEWAYS_CLI_ENABLED:-"{{ services['tideways']['cli-enabled'] ? 'true' : 'false' | default('false') }}"}"
+export TIDEWAYS_ENVIRONMENT_NAME=${TIDEWAYS_ENVIRONMENT_NAME:-"{{ services['tideways']['environment-name'] | default('production') }}"}
