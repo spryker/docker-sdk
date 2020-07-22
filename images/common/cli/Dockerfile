@@ -19,6 +19,7 @@ RUN --mount=type=cache,id=aptlib,sharing=locked,target=/var/lib/apt \
      inotify-tools \
      netcat-openbsd \
      git \
+     redis-tools \
      ; fi'
 # Debian contains outdated NPM package
 RUN --mount=type=cache,id=npm,sharing=locked,target=/root/.npm \
@@ -33,6 +34,7 @@ RUN --mount=type=cache,id=apk,sharing=locked,target=/var/cache/apk mkdir -p /etc
      coreutils \
      ncurses \
      git \
+     redis \
      ; fi'
 
 # TODO Not-available feature: autoload-cache. Should be switchable
