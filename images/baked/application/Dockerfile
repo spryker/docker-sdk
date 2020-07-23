@@ -65,6 +65,15 @@ ENV SPRYKER_BUILD_HASH=${SPRYKER_BUILD_HASH}
 ARG SPRYKER_BUILD_STAMP=''
 ENV SPRYKER_BUILD_STAMP=${SPRYKER_BUILD_STAMP}
 
+RUN curl -L 'https://download.newrelic.com/php_agent/archive/9.12.0.268/newrelic-php5-9.12.0.268-linux-musl.tar.gz' | tar -C /tmp -zx \
+  && export NR_INSTALL_USE_CP_NOT_LN=1 \
+  && export NR_INSTALL_SILENT=1 \
+  && /tmp/newrelic-php5-*/newrelic-install install \
+  && rm -rf /tmp/newrelic-php5-* /tmp/nrinstall* \
+  && /usr/bin/install -d -m 777 /var/log/newrelic/ \
+  && rm /usr/local/etc/php/conf.d/newrelic.ini \
+  && ln -s -f /lib64/ld-linux-x86-64.so.2 /lib/ld-linux-x86-64.so.2
+
 RUN --mount=type=cache,id=apk,sharing=locked,target=/var/cache/apk mkdir -p /etc/apk && ln -vsf /var/cache/apk /etc/apk/cache && \
   apk update && apk add gdb
 
