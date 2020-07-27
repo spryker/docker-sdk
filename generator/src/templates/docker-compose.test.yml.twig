@@ -10,6 +10,8 @@ services:
 {% for applicationName, applicationData in group['applications'] %}
 {% if applicationData['application'] != 'static' %}
   {{ applicationName | lower }}:
+    environment:
+      SPRYKER_TESTING_ENABLED: 1
     <<: *test-envfile
 {% endif %}
 {% endfor %}
