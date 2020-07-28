@@ -272,12 +272,6 @@ file_put_contents(
     $twig->render('php/conf.d/99-from-deploy-yaml-php.ini.twig', $projectData)
 );
 
-file_put_contents(
-    $deploymentDir . DS . 'env' . DS . 'testing.env',
-    $twig->render('env/testing.env.twig', [
-        'project' => $projectData,
-    ])
-);
 
 file_put_contents(
     $deploymentDir . DS . 'env' . DS . 'swagger.env',
