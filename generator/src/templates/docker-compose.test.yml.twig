@@ -1,16 +1,12 @@
 version: "3.5"
 
-x-env_file:
-  &test-envfile
-  env_file:
-    - ${DEPLOYMENT_PATH}/env/testing.env
-
 services:
 {% for group in groups %}
 {% for applicationName, applicationData in group['applications'] %}
 {% if applicationData['application'] != 'static' %}
   {{ applicationName | lower }}:
-    <<: *test-envfile
+    environment:
+      SPRYKER_TESTING_ENABLED: 1
 {% endif %}
 {% endfor %}
 {% endfor %}
