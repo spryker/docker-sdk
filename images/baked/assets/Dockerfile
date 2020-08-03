@@ -19,5 +19,3 @@ RUN --mount=type=cache,id=npm,sharing=locked,target=/root/.npm \
     echo "BUILD HASH: ${SPRYKER_BUILD_HASH}" \
     && echo "MODE: ${SPRYKER_ASSETS_MODE}" \
     && vendor/bin/install -r ${SPRYKER_PIPELINE} -s build-static -s build-static-${SPRYKER_ASSETS_MODE} -vvv
-
-# TODO add tar builder

@@ -1,5 +1,6 @@
-# Ignore generated files
+.idea
+vendor
+node_modules
+
 deployment/*
 !deployment/.gitkeep
-.idea/
-generator/vendor

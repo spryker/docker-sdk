@@ -11,6 +11,10 @@
 {% endif %}
     networks:
         - private
+    labels:
+      'spryker.app.name': swagger
+      'spryker.app.type': hidden
+      'spryker.project': ${SPRYKER_DOCKER_PREFIX}:${SPRYKER_DOCKER_TAG}
     env_file:
         - ${DEPLOYMENT_PATH}/env/{{ serviceName }}.env
     healthcheck:

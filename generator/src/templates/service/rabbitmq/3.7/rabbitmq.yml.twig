@@ -3,6 +3,10 @@
     hostname: {{ serviceName }} # RabbitMQ determinate cluster but its hostname
     networks:
       - private
+    labels:
+      'spryker.app.name': broker
+      'spryker.app.type': services
+      'spryker.project': ${SPRYKER_DOCKER_PREFIX}:${SPRYKER_DOCKER_TAG}
     healthcheck:
       test: [ "CMD", "nc", "-z", "localhost", "5672" ]
       interval: 10s

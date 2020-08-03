@@ -2,6 +2,10 @@
     image: mysql:5.7
     networks:
       - private
+    labels:
+      'spryker.app.name': database
+      'spryker.app.type': services
+      'spryker.project': ${SPRYKER_DOCKER_PREFIX}:${SPRYKER_DOCKER_TAG}
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "--silent"]
       interval: 10s

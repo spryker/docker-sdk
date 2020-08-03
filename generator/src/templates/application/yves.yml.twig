@@ -6,6 +6,10 @@
       - search
     networks:
       - private
+    labels:
+      'spryker.app.name': {{ applicationName }}
+      'spryker.app.type': yves
+      'spryker.project': ${SPRYKER_DOCKER_PREFIX}:${SPRYKER_DOCKER_TAG}
     env_file:
       - ${DEPLOYMENT_PATH}/env/{{ applicationName }}.env
     environment:

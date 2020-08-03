@@ -12,12 +12,18 @@ services:
     networks:
       - public
       - private
+    labels:
+      'spryker.app.name': cli
+      'spryker.app.type': console
+      'spryker.project': ${SPRYKER_DOCKER_PREFIX}:${SPRYKER_DOCKER_TAG}
     volumes:
       - cli_history:/home/spryker/history:rw
       - ./${DEPLOYMENT_PATH}/env/cli:/home/spryker/env:ro
 {% include "application-volumes.yml.twig" with _context %}
     tty: true
     environment:
+      SPRYKER_LOG_STDOUT: /tmp/stdout
+      SPRYKER_LOG_STDERR: /tmp/stderr
       SPRYKER_XDEBUG_HOST_IP: ${SPRYKER_XDEBUG_HOST_IP}
       BLACKFIRE_SERVER_ID: ${BLACKFIRE_SERVER_ID}
       BLACKFIRE_SERVER_TOKEN: ${BLACKFIRE_SERVER_TOKEN}
@@ -34,6 +40,10 @@ services:
     image: ${SPRYKER_DOCKER_PREFIX}_run_frontend:${SPRYKER_DOCKER_TAG}
     networks:
         - private
+    labels:
+      'spryker.app.name': frontend
+      'spryker.app.type': proxy
+      'spryker.project': ${SPRYKER_DOCKER_PREFIX}:${SPRYKER_DOCKER_TAG}
     depends_on:
 {% for group in groups %}
 {% for applicationName, applicationData in group['applications'] %}
@@ -87,6 +97,10 @@ services:
           - {{ host }}
 {% endif %}
 {% endfor %}
+    labels:
+      'spryker.app.name': gateway
+      'spryker.app.type': proxy
+      'spryker.project': ${SPRYKER_DOCKER_PREFIX}:${SPRYKER_DOCKER_TAG}
 
 {% for group in groups %}
 {% for applicationName, applicationData in group['applications'] %}

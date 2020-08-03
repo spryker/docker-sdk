@@ -1,0 +1,19 @@
+  {{ serviceName }}:
+    build:
+      context: ./${DEPLOYMENT_PATH}/
+      dockerfile: images/common/dashboard/Dockerfile
+    networks:
+      - public
+      - private
+    labels:
+      'spryker.app.name': dashboard
+      'spryker.app.type': hidden
+      'spryker.project': ${SPRYKER_DOCKER_PREFIX}:${SPRYKER_DOCKER_TAG}
+    environment:
+      PROJECT: ${SPRYKER_DOCKER_PREFIX}:${SPRYKER_DOCKER_TAG}
+      SPRYKER_LOG_DIRECTORY: ${SPRYKER_LOG_DIRECTORY}
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./${DEPLOYMENT_PATH}/context/dashboard/environment:/dashboard/environment:consistent,ro
+{% include "application-volumes.yml.twig" with project %}
+    privileged: true

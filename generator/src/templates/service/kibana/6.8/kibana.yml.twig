@@ -2,6 +2,10 @@
     image: docker.elastic.co/kibana/kibana:6.8.6
     networks:
         - private
+    labels:
+      'spryker.app.name': kibana
+      'spryker.app.type': services
+      'spryker.project': ${SPRYKER_DOCKER_PREFIX}:${SPRYKER_DOCKER_TAG}
     healthcheck:
         test: curl --cacert /usr/share/elasticsearch/config/certs/ca/ca.crt -s https://localhost:5601 >/dev/null; if [[ $$? == 52 ]]; then echo 0; else echo 1; fi
         interval: 30s

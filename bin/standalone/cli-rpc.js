@@ -1,6 +1,8 @@
 // ATTENTION: THIS CAN BE USED ONLY IN DEVELOPMENT.
 
+const fs = require('fs');
 const http = require('http');
+const {promisify} = require('util');
 const {spawn} = require('child_process');
 
 class Server {
@@ -69,6 +71,25 @@ class Server {
     }
 }
 
-const server = new Server();
+class Logger {
+    async add(pipeName, destinationStream) {
+        console.log(`[INIT] Creating fifo: ${pipeName}`)
+        if (!fs.existsSync(pipeName)) {
+            await spawn('mkfifo', [pipeName]);
+            console.log(`[INIT] Created fifo: ${pipeName}`)
+        }
 
+        const pipeHandle = await promisify(fs.open)(pipeName, fs.constants.O_RDWR);
+        const stream = fs.createReadStream(null, {fd: pipeHandle, autoClose: false});
+
+        stream.pipe(destinationStream);
+        console.log(`[INIT] Piping ${pipeName}`)
+    }
+}
+
+const server = new Server();
 server.listen(9000, '0.0.0.0');
+
+const logger = new Logger();
+logger.add(process.env.SPRYKER_LOG_STDOUT, process.stdout);
+logger.add(process.env.SPRYKER_LOG_STDERR, process.stderr);

@@ -15,8 +15,10 @@ services:
     image: wernight/phantomjs:latest
     networks:
       - public
-    ports:
-      - 4444:4444
+    labels:
+      'spryker.app.name': webdriver
+      'spryker.app.type': services
+      'spryker.project': ${SPRYKER_DOCKER_PREFIX}:${SPRYKER_DOCKER_TAG}
     expose:
       - "4444"
     healthcheck:
