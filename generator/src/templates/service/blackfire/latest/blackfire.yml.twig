@@ -7,3 +7,7 @@
         BLACKFIRE_CLIENT_TOKEN: ${BLACKFIRE_CLIENT_TOKEN}
     networks:
         - private
+    labels:
+      'spryker.app.name': blackfire
+      'spryker.app.type': agents
+      'spryker.project': ${SPRYKER_DOCKER_PREFIX}:${SPRYKER_DOCKER_TAG}

@@ -2,6 +2,10 @@
     image: spryker/jenkins:2.176
     networks:
       - private
+    labels:
+      'spryker.app.name': scheduler
+      'spryker.app.type': services
+      'spryker.project': ${SPRYKER_DOCKER_PREFIX}:${SPRYKER_DOCKER_TAG}
     healthcheck:
       test: [ "CMD", "nc", "-z", "localhost", "8080" ]
       interval: 10s

@@ -1,0 +1,40 @@
+html
+  head
+    title= title
+    link(rel="icon" href="/favicon.ico" type="image/x-icon")
+    link(rel="stylesheet" type="text/css" href="assets/style.css")
+  body
+    div(class="console")
+        div(class="logo")
+            |┌────┐           ┌─┐            ┌────┬────┬─┬─┐
+            |│ ───┼───┬─┬─┬─┬─┤ ├─┬───┬─┬─┐  │ ───┼─┐ ┐│ ┌─┘
+            |├─── │ ┼ │ ┌─┤ │ │───┤ ┼─┤ ┌─┘  ├─── ├─┴─┘│ └─┐
+            |└────┤  ┌┴─┘ ├─┐ ├─┴─┴───┴─┘    └────┴────┴─┴─┘
+            |      └──┘    └───┘
+        |╭─<span class="prompt">/dashboard</span> | Project: #{project}
+        |╰─$ dashboard help
+        |
+        |Dashboard usage:
+        |
+        | [1] <a href="/logs">dashboard logs</a>
+        | [2] <span class="command">dashboard status</span>
+        |
+        |╭─<span class="prompt">/dashboard</span> | Project: #{project}
+        |╰─$ dashboard status
+        |
+        |
+        each application in applications
+            |#{application.name}
+            |
+            each endpoint in application.endpoints
+                |    <a href="#{endpoint}" target="_blank">#{endpoint}</a>
+                |
+        |
+        |
+        |
+        each service in services
+            |#{service.name}
+            |
+            each endpoint in service.endpoints
+                |    <a href="#{endpoint}" target="_blank">#{endpoint}</a>
+                |

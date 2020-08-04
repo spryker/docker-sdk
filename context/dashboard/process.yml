@@ -1,0 +1,5 @@
+apps:
+    -   script: ./src/index.js
+        name: dashboard
+    -   script: log.io-server
+        name: logger-ui

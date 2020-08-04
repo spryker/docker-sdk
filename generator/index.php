@@ -72,6 +72,20 @@ $projectData['composer']['autoload'] = buildComposerAutoloadConfig($projectData)
 $isAutoloadCacheEnabled = $projectData['_isAutoloadCacheEnabled'] = isAutoloadCacheEnabled($projectData);
 $projectData['_requirementAnalyzerData'] = buildDataForRequirementAnalyzer($projectData);
 
+// Making dashboard a required service
+$projectData['_dashboardEndpoint'] = '';
+if (!empty($projectData['services']['dashboard'])) {
+    $projectData['services']['dashboard']['endpoints'] = $projectData['services']['dashboard']['endpoints'] ?? [
+        'localhost' => []
+    ];
+    reset($projectData['services']['dashboard']['endpoints']);
+    $projectData['_dashboardEndpoint'] = sprintf(
+        '%s://%s',
+        ($projectData['docker']['ssl']['enabled'] ?? false) ? 'https' : 'http',
+        key($projectData['services']['dashboard']['endpoints'])
+    );
+}
+
 verbose('Generating NGINX configuration... [DONE]');
 
 @mkdir($deploymentDir . DS . 'env' . DS . 'cli', 0777, true);
@@ -131,6 +145,9 @@ foreach ($primal as $callbacks) {
 $endpointMap = $projectData['_endpointMap'];
 $projectData['_applications'] = [];
 $frontend = [];
+$environment = [
+    'project' => $projectData['namespace'],
+];
 foreach ($projectData['groups'] ?? [] as $groupName => $groupData) {
     foreach ($groupData['applications'] ?? [] as $applicationName => $applicationData) {
         if ($applicationData['application'] !== 'static') {
@@ -147,6 +164,26 @@ foreach ($projectData['groups'] ?? [] as $groupName => $groupData) {
                     'brokerConnections' => getBrokerConnections($projectData),
                 ])
             );
+        }
+
+        $httpEndpoints = array_filter(
+            $applicationData['endpoints'] ?? [],
+            static function ($endpointData) {
+                return ($endpointData['protocol'] ?? 'http') === 'http';
+            }
+        );
+
+        if (!empty($httpEndpoints)) {
+            $environment['applications'][] = [
+                'name' => $applicationName,
+                'endpoints' => array_map(
+                    static function ($endpoint) use ($projectData) {
+                        return sprintf('%s://%s', $projectData['docker']['ssl']['enabled'] ?? false ? 'https' : 'http',
+                            $endpoint);
+                    },
+                    array_keys($httpEndpoints)
+                )
+            ];
         }
 
         foreach ($applicationData['endpoints'] ?? [] as $endpoint => $endpointData) {
@@ -246,6 +283,28 @@ foreach ($projectData['groups'] ?? [] as $groupName => $groupData) {
     }
 }
 
+foreach ($projectData['services'] ?? [] as $serviceName => $serviceData) {
+    $httpEndpoints = array_filter(
+        $serviceData['endpoints'] ?? [],
+        static function ($endpointData) {
+            return ($endpointData['protocol'] ?? 'http') === 'http';
+        }
+    );
+
+    if (!empty($httpEndpoints)) {
+        $environment['services'][] = [
+            'name' => $serviceName,
+            'endpoints' => array_map(
+                static function ($endpoint) use ($projectData) {
+                    return sprintf('%s://%s', $projectData['docker']['ssl']['enabled'] ?? false ? 'https' : 'http',
+                        $endpoint);
+                },
+                array_keys($httpEndpoints)
+            )
+        ];
+    }
+}
+
 file_put_contents(
     $deploymentDir . DS . 'context' . DS . 'nginx' . DS . 'conf.d' . DS . 'frontend.default.conf.tmpl',
     $twig->render('nginx/conf.d/frontend.default.conf.twig', $projectData)
@@ -293,6 +352,10 @@ $envVarEncoder->setIsActive(false);
 file_put_contents(
     $deploymentDir . DS . 'terraform/frontend.json',
     json_encode($frontend, JSON_PRETTY_PRINT)
+);
+file_put_contents(
+    $deploymentDir . DS . 'context/dashboard/environment/environment.json',
+    json_encode($environment, JSON_PRETTY_PRINT)
 );
 
 file_put_contents(
@@ -381,7 +444,7 @@ function retrieveUniquePorts(array $projectData)
 
     foreach (retrieveEndpoints($projectData) as $endpoint => $endpointData) {
         $port = explode(':', $endpoint)[1];
-        $ports[$port] = $port;
+        $ports[$port] = (int)$port;
     }
 
     if (array_key_exists(getDefaultPort($projectData), $ports) && !empty($projectData['docker']['ssl']['redirect'])) {
@@ -850,7 +913,7 @@ function isAutoloadCacheEnabled(array $projectData): bool
  */
 function buildComposerAutoloadConfig(array $projectData): string
 {
-    return trim($projectData['composer']['autoload'] ?? '--optimize');
+    return trim($projectData['composer']['autoload'] ?? ($projectData['_fileMode'] === 'baked' ? '--classmap-authoritative' : ''));
 }
 
 function buildDataForRequirementAnalyzer(array $projectData): array

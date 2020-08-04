@@ -1,0 +1,43 @@
+body {
+    color: #ffffff;
+    font-family: monospace;
+    background: #757575;
+}
+
+.console {
+    display: block;
+    margin: 10px auto;
+    padding: 20px 15px;
+    max-width: 1000px;
+    background: #2c2c2c;
+    white-space: pre;
+    color: #b5b5b5;
+}
+
+.logo {
+    display: block;
+    white-space: pre;
+    margin: 1em 0;
+    color: #9dbc00;
+}
+
+a {
+    color: #f4f700;
+    text-decoration: underline;
+}
+
+.prompt {
+    color: #009796;
+}
+
+.key {
+    color: #f4f700;
+}
+
+.value {
+    color: #9dbc00;
+}
+
+.mode {
+    color: #9976a5;
+}
