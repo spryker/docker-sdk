@@ -119,7 +119,7 @@ readonly SPRYKER_STORES=({{ regions | map((regionData, region) => "'local REGION
 readonly SPRYKER_DEFAULT_STORE={{ (regions | first)['stores'] | keys | first }}
 readonly SPRYKER_FILE_MODE="{{ _fileMode }}"
 readonly DOCKER_COMPOSE_FILES_EXTRA="{{ docker['compose']['yamls'] | default([]) | join(' ') }}"
-readonly SPRYKER_DASHBOARD_ENDPOINT="{{ (project['docker']['ssl']['enabled'] | default(false)) ? 'https' : 'http' }}://{{ _dashboardEndpoint | default("localhost") }}"
+readonly SPRYKER_DASHBOARD_ENDPOINT="{{ _dashboardEndpoint }}"
 readonly KNOWN_HOSTS="{{ _knownHosts | default("") }}"
 readonly SPRYKER_BUILD_HASH="${SPRYKER_BUILD_HASH}"
 readonly SPRYKER_BUILD_DATE="${SPRYKER_BUILD_DATE}"

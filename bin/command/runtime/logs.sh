@@ -6,11 +6,16 @@ Registry::Help::command -c "logs" "Tails all application exception logs."
 
 function Command::logs() {
 
-    Console::info "All logs are now available at ${SPRYKER_DASHBOARD_ENDPOINT}/logs"
+    local answer=y
 
-    Console::warn ""
-    Console::warn "Do you still want to tail \`exception.log\` files (y/n)?"
-    read answer
+    if [ -n "${SPRYKER_DASHBOARD_ENDPOINT}" ]; then
+
+        Console::info "All logs are now available at ${SPRYKER_DASHBOARD_ENDPOINT}/logs"
+
+        Console::warn ""
+        Console::warn "Do you still want to tail \`exception.log\` files (y/n)?"
+        read answer
+    fi
 
     if [ "$answer" != "${answer#[Yy]}" ] ;then
         # shellcheck disable=SC2016

@@ -73,20 +73,18 @@ $isAutoloadCacheEnabled = $projectData['_isAutoloadCacheEnabled'] = isAutoloadCa
 $projectData['_requirementAnalyzerData'] = buildDataForRequirementAnalyzer($projectData);
 
 // Making dashboard a required service
-$dashboardPort = getDefaultPort($projectData);
-if (!array_key_exists($dashboardPort, $projectData['_ports'])) {
-    $dashboardPort = reset($projectData['_ports']);
+$projectData['_dashboardEndpoint'] = '';
+if (!empty($projectData['services']['dashboard'])) {
+    $projectData['services']['dashboard']['endpoints'] = $projectData['services']['dashboard']['endpoints'] ?? [
+        'localhost' => []
+    ];
+    reset($projectData['services']['dashboard']['endpoints']);
+    $projectData['_dashboardEndpoint'] = sprintf(
+        '%s://%s',
+        ($projectData['docker']['ssl']['enabled'] ?? false) ? 'https' : 'http',
+        key($projectData['services']['dashboard']['endpoints'])
+    );
 }
-$projectData['services']['dashboard']['endpoints'] = $projectData['services']['dashboard']['endpoints'] ?? [];
-$dashboardEndpoint = 'localhost' . ($dashboardPort !== getDefaultPort($projectData) ? ':' . $dashboardPort : '');
-reset($projectData['services']['dashboard']['endpoints']);
-$projectData['_dashboardEndpoint'] = key($projectData['services']['dashboard']['endpoints']) ?: $dashboardEndpoint;
-$projectData['services']['dashboard'] = array_replace_recursive([
-    'engine' => 'dashboard',
-    'endpoints' => [
-        $projectData['_dashboardEndpoint'] => [],
-    ],
-], $projectData['services']['dashboard'] ?? []);
 
 verbose('Generating NGINX configuration... [DONE]');
 
