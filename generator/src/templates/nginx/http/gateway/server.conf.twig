@@ -18,6 +18,8 @@ server {
     }
 
     error_page 497 {{ desiredProtocol }}://$host{{ isPortCustom ? ':' ~ port : '' }}$request_uri;
+
+{% include "nginx/vhost.d/timeouts.conf.twig" with { timeout: '60m' } %}
 }
 
 {% if not isPortCustom and portToListen is not defined %}
