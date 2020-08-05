@@ -23,6 +23,7 @@ function Images::_buildApp() {
     local baseAppImage="${SPRYKER_DOCKER_PREFIX}_base_app:${SPRYKER_DOCKER_TAG}"
     local appImage="${SPRYKER_DOCKER_PREFIX}_app:${SPRYKER_DOCKER_TAG}"
     local runtimeImage="${SPRYKER_DOCKER_PREFIX}_run_app:${SPRYKER_DOCKER_TAG}"
+    local schedulerImage="${SPRYKER_DOCKER_PREFIX}_scheduler:${SPRYKER_DOCKER_TAG}"
 
     Console::verbose "${INFO}Building Application images${NC}"
 
@@ -63,6 +64,13 @@ function Images::_buildApp() {
     docker build \
         -t "${runtimeImage}" \
         -f "${DEPLOYMENT_PATH}/images/debug/application/Dockerfile" \
+        --progress="${PROGRESS_TYPE}" \
+        --build-arg "SPRYKER_PARENT_IMAGE=${appImage}" \
+        "${DEPLOYMENT_PATH}/context" 1>&2
+
+    docker build \
+        -t "${schedulerImage}" \
+        -f "${DEPLOYMENT_PATH}/images/common/services/cronicle/Dockerfile" \
         --progress="${PROGRESS_TYPE}" \
         --build-arg "SPRYKER_PARENT_IMAGE=${appImage}" \
         "${DEPLOYMENT_PATH}/context" 1>&2

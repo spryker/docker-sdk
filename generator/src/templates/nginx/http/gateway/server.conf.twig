@@ -11,11 +11,15 @@ server {
     include /etc/nginx/vhost.d/ssl.default.conf;
 {% endif %}
 
+{% block locations %}
     location / {
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection $connection_upgrade;
         proxy_pass http://{% block upstream %}{{ upstream }}{% endblock upstream %};
     }
+{% endblock locations %}
 
     error_page 497 {{ desiredProtocol }}://$host{{ isPortCustom ? ':' ~ port : '' }}$request_uri;
 }

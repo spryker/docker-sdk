@@ -1,0 +1,22 @@
+  {{ serviceName }}:
+    image: ${SPRYKER_DOCKER_PREFIX}_scheduler:${SPRYKER_DOCKER_TAG}
+    hostname: scheduler.spryker.local
+    networks:
+      - private
+    labels:
+      'spryker.app.name': scheduler
+      'spryker.app.type': services
+      'spryker.project': ${SPRYKER_DOCKER_PREFIX}:${SPRYKER_DOCKER_TAG}
+    healthcheck:
+      test: [ "CMD", "nc", "-z", "localhost", "3012" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    environment:
+      CRONICLE_master_ping_freq: 1
+      CRONICLE_master_ping_timeout: 1
+      CRONICLE_base_app_url: http://scheduler.spryker.local
+    volumes:
+      - {{ serviceName }}-{{ serviceData['engine'] }}-data:/home/spryker/cronicle/data
+      - ./${DEPLOYMENT_PATH}/env/cli:/home/spryker/env:consistent,ro
+{% include "application-volumes.yml.twig" with project %}
