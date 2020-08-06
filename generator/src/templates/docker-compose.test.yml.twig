@@ -32,4 +32,4 @@ services:
     image: nginx:alpine
     user: "0:0"
     volumes:
-      - ./${DEPLOYMENT_PATH}/context/nginx/dummy/scheduler.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./${DEPLOYMENT_PATH}/context/nginx/dummy/scheduler.conf:/etc/nginx/conf.d/default.conf:consistent,ro

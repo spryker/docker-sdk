@@ -15,4 +15,4 @@
       SPRYKER_CLI_CONTAINER: "${COMPOSE_PROJECT_NAME}_cli_1"
     volumes:
       - {{ serviceName }}-{{ serviceData['engine'] }}-data:/var/jenkins_home:rw
-      - ${DEPLOYMENT_PATH}/context/jenkins/spryker.sh:/usr/bin/spryker.sh:rw
+      - ${DEPLOYMENT_PATH}/context/jenkins/spryker.sh:/usr/bin/spryker.sh:consistent,ro

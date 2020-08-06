@@ -17,4 +17,4 @@
         - search
     volumes:
         - {{ serviceName }}-{{ serviceData['engine'] }}-data:/usr/share/kibana/data:rw
-        - ./${DEPLOYMENT_PATH}/context/kibana/kibana.yml:/usr/share/kibana/config/kibana.yml:ro
+        - ./${DEPLOYMENT_PATH}/context/kibana/kibana.yml:/usr/share/kibana/config/kibana.yml:consistent,ro

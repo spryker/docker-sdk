@@ -14,4 +14,4 @@
       timeout: 5s
       retries: 5
     volumes:
-      - {{ serviceName }}-{{ serviceData['engine'] }}-data:/maildir
+      - {{ serviceName }}-{{ serviceData['engine'] }}-data:/maildir:rw

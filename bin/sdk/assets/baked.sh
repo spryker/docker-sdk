@@ -26,8 +26,8 @@ function Assets::export() {
     fi
     docker run -i --rm "${userToRun[@]}" \
         -e PROJECT_DIR='/data' \
-        -v "${DEPLOYMENT_DIR}/bin:/data/standalone" \
-        -v "${projectDockerAssetsTmpDirectory}:/data${dockerAssetsTmpDirectory}" \
+        -v "${DEPLOYMENT_DIR}/bin:/data/standalone:consistent,rw" \
+        -v "${projectDockerAssetsTmpDirectory}:/data${dockerAssetsTmpDirectory}:consistent,rw" \
         --entrypoint='' \
         --name="${SPRYKER_DOCKER_PREFIX}_builder_assets" \
         "${builderAssetsImage}" \
