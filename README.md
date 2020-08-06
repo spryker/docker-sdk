@@ -8,7 +8,7 @@ Spryker Docker SDK helps to setup docker environment for your Spryker project.
 This repository does not contain the specific Dockerfile or docker-compose files.
 It contains a tool which prepares those files automatically in order to match the infrastructure specific to your Spryker project.
 
-Spryker Docker SDK requires the [Deploy file](https://documentation.spryker.com/installation/spryker_in_docker/docker_sdk/deploy-file-reference-version-1-201907.htm).
+Spryker Docker SDK requires the [Deploy file](https://documentation.spryker.com/docs/deploy-file-reference-10).
 The tool reads the specified Deploy file and builds a production-like Docker infrastructure for Spryker accordingly.
 
 The purposes of the tool:
