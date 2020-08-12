@@ -52,18 +52,18 @@ To start working with Spryker in Docker, see [Docker SDK](https://documentation.
 |   |   | 11  |
 |   |   | 12  |
 |   | mysql  | 5.7  |
-|   | mysql  | mariadb-10.2  |
-|   | mysql  | mariadb-10.3  |
-|   | mysql  | mariadb-10.4*  |
+|   |   | mariadb-10.2  |
+|   |   | mariadb-10.3  |
+|   |   | mariadb-10.4  |
 | broker  | rabbitmq  | 3.7  |
 | session  | redis  | 5.0  |
 | key_value_store  | redis  | 5.0  |
-| search  | elastic  | 5.6  |
+| search  | elastic  | 5.6*  |
 |   |   | 6.8  |
-|   |   | 7.6*  |
+|   |   | 7.6  |
 | scheduler  | jenkins  | 2.176  |
 | mail_catcher  | mailhog  | 1.0  |
 | swagger  | swagger-ui  | v3.24  |
-| kibana  | kibana  | 5.6 |
+| kibana  | kibana  | 5.6* |
 |   |   | 6.8 |
 | blackfire  | blackfire  | latest |
