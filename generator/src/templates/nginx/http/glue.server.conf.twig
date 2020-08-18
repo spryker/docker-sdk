@@ -11,6 +11,6 @@
         fastcgi_param SPRYKER_ZED_PORT "{{ (zedHost | split(':'))[1] | default(project['_defaultPort']) }}";
 
         fastcgi_param SPRYKER_API_HOST "{{ host }}";
-        fastcgi_param SPRYKER_API_PORT "{{ port }}";
+        fastcgi_param SPRYKER_API_PORT "{{ externalPort }}";
         fastcgi_param SPRYKER_GLUE_APPLICATION_CORS_ALLOW_ORIGIN "*";
 {% endblock location %}
