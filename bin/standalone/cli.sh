@@ -11,17 +11,18 @@ IS_TERMINAL=$(tty >/dev/null && [ -z "${COMMAND}" ] && echo '1' || echo '')
 # shellcheck disable=SC1090
 function importEnvFiles() {
     set -a
-    if [ -n "${SPRYKER_TESTING_ENABLE_FOR_CLI}" ]; then
+    if [ -n "${SPRYKER_TESTING_ENABLE}" ]; then
         source "${HOME}/env/testing.env"
     fi
     source "$(getEnvFile)"
-    if [ -n "${SPRYKER_TESTING_ENABLE_FOR_CLI}" ]; then
+    if [ -n "${SPRYKER_TESTING_ENABLE}" ]; then
         source "${HOME}/env/testing.env"
     fi
     # Alternatively we can copy env and source it again
-    SPRYKER_LOG_STDOUT=/tmp/stdout
-    SPRYKER_LOG_STDERR=/tmp/stderr
     set +a
+
+    export SPRYKER_LOG_STDOUT=/tmp/stdout
+    export SPRYKER_LOG_STDERR=/tmp/stderr
 }
 
 function printLogo() {
@@ -38,8 +39,8 @@ function setPrompt() {
     local status=""
     status+="${YELLOW}Store${NC}: ${GREEN}${APPLICATION_STORE}${NC}"
     status+=" | ${YELLOW}Env${NC}: ${GREEN}${APPLICATION_ENV}${NC}"
-    status+=" | ${PLUM}Debug${NC}: ($([ -n "${SPRYKER_XDEBUG_ENABLE_FOR_CLI}" ] && echo "${GREEN}X" || echo "${DGRAY}.")${NC})"
-    status+=" | ${PLUM}Testing${NC}: ($([ -n "${SPRYKER_TESTING_ENABLE_FOR_CLI}" ] && echo "${GREEN}X" || echo "${DGRAY}.")${NC})"
+    status+=" | ${PLUM}Debug${NC}: ($([ -n "${SPRYKER_XDEBUG_ENABLE}" ] && echo "${GREEN}X" || echo "${DGRAY}.")${NC})"
+    status+=" | ${PLUM}Testing${NC}: ($([ -n "${SPRYKER_TESTING_ENABLE}" ] && echo "${GREEN}X" || echo "${DGRAY}.")${NC})"
 
     export PS1="╭─${CYAN}\w${NC} | ${status}\n╰─$ "
 }
@@ -52,7 +53,7 @@ setPrompt
 
 popd >/dev/null
 
-if [ -n "${SPRYKER_XDEBUG_ENABLE_FOR_CLI}" ]; then
+if [ -n "${SPRYKER_XDEBUG_ENABLE}" ]; then
     export PHP_INI_SCAN_DIR=:/usr/local/etc/php/debug.conf.d
 fi
 

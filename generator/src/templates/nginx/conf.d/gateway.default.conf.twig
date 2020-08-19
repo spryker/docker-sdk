@@ -9,9 +9,14 @@ map $http_upgrade $connection_upgrade {
     ''      close;
 }
 
-map $cookie_XDEBUG_SESSION $xdebug_mode {
+map $cookie_XDEBUG_SESSION $xdebug_mode_from_cookie {
     ""      "";
     default "_xdebug";
+}
+
+map "${SPRYKER_XDEBUG_ENABLE}" $xdebug_mode {
+    "1"      "_xdebug";
+    default "$xdebug_mode_from_cookie";
 }
 
 server {
