@@ -55,6 +55,7 @@ services:
     environment:
       # TODO reconsider to use default in entrypoint
       ALLOWED_IP: "127.0.0.1"
+      SPRYKER_DNS_RESOLVER_IP: "127.0.0.11"
 {% for group in groups %}
 {% for applicationName, applicationData in group['applications'] %}
 {% if applicationData['application'] != 'static' %}
