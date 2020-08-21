@@ -9,6 +9,11 @@ function Command::testing() {
     Compose::ensureTestingMode
     Compose::ensureCliRunning
 
+    # shellcheck disable=SC2034
+    SPRYKER_XDEBUG_ENABLE_FOR_CLI="${SPRYKER_XDEBUG_ENABLE}"
+    # shellcheck disable=SC2034
+    SPRYKER_TESTING_ENABLE_FOR_CLI="${SPRYKER_TESTING_ENABLE}"
+
     Runtime::waitFor database
     Runtime::waitFor broker
     Runtime::waitFor search

@@ -372,10 +372,6 @@ file_put_contents(
     $deploymentDir . DS . 'docker-compose.test.yml',
     $twig->render('docker-compose.test.yml.twig', $projectData)
 );
-file_put_contents(
-    $deploymentDir . DS . 'docker-compose.xdebug.yml',
-    $twig->render('docker-compose.xdebug.yml.twig', $projectData)
-);
 
 verbose('Generating scripts... [DONE]');
 
