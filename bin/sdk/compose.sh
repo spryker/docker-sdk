@@ -37,6 +37,7 @@ function Compose::ensureCliRunning() {
     local isCliRunning=$(docker ps --filter 'status=running' --filter "ancestor=${SPRYKER_DOCKER_PREFIX}_run_cli:${SPRYKER_DOCKER_TAG}" --filter "name=${SPRYKER_DOCKER_PREFIX}_cli_*" --format "{{.Names}}")
     if [ -z "${isCliRunning}" ]; then
         Compose::run --no-deps cli
+        Registry::Flow::runAfterCliReady
     fi
 }
 
@@ -78,7 +79,7 @@ function Compose::command() {
     local -a composeFiles=()
     IFS=' ' read -r -a composeFiles <<< "$(Compose::getComposeFiles)"
 
-    docker-compose \
+    ${DOCKER_COMPOSE_SUBSTITUTE:-'docker-compose'} \
         --project-directory "${PROJECT_DIR}" \
         --project-name "${SPRYKER_DOCKER_PREFIX}" \
         "${composeFiles[@]}" \
@@ -118,12 +119,17 @@ function Compose::up() {
         esac
     done
 
+    Registry::Flow::runBeforeUp
+
     Images::buildApplication ${noCache} ${doBuild}
     Codebase::build ${noCache} ${doBuild}
     Assets::build ${noCache} ${doAssets}
     Images::buildFrontend ${noCache} ${doBuild}
     Compose::run --build
     Compose::command restart frontend gateway
+
+    Registry::Flow::runAfterUp
+
     Data::load ${noCache} ${doData}
     Service::Scheduler::start ${noCache} ${doJobs}
 }
@@ -134,6 +140,9 @@ function Compose::run() {
     Console::verbose "${INFO}Running Spryker containers${NC}"
     sync start
     Compose::command up -d --remove-orphans "${@}"
+
+    # Note: Compose::run can be used for running only one container, e.g. CLI.
+    Registry::Flow::runAfterRun
 }
 
 function Compose::ps() {
@@ -149,20 +158,24 @@ function Compose::restart() {
 function Compose::stop() {
     Console::verbose "${INFO}Stopping all containers${NC}"
     Compose::command stop
+    Registry::Flow::runAfterStop
 }
 
 function Compose::down() {
     Console::verbose "${INFO}Stopping and removing all containers${NC}"
     Compose::command down --remove-orphans
     sync stop
+    Registry::Flow::runAfterDown
 }
 
 function Compose::cleanVolumes() {
     Console::verbose "${INFO}Stopping and removing all Spryker containers and volumes${NC}"
     Compose::command down -v --remove-orphans
+    Registry::Flow::runAfterDown
 }
 
 function Compose::cleanEverything() {
     Console::verbose "${INFO}Stopping and removing all Spryker containers and volumes${NC}"
     Compose::command down -v --remove-orphans --rmi all
+    Registry::Flow::runAfterDown
 }

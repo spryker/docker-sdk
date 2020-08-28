@@ -90,6 +90,7 @@ function Command::bootstrap() {
     cp -rf "${SOURCE_DIR}/bin/standalone" "${tmpDeploymentDir}/context/cli"
     cp -rf "${SOURCE_DIR}/images" "${tmpDeploymentDir}/images"
     cp "${projectYaml}" "${tmpDeploymentDir}/project.yml"
+    cp "$([ -f "./.dockersyncignore" ] && echo './.dockersyncignore' || echo "${SOURCE_DIR}/.dockersyncignore.default")" "${tmpDeploymentDir}/.dockersyncignore"
     if [ -f ".known_hosts" ]; then
         cp ".known_hosts" "${tmpDeploymentDir}/"
     fi
@@ -108,15 +109,6 @@ function Command::bootstrap() {
         -e VERBOSE="${VERBOSE}" \
         -v "${tmpDeploymentDir}":/data/deployment:rw \
         spryker_docker_sdk
-
-    # Just in case of docker volumes caching
-    local counter=1
-    while :; do
-        [ -f "${tmpDeploymentDir}/deploy" ] && break
-        [ "${counter}" -ge 20 ] && Console::error "Could not wait for sync anymore." && exit 1
-        counter=$((counter + 1))
-        sleep 1
-    done
 
     chmod +x "${tmpDeploymentDir}/deploy"
 
