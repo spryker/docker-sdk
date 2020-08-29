@@ -49,7 +49,7 @@ upstream {{ upstream }} {
 upstream {{ upstream }}_xdebug {
     server frontend:{{ debugPort }};
 }
-{% include "nginx/http/gateway/server.conf.twig" with {
+{% include "nginx/http/gateway/#{applicationData['application']}.server.conf.twig" with {
     ssl: ssl,
     endpoint: endpoint,
     endpointData: endpointData,
@@ -58,7 +58,7 @@ upstream {{ upstream }}_xdebug {
 } %}
 
 # Debug: {{ endpoint }}
-{% include "nginx/http/gateway/server.conf.twig" with {
+{% include "nginx/http/gateway/#{applicationData['application']}.server.conf.twig" with {
     portToListen: debugPort,
     ssl: ssl,
     endpoint: endpoint,

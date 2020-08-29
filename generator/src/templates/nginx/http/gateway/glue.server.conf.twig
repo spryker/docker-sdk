@@ -1,0 +1,12 @@
+{% extends "nginx/http/gateway/server.conf.twig" %}
+{% block locations %}
+{{ parent() }}
+    location /schema.yml {
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection $connection_upgrade;
+        proxy_set_header X-SCHEMA-BASE-URL $scheme://$host;
+        proxy_pass http://cli:9000/glueSchema/;
+    }
+{% endblock locations %}

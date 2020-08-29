@@ -331,15 +331,6 @@ file_put_contents(
     $twig->render('php/conf.d/99-from-deploy-yaml-php.ini.twig', $projectData)
 );
 
-
-file_put_contents(
-    $deploymentDir . DS . 'env' . DS . 'swagger.env',
-    $twig->render('env/swagger/swagger-ui.env.twig', [
-        'project' => $projectData,
-        'endpointMap' => $endpointMap,
-    ])
-);
-
 $envVarEncoder->setIsActive(true);
 file_put_contents(
     $deploymentDir . DS . 'terraform/environment.tf',
