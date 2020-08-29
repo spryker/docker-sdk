@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# shellcheck disable=SC2155
+
 require docker docker-compose tr awk wc sed grep
 
 Registry::Flow::addBoot "Compose::verboseMode"
@@ -7,7 +9,7 @@ Registry::Flow::addBoot "Compose::verboseMode"
 function Compose::getComposeFiles() {
     local composeFiles="-f ${DEPLOYMENT_PATH}/docker-compose.yml"
 
-    if [ "${SPRYKER_TESTING_ENABLE}" -eq 1 ]; then
+    if [ -n "${SPRYKER_TESTING_ENABLE}" ]; then
         composeFiles+=" -f ${DEPLOYMENT_PATH}/docker-compose.test.yml"
     fi
 
@@ -27,7 +29,8 @@ function Compose::ensureTestingMode() {
 }
 
 function Compose::ensureRunning() {
-    local isCliRunning=$(docker ps --filter 'status=running' --filter "name=${SPRYKER_DOCKER_PREFIX}_cli_*" --format "{{.Names}}")
+    local service=${1:-'cli'}
+    local isCliRunning=$(docker ps --filter 'status=running' --filter "name=${SPRYKER_DOCKER_PREFIX}_${service}_*" --format "{{.Names}}")
     if [ -z "${isCliRunning}" ]; then
         Compose::run
     fi
@@ -52,7 +55,7 @@ function Compose::exec() {
         -e SPRYKER_CURRENT_REGION="${SPRYKER_CURRENT_REGION}" \
         -e SPRYKER_PIPELINE="${SPRYKER_PIPELINE}" \
         -e SPRYKER_XDEBUG_ENABLE_FOR_CLI="${SPRYKER_XDEBUG_ENABLE_FOR_CLI}" \
-        -e SPRYKER_TESTING_ENABLE_FOR_CLI="$([ "${SPRYKER_TESTING_ENABLE}" -eq 1 ] && echo '1' || echo '')" \
+        -e SPRYKER_TESTING_ENABLE_FOR_CLI="${SPRYKER_TESTING_ENABLE_FOR_CLI}" \
         -e COMPOSER_AUTH="${COMPOSER_AUTH}" \
         cli \
         bash -c 'bash ~/bin/cli.sh'
@@ -63,10 +66,10 @@ function Compose::verboseMode() {
     if [ "${SPRYKER_FILE_MODE}" == 'mount' ]; then
         output+="  DEVELOPMENT MODE  "
     fi
-    if [ "${SPRYKER_TESTING_ENABLE}" -eq 1 ]; then
+    if [ -n "${SPRYKER_TESTING_ENABLE}" ]; then
         output+="  TESTING MODE  "
     fi
-    if [ -n "${SPRYKER_XDEBUG_ENABLE_FOR_CLI}" ]; then
+    if [ -n "${SPRYKER_XDEBUG_ENABLE}" ]; then
         output+="  DEBUGGING MODE  "
     fi
     if [ -n "${output}" ]; then

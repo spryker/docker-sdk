@@ -6,10 +6,13 @@ Registry::Help::command -c "testing" "Starts a new container where you can run c
 Registry::Help::command -c "testing" -a "<command>" "Runs a cli command in testing environment, e.g. ${HELP_HIGH}${SELF_SCRIPT} testing codecept build${HELP_DESC}."
 
 function Command::testing() {
-    readonly SPRYKER_XDEBUG_ENABLE_FOR_CLI="$([ "${SPRYKER_XDEBUG_ENABLE}" -eq 1 ] && echo '1' || echo '')"
-
     Compose::ensureTestingMode
     Compose::ensureCliRunning
+
+    # shellcheck disable=SC2034
+    SPRYKER_XDEBUG_ENABLE_FOR_CLI="${SPRYKER_XDEBUG_ENABLE}"
+    # shellcheck disable=SC2034
+    SPRYKER_TESTING_ENABLE_FOR_CLI="${SPRYKER_TESTING_ENABLE}"
 
     Runtime::waitFor database
     Runtime::waitFor broker
