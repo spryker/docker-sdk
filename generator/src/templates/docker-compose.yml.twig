@@ -97,6 +97,8 @@ services:
           - {{ host }}
 {% endif %}
 {% endfor %}
+    environment:
+      SPRYKER_XDEBUG_ENABLE: ${SPRYKER_XDEBUG_ENABLE}
     labels:
       'spryker.app.name': gateway
       'spryker.app.type': proxy
