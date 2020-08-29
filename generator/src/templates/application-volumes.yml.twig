@@ -1,7 +1,7 @@
       - logs:${SPRYKER_LOG_DIRECTORY}:rw
 {% if _mountMode != 'baked' %}
-{% if _mountMode == 'native' %}
-      - ./:/data
+{% if _mountMode == 'native' or _mountMode == 'delegated' %}
+      - ./:/data:{{ _mountMode == 'delegated' ? 'delegated,' : '' }}rw
 {% else %}
       - ${SPRYKER_DOCKER_PREFIX}_${SPRYKER_DOCKER_TAG}_data_sync:/data:nocopy
 {% endif %}

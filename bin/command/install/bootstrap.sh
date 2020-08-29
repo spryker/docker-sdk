@@ -58,6 +58,7 @@ function Command::bootstrap() {
 
     if [ -f "${DEPLOY_SCRIPT}" ] && [ -z "${BOOT_IN_DEVELOPMENT}" ]; then
         Console::start "Stopping environment..."
+        # shellcheck disable=SC2015
         ${DEPLOY_SCRIPT} down >/dev/null 2>&1 && sleep 1 || true
         Console::end '[DONE]'
     fi
@@ -71,7 +72,8 @@ function Command::bootstrap() {
 
     Command::bootstrap::_validateParameters
 
-    Console::info "Using ${projectYaml}"
+    Console::info "Project: ${DECLARE}${SPRYKER_PROJECT_NAME}"
+    Console::info "Using ${DECLARE}${projectYaml}"
 
     local USER_FULL_ID=$(Environment::getFullUserId)
 
@@ -106,17 +108,8 @@ function Command::bootstrap() {
         -e SPRYKER_DOCKER_SDK_PLATFORM="${_PLATFORM}" \
         -e SPRYKER_DOCKER_SDK_DEPLOYMENT_DIR="${DESTINATION_DIR}" \
         -e VERBOSE="${VERBOSE}" \
-        -v "${tmpDeploymentDir}":/data/deployment:rw \
+        -v "${tmpDeploymentDir}":/data/deployment:consistent,rw \
         spryker_docker_sdk
-
-    # Just in case of docker volumes caching
-    local counter=1
-    while :; do
-        [ -f "${tmpDeploymentDir}/deploy" ] && break
-        [ "${counter}" -ge 20 ] && Console::error "Could not wait for sync anymore." && exit 1
-        counter=$((counter + 1))
-        sleep 1
-    done
 
     chmod +x "${tmpDeploymentDir}/deploy"
 
@@ -128,6 +121,10 @@ function Command::bootstrap() {
 
     if [ ! -f ".dockerignore" ]; then
         cp "${SOURCE_DIR}/.dockerignore.default" .dockerignore
+    fi
+
+    if [ ! -f ".dockersyncignore" ]; then
+        cp "${SOURCE_DIR}/.dockersyncignore.default" .dockerignore
     fi
 
     Console::info "Deployment is generated into ${LGRAY}${DESTINATION_DIR}"
