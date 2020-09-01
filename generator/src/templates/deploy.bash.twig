@@ -97,6 +97,7 @@ System::Bootstrap
 readonly PROJECT_DIR="$(pwd)"
 readonly DEPLOYMENT_DIR="$(cd "${BASH_SOURCE%/*}" >/dev/null 2>&1 && pwd)"
 readonly DEPLOYMENT_PATH="${DEPLOYMENT_DIR/$PROJECT_DIR/.}"
+readonly SECRETS_FILE_PATH="${DEPLOYMENT_DIR}/.secrets"
 readonly PROGRESS_TYPE=${PROGRESS_TYPE:-tty}
 VERBOSE=${VERBOSE:-0}
 
@@ -136,6 +137,7 @@ SPRYKER_XDEBUG_ENABLE="$([ "${SPRYKER_XDEBUG_ENABLE}" == '1' ] && echo '1' || ec
 SPRYKER_XDEBUG_ENABLE_FOR_CLI=''
 SPRYKER_TESTING_ENABLE="$([ "${SPRYKER_TESTING_ENABLE}" == '1' ] && echo '1' || echo '')"
 SPRYKER_TESTING_ENABLE_FOR_CLI=''
+readonly SSH_AUTH_SOCK=${SSH_AUTH_SOCK:-"${DEPLOYMENT_PATH}/context/cli/ssh-agent.mock"}
 SPRYKER_CURRENT_STORE=${SPRYKER_STORE:-${APPLICATION_STORE:-${SPRYKER_DEFAULT_STORE}}}
 readonly GITHUB_TOKEN=${GITHUB_TOKEN:-''}
 if [ -n "${GITHUB_TOKEN}" ]; then
@@ -146,6 +148,7 @@ readonly COMPOSER_AUTH=${COMPOSER_AUTH:-${TOKEN_BASED_COMPOSER_AUTH}}
 # Global variables
 readonly USER_FULL_ID=$(Environment::getFullUserId)
 readonly SPRYKER_XDEBUG_HOST_IP=$(Environment::getHostIp)
+readonly SECRETS_ENVIRONMENT=("COMPOSER_AUTH='${COMPOSER_AUTH}'")
 
 command=${1}
 shift || true
@@ -181,6 +184,7 @@ shift $((OPTIND - 1))
 # Exporting for docker-compose
 export DEPLOYMENT_PATH
 export SPRYKER_XDEBUG_HOST_IP
+export SSH_AUTH_SOCK
 export COMPOSE_PROJECT_NAME
 export SPRYKER_DOCKER_PREFIX
 export SPRYKER_DOCKER_TAG

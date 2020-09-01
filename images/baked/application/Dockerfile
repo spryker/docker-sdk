@@ -7,10 +7,11 @@ USER spryker
 
 # Install composer modules for Spryker
 COPY --chown=spryker:spryker composer.json composer.lock ${srcRoot}/
-ARG COMPOSER_AUTH
 ARG SPRYKER_COMPOSER_MODE
 RUN --mount=type=cache,id=composer,sharing=locked,target=/home/spryker/.composer/cache,uid=1000 \
-    COMPOSER_AUTH="${COMPOSER_AUTH}" composer install --no-scripts --no-interaction ${SPRYKER_COMPOSER_MODE}
+  --mount=type=ssh,uid=1000 --mount=type=secret,id=secrets-env,uid=1000 \
+  set -o allexport && source /run/secrets/secrets-env && set +o allexport \
+  && composer install --no-scripts --no-interaction ${SPRYKER_COMPOSER_MODE} -vvv
 
 FROM application-production-dependecies AS application-production-codebase
 

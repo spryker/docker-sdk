@@ -40,23 +40,25 @@ matrix:
     - name: Demo boot test
       env: DEV_MODE=0
       script:
-        - chmod +x ci/check_boot.sh
-        - ./ci/check_boot.sh
+        - bash ./ci/check_boot.sh
     - name: Dev boot test
       env: DEV_MODE=1
       script:
-        - chmod +x ci/check_boot.sh
-        - ./ci/check_boot.sh
+        - bash ./ci/check_boot.sh
     - name: Demo Bash syntax check
       env: DEV_MODE=0
       script:
-        - chmod +x ci/check_bash_syntax.sh
-        - ./ci/check_bash_syntax.sh
+        - bash ./ci/check_bash_syntax.sh
     - name: Demo Bash syntax check
       env: DEV_MODE=1
       script:
-        - chmod +x ci/check_bash_syntax.sh
-        - ./ci/check_bash_syntax.sh
+        - bash ./ci/check_bash_syntax.sh
+    - name: Tests
+      script:
+          - bash ./ci/tests.sh
+      before_install: skip
+      before_script: skip
+      after_script: skip
 
 before_script:
   - chmod +x sdk
