@@ -42,3 +42,9 @@ COPY --chown=spryker:spryker jenkins/jenkins.docker.xml.twig /home/spryker/jenki
 
 # Build info
 COPY --chown=spryker:spryker php/build.php /home/spryker/build.php
+
+# SSH_KEY
+COPY --chown=spryker:spryker ssh/dev_only_private.key /home/spryker/dev_only_private.key
+COPY --chown=spryker:spryker ssh/dev_only_public.key /home/spryker/dev_only_public.key
+
+RUN chmod 600 /home/spryker/*.key 2>/dev/null || true
