@@ -25,7 +25,6 @@ RUN chown spryker:spryker -R /home/spryker/.ssh
 COPY php/php-fpm.d/worker.conf /usr/local/etc/php-fpm.d/worker.conf
 COPY php/php.ini /usr/local/etc/php/
 COPY php/conf.d/90-opcache.ini /usr/local/etc/php/conf.d
-COPY php/conf.d/92-session.ini /usr/local/etc/php/conf.d
 # removing default opcache.ini
 RUN rm -f /usr/local/etc/php/conf.d/opcache.ini
 
