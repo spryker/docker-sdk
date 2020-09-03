@@ -71,6 +71,7 @@ $projectData['storageData'] = retrieveStorageData($projectData);
 $projectData['composer']['autoload'] = buildComposerAutoloadConfig($projectData);
 $isAutoloadCacheEnabled = $projectData['_isAutoloadCacheEnabled'] = isAutoloadCacheEnabled($projectData);
 $projectData['_requirementAnalyzerData'] = buildDataForRequirementAnalyzer($projectData);
+$projectData['oauth'] = buildOauthCredentials($deploymentDir);
 
 // Making dashboard a required service
 $projectData['_dashboardEndpoint'] = '';
@@ -992,4 +993,90 @@ function generatePasswords(array $users): string
 function getFrontendZoneByDomainLevel(string $host, int $level = 2): string
 {
     return implode('.', array_slice(explode('.', $host), -$level, $level, true));
+}
+
+/**
+ * @param string $deploymentDir
+ *
+ * @return string[]
+ */
+function buildOauthCredentials(string $deploymentDir): array
+{
+    $data = [];
+    $openSshKeys = generateOpenSshKeys($deploymentDir);
+
+    $data['privateKey'] = str_replace(PHP_EOL, '__LINE__', $openSshKeys['privateKey']);
+    $data['publicKey'] = str_replace(PHP_EOL, '__LINE__', $openSshKeys['publicKey']);
+    $data['encryptionKey'] = base64_encode(random_bytes(32));
+    $data['identifier'] = 'frontend';
+    $data['secret'] = 'abc123';
+    $data['token'] = generateToken();
+
+    return $data;
+}
+
+/**
+ * @param string $deploymentDir
+ *
+ * @return string[]
+ */
+function generateOpenSshKeys(string $deploymentDir): array
+{
+    $sshDir = $deploymentDir . DS . 'context' . DS . 'ssh';
+    mkdir($sshDir);
+
+    $generatePrivateKeyCommandTemplate = 'openssl genrsa -out %s 2048 >/dev/null 2>&1 || true';
+    $generatePublicKeyCommandTemplate = 'openssl rsa -in %s -pubout -out %s >/dev/null 2>&1 || true';
+
+    $privateKeyPath = $sshDir . DS .'dev_only_private.key';
+    $publicKeyPath = $sshDir . DS . 'dev_only_public.key';
+
+
+    exec(
+        sprintf($generatePrivateKeyCommandTemplate, $privateKeyPath),
+        $output,
+        $returnCode
+    );
+
+
+    if ($returnCode > 0) {
+        exit($returnCode);
+    }
+
+    exec(
+        sprintf($generatePublicKeyCommandTemplate, $privateKeyPath, $publicKeyPath),
+        $output,
+        $returnCode
+    );
+
+    if ($returnCode > 0) {
+        exit($returnCode);
+    }
+
+    $sshKeys =  [
+        'privateKey' => file_get_contents($privateKeyPath),
+        'publicKey' => file_get_contents($publicKeyPath),
+    ];
+
+    exec('rm -rf ' . $sshDir);
+
+    return $sshKeys;
+}
+
+/**
+ * @return string
+ */
+function generateToken(): string
+{
+    $replaceChars = [
+        '+',
+        '/',
+        '=',
+    ];
+    $tokenLength = 80;
+
+    $token = str_replace($replaceChars, '', base64_encode(random_bytes(80)));
+
+    return substr($token, 0, $tokenLength);
+
 }
