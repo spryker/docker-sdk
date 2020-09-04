@@ -1039,6 +1039,7 @@ function generateOpenSshKeys(string $deploymentDir): array
 
 
     if ($returnCode > 0) {
+        echo implode(PHP_EOL, $output);
         exit($returnCode);
     }
 
@@ -1049,6 +1050,7 @@ function generateOpenSshKeys(string $deploymentDir): array
     );
 
     if ($returnCode > 0) {
+        echo implode(PHP_EOL, $output);
         exit($returnCode);
     }
 
