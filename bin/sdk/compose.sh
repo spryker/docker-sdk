@@ -53,6 +53,7 @@ function Compose::exec() {
         -e APPLICATION_STORE="${SPRYKER_CURRENT_STORE}" \
         -e SPRYKER_CURRENT_REGION="${SPRYKER_CURRENT_REGION}" \
         -e SPRYKER_PIPELINE="${SPRYKER_PIPELINE}" \
+        -e SPRYKER_XDEBUG_MODE_ENABLE="${SPRYKER_XDEBUG_MODE_ENABLE}" \
         -e SPRYKER_XDEBUG_ENABLE_FOR_CLI="${SPRYKER_XDEBUG_ENABLE_FOR_CLI}" \
         -e SPRYKER_TESTING_ENABLE_FOR_CLI="${SPRYKER_TESTING_ENABLE_FOR_CLI}" \
         -e COMPOSER_AUTH="${COMPOSER_AUTH}" \
@@ -68,11 +69,14 @@ function Compose::verboseMode() {
     if [ -n "${SPRYKER_TESTING_ENABLE}" ]; then
         output+="  TESTING MODE  "
     fi
-    if [ -n "${SPRYKER_XDEBUG_ENABLE}" ]; then
+    if [ -n "${SPRYKER_XDEBUG_ENABLE}" ] && [ -n "${SPRYKER_XDEBUG_MODE_ENABLE}" ]; then
         output+="  DEBUGGING MODE  "
     fi
     if [ -n "${output}" ]; then
         Console::warn "-->${output}"
+    fi
+    if [ -n "${SPRYKER_XDEBUG_ENABLE}" ] && [ -z "${SPRYKER_XDEBUG_MODE_ENABLE}" ]; then
+        Console::error "Debugging is disabled in deploy.yml. Please, set ${INFO}deploy.yml: docker: debug: xdebug: enabled: true${WARN}, bootstrap and up to start debugging."
     fi
 }
 
