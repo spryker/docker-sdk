@@ -1007,7 +1007,7 @@ function buildOauthCredentials(string $deploymentDir): array
 
     $data['privateKey'] = str_replace(PHP_EOL, '__LINE__', $openSshKeys['privateKey']);
     $data['publicKey'] = str_replace(PHP_EOL, '__LINE__', $openSshKeys['publicKey']);
-    $data['encryptionKey'] = base64_encode(random_bytes(32));
+    $data['encryptionKey'] = generateToken(48);
     $data['identifier'] = 'frontend';
     $data['secret'] = 'abc123';
     $data['token'] = generateToken();
@@ -1025,12 +1025,11 @@ function generateOpenSshKeys(string $deploymentDir): array
     $sshDir = $deploymentDir . DS . 'context' . DS . 'ssh';
     mkdir($sshDir);
 
-    $generatePrivateKeyCommandTemplate = 'openssl genrsa -out %s 2048 >/dev/null 2>&1 || true';
-    $generatePublicKeyCommandTemplate = 'openssl rsa -in %s -pubout -out %s >/dev/null 2>&1 || true';
+    $generatePrivateKeyCommandTemplate = 'openssl genrsa -out %s 2048 2>&1';
+    $generatePublicKeyCommandTemplate = 'openssl rsa -in %s -pubout -out %s 2>&1';
 
-    $privateKeyPath = $sshDir . DS .'dev_only_private.key';
-    $publicKeyPath = $sshDir . DS . 'dev_only_public.key';
-
+    $privateKeyPath = $sshDir . DS .'private.key';
+    $publicKeyPath = $sshDir . DS . 'public.key';
 
     exec(
         sprintf($generatePrivateKeyCommandTemplate, $privateKeyPath),
@@ -1053,6 +1052,8 @@ function generateOpenSshKeys(string $deploymentDir): array
         exit($returnCode);
     }
 
+    verbose(implode(PHP_EOL, $output));
+
     $sshKeys =  [
         'privateKey' => file_get_contents($privateKeyPath),
         'publicKey' => file_get_contents($publicKeyPath),
@@ -1064,19 +1065,20 @@ function generateOpenSshKeys(string $deploymentDir): array
 }
 
 /**
+ * @param int $tokenLength
+ *
  * @return string
  */
-function generateToken(): string
+function generateToken($tokenLength = 80): string
 {
-    $replaceChars = [
-        '+',
-        '/',
-        '=',
-    ];
-    $tokenLength = 80;
+    $availableChars = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    $availableCharsLength = strlen($availableChars);
+    $token = '';
 
-    $token = str_replace($replaceChars, '', base64_encode(random_bytes(80)));
+    for($i = 0; $i < $tokenLength; $i++) {
+        $randomChar = $availableChars[mt_rand(0, $availableCharsLength - 1)];
+        $token .= $randomChar;
+    }
 
-    return substr($token, 0, $tokenLength);
-
+    return $token;
 }
