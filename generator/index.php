@@ -71,7 +71,7 @@ $projectData['storageData'] = retrieveStorageData($projectData);
 $projectData['composer']['autoload'] = buildComposerAutoloadConfig($projectData);
 $isAutoloadCacheEnabled = $projectData['_isAutoloadCacheEnabled'] = isAutoloadCacheEnabled($projectData);
 $projectData['_requirementAnalyzerData'] = buildDataForRequirementAnalyzer($projectData);
-$projectData['oauth'] = buildOauthCredentials($deploymentDir);
+$projectData['oauth'] = buildAuthCredentials($deploymentDir);
 
 // Making dashboard a required service
 $projectData['_dashboardEndpoint'] = '';
@@ -1000,7 +1000,7 @@ function getFrontendZoneByDomainLevel(string $host, int $level = 2): string
  *
  * @return string[]
  */
-function buildOauthCredentials(string $deploymentDir): array
+function buildAuthCredentials(string $deploymentDir): array
 {
     $data = [];
     $openSshKeys = generateOpenSshKeys($deploymentDir);
@@ -1009,8 +1009,8 @@ function buildOauthCredentials(string $deploymentDir): array
     $data['publicKey'] = str_replace(PHP_EOL, '__LINE__', $openSshKeys['publicKey']);
     $data['encryptionKey'] = generateToken(48);
     $data['identifier'] = 'frontend';
-    $data['secret'] = 'abc123';
-    $data['token'] = generateToken();
+    $data['secret'] = generateToken(48);
+    $data['token'] = generateToken(80);
 
     return $data;
 }
