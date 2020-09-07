@@ -56,6 +56,8 @@ $projectData['_defaultDeploymentDir'] = $defaultDeploymentDir;
 $projectData['tag'] = $projectData['tag'] ?? uniqid();
 $projectData['_platform'] = $platform;
 $mountMode = $projectData['_mountMode'] = retrieveMountMode($projectData, $platform);
+$projectData['_syncIgnore'] = buildSyncIgnore($deploymentDir);
+$projectData['_syncSessionName'] = preg_replace('/[^-a-zA-Z0-9]/', '-', $projectData['namespace'] . '-' . $projectData['tag'] . '-codebase');
 $projectData['_isDevelopment'] = $mountMode !== 'baked';
 $projectData['_fileMode'] = $mountMode === 'baked' ? 'baked' : 'mount';
 $projectData['_ports'] = retrieveUniquePorts($projectData);
@@ -627,6 +629,29 @@ function getStoreSpecific(array $projectData): array
     }
 
     return $storeSpecific;
+}
+
+/**
+ * @param string $deploymentDir
+ *
+ * @return string[]
+ */
+function buildSyncIgnore(string $deploymentDir): array
+{
+    $sourceFilePath = $deploymentDir . DS . '.dockersyncignore';
+
+    if (!file_exists($sourceFilePath)) {
+        return [];
+    }
+
+    $sourceContent = (string) file_get_contents($sourceFilePath);
+
+    $rules = array();
+    preg_match_all('/([^\n#]+)?.*$/im', $sourceContent, $rules);
+
+    return array_map(static function ($element) {
+        return addslashes(trim($element));
+    }, array_filter($rules[1]));
 }
 
 /**
