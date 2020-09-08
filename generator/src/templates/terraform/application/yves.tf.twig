@@ -11,3 +11,7 @@
     serviceData: project['services']['session'],
     serviceName: 'session'
 } %}
+{% include "terraform/mail/mail.tf.twig" with {
+    serviceData: regionData['services']['mail']
+} %}
+
