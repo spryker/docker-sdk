@@ -19,9 +19,10 @@ function importEnvFiles() {
         source "${HOME}/env/testing.env"
     fi
     # Alternatively we can copy env and source it again
-    SPRYKER_LOG_STDOUT=/tmp/stdout
-    SPRYKER_LOG_STDERR=/tmp/stderr
     set +a
+
+    export SPRYKER_LOG_STDOUT=/tmp/stdout
+    export SPRYKER_LOG_STDERR=/tmp/stderr
 }
 
 function printLogo() {
@@ -58,7 +59,7 @@ fi
 
 # --------------------------
 if [ -z "${COMMAND}" ]; then
-    bash
+    bash --norc
 else
-    bash -c "${COMMAND}"
+    bash --norc -c "${COMMAND}"
 fi
