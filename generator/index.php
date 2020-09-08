@@ -20,6 +20,12 @@ $loaders = new ChainLoader([
     new FilesystemLoader($deploymentDir),
 ]);
 $twig = new Environment($loaders);
+$nginxVarEncoder = new class() {
+    public function encode($value)
+    {
+        return str_replace([' ', '"', '{', '}'], ['\ ', '\"', '\{', '\}'], (string)$value);
+    }
+};
 $envVarEncoder = new class() {
     private $isActive = false;
 
@@ -41,6 +47,7 @@ $envVarEncoder = new class() {
     }
 };
 $twig->addFilter(new TwigFilter('env_var', [$envVarEncoder, 'encode'], ['is_safe' => ['all']]));
+$twig->addFilter(new TwigFilter('nginx_var', [$nginxVarEncoder, 'encode'], ['is_safe' => ['all']]));
 $twig->addFilter(new TwigFilter('normalize_endpoint', static function ($string) {
     return str_replace(['.', ':'], ['dot', '_'], $string);
 }, ['is_safe' => ['all']]));
