@@ -1,4 +1,4 @@
-version: "3.5"
+version: "3.7"
 
 services:
 {% for group in groups %}
@@ -12,9 +12,11 @@ services:
 {% endfor %}
 
   webdriver:
-    image: wernight/phantomjs:latest
+    image: blueimp/chromedriver
     networks:
       - public
+    init: true
+    tmpfs: /tmp
     labels:
       'spryker.app.name': webdriver
       'spryker.app.type': services
@@ -26,7 +28,7 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
-    command: "phantomjs --webdriver=4444 --ignore-ssl-errors=true --disk-cache=true --load-images=false --webdriver-loglevel=DEBUG"
+    command: [ "--port=4444", "--whitelisted-ips=", "--url-base=/wd/hub" ]
 
   scheduler:
     image: nginx:alpine
