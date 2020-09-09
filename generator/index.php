@@ -1,5 +1,6 @@
 <?php
 
+use Spatie\Url\Url;
 use Symfony\Component\Yaml\Parser;
 use Twig\Environment;
 use Twig\Loader\ChainLoader;
@@ -90,7 +91,7 @@ if (!empty($projectData['services']['dashboard'])) {
     reset($projectData['services']['dashboard']['endpoints']);
     $projectData['_dashboardEndpoint'] = sprintf(
         '%s://%s',
-        ($projectData['docker']['ssl']['enabled'] ?? false) ? 'https' : 'http',
+        getCurrentScheme($projectData),
         key($projectData['services']['dashboard']['endpoints'])
     );
 }
@@ -141,6 +142,25 @@ foreach ($projectData['groups'] ?? [] as $groupName => $groupData) {
                     };
                 }
             }
+
+            if (array_key_exists('redirect', $endpointData)) {
+                if ($application !== 'static') {
+                    warn('`redirect` attribute is allowed for `static` application only');
+                }
+
+                $redirect = $endpointData['redirect'];
+
+                if (!is_array($redirect)) {
+                    $projectData['groups'][$groupName]['applications'][$applicationName]['endpoints'][$endpoint]['redirect']
+                        = $redirect
+                        = [
+                            'url' => $redirect,
+                        ];
+                }
+
+                $projectData['groups'][$groupName]['applications'][$applicationName]['endpoints'][$endpoint]['redirect']['url']
+                    = ensureUrlScheme($redirect['url'], $projectData);
+            }
         }
     }
 }
@@ -187,8 +207,7 @@ foreach ($projectData['groups'] ?? [] as $groupName => $groupData) {
                 'name' => $applicationName,
                 'endpoints' => array_map(
                     static function ($endpoint) use ($projectData) {
-                        return sprintf('%s://%s', $projectData['docker']['ssl']['enabled'] ?? false ? 'https' : 'http',
-                            $endpoint);
+                        return sprintf('%s://%s', getCurrentScheme($projectData), $endpoint);
                     },
                     array_keys($httpEndpoints)
                 )
@@ -305,8 +324,7 @@ foreach ($projectData['services'] ?? [] as $serviceName => $serviceData) {
             'name' => $serviceName,
             'endpoints' => array_map(
                 static function ($endpoint) use ($projectData) {
-                    return sprintf('%s://%s', $projectData['docker']['ssl']['enabled'] ?? false ? 'https' : 'http',
-                        $endpoint);
+                    return sprintf('%s://%s', getCurrentScheme($projectData), $endpoint);
                 },
                 array_keys($httpEndpoints)
             )
@@ -856,6 +874,11 @@ function verbose($output)
     }
 }
 
+function warn($output)
+{
+    echo $output . PHP_EOL;
+}
+
 /**
  * @param array $services
  * @param string $engine
@@ -1024,4 +1047,31 @@ function generatePasswords(array $users): string
 function getFrontendZoneByDomainLevel(string $host, int $level = 2): string
 {
     return implode('.', array_slice(explode('.', $host), -$level, $level, true));
+}
+
+/**
+ * @param $projectData
+ *
+ * @return string
+ */
+function getCurrentScheme($projectData): string
+{
+    return ($projectData['docker']['ssl']['enabled'] ?? false) ? 'https' : 'http';
+}
+
+/**
+ * @param string $urlString
+ * @param array $projectData
+ *
+ * @return string
+ */
+function ensureUrlScheme(string $urlString, array $projectData): string
+{
+    $url = Url::fromString($urlString);
+
+    if ($url->getScheme() === '') {
+        return (string)$url->withScheme(getCurrentScheme($projectData));
+    }
+
+    return $urlString;
 }
