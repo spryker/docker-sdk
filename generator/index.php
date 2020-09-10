@@ -88,7 +88,7 @@ $projectData['storageData'] = retrieveStorageData($projectData);
 $projectData['composer']['autoload'] = buildComposerAutoloadConfig($projectData);
 $isAutoloadCacheEnabled = $projectData['_isAutoloadCacheEnabled'] = isAutoloadCacheEnabled($projectData);
 $projectData['_requirementAnalyzerData'] = buildDataForRequirementAnalyzer($projectData);
-$projectData['oauth'] = buildAuthCredentials($deploymentDir);
+$projectData['secrets'] = buildSecrets($deploymentDir);
 
 // Making dashboard a required service
 $projectData['_dashboardEndpoint'] = '';
@@ -1095,17 +1095,17 @@ function ensureUrlScheme(string $urlString, array $projectData): string
  *
  * @return string[]
  */
-function buildAuthCredentials(string $deploymentDir): array
+function buildSecrets(string $deploymentDir): array
 {
     $data = [];
     $openSshKeys = generateOpenSshKeys($deploymentDir);
 
-    $data['privateKey'] = str_replace(PHP_EOL, '__LINE__', $openSshKeys['privateKey']);
-    $data['publicKey'] = str_replace(PHP_EOL, '__LINE__', $openSshKeys['publicKey']);
-    $data['encryptionKey'] = generateToken(48);
-    $data['identifier'] = 'frontend';
-    $data['secret'] = generateToken(48);
-    $data['token'] = generateToken(80);
+    $data['SPRYKER_OAUTH_KEY_PRIVATE'] = str_replace(PHP_EOL, '__LINE__', $openSshKeys['privateKey']);
+    $data['SPRYKER_OAUTH_KEY_PUBLIC'] = str_replace(PHP_EOL, '__LINE__', $openSshKeys['publicKey']);
+    $data['SPRYKER_OAUTH_ENCRYPTION_KEY'] = generateToken(48);
+    $data['SPRYKER_OAUTH_CLIENT_IDENTIFIER'] = 'frontend';
+    $data['SPRYKER_OAUTH_CLIENT_SECRET'] = generateToken(48);
+    $data['SPRYKER_ZED_REQUEST_TOKEN'] = generateToken(80);
 
     return $data;
 }
