@@ -1,6 +1,6 @@
 # syntax = docker/dockerfile:experimental
 ARG SPRYKER_PARENT_IMAGE
-FROM ${SPRYKER_PARENT_IMAGE}
+FROM ${SPRYKER_PARENT_IMAGE} AS cli-debug
 
 USER root
 # Make self-signed certificate to be trusted locally

@@ -98,7 +98,10 @@ services:
 {% endif %}
 {% endfor %}
     environment:
+      SPRYKER_XDEBUG_MODE_ENABLE: ${SPRYKER_XDEBUG_MODE_ENABLE}
+{% if docker['debug']['xdebug']['enabled'] is not defined or docker['debug']['xdebug']['enabled'] == true %}
       SPRYKER_XDEBUG_ENABLE: ${SPRYKER_XDEBUG_ENABLE}
+{% endif %}
     labels:
       'spryker.app.name': gateway
       'spryker.app.type': proxy

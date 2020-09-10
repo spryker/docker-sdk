@@ -39,7 +39,9 @@ function setPrompt() {
     local status=""
     status+="${YELLOW}Store${NC}: ${GREEN}${APPLICATION_STORE}${NC}"
     status+=" | ${YELLOW}Env${NC}: ${GREEN}${APPLICATION_ENV}${NC}"
-    status+=" | ${PLUM}Debug${NC}: ($([ -n "${SPRYKER_XDEBUG_ENABLE_FOR_CLI}" ] && echo "${GREEN}X" || echo "${DGRAY}.")${NC})"
+    if [ -n "${SPRYKER_XDEBUG_MODE_ENABLE}" ]; then
+        status+=" | ${PLUM}Debug${NC}: ($([ -n "${SPRYKER_XDEBUG_ENABLE_FOR_CLI}" ] && echo "${GREEN}X" || echo "${DGRAY}.")${NC})"
+    fi
     status+=" | ${PLUM}Testing${NC}: ($([ -n "${SPRYKER_TESTING_ENABLE_FOR_CLI}" ] && echo "${GREEN}X" || echo "${DGRAY}.")${NC})"
 
     export PS1="╭─${CYAN}\w${NC} | ${status}\n╰─$ "
@@ -53,7 +55,7 @@ setPrompt
 
 popd >/dev/null
 
-if [ -n "${SPRYKER_XDEBUG_ENABLE_FOR_CLI}" ]; then
+if [ -n "${SPRYKER_XDEBUG_ENABLE_FOR_CLI}" ] && [ -n "${SPRYKER_XDEBUG_MODE_ENABLE}" ]; then
     export PHP_INI_SCAN_DIR=:/usr/local/etc/php/debug.conf.d
 fi
 
