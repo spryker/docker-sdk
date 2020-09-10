@@ -24,6 +24,8 @@ function Images::_prepareSecrets() {
 }
 
 function Images::_buildApp() {
+
+    local -a sshArgument=()
     local folder=${1}
     local baseAppImage="${SPRYKER_DOCKER_PREFIX}_base_app:${SPRYKER_DOCKER_TAG}"
     local appImage="${SPRYKER_DOCKER_PREFIX}_app:${SPRYKER_DOCKER_TAG}"
@@ -31,6 +33,10 @@ function Images::_buildApp() {
     local baseCliImage="${SPRYKER_DOCKER_PREFIX}_base_cli:${SPRYKER_DOCKER_TAG}"
     local cliImage="${SPRYKER_DOCKER_PREFIX}_cli:${SPRYKER_DOCKER_TAG}"
     local runtimeCliImage="${SPRYKER_DOCKER_PREFIX}_run_cli:${SPRYKER_DOCKER_TAG}"
+
+    if [ -n "${SSH_AUTH_SOCK_IN_CLI}" ]; then
+        sshArgument=('--ssh' 'default')
+    fi
 
     Images::_prepareSecrets
     Registry::Trap::addExitHook 'removeBuildSecrets' "rm -f ${SECRETS_FILE_PATH}"
@@ -55,7 +61,7 @@ function Images::_buildApp() {
         -t "${appImage}" \
         -t "${runtimeImage}" \
         -f "${DEPLOYMENT_PATH}/images/${folder}/application/Dockerfile" \
-        --ssh default \
+        "${sshArgument[@]}" \
         --secret "id=secrets-env,src=$SECRETS_FILE_PATH" \
         --progress="${PROGRESS_TYPE}" \
         --build-arg "SPRYKER_PARENT_IMAGE=${baseAppImage}" \
@@ -94,7 +100,7 @@ function Images::_buildApp() {
         -t "${cliImage}" \
         -t "${runtimeCliImage}" \
         -f "${DEPLOYMENT_PATH}/images/${folder}/cli/Dockerfile" \
-        --ssh default \
+        "${sshArgument[@]}" \
         --secret "id=secrets-env,src=$SECRETS_FILE_PATH" \
         --progress="${PROGRESS_TYPE}" \
         --build-arg "SPRYKER_PARENT_IMAGE=${baseCliImage}" \

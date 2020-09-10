@@ -18,7 +18,7 @@ services:
 {%  if _platform == 'macos' %}
       - /run/host-services/ssh-auth.sock:/tmp/ssh-relay/input-ssh-auth.sock
 {% else %}
-      - ${SSH_AUTH_SOCK_FOR_CLI}:/tmp/ssh-relay/input-ssh-auth.sock
+      - ${SSH_AUTH_SOCK_ON_HOST}:/tmp/ssh-relay/input-ssh-auth.sock
 {% endif %}
 
   cli:
