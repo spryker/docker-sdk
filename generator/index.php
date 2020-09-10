@@ -27,6 +27,12 @@ $nginxVarEncoder = new class() {
         return str_replace([' ', '"', '{', '}'], ['\ ', '\"', '\{', '\}'], (string)$value);
     }
 };
+$tfVarEncoder = new class() {
+    public function encode($value)
+    {
+        return json_encode((string)$value);
+    }
+};
 $envVarEncoder = new class() {
     private $isActive = false;
 
@@ -47,6 +53,7 @@ $envVarEncoder = new class() {
         $this->isActive = $isActive;
     }
 };
+$twig->addFilter(new TwigFilter('tf_var', [$tfVarEncoder, 'encode'], ['is_safe' => ['all']]));
 $twig->addFilter(new TwigFilter('env_var', [$envVarEncoder, 'encode'], ['is_safe' => ['all']]));
 $twig->addFilter(new TwigFilter('nginx_var', [$nginxVarEncoder, 'encode'], ['is_safe' => ['all']]));
 $twig->addFilter(new TwigFilter('normalize_endpoint', static function ($string) {
@@ -377,6 +384,12 @@ file_put_contents(
     ])
 );
 $envVarEncoder->setIsActive(false);
+file_put_contents(
+    $deploymentDir . DS . 'terraform/secrets.sdk.auto.tfvars',
+    $twig->render('terraform/secrets.sdk.auto.tfvars.twig', [
+        'project' => $projectData,
+    ])
+);
 file_put_contents(
     $deploymentDir . DS . 'terraform/frontend.json',
     json_encode($frontend, JSON_PRETTY_PRINT)
