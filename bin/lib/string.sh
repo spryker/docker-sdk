@@ -1,7 +1,7 @@
 #!/bin/bash
 
 function String::trimWhitespaces() {
-    echo "${*}" | tr -d " /n/r"
+    echo -n "${*}" | tr -d " /n/r"
 }
 
 function String::removeColors() {

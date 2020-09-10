@@ -12,5 +12,12 @@
 
         fastcgi_param SPRYKER_API_HOST "{{ host }}";
         fastcgi_param SPRYKER_API_PORT "{{ externalPort }}";
-        fastcgi_param SPRYKER_GLUE_APPLICATION_CORS_ALLOW_ORIGIN "*";
+        fastcgi_param SPRYKER_GLUE_APPLICATION_CORS_ALLOW_ORIGIN "{{ endpointData['cors-allow-origin'] | default('') | nginx_var }}";
+
+{% if storeServices['mail']['sender']['email'] is not empty %}
+        fastcgi_param SPRYKER_MAIL_SENDER_EMAIL "{{ storeServices['mail']['sender']['email'] }}";
+{% endif %}
+{% if storeServices['mail']['sender']['name'] is not empty %}
+        fastcgi_param SPRYKER_MAIL_SENDER_NAME "{{ storeServices['mail']['sender']['name'] }}";
+{% endif %}
 {% endblock location %}

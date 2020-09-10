@@ -1,5 +1,6 @@
 <?php
 
+use Spatie\Url\Url;
 use Symfony\Component\Yaml\Parser;
 use Twig\Environment;
 use Twig\Loader\ChainLoader;
@@ -20,6 +21,12 @@ $loaders = new ChainLoader([
     new FilesystemLoader($deploymentDir),
 ]);
 $twig = new Environment($loaders);
+$nginxVarEncoder = new class() {
+    public function encode($value)
+    {
+        return str_replace([' ', '"', '{', '}'], ['\ ', '\"', '\{', '\}'], (string)$value);
+    }
+};
 $envVarEncoder = new class() {
     private $isActive = false;
 
@@ -41,6 +48,7 @@ $envVarEncoder = new class() {
     }
 };
 $twig->addFilter(new TwigFilter('env_var', [$envVarEncoder, 'encode'], ['is_safe' => ['all']]));
+$twig->addFilter(new TwigFilter('nginx_var', [$nginxVarEncoder, 'encode'], ['is_safe' => ['all']]));
 $twig->addFilter(new TwigFilter('normalize_endpoint', static function ($string) {
     return str_replace(['.', ':'], ['dot', '_'], $string);
 }, ['is_safe' => ['all']]));
@@ -56,6 +64,8 @@ $projectData['_defaultDeploymentDir'] = $defaultDeploymentDir;
 $projectData['tag'] = $projectData['tag'] ?? uniqid();
 $projectData['_platform'] = $platform;
 $mountMode = $projectData['_mountMode'] = retrieveMountMode($projectData, $platform);
+$projectData['_syncIgnore'] = buildSyncIgnore($deploymentDir);
+$projectData['_syncSessionName'] = preg_replace('/[^-a-zA-Z0-9]/', '-', $projectData['namespace'] . '-' . $projectData['tag'] . '-codebase');
 $projectData['_isDevelopment'] = $mountMode !== 'baked';
 $projectData['_fileMode'] = $mountMode === 'baked' ? 'baked' : 'mount';
 $projectData['_ports'] = retrieveUniquePorts($projectData);
@@ -81,7 +91,7 @@ if (!empty($projectData['services']['dashboard'])) {
     reset($projectData['services']['dashboard']['endpoints']);
     $projectData['_dashboardEndpoint'] = sprintf(
         '%s://%s',
-        ($projectData['docker']['ssl']['enabled'] ?? false) ? 'https' : 'http',
+        getCurrentScheme($projectData),
         key($projectData['services']['dashboard']['endpoints'])
     );
 }
@@ -132,6 +142,25 @@ foreach ($projectData['groups'] ?? [] as $groupName => $groupData) {
                     };
                 }
             }
+
+            if (array_key_exists('redirect', $endpointData)) {
+                if ($application !== 'static') {
+                    warn('`redirect` attribute is allowed for `static` application only');
+                }
+
+                $redirect = $endpointData['redirect'];
+
+                if (!is_array($redirect)) {
+                    $projectData['groups'][$groupName]['applications'][$applicationName]['endpoints'][$endpoint]['redirect']
+                        = $redirect
+                        = [
+                            'url' => $redirect,
+                        ];
+                }
+
+                $projectData['groups'][$groupName]['applications'][$applicationName]['endpoints'][$endpoint]['redirect']['url']
+                    = ensureUrlScheme($redirect['url'], $projectData);
+            }
         }
     }
 }
@@ -178,8 +207,7 @@ foreach ($projectData['groups'] ?? [] as $groupName => $groupData) {
                 'name' => $applicationName,
                 'endpoints' => array_map(
                     static function ($endpoint) use ($projectData) {
-                        return sprintf('%s://%s', $projectData['docker']['ssl']['enabled'] ?? false ? 'https' : 'http',
-                            $endpoint);
+                        return sprintf('%s://%s', getCurrentScheme($projectData), $endpoint);
                     },
                     array_keys($httpEndpoints)
                 )
@@ -296,8 +324,7 @@ foreach ($projectData['services'] ?? [] as $serviceName => $serviceData) {
             'name' => $serviceName,
             'endpoints' => array_map(
                 static function ($endpoint) use ($projectData) {
-                    return sprintf('%s://%s', $projectData['docker']['ssl']['enabled'] ?? false ? 'https' : 'http',
-                        $endpoint);
+                    return sprintf('%s://%s', getCurrentScheme($projectData), $endpoint);
                 },
                 array_keys($httpEndpoints)
             )
@@ -632,6 +659,29 @@ function getStoreSpecific(array $projectData): array
 /**
  * @param string $deploymentDir
  *
+ * @return string[]
+ */
+function buildSyncIgnore(string $deploymentDir): array
+{
+    $sourceFilePath = $deploymentDir . DS . '.dockersyncignore';
+
+    if (!file_exists($sourceFilePath)) {
+        return [];
+    }
+
+    $sourceContent = (string) file_get_contents($sourceFilePath);
+
+    $rules = array();
+    preg_match_all('/([^\n#]+)?.*$/im', $sourceContent, $rules);
+
+    return array_map(static function ($element) {
+        return addslashes(trim($element));
+    }, array_filter($rules[1]));
+}
+
+/**
+ * @param string $deploymentDir
+ *
  * @return string
  */
 function buildKnownHosts(string $deploymentDir): string
@@ -824,6 +874,11 @@ function verbose($output)
     }
 }
 
+function warn($output)
+{
+    echo $output . PHP_EOL;
+}
+
 /**
  * @param array $services
  * @param string $engine
@@ -992,4 +1047,31 @@ function generatePasswords(array $users): string
 function getFrontendZoneByDomainLevel(string $host, int $level = 2): string
 {
     return implode('.', array_slice(explode('.', $host), -$level, $level, true));
+}
+
+/**
+ * @param $projectData
+ *
+ * @return string
+ */
+function getCurrentScheme($projectData): string
+{
+    return ($projectData['docker']['ssl']['enabled'] ?? false) ? 'https' : 'http';
+}
+
+/**
+ * @param string $urlString
+ * @param array $projectData
+ *
+ * @return string
+ */
+function ensureUrlScheme(string $urlString, array $projectData): string
+{
+    $url = Url::fromString($urlString);
+
+    if ($url->getScheme() === '') {
+        return (string)$url->withScheme(getCurrentScheme($projectData));
+    }
+
+    return $urlString;
 }

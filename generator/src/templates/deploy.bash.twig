@@ -5,6 +5,9 @@ set -e
 
 SELF_SCRIPT=${SELF_SCRIPT:-$0}
 
+# Overridable
+DOCKER_COMPOSE_SUBSTITUTE='docker-compose'
+
 pushd "${BASH_SOURCE%/*}" >/dev/null
 . ./bin/framework.sh
 popd >/dev/null
@@ -117,8 +120,11 @@ readonly SPRYKER_LOG_DIRECTORY="{{ docker['logs']['path'] | default('/var/log/sp
 readonly SPRYKER_ASSETS_MODE="{{ assets['mode'] | default('development') }}"
 readonly SPRYKER_DB_ENGINE="{{ services['database']['engine'] == 'mysql' ? 'mysql' : 'pgsql' }}"
 readonly SPRYKER_STORES=({{ regions | map((regionData, region) => "'local REGION=" ~ '"' ~ region ~ '"' ~ "; local STORES=(" ~ (regionData['stores'] | keys | join(' ')) ~ ")'") | join(' ') | raw }})
-readonly SPRYKER_DEFAULT_STORE={{ (regions | first)['stores'] | keys | first }}
+readonly SPRYKER_DEFAULT_STORE="{{ (regions | first)['stores'] | keys | first }}"
 readonly SPRYKER_FILE_MODE="{{ _fileMode }}"
+readonly SPRYKER_XDEBUG_MODE_ENABLE="{{ docker['debug']['xdebug']['enabled'] is not defined or docker['debug']['xdebug']['enabled'] == true ? '1' : '' }}"
+readonly SPRYKER_SYNC_SESSION_NAME="{{ _syncSessionName }}"
+readonly SPRYKER_SYNC_VOLUME="${SPRYKER_DOCKER_PREFIX}_${SPRYKER_DOCKER_TAG}_data_sync"
 readonly DOCKER_COMPOSE_FILES_EXTRA="{{ docker['compose']['yamls'] | default([]) | join(' ') }}"
 readonly SPRYKER_DASHBOARD_ENDPOINT="{{ _dashboardEndpoint }}"
 readonly KNOWN_HOSTS="{{ _knownHosts | default("") }}"
@@ -188,6 +194,7 @@ export SSH_AUTH_SOCK
 export COMPOSE_PROJECT_NAME
 export SPRYKER_DOCKER_PREFIX
 export SPRYKER_DOCKER_TAG
+export SPRYKER_XDEBUG_MODE_ENABLE
 export SPRYKER_XDEBUG_ENABLE
 export SPRYKER_LOG_DIRECTORY
 export SPRYKER_BUILD_HASH
