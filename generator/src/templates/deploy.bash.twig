@@ -5,6 +5,9 @@ set -e
 
 SELF_SCRIPT=${SELF_SCRIPT:-$0}
 
+# Overridable
+DOCKER_COMPOSE_SUBSTITUTE='docker-compose'
+
 pushd "${BASH_SOURCE%/*}" >/dev/null
 . ./bin/framework.sh
 popd >/dev/null
@@ -119,6 +122,8 @@ readonly SPRYKER_STORES=({{ regions | map((regionData, region) => "'local REGION
 readonly SPRYKER_DEFAULT_STORE="{{ (regions | first)['stores'] | keys | first }}"
 readonly SPRYKER_FILE_MODE="{{ _fileMode }}"
 readonly SPRYKER_XDEBUG_MODE_ENABLE="{{ docker['debug']['xdebug']['enabled'] is not defined or docker['debug']['xdebug']['enabled'] == true ? '1' : '' }}"
+readonly SPRYKER_SYNC_SESSION_NAME="{{ _syncSessionName }}"
+readonly SPRYKER_SYNC_VOLUME="${SPRYKER_DOCKER_PREFIX}_${SPRYKER_DOCKER_TAG}_data_sync"
 readonly DOCKER_COMPOSE_FILES_EXTRA="{{ docker['compose']['yamls'] | default([]) | join(' ') }}"
 readonly SPRYKER_DASHBOARD_ENDPOINT="{{ _dashboardEndpoint }}"
 readonly KNOWN_HOSTS="{{ _knownHosts | default("") }}"

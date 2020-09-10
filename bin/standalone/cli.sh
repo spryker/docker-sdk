@@ -61,7 +61,7 @@ fi
 
 # --------------------------
 if [ -z "${COMMAND}" ]; then
-    bash
+    bash --norc
 else
-    bash -c "${COMMAND}"
+    bash --norc -c "${COMMAND}"
 fi
