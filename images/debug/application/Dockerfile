@@ -1,6 +1,6 @@
 # syntax = docker/dockerfile:experimental
 ARG SPRYKER_PARENT_IMAGE
-FROM ${SPRYKER_PARENT_IMAGE}
+FROM ${SPRYKER_PARENT_IMAGE} AS application-debug
 
 RUN --mount=type=cache,id=aptlib,sharing=locked,target=/var/lib/apt \
     --mount=type=cache,id=aptcache,sharing=locked,target=/var/cache/apt \

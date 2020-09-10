@@ -21,3 +21,6 @@
     serviceName: 'broker',
     brokerConnections: brokerConnections
 } %}
+{% include "terraform/mail/mail.tf.twig" with {
+    serviceData: regionData['services']['mail']
+} %}

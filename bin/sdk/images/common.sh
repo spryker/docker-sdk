@@ -60,12 +60,14 @@ function Images::_buildApp() {
         --build-arg "SPRYKER_BUILD_STAMP=${SPRYKER_BUILD_STAMP:-""}" \
         . 1>&2
 
-    docker build \
-        -t "${runtimeImage}" \
-        -f "${DEPLOYMENT_PATH}/images/debug/application/Dockerfile" \
-        --progress="${PROGRESS_TYPE}" \
-        --build-arg "SPRYKER_PARENT_IMAGE=${appImage}" \
-        "${DEPLOYMENT_PATH}/context" 1>&2
+    if [ -n "${SPRYKER_XDEBUG_MODE_ENABLE}" ]; then
+        docker build \
+            -t "${runtimeImage}" \
+            -f "${DEPLOYMENT_PATH}/images/debug/application/Dockerfile" \
+            --progress="${PROGRESS_TYPE}" \
+            --build-arg "SPRYKER_PARENT_IMAGE=${appImage}" \
+            "${DEPLOYMENT_PATH}/context" 1>&2
+    fi
 }
 
 function Images::_buildCli() {
@@ -99,18 +101,20 @@ function Images::_buildCli() {
         --build-arg "SPRYKER_BUILD_STAMP=${SPRYKER_BUILD_STAMP:-""}" \
         .  1>&2
 
-    docker build \
-        -t "${runtimeCliImage}" \
-        -f "${DEPLOYMENT_PATH}/images/debug/cli/Dockerfile" \
-        --progress="${PROGRESS_TYPE}" \
-        --build-arg "SPRYKER_PARENT_IMAGE=${cliImage}" \
-        "${DEPLOYMENT_PATH}/context" 1>&2
+    if [ -n "${SPRYKER_XDEBUG_MODE_ENABLE}" ]; then
+        docker build \
+            -t "${runtimeCliImage}" \
+            -f "${DEPLOYMENT_PATH}/images/debug/cli/Dockerfile" \
+            --progress="${PROGRESS_TYPE}" \
+            --build-arg "SPRYKER_PARENT_IMAGE=${cliImage}" \
+            "${DEPLOYMENT_PATH}/context" 1>&2
+    fi
 }
 
 function Images::_buildFrontend() {
     local folder=${1}
     local cliImage="${SPRYKER_DOCKER_PREFIX}_cli:${SPRYKER_DOCKER_TAG}"
-    local builderAssetsImage=$(Assets::getImageTag)
+    local builderAssetsImage="$(Assets::getImageTag)"
     local baseFrontendImage="${SPRYKER_DOCKER_PREFIX}_base_frontend:${SPRYKER_DOCKER_TAG}"
     local frontendImage="${SPRYKER_DOCKER_PREFIX}_frontend:${SPRYKER_DOCKER_TAG}"
     local runtimeFrontendImage="${SPRYKER_DOCKER_PREFIX}_run_frontend:${SPRYKER_DOCKER_TAG}"
@@ -135,12 +139,14 @@ function Images::_buildFrontend() {
         --build-arg "SPRYKER_ASSETS_BUILDER_IMAGE=${builderAssetsImage}" \
         "${DEPLOYMENT_PATH}/context" 1>&2
 
-    docker build \
-        -t "${runtimeFrontendImage}" \
-        -f "${DEPLOYMENT_PATH}/images/debug/frontend/Dockerfile" \
-        --progress="${PROGRESS_TYPE}" \
-        --build-arg "SPRYKER_PARENT_IMAGE=${frontendImage}" \
-        "${DEPLOYMENT_PATH}/context" 1>&2
+    if [ -n "${SPRYKER_XDEBUG_MODE_ENABLE}" ]; then
+        docker build \
+            -t "${runtimeFrontendImage}" \
+            -f "${DEPLOYMENT_PATH}/images/debug/frontend/Dockerfile" \
+            --progress="${PROGRESS_TYPE}" \
+            --build-arg "SPRYKER_PARENT_IMAGE=${frontendImage}" \
+            "${DEPLOYMENT_PATH}/context" 1>&2
+    fi
 }
 
 function Images::_buildGateway() {
@@ -159,7 +165,7 @@ function Images::_tagByApp() {
     local applicationName=$1
     local imageName=$2
     local baseImageName=${3:-${imageName}}
-    local applicationPrefix=$(echo "$applicationName" | tr '[:upper:]' '[:lower:]')
+    local applicationPrefix="$(echo "$applicationName" | tr '[:upper:]' '[:lower:]')"
     local tag="${imageName}-${applicationPrefix}"
 
     docker tag "${baseImageName}" "${tag}"

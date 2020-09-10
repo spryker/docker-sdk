@@ -11,7 +11,7 @@ function sync() {
     case "${command}" in
         create)
             Console::verbose "${INFO}Creating 'data-sync' volume${NC}"
-            docker volume create --name="${syncVolume}"
+            docker volume create --name="${syncVolume}" >/dev/null
             ;;
 
         recreate)
