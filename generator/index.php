@@ -30,7 +30,7 @@ $nginxVarEncoder = new class() {
 $tfVarEncoder = new class() {
     public function encode($value)
     {
-        return json_encode((string)$value);
+        return json_encode((string)$value, JSON_UNESCAPED_SLASHES);
     }
 };
 $envVarEncoder = new class() {
