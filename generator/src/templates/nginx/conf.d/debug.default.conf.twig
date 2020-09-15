@@ -1,6 +1,7 @@
 {% for groupData in groups %}
 {% for applicationName, applicationData in groupData['applications'] %}
 {% for endpoint, endpointData in applicationData['endpoints'] %}
+{% if applicationData['application'] != 'static' %}
 {% set zedEndpoint = _endpointMap[endpointData['store']]['zed'] | default('') %}
 {% include "nginx/http/#{applicationData['application']}.server.conf.twig" with {
     portToListen: _endpointDebugMap[endpoint],
@@ -13,6 +14,7 @@
     timeout: '60m',
     project: _context
 } %}
+{% endif %}
 {% endfor %}
 {% endfor %}
 {% endfor %}
