@@ -9,8 +9,6 @@ language: minimal
 env:
    global:
      - PROGRESS_TYPE=plain
-     - SPRYKER_PHP_VERSION=7.3
-     - SPRYKER_DB_ENGINE=PGSQL
 
 cache:
   timeout: 60
@@ -64,8 +62,6 @@ matrix:
         - chmod +x ci/check_bash_syntax.sh
         - ./ci/check_bash_syntax.sh
     - name: Docker / B2C Demoshop / PHP-7.3 Alpine / MariaDB / Functional
-      git:
-        clone: false
       env:
         - SPRYKER_PLATFORM_IMAGE=spryker/php:7.3-alpine3.12
         - TRAVIS=1
@@ -75,11 +71,10 @@ matrix:
         - PROJECT=suite
         - POSTGRES_PORT="5433"
       script:
-        - git clone --depth=3 --branch=master https://github.com/spryker-shop/b2c-demo-shop.git spryker-shop/b2c-demo-shop
-        - cd spryker-shop/b2c-demo-shop && git clone https://github.com/spryker/docker-sdk.git ./docker
-        - docker/sdk boot deploy.ci.functional.mariadb.yml -v
-        - docker/sdk up -t -v
-        - docker/sdk testing codecept run -c codeception.ci.functional.yml
+        - cd ../ && git clone --depth=3 --branch=master https://github.com/spryker-shop/b2c-demo-shop.git b2c-demo-shop && mv docker-sdk b2c-demo-shop
+        - docker-sdk/sdk boot deploy.ci.functional.mariadb.yml -v
+        - docker-sdk/sdk up -t -v
+        - docker-sdk/sdk testing codecept run -c codeception.ci.functional.yml
       before_script: skip
       after_script: skip
 
