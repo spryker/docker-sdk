@@ -4,16 +4,25 @@ os:
   - linux
 language: minimal
 
+git:
+  clone: false
+
 env:
   global:
-    - PROGRESS_TYPE=plain
-    - SPRYKER_PHP_VERSION=7.3
-    - SPRYKER_DB_ENGINE=PGSQL
+    - APPLICATION_ENV=ci.pgsql
+    - SPRYKER_TESTING_ENABLED=1
+    - APPLICATION_STORE=DE
+    - PROJECT=suite
+    - POSTGRES_PORT="5433"
 
 cache:
   timeout: 60
 
 addons:
+  hosts:
+    - yves.de.spryker.local
+    - zed.de.spryker.local
+    - glue.de.spryker.local
   apt:
     packages:
       - apache2-utils
@@ -41,22 +50,56 @@ matrix:
       env: DEV_MODE=0
       script:
         - chmod +x ci/check_boot.sh
-        - ./ci/check_boot.sh
+        - ./docker/ci/check_boot.sh
+      before_install:
+        - git clone --depth=3 --branch=master https://github.com/spryker/docker-sdk.git ./docker
+      before_script: skip
+      after_script: skip
     - name: Dev boot test
       env: DEV_MODE=1
       script:
         - chmod +x ci/check_boot.sh
-        - ./ci/check_boot.sh
+        - ./docker/ci/check_boot.sh
+      before_install:
+        - git clone --depth=3 --branch=master https://github.com/spryker/docker-sdk.git ./docker
+      before_script: skip
+      after_script: skip
     - name: Demo Bash syntax check
       env: DEV_MODE=0
       script:
         - chmod +x ci/check_bash_syntax.sh
-        - ./ci/check_bash_syntax.sh
+        - ./docker/ci/check_bash_syntax.sh
+      before_install:
+        - git clone --depth=3 --branch=master https://github.com/spryker/docker-sdk.git ./docker
+      before_script: skip
+      after_script: skip
     - name: Demo Bash syntax check
       env: DEV_MODE=1
       script:
         - chmod +x ci/check_bash_syntax.sh
-        - ./ci/check_bash_syntax.sh
+        - ./docker/ci/check_bash_syntax.sh
+      before_install:
+        - git clone --depth=3 --branch=master https://github.com/spryker/docker-sdk.git ./docker
+      before_script: skip
+      after_script: skip
+    - name: Docker / B2C Demoshop / PHP:7.3 Alpine / MariaDB / Functional
+      os: linux
+      dist: bionic
+      language: shell
+      env:
+        - PROGRESS_TYPE=plain
+        - SPRYKER_PLATFORM_IMAGE=spryker/php:7.3-alpine3.12
+        - TRAVIS=1
+      script:
+        - git clone --depth=3 --branch=master https://github.com/spryker-shop/b2b-demo-shop.git spryker-shop/b2b-demo-shop
+        - cd spryker-shop/b2b-demo-shop && git clone https://github.com/spryker/docker-sdk.git --single-branch --branch master ./docker
+        - docker/sdk boot deploy.ci.functional.mariadb.yml -v
+        - docker/sdk up -t -v
+        - docker/sdk testing codecept run -c codeception.ci.functional.yml
+      before_install: skip
+      before_script: skip
+      after_script: skip
+
 
 before_script:
   - chmod +x sdk
