@@ -64,7 +64,14 @@ matrix:
       script:
         - chmod +x ci/check_bash_syntax.sh
         - ./ci/check_bash_syntax.sh
-    - name: Docker / B2C Demoshop / PHP:7.3 Alpine / MariaDB / Functional
+    - name: Docker / B2C Demoshop / PHP-7.3 Alpine / MariaDB / Functional
+      git:
+          clone: false
+      branches:
+        only:
+          - master
+          - /feature\/[a-z]+-\d+\/(master).+|feature\/[a-z]+-\d+\/[a-z]+-\d+\/(master).+/
+          - /(bugfix|hotfix|beta)\/.+/
       os: linux
       dist: bionic
       language: shell
@@ -78,16 +85,16 @@ matrix:
         - PROJECT=suite
         - POSTGRES_PORT="5433"
       script:
-        - git clone --depth=3 --branch=master https://github.com/spryker-shop/b2b-demo-shop.git spryker-shop/b2b-demo-shop
-        - cd spryker-shop/b2b-demo-shop && git clone https://github.com/spryker/docker-sdk.git --single-branch --branch master ./docker
+        - git clone --depth=3 --branch=master https://github.com/spryker-shop/b2c-demo-shop.git spryker-shop/b2c-demo-shop
+        - cd spryker-shop/b2c-demo-shop && git clone https://github.com/spryker/docker-sdk.git --single-branch --branch master ./docker
         - docker/sdk boot deploy.ci.functional.mariadb.yml -v
         - docker/sdk up -t -v
         - docker/sdk testing codecept run -c codeception.ci.functional.yml
+      before_script: skip
+      after_script: skip
 
 
 before_script:
-  - git clone --depth=3 --branch=master https://github.com/spryker/docker-sdk.git spryker/docker-sdk
-  - cd spryker/docker-sdk
   - chmod +x sdk
   - if [[ $DEV_MODE == 0 ]] ; then ./sdk boot ci/deploy.yml; fi
   - if [[ $DEV_MODE == 1 ]] ; then ./sdk boot ci/deploy.dev.yml; fi
