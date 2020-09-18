@@ -71,7 +71,7 @@ matrix:
         - PROJECT=suite
         - POSTGRES_PORT="5433"
       script:
-        - cd ../ && git clone --depth=3 --branch=master https://github.com/spryker-shop/b2c-demo-shop.git b2c-demo-shop && mv docker-sdk b2c-demo-shop
+        - cd ../ && git clone --depth=3 --branch=master https://github.com/spryker-shop/b2c-demo-shop.git b2c-demo-shop && mv docker-sdk b2c-demo-shop && cd b2c-demo-shop
         - docker-sdk/sdk boot deploy.ci.functional.mariadb.yml -v
         - docker-sdk/sdk up -t -v
         - docker-sdk/sdk testing codecept run -c codeception.ci.functional.yml
