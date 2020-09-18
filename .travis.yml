@@ -49,7 +49,7 @@ matrix:
     - name: Demo boot test
       env: DEV_MODE=0
       script:
-        - chmod +x ci/check_boot.sh
+        - chmod +x docker/ci/check_boot.sh
         - ./docker/ci/check_boot.sh
       before_install:
         - git clone --depth=3 --branch=master https://github.com/spryker/docker-sdk.git ./docker
@@ -58,7 +58,7 @@ matrix:
     - name: Dev boot test
       env: DEV_MODE=1
       script:
-        - chmod +x ci/check_boot.sh
+        - chmod +x docker/ci/check_boot.sh
         - ./docker/ci/check_boot.sh
       before_install:
         - git clone --depth=3 --branch=master https://github.com/spryker/docker-sdk.git ./docker
@@ -67,7 +67,7 @@ matrix:
     - name: Demo Bash syntax check
       env: DEV_MODE=0
       script:
-        - chmod +x ci/check_bash_syntax.sh
+        - chmod +x docker/ci/check_bash_syntax.sh
         - ./docker/ci/check_bash_syntax.sh
       before_install:
         - git clone --depth=3 --branch=master https://github.com/spryker/docker-sdk.git ./docker
@@ -76,7 +76,7 @@ matrix:
     - name: Demo Bash syntax check
       env: DEV_MODE=1
       script:
-        - chmod +x ci/check_bash_syntax.sh
+        - chmod +x docker/ci/check_bash_syntax.sh
         - ./docker/ci/check_bash_syntax.sh
       before_install:
         - git clone --depth=3 --branch=master https://github.com/spryker/docker-sdk.git ./docker
