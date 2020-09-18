@@ -8,12 +8,10 @@ git:
   clone: false
 
 env:
-  global:
-    - APPLICATION_ENV=ci.pgsql
-    - SPRYKER_TESTING_ENABLED=1
-    - APPLICATION_STORE=DE
-    - PROJECT=suite
-    - POSTGRES_PORT="5433"
+   global:
+     - PROGRESS_TYPE=plain
+     - SPRYKER_PHP_VERSION=7.3
+     - SPRYKER_DB_ENGINE=PGSQL
 
 cache:
   timeout: 60
@@ -49,39 +47,27 @@ matrix:
     - name: Demo boot test
       env: DEV_MODE=0
       script:
-        - chmod +x docker/ci/check_boot.sh && cd docker
-        - ./docker/ci/check_boot.sh
-      before_install:
-        - git clone --depth=3 --branch=master https://github.com/spryker/docker-sdk.git ./docker
-      before_script: skip
-      after_script: skip
+        - git clone --depth=3 --branch=master https://github.com/spryker/docker-sdk.git
+        - chmod +x ci/check_boot.sh
+        - ./ci/check_boot.sh
     - name: Dev boot test
       env: DEV_MODE=1
       script:
-        - chmod +x docker/ci/check_boot.sh
-        - cd docker && ./ci/check_boot.sh
-      before_install:
-        - git clone --depth=3 --branch=master https://github.com/spryker/docker-sdk.git ./docker
-      before_script: skip
-      after_script: skip
+        - git clone --depth=3 --branch=master https://github.com/spryker/docker-sdk.git
+        - chmod +x ci/check_boot.sh
+        - ./ci/check_boot.sh
     - name: Demo Bash syntax check
       env: DEV_MODE=0
       script:
-        - chmod +x docker/ci/check_bash_syntax.sh
+        - git clone --depth=3 --branch=master https://github.com/spryker/docker-sdk.git
+        - chmod +x ci/check_bash_syntax.sh
         - cd docker && ./ci/check_bash_syntax.sh
-      before_install:
-        - git clone --depth=3 --branch=master https://github.com/spryker/docker-sdk.git ./docker
-      before_script: skip
-      after_script: skip
     - name: Demo Bash syntax check
       env: DEV_MODE=1
       script:
-        - chmod +x docker/ci/check_bash_syntax.sh
-        - cd docker && ./ci/check_bash_syntax.sh
-      before_install:
-        - git clone --depth=3 --branch=master https://github.com/spryker/docker-sdk.git ./docker
-      before_script: skip
-      after_script: skip
+        - git clone --depth=3 --branch=master https://github.com/spryker/docker-sdk.git
+        - chmod +x ci/check_bash_syntax.sh
+        - ./ci/check_bash_syntax.sh
     - name: Docker / B2C Demoshop / PHP:7.3 Alpine / MariaDB / Functional
       os: linux
       dist: bionic
@@ -90,6 +76,11 @@ matrix:
         - PROGRESS_TYPE=plain
         - SPRYKER_PLATFORM_IMAGE=spryker/php:7.3-alpine3.12
         - TRAVIS=1
+        - APPLICATION_ENV=ci.pgsql
+        - SPRYKER_TESTING_ENABLED=1
+        - APPLICATION_STORE=DE
+        - PROJECT=suite
+        - POSTGRES_PORT="5433"
       script:
         - git clone --depth=3 --branch=master https://github.com/spryker-shop/b2b-demo-shop.git spryker-shop/b2b-demo-shop
         - cd spryker-shop/b2b-demo-shop && git clone https://github.com/spryker/docker-sdk.git --single-branch --branch master ./docker
