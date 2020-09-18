@@ -47,25 +47,21 @@ matrix:
     - name: Demo boot test
       env: DEV_MODE=0
       script:
-        - git clone --depth=3 --branch=master https://github.com/spryker/docker-sdk.git
         - chmod +x ci/check_boot.sh
         - ./ci/check_boot.sh
     - name: Dev boot test
       env: DEV_MODE=1
       script:
-        - git clone --depth=3 --branch=master https://github.com/spryker/docker-sdk.git
         - chmod +x ci/check_boot.sh
         - ./ci/check_boot.sh
     - name: Demo Bash syntax check
       env: DEV_MODE=0
       script:
-        - git clone --depth=3 --branch=master https://github.com/spryker/docker-sdk.git
         - chmod +x ci/check_bash_syntax.sh
-        - cd docker && ./ci/check_bash_syntax.sh
+        - ./ci/check_bash_syntax.sh
     - name: Demo Bash syntax check
       env: DEV_MODE=1
       script:
-        - git clone --depth=3 --branch=master https://github.com/spryker/docker-sdk.git
         - chmod +x ci/check_bash_syntax.sh
         - ./ci/check_bash_syntax.sh
     - name: Docker / B2C Demoshop / PHP:7.3 Alpine / MariaDB / Functional
@@ -93,10 +89,11 @@ matrix:
 
 
 before_script:
+  - git clone --depth=3 --branch=master https://github.com/spryker/docker-sdk.git spryker/docker-sdk
+  - cd spryker/docker-sdk
   - chmod +x sdk
   - if [[ $DEV_MODE == 0 ]] ; then ./sdk boot ci/deploy.yml; fi
   - if [[ $DEV_MODE == 1 ]] ; then ./sdk boot ci/deploy.dev.yml; fi
 
 notifications:
   email: false
-
