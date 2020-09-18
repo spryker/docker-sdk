@@ -2,8 +2,10 @@ dist: bionic
 
 sudo: required
 
-os:
-  - linux
+git:
+  depth: 3
+
+os: linux
 language: minimal
 
 env:
@@ -65,16 +67,30 @@ matrix:
       env:
         - SPRYKER_PLATFORM_IMAGE=spryker/php:7.3-alpine3.12
         - TRAVIS=1
-        - APPLICATION_ENV=ci.pgsql
+        - APPLICATION_ENV=ci.mysql
         - SPRYKER_TESTING_ENABLED=1
         - APPLICATION_STORE=DE
         - PROJECT=suite
-        - POSTGRES_PORT="5433"
       script:
-        - cd ../ && git clone --depth=3 --branch=master https://github.com/spryker-shop/b2c-demo-shop.git b2c-demo-shop && mv docker-sdk b2c-demo-shop && cd b2c-demo-shop
+        - cd ../ && git clone --depth=3 --branch=master https://github.com/spryker-shop/b2c-demo-shop.git demo-shop && mv docker-sdk demo-shop && cd demo-shop
         - docker-sdk/sdk boot deploy.ci.functional.mariadb.yml -v
         - docker-sdk/sdk up -t -v
         - docker-sdk/sdk testing codecept run -c codeception.ci.functional.yml
+      before_script: skip
+      after_script: skip
+    - name: Docker / B2C Demoshop / PHP-7.4 Debian / PostgreSQL / Functional
+      env:
+          - SPRYKER_PLATFORM_IMAGE=spryker/php:7.4-debian
+          - TRAVIS=1
+          - APPLICATION_ENV=ci.pgsql
+          - SPRYKER_TESTING_ENABLED=1
+          - APPLICATION_STORE=DE
+          - PROJECT=suite
+      script:
+          - cd ../ && git clone --depth=3 --branch=master https://github.com/spryker-shop/b2c-demo-shop.git demo-shop && mv docker-sdk demo-shop && cd demo-shop
+          - docker-sdk/sdk boot deploy.ci.functional.yml -v
+          - docker-sdk/sdk up -t -v
+          - docker-sdk/sdk testing codecept run -c codeception.ci.functional.yml
       before_script: skip
       after_script: skip
 
