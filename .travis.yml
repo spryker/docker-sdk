@@ -1,11 +1,10 @@
 dist: bionic
+
 sudo: required
+
 os:
   - linux
 language: minimal
-
-git:
-  clone: false
 
 env:
    global:
@@ -66,7 +65,7 @@ matrix:
         - ./ci/check_bash_syntax.sh
     - name: Docker / B2C Demoshop / PHP-7.3 Alpine / MariaDB / Functional
       git:
-          clone: false
+        clone: false
       branches:
         only:
           - master
@@ -92,7 +91,6 @@ matrix:
         - docker/sdk testing codecept run -c codeception.ci.functional.yml
       before_script: skip
       after_script: skip
-
 
 before_script:
   - chmod +x sdk
