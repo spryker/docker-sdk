@@ -64,7 +64,7 @@ matrix:
         - chmod +x ci/check_bash_syntax.sh
         - ./ci/check_bash_syntax.sh
     - name: Docker / B2C Demoshop / PHP-7.3 Alpine / MariaDB / Functional
-      if: branch =~ ^(master|dev)
+      if: branch =~ /feature\/[a-z]+-\d+\/(master|dev).+|feature\/[a-z]+-\d+\/[a-z]+-\d+\/(master|dev).+/
       env:
         - SPRYKER_PLATFORM_IMAGE=spryker/php:7.3-alpine3.12
         - TRAVIS=1
@@ -80,7 +80,7 @@ matrix:
       before_script: skip
       after_script: skip
     - name: Docker / B2C Demoshop / PHP-7.4 Debian / PostgreSQL / Functional
-      if: branch =~ ^(master|dev)
+      if: branch =~ /feature\/[a-z]+-\d+\/(master|dev).+|feature\/[a-z]+-\d+\/[a-z]+-\d+\/(master|dev).+/
       env:
           - SPRYKER_PLATFORM_IMAGE=spryker/php:7.4-debian
           - TRAVIS=1
@@ -96,7 +96,7 @@ matrix:
       before_script: skip
       after_script: skip
     - name: Docker / B2B Demoshop / PHP-7.2 Alpine / PostgreSQL / Functional
-      if: branch =~ ^(master|dev)
+      if: branch =~ /feature\/[a-z]+-\d+\/(master|dev).+|feature\/[a-z]+-\d+\/[a-z]+-\d+\/(master|dev).+/
       env:
           - SPRYKER_PLATFORM_IMAGE=spryker/php:7.2-alpine3.12
           - TRAVIS=1
@@ -112,7 +112,7 @@ matrix:
       before_script: skip
       after_script: skip
     - name: Docker / B2B Demoshop / PHP-7.4 Debian / MariaDB / Functional
-      if: branch =~ ^(master|dev)
+      if: branch =~ /feature\/[a-z]+-\d+\/(master|dev).+|feature\/[a-z]+-\d+\/[a-z]+-\d+\/(master|dev).+/
       env:
           - SPRYKER_PLATFORM_IMAGE=spryker/php:7.4-debian
           - TRAVIS=1
