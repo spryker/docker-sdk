@@ -83,9 +83,6 @@ matrix:
         - docker/sdk boot deploy.ci.functional.mariadb.yml -v
         - docker/sdk up -t -v
         - docker/sdk testing codecept run -c codeception.ci.functional.yml
-      before_install: skip
-      before_script: skip
-      after_script: skip
 
 
 before_script:
