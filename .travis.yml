@@ -66,16 +66,7 @@ matrix:
     - name: Docker / B2C Demoshop / PHP-7.3 Alpine / MariaDB / Functional
       git:
         clone: false
-      branches:
-        only:
-          - master
-          - /feature\/[a-z]+-\d+\/(master).+|feature\/[a-z]+-\d+\/[a-z]+-\d+\/(master).+/
-          - /(bugfix|hotfix|beta)\/.+/
-      os: linux
-      dist: bionic
-      language: shell
       env:
-        - PROGRESS_TYPE=plain
         - SPRYKER_PLATFORM_IMAGE=spryker/php:7.3-alpine3.12
         - TRAVIS=1
         - APPLICATION_ENV=ci.pgsql
@@ -85,7 +76,7 @@ matrix:
         - POSTGRES_PORT="5433"
       script:
         - git clone --depth=3 --branch=master https://github.com/spryker-shop/b2c-demo-shop.git spryker-shop/b2c-demo-shop
-        - cd spryker-shop/b2c-demo-shop && git clone https://github.com/spryker/docker-sdk.git --single-branch --branch master ./docker
+        - cd spryker-shop/b2c-demo-shop && git clone https://github.com/spryker/docker-sdk.git ./docker
         - docker/sdk boot deploy.ci.functional.mariadb.yml -v
         - docker/sdk up -t -v
         - docker/sdk testing codecept run -c codeception.ci.functional.yml
