@@ -64,6 +64,7 @@ matrix:
         - chmod +x ci/check_bash_syntax.sh
         - ./ci/check_bash_syntax.sh
     - name: Docker / B2C Demoshop / PHP-7.3 Alpine / MariaDB / Functional
+      if: branch =~ ^master
       env:
         - SPRYKER_PLATFORM_IMAGE=spryker/php:7.3-alpine3.12
         - TRAVIS=1
