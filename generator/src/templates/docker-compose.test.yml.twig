@@ -11,23 +11,9 @@ services:
 {% endfor %}
 {% endfor %}
 
-  webdriver:
-    image: alexjo/chromedriver-chromium
-    networks:
-      - public
-    init: true
-    labels:
-      'spryker.app.name': webdriver
-      'spryker.app.type': services
-      'spryker.project': ${SPRYKER_DOCKER_PREFIX}:${SPRYKER_DOCKER_TAG}
-    expose:
-      - "4444"
-    healthcheck:
-      test: [ "CMD", "bash", "-c", "(echo >/dev/tcp/localhost/4444) &>/dev/null" ]
-      interval: 5s
-      timeout: 5s
-      retries: 5
-    command: [ "--port=4444", "--whitelisted-ips=", "--url-base=/wd/hub" ]
+{% set webdriver_engine = services['webdriver']['engine'] | lower | default ('phantomjs') %}
+{% set webdriver_version = services['webdriver']['version'] | default('default') %}
+{% include "service/" ~ webdriver_engine ~ "/" ~ webdriver_version ~ "/" ~  webdriver_engine ~ ".yml.twig" with { serviceName: 'webdriver' } only %}
 
   scheduler:
     image: nginx:alpine

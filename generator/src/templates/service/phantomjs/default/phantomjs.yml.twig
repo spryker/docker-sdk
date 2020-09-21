@@ -1,0 +1,16 @@
+  {{ serviceName }}:
+    image: wernight/phantomjs:latest
+    networks:
+      - public
+    labels:
+      'spryker.app.name': webdriver
+      'spryker.app.type': services
+      'spryker.project': ${SPRYKER_DOCKER_PREFIX}:${SPRYKER_DOCKER_TAG}
+    expose:
+      - "4444"
+    healthcheck:
+      test: [ "CMD", "bash", "-c", "(echo >/dev/tcp/localhost/4444) &>/dev/null" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    command: "phantomjs --webdriver=4444 --ignore-ssl-errors=true --disk-cache=true --load-images=false --webdriver-loglevel=DEBUG"
