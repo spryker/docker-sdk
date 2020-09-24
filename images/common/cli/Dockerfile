@@ -56,7 +56,6 @@ COPY --chown=spryker:spryker cli /home/spryker/bin
 RUN find /home/spryker/bin -type f -exec chmod +x {} \;
 ENV PATH=/home/spryker/bin:$PATH
 
-ENV SSH_AUTH_SOCK=''
 RUN mkdir -p /home/spryker/ssh-relay/ && chmod 777 /home/spryker/ssh-relay && touch /home/spryker/ssh-relay/ssh-auth.sock && chmod 666 /home/spryker/ssh-relay/ssh-auth.sock
 
 RUN mkdir -p /home/spryker/history && touch /home/spryker/history/.bash_history && chmod 0600 /home/spryker/history/.bash_history
