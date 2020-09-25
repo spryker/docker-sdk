@@ -1,4 +1,4 @@
-version: "3.5"
+version: "3.7"
 
 x-volumes:
   &app-volumes
@@ -80,7 +80,9 @@ services:
     depends_on:
       - frontend
 {% for serviceName, serviceData in services %}
+{% if serviceName != 'webdriver' %}
       - {{ serviceName }}
+{% endif %}
 {% endfor %}
     networks:
       private:
@@ -121,10 +123,11 @@ services:
 {% endfor %}
 {% endfor %}
 {% for serviceName, serviceData in services %}
-    {% set engine = serviceData['engine'] | lower %}
-    {% set version = serviceData['version'] | default('default') %}
-
+{% if serviceName != 'webdriver' %}
+{% set engine = serviceData['engine'] | lower %}
+{% set version = serviceData['version'] | default('default') %}
 {% include "service/" ~ engine ~ "/" ~ version ~ "/" ~  engine ~ ".yml.twig" with { project: _context, serviceName: serviceName, serviceData: serviceData, engine: engine, version: version } only %}
+{% endif %}
 {% endfor %}
 
 {% include "mount/" ~ _mountMode ~ ".yml.twig" ignore missing with _context %}
