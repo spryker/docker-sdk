@@ -22,6 +22,7 @@ function Images::_buildApp() {
     local folder=${1}
     local baseAppImage="${SPRYKER_DOCKER_PREFIX}_base_app:${SPRYKER_DOCKER_TAG}"
     local appImage="${SPRYKER_DOCKER_PREFIX}_app:${SPRYKER_DOCKER_TAG}"
+    local localAppImage="${SPRYKER_DOCKER_PREFIX}_local_app:${SPRYKER_DOCKER_TAG}"
     local runtimeImage="${SPRYKER_DOCKER_PREFIX}_run_app:${SPRYKER_DOCKER_TAG}"
 
     Console::verbose "${INFO}Building Application images${NC}"
@@ -42,7 +43,6 @@ function Images::_buildApp() {
 
     docker build \
         -t "${appImage}" \
-        -t "${runtimeImage}" \
         -f "${DEPLOYMENT_PATH}/images/${folder}/application/Dockerfile" \
         --progress="${PROGRESS_TYPE}" \
         --build-arg "SPRYKER_PARENT_IMAGE=${baseAppImage}" \
@@ -60,12 +60,20 @@ function Images::_buildApp() {
         --build-arg "SPRYKER_BUILD_STAMP=${SPRYKER_BUILD_STAMP:-""}" \
         . 1>&2
 
+    docker build \
+        -t "${localAppImage}" \
+        -t "${runtimeImage}" \
+        -f "${DEPLOYMENT_PATH}/images/common/application-local/Dockerfile" \
+        --progress="${PROGRESS_TYPE}" \
+        --build-arg "SPRYKER_PARENT_IMAGE=${appImage}" \
+        "${DEPLOYMENT_PATH}/context" 1>&2
+
     if [ -n "${SPRYKER_XDEBUG_MODE_ENABLE}" ]; then
         docker build \
             -t "${runtimeImage}" \
             -f "${DEPLOYMENT_PATH}/images/debug/application/Dockerfile" \
             --progress="${PROGRESS_TYPE}" \
-            --build-arg "SPRYKER_PARENT_IMAGE=${appImage}" \
+            --build-arg "SPRYKER_PARENT_IMAGE=${localAppImage}" \
             "${DEPLOYMENT_PATH}/context" 1>&2
     fi
 }
@@ -84,7 +92,7 @@ function Images::_buildCli() {
         -t "${baseCliImage}" \
         -f "${DEPLOYMENT_PATH}/images/common/cli/Dockerfile" \
         --progress="${PROGRESS_TYPE}" \
-        --build-arg "SPRYKER_PARENT_IMAGE=${appImage}" \
+        --build-arg "SPRYKER_PARENT_IMAGE=${localAppImage}" \
         "${DEPLOYMENT_PATH}/context" 1>&2
 
     docker build \

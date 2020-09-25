@@ -18,9 +18,5 @@ COPY php/debug/etc/ /usr/local/etc/
 COPY php/debug/supervisord.conf /etc/supervisor/supervisord.conf
 RUN mkdir -p /var/log/supervisor
 
-# Make self-signed certificate to be trusted locally
-COPY nginx/ssl/ca.crt /usr/local/share/ca-certificates
-RUN update-ca-certificates
-
 CMD [ "/usr/bin/supervisord", "-c", "/etc/supervisor/supervisord.conf" ]
 EXPOSE 9000 9001
