@@ -9,10 +9,6 @@ Registry::Flow::addBoot "Compose::verboseMode"
 function Compose::getComposeFiles() {
     local composeFiles="-f ${DEPLOYMENT_PATH}/docker-compose.yml"
 
-    if [ -n "${SPRYKER_TESTING_ENABLE}" ]; then
-        composeFiles+=" -f ${DEPLOYMENT_PATH}/docker-compose.test.yml"
-    fi
-
     for composeFile in ${DOCKER_COMPOSE_FILES_EXTRA}; do
         composeFiles+=" -f ${composeFile}"
     done
@@ -146,7 +142,10 @@ function Compose::run() {
 
     Console::verbose "${INFO}Running Spryker containers${NC}"
     sync start
-    Compose::command up -d --remove-orphans "${@}"
+    Compose::command up -d --remove-orphans \
+      --scale "webdriver=$([ -n "${SPRYKER_TESTING_ENABLE}" ] && echo 1 || echo 0)" \
+      --scale "scheduler=$([ -n "${SPRYKER_TESTING_ENABLE}" ] && echo 0 || echo 1)" \
+      "${@}"
 
     # Note: Compose::run can be used for running only one container, e.g. CLI.
     Registry::Flow::runAfterRun
