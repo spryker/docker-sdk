@@ -27,6 +27,12 @@ $nginxVarEncoder = new class() {
         return str_replace([' ', '"', '{', '}'], ['\ ', '\"', '\{', '\}'], (string)$value);
     }
 };
+$tfVarEncoder = new class() {
+    public function encode($value)
+    {
+        return json_encode((string)$value, JSON_UNESCAPED_SLASHES);
+    }
+};
 $envVarEncoder = new class() {
     private $isActive = false;
 
@@ -47,6 +53,7 @@ $envVarEncoder = new class() {
         $this->isActive = $isActive;
     }
 };
+$twig->addFilter(new TwigFilter('tf_var', [$tfVarEncoder, 'encode'], ['is_safe' => ['all']]));
 $twig->addFilter(new TwigFilter('env_var', [$envVarEncoder, 'encode'], ['is_safe' => ['all']]));
 $twig->addFilter(new TwigFilter('nginx_var', [$nginxVarEncoder, 'encode'], ['is_safe' => ['all']]));
 $twig->addFilter(new TwigFilter('normalize_endpoint', static function ($string) {
@@ -81,6 +88,7 @@ $projectData['storageData'] = retrieveStorageData($projectData);
 $projectData['composer']['autoload'] = buildComposerAutoloadConfig($projectData);
 $isAutoloadCacheEnabled = $projectData['_isAutoloadCacheEnabled'] = isAutoloadCacheEnabled($projectData);
 $projectData['_requirementAnalyzerData'] = buildDataForRequirementAnalyzer($projectData);
+$projectData['secrets'] = buildSecrets($deploymentDir);
 
 // Making dashboard a required service
 $projectData['_dashboardEndpoint'] = '';
@@ -376,6 +384,12 @@ file_put_contents(
     ])
 );
 $envVarEncoder->setIsActive(false);
+file_put_contents(
+    $deploymentDir . DS . 'terraform/secrets.sdk.auto.tfvars',
+    $twig->render('terraform/secrets.sdk.auto.tfvars.twig', [
+        'project' => $projectData,
+    ])
+);
 file_put_contents(
     $deploymentDir . DS . 'terraform/frontend.json',
     json_encode($frontend, JSON_PRETTY_PRINT)
@@ -1074,4 +1088,94 @@ function ensureUrlScheme(string $urlString, array $projectData): string
     }
 
     return $urlString;
+}
+
+/**
+ * @param string $deploymentDir
+ *
+ * @return string[]
+ */
+function buildSecrets(string $deploymentDir): array
+{
+    $data = [];
+    $openSshKeys = generateOpenSshKeys($deploymentDir);
+
+    $data['SPRYKER_OAUTH_KEY_PRIVATE'] = str_replace(PHP_EOL, '__LINE__', $openSshKeys['privateKey']);
+    $data['SPRYKER_OAUTH_KEY_PUBLIC'] = str_replace(PHP_EOL, '__LINE__', $openSshKeys['publicKey']);
+    $data['SPRYKER_OAUTH_ENCRYPTION_KEY'] = generateToken(48);
+    $data['SPRYKER_OAUTH_CLIENT_IDENTIFIER'] = 'frontend';
+    $data['SPRYKER_OAUTH_CLIENT_SECRET'] = generateToken(48);
+    $data['SPRYKER_ZED_REQUEST_TOKEN'] = generateToken(80);
+
+    return $data;
+}
+
+/**
+ * @param string $deploymentDir
+ *
+ * @return string[]
+ */
+function generateOpenSshKeys(string $deploymentDir): array
+{
+    $sshDir = $deploymentDir . DS . 'context' . DS . 'ssh';
+    mkdir($sshDir);
+
+    $generatePrivateKeyCommandTemplate = 'openssl genrsa -out %s 2048 2>&1';
+    $generatePublicKeyCommandTemplate = 'openssl rsa -in %s -pubout -out %s 2>&1';
+
+    $privateKeyPath = $sshDir . DS .'private.key';
+    $publicKeyPath = $sshDir . DS . 'public.key';
+
+    exec(
+        sprintf($generatePrivateKeyCommandTemplate, $privateKeyPath),
+        $output,
+        $returnCode
+    );
+
+
+    if ($returnCode > 0) {
+        echo implode(PHP_EOL, $output);
+        exit($returnCode);
+    }
+
+    exec(
+        sprintf($generatePublicKeyCommandTemplate, $privateKeyPath, $publicKeyPath),
+        $output,
+        $returnCode
+    );
+
+    if ($returnCode > 0) {
+        echo implode(PHP_EOL, $output);
+        exit($returnCode);
+    }
+
+    verbose(implode(PHP_EOL, $output));
+
+    $sshKeys =  [
+        'privateKey' => file_get_contents($privateKeyPath),
+        'publicKey' => file_get_contents($publicKeyPath),
+    ];
+
+    exec('rm -rf ' . $sshDir);
+
+    return $sshKeys;
+}
+
+/**
+ * @param int $tokenLength
+ *
+ * @return string
+ */
+function generateToken($tokenLength = 80): string
+{
+    $availableChars = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    $availableCharsLength = strlen($availableChars);
+    $token = '';
+
+    for($i = 0; $i < $tokenLength; $i++) {
+        $randomChar = $availableChars[mt_rand(0, $availableCharsLength - 1)];
+        $token .= $randomChar;
+    }
+
+    return $token;
 }
