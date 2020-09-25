@@ -80,8 +80,7 @@ function Images::_buildApp() {
 
 function Images::_buildCli() {
     local folder=${1}
-    local appImage="${SPRYKER_DOCKER_PREFIX}_app:${SPRYKER_DOCKER_TAG}"
-    local appImage="${SPRYKER_DOCKER_PREFIX}_app:${SPRYKER_DOCKER_TAG}"
+    local localAppImage="${SPRYKER_DOCKER_PREFIX}_local_app:${SPRYKER_DOCKER_TAG}"
     local baseCliImage="${SPRYKER_DOCKER_PREFIX}_base_cli:${SPRYKER_DOCKER_TAG}"
     local cliImage="${SPRYKER_DOCKER_PREFIX}_cli:${SPRYKER_DOCKER_TAG}"
     local runtimeCliImage="${SPRYKER_DOCKER_PREFIX}_run_cli:${SPRYKER_DOCKER_TAG}"
@@ -101,7 +100,6 @@ function Images::_buildCli() {
         -f "${DEPLOYMENT_PATH}/images/${folder}/cli/Dockerfile" \
         --progress="${PROGRESS_TYPE}" \
         --build-arg "SPRYKER_PARENT_IMAGE=${baseCliImage}" \
-        --build-arg "SPRYKER_APPLICATION_IMAGE=${appImage}" \
         --build-arg "DEPLOYMENT_PATH=${DEPLOYMENT_PATH}" \
         --build-arg "COMPOSER_AUTH=${COMPOSER_AUTH}" \
         --build-arg "SPRYKER_PIPELINE=${SPRYKER_PIPELINE}" \
