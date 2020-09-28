@@ -29,6 +29,7 @@ function Images::_buildApp() {
     local folder=${1}
     local baseAppImage="${SPRYKER_DOCKER_PREFIX}_base_app:${SPRYKER_DOCKER_TAG}"
     local appImage="${SPRYKER_DOCKER_PREFIX}_app:${SPRYKER_DOCKER_TAG}"
+    local localAppImage="${SPRYKER_DOCKER_PREFIX}_local_app:${SPRYKER_DOCKER_TAG}"
     local runtimeImage="${SPRYKER_DOCKER_PREFIX}_run_app:${SPRYKER_DOCKER_TAG}"
     local baseCliImage="${SPRYKER_DOCKER_PREFIX}_base_cli:${SPRYKER_DOCKER_TAG}"
     local cliImage="${SPRYKER_DOCKER_PREFIX}_cli:${SPRYKER_DOCKER_TAG}"
@@ -59,7 +60,6 @@ function Images::_buildApp() {
 
     docker build \
         -t "${appImage}" \
-        -t "${runtimeImage}" \
         -f "${DEPLOYMENT_PATH}/images/${folder}/application/Dockerfile" \
         "${sshArgument[@]}" \
         --secret "id=secrets-env,src=$SECRETS_FILE_PATH" \
@@ -78,12 +78,20 @@ function Images::_buildApp() {
         --build-arg "SPRYKER_BUILD_STAMP=${SPRYKER_BUILD_STAMP:-""}" \
         . 1>&2
 
+    docker build \
+        -t "${localAppImage}" \
+        -t "${runtimeImage}" \
+        -f "${DEPLOYMENT_PATH}/images/common/application-local/Dockerfile" \
+        --progress="${PROGRESS_TYPE}" \
+        --build-arg "SPRYKER_PARENT_IMAGE=${appImage}" \
+        "${DEPLOYMENT_PATH}/context" 1>&2
+
     if [ -n "${SPRYKER_XDEBUG_MODE_ENABLE}" ]; then
         docker build \
             -t "${runtimeImage}" \
             -f "${DEPLOYMENT_PATH}/images/debug/application/Dockerfile" \
             --progress="${PROGRESS_TYPE}" \
-            --build-arg "SPRYKER_PARENT_IMAGE=${appImage}" \
+            --build-arg "SPRYKER_PARENT_IMAGE=${localAppImage}" \
             "${DEPLOYMENT_PATH}/context" 1>&2
     fi
 
@@ -93,7 +101,7 @@ function Images::_buildApp() {
         -t "${baseCliImage}" \
         -f "${DEPLOYMENT_PATH}/images/common/cli/Dockerfile" \
         --progress="${PROGRESS_TYPE}" \
-        --build-arg "SPRYKER_PARENT_IMAGE=${appImage}" \
+        --build-arg "SPRYKER_PARENT_IMAGE=${localAppImage}" \
         "${DEPLOYMENT_PATH}/context" 1>&2
 
     docker build \
@@ -104,7 +112,6 @@ function Images::_buildApp() {
         --secret "id=secrets-env,src=$SECRETS_FILE_PATH" \
         --progress="${PROGRESS_TYPE}" \
         --build-arg "SPRYKER_PARENT_IMAGE=${baseCliImage}" \
-        --build-arg "SPRYKER_APPLICATION_IMAGE=${appImage}" \
         --build-arg "DEPLOYMENT_PATH=${DEPLOYMENT_PATH}" \
         --build-arg "SPRYKER_PIPELINE=${SPRYKER_PIPELINE}" \
         --build-arg "SPRYKER_BUILD_HASH=${SPRYKER_BUILD_HASH:-"current"}" \

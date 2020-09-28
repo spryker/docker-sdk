@@ -1,7 +1,7 @@
 # syntax = docker/dockerfile:experimental
 ARG SPRYKER_PARENT_IMAGE
 
-FROM ${SPRYKER_PARENT_IMAGE} AS application-production-dependecies
+FROM ${SPRYKER_PARENT_IMAGE} AS application-production-dependencies
 
 USER spryker
 
@@ -13,7 +13,7 @@ RUN --mount=type=cache,id=composer,sharing=locked,target=/home/spryker/.composer
   set -o allexport && . /run/secrets/secrets-env && set +o allexport \
   && composer install --no-scripts --no-interaction ${SPRYKER_COMPOSER_MODE} -vvv
 
-FROM application-production-dependecies AS application-production-codebase
+FROM application-production-dependencies AS application-production-codebase
 
 COPY --chown=spryker:spryker src ${srcRoot}/src
 COPY --chown=spryker:spryker config ${srcRoot}/config
