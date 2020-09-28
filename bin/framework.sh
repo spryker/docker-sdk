@@ -14,6 +14,7 @@ FRAMEWORK_CWD=$(pwd)
 . ./platform.sh
 
 . ./registry/require.sh
+. ./registry/trap.sh
 . ./registry/command.sh
 . ./registry/help.sh
 . ./registry/installer.sh

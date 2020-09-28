@@ -15,6 +15,7 @@ popd >/dev/null
 import environment/cross-platform.sh
 import environment/docker.sh
 import environment/docker-compose.sh
+import environment/composer.sh
 
 # Help intro
 import command/deploy.sh
@@ -65,7 +66,6 @@ import command/internal/sync.sh
 import command/internal/prune.sh
 
 # Installers
-import installer/vcs.sh
 {% if services['scheduler']['engine'] is defined and services['scheduler']['engine'] == 'jenkins' %}
 import installer/jenkins-template.sh
 {% endif %}
@@ -100,6 +100,7 @@ System::Bootstrap
 readonly PROJECT_DIR="$(pwd)"
 readonly DEPLOYMENT_DIR="$(cd "${BASH_SOURCE%/*}" >/dev/null 2>&1 && pwd)"
 readonly DEPLOYMENT_PATH="${DEPLOYMENT_DIR/$PROJECT_DIR/.}"
+readonly SECRETS_FILE_PATH="${DEPLOYMENT_DIR}/.secrets"
 readonly PROGRESS_TYPE=${PROGRESS_TYPE:-tty}
 VERBOSE=${VERBOSE:-0}
 
@@ -148,10 +149,13 @@ if [ -n "${GITHUB_TOKEN}" ]; then
     readonly TOKEN_BASED_COMPOSER_AUTH="{\"github-oauth\":{\"github.com\":\"${GITHUB_TOKEN}\"}}"
 fi
 readonly COMPOSER_AUTH=${COMPOSER_AUTH:-${TOKEN_BASED_COMPOSER_AUTH}}
+readonly SSH_AUTH_SOCK_ON_HOST=${SSH_AUTH_SOCK:-"${DEPLOYMENT_PATH}/context/ssh/ssh-agent.mock"}
+readonly SSH_AUTH_SOCK_IN_CLI="$([ -n "${SSH_AUTH_SOCK}" ] && [ -z "${COMPOSER_AUTH}" ] && echo '/home/spryker/ssh-relay/ssh-auth.sock' || echo '')"
 
 # Global variables
 readonly USER_FULL_ID=$(Environment::getFullUserId)
 readonly SPRYKER_XDEBUG_HOST_IP=$(Environment::getHostIp)
+readonly SECRETS_ENVIRONMENT=("COMPOSER_AUTH='${COMPOSER_AUTH}'")
 
 command=${1}
 shift || true
@@ -187,6 +191,7 @@ shift $((OPTIND - 1))
 # Exporting for docker-compose
 export DEPLOYMENT_PATH
 export SPRYKER_XDEBUG_HOST_IP
+export SSH_AUTH_SOCK_ON_HOST
 export COMPOSE_PROJECT_NAME
 export SPRYKER_DOCKER_PREFIX
 export SPRYKER_DOCKER_TAG

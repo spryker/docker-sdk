@@ -39,8 +39,9 @@ function Data::load() {
         fi
 
         if [ -z "${schedulerSuspended}" ]; then
+            schedulerSuspended=1
             Service::Scheduler::pause
-            trap 'Service::Scheduler::unpause > /dev/null' SIGINT SIGQUIT SIGTSTP EXIT
+            Registry::Trap::addExitHook 'resumeScheduler' 'Service::Scheduler::unpause'
         fi
 
         for store in "${STORES[@]}"; do
@@ -57,8 +58,5 @@ function Data::load() {
         Compose::exec "vendor/bin/install${verboseOption} -r ${SPRYKER_PIPELINE} -s clean-storage -s init-storage -s init-storages-per-region -s ${demoDataSection}"
     done
 
-    if [ -n "${schedulerSuspended}" ]; then
-        trap - SIGINT SIGQUIT SIGTSTP EXIT
-        Service::Scheduler::unpause
-    fi
+    Registry::Trap::releaseExitHook 'resumeScheduler'
 }

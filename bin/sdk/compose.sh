@@ -39,7 +39,7 @@ function Compose::ensureRunning() {
 function Compose::ensureCliRunning() {
     local isCliRunning=$(docker ps --filter 'status=running' --filter "ancestor=${SPRYKER_DOCKER_PREFIX}_run_cli:${SPRYKER_DOCKER_TAG}" --filter "name=${SPRYKER_DOCKER_PREFIX}_cli_*" --format "{{.Names}}")
     if [ -z "${isCliRunning}" ]; then
-        Compose::run --no-deps cli
+        Compose::run --no-deps cli cli_ssh_relay
         Registry::Flow::runAfterCliReady
     fi
 }
@@ -54,6 +54,7 @@ function Compose::exec() {
         -e APPLICATION_STORE="${SPRYKER_CURRENT_STORE}" \
         -e SPRYKER_CURRENT_REGION="${SPRYKER_CURRENT_REGION}" \
         -e SPRYKER_PIPELINE="${SPRYKER_PIPELINE}" \
+        -e SSH_AUTH_SOCK="${SSH_AUTH_SOCK_IN_CLI}" \
         -e SPRYKER_XDEBUG_MODE_ENABLE="${SPRYKER_XDEBUG_MODE_ENABLE}" \
         -e SPRYKER_XDEBUG_ENABLE_FOR_CLI="${SPRYKER_XDEBUG_ENABLE_FOR_CLI}" \
         -e SPRYKER_TESTING_ENABLE_FOR_CLI="${SPRYKER_TESTING_ENABLE_FOR_CLI}" \

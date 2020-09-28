@@ -8,12 +8,6 @@ git:
 os: linux
 language: minimal
 
-branches:
-  only:
-    - master
-    - /feature\/[a-z]+-\d+\/(master|dev).+|feature\/[a-z]+-\d+\/[a-z]+-\d+\/(master|dev).+/
-    - /(bugfix|hotfix|beta)\/.+/
-
 env:
    global:
      - PROGRESS_TYPE=plain
@@ -52,23 +46,25 @@ matrix:
     - name: Demo boot test
       env: DEV_MODE=0
       script:
-        - chmod +x ci/check_boot.sh
-        - ./ci/check_boot.sh
+        - bash ./ci/check_boot.sh
     - name: Dev boot test
       env: DEV_MODE=1
       script:
-        - chmod +x ci/check_boot.sh
-        - ./ci/check_boot.sh
+        - bash ./ci/check_boot.sh
     - name: Demo Bash syntax check
       env: DEV_MODE=0
       script:
-        - chmod +x ci/check_bash_syntax.sh
-        - ./ci/check_bash_syntax.sh
+        - bash ./ci/check_bash_syntax.sh
     - name: Demo Bash syntax check
       env: DEV_MODE=1
       script:
-        - chmod +x ci/check_bash_syntax.sh
-        - ./ci/check_bash_syntax.sh
+        - bash ./ci/check_bash_syntax.sh
+    - name: Tests
+      script:
+          - bash ./ci/tests.sh
+      before_install: skip
+      before_script: skip
+      after_script: skip
     - name: Docker / B2C Demoshop / PHP-7.3 Alpine / MariaDB / Functional
       env:
         - SPRYKER_PLATFORM_IMAGE=spryker/php:7.3-alpine3.12

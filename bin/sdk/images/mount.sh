@@ -18,7 +18,6 @@ function Images::buildApplication() {
     done
 
     Images::_buildApp mount
-    Images::_buildCli mount
     Images::tagApplications "${SPRYKER_DOCKER_TAG}"
 }
 
