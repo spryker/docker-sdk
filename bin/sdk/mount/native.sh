@@ -1,13 +1,12 @@
 #!/bin/bash
 
-function sync() {
+function Mount::logs() {
+    Console::error "This mount mode does not support logging."
+    exit 1
+}
 
-    case $1 in
-        logs)
-            Console::error "This mount mode does not support logging."
-            exit 1
-            ;;
-    esac
+function sync() {
+    # @deprecated
 
     return "${TRUE}"
 }

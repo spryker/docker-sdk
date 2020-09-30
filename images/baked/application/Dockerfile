@@ -1,18 +1,19 @@
 # syntax = docker/dockerfile:experimental
 ARG SPRYKER_PARENT_IMAGE
 
-FROM ${SPRYKER_PARENT_IMAGE} AS application-production-dependecies
+FROM ${SPRYKER_PARENT_IMAGE} AS application-production-dependencies
 
 USER spryker
 
 # Install composer modules for Spryker
 COPY --chown=spryker:spryker composer.json composer.lock ${srcRoot}/
-ARG COMPOSER_AUTH
 ARG SPRYKER_COMPOSER_MODE
 RUN --mount=type=cache,id=composer,sharing=locked,target=/home/spryker/.composer/cache,uid=1000 \
-    COMPOSER_AUTH="${COMPOSER_AUTH}" composer install --no-scripts --no-interaction ${SPRYKER_COMPOSER_MODE}
+  --mount=type=ssh,uid=1000 --mount=type=secret,id=secrets-env,uid=1000 \
+  set -o allexport && . /run/secrets/secrets-env && set +o allexport \
+  && composer install --no-scripts --no-interaction ${SPRYKER_COMPOSER_MODE} -vvv
 
-FROM application-production-dependecies AS application-production-codebase
+FROM application-production-dependencies AS application-production-codebase
 
 COPY --chown=spryker:spryker src ${srcRoot}/src
 COPY --chown=spryker:spryker config ${srcRoot}/config

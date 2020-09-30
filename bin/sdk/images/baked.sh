@@ -18,7 +18,6 @@ function Images::buildApplication() {
     done
 
     Images::_buildApp baked
-    Images::_buildCli baked
     Images::tagApplications "${SPRYKER_DOCKER_TAG}"
 }
 

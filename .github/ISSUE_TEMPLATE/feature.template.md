@@ -10,7 +10,7 @@ Thank you for suggesting an idea to make Docker SDK better.
 Please, fill in as much of the template below as you're able.
 -->
 
-### What is the problem you you are trying to solve by the feature?
+### What is the problem you are trying to solve by the feature?
 <!--
 Please, describe the problem you are trying to solve.
 -->

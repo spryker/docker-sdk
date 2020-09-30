@@ -1,5 +1,5 @@
 # Spryker Commerce OS - Docker SDK
-[![Build Status](https://travis-ci.org/spryker/docker-sdk.svg)](https://travis-ci.org/spryker/docker-sdk)
+[![Build Status](https://travis-ci.com/spryker/docker-sdk.svg?branch=master)](https://travis-ci.com/spryker/docker-sdk)
 
 ## Description
 

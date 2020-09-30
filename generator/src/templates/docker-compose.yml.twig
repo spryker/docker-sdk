@@ -7,6 +7,20 @@ x-volumes:
 
 services:
 
+  cli_ssh_relay:
+    image: bpack/socat
+    privileged: true
+    command: UNIX-LISTEN:/tmp/ssh-relay/ssh-auth.sock,fork,unlink-early,user=1000,group=1000,mode=666 UNIX-CONNECT:/tmp/ssh-relay/input-ssh-auth.sock
+    networks:
+      - private
+    volumes:
+      - ssh-relay:/tmp/ssh-relay
+{%  if _platform == 'macos' %}
+      - /run/host-services/ssh-auth.sock:/tmp/ssh-relay/input-ssh-auth.sock
+{% else %}
+      - ${SSH_AUTH_SOCK_ON_HOST}:/tmp/ssh-relay/input-ssh-auth.sock
+{% endif %}
+
   cli:
     image: ${SPRYKER_DOCKER_PREFIX}_run_cli:${SPRYKER_DOCKER_TAG}
     networks:
@@ -17,6 +31,7 @@ services:
       'spryker.app.type': console
       'spryker.project': ${SPRYKER_DOCKER_PREFIX}:${SPRYKER_DOCKER_TAG}
     volumes:
+      - ssh-relay:/home/spryker/ssh-relay
       - cli_history:/home/spryker/history:rw
       - ./${DEPLOYMENT_PATH}/env/cli:/home/spryker/env:ro
 {% include "application-volumes.yml.twig" with _context %}
@@ -98,7 +113,10 @@ services:
 {% endif %}
 {% endfor %}
     environment:
+      SPRYKER_XDEBUG_MODE_ENABLE: ${SPRYKER_XDEBUG_MODE_ENABLE}
+{% if docker['debug']['xdebug']['enabled'] is not defined or docker['debug']['xdebug']['enabled'] == true %}
       SPRYKER_XDEBUG_ENABLE: ${SPRYKER_XDEBUG_ENABLE}
+{% endif %}
     labels:
       'spryker.app.name': gateway
       'spryker.app.type': proxy
@@ -132,6 +150,8 @@ volumes:
     external: false
 {% endfor %}
 
+  ssh-relay:
+      external: false
   logs:
     external: false
   cli_history:
@@ -141,6 +161,31 @@ volumes:
     external: true
 {% endif %}
 
+{% if  _mountMode == 'mutagen' %}
+x-mutagen:
+  sync:
+    defaults:
+      symlink:
+        mode: posix-raw
+      ignore:
+        paths:
+{% for rule in _syncIgnore %}
+          - '{{ rule | raw }}'
+{% endfor %}
+      permissions:
+        defaultFileMode: 0666
+        defaultDirectoryMode: 0777
+
+    {{ _syncSessionName }}:
+      alpha: ./
+      beta: volume://{{ namespace }}_{{ tag }}_data_sync
+      mode: two-way-resolved
+      configurationBeta:
+        permissions:
+          defaultOwner: id:1000
+          defaultGroup: id:1000
+
+{% endif %}
 networks:
   public:
   private:
