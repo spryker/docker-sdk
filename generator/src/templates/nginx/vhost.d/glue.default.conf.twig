@@ -1,2 +1,1 @@
-    client_max_body_size 2m;
-
+    client_max_body_size {{ applicationData['http']['max-request-body-size'] | default('2m') }};
