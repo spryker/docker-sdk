@@ -67,3 +67,4 @@ To start working with Spryker in Docker, see [Docker SDK](https://documentation.
 | kibana  | kibana  | 5.6* |
 |   |   | 6.8 |
 | blackfire  | blackfire  | latest |
+| webdriver  | chromedriver  | latest |
