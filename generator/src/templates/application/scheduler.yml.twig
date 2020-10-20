@@ -1,0 +1,35 @@
+{% set schema = _project['docker']['ssl']['enabled'] ? 'https://' : 'http://' %}
+{% set hostname = applicationData['endpoints'] | keys | first | split(':') | first %}
+  {{ applicationName | lower }}:
+    image: ${SPRYKER_DOCKER_PREFIX}_scheduler_app:${SPRYKER_DOCKER_TAG}
+    hostname: {{ hostname }}
+    depends_on:
+        - database
+        - broker
+        - key_value_store
+        - search
+    networks:
+        - private
+    labels:
+        'spryker.app.name': {{ applicationName }}
+        'spryker.app.type': zed
+        'spryker.project': ${SPRYKER_DOCKER_PREFIX}:${SPRYKER_DOCKER_TAG}
+    healthcheck:
+        test: [ "CMD", "nc", "-z", "localhost", "3012" ]
+        interval: 10s
+        timeout: 5s
+        retries: 5
+    environment:
+        CRONICLE_master_ping_freq: 1
+        CRONICLE_master_ping_timeout: 1
+        CRONICLE_base_app_url: {{ schema ~ hostname }}
+    env_file:
+        - ${DEPLOYMENT_PATH}/env/{{ applicationName }}.env
+    volumes:
+        - {{ applicationName }}-data:/home/spryker/cronicle/data
+        - ./${DEPLOYMENT_PATH}/env/cli:/home/spryker/env:consistent,ro
+        - ./docker/context/cronicle/conf/hook.js:/home/spryker/cronicle/conf/hook.js:rw
+        - ./docker/context/cronicle/bin/control.sh:/home/spryker/cronicle/bin/control.sh:rw
+        - ./docker/context/cronicle/entrypoint.sh:/home/spryker/cronicle/entrypoint.sh:rw
+        - logs:${SPRYKER_LOG_DIRECTORY}:rw
+        - ${SPRYKER_DOCKER_PREFIX}_${SPRYKER_DOCKER_TAG}_data_sync:/data

@@ -1,2 +1,2 @@
       SPRYKER_DB_ENGINE = "pgsql"
-      SPRYKER_DB_DATABASE = {{ regionData['database'] | default(serviceData['database']) | env_var }}
+      SPRYKER_DB_DATABASE = {{ regionData['database'] | default(serviceData['database']) | tf_var }}

@@ -9,6 +9,10 @@ image: spryker/php:7.2
 regions:
   EU:
     services:
+      mail:
+        sender:
+          name: Spryker No-Reply
+          email: no-reply@spryker.local
       database:
         database: eu-docker
         username: spryker
@@ -17,6 +21,10 @@ regions:
     stores:
       DE:
         services:
+          mail:
+            sender:
+              name: Spryker No-Reply [DE]
+              email: no-reply@de.spryker.local
           broker:
             namespace: de-docker
           key_value_store:

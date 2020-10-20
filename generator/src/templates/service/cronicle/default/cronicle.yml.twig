@@ -1,5 +1,5 @@
   {{ serviceName }}:
-    image: ${SPRYKER_DOCKER_PREFIX}_scheduler:${SPRYKER_DOCKER_TAG}
+    image: ${SPRYKER_DOCKER_PREFIX}_scheduler_app:${SPRYKER_DOCKER_TAG}
     hostname: scheduler.spryker.local
     networks:
       - private
@@ -16,7 +16,12 @@
       CRONICLE_master_ping_freq: 1
       CRONICLE_master_ping_timeout: 1
       CRONICLE_base_app_url: http://scheduler.spryker.local
+    env_file:
+      - ${DEPLOYMENT_PATH}/env/zed_eu.env
     volumes:
       - {{ serviceName }}-{{ serviceData['engine'] }}-data:/home/spryker/cronicle/data
       - ./${DEPLOYMENT_PATH}/env/cli:/home/spryker/env:consistent,ro
+      - ./docker/context/cronicle/conf/hook.js:/home/spryker/cronicle/conf/hook.js:rw
+      - ./docker/context/cronicle/bin/control.sh:/home/spryker/cronicle/bin/control.sh:rw
+      - ./docker/context/cronicle/entrypoint.sh:/home/spryker/cronicle/entrypoint.sh:rw
 {% include "application-volumes.yml.twig" with project %}

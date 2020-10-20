@@ -1,5 +1,5 @@
 # Spryker Commerce OS - Docker SDK
-[![Build Status](https://travis-ci.org/spryker/docker-sdk.svg)](https://travis-ci.org/spryker/docker-sdk)
+[![Build Status](https://travis-ci.com/spryker/docker-sdk.svg?branch=master)](https://travis-ci.com/spryker/docker-sdk)
 
 ## Description
 
@@ -8,7 +8,7 @@ Spryker Docker SDK helps to setup docker environment for your Spryker project.
 This repository does not contain the specific Dockerfile or docker-compose files.
 It contains a tool which prepares those files automatically in order to match the infrastructure specific to your Spryker project.
 
-Spryker Docker SDK requires the [Deploy file](https://documentation.spryker.com/installation/spryker_in_docker/docker_sdk/deploy-file-reference-version-1-201907.htm).
+Spryker Docker SDK requires the [Deploy file](https://documentation.spryker.com/docs/deploy-file-reference-10).
 The tool reads the specified Deploy file and builds a production-like Docker infrastructure for Spryker accordingly.
 
 The purposes of the tool:
@@ -41,7 +41,7 @@ docker/sdk up
 
 ## Documentation
 
-To start working with Spryker in Docker, follow [the link](https://documentation.spryker.com/installation/spryker_in_docker/docker_sdk/docker-sdk.htm).
+To start working with Spryker in Docker, see [Docker SDK](https://documentation.spryker.com/docs/docker-sdk).
 
 ## Supported services
 
@@ -52,18 +52,18 @@ To start working with Spryker in Docker, follow [the link](https://documentation
 |   |   | 11  |
 |   |   | 12  |
 |   | mysql  | 5.7  |
-|   | mysql  | mariadb-10.2  |
-|   | mysql  | mariadb-10.3  |
-|   | mysql  | mariadb-10.4*  |
+|   |   | mariadb-10.2  |
+|   |   | mariadb-10.3  |
+|   |   | mariadb-10.4  |
 | broker  | rabbitmq  | 3.7  |
 | session  | redis  | 5.0  |
 | key_value_store  | redis  | 5.0  |
-| search  | elastic  | 5.6  |
+| search  | elastic  | 5.6*  |
 |   |   | 6.8  |
-|   |   | 7.6*  |
+|   |   | 7.6  |
 | scheduler  | jenkins  | 2.176  |
 | mail_catcher  | mailhog  | 1.0  |
 | swagger  | swagger-ui  | v3.24  |
-| kibana  | kibana  | 5.6 |
+| kibana  | kibana  | 5.6* |
 |   |   | 6.8 |
 | blackfire  | blackfire  | latest |

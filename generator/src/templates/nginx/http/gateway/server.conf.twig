@@ -10,7 +10,6 @@ server {
 {% if ssl %}
     include /etc/nginx/vhost.d/ssl.default.conf;
 {% endif %}
-
 {% block locations %}
     location / {
         proxy_set_header Host $host;
@@ -20,8 +19,9 @@ server {
         proxy_pass http://{% block upstream %}{{ upstream }}{% endblock upstream %};
     }
 {% endblock locations %}
-
     error_page 497 {{ desiredProtocol }}://$host{{ isPortCustom ? ':' ~ port : '' }}$request_uri;
+
+{% include "nginx/vhost.d/timeouts.conf.twig" with { timeout: '60m' } %}
 }
 
 {% if not isPortCustom and portToListen is not defined %}

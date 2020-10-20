@@ -2,7 +2,7 @@
 {% block locations %}
 
 {% if endpointData['redirect'] is not empty %}
-    return {{ endpointData['redirect']['code'] | default(302) }} "${scheme}://{{ endpointData['redirect']['url'] }}";
+    return {{ endpointData['redirect']['code'] | default(302) }} "{{ endpointData['redirect']['url'] }}";
 {% else %}
 
     location / {

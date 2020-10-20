@@ -1,0 +1,9 @@
+    proxy_connect_timeout {{ timeout }};
+    proxy_read_timeout {{ timeout }};
+    proxy_send_timeout {{ timeout }};
+    fastcgi_send_timeout {{ timeout }};
+    fastcgi_read_timeout {{ timeout }};
+    client_body_timeout {{ timeout }};
+    client_header_timeout {{ timeout }};
+    send_timeout {{ timeout }};
+    keepalive_timeout {{ timeout }};

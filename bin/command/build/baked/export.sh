@@ -66,7 +66,7 @@ function Command::export() {
             Images::printAll "${tag}"
             ;;
         *)
-            Console::error "Unknown export '${subCommand}' is occurred. No action. Usage: ${HELP_SCR}${SELF_SCRIPT} images [-t <tag>]" > /dev/stderr
+            Console::error "Unknown export '${subCommand}' is occurred. No action. Usage: ${HELP_SCR}${SELF_SCRIPT} export images [-t <tag>]" > /dev/stderr
             exit 1
             ;;
     esac

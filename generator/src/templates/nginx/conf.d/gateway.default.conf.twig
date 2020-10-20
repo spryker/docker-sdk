@@ -9,9 +9,19 @@ map $http_upgrade $connection_upgrade {
     ''      close;
 }
 
-map $cookie_XDEBUG_SESSION $xdebug_mode {
+map "${SPRYKER_XDEBUG_MODE_ENABLE}" $xdebug_mode_enabled {
+    "1"      "_xdebug";
+    default "";
+}
+
+map $cookie_XDEBUG_SESSION $xdebug_mode_from_cookie {
     ""      "";
-    default "_xdebug";
+    default "$xdebug_mode_enabled";
+}
+
+map "${SPRYKER_XDEBUG_ENABLE}" $xdebug_mode {
+    "1"      "$xdebug_mode_enabled";
+    default "$xdebug_mode_from_cookie";
 }
 
 server {
@@ -41,9 +51,11 @@ server {
 upstream {{ upstream }} {
     server frontend:{{ port }};
 }
+{% if applicationData['application'] != 'static' %}
 upstream {{ upstream }}_xdebug {
     server frontend:{{ debugPort }};
 }
+{% endif %}
 {% include "nginx/http/gateway/server.conf.twig" with {
     ssl: ssl,
     endpoint: endpoint,
@@ -52,6 +64,7 @@ upstream {{ upstream }}_xdebug {
     project: _context
 } %}
 
+{% if applicationData['application'] != 'static' and applicationData['application'] != 'scheduler' %}
 # Debug: {{ endpoint }}
 {% include "nginx/http/gateway/server.conf.twig" with {
     portToListen: debugPort,
@@ -61,6 +74,7 @@ upstream {{ upstream }}_xdebug {
     upstream: upstream ~ '_xdebug',
     project: _context
 } %}
+{% endif %}
 {% endfor %}
 {% endfor %}
 {% endfor %}

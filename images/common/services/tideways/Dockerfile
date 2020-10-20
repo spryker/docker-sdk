@@ -1,4 +1,4 @@
-FROM debian:stable-slim
+FROM debian:stable-slim AS tideways-deamon
 
 ARG TIDEWAYS_ENVIRONMENT_DEFAULT=production
 ENV TIDEWAYS_ENVIRONMENT=$TIDEWAYS_ENVIRONMENT_DEFAULT

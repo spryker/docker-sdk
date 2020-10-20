@@ -13,7 +13,8 @@ function Command::sync() {
             sync start
             ;;
         logs|log)
-            sync logs
+            sync logs # TODO deprecated, use Mount::logs instead
+            Mount::logs "${@}"
             ;;
         *)
             Console::error "Unknown command ${INFO}${command}${WARN} is occurred."

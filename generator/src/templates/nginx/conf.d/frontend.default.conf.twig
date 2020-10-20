@@ -8,6 +8,11 @@
 {% endfor %}
 {% endif %}
 
+map $http_upgrade $connection_upgrade {
+    default upgrade;
+    ''      close;
+}
+
 server {
     server_name _ default; # This is just an invalid value which will never trigger on a real hostname.
     listen 80;
@@ -22,10 +27,12 @@ server {
 {% include "nginx/http/#{applicationData['application']}.server.conf.twig" with {
     endpoint: endpoint,
     endpointData: endpointData,
+    applicationName: applicationName,
     auth: endpointData['auth'] | default([]),
     storeServices: regions[groupData['region']]['stores'][endpointData['store']]['services'] | default([]),
     upstream: "${SPRYKER_NGINX_CGI_" ~ (applicationName | upper) ~ "}",
     zedHost: _endpointMap[endpointData['store']]['zed'] | default(''),
+    timeout: '1m',
     project: _context
 } %}
 {% endfor %}

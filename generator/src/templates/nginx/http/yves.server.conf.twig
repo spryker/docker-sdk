@@ -3,6 +3,7 @@
 {{ parent() }}
 
 {% include "nginx/vhost.d/yves.default.conf.twig" with _context %}
+{% include "nginx/vhost.d/timeouts.conf.twig" with { timeout: timeout | default('1m') } %}
 {% endblock server %}
 {% block location %}
 {{ parent() }}
@@ -11,5 +12,12 @@
 
         fastcgi_param SPRYKER_SESSION_FE_NAMESPACE "{{ storeServices['session']['namespace'] | default(endpointData['services']['session']['namespace']) }}";
         fastcgi_param SPRYKER_FE_HOST "{{ host }}";
-        fastcgi_param SPRYKER_FE_PORT "{{ port }}";
+        fastcgi_param SPRYKER_FE_PORT "{{ externalPort }}";
+
+{% if storeServices['mail']['sender']['email'] is not empty %}
+        fastcgi_param SPRYKER_MAIL_SENDER_EMAIL "{{ storeServices['mail']['sender']['email'] }}";
+{% endif %}
+{% if storeServices['mail']['sender']['name'] is not empty %}
+        fastcgi_param SPRYKER_MAIL_SENDER_NAME "{{ storeServices['mail']['sender']['name'] }}";
+{% endif %}
 {% endblock location %}

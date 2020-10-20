@@ -5,6 +5,9 @@ set -e
 
 SELF_SCRIPT=${SELF_SCRIPT:-$0}
 
+# Overridable
+DOCKER_COMPOSE_SUBSTITUTE='docker-compose'
+
 pushd "${BASH_SOURCE%/*}" >/dev/null
 . ./bin/framework.sh
 popd >/dev/null
@@ -12,6 +15,7 @@ popd >/dev/null
 import environment/cross-platform.sh
 import environment/docker.sh
 import environment/docker-compose.sh
+import environment/composer.sh
 
 # Help intro
 import command/deploy.sh
@@ -62,7 +66,6 @@ import command/internal/sync.sh
 import command/internal/prune.sh
 
 # Installers
-import installer/vcs.sh
 {% if services['scheduler']['engine'] is defined and services['scheduler']['engine'] == 'jenkins' %}
 import installer/jenkins-template.sh
 {% endif %}
@@ -79,7 +82,9 @@ import installer/autoload-cache.sh
 # Services
 import service/database/{{ services['database']['engine'] }}.sh
 import service/broker/{{ services['broker']['engine'] }}.sh
-import service/scheduler/{{ services['scheduler']['engine'] }}.sh
+{% if services['scheduler'] is defined %}
+    import service/scheduler/{{ services['scheduler']['engine'] }}.sh
+{% endif %}
 
 # Implementation
 import sdk/compose.sh
@@ -97,6 +102,7 @@ System::Bootstrap
 readonly PROJECT_DIR="$(pwd)"
 readonly DEPLOYMENT_DIR="$(cd "${BASH_SOURCE%/*}" >/dev/null 2>&1 && pwd)"
 readonly DEPLOYMENT_PATH="${DEPLOYMENT_DIR/$PROJECT_DIR/.}"
+readonly SECRETS_FILE_PATH="${DEPLOYMENT_DIR}/.secrets"
 readonly PROGRESS_TYPE=${PROGRESS_TYPE:-tty}
 VERBOSE=${VERBOSE:-0}
 
@@ -116,8 +122,11 @@ readonly SPRYKER_LOG_DIRECTORY="{{ docker['logs']['path'] | default('/var/log/sp
 readonly SPRYKER_ASSETS_MODE="{{ assets['mode'] | default('development') }}"
 readonly SPRYKER_DB_ENGINE="{{ services['database']['engine'] == 'mysql' ? 'mysql' : 'pgsql' }}"
 readonly SPRYKER_STORES=({{ regions | map((regionData, region) => "'local REGION=" ~ '"' ~ region ~ '"' ~ "; local STORES=(" ~ (regionData['stores'] | keys | join(' ')) ~ ")'") | join(' ') | raw }})
-readonly SPRYKER_DEFAULT_STORE={{ (regions | first)['stores'] | keys | first }}
+readonly SPRYKER_DEFAULT_STORE="{{ (regions | first)['stores'] | keys | first }}"
 readonly SPRYKER_FILE_MODE="{{ _fileMode }}"
+readonly SPRYKER_XDEBUG_MODE_ENABLE="{{ docker['debug']['xdebug']['enabled'] is not defined or docker['debug']['xdebug']['enabled'] == true ? '1' : '' }}"
+readonly SPRYKER_SYNC_SESSION_NAME="{{ _syncSessionName }}"
+readonly SPRYKER_SYNC_VOLUME="${SPRYKER_DOCKER_PREFIX}_${SPRYKER_DOCKER_TAG}_data_sync"
 readonly DOCKER_COMPOSE_FILES_EXTRA="{{ docker['compose']['yamls'] | default([]) | join(' ') }}"
 readonly SPRYKER_DASHBOARD_ENDPOINT="{{ _dashboardEndpoint }}"
 readonly KNOWN_HOSTS="{{ _knownHosts | default("") }}"
@@ -132,18 +141,23 @@ readonly SPRYKER_REPOSITORY_HASH="${SPRYKER_BUILD_HASH:-"$(git rev-parse --verif
 {% endfor %}
 
 # Variables from environment
-SPRYKER_XDEBUG_ENABLE=${SPRYKER_XDEBUG_ENABLE:-0}
-SPRYKER_TESTING_ENABLE=${SPRYKER_TESTING_ENABLE:-0}
+SPRYKER_XDEBUG_ENABLE="$([ "${SPRYKER_XDEBUG_ENABLE}" == '1' ] && echo '1' || echo '')"
+SPRYKER_XDEBUG_ENABLE_FOR_CLI=''
+SPRYKER_TESTING_ENABLE="$([ "${SPRYKER_TESTING_ENABLE}" == '1' ] && echo '1' || echo '')"
+SPRYKER_TESTING_ENABLE_FOR_CLI=''
 SPRYKER_CURRENT_STORE=${SPRYKER_STORE:-${APPLICATION_STORE:-${SPRYKER_DEFAULT_STORE}}}
 readonly GITHUB_TOKEN=${GITHUB_TOKEN:-''}
 if [ -n "${GITHUB_TOKEN}" ]; then
     readonly TOKEN_BASED_COMPOSER_AUTH="{\"github-oauth\":{\"github.com\":\"${GITHUB_TOKEN}\"}}"
 fi
 readonly COMPOSER_AUTH=${COMPOSER_AUTH:-${TOKEN_BASED_COMPOSER_AUTH}}
+readonly SSH_AUTH_SOCK_ON_HOST=${SSH_AUTH_SOCK:-"${DEPLOYMENT_PATH}/context/ssh/ssh-agent.mock"}
+readonly SSH_AUTH_SOCK_IN_CLI="$([ -n "${SSH_AUTH_SOCK}" ] && [ -z "${COMPOSER_AUTH}" ] && echo '/home/spryker/ssh-relay/ssh-auth.sock' || echo '')"
 
 # Global variables
 readonly USER_FULL_ID=$(Environment::getFullUserId)
 readonly SPRYKER_XDEBUG_HOST_IP=$(Environment::getHostIp)
+readonly SECRETS_ENVIRONMENT=("COMPOSER_AUTH='${COMPOSER_AUTH}'")
 
 command=${1}
 shift || true
@@ -179,9 +193,12 @@ shift $((OPTIND - 1))
 # Exporting for docker-compose
 export DEPLOYMENT_PATH
 export SPRYKER_XDEBUG_HOST_IP
+export SSH_AUTH_SOCK_ON_HOST
 export COMPOSE_PROJECT_NAME
 export SPRYKER_DOCKER_PREFIX
 export SPRYKER_DOCKER_TAG
+export SPRYKER_XDEBUG_MODE_ENABLE
+export SPRYKER_XDEBUG_ENABLE
 export SPRYKER_LOG_DIRECTORY
 export SPRYKER_BUILD_HASH
 export SPRYKER_BUILD_DATE

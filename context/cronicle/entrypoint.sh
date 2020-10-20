@@ -1,7 +1,7 @@
 #!/bin/bash
 
-set -e
-set -x
+# set -e
+# set -x
 
 ROOT_DIR=/home/spryker/cronicle
 CONF_DIR=$ROOT_DIR/conf
@@ -11,7 +11,7 @@ DATA_DIR=$ROOT_DIR/data
 # PLUGINS_DIR needs to be the same as the exposed Docker volume in Dockerfile
 PLUGINS_DIR=$ROOT_DIR/plugins
 
-rm -f "${ROOT_DIR}/logs/cronicle.pid"
+rm -f "${ROOT_DIR}/logs/cronicled.pid"
 
 # The env variables below are needed for Docker and cannot be overwritten
 export CRONICLE_Storage__Filesystem__base_dir=${DATA_DIR}
@@ -22,7 +22,7 @@ export CRONICLE_foreground=1
 # Only run setup when setup needs to be done
 if [ ! -f "$DATA_DIR/.setup_done" ]
 then
-  "$BIN_DIR/control.sh" setup
+  bash "$BIN_DIR/control.sh" setup
 
 #  cp "$CONF_DIR/config.json" "$CONF_DIR/config.json.origin"
 #
@@ -40,4 +40,4 @@ then
 fi
 
 # Run cronicle
-"$BIN_DIR/control.sh" start
+bash "$BIN_DIR/control.sh" start
