@@ -1135,7 +1135,9 @@ function buildSecrets(string $deploymentDir): array
 function generateOpenSshKeys(string $deploymentDir): array
 {
     $sshDir = $deploymentDir . DS . 'context' . DS . 'ssh';
-    mkdir($sshDir);
+    if (!file_exists($sshDir)) {
+        mkdir($sshDir);
+    }
 
     $generatePrivateKeyCommandTemplate = 'openssl genrsa -out %s 2048 2>&1';
     $generatePublicKeyCommandTemplate = 'openssl rsa -in %s -pubout -out %s 2>&1';

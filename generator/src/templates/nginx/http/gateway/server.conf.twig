@@ -21,6 +21,7 @@ server {
 {% endblock locations %}
     error_page 497 {{ desiredProtocol }}://$host{{ isPortCustom ? ':' ~ port : '' }}$request_uri;
 
+    client_max_body_size 0;
 {% include "nginx/vhost.d/timeouts.conf.twig" with { timeout: '60m' } %}
 }
 
