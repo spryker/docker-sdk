@@ -128,7 +128,13 @@ foreach ($projectData['groups'] ?? [] as $groupName => $groupData) {
             }
 
             if ($applicationData['application'] === 'scheduler') {
-                $projectData['_schedulers'][$groupName][] = $applicationData['scheduler-id'];
+                $host = array_key_first($applicationData['endpoints']);
+                $port = $applicationData['endpoints'][$host] ?: '';
+                $apiKey = generateToken(32);
+                $projectData['_schedulers'][$groupName][$applicationData['scheduler-id']] = [
+                    'base_url' => sprintf('%s://%s:%s', getCurrentScheme($projectData), $host, $port),
+                    'api_key' => $apiKey,
+                ];
             }
 
             $entryPoint = $endpointData['entry-point'] ?? ucfirst(strtolower($applicationData['application']));
@@ -207,10 +213,11 @@ foreach ($projectData['groups'] ?? [] as $groupName => $groupData) {
                 'regionName' => $groupData['region'],
                 'regionData' => $projectData['regions'][$groupData['region']],
                 'brokerConnections' => getBrokerConnections($projectData),
+                'enabledSchedulers' => json_encode($projectData['_schedulers'][$groupName] ?? [], JSON_UNESCAPED_SLASHES),
             ];
 
-            if ($applicationData['application'] === 'zed') {
-                $data['enabledSchedulers'] = json_encode($projectData['_schedulers'][$groupName] ?? []);
+            if ($applicationData['application'] === 'scheduler') {
+                $data['applicationData']['cronicleApiKey'] = $projectData['_schedulers'][$groupName][$applicationData['scheduler-id']]['api_key'];
             }
 
             file_put_contents(
@@ -283,7 +290,7 @@ foreach ($projectData['groups'] ?? [] as $groupName => $groupData) {
                         'storeName' => $endpointData['store'],
                         'services' => $services,
                         'endpointMap' => $endpointMap,
-                        'enabledSchedulers' => json_encode($projectData['_schedulers'][$groupName] ?? [])
+                        'enabledSchedulers' => json_encode($projectData['_schedulers'][$groupName] ?? [], JSON_UNESCAPED_SLASHES)
                     ])
                 );
 
@@ -393,6 +400,7 @@ file_put_contents(
 );
 
 $envVarEncoder->setIsActive(true);
+
 file_put_contents(
     $deploymentDir . DS . 'terraform/environment.tf',
     $twig->render('terraform/environment.tf.twig', [

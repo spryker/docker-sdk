@@ -24,3 +24,10 @@
 {% include "terraform/mail/mail.tf.twig" with {
     serviceData: regionData['services']['mail']
 } %}
+
+      SPRYKER_ENABLED_SCHEDULERS = {{ project['_schedulers'][regionName] | json_encode | tf_var }}
+      SPRYKER_CURRENT_SCHEDULER = {{ applicationData['scheduler-id'] | tf_var }}
+      SPRYKER_SCHEDULER_API_KEY = {{ project['_schedulers'][regionName][applicationData['scheduler-id']]['api_key'] | tf_var }}
+      SPRYKER_SCHEDULER_ADMIN_USERNAME = {{ applicationData['admin']['username'] | default('spryker') | tf_var }}
+      SPRYKER_SCHEDULER_ADMIN_PASSWORD = {{ applicationData['admin']['password'] | default('secret') | tf_var }}
+      SPRYKER_SCHEDULER_ADMIN_EMAIL = {{ applicationData['admin']['email'] | default('admin@spryker.local') | tf_var }}

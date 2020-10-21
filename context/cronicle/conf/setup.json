@@ -42,18 +42,6 @@
 			"max_children": 0
 		} ],
 		[ "listCreate", "global/server_groups", {} ],
-		[ "listPush", "global/server_groups", {
-			"id": "maingrp",
-			"title": "Master Group",
-			"regexp": "_HOSTNAME_",
-			"master": 1
-		} ],
-		[ "listPush", "global/server_groups", {
-			"id": "allgrp",
-			"title": "All Servers",
-			"regexp": ".+",
-			"master": 0
-		} ],
 		[ "listCreate", "global/servers", {} ],
 		[ "listPush", "global/servers", {
 			"hostname": "_HOSTNAME_",

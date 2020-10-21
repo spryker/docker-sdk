@@ -107,7 +107,7 @@ do
 		exit
 	;;
 	admin)
-		node $HOMEDIR/bin/storage-cli.js admin $2 $3
+		node $HOMEDIR/bin/storage-cli.js admin $2 $3 $4
 		exit
 	;;
 	export)

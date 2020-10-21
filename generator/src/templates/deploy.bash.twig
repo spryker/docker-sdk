@@ -82,9 +82,8 @@ import installer/autoload-cache.sh
 # Services
 import service/database/{{ services['database']['engine'] }}.sh
 import service/broker/{{ services['broker']['engine'] }}.sh
-{% if services['scheduler'] is defined %}
-    import service/scheduler/{{ services['scheduler']['engine'] }}.sh
-{% endif %}
+{% set scheduler = services['scheduler'] is defined ? services['scheduler']['engine'] : 'scheduler' %}
+import service/scheduler/{{ scheduler }}.sh
 
 # Implementation
 import sdk/compose.sh

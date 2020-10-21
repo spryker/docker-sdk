@@ -65,7 +65,7 @@ upstream {{ upstream }}_xdebug {
     project: _context
 } %}
 
-{% if applicationData['application'] != 'static' and applicationData['application'] != 'scheduler' %}
+{% if applicationData['application'] != 'static' %}
 # Debug: {{ endpoint }}
 {% include "nginx/http/gateway/server.conf.twig" with {
     portToListen: debugPort,

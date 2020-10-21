@@ -12,7 +12,7 @@
         - private
     labels:
         'spryker.app.name': {{ applicationName }}
-        'spryker.app.type': zed
+        'spryker.app.type': scheduler
         'spryker.project': ${SPRYKER_DOCKER_PREFIX}:${SPRYKER_DOCKER_TAG}
     healthcheck:
         test: [ "CMD", "nc", "-z", "localhost", "3012" ]
@@ -23,6 +23,8 @@
         CRONICLE_master_ping_freq: 1
         CRONICLE_master_ping_timeout: 1
         CRONICLE_base_app_url: {{ schema ~ hostname }}
+        CRONICLE_smtp_hostname: 'mail_catcher'
+        CRONICLE_smtp_port: 1025
     env_file:
         - ${DEPLOYMENT_PATH}/env/{{ applicationName }}.env
     volumes:

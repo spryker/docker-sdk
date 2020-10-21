@@ -1,8 +1,5 @@
 #!/bin/bash
 
-# set -e
-# set -x
-
 ROOT_DIR=/home/spryker/cronicle
 CONF_DIR=$ROOT_DIR/conf
 BIN_DIR=$ROOT_DIR/bin

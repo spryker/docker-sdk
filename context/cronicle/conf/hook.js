@@ -3,8 +3,6 @@
 var path = require('path');
 var cp = require('child_process');
 var os = require('os');
-var fs = require('fs');
-var async = require('async');
 var bcrypt = require('bcrypt-node');
 
 var Args = require('pixl-args');
@@ -129,13 +127,100 @@ var storage = new StandaloneStorage(config.Storage, function (err) {
 
     verbose("\n");
 
-    console.log('=========');
-    console.log('bbb');
-    console.log('=========');
-    console.log(cmd);
-    console.log('=========');
     switch (cmd) {
         case 'before-start':
+
+            // Setting up the default user
+            let username = process.env.SPRYKER_SCHEDULER_USERNAME || 'spryker';
+                username = username.toLowerCase()
+            let password = process.env.SPRYKER_SCHEDULER_PASSWORD || 'secret';
+            let email = process.env.SPRYKER_SCHEDULER_EMAIL || 'admin@spryker.local';
+
+            storage.get('users/' + username, function(err, user) {
+                if (err) {
+                    print('ERROR: ' + err);
+                }
+
+                if (!user) {
+                    let user = {
+                        username: username,
+                        password: password,
+                        full_name: "Spryker",
+                        email: email
+                    };
+
+                    user.active = 1;
+                    user.created = user.modified = Tools.timeNow(true);
+                    user.salt = Tools.generateUniqueID( 64, user.username );
+                    user.password = bcrypt.hashSync( user.password + user.salt );
+                    user.privileges = {
+                        admin: 1
+                    };
+
+                    storage.put('users/' + user.username, user, function(err) {
+                        if (err) {
+                            print('ERROR: ' + err);
+                        }
+                        print( "\nAdministrator '"+username+"' created successfully.\n" );
+                        print("\n");
+                    });
+
+                    storage.listPush('global/users', {"username": user.username}, function(err) {
+                        if (err) {
+                            print('ERROR: ' + err);
+                        }
+                    });
+                }
+
+            });
+
+            // Set up api_key
+            let title = process.env.SPRYKER_CURRENT_SCHEDULER;
+            let key = process.env.SPRYKER_SCHEDULER_API_KEY;
+            let timeNow = Tools.timeNow(true);
+            let apiKeyParams = {
+                'id': title,
+                'title': title,
+                'key': key,
+                'username': 'admin',
+                'created':  timeNow,
+                'modified': timeNow,
+                'active': 1,
+                'privileges': {
+                    admin: 1,
+                },
+            };
+
+            storage.listFindUpdate( 'global/api_keys', { id: apiKeyParams.id }, apiKeyParams, function(err) {
+                if (err) {
+                    storage.listUnshift('global/api_keys', apiKeyParams, function(err) {
+                        if (err) {
+                            print("Failed to create api_key: " + err);
+                            process.exit(1);
+                        }
+                    });
+                }
+            });
+
+            // Set up scheduler group
+            let groupData = {
+                "id": process.env.SPRYKER_CURRENT_SCHEDULER,
+                "title": "Master Group",
+                "regexp": ".+",
+                "master": 1
+            };
+
+            storage.listFindUpdate('global/server_groups', { id: groupData.id }, groupData, function(err, group) {
+                if (err) {
+                    storage.listUnshift('global/server_groups', groupData, function(err) {
+                        if (err) {
+                            print("Failed to create server group: " + err);
+                            process.exit(1);
+                        }
+                    });
+                }
+            });
+
             let scheduledEventIds = {};
             storage.listGet( 'global/schedule', parseInt(0), parseInt(0), function(err, items, list) {
                 for (let i = 0; i <= items.length; i++) {
@@ -145,6 +230,7 @@ var storage = new StandaloneStorage(config.Storage, function (err) {
                         storage.listFindUpdate( 'global/schedule', { id: items[i].id }, items[i], function(err) {
                             if (err) {
                                 print("Failed to update event: " + err);
+                                process.exit(1);
                             }
                         });
                     }
@@ -172,6 +258,7 @@ var storage = new StandaloneStorage(config.Storage, function (err) {
             let errors = '';
             schedulerDataReader.stdout.on('data', (data) => {
                 jobs += String(data);
+
             });
             schedulerDataReader.stderr.on('data', (data) => {
                 errors += String(data);
@@ -184,7 +271,7 @@ var storage = new StandaloneStorage(config.Storage, function (err) {
 
                 let events = JSON.parse(jobs.substring(Math.min(jobs.indexOf("["), jobs.indexOf("{"))));
 
-                var categories = {};
+                let categories = {};
 
                 for (var key in events) {
                     let cat = {
@@ -207,7 +294,8 @@ var storage = new StandaloneStorage(config.Storage, function (err) {
                     if (!globalCategories[cat.id]) {
                         storage.listUnshift('global/categories', cat, function (err) {
                             if (err) {
-                                print('category', "Failed to create category: " + err);
+                                print("Failed to create category: " + err);
+                                process.exit(1);
                             }
                         });
                         globalCategories[cat.id] = cat.title;
@@ -219,12 +307,14 @@ var storage = new StandaloneStorage(config.Storage, function (err) {
                         storage.listFindUpdate( 'global/schedule', { id: event.id }, event, function(err) {
                             if (err) {
                                 print("Failed to update event: " + err);
+                                process.exit(1);
                             }
                         });
                     } else {
                         storage.listUnshift('global/schedule', event, function (err) {
                             if (err) {
                                 print("Failed to create event: " + err);
+                                process.exit(1);
                             }
                         });
                     }
