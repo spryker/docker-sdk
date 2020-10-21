@@ -33,5 +33,4 @@
         - ./docker/context/cronicle/conf/hook.js:/home/spryker/cronicle/conf/hook.js:rw
         - ./docker/context/cronicle/bin/control.sh:/home/spryker/cronicle/bin/control.sh:rw
         - ./docker/context/cronicle/entrypoint.sh:/home/spryker/cronicle/entrypoint.sh:rw
-        - logs:${SPRYKER_LOG_DIRECTORY}:rw
-        - ${SPRYKER_DOCKER_PREFIX}_${SPRYKER_DOCKER_TAG}_data_sync:/data
+    <<: *app-volumes
