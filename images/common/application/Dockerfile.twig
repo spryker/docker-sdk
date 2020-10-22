@@ -3,6 +3,7 @@ ARG SPRYKER_PLATFORM_IMAGE=spryker/php:7.3
 FROM ${SPRYKER_PLATFORM_IMAGE} AS application-basic
 
 ENV SPRYKER_IN_DOCKER=1
+ENV COMPOSER_IGNORE_CHROMEDRIVER=1
 {% for envName, envValue in _envs %}
 ENV {{ envName }}='{{ envValue }}'
 {% endfor %}

@@ -1,4 +1,4 @@
-version: "3.5"
+version: "3.7"
 
 x-volumes:
   &app-volumes
@@ -70,6 +70,10 @@ services:
     environment:
       # TODO reconsider to use default in entrypoint
       ALLOWED_IP: "127.0.0.1"
+      SPRYKER_TESTING_ENABLE: ${SPRYKER_TESTING_ENABLE}
+{% if docker['debug']['xdebug']['enabled'] is not defined or docker['debug']['xdebug']['enabled'] == true %}
+      SPRYKER_XDEBUG_ENABLE: ${SPRYKER_XDEBUG_ENABLE}
+{% endif %}
 {% for group in groups %}
 {% for applicationName, applicationData in group['applications'] %}
 {% if applicationData['application'] != 'static' %}
@@ -113,6 +117,7 @@ services:
 {% endif %}
 {% endfor %}
     environment:
+      SPRYKER_TESTING_ENABLE: ${SPRYKER_TESTING_ENABLE}
       SPRYKER_XDEBUG_MODE_ENABLE: ${SPRYKER_XDEBUG_MODE_ENABLE}
 {% if docker['debug']['xdebug']['enabled'] is not defined or docker['debug']['xdebug']['enabled'] == true %}
       SPRYKER_XDEBUG_ENABLE: ${SPRYKER_XDEBUG_ENABLE}
@@ -136,9 +141,8 @@ services:
 {% endfor %}
 {% endfor %}
 {% for serviceName, serviceData in services %}
-    {% set engine = serviceData['engine'] | lower %}
-    {% set version = serviceData['version'] | default('default') %}
-
+{% set engine = serviceData['engine'] | lower %}
+{% set version = serviceData['version'] | default('default') %}
 {% include "service/" ~ engine ~ "/" ~ version ~ "/" ~  engine ~ ".yml.twig" with { project: _context, serviceName: serviceName, serviceData: serviceData, engine: engine, version: version } only %}
 {% endfor %}
 

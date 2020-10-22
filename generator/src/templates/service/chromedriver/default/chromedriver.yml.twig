@@ -1,0 +1,17 @@
+  {{ serviceName }}:
+    image: spryker/chromedriver
+    networks:
+      - public
+    init: true
+    labels:
+      'spryker.app.name': webdriver
+      'spryker.app.type': services
+      'spryker.project': ${SPRYKER_DOCKER_PREFIX}:${SPRYKER_DOCKER_TAG}
+    expose:
+      - "4444"
+    healthcheck:
+      test: [ "CMD", "bash", "-c", "(echo >/dev/tcp/localhost/4444) &>/dev/null" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    command: [ "--port=4444", "--whitelisted-ips=", "--url-base=/wd/hub" ]

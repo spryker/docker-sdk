@@ -25,6 +25,11 @@ map "${SPRYKER_XDEBUG_ENABLE}" $xdebug_mode {
     default "$xdebug_mode_from_cookie";
 }
 
+map "${SPRYKER_TESTING_ENABLE}" $testing_mode {
+    "1"      "1";
+    default "";
+}
+
 server {
     server_name _ default_ssl; # This is just an invalid value which will never trigger on a real hostname.
     listen 443 ssl http2;

@@ -25,7 +25,6 @@ bootFileCollection=(
     deployment/default/spryker_ca.crt
     deployment/default/project.yml
     deployment/default/docker-compose.yml
-    deployment/default/docker-compose.test.yml
 )
 
 checkFiles "${bootFileCollection[@]}"
