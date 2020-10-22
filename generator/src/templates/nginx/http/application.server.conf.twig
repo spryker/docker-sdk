@@ -17,7 +17,7 @@
 
     location ~ \.php$ {
         include fastcgi.conf;
-        fastcgi_pass {{ upstream }};
+        fastcgi_pass {{ fast_cgi_upstream }};
         fastcgi_intercept_errors off;
         try_files $fastcgi_script_name @proxy;
     }
@@ -25,7 +25,7 @@
     location @proxy {
 {% block location %}
         include fastcgi.conf;
-        fastcgi_pass "{{ upstream }}";
+        fastcgi_pass "{{ fast_cgi_upstream }}";
 
 {% include "nginx/http/default.location.conf.twig" with _context %}
 

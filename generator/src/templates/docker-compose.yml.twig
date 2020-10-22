@@ -72,8 +72,10 @@ services:
       ALLOWED_IP: "127.0.0.1"
 {% for group in groups %}
 {% for applicationName, applicationData in group['applications'] %}
-{% if applicationData['application'] != 'static' %}
-      SPRYKER_NGINX_CGI_HOST_{{ applicationName | upper }}: {{ applicationName | lower }}
+{% if applicationData['application'] == 'scheduler' %}
+      SPRYKER_NGINX_CGI_{{ applicationName | upper }}: {{ applicationName | lower }}:3012
+{% elseif applicationData['application'] != 'static' %}
+      SPRYKER_NGINX_CGI_{{ applicationName | upper }}: {{ applicationName | lower }}:9000
 {% endif %}
 {% endfor %}
 {% endfor %}

@@ -6,6 +6,6 @@
     location =/build.php {
         root /home/spryker;
         include fastcgi.conf;
-        fastcgi_pass {{ upstream }};
+        fastcgi_pass {{ fast_cgi_upstream }};
         fastcgi_intercept_errors off;
     }

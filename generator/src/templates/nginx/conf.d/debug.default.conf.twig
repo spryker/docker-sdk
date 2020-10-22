@@ -10,7 +10,8 @@
     applicationData: applicationData,
     auth: endpointData['auth'] | default([]),
     storeServices: regions[groupData['region']]['stores'][endpointData['store']]['services'] | default([]),
-    upstream: (applicationName | lower) ~ ":9001",
+    upstream: (applicationName | lower),
+    fast_cgi_upstream: (applicationName | lower) ~ ":9001",
     zedHost: (zedEndpoint | split(':') | first) ~ ':' ~ (_endpointDebugMap[zedEndpoint]),
     timeout: '60m',
     project: _context
