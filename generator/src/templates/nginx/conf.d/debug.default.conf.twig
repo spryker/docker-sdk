@@ -7,6 +7,7 @@
     portToListen: _endpointDebugMap[endpoint],
     endpoint: endpoint,
     endpointData: endpointData,
+    applicationData: applicationData,
     auth: endpointData['auth'] | default([]),
     storeServices: regions[groupData['region']]['stores'][endpointData['store']]['services'] | default([]),
     upstream: (applicationName | lower) ~ ":9001",

@@ -90,7 +90,14 @@ $isAutoloadCacheEnabled = $projectData['_isAutoloadCacheEnabled'] = isAutoloadCa
 $projectData['_requirementAnalyzerData'] = buildDataForRequirementAnalyzer($projectData);
 $projectData['secrets'] = buildSecrets($deploymentDir);
 
-// Making dashboard a required service
+// TODO Make it optional in next major
+// Making webdriver as required service for BC reasons
+if (empty($projectData['services']['webdriver'])) {
+    $projectData['services']['webdriver'] = [
+        'engine' => 'phantomjs',
+    ];
+}
+
 $projectData['_dashboardEndpoint'] = '';
 if (!empty($projectData['services']['dashboard'])) {
     $projectData['services']['dashboard']['endpoints'] = $projectData['services']['dashboard']['endpoints'] ?? [
@@ -399,10 +406,6 @@ unlink($deploymentDir . DS . 'images' . DS . 'common' . DS . 'application' . DS 
 file_put_contents(
     $deploymentDir . DS . 'docker-compose.yml',
     $twig->render('docker-compose.yml.twig', $projectData)
-);
-file_put_contents(
-    $deploymentDir . DS . 'docker-compose.test.yml',
-    $twig->render('docker-compose.test.yml.twig', $projectData)
 );
 
 verbose('Generating scripts... [DONE]');
@@ -1109,7 +1112,9 @@ function buildSecrets(string $deploymentDir): array
 function generateOpenSshKeys(string $deploymentDir): array
 {
     $sshDir = $deploymentDir . DS . 'context' . DS . 'ssh';
-    mkdir($sshDir);
+    if (!file_exists($sshDir)) {
+        mkdir($sshDir);
+    }
 
     $generatePrivateKeyCommandTemplate = 'openssl genrsa -out %s 2048 2>&1';
     $generatePublicKeyCommandTemplate = 'openssl rsa -in %s -pubout -out %s 2>&1';

@@ -62,6 +62,8 @@ To start working with Spryker in Docker, see [Docker SDK](https://documentation.
 |   |   | 6.8  |
 |   |   | 7.6  |
 | scheduler  | jenkins  | 2.176  |
+| webdriver  | phantomjs  | latest* |
+|   | chromedriver  | latest |
 | mail_catcher  | mailhog  | 1.0  |
 | swagger  | swagger-ui  | v3.24  |
 | kibana  | kibana  | 5.6* |

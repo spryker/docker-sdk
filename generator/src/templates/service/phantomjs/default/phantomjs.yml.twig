@@ -1,17 +1,4 @@
-version: "3.5"
-
-services:
-{% for group in groups %}
-{% for applicationName, applicationData in group['applications'] %}
-{% if applicationData['application'] != 'static' %}
-  {{ applicationName | lower }}:
-    environment:
-      SPRYKER_TESTING_ENABLED: 1
-{% endif %}
-{% endfor %}
-{% endfor %}
-
-  webdriver:
+  {{ serviceName }}:
     image: wernight/phantomjs:latest
     networks:
       - public
@@ -27,9 +14,3 @@ services:
       timeout: 5s
       retries: 5
     command: "phantomjs --webdriver=4444 --ignore-ssl-errors=true --disk-cache=true --load-images=false --webdriver-loglevel=DEBUG"
-
-  scheduler:
-    image: nginx:alpine
-    user: "0:0"
-    volumes:
-      - ./${DEPLOYMENT_PATH}/context/nginx/dummy/scheduler.conf:/etc/nginx/conf.d/default.conf:ro

@@ -7,20 +7,26 @@ server {
     listen {{ portToListen | default(port) }} {{ ssl ? 'ssl http2' }};
     listen [::]:{{ portToListen | default(port) }} {{ ssl ? 'ssl http2' }};
     server_name {{ host }};
+    resolver 127.0.0.11 valid=10s;
 {% if ssl %}
     include /etc/nginx/vhost.d/ssl.default.conf;
 {% endif %}
 {% block locations %}
     location / {
+{% block location %}
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header Upgrade $http_upgrade;
         proxy_set_header Connection $connection_upgrade;
-        proxy_pass http://{% block upstream %}{{ upstream }}{% endblock upstream %};
+
+        set $upstream http://{% block upstream %}{{ upstream }}{% endblock upstream %};
+        proxy_pass $upstream;
+{% endblock location %}
     }
 {% endblock locations %}
     error_page 497 {{ desiredProtocol }}://$host{{ isPortCustom ? ':' ~ port : '' }}$request_uri;
 
+    client_max_body_size 0;
 {% include "nginx/vhost.d/timeouts.conf.twig" with { timeout: '60m' } %}
 }
 
