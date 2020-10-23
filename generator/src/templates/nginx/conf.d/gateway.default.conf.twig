@@ -62,7 +62,7 @@ upstream {{ upstream }}_xdebug {
     server frontend:{{ debugPort }};
 }
 {% endif %}
-{% include "nginx/http/gateway/server.conf.twig" with {
+{% include "nginx/http/gateway/#{applicationData['application']}.server.conf.twig" with {
     ssl: ssl,
     endpoint: endpoint,
     endpointData: endpointData,
@@ -72,7 +72,7 @@ upstream {{ upstream }}_xdebug {
 
 {% if applicationData['application'] != 'static' %}
 # Debug: {{ endpoint }}
-{% include "nginx/http/gateway/server.conf.twig" with {
+{% include "nginx/http/gateway/#{applicationData['application']}.server.conf.twig" with {
     portToListen: debugPort,
     ssl: ssl,
     endpoint: endpoint,
