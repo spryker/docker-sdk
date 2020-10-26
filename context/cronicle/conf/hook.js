@@ -262,17 +262,14 @@ var storage = new StandaloneStorage(config.Storage, function (err) {
                 let errors = '';
                 schedulerDataReader.stdout.on('data', (data) => {
                     jobs += String(data);
-                    console.log(jobs);
                 });
                 schedulerDataReader.stderr.on('data', (data) => {
                     errors += String(data);
                     console.log(errors);
-                    process.exit(1);
                 });
                 schedulerDataReader.on('close', (code) => {
                     if (code > 0) {
                         console.error(errors);
-                        process.exit(1);
                     }
 
                     let events = JSON.parse(jobs.substring(Math.min(jobs.indexOf("["), jobs.indexOf("{"))));
@@ -329,7 +326,6 @@ var storage = new StandaloneStorage(config.Storage, function (err) {
 
                 schedulerDataReader.stderr.on('data', (data) => {
                     console.error(`stderr: ${data}`);
-                    process.exit(1);
                 });
             // }
             break;
