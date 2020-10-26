@@ -247,16 +247,14 @@ var storage = new StandaloneStorage(config.Storage, function (err) {
                 }
             });
 
-            let enabledSchedulerStores = JSON.parse(process.env.SPRYKER_ENABLED_SCHEDULER_STORES || []);
+            // let enabledSchedulerStores = JSON.parse(process.env.SPRYKER_ENABLED_SCHEDULER_STORES || []);
 
-            for (let i = 1; i <= enabledSchedulerStores.length; i++) {
+
+            // for (let i = 0; i < enabledSchedulerStores.length; i++) {
                 const schedulerDataReader = cp.spawn(
                     'vendor/bin/console', ['scheduler:export', process.env.SPRYKER_CURRENT_SCHEDULER || 'cronicle'],
                     {
                         cwd: '/data',
-                        env: {
-                            APPLICATION_STORE: enabledSchedulerStores[i],
-                        }
                     }
                 );
 
@@ -333,7 +331,7 @@ var storage = new StandaloneStorage(config.Storage, function (err) {
                     console.error(`stderr: ${data}`);
                     process.exit(1);
                 });
-            }
+            // }
             break;
 
         default:

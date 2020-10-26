@@ -220,7 +220,7 @@ foreach ($projectData['groups'] ?? [] as $groupName => $groupData) {
             ];
 
             if ($applicationData['application'] === 'scheduler') {
-                $projectData['_schedulers'][$groupName]['enabledStores'] = $schedulerEnabledStores;
+                $projectData['_schedulers']['enabledStores'][$groupName] = $schedulerEnabledStores;
                 $data['applicationData']['cronicleApiKey'] = $projectData['_schedulers'][$groupName][$applicationData['scheduler-id']]['api_key'];
             }
 
