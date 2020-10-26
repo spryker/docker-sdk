@@ -249,7 +249,6 @@ var storage = new StandaloneStorage(config.Storage, function (err) {
 
             // let enabledSchedulerStores = JSON.parse(process.env.SPRYKER_ENABLED_SCHEDULER_STORES || []);
 
-
             // for (let i = 0; i < enabledSchedulerStores.length; i++) {
                 const schedulerDataReader = cp.spawn(
                     'vendor/bin/console', ['scheduler:export', process.env.SPRYKER_CURRENT_SCHEDULER || 'cronicle'],

@@ -96,7 +96,7 @@ function Images::_buildApp() {
             "${DEPLOYMENT_PATH}/context" 1>&2
     fi
 
-#    if [ -n "${SPRYKER_SCHEDULER_APP_ENABLED}" ]; then
+    if [ -n "${SPRYKER_SCHEDULER_APP_ENABLED}" ]; then
         Console::verbose "${INFO}Building Scheduler application images${NC}"
 
         docker build \
@@ -105,7 +105,7 @@ function Images::_buildApp() {
             --progress="${PROGRESS_TYPE}" \
             --build-arg "SPRYKER_PARENT_IMAGE=${appImage}" \
             "${DEPLOYMENT_PATH}/context" 1>&2
-#    fi
+    fi
 
     Console::verbose "${INFO}Building CLI images${NC}"
 
