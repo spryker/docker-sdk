@@ -96,12 +96,16 @@ function Images::_buildApp() {
             "${DEPLOYMENT_PATH}/context" 1>&2
     fi
 
-    docker build \
-        -t "${schedulerImage}" \
-        -f "${DEPLOYMENT_PATH}/images/common/services/cronicle/Dockerfile" \
-        --progress="${PROGRESS_TYPE}" \
-        --build-arg "SPRYKER_PARENT_IMAGE=${appImage}" \
-        "${DEPLOYMENT_PATH}/context" 1>&2
+    if [ -n "${SPRYKER_SCHEDULER_APP_ENABLED}" ]; then
+        Console::verbose "${INFO}Building Scheduler application images${NC}"
+
+        docker build \
+            -t "${schedulerImage}" \
+            -f "${DEPLOYMENT_PATH}/images/common/services/cronicle/Dockerfile" \
+            --progress="${PROGRESS_TYPE}" \
+            --build-arg "SPRYKER_PARENT_IMAGE=${appImage}" \
+            "${DEPLOYMENT_PATH}/context" 1>&2
+    fi
 
     Console::verbose "${INFO}Building CLI images${NC}"
 
@@ -202,8 +206,12 @@ function Images::tagApplications() {
     local tag=${1:-${SPRYKER_DOCKER_TAG}}
 
     for application in "${SPRYKER_APPLICATIONS[@]}"; do
-        Images::_tagByApp "${application}" "${SPRYKER_DOCKER_PREFIX}_app:${tag}" "${SPRYKER_DOCKER_PREFIX}_app:${SPRYKER_DOCKER_TAG}"
-        Images::_tagByApp "${application}" "${SPRYKER_DOCKER_PREFIX}_run_app:${tag}" "${SPRYKER_DOCKER_PREFIX}_run_app:${SPRYKER_DOCKER_TAG}"
+        if [[ -n "${SPRYKER_SCHEDULER_APP_ENABLED}" && "${application}" == *"scheduler"* ]]; then
+            Images::_tagByApp "${application}" "${SPRYKER_DOCKER_PREFIX}_scheduler_app:${tag}" "${SPRYKER_DOCKER_PREFIX}_scheduler_app:${SPRYKER_DOCKER_TAG}"
+        else
+            Images::_tagByApp "${application}" "${SPRYKER_DOCKER_PREFIX}_app:${tag}" "${SPRYKER_DOCKER_PREFIX}_app:${SPRYKER_DOCKER_TAG}"
+            Images::_tagByApp "${application}" "${SPRYKER_DOCKER_PREFIX}_run_app:${tag}" "${SPRYKER_DOCKER_PREFIX}_run_app:${SPRYKER_DOCKER_TAG}"
+        fi
     done
 }
 

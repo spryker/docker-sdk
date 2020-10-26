@@ -131,6 +131,7 @@ foreach ($projectData['groups'] ?? [] as $groupName => $groupData) {
                 $host = array_key_first($applicationData['endpoints']);
                 $port = $applicationData['endpoints'][$host] ?: '';
                 $apiKey = generateToken(32);
+
                 $projectData['_schedulers'][$groupName][$applicationData['scheduler-id']] = [
                     'base_url' => sprintf('%s://%s:%s', getCurrentScheme($projectData), $host, $port),
                     'api_key' => $apiKey,
@@ -206,6 +207,7 @@ foreach ($projectData['groups'] ?? [] as $groupName => $groupData) {
         if ($applicationData['application'] !== 'static') {
             $projectData['_applications'][] = $applicationName;
 
+            $schedulerEnabledStores = array_keys($projectData['regions'][$groupData['region']]['stores']) ?? [];
             $data = [
                 'applicationName' => $applicationName,
                 'applicationData' => $applicationData,
@@ -214,9 +216,11 @@ foreach ($projectData['groups'] ?? [] as $groupName => $groupData) {
                 'regionData' => $projectData['regions'][$groupData['region']],
                 'brokerConnections' => getBrokerConnections($projectData),
                 'enabledSchedulers' => json_encode($projectData['_schedulers'][$groupName] ?? [], JSON_UNESCAPED_SLASHES),
+                'enabledSchedulerStores' => json_encode($schedulerEnabledStores),
             ];
 
             if ($applicationData['application'] === 'scheduler') {
+                $projectData['_schedulers'][$groupName]['enabledStores'] = $schedulerEnabledStores;
                 $data['applicationData']['cronicleApiKey'] = $projectData['_schedulers'][$groupName][$applicationData['scheduler-id']]['api_key'];
             }
 

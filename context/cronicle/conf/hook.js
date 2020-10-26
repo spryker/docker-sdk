@@ -247,83 +247,93 @@ var storage = new StandaloneStorage(config.Storage, function (err) {
                 }
             });
 
-            const schedulerDataReader = cp.spawn(
-                'vendor/bin/console', ['scheduler:export', process.env.SPRYKER_CURRENT_SCHEDULER || 'cronicle'],
-                {
-                    cwd: '/data',
-                }
-            );
+            let enabledSchedulerStores = JSON.parse(process.env.SPRYKER_ENABLED_SCHEDULER_STORES || []);
 
-            let jobs = '';
-            let errors = '';
-            schedulerDataReader.stdout.on('data', (data) => {
-                jobs += String(data);
+            for (let i = 1; i <= enabledSchedulerStores.length; i++) {
+                const schedulerDataReader = cp.spawn(
+                    'vendor/bin/console', ['scheduler:export', process.env.SPRYKER_CURRENT_SCHEDULER || 'cronicle'],
+                    {
+                        cwd: '/data',
+                        env: {
+                            APPLICATION_STORE: enabledSchedulerStores[i],
+                        }
+                    }
+                );
 
-            });
-            schedulerDataReader.stderr.on('data', (data) => {
-                errors += String(data);
-            });
-            schedulerDataReader.on('close', (code) => {
-                if (code > 0) {
-                    console.error(errors);
+                let jobs = '';
+                let errors = '';
+                schedulerDataReader.stdout.on('data', (data) => {
+                    jobs += String(data);
+                    console.log(jobs);
+                });
+                schedulerDataReader.stderr.on('data', (data) => {
+                    errors += String(data);
+                    console.log(errors);
                     process.exit(1);
-                }
-
-                let events = JSON.parse(jobs.substring(Math.min(jobs.indexOf("["), jobs.indexOf("{"))));
-
-                let categories = {};
-
-                for (var key in events) {
-                    let cat = {
-                        'max_children': 0,
-                        'enabled': 1
-                    };
-                    let event = JSON.parse(JSON.stringify(events[key]));
-                    let categoryTitle = event.title.split('__')[0].toString().replace(/\W+/g, '');
-
-                    if (categories.hasOwnProperty(categoryTitle)) {
-                        cat.id = event.category = categories[categoryTitle];
-                        cat.title = categoryTitle;
+                });
+                schedulerDataReader.on('close', (code) => {
+                    if (code > 0) {
+                        console.error(errors);
+                        process.exit(1);
                     }
 
-                    if (event.category === null) {
-                        cat.title = categoryTitle;
-                        cat.id = categories[categoryTitle] = event.category = categoryTitle.toString().toLowerCase().replace(/\W+/g, '');
+                    let events = JSON.parse(jobs.substring(Math.min(jobs.indexOf("["), jobs.indexOf("{"))));
+
+                    let categories = {};
+
+                    for (var key in events) {
+                        let cat = {
+                            'max_children': 0,
+                            'enabled': 1
+                        };
+                        let event = JSON.parse(JSON.stringify(events[key]));
+                        let categoryTitle = event.title.split('__')[0].toString().replace(/\W+/g, '');
+
+                        if (categories.hasOwnProperty(categoryTitle)) {
+                            cat.id = event.category = categories[categoryTitle];
+                            cat.title = categoryTitle;
+                        }
+
+                        if (event.category === null) {
+                            cat.title = categoryTitle;
+                            cat.id = categories[categoryTitle] = event.category = categoryTitle.toString().toLowerCase().replace(/\W+/g, '');
+                        }
+
+                        if (!globalCategories[cat.id]) {
+                            storage.listUnshift('global/categories', cat, function (err) {
+                                if (err) {
+                                    print("Failed to create category: " + err);
+                                    process.exit(1);
+                                }
+                            });
+                            globalCategories[cat.id] = cat.title;
+                        }
+
+                        event.id = event.title.toString().toLowerCase().replace(/\W+/g, '');
+
+                        if (scheduledEventIds[event.id]) {
+                            storage.listFindUpdate('global/schedule', {id: event.id}, event, function (err) {
+                                if (err) {
+                                    print("Failed to update event: " + err);
+                                    process.exit(1);
+                                }
+                            });
+                        } else {
+                            storage.listUnshift('global/schedule', event, function (err) {
+                                if (err) {
+                                    print("Failed to create event: " + err);
+                                    process.exit(1);
+                                }
+                            });
+                        }
                     }
+                });
 
-                    if (!globalCategories[cat.id]) {
-                        storage.listUnshift('global/categories', cat, function (err) {
-                            if (err) {
-                                print("Failed to create category: " + err);
-                                process.exit(1);
-                            }
-                        });
-                        globalCategories[cat.id] = cat.title;
-                    }
-
-                    event.id = event.title.toString().toLowerCase().replace(/\W+/g, '');
-
-                    if (scheduledEventIds[event.id]) {
-                        storage.listFindUpdate( 'global/schedule', { id: event.id }, event, function(err) {
-                            if (err) {
-                                print("Failed to update event: " + err);
-                                process.exit(1);
-                            }
-                        });
-                    } else {
-                        storage.listUnshift('global/schedule', event, function (err) {
-                            if (err) {
-                                print("Failed to create event: " + err);
-                                process.exit(1);
-                            }
-                        });
-                    }
-                }
-            });
-
-            schedulerDataReader.stderr.on('data', (data) => {
-                console.error(`stderr: ${data}`);
-            });
+                schedulerDataReader.stderr.on('data', (data) => {
+                    console.error(`stderr: ${data}`);
+                    process.exit(1);
+                });
+            }
             break;
 
         default:

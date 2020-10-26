@@ -82,8 +82,7 @@ import installer/autoload-cache.sh
 # Services
 import service/database/{{ services['database']['engine'] }}.sh
 import service/broker/{{ services['broker']['engine'] }}.sh
-{% set scheduler = services['scheduler'] is defined ? services['scheduler']['engine'] : 'scheduler' %}
-import service/scheduler/{{ scheduler }}.sh
+import service/scheduler/{{ services['scheduler']['engine'] | default('scheduler') }}.sh
 
 # Implementation
 import sdk/compose.sh
@@ -132,6 +131,7 @@ readonly KNOWN_HOSTS="{{ _knownHosts | default("") }}"
 readonly SPRYKER_BUILD_HASH="${SPRYKER_BUILD_HASH}"
 readonly SPRYKER_BUILD_DATE="${SPRYKER_BUILD_DATE}"
 readonly SPRYKER_REPOSITORY_HASH="${SPRYKER_BUILD_HASH:-"$(git rev-parse --verify HEAD 2>/dev/null || echo "head")"}"
+readonly SPRYKER_SCHEDULER_APP_ENABLED="{{ services['scheduler']['engine'] is not defined ? '1' : '' }}"
 
 # Specific variables
 {% for serviceName, serviceData in services %}
