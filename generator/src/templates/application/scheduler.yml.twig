@@ -29,10 +29,6 @@
         - ${DEPLOYMENT_PATH}/env/{{ applicationName }}.env
     volumes:
         - {{ applicationName }}-data:/home/spryker/cronicle/data
-        - ./${DEPLOYMENT_PATH}/env/cli:/home/spryker/env:consistent,ro
-        - ./docker/context/cronicle/conf/hook.js:/home/spryker/cronicle/conf/hook.js:rw
-        - ./docker/context/cronicle/bin/control.sh:/home/spryker/cronicle/bin/control.sh:rw
-        - ./docker/context/cronicle/entrypoint.sh:/home/spryker/cronicle/entrypoint.sh:rw
         - logs:${SPRYKER_LOG_DIRECTORY}:rw
 {% if _mountMode != 'baked' %}
 {% if _mountMode == 'native' %}

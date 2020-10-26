@@ -3,7 +3,6 @@ ARG SPRYKER_PARENT_IMAGE
 
 FROM ${SPRYKER_PARENT_IMAGE} AS scheduler
 
-ARG DEPLOYMENT_PATH
 ARG CRONICLE_VERSION='0.8.49'
 ENV CRONICLE_echo=1
 ENV CRONICLE_foreground=1
@@ -50,11 +49,9 @@ RUN --mount=type=cache,id=npm,sharing=locked,target=/root/.npm \
   && npm install \
   && node bin/build.js dist
 
-RUN mkdir -p /home/spryker/env
-COPY ${DEPLOYMENT_PATH}/env/cli /home/spryker/env
-COPY ${DEPLOYMENT_PATH}/context/cronicle/bin /home/spryker/cronicle/bin
-COPY ${DEPLOYMENT_PATH}/context/cronicle/conf /home/spryker/cronicle/conf
-ADD ${DEPLOYMENT_PATH}/context/cronicle/entrypoint.sh /home/spryker/cronicle/entrypoint.sh
+COPY cronicle/bin /home/spryker/cronicle/bin
+COPY cronicle/conf /home/spryker/cronicle/conf
+ADD cronicle/entrypoint.sh /home/spryker/cronicle/entrypoint.sh
 
 EXPOSE 3012 3014
 
