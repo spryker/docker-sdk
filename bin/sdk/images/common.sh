@@ -103,8 +103,9 @@ function Images::_buildApp() {
             -t "${schedulerImage}" \
             -f "${DEPLOYMENT_PATH}/images/common/services/cronicle/Dockerfile" \
             --progress="${PROGRESS_TYPE}" \
+            --build-arg "DEPLOYMENT_PATH=${DEPLOYMENT_PATH}" \
             --build-arg "SPRYKER_PARENT_IMAGE=${appImage}" \
-            "${DEPLOYMENT_PATH}/context" 1>&2
+            . 1>&2
     fi
 
     Console::verbose "${INFO}Building CLI images${NC}"
