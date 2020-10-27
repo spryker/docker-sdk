@@ -129,6 +129,9 @@ verbose('Generating ENV files... [DONE]');
 foreach ($projectData['groups'] ?? [] as $groupName => $groupData) {
     foreach ($groupData['applications'] ?? [] as $applicationName => $applicationData) {
         foreach ($applicationData['endpoints'] ?? [] as $endpoint => $endpointData) {
+            if ($endpointData === null) {
+                $endpointData = [];
+            }
             $entryPoint = $endpointData['entry-point'] ?? ucfirst(strtolower($applicationData['application']));
             $projectData['_entryPoints'][$entryPoint] = $entryPoint;
             $projectData['groups'][$groupName]['applications'][$applicationName]['endpoints'][$endpoint]['entry-point'] = $entryPoint;
