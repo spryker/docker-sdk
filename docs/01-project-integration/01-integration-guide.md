@@ -23,7 +23,7 @@ This document describes the following:
 The structure below is just a reference. We encourage you to add subsections, change or swap the provided sections if needed.
 :::
 
-### How do I update the modules?
+### What are the modules do I need to update?
 
 ### How do I configure environment?
 

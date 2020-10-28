@@ -1,9 +1,9 @@
 > Audience:
 >
-> -
+> - Devops who use docker/sdk.
 >
 > Outcome:
-> -
+> - You know all the components running by docker/sdk and their relations.
 
 ## Outline
 
