@@ -223,16 +223,19 @@ var storage = new StandaloneStorage(config.Storage, function (err) {
 
             let scheduledEventIds = {};
             storage.listGet( 'global/schedule', parseInt(0), parseInt(0), function(err, items, list) {
-                for (let i = 0; i <= items.length; i++) {
-                    if (items[i] != null) {
-                        scheduledEventIds[items[i].id] = items[i].title;
-                        items[i].enabled = 0;
-                        storage.listFindUpdate( 'global/schedule', { id: items[i].id }, items[i], function(err) {
-                            if (err) {
-                                print("Failed to update event: " + err);
-                                process.exit(1);
-                            }
-                        });
+                if (items !== null) {
+                    for (let i = 0; i <= items.length; i++) {
+                        if (items[i] != null) {
+                            scheduledEventIds[items[i].id] = items[i].title;
+                            items[i].enabled = 0;
+                            storage.listFindUpdate( 'global/schedule', { id: items[i].id }, items[i], function(err) {
+                                if (err) {
+                                    print("Failed to update event: " + err);
+                                    console.log('-----------------------------');
+                                    process.exit(1);
+                                }
+                            });
+                        }
                     }
                 }
             });
@@ -240,9 +243,11 @@ var storage = new StandaloneStorage(config.Storage, function (err) {
             let globalCategories = {};
 
             storage.listGet( 'global/categories', parseInt(0), parseInt(0), function(err, items, list) {
-                for (let i = 0; i <= items.length; i++) {
-                    if (items[i] != null) {
-                        globalCategories[items[i].id] = items[i].title;
+                if (items !== null) {
+                    for (let i = 0; i <= items.length; i++) {
+                        if (items[i] != null) {
+                            globalCategories[items[i].id] = items[i].title;
+                        }
                     }
                 }
             });
@@ -265,7 +270,6 @@ var storage = new StandaloneStorage(config.Storage, function (err) {
                 });
                 schedulerDataReader.stderr.on('data', (data) => {
                     errors += String(data);
-                    console.log(errors);
                 });
                 schedulerDataReader.on('close', (code) => {
                     if (code > 0) {

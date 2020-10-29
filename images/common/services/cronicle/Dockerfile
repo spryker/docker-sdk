@@ -49,8 +49,8 @@ RUN --mount=type=cache,id=npm,sharing=locked,target=/root/.npm \
   && npm install \
   && node bin/build.js dist
 
-COPY cronicle/bin /home/spryker/cronicle/bin
-COPY cronicle/conf /home/spryker/cronicle/conf
+COPY --chown=spryker cronicle/bin /home/spryker/cronicle/bin
+COPY --chown=spryker cronicle/conf /home/spryker/cronicle/conf
 ADD cronicle/entrypoint.sh /home/spryker/cronicle/entrypoint.sh
 
 EXPOSE 3012 3014
