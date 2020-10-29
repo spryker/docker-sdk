@@ -1,3 +1,10 @@
+This document is a draft. See [Docker SDK](https://documentation.spryker.com/docs/docker-sdk) for official documentation.
+
+## Description
+Read the description below and, in the *Structure* section, fill out the document by answering the questions directly.
+We may have added some existing content and encourage you to update, remove or restructure it if needed. 
+
+
 > Audience:
 >
 > - Everybody who need access to private repositories when using docker/sdk for developing and production.
