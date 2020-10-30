@@ -5,21 +5,22 @@
 > Outcome:
 > - You know possibilities on how to link your project to the specific docker/sdk version.
 
-## Why should you link your project to a specific docker/sdk version?
+## Why should you link your project to a particular docker/sdk version?
 
-
+You should link your project to a particular docker/sdk version due to the following reasons:
 - Compatibility: You ensure compatibility between the project configuration and the linked docker/sdk version.
-- Consistency: You constrain developers, integration and deployment pipelines to use the same docker/sdk version.
+- Consistency: the same docker/sdk version is used in development, integration and deployment pipelines.
 - Control: You control when and how you switch the project to a new docker/sdk functionality.
 - Stability: You stabilize pipelines and make sure unexpected behavior doesn't happen.
 
 ## 1. Choose the version you want to link to.
 
-Making your choice you should consider the following:
-- What kind of the project is? Long-term, short-term, production, demo, etc.
-- Who will use docker/sdk with the project? Developers, Devops, pipelines, etc.
-- Do you need to make changes in docker/sdk itself?
-- What are the efforts to maintain the link?
+To choose a version to link to, consider the following:
+- What kind of project will it be used for? For example, Long-term, short-term, production, demo, etc.
+- What will docker/sdk be used for? For example, for development, operations, CI/CD management, etc.
+- Do you need to make changes in docker/sdk?
+- How much resources will you need to support the link?
+
 
 | Link to | Compatibility | Consistency | Control | Stability | Cases |
 |---|---|---|---|---|---|
@@ -34,22 +35,28 @@ Making your choice you should consider the following:
 Spryker Cloud does not support forks of `spryker/docker-sdk`.
 :::
 
-## 2. Choose the way how the project repository contains the link.
+## 2. Configuring the link in the project repository
 
-### Git Submodule
+Depending on your project requirements, choose one of the following ways to configure the link to docker/sdk:
 
-Use this approach when you want:
-- To customize docker/sdk.
-- A simple way to fetch a specific version of docker/sdk.
-- A strict hash-to-hash link.
+* Git submodule:
+  * To customize docker/sdk.
+  * To have a simple way to fetch a particular version of docker/sdk.
+  * To link hash to hash
+* Reference file:
+  * to link to the latest commit in a branch
+  * when Git Submodlue is not supported
 
+### Git submodule 
 
-1. Create a submodule:
+To link via git submodule:
+
+1. Create a git submodule:
 ```bash
 git submodule add git@github.com:spryker/docker-sdk.git ./docker
 ```
 
-2. Checkout the local clone of the repository to a specific hash,branch, or tag:
+2. Checkout the local clone of the repository to a specific hash, branch, or tag:
 ```bash
 cd docker
 git checkout my-branch
@@ -63,7 +70,7 @@ git commit -m "Added docker submodule"
 git push
 ```
 
-4. Commit and push the submodule again each time you need to refer to a new version of docker/sdk:
+4. Commit and push the git submodule again each time you need to refer to a new version of docker/sdk:
 ```bash
 git add docker
 git commit -m "Updated docker submodule"
@@ -73,7 +80,8 @@ git push
 See [7.11 Git Tools - Submodules](https://www.git-scm.com/book/en/v2/Git-Tools-Submodules) and [git-submodule reference](https://git-scm.com/docs/git-submodule) for more details.
 
 5. Prepare a tool to fetch the linked docker/sdk version:
-Run the following to init or update the docker/sdk submodule:
+
+  Init or update the docker/sdk submodule:
   ```bash
   git submodule update --init --force docker
   ```
@@ -87,18 +95,16 @@ Run the following to init or update the docker/sdk submodule:
   ```
 
 
-### File with the reference
+### Reference file
 
-Use this approach when:
-- Git Submodule is not supported. As example: AWS CodePipeline.
-- You want to link to the latest commit in a branch.
+To configure a reference file:
 
 1. Create `.git.docker` in the project root.
 
-2. Depending on what you are linking to, add to the file one of the following:
-  * Tag: `1.24.0` or `1.x`
-  * branch name: `my-branch`
-  * hash: `dbdfac276ae80dbe6f7b66ec1cd05ef21372988a`
+2. Depending on what you are linking to, add one of the following to the file:
+  * Tag. For example, `1.24.0` or `1.x`
+  * Branch name. For example, `my-branch`
+  * Hash. For example, `dbdfac276ae80dbe6f7b66ec1cd05ef21372988a`
 
 
 3. Commit and push:
@@ -108,7 +114,7 @@ git commit -m "Added .git.docker"
 git push
 ```
 
-4. Commit and push the submodule each time you need to refer to a different hash,branch, or tag of docker/sdk.
+4. Commit and push the submodule each time you need to refer to a different hash, branch, or tag of docker/sdk.
 ```bash
 git add .git.docker
 git commit -m "Updated .git.docker"
