@@ -36,6 +36,7 @@ The structure below is just a reference. We encourage you to add subsections, ch
 ## What issues can I encounter while running applications and how can I resolve them?
 
 
+
 ### Docker daemon is not running
 
 **when** 
@@ -90,54 +91,6 @@ Update docker-sync:
 gem install docker-sync
 ```
 
-### Xdebug does not work
-
-**when** 
-Xdebug does not work.
-
-**then**
-1. Make sure your IDE is listening to the port 9000.
-2. Get into any application container:
-```bash
-$ docker exec -i spryker_zed_1 bash
-```
-3. Check that the `xdebug` extension is active:
-```bash
-$ docker/sdk cli php -m
-```
-4. Check if the host is accessible from the container:
-```bash
-$ nc -zv ${SPRYKER_XDEBUG_HOST_IP} 9000
-```
-
-***
-
-**when**
-PHP xdebug extension is not active.
-
-**then**
-Exit the container and run `docker/sdk restart -x`
-
-***
-
-  
-**when**
-`nc` command does not give any output.
-
-**then**
-[Contact us](https://support.spryker.com/hc/en-us).
-
-***
-**when**
-`nc` command tells that the port is opened.
-
-**then**
-1. Exit the container.
-2. Check what process occupies the port by running the command:
-```bash
-sudo lsof -nPi:9000 | grep LISTEN
-```
-3. Make sure it is your IDE.
 
 ### Exception upon new indexes setup
 
@@ -188,13 +141,62 @@ docker/sdk up
 
 
 
+## What issues can I encounter during debugging and how can I resolve them?
+
+### Xdebug does not work
+
+**when** 
+Xdebug does not work.
+
+**then**
+1. Make sure your IDE is listening to the port 9000.
+2. Get into any application container:
+```bash
+$ docker exec -i spryker_zed_1 bash
+```
+3. Check that the `xdebug` extension is active:
+```bash
+$ docker/sdk cli php -m
+```
+4. Check if the host is accessible from the container:
+```bash
+$ nc -zv ${SPRYKER_XDEBUG_HOST_IP} 9000
+```
+
+***
+
+**when**
+PHP xdebug extension is not active.
+
+**then**
+Exit the container and run `docker/sdk restart -x`
+
+***
+
+  
+**when**
+`nc` command does not give any output.
+
+**then**
+[Contact us](https://support.spryker.com/hc/en-us).
+
+***
+**when**
+`nc` command tells that the port is opened.
+
+**then**
+1. Exit the container.
+2. Check what process occupies the port by running the command:
+```bash
+sudo lsof -nPi:9000 | grep LISTEN
+```
+3. Make sure it is your IDE.
+
+
+
+
+
 ## How can I debug applications?
-
-
-
-
-
-
 
 
 
