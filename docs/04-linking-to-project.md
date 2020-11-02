@@ -25,7 +25,7 @@ To choose a version to link to, consider the following:
 | Link to | Compatibility | Consistency | Control | Stability | Cases |
 |---|---|---|---|---|---|
 | Release | + | + | + | + | Live projects. |
-| Hash | + | + | + | +/- | Using git submodule. Contributing into docker/sdk. |
+| Hash | + | + | + | +/- | Contributing into docker/sdk. |
 | Branch | + | - | + | +/- | Contributing into docker/sdk. |
 | Major branch `spryker/docker-sdk:1.x` | + | - | - | - | Demo projects. Backward compatibility checks. |
 | Master branch `spryker/docker-sdk:master` | - | - | - | - | Short-term demo projects. Quick start. |
