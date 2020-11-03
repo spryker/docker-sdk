@@ -5,24 +5,31 @@
 > Outcome:
 > - You know possibilities on how to link your project to the specific docker/sdk version.
 
-## Why should you link your project to a particular docker/sdk version?
 
-You should link your project to a particular docker/sdk version due to the following reasons:
-- Compatibility: You ensure compatibility between the project configuration and the linked docker/sdk version.
+
+This document describes why and how to select a particular version of docker/sdk and use it in your project. 
+
+
+## Why should you use a particular docker/sdk version?
+
+You should link use a particular docker/sdk version for:
+- Compatibility: project configuration is compatible with the selected docker/sdk version.
 - Consistency: the same docker/sdk version is used in development, integration and deployment pipelines.
-- Control: You control when and how you switch the project to a new docker/sdk functionality.
-- Stability: You stabilize pipelines and make sure unexpected behavior doesn't happen.
+- Control: control when and how you switch the docker/sdk version of the project.
+- Stability: avoid unexpected behavior in pipelines.
 
-## 1. Choose the version you want to link to.
+## How do you choose a docker/sdk version?
 
-To choose a version to link to, consider the following:
-- What kind of project will it be used for? For example, Long-term, short-term, production, demo, etc.
-- What will docker/sdk be used for? For example, for development, operations, CI/CD management, etc.
+To choose a version, consider the following:
+- What kind of project do you have? For example, Long-term, short-term, production, demo.
+- What will you use docker/sdk for? For example, for development, operations, CI/CD management.
 - Do you need to make changes in docker/sdk?
-- How much resources will you need to support the link?
+- How much resources will you need to support docker/sdk in your project?
 
 
-| Link to | Compatibility | Consistency | Control | Stability | Cases |
+Depending on your project requirements, choose on of the version types:
+
+| Version type | Compatibility | Consistency | Control | Stability | Cases |
 |---|---|---|---|---|---|
 | Release | + | + | + | + | Live projects. |
 | Hash | + | + | + | +/- | Contributing into docker/sdk. |
@@ -35,21 +42,21 @@ To choose a version to link to, consider the following:
 Spryker Cloud does not support forks of `spryker/docker-sdk`.
 :::
 
-## 2. Configuring the link in the project repository
+## 2. How can I configure my project to use a particular version of docker/sdk?
 
 Depending on your project requirements, choose one of the following ways to configure the link to docker/sdk:
 
 * Git submodule:
   * To customize docker/sdk.
   * To have a simple way to fetch a particular version of docker/sdk.
-  * To link hash to hash
+  * To link hash to hash.
 * Reference file:
-  * to link to the latest commit in a branch
-  * when Git Submodlue is not supported
+  * To link to the latest commit in a branch.
+  * When Git Submodlue is not supported.
 
 ### Git submodule 
 
-To link via git submodule:
+To configure git submodule:
 
 1. Create a git submodule:
 ```bash
