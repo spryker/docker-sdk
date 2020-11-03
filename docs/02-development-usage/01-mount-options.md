@@ -31,6 +31,7 @@ The structure below is just a reference. We encourage you to add subsections, ch
 
 ### What mount modes does docker/sdk support? 
 
+### How do I change a mount mode?
 
 ### How do sync modes work and what are their downsides?
 
