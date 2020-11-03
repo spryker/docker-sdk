@@ -59,7 +59,7 @@ git clone https://github.com/spryker/docker-sdk.git ./docker
 :::
 
 ## Database 
-In Docker SDK, [PostgreSQL](https://www.postgresql.org/) is provided as a service by default, but you can switch to MySQL or MariaDB as described below.
+In Docker SDK, [MariaDB](https://mariadb.org/) is provided as a service by default, but you can switch to MySQL or PostgreSQL as described below.
 
 ### MySQL
 [MySQL](https://www.mysql.com) is an open source relational database management system based on Structured Query Language (SQL). MySQL enables data to be stored and accessed across multiple storage engines, including InnoDB, CSV and NDB. MySQL is also capable of replicating data and partitioning tables for better performance and durability.
@@ -85,30 +85,26 @@ docker/sdk clean-data
 docker/sdk demo-data
 ```
 
-### MariaDB
 
-[MariaDB](https://mariadb.org/) is a community-developed, commercially supported fork of the [MySQL](https://www.mysql.com/) relational database management system.
+### PostgreSQL
+[PostgreSQL](https://www.postgresql.org/) PostgreSQL is a powerful, open source object-relational database system that uses and extends the SQL language combined with many features that safely store and scale the most complicated data workloads.
 
-See [MariaDB knowledge base](https://mariadb.com/kb/en/) for more details.
+See [PostgreSQL documentation](https://www.postgresql.org/docs/) for more details.
 
 #### Configuration
-Follow the steps below to switch the database service to MariaDB:
-
+Follow the steps below to switch database engine to PostgreSQL:
 1. Adjust `deploy.*.yaml` in the `services:` section:
-
 ```yaml
 ...
 services:
     database:
-        engine: mysql
-        version: mariadb-10.4
+        engine: postgres
         ...
         endpoints:
-            localhost:3306:
+            localhost:5432:
 ...
 ```
 2. Regenerate demo data:
-
 ```bash
 docker/sdk clean-data
 docker/sdk demo-data
