@@ -14,3 +14,4 @@ The cases:
 3. How to add a new version of a service.
 4. How to extend PHP configuration.
 5. How to extend Nginx configuration.
+6. How to extend PHP memory.
