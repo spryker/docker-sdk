@@ -195,13 +195,26 @@ If not specified, the default value applies:
 
 :::
 ***
+### image: environment:
+Defines additional ENV variables for Spryker applications.
+```yaml
+version: 1.0
+
+image:
+  environment:
+      SOME_ENV_VARIABLE: some-value
+```
+***
 
 ### image: php:
 
 Defines the PHP settings for Spryker applications.
 
 * `image: php: ini:` - defines `php.ini` configuration.
-* `image: php: enabled-extensions` - defines enabled PHP extensions. Only `blackfire` and `newrelic` are allowed here.
+* `image: php: enabled-extensions` - defines enabled PHP extensions. Allowed extensions:
+  * `blackfire`
+  * `newrelic`
+  * `tideways`
 
 ```yaml
 image:
@@ -212,7 +225,19 @@ image:
         enabled-extensions:
             - blackfire
             - newrelic
+            - tideways
 ```
+***
+### Assets:
+
+Defines setting for **Assets**.
+* `assets: image:` - defines specific docker image for a frontend container. Default value is `nginx:alpine`
+* `assets: mode:` - defines a mode for running specific static build section from install recipe. Possible values are `production` and `development`. Default value is  `development`.
+* `assets: compression:` - defines engine for static compressions. Possible engine are `gzip` and `brotli`. 
+* `assets: compression: engine: static:` - defines comression mode. Allowed params are `only`, `true` and `false`
+* `assets: compression: engine: level:` - defines compression level. Allowed range form 1 to 9
+* `assets: compression: engine: types:` - defines additional MIME types to be compressed additionally.
+
 ***
 
 ### regions:
@@ -220,7 +245,7 @@ image:
 Defines the list of **Regions**.
 
 <a name="regions-services"></a>
-* `regions: services:` - defines settings for **Region**-specific `services:`. Only `database:` is currently allowed here.
+* `regions: services:` - defines settings for **Region**-specific `services:`. Only `database:` and `mail: sender:` are currently allowed here. `mail: sender:` - defines the mail sender configuration. Possible params are `name` and `email`.
 * `regions: stores:` - defines the list of **Stores**.
 <a name="regions-stores-services"></a>
 * `regions: stores: services:` - defines application-wide, **Store**-specific settings for **Services**. Only `broker:`, `key_value_store:` and `search:` are currently allowed here. See [services:](#services-reference) to learn more.
@@ -330,7 +355,22 @@ Obligatory parameters for each `application:`:
 * `groups: applications: endpoints:` - defines the list of **Endpoints** to access the **Application**. See [groups: applications: endpoints:](#groups-applications-endpoints) to learn more.
 
 Optional parameters for `application:`:
-
+* `groups: applications: application: application:` - defines the application type. Allowed value is `static`.
+* `groups: applications: application: endpoints: endpoint: entry-point:` - defines entry-point, the path to index directory of the application.
+* `groups: applications: application: endpoints: endpoint: redirect:` - defines rules for redirect.
+* `groups: applications: application: endpoints: endpoint: redirect: code` - defines http code for redirect. Allowed value are `301` and `302`.
+* `groups: applications: application: endpoints: endpoint: redirect: url` - defines url for redirect.
+  
+* `groups: applications: application: endpoints: real-ip: from:` - defines gateway IP addresses to fetch real IP address.
+* `groups: applications: application: endpoints: auth:` - defines basic auth
+* `groups: applications: application: endpoints: auth: engine:` - defines engine for basic auth. Allowed option are `basic` and `whitelist`.
+  * Basic:
+    * `groups: applications: application: endpoints: auth: users:` - defines user credentials for basic auth. Each credential should have `username` and `password` params.
+    * `groups: applications: application: endpoints: auth: exclude:` - defines allowed ip's
+  * Whitelist:
+    * `groups: applications: application: endpoints: auth: include:` - defines allowed ip's 
+  
+* `groups: applications: application: endpoints: primal:` - defines endpoint like gateway. Default behavior is always first `zed`
 * `groups: applications: application: http: max-request-body-size:` - defines the maximum allowed size of the request body that can be sent to the application, in MB.
   
 ```yaml
@@ -374,20 +414,20 @@ Find common settings for all services below:
 
 ```yaml
 services:
-database:
-	engine: postgres
-	version: 9.6
-	root:
-		username: "root"
-		password: "secret"
-
-broker:
-	engine: rabbitmq
-	api:
-		username: "root"
-		password: "secret"
-	endpoints:
-		queue.spryker.local:
+    database:
+        engine: postgres
+        version: 9.6
+        root:
+            username: "root"
+            password: "secret"
+    
+    broker:
+        engine: rabbitmq
+        api:
+            username: "root"
+            password: "secret"
+        endpoints:
+            queue.spryker.local:
 
 	session:
 		engine: redis
@@ -436,6 +476,7 @@ The format of the key  is `domain[:port]`. The key must be project-wide unique.
 * `groups: applications: endpoints: store:` defines the **Store** as context to process requests within.
 <a name="groups-applications-endpoints-services"></a>
 * `groups: applications: endpoints: services:` defines the **Store**-specific settings for services. Only `session:` is currently allowed here. See [Services](#services) to learn more.
+* `groups: applications: endpoints: cors-allow-origin:` defines CORS header. Allowed for `Glue` application only. Possible values are `single domain as string` or `*` to allow all domains.
 
 ### services: endpoints:
 Defines the list of **Endpoints** to access a **Service** for development or monitoring needs. The format of the key  is `domain[:port]`. The key must be project-wide unique.
@@ -480,6 +521,8 @@ When no engine is defined in `deploy.yml`, the Docker Engine is used.
 Defines the [New Relic](https://documentation.spryker.com/docs/services#new-relic) configuration.
 
 * `docker: newrelic: license:` - defines the New Relic license which should be acquired from [New Relic](https://www.newrelic.com/).
+* `docker: newrelic: appname:` - defines the New Relic application name. Optional param.
+* `docker: newrelic: enabled:` - defines the flag for enabling Newrelic. Optional param. Default value is `true`
 
 ```yaml
 docker:
@@ -527,6 +570,7 @@ docker:
 		enabled: true
 		
  ```
+* `docker: debug: xdebug: enabled:` - defines for enabling/disabling XDebug
 
 ***
 ### docker: logs:
@@ -567,7 +611,7 @@ If not specified, the default value applies:
 :::
 2. `native:`- source files are mounted from host machine into containers directly. We recommend using it Linux.
 3. `docker-sync:`- source files are synced from host machine into containers during runtime. Use it as a workaround solution with MacOS and Windows.
-<!-- 4.  `mutagen:`- source files are synced from host machine into containers during runtime. Use it as a workaround solution with MacOS and Windows. --> 
+4.  `mutagen:`- source files are synced from host machine into containers during runtime. Use it as a workaround solution with MacOS and Windows. 
 
 `As mount:` is a platform-specific setting. You can define multiple mount modes. Use the`platforms:` list to define the mount mode for a particular platform. Possible platforms are `windows`, `macos` and `linux`.
 
@@ -580,10 +624,11 @@ docker:
 		native:
 			platforms:
 				- linux
-
+        mutagen:
+            platforms:
+                - macos
 		docker-sync:
 			platforms:
-				- macos
 				- windows
 		
  ```
@@ -593,7 +638,7 @@ docker:
 
 Defines the composer settings to be used during deployment.
 
-1. `mode:` - defines whether packages should be installed from the  `require` or `require-dev` section of `composer.json`. Possible values are `--no-dev`and `-dev`.
+1. `mode:` - defines whether packages should be installed from the  `require` or `require-dev` section of `composer.json`. Possible values are `--no-dev` and `-dev`.
 
 2. `autoload:` - defines composer autoload options. Possible values are `--optimize` and `--classmap-authoritative`.
 
@@ -622,6 +667,7 @@ The following services are supported:
 
 *     blackfire
 *     broker
+*     dashboard
 *     database
 *     key_value_store
 *     kibana
@@ -631,6 +677,7 @@ The following services are supported:
 *     search
 *     session
 *     swagger
+*     tideways
 
 ***
 ### blackfire:
@@ -658,6 +705,15 @@ A message broker **Service**.
   - `broker: username:`, `broker: password:` - defines the credentials to access the namespace (virtual host) defined by `broker: namespace:`.
 
 
+***
+### dashboard:
+
+Real-time log monitoring **Service**.
+
+* Project-wide
+
+  - `dashboard: engine:` - possible values is `dashboard`.
+  - `dashboard: endpoints:` - defines the service's port or/and web-interface that can be accessed via given endpoints.
 ***
 
 ### database:
@@ -777,7 +833,14 @@ The swagger-ui **Service** used to run Swagger UI to develop API endpoints.
 * Project-wide
     * `swagger: engine:`- possible value is `swagger-ui`.
     * `swagger-ui: endpoints:` - defines the service's port or/and web interface that can be accessed via given endpoints.
-        
+
+***
+### tideways:
+An application profiler **Service** used for testing and debugging.
+* Project-wide
+  - `tideways: apikey:` - defines the api-key used  to authenticate with Tideways.
+  - `tideways: environment-name:` - defines the environment name used to named your environment on Tideways. Optional param. Default value is `production`
+  - `tideways: cli-enabled:` - defines flag for profilling CLI script like cronjobs, etc. Optional param. Default value is `false`       
 
 
 ***
