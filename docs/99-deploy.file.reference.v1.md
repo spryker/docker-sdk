@@ -93,8 +93,6 @@ namespace: spryker-demo
 :::(Info) (Optional variable)
 If not specified, the default value applies:
 `version: "0.1"`
-
-
 :::
 
 ***
@@ -196,13 +194,15 @@ If not specified, the default value applies:
 :::
 ***
 ### image: environment:
+
 Defines additional ENV variables for Spryker applications.
+
 ```yaml
 version: 1.0
 
 image:
   environment:
-      SOME_ENV_VARIABLE: some-value
+	      {env_variable}: {env_variable_value}
 ```
 ***
 
@@ -211,7 +211,7 @@ image:
 Defines the PHP settings for Spryker applications.
 
 * `image: php: ini:` - defines `php.ini` configuration.
-* `image: php: enabled-extensions` - defines enabled PHP extensions. Allowed extensions:
+* `image: php: enabled-extensions` - defines enabled PHP extensions. The following extensions are allowed here:
   * `blackfire`
   * `newrelic`
   * `tideways`
@@ -228,14 +228,22 @@ image:
             - tideways
 ```
 ***
-### Assets:
+### assets:
 
-Defines setting for **Assets**.
-* `assets: image:` - defines specific docker image for a frontend container. Default value is `nginx:alpine`
-* `assets: mode:` - defines a mode for running specific static build section from install recipe. Possible values are `production` and `development`. Default value is  `development`.
-* `assets: compression:` - defines engine for static compressions. Possible engine are `gzip` and `brotli`. 
-* `assets: compression: engine: static:` - defines comression mode. Allowed params are `only`, `true` and `false`
-* `assets: compression: engine: level:` - defines compression level. Allowed range form 1 to 9
+Defines the setting of **Assets**.
+* `assets: image:` - defines the docker image for a front-end container.
+:::(Info) (Optional variable)
+If not specified, the default value applies:
+`assets: image: nginx:alpine`
+:::
+* `assets: mode:` - defines a mode for running a static build section from the install recipe. Possible values are `production` and `development`. Default value is  `development`.
+:::(Info) (Optional variable)
+If not specified, the default value applies:
+`assets: mode: development`
+:::
+* `assets: compression:` - defines an engine for static compressions. Possible values are `gzip` and `brotli`. 
+* `assets: compression: engine: static:` - defines a comression mode. Allowed values are `only`, `true`, and `false`.
+* `assets: compression: engine: level:` - defines a compression level. Allowed range is from `1` to `9`.
 * `assets: compression: engine: types:` - defines additional MIME types to be compressed additionally.
 
 ***
@@ -349,26 +357,28 @@ Defines the list of **Applications**.
 
 The key must be project-wide unique.
 
-Obligatory parameters for each `application:`:
+Obligatory parameters for `application:`:
 
-* `groups: applications: application:` - defines the type of **Application**. Possible values are `zed`, `yves` and `glue`.
+* `groups: applications: application:` - defines the type of **Application**. Possible values are `zed`, `yves`, and `glue`.
 * `groups: applications: endpoints:` - defines the list of **Endpoints** to access the **Application**. See [groups: applications: endpoints:](#groups-applications-endpoints) to learn more.
 
 Optional parameters for `application:`:
 * `groups: applications: application: application:` - defines the application type. Allowed value is `static`.
-* `groups: applications: application: endpoints: endpoint: entry-point:` - defines entry-point, the path to index directory of the application.
-* `groups: applications: application: endpoints: endpoint: redirect:` - defines rules for redirect.
-* `groups: applications: application: endpoints: endpoint: redirect: code` - defines http code for redirect. Allowed value are `301` and `302`.
+* `groups: applications: application: endpoints: endpoint: entry-point:` - defines an entry-point, the path to the index directory of the application.
+* `groups: applications: application: endpoints: endpoint: redirect:` - defines redirect rules.
+* `groups: applications: application: endpoints: endpoint: redirect: code` - defines an HTTP code for a redirect. Allowed values are `301` and `302`.
 * `groups: applications: application: endpoints: endpoint: redirect: url` - defines url for redirect.
   
-* `groups: applications: application: endpoints: real-ip: from:` - defines gateway IP addresses to fetch real IP address.
-* `groups: applications: application: endpoints: auth:` - defines basic auth
-* `groups: applications: application: endpoints: auth: engine:` - defines engine for basic auth. Allowed option are `basic` and `whitelist`.
-  * Basic:
-    * `groups: applications: application: endpoints: auth: users:` - defines user credentials for basic auth. Each credential should have `username` and `password` params.
-    * `groups: applications: application: endpoints: auth: exclude:` - defines allowed ip's
-  * Whitelist:
-    * `groups: applications: application: endpoints: auth: include:` - defines allowed ip's 
+* `groups: applications: application: endpoints: real-ip: from:` - defines gateway IP addresses to fetch the real IP address.
+* `groups: applications: application: endpoints: auth:` - defines the basic auth.
+* `groups: applications: application: endpoints: auth: engine:` - defines an engine for the basic auth. Allowed values are `basic` and `whitelist`.
+  * Basic auth variables:
+    * `groups: applications: application: endpoints: auth: users:` - defines user credentials for basic auth. 
+    	* `groups: applications: application: endpoints: auth: users: username:` - defines a username for basic auth.
+	* `groups: applications: application: endpoints: auth: users: password:` - defines a password for basic auth.
+    * `groups: applications: application: endpoints: auth: exclude:` - defines the IPs to allow access from.
+  * Whitelist auth variables:
+    * `groups: applications: application: endpoints: auth: include:` - defines the IPs to allow access from.
   
 * `groups: applications: application: endpoints: primal:` - defines endpoint like gateway. Default behavior is always first `zed`
 * `groups: applications: application: http: max-request-body-size:` - defines the maximum allowed size of the request body that can be sent to the application, in MB.
@@ -476,7 +486,7 @@ The format of the key  is `domain[:port]`. The key must be project-wide unique.
 * `groups: applications: endpoints: store:` defines the **Store** as context to process requests within.
 <a name="groups-applications-endpoints-services"></a>
 * `groups: applications: endpoints: services:` defines the **Store**-specific settings for services. Only `session:` is currently allowed here. See [Services](#services) to learn more.
-* `groups: applications: endpoints: cors-allow-origin:` defines CORS header. Allowed for `Glue` application only. Possible values are `single domain as string` or `*` to allow all domains.
+* `groups: applications: endpoints: cors-allow-origin:` defines a CORS header. It is allowed for `glue` application only. Possible values are `single domain as string` or `*` to allow all domains.
 
 ### services: endpoints:
 Defines the list of **Endpoints** to access a **Service** for development or monitoring needs. The format of the key  is `domain[:port]`. The key must be project-wide unique.
@@ -611,7 +621,7 @@ If not specified, the default value applies:
 :::
 2. `native:`- source files are mounted from host machine into containers directly. We recommend using it Linux.
 3. `docker-sync:`- source files are synced from host machine into containers during runtime. Use it as a workaround solution with MacOS and Windows.
-4.  `mutagen:`- source files are synced from host machine into containers during runtime. Use it as a workaround solution with MacOS and Windows. 
+4.  `mutagen:`- source files are synced from the host machine into running containers. Use it as a workaround for MacOS and Windows. 
 
 `As mount:` is a platform-specific setting. You can define multiple mount modes. Use the`platforms:` list to define the mount mode for a particular platform. Possible platforms are `windows`, `macos` and `linux`.
 
@@ -708,12 +718,12 @@ A message broker **Service**.
 ***
 ### dashboard:
 
-Real-time log monitoring **Service**.
+A real-time log monitoring **Service**.
 
 * Project-wide
 
-  - `dashboard: engine:` - possible values is `dashboard`.
-  - `dashboard: endpoints:` - defines the service's port or/and web-interface that can be accessed via given endpoints.
+  - `dashboard: engine:` - possible value is `dashboard`.
+  - `dashboard: endpoints:` - defines the service's port and web interface that can be accessed via given endpoints.
 ***
 
 ### database:
@@ -836,10 +846,14 @@ The swagger-ui **Service** used to run Swagger UI to develop API endpoints.
 
 ***
 ### tideways:
-An application profiler **Service** used for testing and debugging.
+An application profiler **Service** for testing and debugging.
 * Project-wide
-  - `tideways: apikey:` - defines the api-key used  to authenticate with Tideways.
-  - `tideways: environment-name:` - defines the environment name used to named your environment on Tideways. Optional param. Default value is `production`
+  - `tideways: apikey:` - defines the api-key to authenticate with Tideways.
+  - `tideways: environment-name:` - defines the environment name of your environment on Tideways. 
+:::(Info) (Optional variable)
+If not specified, the default value applies:
+`environment-name: production`
+:::
   - `tideways: cli-enabled:` - defines flag for profilling CLI script like cronjobs, etc. Optional param. Default value is `false`       
 
 
