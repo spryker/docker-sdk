@@ -13,6 +13,13 @@ Read the description below and, in the *Structure* section, fill out the documen
 ## Outline
 1. Short description how to set up necessary software for developing purpose.
 
+
+:::(Warning)(Mutagen commands)
+Docker SDK does not support native docker/mutagen commands. Use them at your own risk.
+:::
+
+
+
 ### Mutagen - MacOS.
 
 * Make sure you use Stable version of Docker Desktop for Mac (e.g. 2.3.0.4).
