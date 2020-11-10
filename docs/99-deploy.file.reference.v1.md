@@ -631,6 +631,7 @@ The following services are supported:
 *     search
 *     session
 *     swagger
+*     webdriver
 
 ***
 ### blackfire:
@@ -779,6 +780,14 @@ The swagger-ui **Service** used to run Swagger UI to develop API endpoints.
     * `swagger-ui: endpoints:` - defines the service's port or/and web interface that can be accessed via given endpoints.
         
 
+
+***
+
+### webdriver:
+
+A **Service** to control user agents.
+
+* `webdriver: engine:` - possible values are `chromedriver,` `phantomjs`. This variable is optional with the default value of `phantomjs`.
 
 ***
 
