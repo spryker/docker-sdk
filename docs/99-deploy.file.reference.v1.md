@@ -244,7 +244,7 @@ If not specified, the default value applies:
 * `assets: compression:` - defines an engine for static compressions. Possible values are `gzip` and `brotli`. 
 * `assets: compression: engine: static:` - defines a comression mode. Allowed values are `only`, `true`, and `false`.
 * `assets: compression: engine: level:` - defines a compression level. Allowed range is from `1` to `9`.
-* `assets: compression: engine: types:` - defines additional MIME types to be compressed additionally.
+* `assets: compression: engine: types:` - defines additional MIME types to be compressed.
 
 ***
 
@@ -253,7 +253,9 @@ If not specified, the default value applies:
 Defines the list of **Regions**.
 
 <a name="regions-services"></a>
-* `regions: services:` - defines settings for **Region**-specific `services:`. Only `database:` and `mail: sender:` are currently allowed here. `mail: sender:` - defines the mail sender configuration. Possible params are `name` and `email`.
+* `regions: services:` - defines settings for **Region**-specific `services:`. Only `database:` and `mail: sender:` are allowed here. 
+	* `regions: services: database:` - see [database](#database)
+	* `regions: services: mail: sender:` - defines the mail sender configuration. Possible values are `name:` and `email:`.
 * `regions: stores:` - defines the list of **Stores**.
 <a name="regions-stores-services"></a>
 * `regions: stores: services:` - defines application-wide, **Store**-specific settings for **Services**. Only `broker:`, `key_value_store:` and `search:` are currently allowed here. See [services:](#services-reference) to learn more.
@@ -363,11 +365,11 @@ Obligatory parameters for `application:`:
 * `groups: applications: endpoints:` - defines the list of **Endpoints** to access the **Application**. See [groups: applications: endpoints:](#groups-applications-endpoints) to learn more.
 
 Optional parameters for `application:`:
-* `groups: applications: application: application:` - defines the application type. Allowed value is `static`.
+* `groups: applications: application: application:` - defines if the application is static. Only `static` is allowed here.
 * `groups: applications: application: endpoints: endpoint: entry-point:` - defines an entry-point, the path to the index directory of the application.
 * `groups: applications: application: endpoints: endpoint: redirect:` - defines redirect rules.
 * `groups: applications: application: endpoints: endpoint: redirect: code` - defines an HTTP code for a redirect. Allowed values are `301` and `302`.
-* `groups: applications: application: endpoints: endpoint: redirect: url` - defines url for redirect.
+* `groups: applications: application: endpoints: endpoint: redirect: url` - defines a URL to redirect to.
   
 * `groups: applications: application: endpoints: real-ip: from:` - defines gateway IP addresses to fetch the real IP address.
 * `groups: applications: application: endpoints: auth:` - defines the basic auth.
@@ -531,8 +533,8 @@ When no engine is defined in `deploy.yml`, the Docker Engine is used.
 Defines the [New Relic](https://documentation.spryker.com/docs/services#new-relic) configuration.
 
 * `docker: newrelic: license:` - defines the New Relic license which should be acquired from [New Relic](https://www.newrelic.com/).
-* `docker: newrelic: appname:` - defines the New Relic application name. Optional param.
-* `docker: newrelic: enabled:` - defines the flag for enabling Newrelic. Optional param. Default value is `true`
+* `docker: newrelic: appname:` - defines the New Relic application name. This variable is optional and does not have a default value. 
+* `docker: newrelic: enabled:` - defines if Newrelic is enabled. Possible values are `true` and `false`. This variable is optional. The default value is `true`.
 
 ```yaml
 docker:
@@ -580,7 +582,7 @@ docker:
 		enabled: true
 		
  ```
-* `docker: debug: xdebug: enabled:` - defines for enabling/disabling XDebug
+* `docker: debug: xdebug: enabled:` - defines if Xdebug is enabled.
 
 ***
 ### docker: logs:
@@ -854,7 +856,7 @@ An application profiler **Service** for testing and debugging.
 If not specified, the default value applies:
 `environment-name: production`
 :::
-  - `tideways: cli-enabled:` - defines flag for profilling CLI script like cronjobs, etc. Optional param. Default value is `false`       
+  - `tideways: cli-enabled:` - defines if profilling of CLI script is enabled. This variable is optional with the default value of `false`.       
 
 
 ***
