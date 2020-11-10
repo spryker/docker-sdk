@@ -36,6 +36,7 @@ This document describes configuration options of the services shipped with Spryk
 *     MailHog
 *     Blackfire
 *     New Relic
+*     ChromeDriver
 
 :::(Info) ()
 * Before you start configuring a service, make sure to install or update Docker SDK to the latest version:
@@ -404,3 +405,19 @@ NEWRELIC_LICENSE={new_relic_license} docker/sdk up
 :::(Warning) (Note)
 You can pass the New Relic license only with the `docker/sdk up` command.
 :::
+
+
+## ChromeDriver
+
+[ChromeDriver](https://chromedriver.chromium.org/) is a thin wrapper on WebDriver and [Chromium](https://chromedriver.chromium.org/) headless browser. It is used for automating web page interaction, JavaScript execution, and other testing-related activities. It provides full-control API to make end-to-end testing flexible and comfortable.  
+
+ 
+
+### Configuration
+To enable Chromedriver, in `deploy.*.yml`, add a new `webdriver` service with the `chromedriver` engine:
+
+```yaml
+services:
+    webdriver:
+        engine: chromedriver
+```
