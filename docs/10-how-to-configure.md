@@ -11,7 +11,16 @@ This document is a draft. See [Docker SDK](https://documentation.spryker.com/doc
 
 1. List all common configuration cases we have faced in the community channel, etc.
 
-### How to configure Opcache.
+
+## Structure
+
+
+
+This document is a quick reference for the most common configuration options of docker/sdk.
+
+
+
+### How to configure Opcache
 
 ```yaml
 image:
@@ -24,7 +33,7 @@ image:
             ...
 ```
 
-### How to configure `memory_limit`.
+### How to define a memory limit
 
 ```yaml
 image:
@@ -34,7 +43,7 @@ image:
             "memory_limit": 512m
 ```
 
-### How to provide custom environment variables to Spryker applications.
+### How to provide custom environment variables to Spryker applications
 
 ```yaml
 image:
@@ -43,4 +52,7 @@ image:
         MY_CUSTOM_ENVIRONMENT_VARIABLE: 1
         ...
 ```
-Note: These variables are embedded into all application images.
+
+:::(Info)()
+These variables are embedded into all application images.
+:::
