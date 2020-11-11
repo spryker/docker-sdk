@@ -79,7 +79,7 @@ docker: Error response from daemon: Conflict. The container name "/data-sync" is
 ***
 
 **when**
-You get a  similar error:
+You get a an error similar to the following:
 ```bash
 Unable to find image "eugenmayer/unison:hostsync_@.2' Locally
 docker: Error response from daemon: manifest for eugenmayer/unison:hostsync_@.2 not found: manifest unknown: manifest unknown.
@@ -92,7 +92,7 @@ gem install docker-sync
 ```
 
 
-### Exception upon new indexes setup
+### Setup of new indexes throws an exception
 
 **when**
 Running the command `setup-search-create-sources [vendor/bin/console search:setup:sources]` returns the exception:
@@ -139,10 +139,10 @@ docker pull nginx:alpine
 docker/sdk up
 ```
 
-### Vendor folder synchronization problems.
+### Vendor folder synchronization
 
 **when**
-You get `vendor/bin/console: not found` or similar problem.
+You get an error similar to `vendor/bin/console: not found`.
 
 **then**
 ```bash
@@ -153,10 +153,10 @@ docker/sdk up --build
 ### An application is not reachable over http
 
 **when**
-Yves, Zed, or Glue, etc. application is not reachable over and installation process finished.
+An application like Yves, Zed, or Glue is not reachable after installation.
 
 **then**
-Check ssl section in the deployment file, e.g deploy.*.yml.
+Ensure that SSL encryption is enabled in `deploy.*.yml`:
 ```yaml
 docker:
     ssl:
@@ -177,8 +177,6 @@ image:
 
 ## What issues can I encounter during debugging and how can I resolve them?
 
-### Xdebug does not work
-
 **when**
 Xdebug does not work.
 
@@ -197,19 +195,18 @@ $ docker/sdk cli php -m
 $ nc -zv ${SPRYKER_XDEBUG_HOST_IP} 9000
 ```
 
-***
 
 **when**
-PHP xdebug extension is not active in `CLI`.
+PHP `xdebug` extension is not active in CLI.
 
 **then**
-Exit the CLI session and run `docker/sdk cli -x`
+Exit the CLI session and run `docker/sdk cli -x`.
 
 **when**
-PHP xdebug extension is not active in the browser.
+PHP `xdebug` extension is not active in the browser.
 
 **then**
-Make sure the following is set too `true` or absent:
+Ensure that Xdebug is enabled in your `deploy.*.yml`:
 ```yaml
 docker:
 ...
@@ -217,6 +214,8 @@ docker:
       xdebug:
         enabled: true
 ```
+
+
 # Option 1.
 Set cookie `XDEBUG_SESSION=spryker` for the request.
 # Option 2.
