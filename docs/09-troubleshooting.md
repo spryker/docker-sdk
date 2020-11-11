@@ -173,6 +173,9 @@ The console command `frontend:project:install-dependencies` finished with error.
 image:
     tag: spryker/php:7.3-alpine3.10
 ```
+```bash
+docker/sdk boot && docker/sdk up
+```
 
 
 ## What issues can I encounter during debugging and how can I resolve them?
