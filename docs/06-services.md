@@ -37,6 +37,9 @@ This document describes configuration options of the services shipped with Spryk
 *     Blackfire
 *     New Relic
 *     ChromeDriver
+*     Dashboard
+*     Tideways
+
 
 :::(Info) ()
 * Before you start configuring a service, make sure to install or update Docker SDK to the latest version:
@@ -47,7 +50,7 @@ git clone https://github.com/spryker/docker-sdk.git ./docker
 * After enabling a service, make sure to apply the new configuration:
     1. Bootstrap docker setup:
     ```bash
-    docker/sdk boot {deploy.yaml | deploy.dev.yaml}
+    docker/sdk boot {deploy.yml | deploy.dev.yml}
     ```
 
     2. Once the job finishes, build and start the instance:
@@ -94,7 +97,7 @@ See [PostgreSQL documentation](https://www.postgresql.org/docs/) for more detail
 
 #### Configuration
 Follow the steps below to switch database engine to PostgreSQL:
-1. Adjust `deploy.*.yaml` in the `services:` section:
+1. Adjust `deploy.*.yml` in the `services:` section:
 ```yaml
 ...
 services:
@@ -121,7 +124,7 @@ See:
 
 ### Configuration
 
-Adjust `deploy.*.yaml` in the `services:` section to open the port used for accessing ElasticSearch:
+Adjust `deploy.*.yml` in the `services:` section to open the port used for accessing ElasticSearch:
 ```yaml
 services:
     search:
@@ -141,7 +144,7 @@ In Docker SDK, Kibana UI is provided as a service by default.
 
 ### Configuration
 Follow the steps to configure an endpoint for Kibana UI:
-1. Adjust `deploy.*.yaml` in the `services:` section:
+1. Adjust `deploy.*.yml` in the `services:` section:
 ```yaml
 services:
     ...
@@ -161,7 +164,7 @@ echo "127.0.0.1 {custom_endpoint}" | sudo tee -a /etc/hosts
 
 ### Configuration
 
-Adjust `deploy.*.yaml` in the `services:` section to open the port used for accessing RabbitMQ:
+Adjust `deploy.*.yml` in the `services:` section to open the port used for accessing RabbitMQ:
 ```yaml
 services:
     broker:
@@ -186,7 +189,7 @@ Spryker provides the basic functionality to generate [OpenApi schema specificati
 
 ### Configuration
 Follow the steps to configure an endpoint for Swagger UI:
-1. Adjust `deploy.*.yaml` in the `services:` section:
+1. Adjust `deploy.*.yml` in the `services:` section:
 ```yaml	
 services:
     ...
@@ -209,7 +212,7 @@ See [Redis documentation](https://redis.io/documentation) for more details.
 
 ### Configuration
 
-Adjust `deploy.*.yaml` in the `services:` section to open the port used for accessing Redis:
+Adjust `deploy.*.yml` in the `services:` section to open the port used for accessing Redis:
 ```yaml
 services:
     key_value_store:
@@ -226,7 +229,7 @@ services:
 ### Configuration
 Follow the steps to configure an endpoint for Redis Commander: 
 
-1. Adjust `deploy.*.yaml` in the `services:` section:
+1. Adjust `deploy.*.yml` in the `services:` section:
 
 ```yaml
 services:
@@ -260,7 +263,7 @@ By default the following applies:
 * Login is not required
 :::
 ### Configuration
-Adjust `deploy.*.yaml` in the `services:` section to specify a custom endpoint:
+Adjust `deploy.*.yml` in the `services:` section to specify a custom endpoint:
 ```yaml
 services:
         ...
@@ -277,7 +280,7 @@ services:
 
 Follow the steps to enable Blackfire:
 
-1. Adjust `deploy.*.yaml` in the `image:` section to enable the Blackfire PHP extension:
+1. Adjust `deploy.*.yml` in the `image:` section to enable the Blackfire PHP extension:
 
 ```yaml
 image:
@@ -288,7 +291,7 @@ image:
             - blackfire
 ```
 
-2. Adjust `deploy.*.yaml` in the `services:` section to configure Blackfire client:
+2. Adjust `deploy.*.yml` in the `services:` section to configure Blackfire client:
 
 ```yaml
 services:
@@ -307,7 +310,7 @@ Use the following configuration if you are going to change server or client deta
 
 Follow the steps to enable Blackfire:
 
-1. Adjust `deploy.*.yaml` in the `image:` section to enable the Blackfire PHP extension:
+1. Adjust `deploy.*.yml` in the `image:` section to enable the Blackfire PHP extension:
 
 ```yaml
 image:
@@ -318,7 +321,7 @@ image:
             - blackfire
 ```
 
-2. Adjust `deploy.*.yaml` in the `services:` section to enable Blackfire service:
+2. Adjust `deploy.*.yml` in the `services:` section to enable Blackfire service:
 
 ```yaml
 services:
@@ -420,4 +423,36 @@ To enable Chromedriver, in `deploy.*.yml`, add a new `webdriver` service with th
 services:
     webdriver:
         engine: chromedriver
+```
+
+
+## Dashboard
+
+Dashboard is a tool that helps to monitor logs in real time. You can monitor logs in all or a particular container. 
+
+
+### Configuration
+
+To configure Вashboard, adjust your `deploy.*.yml` as follows:
+
+```yaml
+dashboard:
+        engine: dashboard
+        endpoints:
+            {custom_endpoint}:
+```
+
+## Tideways
+
+[Tideways](https://tideways.com/) is an application profiler used for testing and debugging. Its main functions are profiling, monitoring, and exception tracking.
+
+
+### Configuration
+To configure Tideways, adjust your `deploy.*.yml` as follows:
+
+```yaml
+tideways:
+    apikey: {tideways_api_key}
+    environment-name: {tideways_environment_name}
+    cli-enabled: {true|false}
 ```
