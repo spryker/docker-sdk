@@ -46,14 +46,14 @@ Error response from daemon: Bad response from Docker engine
 ```
 
 **then**
-1. Make sure Docker demon is running.
+1. Make sure Docker daemon is running.
 2. Run `docker/sdk up` again.
 
 
 ### Port is already occupied on host
 
 **when**
-Running the `docker/sdk up` console command returns a similar error:
+Running the `docker/sdk up` console command returns an error similar to this:
 ```bash
 ERROR: for nginx_frontend Cannot start service nginx_frontend: driver failed programming external connectivity on endpoint spryker_nginx_frontend_1 (e4fdb360f6c9a3243c0a88fa74f8d377325f65b8cd2340b2dacb51377519c1cf): Error starting userland proxy: Bind for 0.0.0.0:80: unexpected error (Failure EADDRINUSE)
 ```
@@ -68,7 +68,7 @@ sudo lsof -nPi:80 | grep LISTEN
 
 ### docker-sync
 **when**
-Running `docker-sync clean` returns a similar error:
+Running `docker-sync clean` returns an error similar to this:
 ```bash
 docker: Error response from daemon: Conflict. The container name "/data-sync" is already in use by container "47dd708a7a7f9550390432289bd85fe0e4491b080748fcbba7ddb3331de2c7e7". You have to remove (or rename) that container to be able to reuse that name.
 ```
@@ -79,7 +79,7 @@ docker: Error response from daemon: Conflict. The container name "/data-sync" is
 ***
 
 **when**
-You get a an error similar to the following:
+You get an error similar to the following:
 ```bash
 Unable to find image "eugenmayer/unison:hostsync_@.2' Locally
 docker: Error response from daemon: manifest for eugenmayer/unison:hostsync_@.2 not found: manifest unknown: manifest unknown.
@@ -139,19 +139,19 @@ docker pull nginx:alpine
 docker/sdk up
 ```
 
-### Vendor folder synchronization
+### Vendor folder synchronization error
 
 **when**
 You get an error similar to `vendor/bin/console: not found`.
 
 **then**
-Re-build basic images, assets and codebase:
+Re-build basic images, assets, and codebase:
 ```bash
 docker/sdk up --build
 ```
 
 
-### An application is not reachable over http
+### An application is not reachable via http
 
 **when**
 An application like Yves, Zed, or Glue is not reachable after installation.
@@ -191,7 +191,7 @@ gyp ERR!
 
 **then**
 
-1. In `deploy.*.yaml` change the base PHP image:
+1. In `deploy.*.yaml`, change the base PHP image:
 ```yaml
 image:
     tag: spryker/php:7.3-alpine3.10
@@ -209,7 +209,7 @@ docker/sdk boot && docker/sdk up
 Xdebug does not work.
 
 **then**
-1. Make sure your IDE is listening to the port 9000.
+1. Ensure that IDE is listening to the port 9000.
 2. Get into any application container:
 ```bash
 $ docker exec -i spryker_zed_1 bash
@@ -234,7 +234,7 @@ Exit the CLI session and run `docker/sdk cli -x`.
 PHP `xdebug` extension is not active in the browser.
 
 **then**
-1. Ensure that Xdebug is enabled in your `deploy.*.yml`:
+1. In `deploy.*.yml`, ensure that Xdebug is enabled:
 ```
 ```yaml
 docker:
@@ -244,7 +244,7 @@ docker:
         enabled: true
 ```
 2. Try the following:
-    * Set cookie `XDEBUG_SESSION=spryker` for the request.
+    * Set the `XDEBUG_SESSION=spryker` cookie  for the request.
     * Run the following command:
     ```bash
     docker/sdk run -x
