@@ -382,7 +382,7 @@ Optional parameters for `application:`:
   * Whitelist auth variables:
     * `groups: applications: application: endpoints: auth: include:` - defines the IPs to allow access from.
   
-* `groups: applications: application: endpoints: primal:` - defines endpoint like gateway. Default behavior is always first `zed`
+* `groups: applications: application: endpoints: primal:` - defines if a ZED endpoint is primal for a store. Yves and Glue applications send Zed RPC calls to the primal endpoint. This variable is optional with the default value of `false`. If no endpoint is defined as primal for a store, the first endpoint in descending order is considered primal.
 * `groups: applications: application: http: max-request-body-size:` - defines the maximum allowed size of the request body that can be sent to the application, in MB.
   
 ```yaml
