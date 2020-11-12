@@ -1,0 +1,3 @@
+{% extends "nginx/tcp/server.conf.twig" %}
+{% block port %}{{ port | default(8000) }}{% endblock port %}
+{% block upstream %}{{ upstream }}:8000{% endblock upstream %}

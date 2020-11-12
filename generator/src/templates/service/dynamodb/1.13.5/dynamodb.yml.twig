@@ -1,0 +1,10 @@
+  {{ serviceName }}:
+    image: amazon/dynamodb-local:1.13.5
+    networks:
+      - private
+    labels:
+      'spryker.app.name': dynamodb
+      'spryker.app.type': aws
+      'spryker.project': ${SPRYKER_DOCKER_PREFIX}:${SPRYKER_DOCKER_TAG}
+    volumes:
+{% include "application-volumes.yml.twig" with project %}
