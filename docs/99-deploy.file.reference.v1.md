@@ -787,7 +787,8 @@ The swagger-ui **Service** used to run Swagger UI to develop API endpoints.
 
 A **Service** to control user agents.
 
-* `webdriver: engine:` - possible values are `chromedriver,` `phantomjs`. This variable is optional with the default value of `phantomjs`.
+* Project-wide
+    * `webdriver: engine:` - possible values are `chromedriver,` `phantomjs`. This variable is optional with the default value of `phantomjs`.
 
 ***
 
