@@ -195,7 +195,7 @@ If not specified, the default value applies:
 ***
 ### image: environment:
 
-Defines additional ENV variables for Spryker applications.
+Defines additional environment variables variables for Spryker applications.
 
 ```yaml
 version: 1.0
@@ -211,7 +211,7 @@ image:
 Defines the PHP settings for Spryker applications.
 
 * `image: php: ini:` - defines `php.ini` configuration.
-* `image: php: enabled-extensions` - defines enabled PHP extensions. The following extensions are allowed here:
+* `image: php: enabled-extensions` - defines enabled PHP extensions. The following extensions are allowed:
   * `blackfire`
   * `newrelic`
   * `tideways`
@@ -231,11 +231,8 @@ image:
 ### assets:
 
 Defines the setting of **Assets**.
-* `assets: image:` - defines a docker image for a front-end container.
-:::(Info) (Optional variable)
-If not specified, the default value applies:
-`assets: image: nginx:alpine`
-:::
+* `assets: image:` - defines a docker image for a front-end container. If not specified, the default value applies:
+`assets: image: nginx:alpine`.
 * `assets: mode:` - defines a mode for running a static build section from the install recipe. Possible values are `production` and `development`. This variable is optional with the default value of `development`.
 * `assets: compression:` - defines an engine for static compressions. Possible values are `gzip` and `brotli`. 
 * `assets: compression: engine: static:` - defines a comression mode. Allowed values are `only`, `true`, and `false`.
@@ -528,9 +525,9 @@ When no engine is defined in `deploy.yml`, the Docker Engine is used.
 
 Defines the [New Relic](https://documentation.spryker.com/docs/services#new-relic) configuration.
 
-* `docker: newrelic: license:` - defines the New Relic license which should be acquired from [New Relic](https://www.newrelic.com/).
-* `docker: newrelic: appname:` - defines the New Relic application name. This variable is optional and does not have a default value. 
-* `docker: newrelic: enabled:` - defines if Newrelic is enabled. Possible values are `true` and `false`. This variable is optional. The default value is `true`.
+* `docker: newrelic: license:` - defines a New Relic license. Aquire it from [New Relic](https://www.newrelic.com/).
+* `docker: newrelic: appname:` - defines a New Relic application name. This variable is optional and does not have a default value. 
+* `docker: newrelic: enabled:` - defines if Newrelic is enabled. Possible values are `true` and `false`. This variable is optional with the default value of `true`.
 
 ```yaml
 docker:
@@ -847,11 +844,7 @@ The swagger-ui **Service** used to run Swagger UI to develop API endpoints.
 An application profiler **Service** for testing and debugging.
 * Project-wide
   - `tideways: apikey:` - defines the api-key to authenticate with Tideways.
-  - `tideways: environment-name:` - defines the environment name of your environment on Tideways. 
-:::(Info) (Optional variable)
-If not specified, the default value applies:
-`environment-name: production`
-:::
+  - `tideways: environment-name:` - defines the environment name of your environment on Tideways. This variable is optional with the default value of `production`.
   - `tideways: cli-enabled:` - defines if profilling of CLI script is enabled. This variable is optional with the default value of `false`.       
 
 
