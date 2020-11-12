@@ -145,6 +145,7 @@ docker/sdk up
 You get an error similar to `vendor/bin/console: not found`.
 
 **then**
+Re-build basic images, assets and codebase:
 ```bash
 docker/sdk up --build
 ```
@@ -156,23 +157,47 @@ docker/sdk up --build
 An application like Yves, Zed, or Glue is not reachable after installation.
 
 **then**
-Ensure that SSL encryption is enabled in `deploy.*.yml`:
+In `deploy.*.yml`, ensure that SSL encryption is enabled:
 ```yaml
 docker:
     ssl:
         enabled: true
 ```
 
-### During the frontend setup an error occurred.
+### An error during front end setup
 
 **when**
-The console command `frontend:project:install-dependencies` finished with error.
+The `frontend:project:install-dependencies` command returns an error similar to this:
+```
+-->  DEVELOPMENT MODE
+Store: US | Environment: docker
+Install Project dependencies
+[info] npm
+[info]  WARN prepare
+[info]  removing existing node_modules/ before installation
+[info]
+> fsevents@1.2.11 install /data/node_modules/fsevents
+> node-gyp rebuild
+[info] gyp
+[info]  ERR! find Python
+gyp ERR! find Python
+[info]  Python is not set from command line or npm configuration
+gyp ERR!
+[info] find Python Python is not set from environment variable PYTHON
+gyp ERR!
+[info]  find Python checking if "python" can be used
+gyp ERR!
+```
 
 **then**
+
+1. In `deploy.*.yaml` change the base PHP image:
 ```yaml
 image:
     tag: spryker/php:7.3-alpine3.10
 ```
+
+2. Fetch the changes and start the instance:
 ```bash
 docker/sdk boot && docker/sdk up
 ```
@@ -209,7 +234,8 @@ Exit the CLI session and run `docker/sdk cli -x`.
 PHP `xdebug` extension is not active in the browser.
 
 **then**
-Ensure that Xdebug is enabled in your `deploy.*.yml`:
+1. Ensure that Xdebug is enabled in your `deploy.*.yml`:
+```
 ```yaml
 docker:
 ...
@@ -217,15 +243,12 @@ docker:
       xdebug:
         enabled: true
 ```
-
-
-# Option 1.
-Set cookie `XDEBUG_SESSION=spryker` for the request.
-# Option 2.
-Run the following command:
-```bash
-docker/sdk run -x
-```
+2. Try the following:
+    * Set cookie `XDEBUG_SESSION=spryker` for the request.
+    * Run the following command:
+    ```bash
+    docker/sdk run -x
+    ```
 
 **when**
 `nc` command does not give any output.
