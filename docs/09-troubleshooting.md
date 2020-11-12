@@ -157,11 +157,11 @@ docker/sdk up --build
 An application like Yves, Zed, or Glue is not reachable after installation.
 
 **then**
-In `deploy.*.yml`, ensure that SSL encryption is enabled:
+In `deploy.*.yml`, ensure that SSL encryption is disabled:
 ```yaml
 docker:
     ssl:
-        enabled: true
+        enabled: false
 ```
 
 ### An error during front end setup
