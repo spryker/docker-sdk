@@ -281,15 +281,6 @@ docker/sdk up --build --data --assets
         ```bash
         sudo chmod +x /usr/local/bin/docker-compose
         ```
-* Adjust deploy.local.yml mount section to the following:
-```yaml
-docker:
-...
-   mount:
-       native:
-           platforms:
-               - windows
-```
 * Bootstrap docker/sdk.
 ```bash
 docker/sdk boot
