@@ -13,10 +13,11 @@ Read the description below and, in the *Structure* section, fill out the documen
 ## Outline
 1. Short description how to set up the environment for developing purpose.
 
-### How to configure mutagen mount mode for MacOS platform.
+### How to configure mutagen mount mode on MacOS
 
-* Make sure you use stable version of [Docker Desktop for Mac](https://docs.docker.com/docker-for-mac/install/) (e.g. 2.3.0.4).
-* Adjust deploy.local.yml mount section to the following:
+1. Ensure that you run a stable version of [Docker Desktop for Mac](https://docs.docker.com/docker-for-mac/install/).
+
+2. Adjust the mount section of `deploy.local.yml` as follows:
 ```yaml
 docker:
 ...
@@ -26,33 +27,39 @@ docker:
                  - macos
 
 ```
-* Bootstrap docker/sdk.
+
+3. Bootstrap docker/sdk:
 ```bash
 docker/sdk boot
 ```
+
 * Follow installation instructions displayed in the grey block during the execution of the previous command and execute:
  - `brew install mutagen-io/mutagen/mutagen-beta`
  - Adjust host file.
-* Execute the following command to build and run Spryker application based on demo data:
+ 
+* Build and run Spryker application based on demo data:
 ```bash
 docker/sdk up --build --data --assets
 ```
 
-### How to configure docker-sync mount mode for MacOS platform.
+### How to configure docker-sync mount mode on MacOS
 
-* Install Ruby and Ruby -dev. Make sure you use `Ruby` version `2.7.0preview1` or higher:
+1. Install ruby and ruby-dev. Make sure you use `Ruby` version `2.7.0preview1` or higher:
 ```bash
 sudo apt-get install ruby ruby-dev
 ```
-* Install Unison. Make sure you use `Unison` version `2.51.2` or higher:
+
+2. Install Unison. Make sure you use `Unison` version `2.51.2` or higher:
 ```bash
 brew install unison
 ```
-* Install docker-sync. Make sure you use `Docker-sync` version `0.5.11` or higher:
+
+3. Install docker-sync. Make sure you use `Docker-sync` version `0.5.11` or higher:
 ```bash
 sudo gem install docker-sync
 ```
-* Adjust deploy.local.yml mount section to the following:
+
+4. Adjust the mount section of `deploy.local.yml` as follows:
 ```yaml
 docker:
 ...
@@ -61,20 +68,24 @@ docker:
            platforms:
                - macos
 ```
-* Bootstrap docker/sdk:
+
+5. Bootstrap docker/sdk:
 ```bash
 docker/sdk boot
 ```
-* Follow installation instructions displayed in the grey block during the execution of the previous command.
-* Execute the following command to build and run Spryker application based on demo data:
+
+6. Follow installation instructions displayed in the grey block during the execution of the previous command.
+
+7. Build and run Spryker application based on demo data:
 ```bash
 docker/sdk up --build --data --assets
 ```
 
-### How to configure native mount mode for Linux platform.
+### How to configure native mount mode on Linux
 
-* Make sure you use stable version of Docker for Linux.
-* Adjust deploy.local.yml mount section to the following:
+1. Ensure that you run a stable version of Docker for Linux.
+
+2. Adjust the mount section of `deploy.local.yml` as follows:
 ```yaml
 docker:
 ...
@@ -83,19 +94,19 @@ docker:
            platforms:
                - linux
 ```
-* Bootstrap docker/sdk:
+3. Bootstrap docker/sdk:
 ```bash
 docker/sdk boot
 ```
-* Follow installation instructions displayed in the grey block during the execution of the previous command.
-* Execute the following command to build and run Spryker application based on demo data:
+4. Follow installation instructions displayed in the grey block during the execution of the previous command.
+5. Build and run Spryker application based on demo data:
 ```bash
 docker/sdk up --build --data --assets
 ```
 
 ### How to configure docker-sync mount mode for Windows (WSL1) platform.
-* Download [Docker Desktop Stable 2.3.0.2](https://docs.docker.com/docker-for-windows/install/), or a later release.
-* Enable the WSL (Windows Subsystem for Linux). It allows Linux programs to run on Windows.
+* Download [Docker Desktop Stable 2.3.0.2](https://docs.docker.com/docker-for-windows/install/) or a later release.
+* Enable [Windows Subsystem for Linux](https://docs.microsoft.com/en-us/windows/wsl/install-win10) (WSL).
     * Open Windows *Control Panel* → *Programs* → *Programs and Features*.
     * Select *Turn Windows features on* or off *hyperlink*.
     * Check *Windows Subsystem for Linux* and click *OK*.
@@ -131,7 +142,7 @@ docker/sdk up --build --data --assets
               gnupg-agent \
               software-properties-common
               ```
-            * Add Docker's official GPG (GNU Privacy Guard) key:
+            * Add Docker's official GNU Privacy Guard key:
               ```bash
               curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
               ```
@@ -142,11 +153,11 @@ docker/sdk up --build --data --assets
               $(lsb_release -cs) \
               stable"
               ```
-        * Install the latest version of Docker CE:
+        * Install the latest version of Docker Comunitiy Edition:
           ```bash
           sudo apt-get install docker-ce docker-ce-cli containerd.io
           ```
-        * Install Docker Compose.
+        * Install Docker Compose:
             * Download the current stable release of Docker Compose:
               ```bash
               sudo curl -L "https://github.com/docker/compose/releases/download/1.24.0/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
@@ -155,18 +166,19 @@ docker/sdk up --build --data --assets
               ```bash
               sudo chmod +x /usr/local/bin/docker-compose
               ```
-        * Install Docker Sync.
-            * Install Ruby and Ruby -dev:
+        * Install Docker Sync:
+            * Install ruby and ruby-dev:
               ```bash
               sudo apt-get install ruby ruby-dev
               ```
+              
             * Install docker-sync:
               ```bash
               sudo gem install docker-sync
               ```
-            * Set your Docker for Windows host as an ENV variable:
-                * Open the *Docker for Windows* settings and check Expose daemon on *tcp://localhost:2375 without TLS*.
-                * Run the following command in your WSL shell:
+            * Set your Docker for Windows host as an environment variable:
+                * Open the Docker for Windows settings and check Expose daemon on `tcp://localhost:2375` without TLS.
+                * In your WSL shell, run the command:
                   ```bash
                   echo "export DOCKER_HOST=tcp://127.0.0.1:2375" >> ~/.bashrc
                   ```
@@ -248,7 +260,7 @@ docker/sdk up --build --data --assets
      ```bash
      sudo apt-get update
      ```
-    * Install packages to allow apt to use a repository over HTTPS:
+    * Install packages to allow `apt` to use a repository over HTTPS:
       ```bash
       sudo apt-get install \
       apt-transport-https \
@@ -257,7 +269,7 @@ docker/sdk up --build --data --assets
       gnupg-agent \
       software-properties-common
       ```
-    * Add Docker's official GPG (GNU Privacy Guard) key:
+    * Add Docker's official GNU Privacy Guard key:
       ```bash
       curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
       ```
@@ -268,7 +280,7 @@ docker/sdk up --build --data --assets
       $(lsb_release -cs) \
       stable"
       ```
-    * Install the latest version of Docker CE:
+    * Install the latest version of Docker Community Edition:
       ```bash
       sudo apt-get install docker-ce docker-ce-cli containerd.io
       ```
