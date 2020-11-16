@@ -212,7 +212,7 @@ unable to reconcile Mutagen sessions: unable to create synchronization session (
 
 **then**
 1. Restart your OS.
-2. If the error persists: Check [Mutagen documentation](https://mutagen.readthedocs.io).
+2. If the error persists: Check [Mutagen documentation](https://mutagen.io/documentation/introduction).
 
 ### Debugging
 
