@@ -31,7 +31,7 @@ The structure below is just a reference. We encourage you to add subsections, ch
 
 ***
 
-This document contains solutions to the most common issues.
+This document contains solutions to the most common issues related to docker/sdk.
 
 ### Installation
 
