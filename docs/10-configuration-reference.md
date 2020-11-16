@@ -54,5 +54,5 @@ image:
 ```
 
 :::(Info)()
-These variables are embedded into all application images.
+The environment variables defined in `environment` are embedded into all application images.
 :::
