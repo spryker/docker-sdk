@@ -27,56 +27,48 @@ Read the description below and, in the *Structure* section, fill out the documen
 The structure below is just a reference. We encourage you to add subsections, change or swap the provided sections if needed.
 :::
 
-### How to select mount option for the development purpose?
+### How to select a mount option for development?
 
-During the development it's required to select mount option to synchronize code between host machine and a remote container in effective real-time way.
-In the table below you can find suitable mount option depends on your operation system.
+Depending on your operating system, choose one of the mount options in the table.
 
-| Mount option | MacOS       | Linux      | Windows (WSL1) | Windows (WSL2)  |
-|--------------|-------------|------------|----------------|-----------------|
-| native       | &#x2611; ^  | &#x2611; * | &#x2611; ^     | &#x2611; *      |
-| mutagen      | &#x2611; *  | -          | -              | -               |
-| docker-sync  | &#x2611;    | -          | &#x2611; *     | -               |
+| Mount option |        MacOS            | Linux              | Windows (WSL1)          | Windows (WSL2)     |
+|--------------|-------------------------|--------------------|-------------------------|--------------------|
+| native       | :ballot_box_with_check: | :heavy_check_mark: | :ballot_box_with_check: | :heavy_check_mark: |
+| mutagen      | :heavy_check_mark:      |                    |                         |                    |
+| docker-sync  | :white_check_mark:      |                    | :heavy_check_mark:      |                    |
 
-* (^) - the performance is very slow.
-* (*) - recommended mount option for the platform.
-* (-) - not supported mount option.
+* (:heavy_check_mark:) - recommended solution
+* (:white_check_mark:) - supported solution
+* (:ballot_box_with_check:) - supported solution with very slow performance
 
 ### What mount modes does docker/sdk support?
 
-docker/sdk supports the following modes for mounting source files into the application containers:
+docker/sdk supports the following mount modes:
 
 * baked.\
-Performs the source files copying into image, so they *cannot* be changed from host machine.
+Copies source files into image, so they *cannot* be changed from host machine.
 The file or directory is referenced by its absolute path on the host machine.
 
-**NOTE:**
-The default mount option for the demo mode.
+::(Info)(Default mount option)
+This mount option is default for the demo mode.
+::
 
 * native.\
-Performs the source files mounting from host machine into containers directly.
-Works perfectly with Linux.
-
-**NOTE:**
-It works perfectly as a solution for Linux and Windows (WS2) platforms.
+Mounts source files directly from host machine into containers.
+Works perfectly with Linux and Windows (WS2).
 
 * docker-sync.\
-Performs the source files synchronization from host machine into containers during runtime.
-
-**NOTE:**
-It works stable as a solution with MacOS and Windows(WS1) platforms.
+Synchronizes source files from host machine into running containers.
+It is stable with MacOS and Windows(WS1).
 
 * mutagen.\
-Performs the source files synchronization between your host machine, and a remote container in effective real-time way that combines the performance of the rsync algorithm with bidirectionality and low-latency filesystem watching.
+Synchronizes source files between your host machine and a container in an effective real-time way that combines the performance of the rsync algorithm with bidirectionality and low-latency filesystem watching.
 
-**NOTE:**
-It works stable as a solution for MacOS platform.
+It is stable with MacOS.
 
 ### How do I change a mount mode?
 
-As `docker: mount:` is a platform-specific configuration setting.
-During the configuration process its possible to define multiple mount modes depends on the required platform. Possible platforms are windows, macos and linux.
-Check the configuration example below:
+To change a mount mode, in `deploy.*.yaml`, define a platform for each mount mode:
 
 ```yaml
 docker:
@@ -97,27 +89,25 @@ docker:
                 - macos
 ```
 
-**Note:**
-The first mount mode matching the host platform is chosen.
+:::(Info)(Multiple mount modes)
+If the same platform is defined for multiple mount modes, the first mount mode matching the platform in descending order is selected.
+:::
 
 ## How to configure required mount mode:
 [link to mount-modes-configuration.md] file.
 
 ### How do sync modes work and what are their downsides?
-The file synchronization uses a novel algorithm that combines the performance and low-latency filesystem watching.
+File synchronization uses a novel algorithm that combines the performance and low-latency filesystem watching.
 It uses to synchronize code between host machine and a remote container in effective real-time, allowing you to edit code with your editor of choice and have it pushed to the remote container almost instantly.
 
 Sync modes downsides:
-* Logs monitoring.
-* In general not stable solutions.
+* Logs monitoring
+* In general not stable solutions
 
-### What related Docker Desktop and Github documentation can I check?
+### See also
 
-* Docker:
-    * https://docs.docker.com/storage/
+* [Manage data in Docker](https://docs.docker.com/storage/)
 
-* Mutagen:
-    * https://mutagen.io/
+* [Mutagen documentation](https://mutagen.io/documentation/introduction)
 
-* Docker-sync:
-    * https://docker-sync.readthedocs.io/en/latest/
+* [Docker-sync documentation](https://docker-sync.readthedocs.io/)
