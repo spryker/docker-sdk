@@ -29,12 +29,9 @@ We may have added some existing content and encourage you to update, remove or r
 The structure below is just a reference. We encourage you to add subsections, change or swap the provided sections if needed.
 :::
 
-## Why and when should I use this document?
+***
 
-## What issues can I encounter during installation and how can I resolve them?
-
-## What issues can I encounter while running applications and how can I resolve them?
-
+This document contains solutions to the most common issues.
 
 ### Installation
 
@@ -54,7 +51,7 @@ Error response from daemon: Bad response from Docker engine
 #### docker-sync cannot start
 
 **when**
-Running `docker-sync clean` returns an error similar to this:
+Running `docker-sync clean` returns an error similar to the following:
 ```bash
 docker: Error response from daemon: Conflict. The container name "/data-sync" is already in use by container "47dd708a7a7f9550390432289bd85fe0e4491b080748fcbba7ddb3331de2c7e7". You have to remove (or rename) that container to be able to reuse that name.
 ```
@@ -104,7 +101,7 @@ docker/sdk up --build
 #### An error during front end setup
 
 **when**
-The `frontend:project:install-dependencies` command returns an error similar to this:
+The `frontend:project:install-dependencies` command returns an error similar to the following:
 ```
 -->  DEVELOPMENT MODE
 Store: US | Environment: docker
@@ -139,12 +136,12 @@ image:
 docker/sdk boot && docker/sdk up
 ```
 
-### Running
+### Running applications
 
 #### Port is already occupied on host
 
 **when**
-Running the `docker/sdk up` console command returns an error similar to this:
+Running the `docker/sdk up` console command returns an error similar to the following:
 ```bash
 ERROR: for nginx_frontend Cannot start service nginx_frontend: driver failed programming external connectivity on endpoint spryker_nginx_frontend_1 (e4fdb360f6c9a3243c0a88fa74f8d377325f65b8cd2340b2dacb51377519c1cf): Error starting userland proxy: Bind for 0.0.0.0:80: unexpected error (Failure EADDRINUSE)
 ```
@@ -219,8 +216,6 @@ unable to reconcile Mutagen sessions: unable to create synchronization session (
 
 ### Debugging
 
-### What issues can I encounter during debugging and how can I resolve them?
-
 **when**
 Xdebug does not work.
 
@@ -271,7 +266,7 @@ docker:
 **then**
 [Contact us](https://support.spryker.com/hc/en-us).
 
-***
+
 **when**
 `nc` command tells that the port is opened.
 
@@ -282,6 +277,3 @@ docker:
 sudo lsof -nPi:9000 | grep LISTEN
 ```
 3. Make sure it is your IDE.
-
-
-## Running tests
