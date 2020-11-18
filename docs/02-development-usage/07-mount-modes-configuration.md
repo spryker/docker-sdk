@@ -15,6 +15,8 @@ Read the description below and, in the *Structure* section, fill out the documen
 
 ### How to configure mutagen mount mode on MacOS
 
+To configure Mutagen mount mode on MacOS:
+
 1. Ensure that you run a stable version of [Docker Desktop for Mac](https://docs.docker.com/docker-for-mac/install/).
 
 2. Adjust the mount section of `deploy.local.yml` as follows:
@@ -44,17 +46,19 @@ docker/sdk up --build --data --assets
 
 ### How to configure docker-sync mount mode on MacOS
 
-1. Install ruby and ruby-dev. Make sure you use `Ruby` version `2.7.0preview1` or higher:
+To configure docker-sync mount mode on MacOS:
+
+1. Install ruby and ruby-dev. Make sure you use Ruby version `2.7.0preview1` or higher:
 ```bash
 sudo apt-get install ruby ruby-dev
 ```
 
-2. Install Unison. Make sure you use `Unison` version `2.51.2` or higher:
+2. Install Unison. Make sure you use Unison version `2.51.2` or higher:
 ```bash
 brew install unison
 ```
 
-3. Install docker-sync. Make sure you use `Docker-sync` version `0.5.11` or higher:
+3. Install docker-sync. Make sure you use docker-sync version `0.5.11` or higher:
 ```bash
 sudo gem install docker-sync
 ```
@@ -82,6 +86,8 @@ docker/sdk up --build --data --assets
 ```
 
 ### How to configure native mount mode on Linux
+
+To configure native mount mode on Linux:
 
 1. Ensure that you run a stable version of Docker for Linux.
 
@@ -128,12 +134,12 @@ docker/sdk up --build --data --assets
               mountFsTab = false
               ```
         * Restart Ubuntu.
-        * Install the latest version of Docker
-            * Update distributive to the latest version.
+        * Install the latest version of Docker:
+            * Update the packages to the latest versions.
              ```bash
              sudo apt-get update
              ```
-            * Install packages to allow apt to use a repository over HTTPS:
+            * Install packages to allow apt to access a repository via HTTPS:
               ```bash
               sudo apt-get install \
               apt-transport-https \
@@ -178,7 +184,7 @@ docker/sdk up --build --data --assets
               ```
             * Set your Docker for Windows host as an environment variable:
                 * Open the Docker for Windows settings and check Expose daemon on `tcp://localhost:2375` without TLS.
-                * In your WSL shell, run the command:
+                * To update the profile with the environment variable, in your WSL shell, run the command:
                   ```bash
                   echo "export DOCKER_HOST=tcp://127.0.0.1:2375" >> ~/.bashrc
                   ```
