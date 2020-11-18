@@ -257,16 +257,19 @@ docker/sdk boot
 docker/sdk up --build --data --assets
 ```
 
-### How to configure native mount mode for Windows (WSL2) platform.
+### How to configure native mount mode for Windows with WSL2
 
-* Download [Docker Desktop Stable 2.3.0.2](https://docs.docker.com/docker-for-windows/install/), or a later release.
-* Follow the [WLS2 installation guide](https://docs.microsoft.com/en-us/windows/wsl/install-win10)
-* When installation is finished proceed with docker installation guide:
-    * Update distributive to the latest version.
+To configure native mount mode for Windows with WSL2:
+
+1. Download [Docker Desktop Stable 2.3.0.2](https://docs.docker.com/docker-for-windows/install/) or a later release.
+2. Install WSL2 by following [Windows Subsystem for Linux Installation Guide for Windows 10](https://docs.microsoft.com/en-us/windows/wsl/install-win10)
+3. Install Docker in WSL:
+    1. Update packages to the latest version:
      ```bash
      sudo apt-get update
      ```
-    * Install packages to allow `apt` to use a repository over HTTPS:
+    
+    2. Install packages to allow `apt` to access a repository via HTTPS:
       ```bash
       sudo apt-get install \
       apt-transport-https \
@@ -275,36 +278,39 @@ docker/sdk up --build --data --assets
       gnupg-agent \
       software-properties-common
       ```
-    * Add Docker's official GNU Privacy Guard key:
+    
+    3. Add Docker's official GNU Privacy Guard key:
       ```bash
       curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
       ```
-    * Set up a stable repository:
+    
+    4. Set up a stable repository:
       ```bash
       sudo add-apt-repository \
       "deb [arch=amd64] https://download.docker.com/linux/ubuntu \
       $(lsb_release -cs) \
       stable"
       ```
-    * Install the latest version of Docker Community Edition:
+    5. Install the latest version of Docker Community Edition:
       ```bash
       sudo apt-get install docker-ce docker-ce-cli containerd.io
       ```
-    * Install Docker Compose.
-      * Download the current stable release of Docker Compose:
+    
+    6. Install Docker Compose:
+      1. Download the current stable release of Docker Compose:
         ```bash
         sudo curl -L "https://github.com/docker/compose/releases/download/1.24.0/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
         ```
-      * Apply executable permissions to the binary:
+      2. Apply executable permissions to the binary:
         ```bash
         sudo chmod +x /usr/local/bin/docker-compose
         ```
-* Bootstrap docker/sdk.
+4. Bootstrap docker/sdk.
 ```bash
 docker/sdk boot
 ```
-* Follow installation instructions displayed in the grey block during the execution of the previous command and execute them.
-* Execute the following command to build and run Spryker application based on demo data.
+5. Follow installation instructions displayed in the grey block during the execution of the previous command and execute them.
+6. Build and run Spryker application based on demo data.
 ```bash
 docker/sdk up --build --data --assets
 ```
