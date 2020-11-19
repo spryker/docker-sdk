@@ -110,114 +110,97 @@ docker/sdk boot
 docker/sdk up --build --data --assets
 ```
 
-### How to configure docker-sync mount mode for Windows (WSL1) platform.
-* Download [Docker Desktop Stable 2.3.0.2](https://docs.docker.com/docker-for-windows/install/) or a later release.
-* Enable [Windows Subsystem for Linux](https://docs.microsoft.com/en-us/windows/wsl/install-win10) (WSL).
-    * Open Windows *Control Panel* → *Programs* → *Programs and Features*.
-    * Select *Turn Windows features on* or off *hyperlink*.
-    * Check *Windows Subsystem for Linux* and click *OK*.
-    * Install and Update Ubuntu.
-        * Open Microsoft Store.
-        * In the Search filed, enter "Ubuntu" and press Enter.
-        * From the search results page, select Ubuntu 18.04 LTS and install it.
-        * Once Ubuntu is installed, update it:
-            * Open the *Start menu*.
-            * Find and launch *Ubuntu*.
-            * Follow the instructions in the wizard.
-            * Set the default root mount point in */etc/wsl.conf*.
-              ```yaml
-              # Enable extra metadata options by default
-              [automount]
-              enabled = true
-              root = /
-              options = "metadata,umask=22,fmask=11"
-              mountFsTab = false
-              ```
-        * Restart Ubuntu.
-        * Install the latest version of Docker:
-            * Update the packages to the latest versions.
-             ```bash
-             sudo apt-get update
-             ```
-            * Install packages to allow apt to access a repository via HTTPS:
-              ```bash
-              sudo apt-get install \
-              apt-transport-https \
-              ca-certificates \
-              curl \
-              gnupg-agent \
-              software-properties-common
-              ```
-            * Add Docker's official GNU Privacy Guard key:
-              ```bash
-              curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
-              ```
-            * Set up a stable repository:
-              ```bash
-              sudo add-apt-repository \
-              "deb [arch=amd64] https://download.docker.com/linux/ubuntu \
-              $(lsb_release -cs) \
-              stable"
-              ```
-        * Install the latest version of Docker Comunitiy Edition:
-          ```bash
-          sudo apt-get install docker-ce docker-ce-cli containerd.io
-          ```
-        * Install Docker Compose:
-            * Download the current stable release of Docker Compose:
-              ```bash
-              sudo curl -L "https://github.com/docker/compose/releases/download/1.24.0/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-              ```
-            * Apply executable permissions to the binary:
-              ```bash
-              sudo chmod +x /usr/local/bin/docker-compose
-              ```
-        * Install Docker Sync:
-            * Install ruby and ruby-dev:
-              ```bash
-              sudo apt-get install ruby ruby-dev
-              ```
-              
-            * Install docker-sync:
-              ```bash
-              sudo gem install docker-sync
-              ```
-            * Set your Docker for Windows host as an environment variable:
-                * Open the Docker for Windows settings and check Expose daemon on `tcp://localhost:2375` without TLS.
-                * To update the profile with the environment variable, in your WSL shell, run the command:
-                  ```bash
-                  echo "export DOCKER_HOST=tcp://127.0.0.1:2375" >> ~/.bashrc
-                  ```
-            * Compile and install OCaml.
-              Before proceeding, check [OCaml release changelog](https://github.com/ocaml/ocaml/releases) and ensure that the OCaml version that you are going to install is compatible.
-                * Install the build script:
-                  ```bash
-                  sudo apt-get install build-essential make
-                  ```
-                * Download the ocaml archive:
-                  ```bash
-                  wget http://caml.inria.fr/pub/distrib/ocaml-{latest-version}/ocaml-{latest-version}.tar.gz
-                  ```
-                * Extract the downloaded archive:
-                  ```bash
-                  tar xvf ocaml-{latest-version}.tar.gz
-                  ```
-                * Change the directory:
-                  ```bash
-                  cd ocaml-{latest-version}
-                  ```
-                * Configure and compile ocaml:
-                  ```bash
-                  ./configure
-                  make world
-                  make opt
-                  umask 022
-                  ```
-                * Install ocaml and clean:
-                  ```bash
-                  sudo make install
-                  sudo make clean
-                  ```
+### How to configure docker-sync mount mode for Windows with WSL1
+
+To configure docker-sync mount mode:
+
+1. Download and install [Docker Desktop Stable 2.3.0.2](https://docs.docker.com/docker-for-windows/install/) or a later release.
+2. Enable Windows Subsystem for Linux 1 (WSL1) by following [Windows Subsystem for Linux Installation Guide for Windows 10](https://docs.microsoft.com/en-us/windows/wsl/install-win10).
+3. In WSL, install the latest version of Docker:
+    1. Update the packages to the latest versions:
+     ```bash
+    sudo apt-get update
+    ```
+    2. Install the following packages to allow apt to access a repository via HTTPS:
+    ```bash
+    sudo apt-get install \
+    apt-transport-https \
+    ca-certificates \
+    curl \
+    gnupg-agent \
+    software-properties-common
+    ```
+    3. Add Docker's official GNU Privacy Guard key:
+    ```bash
+    curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+    ```
+    4. Set up a stable repository:
+    ```bash
+    sudo add-apt-repository \
+    "deb [arch=amd64] https://download.docker.com/linux/ubuntu \
+    $(lsb_release -cs) \
+    stable"
+    ```
+4. Install the latest version of Docker Comunitiy Edition:
+```bash
+sudo apt-get install docker-ce docker-ce-cli containerd.io
+```
+5. Install Docker Compose:
+    1. Download the current stable release of Docker Compose:
+    ```bash
+    sudo curl -L "https://github.com/docker/compose/releases/download/1.24.0/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+    ```
+    2. Apply executable permissions to the binary:
+    ```bash
+    sudo chmod +x /usr/local/bin/docker-compose
+    ```
+6. Install docker-sync:
+    1. Install ruby and ruby-dev:
+    ```bash
+    sudo apt-get install ruby ruby-dev
+    ```
+
+    2. Install docker-sync:
+    ```bash
+    sudo gem install docker-sync
+    ```
+7. Set your Docker for Windows host as an environment variable:
+    1. Open the Docker for Windows settings and check Expose daemon on `tcp://localhost:2375` without TLS.
+    2. To update the profile with the environment variable, in your WSL shell, run the command:
+    ```bash
+    echo "export DOCKER_HOST=tcp://127.0.0.1:2375" >> ~/.bashrc
+    ```
+8. Compile and install OCaml:
+    1. Install the build script:
+    ```bash
+    sudo apt-get install build-essential make
+    ```
+    2. Check the latest compatible OCaml version in [OCaml release changelog](https://github.com/ocaml/ocaml/releases). 
+    In the next steps, replace `{ocaml-version}` in command parameters with the version you choose.
+    3. Download the OCaml archive:
+    ```bash
+    wget http://caml.inria.fr/pub/distrib/ocaml-{ocaml-version}/ocaml-{ocaml-version}.tar.gz
+    ```
+    4. Extract the downloaded archive:
+    ```bash
+    tar xvf ocaml-{ocaml-version}.tar.gz
+    ```
+    5. Change the directory:
+    ```bash
+    cd ocaml-{ocaml-version}
+    ```
+    6. Configure and compile ocaml:
+    ```bash
+    ./configure
+    make world
+    make opt
+    umask 022
+    ```
+    7. Install OCaml and clean:
+    ```bash
+    sudo make install
+    sudo make clean
+    ```
                 * Compile and Install Unison.
                     * Check [Unison release](https://github.com/bcpierce00/unison/releases).
                     * Download the Unison archive:
