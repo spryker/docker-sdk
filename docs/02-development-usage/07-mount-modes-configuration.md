@@ -114,14 +114,14 @@ docker/sdk up --build --data --assets
 
 To configure docker-sync mount mode:
 
-1. Download and install [Docker Desktop Stable 2.3.0.2](https://docs.docker.com/docker-for-windows/install/) or a later release.
+1. Download and install Docker Desktop Stable 2.3.0.2 or a later release. See [Install Docker Desktop on Windows](https://docs.docker.com/docker-for-windows/install/) to learn more.
 2. Enable Windows Subsystem for Linux 1 (WSL1) by following [Windows Subsystem for Linux Installation Guide for Windows 10](https://docs.microsoft.com/en-us/windows/wsl/install-win10).
 3. In WSL, install the latest version of Docker:
     1. Update the packages to the latest versions:
      ```bash
     sudo apt-get update
     ```
-    2. Install the following packages to allow apt to access a repository via HTTPS:
+    2. Install the following packages to allow apt to access repositories via HTTPS:
     ```bash
     sudo apt-get install \
     apt-transport-https \
@@ -141,16 +141,18 @@ To configure docker-sync mount mode:
     $(lsb_release -cs) \
     stable"
     ```
-4. Install the latest version of Docker Comunitiy Edition:
+4. Install the latest version of Docker Communitiy Edition:
 ```bash
 sudo apt-get install docker-ce docker-ce-cli containerd.io
 ```
 5. Install Docker Compose:
-    1. Download the current stable release of Docker Compose:
+    
+    1. Check the latest stable release of Docker Compose in [Docker Compose releases](https://github.com/docker/compose/releases).
+    2. To download the version you have selected, replace `{docker-compose-release}` in the command parameter below and run it:
     ```bash
-    sudo curl -L "https://github.com/docker/compose/releases/download/1.24.0/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+    sudo curl -L "https://github.com/docker/compose/releases/download/{docker-compose-release}/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
     ```
-    2. Apply executable permissions to the binary:
+    3. Apply executable permissions to the binary:
     ```bash
     sudo chmod +x /usr/local/bin/docker-compose
     ```
@@ -165,7 +167,7 @@ sudo apt-get install docker-ce docker-ce-cli containerd.io
     sudo gem install docker-sync
     ```
 7. Set your Docker for Windows host as an environment variable:
-    1. Open the Docker for Windows settings and check Expose daemon on `tcp://localhost:2375` without TLS.
+    1. In Docker for Windows settings, check Expose daemon on `tcp://localhost:2375` without TLS.
     2. To update the profile with the environment variable, in your WSL shell, run the command:
     ```bash
     echo "export DOCKER_HOST=tcp://127.0.0.1:2375" >> ~/.bashrc
@@ -201,27 +203,28 @@ sudo apt-get install docker-ce docker-ce-cli containerd.io
     sudo make install
     sudo make clean
     ```
-                * Compile and Install Unison.
-                    * Check [Unison release](https://github.com/bcpierce00/unison/releases).
-                    * Download the Unison archive:
-                      ```bash
-                      wget https://github.com/bcpierce00/unison/archive/{latest-version}.tar.gz
-                      ```
-                    * Extract the archive:
-                      ```bash
-                      tar xvf {latest-version}.tar.gz
-                      ```
-                    * Change the directory:
-                      ```bash
-                      cd unison-{latest-version}
-                      ```
-                    * Compile and install Unison:
-                      ```bash
-                      make UISTYLE=text
-                      sudo cp src/unison /usr/local/bin/unison
-                      sudo cp src/unison-fsmonitor /usr/local/bin/unison-fsmonitor
-                      ```
-* Adjust deploy.local.yml mount section to the following:
+9. Compile and Install Unison:
+    1. Check the latest version of Unison in [Unison releases](https://github.com/bcpierce00/unison/releases).
+    In the next steps, replace `{unison-version}` in command parameters with the version you choose.
+    2. Download the Unison archive:
+    ```bash
+    wget https://github.com/bcpierce00/unison/archive/{unison-version}.tar.gz
+    ```
+    3. Extract the archive:
+    ```bash
+    tar xvf {unison-version}.tar.gz
+    ```
+    4. Change the directory:
+    ```bash
+    cd unison-{unison-version}
+    ```
+    5. Compile and install Unison:
+    ```bash
+    make UISTYLE=text
+    sudo cp src/unison /usr/local/bin/unison
+    sudo cp src/unison-fsmonitor /usr/local/bin/unison-fsmonitor
+    ```
+10. Adjust the `mount:` section of `deploy.local.yml` as follows:
 ```yaml
 docker:
 ...
@@ -230,12 +233,12 @@ docker:
            platforms:
                - windows
 ```
-* Bootstrap docker/sdk.
+11. Bootstrap docker/sdk:
 ```bash
 docker/sdk boot
 ```
-* Follow installation instructions displayed in the grey block during the execution of the previous command and execute them.
-* Execute the following command to build and run Spryker application based on demo data.
+12. Optional: Follow the installation instructions displayed in the grey block of the output of the previous command.
+13. Build and run Spryker application based on demo data:
 ```bash
 docker/sdk up --build --data --assets
 ```
@@ -244,15 +247,15 @@ docker/sdk up --build --data --assets
 
 To configure native mount mode for Windows with WSL2:
 
-1. Download [Docker Desktop Stable 2.3.0.2](https://docs.docker.com/docker-for-windows/install/) or a later release.
-2. Install WSL2 by following [Windows Subsystem for Linux Installation Guide for Windows 10](https://docs.microsoft.com/en-us/windows/wsl/install-win10)
+1. Download and install Docker Desktop Stable 2.3.0.2 or a later release. See [Install Docker Desktop on Windows](https://docs.docker.com/docker-for-windows/install/) to learn more.
+2. Enable Windows Subsystem for Linux 2 (WSL2) by following [Windows Subsystem for Linux Installation Guide for Windows 10](https://docs.microsoft.com/en-us/windows/wsl/install-win10).
 3. Install Docker in WSL:
     1. Update packages to the latest version:
      ```bash
      sudo apt-get update
      ```
     
-    2. Install packages to allow `apt` to access a repository via HTTPS:
+    2. Install packages to allow apt to access repositories via HTTPS:
       ```bash
       sudo apt-get install \
       apt-transport-https \
@@ -280,14 +283,15 @@ To configure native mount mode for Windows with WSL2:
       ```
     
     6. Install Docker Compose:
-      1. Download the current stable release of Docker Compose:
-        ```bash
-        sudo curl -L "https://github.com/docker/compose/releases/download/1.24.0/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-        ```
-      2. Apply executable permissions to the binary:
-        ```bash
-        sudo chmod +x /usr/local/bin/docker-compose
-        ```
+    1. Check the latest stable release of Docker Compose in [Docker Compose releases](https://github.com/docker/compose/releases).
+    2. To download the version you have selected, replace `{docker-compose-release}` in the command parameter below and run it:
+    ```bash
+    sudo curl -L "https://github.com/docker/compose/releases/download/{docker-compose-release}/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+    ```
+    3. Apply executable permissions to the binary:
+    ```bash
+    sudo chmod +x /usr/local/bin/docker-compose
+    ```
 4. Bootstrap docker/sdk.
 ```bash
 docker/sdk boot
