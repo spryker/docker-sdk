@@ -6,5 +6,8 @@
       'spryker.app.name': dynamodb
       'spryker.app.type': aws
       'spryker.project': ${SPRYKER_DOCKER_PREFIX}:${SPRYKER_DOCKER_TAG}
+    working_dir: /home/dynamodblocal
+    command: "-jar DynamoDBLocal.jar -sharedDb -dbPath ."
     volumes:
+      - {{ serviceName }}-{{ serviceData['engine'] }}-data:/home/dynamodblocal
 {% include "application-volumes.yml.twig" with project %}

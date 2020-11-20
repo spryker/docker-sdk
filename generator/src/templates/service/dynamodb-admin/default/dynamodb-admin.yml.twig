@@ -1,0 +1,12 @@
+  {{ serviceName }}:
+    image: aaronshaf/dynamodb-admin:latest
+    networks:
+        - private
+    labels:
+        'spryker.app.name': dynamodb-admin
+        'spryker.app.type': hidden
+        'spryker.project': ${SPRYKER_DOCKER_PREFIX}:${SPRYKER_DOCKER_TAG}
+    environment:
+        DYNAMO_ENDPOINT: http://dynamodb:8000
+    depends_on:
+        - dynamodb
