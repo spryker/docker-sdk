@@ -45,20 +45,20 @@ Depending on your operating system (OS), choose one of the mount options in the 
 
 docker/sdk supports the following mount modes:
 
-* baked.\
+* baked
 Copies source files into image, so they *cannot* be changed from host machine.
 The file or directory is referenced by its absolute path on the host machine.
 This mount option is default for the Demo mode.
 
-* native.\
+* native
 Mounts source files directly from host machine into containers.
 Works perfectly with Linux and Windows (WSL2).
 
-* docker-sync.\
+* docker-sync
 Synchronizes source files from host machine into running containers.
 This mount option is stable with MacOS and Windows (WSL1).
 
-* mutagen.\
+* mutagen
 Synchronizes source files between your host machine and a container in an effective real-time way that combines the performance of the rsync algorithm with bidirectionality and low-latency filesystem watching.
 This mount option is stable with MacOS.
 
@@ -100,6 +100,8 @@ It uses to synchronize code between host machine and a remote container in effec
 Sync modes downsides:
 * Logs monitoring
 * In general not stable solutions
+
+To be updated by Mike.
 
 ### See also
 
