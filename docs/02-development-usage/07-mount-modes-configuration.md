@@ -13,9 +13,9 @@ Read the description below and, in the *Structure* section, fill out the documen
 ## Outline
 1. Short description how to set up the environment for developing purpose.
 
-### Configuring Mutagen mount mode on MacOS
+### Configuring mutagen mount mode on MacOS
 
-To configure Mutagen mount mode on MacOS:
+To configure mutagen mount mode on MacOS:
 
 1. [Install or update Docker Desktop for Mac](https://docs.docker.com/docker-for-mac/install/) to the latest stable version.
 
