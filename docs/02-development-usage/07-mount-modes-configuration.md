@@ -17,7 +17,7 @@ Read the description below and, in the *Structure* section, fill out the documen
 
 To configure Mutagen mount mode on MacOS:
 
-1. Install or update [Docker Desktop for Mac](https://docs.docker.com/docker-for-mac/install/) to the latest stable version.
+1. [Install or update Docker Desktop for Mac](https://docs.docker.com/docker-for-mac/install/) to the latest stable version.
 
 2. Adjust the `mount:` section of `deploy.local.yml` as follows:
 ```yaml
@@ -115,8 +115,10 @@ docker/sdk up --build --data --assets
 
 To configure docker-sync mount mode on Windows with Windows Subsystem for Linux 1 (WSL1):
 
-1. Download and install Docker Desktop Stable 2.3.0.2 or higher. See [Install Docker Desktop on Windows](https://docs.docker.com/docker-for-windows/install/) to learn more.
-2. Enable WSL1 by following [Windows Subsystem for Linux Installation Guide for Windows 10](https://docs.microsoft.com/en-us/windows/wsl/install-win10).
+1. [Install Docker Desktop Stable](https://docs.docker.com/docker-for-windows/install/) 2.3.0.2 or higher.
+
+2. [Enable WSL1](https://docs.microsoft.com/en-us/windows/wsl/install-win10).
+
 3. In WSL, install the latest version of Docker:
     1. Update packages to the latest versions:
      ```bash
@@ -147,7 +149,7 @@ To configure docker-sync mount mode on Windows with Windows Subsystem for Linux 
     sudo apt-get install docker-ce docker-ce-cli containerd.io
     ```
 4. Install Docker Compose:
-    1. Check the latest stable release of Docker Compose in [Docker Compose releases](https://github.com/docker/compose/releases).
+    1. Check the latest stable [release of Docker Compose](https://github.com/docker/compose/releases).
     
     2. Download Docker Compose:
 :::(Info) (Docker Compose version)
@@ -161,6 +163,7 @@ To configure docker-sync mount mode on Windows with Windows Subsystem for Linux 
     ```bash
     sudo chmod +x /usr/local/bin/docker-compose
     ```
+    
 5. Install docker-sync:
     1. Install ruby and ruby-dev:
     ```bash
@@ -172,7 +175,9 @@ To configure docker-sync mount mode on Windows with Windows Subsystem for Linux 
     sudo gem install docker-sync
     ```
 6. Set your Docker for Windows host as an environment variable:
-    1. In Docker for Windows settings, check Expose daemon on `tcp://localhost:2375` without TLS.
+
+    1. In Docker for Windows settings, check **Expose daemon on tcp://localhost:2375 without TLS**.
+    
     2. To update the profile with the environment variable, in your WSL shell, run the command:
     ```bash
     echo "export DOCKER_HOST=tcp://127.0.0.1:2375" >> ~/.bashrc
@@ -182,13 +187,14 @@ To configure docker-sync mount mode on Windows with Windows Subsystem for Linux 
     ```bash
     sudo apt-get install build-essential make
     ```
-    2. Check the latest compatible OCaml version in [OCaml release changelog](https://github.com/ocaml/ocaml/releases). 
+    2. Check the latest compatible [OCaml release](https://github.com/ocaml/ocaml/releases). 
     In the next steps, replace `{ocaml-version}` in command parameters with the version you choose.
+    
     3. Download the OCaml archive:
     ```bash
     wget http://caml.inria.fr/pub/distrib/ocaml-{ocaml-version}/ocaml-{ocaml-version}.tar.gz
     ```
-    4. Extract the downloaded archive:
+    4. Extract the archive:
     ```bash
     tar xvf ocaml-{ocaml-version}.tar.gz
     ```
@@ -208,21 +214,25 @@ To configure docker-sync mount mode on Windows with Windows Subsystem for Linux 
     sudo make install
     sudo make clean
     ```
-8. Compile and Install Unison:
-    1. Check the latest version of Unison in [Unison releases](https://github.com/bcpierce00/unison/releases).
+8. Compile and install Unison:
+    1. Check the latest [release of Unison](https://github.com/bcpierce00/unison/releases).
     In the next steps, replace `{unison-version}` in command parameters with the version you choose.
+    
     2. Download the Unison archive:
     ```bash
     wget https://github.com/bcpierce00/unison/archive/{unison-version}.tar.gz
     ```
+    
     3. Extract the archive:
     ```bash
     tar xvf {unison-version}.tar.gz
     ```
-    4. Change directory:
+    
+    4. Change the directory:
     ```bash
     cd unison-{unison-version}
     ```
+    
     5. Compile and install Unison:
     ```bash
     make UISTYLE=text
@@ -238,11 +248,14 @@ docker:
            platforms:
                - windows
 ```
+
 10. Bootstrap docker/sdk:
 ```bash
 docker/sdk boot
 ```
+
 11. Follow the installation instructions displayed in the grey block of the output of the command you have run in the previous step.
+
 12. Build and run Spryker application based on demo data:
 ```bash
 docker/sdk up --build --data --assets
@@ -252,8 +265,10 @@ docker/sdk up --build --data --assets
 
 To configure native mount mode for Windows with Windows Subsystem for Linux 2 (WSL2):
 
-1. Download and install Docker Desktop Stable 2.3.0.2 or higher. See [Install Docker Desktop on Windows](https://docs.docker.com/docker-for-windows/install/) to learn more.
-2. Enable WSL2 by following [Windows Subsystem for Linux Installation Guide for Windows 10](https://docs.microsoft.com/en-us/windows/wsl/install-win10).
+1. [Download and install Docker Desktop Stable](https://docs.docker.com/docker-for-windows/install/) 2.3.0.2 or higher.
+
+2. [Enable WSL2](https://docs.microsoft.com/en-us/windows/wsl/install-win10).
+
 3. In WSL, install Docker:
     1. Update packages to the latest version:
      ```bash
@@ -282,13 +297,14 @@ To configure native mount mode for Windows with Windows Subsystem for Linux 2 (W
       $(lsb_release -cs) \
       stable"
       ```
+      
     5. Install the latest version of Docker Community Edition:
       ```bash
       sudo apt-get install docker-ce docker-ce-cli containerd.io
       ```
     
 4. Install Docker Compose:
-    1. Check the latest stable release of Docker Compose in [Docker Compose releases](https://github.com/docker/compose/releases).
+    1. Check the latest stable [release of Docker Compose](https://github.com/docker/compose/releases).
     
     2. Download Docker Compose:
     :::(Info) (Docker Compose version)
