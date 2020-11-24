@@ -31,9 +31,7 @@ For more details please check [03.installation.md]
 
 ### Installation
 
-Run the command:
-
-Clone docker/sdk from the remote repository.
+Clone docker/sdk from the remote repository:
 
 ```bash
 mkdir {project-name} && cd {project-name}
@@ -42,16 +40,16 @@ git clone git@github.com:spryker/docker-sdk.git docker
 ```
 
 
-### Developer environment set up
+### Developer environment setup
 
-#### Run the command right after cloning the repository:
+#### Bootstrap docker setup, build and start the instance:
 
 ```bash
 docker/sdk boot deploy.dev.yml
 docker/sdk up
 ```
 
-#### Git checkout:
+#### Switch your branch:
 
 ```bash
 git checkout {your_branch}
@@ -66,16 +64,16 @@ docker/sdk up --build --assets --data
 > - `--data` - get new demo data
 
 
-### Production-like environment set up
+### Production-like environment setup
 
-#### Run the following command right after cloning the repository:
+#### Bootstrap docker setup, build and start the instance:
 
 ```bash
 docker/sdk boot -s
 docker/sdk up
 ```
 
-#### Git checkout with assets and importing data:
+#### Switch your branch, build the application with assets and demo data:
 
 ```bash
 git checkout {your_branch_name}
@@ -107,7 +105,7 @@ docker/sdk clean-data && docker/sdk up && docker/sdk console q:w:s -v -s
 
 ### Troubleshooting
 
-Link to the [09-troubleshooting.md]
+For solutions to common issues, see [Troubleshooting].
 
 
 ### What documents should I use to start developing and configuring my project?
