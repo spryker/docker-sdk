@@ -136,6 +136,17 @@ image:
 docker/sdk boot && docker/sdk up
 ```
 
+#### Demo data was imported incorrectly
+
+**when**
+Demo data was imported incorrectly.
+
+**then** 
+Re-load demo data:
+```bash
+docker/sdk clean-data && docker/sdk up && docker/sdk console q:w:s -v -s
+```
+
 ### Running applications
 
 #### Port is already occupied on host
