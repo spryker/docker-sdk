@@ -45,10 +45,10 @@ This reference page describes version 1 of the Deploy file format. This is the n
  <dd>A YAML file defining Spryker infrastructure and services for Spryker tools used to deploy Spryker applications in different environments.</dd>
 
  <dt>Region</dt>
- <dd>Defines one or more isolated instances of Spryker applications that have only one persistent database to work with; limits the visibility of a project's <b>Stores</b> to operate only with the <b>Stores</b> that belong to a <b>Region</b>; refers to geographical terms like data centers, regions and continents in the real world.</dd>
+ <dd>Defines one or more isolated instances of Spryker applications that have only one persistent database to work with; limits the visibility of a project's <i>Stores</i> to operate only with the <i>Stores</i> that belong to a <i>Region</i>; refers to geographical terms like data centers, regions and continents in the real world.</dd>
 
  <dt>Group</dt>
- <dd>Defines a group of Spryker applications within a <b>Region</b> that is scaled separately from other groups; can be assumed as an auto scaling group in the Cloud.</dd>
+ <dd>Defines a group of Spryker applications within a <i>Region</i> that is scaled separately from other groups; can be assumed as an auto scaling group in the Cloud.</dd>
 
  <dt>Store</dt>
  <dd>A store related context a request is processed in.</dd>
@@ -60,7 +60,7 @@ This reference page describes version 1 of the Deploy file format. This is the n
  <dd>An external storage or utility service. Represents service type and configuration. The configuration can be defined on different levels: project-wide, region-wide, store-specific or endpoint-specific with limitations based on the service type.</dd>
 
  <dt>Endpoint</dt>
- <dd>A point of access to <b>Application</b> or <b>Service</b>. The key format is `domain[:port]`. By default, the port for HTTP endpoints is 80 . Port is mandatory for TCP endpoints.</dd>
+ <dd>A point of access to <i>Application</i> or <i>Service</i>. The key format is `domain[:port]`. By default, the port for HTTP endpoints is 80 . Port is mandatory for TCP endpoints.</dd>
 
 </dl>
 </div>
@@ -70,7 +70,7 @@ This reference page describes version 1 of the Deploy file format. This is the n
 The topics below are organized alphabetically for top-level keys and sub-level keys to describe the hierarchy.
 
 You can use the extended YAML syntax according to [YAML™ Version 1.2](https://yaml.org/spec/1.2/spec.html).
-Find B2B/B2C deploy file examples for [development](https://documentation.spryker.com/docs/modes-overview#development-mode) and [demo](https://documentation.spryker.com/docs/modes-overview#demo-mode) environments in the table:
+Find B2B and B2C deploy file examples for [development](https://documentation.spryker.com/docs/modes-overview#development-mode) and [demo](https://documentation.spryker.com/docs/modes-overview#demo-mode) environments in the table:
 
 | Development mode | Demo mode |
 | --- | --- |
@@ -82,7 +82,9 @@ Find B2B/B2C deploy file examples for [development](https://documentation.spryke
 
 Defines the version of the Deploy file format.
 
-This reference page describes the Deploy file format for versions 1.*.
+This reference page describes the Deploy file format for versions 1.*. 
+
+This variable is optional. If not specified, the default value applies: `version: "0.1"`.
 
 ```yaml
 version: 1.0
@@ -90,10 +92,9 @@ version: 1.0
 namespace: spryker-demo
 ...
 ```
-:::(Info) (Optional variable)
-If not specified, the default value applies:
-`version: "0.1"`
-:::
+
+
+
 
 ***
 
@@ -101,18 +102,15 @@ If not specified, the default value applies:
 
 Defines the namespace to separate different deployments in a single environment.
 
-For example, Docker images, containers and volume names start with a `namespace:` to avoid intersections between different deployments on a single host machine.
+For example, Docker images, containers and volume names start with a `namespace:` to avoid intersections between different deployments on a single host machine. 
+
+This variable is optional. If not specified, the default value applies: `namespace: spryker`.
 
 ```yaml
 version: 1.0
 namespace: spryker-demo
 ```
-:::(Info) (Optional variable)
-If not specified, the default value applies:
-`namespace: spryker`
 
-
-:::
 ***
 
 ### tag:
@@ -121,7 +119,13 @@ Defines a tag to separate different boots for a single deployment.
 
 By default, the tag is a randomly generated, unique value.
 
-For example, Docker images and volumes are tagged with a `tag:` to avoid intersections between different boots for a signle deployment on a single host machine. The tag can be set directly in the deploy file to ensure that all the boots of a deployment run with the same images and volumes.
+For example, Docker images and volumes are tagged with a `tag:` to avoid intersections between different boots for a signle deployment on a single host machine. The tag can be set directly in the deploy file to ensure that all the boots of a deployment run with the same images and volumes. 
+
+This variable is optional. If not specified, the default value applies: `tag: '1.0'`.
+
+
+:::
+
 ```yaml
 version: 1.0
 
@@ -132,12 +136,7 @@ version: 1.0
 
 tag: 'custom-one'
 ```
-:::(Info) (Optional variable)
-If not specified, the default value applies:
-`tag: '1.0'`
 
-
-:::
 
 ***
 
@@ -146,18 +145,15 @@ If not specified, the default value applies:
 Defines the environment name for Spryker applications mainly to point to specific configuration files, namely `config/Shared/config-default_{environment_name}_{store}.php`.
 
 The `APPLICATION_ENV` environment variable is set for all the corresponding Spryker applications.
+
+This variable is optional. If not specified, the default value applies: `environment: 'docker'`.
+
 ```yaml
 version: 1.0
 
 environment: 'docker'
 ```
 
-:::(Info) (Optional variable)
-If not specified, the default value applies:
-`environment: 'docker'`
-
-
-:::
 
 ***
 
@@ -179,6 +175,9 @@ Defines the image tag according to the `spryker/php` images located at [Docker H
     * Non-lating languages
     * Tideways
 
+
+This variable is optional. If not specified, the default value applies: `image: spryker/php:7.2`.
+
 ```yaml
 version: 1.0
 
@@ -186,16 +185,12 @@ image:
     tag: spryker/php:7.2
 ```
 
-:::(Info) (Optional variable)
-If not specified, the default value applies:
-`image: spryker/php:7.2`
 
 
-:::
 ***
 ### image: environment:
 
-Defines additional environment variables variables for Spryker applications.
+Defines additional environment variables for Spryker applications.
 
 ```yaml
 version: 1.0
@@ -208,7 +203,7 @@ image:
 
 ### image: php:
 
-Defines the PHP settings for Spryker applications.
+Defines PHP settings for Spryker applications.
 
 * `image: php: ini:` - defines `php.ini` configuration.
 * `image: php: enabled-extensions` - defines enabled PHP extensions. The following extensions are allowed:
@@ -243,15 +238,15 @@ Defines the setting of **Assets**.
 
 ### regions:
 
-Defines the list of **Regions**.
+Defines the list of *Regions*.
 
 <a name="regions-services"></a>
-* `regions: services:` - defines settings for **Region**-specific `services:`. Only `database:` and `mail: sender:` are allowed here. 
+* `regions: services:` - defines settings for *Region*-specific `services:`. Only `database:` and `mail: sender:` are allowed here. 
 	* `regions: services: database:` - see [database](#database)
 	* `regions: services: mail: sender:` - defines the mail sender configuration. Possible values are `name:` and `email:`.
-* `regions: stores:` - defines the list of **Stores**.
+* `regions: stores:` - defines the list of *Stores*.
 <a name="regions-stores-services"></a>
-* `regions: stores: services:` - defines application-wide, **Store**-specific settings for **Services**. Only `broker:`, `key_value_store:` and `search:` are currently allowed here. See [services:](#services-reference) to learn more.
+* `regions: stores: services:` - defines application-wide, *Store*-specific settings for *Services*. Only `broker:`, `key_value_store:` and `search:` are currently allowed here. See [services:](#services-reference) to learn more.
 
 ```yaml
 version: "1.0"
@@ -275,10 +270,10 @@ regions:
 
 ### groups:
 
-Defines the list of **Groups**.
+Defines the list of *Groups**.
 
-* `groups: region:` - defines the relation to a **Region** by key.
-* `groups: applications:` - defines the list of **Applications**. See [groups: applications:](#groups-applications) to learn more.
+* `groups: region:` - defines the relation to a *Region* by key.
+* `groups: applications:` - defines the list of *Applications*. See [groups: applications:](#groups-applications) to learn more.
 
 ```yaml
 version: "1.0"
@@ -322,7 +317,7 @@ groups:
 		
  ```
 
-Applications can be defined as **Store**-agnostic, as in the example above. Also, applications can be defined as **Store**-specific by leaving a single endpoint pointing to each application. You can see it in the example below. You can use both approaches to scale applications separately by **Store**.
+Applications can be defined as *Store*-agnostic, as in the example above. Also, applications can be defined as *Store*-specific by leaving a single endpoint pointing to each application. You can see it in the example below. You can use both approaches to scale applications separately by *Store*.
 ```yaml
 version: "1.0"
 
@@ -348,14 +343,14 @@ groups:
 
 ### groups: applications:
 
-Defines the list of **Applications**.
+Defines the list of *Applications*.
 
 The key must be project-wide unique.
 
 Obligatory parameters for `application:`:
 
-* `groups: applications: application:` - defines the type of **Application**. Possible values are `zed`, `yves`, and `glue`.
-* `groups: applications: endpoints:` - defines the list of **Endpoints** to access the **Application**. See [groups: applications: endpoints:](#groups-applications-endpoints) to learn more.
+* `groups: applications: application:` - defines the type of *Application*. Possible values are `zed`, `yves`, and `glue`.
+* `groups: applications: endpoints:` - defines the list of *Endpoints* to access the *Application*. See [groups: applications: endpoints:](#groups-applications-endpoints) to learn more.
 
 Optional parameters for `application:`:
 * `groups: applications: application: application:` - defines if the application is static. Only `static` is allowed here.
@@ -376,7 +371,10 @@ Optional parameters for `application:`:
     * `groups: applications: application: endpoints: auth: include:` - defines the IPs to allow access from.
   
 * `groups: applications: application: endpoints: primal:` - defines if a ZED endpoint is primal for a store. Yves and Glue applications send Zed RPC calls to the primal endpoint. This variable is optional with the default value of `false`. If no endpoint is defined as primal for a store, the first endpoint in descending order is considered primal.
-* `groups: applications: application: http: max-request-body-size:` - defines the maximum allowed size of the request body that can be sent to the application, in MB.
+* `groups: applications: application: http: max-request-body-size:` - defines the maximum allowed size of the request body that can be sent to the application, in MB. If not specified, the default values apply:
+	* `zed` - `10m`
+	* `glue` - `2m`
+	* `yves` - `1m`
   
 ```yaml
 ...
@@ -390,12 +388,8 @@ Optional parameters for `application:`:
 						store: STORE-1
  ```
 
-:::(Info) (Variable details)
-* If not specified, the default value applies:
-	* `zed` - `10m`
-	* `glue` - `2m`
-	* `yves` - `1m`
-* To disable the validation of request body size against this parameter, set it to `0`. We do not recommended disabling it.
+:::(Info) ()
+To disable the validation of request body size against this parameter, set it to `0`. We do not recommended disabling it.
 :::
 
 
@@ -406,14 +400,14 @@ Optional parameters for `application:`:
 <a name="services-reference"></a>
 ### services:
 
-Defines the list of **Services** and their project-wide settings.
+Defines the list of *Services* and their project-wide settings.
 
 Each service has its own set of settings to be defined. See [Services](#services) to learn more.
 
 Find common settings for all services below:
 
-* `engine:` - defines a third-party application supported by Spryker that does the job specific for the **Service**. For example, you can currently set `database:engine:` to `postgres` or `mysql`.
-* `endpoints:` - defines the list of **Endpoints** that point to the **Service** web interface or port.
+* `engine:` - defines a third-party application supported by Spryker that does the job specific for the *Service*. For example, you can currently set `database:engine:` to `postgres` or `mysql`.
+* `endpoints:` - defines the list of *Endpoints* that point to the *Service* web interface or port.
 * `version:` - defines the version of the service to be installed. If `database:engine:` is set to `mysql`, also defines if MySQL or MariaDB is used according to the [version](https://github.com/spryker/docker-sdk#supported-services). See [Database](https://documentation.spryker.com/docs/services#database) for detailed configuration instructions.
 @(Info)(Optional variable)(If not specified, the [default version](https://github.com/spryker/docker-sdk#supported-services) applies.)
 
@@ -475,16 +469,16 @@ Service settings can be extended on other levels for specific contexts. See [reg
 
 ### groups: applications: endpoints:
 
-Defines the list of **Endpoints** to access the **Application**.
+Defines the list of *Endpoints* to access the *Application*.
 
 The format of the key  is `domain[:port]`. The key must be project-wide unique.
-* `groups: applications: endpoints: store:` defines the **Store** as context to process requests within.
+* `groups: applications: endpoints: store:` defines the *Store* as context to process requests within.
 <a name="groups-applications-endpoints-services"></a>
-* `groups: applications: endpoints: services:` defines the **Store**-specific settings for services. Only `session:` is currently allowed here. See [Services](#services) to learn more.
+* `groups: applications: endpoints: services:` defines the *Store*-specific settings for services. Only `session:` is currently allowed here. See [Services](#services) to learn more.
 * `groups: applications: endpoints: cors-allow-origin:` defines a CORS header. It is allowed for `glue` application only. Possible values are `single domain as string` or `*` to allow all domains.
 
 ### services: endpoints:
-Defines the list of **Endpoints** to access a **Service** for development or monitoring needs. The format of the key  is `domain[:port]`. The key must be project-wide unique.
+Defines the list of *Endpoints* to access a *Service* for development or monitoring needs. The format of the key  is `domain[:port]`. The key must be project-wide unique.
 * `services: endpoints: protocol:` defines the protocol. Possible values are: `tcp`and `http`. The default one is `http`.
 
 A port must be defined if protocol is set to `tcp`. The TCP port must be project-wide unique.
@@ -542,6 +536,9 @@ docker:
 Defines configuration for SSL module in Spryker Docker SDK.
 
 If `docker: ssl: enabled:` is set to `true`, all endpoints use HTTPS.
+
+This variable is optional. If not specified, the default value applies: `enabled: false`.
+
 ```yaml
 version: 1.0
 
@@ -550,14 +547,11 @@ docker:
 		enabled: true
 		
  ```
-:::(Info) (Optional variable)
-If not specified, the default value applies:
-`enabled: false`
-
-
+:::(Info) ()
+To enable secure connection in your browser, register the self-signed CA certificate from `./docker/generator/openssl/default.crt` in your system.
 :::
 
-To enable secure connection in your browser, register the self-signed CA certificate from `./docker/generator/openssl/default.crt` in your system.
+
 
 
 ***
@@ -579,26 +573,15 @@ docker:
 
 ***
 ### docker: logs:
-* `docker: logs: path:` defines the path to the directory with Docker logs.
+* `docker: logs: path:` defines the path to the directory with Docker logs. This variable is optional. If not specified, the default value applies: `path: '/var/log/spryker`.
 
-:::(Info) (Optional variable)
-If not specified, the default value applies:
-`path: '/var/log/spryker'`
-
-
-:::
 
 ***
 ### docker: testing:
 
 Defines the configuration for testing.
 
-* `docker: testing: store:` defines a **Store** as the context for running tests using specific console commands, like `docker/sdk console code:test`.
-
-:::(Info) (Optional variable)
-If not specified, the default value applies:
-`store: DE`
-
+* `docker: testing: store:` defines a *Store* as the context for running tests using specific console commands, like `docker/sdk console code:test`. This variable is optional. If not specified, the default value applies: `store: DE`.
 
 :::
 ***
@@ -607,18 +590,12 @@ If not specified, the default value applies:
 
 Defines the mode for mounting source files into application containers.
 
-1. `baked:`- source files are copied into the image, so they cannot be changed from host machine.
-:::(Info) (Optional variable)
-If not specified, the default value applies:
-`baked:baked`
-
-
-:::
+1. `baked:`- source files are copied into the image, so they cannot be changed from host machine. This variable is optional. If not specified, the default value applies: `baked:baked`.
 2. `native:`- source files are mounted from host machine into containers directly. We recommend using it Linux.
 3. `docker-sync:`- source files are synced from host machine into containers during runtime. Use it as a workaround solution with MacOS and Windows.
 4.  `mutagen:`- source files are synced from the host machine into running containers. Use it as a workaround for MacOS and Windows. 
 
-`As mount:` is a platform-specific setting. You can define multiple mount modes. Use the`platforms:` list to define the mount mode for a particular platform. Possible platforms are `windows`, `macos` and `linux`.
+`As mount:` is a platform-specific setting. You can define multiple mount modes. Use the`platforms:` list to define a mount mode for a platform. Possible platforms are `windows`, `macos`, and `linux`.
 
 The first mount mode matching the host platform is selected by default.
 ```yaml
@@ -643,23 +620,12 @@ docker:
 
 Defines the composer settings to be used during deployment.
 
-1. `mode:` - defines whether packages should be installed from the  `require` or `require-dev` section of `composer.json`. Possible values are `--no-dev` and `-dev`.
-
-2. `autoload:` - defines composer autoload options. Possible values are `--optimize` and `--classmap-authoritative`.
-
-
- 
-:::(Info) (Optional variable)
-If not specified, the default values apply:
-
-1. Development mode:
-    * `mode: --dev`
-    * `autoload: --optimize`
-2. Demo mode:
-    * `mode: --no-dev`
-    * `autoload: --classmap-authoritative`
-:::
-
+1. `mode:` - defines whether packages should be installed from the  `require` or `require-dev` section of `composer.json`. Possible values are `--no-dev` and `-dev`. This variable is optional. If not specified, the default values apply:
+	* [Development mode]: `mode: --dev`
+	* [Demo mode]: `mode: --no-dev`
+2. `autoload:` - defines composer autoload options. Possible values are `--optimize` and `--classmap-authoritative`. This variable is optional. If not specified, the default values apply:
+	* Development mode: `autoload: --optimize`
+	* Demo mode: `autoload: --classmap-authoritative`
 ***
 
 ## Services
@@ -686,7 +652,7 @@ The following services are supported:
 
 ***
 ### blackfire:
-An application profiler **Service** used for testing and debugging.
+An application profiler *Service* used for testing and debugging.
 * Project-wide
     - `blackfire: engine:` - possible value is `blackfire`.
     - `blackfire: server-id:` - defines the server id used to authenticate with Blackfire. Use it only if you have a shared agent between multiple environments.
@@ -696,7 +662,7 @@ An application profiler **Service** used for testing and debugging.
 ***
 ### broker:
 
-A message broker **Service**.
+A message broker *Service*.
 
 * Project-wide
 
@@ -713,7 +679,7 @@ A message broker **Service**.
 ***
 ### dashboard:
 
-A real-time log monitoring **Service**.
+A real-time log monitoring *Service*.
 
 * Project-wide
 
@@ -723,7 +689,7 @@ A real-time log monitoring **Service**.
 
 ### database:
 
-An SQL database management system **Service**.
+An SQL database management system *Service*.
 
 * Project-wide
 
@@ -742,7 +708,7 @@ An SQL database management system **Service**.
 
 ### key_value_store:
 
-A key-value store **Service** for storing business data.
+A key-value store *Service* for storing business data.
 
 * Project-wide
 
@@ -758,7 +724,7 @@ A key-value store **Service** for storing business data.
 
 ### kibana:
 
-A **Service** to visualize Elasticsearch data and navigate the Elastic Stack. 
+A *Service* to visualize Elasticsearch data and navigate the Elastic Stack. 
 
 * Project-wide
     * `kibana: engine:` - possible value is: `kibana`.
@@ -769,7 +735,7 @@ A **Service** to visualize Elasticsearch data and navigate the Elastic Stack.
 
 ### mail_catcher:
 
-A mail catcher **Service** used to catch all outgoing emails for development or testing needs.
+A mail catcher *Service* used to catch all outgoing emails for development or testing needs.
 
 * Project-wide
 
@@ -796,7 +762,7 @@ A **Service** that provides a graphical user interface to access Redis databases
 
 ### scheduler:
 
-A scheduler **Service** used to run application-specific jobs periodically in the background.
+A scheduler *Service* used to run application-specific jobs periodically in the background.
 
 * Project-wide
   * `scheduler: engine:` - possible value is `jenkins`.
@@ -806,7 +772,7 @@ A scheduler **Service** used to run application-specific jobs periodically in th
 ***
 ### search:
 
-A search **Service** that provides a distributed, multitenant-capable full-text search engine. 
+A search *Service* that provides a distributed, multitenant-capable full-text search engine. 
 
 * Project-wide
   * `search: engine:` - possible value is `elastic`.
@@ -815,7 +781,7 @@ A search **Service** that provides a distributed, multitenant-capable full-text 
 
 ### session:
 
-A key-value store **Service** for storing session data.
+A key-value store *Service* for storing session data.
 
 * Project-wide
 
@@ -833,7 +799,7 @@ A key-value store **Service** for storing session data.
 ***
 ### swagger:
 
-The swagger-ui **Service** used to run Swagger UI to develop API endpoints.
+The swagger-ui *Service* used to run Swagger UI to develop API endpoints.
 
 * Project-wide
     * `swagger: engine:`- possible value is `swagger-ui`.
@@ -841,7 +807,7 @@ The swagger-ui **Service** used to run Swagger UI to develop API endpoints.
 
 ***
 ### tideways:
-An application profiler **Service** for testing and debugging.
+An application profiler *Service* for testing and debugging.
 * Project-wide
   - `tideways: apikey:` - defines the api-key to authenticate with Tideways.
   - `tideways: environment-name:` - defines the environment name of your environment on Tideways. This variable is optional with the default value of `production`.
