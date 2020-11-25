@@ -23,85 +23,73 @@ Read the description below and, in the *Structure* section, fill out the documen
 The structure below is just a reference. We encourage you to add subsections, change or swap the provided sections if needed.
 :::
 
-### How do I run docker/sdk in my local environment?
+### Running docker/sdk in a local environment
 
 #### Docker installation
 
-For more details please check [03.installation.md]
+For Docker installation instructions, see [03.installation.md].
 
-### Installation
+#### docker/sdk and project setup
 
-Clone docker/sdk from the remote repository:
-
+1. Create the project repository and clone the source:
 ```bash
 mkdir {project-name} && cd {project-name}
-git clone https://github.com/{project-name} ./
+git clone https://github.com/{project-url} ./
+```
+
+2. Clone the latest version of docker/sdk:
+
+```bash
+
 git clone git@github.com:spryker/docker-sdk.git docker
 ```
 
 
 ### Developer environment setup
 
-#### Bootstrap docker setup, build and start the instance:
+1. Bootstrap docker setup, build and start the instance:
 
 ```bash
 docker/sdk boot deploy.dev.yml
 docker/sdk up
 ```
 
-#### Switch your branch:
+2. Switch your project branch:
 
 ```bash
 git checkout {your_branch}
-docker/sdk boot -s deploy.dev.yml
-
+docker/sdk boot deploy.dev.yml
 docker/sdk up --build --assets --data
 ```
-> Optional `up` command arguments:
->
-> - `--build` - update composer, generate transfer objects, etc.
-> - `--assets` - build assets
-> - `--data` - get new demo data
+
+Depending on your requirements, you can select any combination of the following `up` command attributes. After changing a branch, we recommend running the command with all of them:
+- `--build` - update composer, generate transfer objects, etc.
+- `--assets` - build assets
+- `--data` - get new demo data
 
 
 ### Production-like environment setup
 
-#### Bootstrap docker setup, build and start the instance:
+1. Bootstrap docker setup, build and start the instance:
 
 ```bash
-docker/sdk boot -s
+docker/sdk boot deploy.*.yml
 docker/sdk up
 ```
 
-#### Switch your branch, build the application with assets and demo data:
+2. Switch your project branch, build the application with assets and demo data:
 
 ```bash
 git checkout {your_branch_name}
-docker/sdk boot -s
-
+docker/sdk boot
 docker/sdk up --build --assets --data
 ```
 
-> Optional `up` command arguments:
->
-> - `--build` - update composer, generate transfer objects, etc.
-> - `--assets` - build assets
-> - `--data` - get new demo data
+Depending on your requirements, you can select any combination of the following `up` command attributes. After changing a branch, we recommend running the command with all of them:
+- `--build` - update composer, generate transfer objects, etc.
+- `--assets` - build assets
+- `--data` - get new demo data
 
-#### Light git checkout:
-
-```bash
-git checkout {your_branch_name}
-docker/sdk boot -s
-
-docker/sdk up
-```
-
-#### Reload all the data:
-
-```bash
-docker/sdk clean-data && docker/sdk up && docker/sdk console q:w:s -v -s
-```
 
 ### Troubleshooting
 
