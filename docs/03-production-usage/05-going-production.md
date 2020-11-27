@@ -1,3 +1,9 @@
+This document is a draft. See [Docker SDK](https://documentation.spryker.com/docs/docker-sdk) for official documentation.
+
+## Description
+Read the description below and, in the *Structure* section, fill out the document by answering the questions directly.
+
+
 > Audience:
 >
 > - Devops who use docker/sdk for production.
@@ -12,3 +18,14 @@
 3. Set basic auth for Zed Backoffice.
 4. Set IP white list to Zed Gateway.
 [List need to be expanded during writing.]
+
+## Structure
+
+:::(Info)(Structure)
+The structure below is just a reference. We encourage you to add subsections, change or swap the provided sections if needed.
+:::
+
+
+## What is this document about?
+
+## What checks should I go through before going production?
