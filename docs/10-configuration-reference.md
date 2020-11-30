@@ -16,11 +16,15 @@ This document is a draft. See [Docker SDK](https://documentation.spryker.com/doc
 
 
 
-This document is a quick reference for the most common configuration options of docker/sdk.
+This document is a quick reference for the most common configuration options of docker/sdk. 
+
+The configuration parameters in this document are examplary. You may need to adjust them per your project requirements.
 
 
 
-### How to configure Opcache
+### Сonfigure Opcache
+
+To configure Opcache, adjust `deploy.*.yml` as follows:
 
 ```yaml
 image:
@@ -33,7 +37,9 @@ image:
             ...
 ```
 
-### How to define a memory limit
+### Define a memory limit
+
+To define a memory limit, adjust `deploy.*.yml` as follows:
 
 ```yaml
 image:
@@ -43,7 +49,9 @@ image:
             "memory_limit": 512m
 ```
 
-### How to provide custom environment variables to Spryker applications
+### Provide custom environment variables to Spryker applications
+
+To provide custom environment variables to Spryker applications, adjust `deploy.*.yml` as follows:
 
 ```yaml
 image:
@@ -54,5 +62,5 @@ image:
 ```
 
 :::(Info)()
-The environment variables defined in `environment` are embedded into all application images.
+The environment variables defined in `environment:` are embedded into all application images.
 :::
