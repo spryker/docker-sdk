@@ -65,6 +65,38 @@ git clone https://github.com/spryker/docker-sdk.git ./docker
 ## Database 
 [MariaDB](https://mariadb.org/) is provided as a service by default, but you can switch to MySQL or PostgreSQL as described below.
 
+### MariaDB
+[MariaDB](https://mariadb.org/) is a community-developed, commercially supported fork of the [MySQL](https://www.mysql.com/) relational database management system.
+
+See [MariaDB knowledge base](https://mariadb.com/kb/en/) for more details.
+
+:::(Warning) (Default service)
+MariaDB is provided as a service by default. You may only need to use this configuration if you are running an older version of Docker SDK or if you've previously switched to another database.
+:::
+
+#### Configuration
+Follow the steps below to switch the database service to MariaDB:
+
+1. Adjust `deploy.*.yml` in the `services:` section:
+
+```yaml
+...
+services:
+    database:
+        engine: mysql
+        version: mariadb-10.4
+        ...
+        endpoints:
+            localhost:3306:
+...
+```
+2. Regenerate demo data:
+```bash
+docker/sdk clean-data
+docker/sdk demo-data
+```
+
+
 ### MySQL
 [MySQL](https://www.mysql.com) is an open source relational database management system based on Structured Query Language (SQL). MySQL enables data to be stored and accessed across multiple storage engines, including InnoDB, CSV and NDB. MySQL is also capable of replicating data and partitioning tables for better performance and durability.
 
