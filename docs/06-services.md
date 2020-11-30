@@ -71,7 +71,7 @@ git clone https://github.com/spryker/docker-sdk.git ./docker
 See [MariaDB knowledge base](https://mariadb.com/kb/en/) for more details.
 
 :::(Warning) (Default service)
-MariaDB is provided as a service by default. You may only need to use this configuration if you are running an older version of Docker SDK or if you've previously switched to another database.
+MariaDB is provided as a service by default. You may only need to use this configuration if you are running an older version of Docker SDK or if you've previously switched to another database engine.
 :::
 
 #### Configuration
