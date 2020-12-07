@@ -43,6 +43,7 @@ FROM application-production-codebase AS application-production
 
 COPY --chown=spryker:spryker public ${srcRoot}/public
 COPY --chown=spryker:spryker frontend ${srcRoot}/frontend
+COPY --chown=spryker:spryker .yarn ${srcRoot}/.yarn
 COPY --chown=spryker:spryker .* *.* LICENSE ${srcRoot}/
 
 USER root
