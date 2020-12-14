@@ -30,30 +30,26 @@ The structure below is just a reference. We encourage you to add subsections, ch
 
 ### What is a testing mode?
 
-It's a mode in which you can check that your system functional correctly
+Docker SDK provides you to run application in a specially prepared environment where you can check that your system functional correctly
 
 #### How is the testing mode different from the usual mode?
 
-Starts a new webdriver container where you can run cli commands in testing environment.
+By default, testing mode different from usual is generates specific env file with variables(e.g. without SSL) and container set(e.g. with webdriver and without a scheduler).
 
 #### How do I turn on the testing mode?
 
-```bash
-docker/sdk up -t
-```
-
-```bash
-docker/sdk testing
-```
-
-Note: Problems, check your webdriver container.
+You have two ways of running a testing mode:
+* running `docker/sdk up` with `-t` flag, this command restarts all your containers in the testing environment;
+* running  `docker/sdk testing`, starts a new container where you can run CLI commands in the testing environment.
 
 ### How do I run tests?
 
-Locally
+The test running process in docker doesn't have any difference from local environment. All you need is to run `codecept run` in CLI container.
 
-CI
-
+You have a few ways:
+* if you run `docker/sdk up` with `-t` flag, you need to go in CLI container(`docker/sdk cli`) and run test;
+* if you start CLI container in testing mode(`docker/sdk testing`), you need is run `codecept run`;
+* you can run `docker/sdk testing codecept run`.
 
 ### How do I choose a webdriver?
 
@@ -72,6 +68,22 @@ Pros:
 
 Cons:
 * Emulation capabilities limited to one browser.
+
+PhantomJS (Scriptable Headless Browser).
+
+Pros:
+* Default driver with Codeception
+
+Cons:
+* Not supportable anymore.
+
+For choosing webdriver, you need to update your `deploy.yml`
+
+```yaml
+services:
+    webdriver:
+        engine: chromedriver
+```        
 
 ### How do I configure codeception?
 1. Prepare required environment variables:
@@ -112,5 +124,4 @@ params:
     - tests/default.yml
     - env
 ```
-
 
