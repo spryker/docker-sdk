@@ -33,11 +33,10 @@ Follow the steps to install and configure the required software:
 
 @(Warning)()(You can set lower **Memory:** and **Swap:** limit values. However, the default limits won't be sufficient to run the application, so make sure to increase them. )
 
-5. Install or update docker-sync:
+5. [Development mode](https://documentation.spryker.com/docs/modes-overview#development-mode): Install Mutagen:
 ```shell
-sudo gem install docker-sync
+brew install mutagen-io/mutagen/mutagen-beta
 ```
-@(Info)()(This step is required if you want to run Spryker in [Development mode](https://documentation.spryker.com/docs/modes-overview#development-mode).)
 
 ## What's next?
 See [Modes Overview](https://documentation.spryker.com/docs/modes-overview) to learn about installation modes of Spryker in Docker.
