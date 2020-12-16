@@ -82,7 +82,7 @@ Find B2B and B2C deploy file examples for [development](https://documentation.sp
 
 Defines the version of the Deploy file format.
 
-This reference page describes the Deploy file format for versions 1.*. 
+This reference page describes the Deploy file format for versions 1.*.
 
 This variable is optional. If not specified, the default value applies: `version: "0.1"`.
 
@@ -102,7 +102,7 @@ namespace: spryker-demo
 
 Defines the namespace to separate different deployments in a single environment.
 
-For example, Docker images, containers and volume names start with a `namespace:` to avoid intersections between different deployments on a single host machine. 
+For example, Docker images, containers and volume names start with a `namespace:` to avoid intersections between different deployments on a single host machine.
 
 This variable is optional. If not specified, the default value applies: `namespace: spryker`.
 
@@ -119,7 +119,7 @@ Defines a tag to separate different boots for a single deployment.
 
 By default, the tag is a randomly generated, unique value.
 
-For example, Docker images and volumes are tagged with a `tag:` to avoid intersections between different boots for a signle deployment on a single host machine. The tag can be set directly in the deploy file to ensure that all the boots of a deployment run with the same images and volumes. 
+For example, Docker images and volumes are tagged with a `tag:` to avoid intersections between different boots for a signle deployment on a single host machine. The tag can be set directly in the deploy file to ensure that all the boots of a deployment run with the same images and volumes.
 
 This variable is optional. If not specified, the default value applies: `tag: '1.0'`.
 
@@ -171,7 +171,7 @@ Defines the image tag according to the `spryker/php` images located at [Docker H
 
 3. `spryker/php:7.2-alpine` - applies Alpine as a base image. The Alpine images are smaller, but you may have issues with:
     * iconv
-    * NFS 
+    * NFS
     * Non-lating languages
     * Tideways
 
@@ -181,7 +181,7 @@ This variable is optional. If not specified, the default value applies: `image: 
 ```yaml
 version: 1.0
 
-image:  
+image:
     tag: spryker/php:7.2
 ```
 
@@ -229,7 +229,7 @@ Defines the setting of **Assets**.
 * `assets: image:` - defines a docker image for a front-end container. If not specified, the default value applies:
 `assets: image: nginx:alpine`.
 * `assets: mode:` - defines a mode for running a static build section from the install recipe. Possible values are `production` and `development`. This variable is optional with the default value of `development`.
-* `assets: compression:` - defines an engine for static compressions. Possible values are `gzip` and `brotli`. 
+* `assets: compression:` - defines an engine for static compressions. Possible values are `gzip` and `brotli`.
 * `assets: compression: engine: static:` - defines a comression mode. Allowed values are `only`, `true`, and `false`.
 * `assets: compression: engine: level:` - defines a compression level. Allowed range is from `1` to `9`.
 * `assets: compression: engine: types:` - defines additional MIME types to be compressed.
@@ -241,7 +241,7 @@ Defines the setting of **Assets**.
 Defines the list of *Regions*.
 
 <a name="regions-services"></a>
-* `regions: services:` - defines settings for *Region*-specific `services:`. Only `database:` and `mail: sender:` are allowed here. 
+* `regions: services:` - defines settings for *Region*-specific `services:`. Only `database:` and `mail: sender:` are allowed here.
 	* `regions: services: database:` - see [database](#database)
 	* `regions: services: mail: sender:` - defines the mail sender configuration. Possible values are `name:` and `email:`.
 * `regions: stores:` - defines the list of *Stores*.
@@ -263,7 +263,7 @@ regions:
 			STORE-2:
 				services:
 					# Store-specific services settings
-			
+
  ```
 
 ***
@@ -314,7 +314,7 @@ groups:
 						store: STORE-1
 					glue.store2.spryker.local:
 						store: STORE-2
-		
+
  ```
 
 Applications can be defined as *Store*-agnostic, as in the example above. Also, applications can be defined as *Store*-specific by leaving a single endpoint pointing to each application. You can see it in the example below. You can use both approaches to scale applications separately by *Store*.
@@ -335,7 +335,7 @@ groups:
 				endpoints:
 					zed.store2.spryker.local:
 						store: STORE-2
-		
+
  ```
 
 ***
@@ -358,24 +358,24 @@ Optional parameters for `application:`:
 * `groups: applications: application: endpoints: endpoint: redirect:` - defines redirect rules.
 * `groups: applications: application: endpoints: endpoint: redirect: code` - defines an HTTP code for a redirect. Allowed values are `301` and `302`.
 * `groups: applications: application: endpoints: endpoint: redirect: url` - defines a URL to redirect to.
-  
+
 * `groups: applications: application: endpoints: real-ip: from:` - defines gateway IP addresses to fetch the real IP address.
 * `groups: applications: application: endpoints: auth:` - defines the basic auth.
 * `groups: applications: application: endpoints: auth: engine:` - defines an engine for the basic auth. Allowed values are `basic` and `whitelist`.
   * Basic auth variables:
-    * `groups: applications: application: endpoints: auth: users:` - defines user credentials for basic auth. 
+    * `groups: applications: application: endpoints: auth: users:` - defines user credentials for basic auth.
     	* `groups: applications: application: endpoints: auth: users: username:` - defines a username for basic auth.
 	* `groups: applications: application: endpoints: auth: users: password:` - defines a password for basic auth.
     * `groups: applications: application: endpoints: auth: exclude:` - defines the IPs to allow access from.
   * Whitelist auth variables:
     * `groups: applications: application: endpoints: auth: include:` - defines the IPs to allow access from.
-  
+
 * `groups: applications: application: endpoints: primal:` - defines if a ZED endpoint is primal for a store. Yves and Glue applications send Zed RPC calls to the primal endpoint. This variable is optional with the default value of `false`. If no endpoint is defined as primal for a store, the first endpoint in descending order is considered primal.
 * `groups: applications: application: http: max-request-body-size:` - defines the maximum allowed size of the request body that can be sent to the application, in MB. If not specified, the default values apply:
 	* `zed` - `10m`
 	* `glue` - `2m`
 	* `yves` - `1m`
-  
+
 ```yaml
 ...
 		applications:
@@ -419,7 +419,7 @@ services:
         root:
             username: "root"
             password: "secret"
-    
+
     broker:
         engine: rabbitmq
         api:
@@ -501,16 +501,16 @@ docker:
 
 	mount:
 		baked:
-		
+
  ```
 
 ***
-    
+
 ### docker: docker-machine:
 Defines the virtualization engine to be used for the overall development environment. Possible values are:
 1. `docker:`.
 2. `parallels:`
-[Parallels](https://www.parallels.com/) requires a paid license to be used. 
+[Parallels](https://www.parallels.com/) requires a paid license to be used.
 
 When no engine is defined in `deploy.yml`, the Docker Engine is used.
 ***
@@ -520,7 +520,7 @@ When no engine is defined in `deploy.yml`, the Docker Engine is used.
 Defines the [New Relic](https://documentation.spryker.com/docs/services#new-relic) configuration.
 
 * `docker: newrelic: license:` - defines a New Relic license. Aquire it from [New Relic](https://www.newrelic.com/).
-* `docker: newrelic: appname:` - defines a New Relic application name. This variable is optional and does not have a default value. 
+* `docker: newrelic: appname:` - defines a New Relic application name. This variable is optional and does not have a default value.
 * `docker: newrelic: enabled:` - defines if Newrelic is enabled. Possible values are `true` and `false`. This variable is optional with the default value of `true`.
 
 ```yaml
@@ -545,7 +545,7 @@ version: 1.0
 docker:
 	ssl:
 		enabled: true
-		
+
  ```
 :::(Info) ()
 To enable secure connection in your browser, register the self-signed CA certificate from `./docker/generator/openssl/default.crt` in your system.
@@ -567,7 +567,7 @@ version: 1.0
 docker:
 	debug:
 		enabled: true
-		
+
  ```
 * `docker: debug: xdebug: enabled:` - defines if Xdebug is enabled.
 
@@ -593,7 +593,7 @@ Defines the mode for mounting source files into application containers.
 1. `baked:`- source files are copied into the image, so they cannot be changed from host machine. This variable is optional. If not specified, the default value applies: `baked:baked`.
 2. `native:`- source files are mounted from host machine into containers directly. We recommend using it Linux.
 3. `docker-sync:`- source files are synced from host machine into containers during runtime. Use it as a workaround solution with MacOS and Windows.
-4.  `mutagen:`- source files are synced from the host machine into running containers. Use it as a workaround for MacOS and Windows. 
+4.  `mutagen:`- source files are synced from the host machine into running containers. Use it as a workaround for MacOS and Windows.
 
 `As mount:` is a platform-specific setting. You can define multiple mount modes. Use the`platforms:` list to define a mount mode for a platform. Possible platforms are `windows`, `macos`, and `linux`.
 
@@ -612,10 +612,10 @@ docker:
 		docker-sync:
 			platforms:
 				- windows
-		
+
  ```
- *** 
- 
+ ***
+
 ### composer:
 
 Defines the composer settings to be used during deployment.
@@ -649,6 +649,7 @@ The following services are supported:
 *     session
 *     swagger
 *     tideways
+*     webdriver
 
 ***
 ### blackfire:
@@ -724,7 +725,7 @@ A key-value store *Service* for storing business data.
 
 ### kibana:
 
-A *Service* to visualize Elasticsearch data and navigate the Elastic Stack. 
+A *Service* to visualize Elasticsearch data and navigate the Elastic Stack.
 
 * Project-wide
     * `kibana: engine:` - possible value is: `kibana`.
@@ -772,7 +773,7 @@ A scheduler *Service* used to run application-specific jobs periodically in the 
 ***
 ### search:
 
-A search *Service* that provides a distributed, multitenant-capable full-text search engine. 
+A search *Service* that provides a distributed, multitenant-capable full-text search engine.
 
 * Project-wide
   * `search: engine:` - possible value is `elastic`.
@@ -811,8 +812,17 @@ An application profiler *Service* for testing and debugging.
 * Project-wide
   - `tideways: apikey:` - defines the api-key to authenticate with Tideways.
   - `tideways: environment-name:` - defines the environment name of your environment on Tideways. This variable is optional with the default value of `production`.
-  - `tideways: cli-enabled:` - defines if profilling of CLI script is enabled. This variable is optional with the default value of `false`.       
+  - `tideways: cli-enabled:` - defines if profilling of CLI script is enabled. This variable is optional with the default value of `false`.
 
+
+***
+
+### webdriver:
+
+A **Service** to control user agents.
+
+* Project-wide
+    * `webdriver: engine:` - possible values are `chromedriver,` `phantomjs`. This variable is optional with the default value of `phantomjs`.
 
 ***
 

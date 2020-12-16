@@ -15,3 +15,13 @@ Sections:
 3. Installation guides for Linux/Windows/Mac.
 4. Optional dependencies: docker-sync, mutagen.io.
 5. Link to SSL certificate installation.
+
+
+Note:
+
+Recommended system requirements:
+
+|Macbook type| vCPU | RAM |
+|------------|------|-----|
+|     15'    |  4   | 6GB |
+|     13'    |  2   | 4GB |

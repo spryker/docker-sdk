@@ -10,7 +10,7 @@
 
 
 
-This document describes why and how to select a particular version of docker/sdk and use it in your project. 
+This document describes why and how to select a particular version of docker/sdk and use it in your project.
 
 
 ## Why should you use a particular docker/sdk version?
@@ -55,7 +55,7 @@ Depending on your project requirements, choose one of the following ways to conf
   * To use a branch as a versioning approach.
   * When Git Submodlue is not supported.
 
-### Git submodule 
+### Git submodule
 
 To configure git submodule:
 
@@ -107,9 +107,10 @@ To configure a reference file:
 
 |Versioning approach | Example |
 |---|---|
-|Tag|1.24.0 or 1.x|
-|Branch name|my-branch| 
-|Hash|dbdfac276ae80dbe6f7b66ec1cd05ef21372988a| 
+|Hash|dbdfac276ae80dbe6f7b66ec1cd05ef21372988a|
+|Release|1.24.0|
+|Branch name|my-branch|
+|Major branch|1.x|
 
 
 
