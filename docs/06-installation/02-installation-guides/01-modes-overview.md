@@ -29,7 +29,7 @@ You can find file syncronization soulutions for each operating system in the tab
 | OS | Description |
 | --- | --- |
 | Linux | bind mount |
-| MacOS | [docker-sync](http://docker-sync.io/) |
+| MacOS | [Mutagen](https://mutagen.io/) |
 | Windows | [docker-sync](http://docker-sync.io/) |
 
 Learn more about the solutions in respective documentation:
