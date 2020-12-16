@@ -15,13 +15,13 @@ Follow the steps to install Spryker in Demo Mode:
     a. Clone the B2C repository:
 
     ```shell
-    git clone https://github.com/spryker-shop/b2c-demo-shop.git -b 202001.0 --single-branch ./
+    git clone https://github.com/spryker-shop/b2c-demo-shop.git -b 202009.0 --single-branch ./
     ```
 
     b. Clone the B2B repository:
 
     ```shell
-    git clone https://github.com/spryker-shop/b2b-demo-shop.git -b 202001.0 --single-branch ./
+    git clone https://github.com/spryker-shop/b2b-demo-shop.git -b 202009.0 --single-branch ./
     ```
 4. Depending on the cloned repository, navigate into the cloned folder:
     * B2C repository:
@@ -36,13 +36,7 @@ Follow the steps to install Spryker in Demo Mode:
 Make sure that you are in the correct folder by running the `pwd` command.
 :::
 
-5. In `deploy.yml`, define `image:` with the PHP image compatible with the current release of the demo shop:
-
-```yaml
-image: spryker/php:7.3-alpine3.12
-```
-
-6. Clone the Docker repository into the same folder:
+5. Clone the Docker repository into the same folder:
 ```shell
 git clone git@github.com:spryker/docker-sdk.git --single-branch docker
 ```
@@ -54,7 +48,7 @@ $ docker version
 $ docker-compose --version
 ```
 :::
-7. Bootstrap the local Docker setup for demo:
+6. Bootstrap the local Docker setup for demo:
 ```shell
 docker/sdk bootstrap
 ```
@@ -65,11 +59,11 @@ Once you finish the setup, you don't need to run `bootstrap` to start the instan
 * Docker SDK version update;
 * Deploy file update.
 :::
-8. Once the job finishes, build and start the instance:
+7. Once the job finishes, build and start the instance:
 ```shell
 docker/sdk up
 ```
-9. Update the `hosts` file:
+8. Update the `hosts` file:
 
   - Linux/MacOS:
 ```shell
