@@ -26,15 +26,12 @@ File synchronization is used to test new functionalities without rebuilding Dock
 
 You can find file syncronization soulutions for each operating system in the table:
 
-| OS | Description |
+| OS | Solution |
 | --- | --- |
-| Linux | bind mount |
-| MacOS | [Mutagen](https://mutagen.io/) |
-| Windows | [docker-sync](http://docker-sync.io/) |
+| Linux | [bind mount](https://docs.docker.com/storage/bind-mounts/) |
+| MacOS | [Mutagen](https://mutagen.io/documentation/introduction) |
+| Windows | [docker-sync](https://docker-sync.readthedocs.io/en/latest/) |
 
-Learn more about the solutions in respective documentation:
-*  [bind mount](https://docs.docker.com/storage/bind-mounts/)
-*  [docker-sync](https://docker-sync.readthedocs.io/en/latest/)
 
 ### Database Access
 
@@ -59,7 +56,7 @@ You can change the credentials in the [Deploy file](https://documentation.spryke
 In Development mode, you can use [Xdebug](https://xdebug.org) for debugging.
 Run the command, to enable it:
 ```bash
-docker/sdk {run|start|up} -x
+docker/sdk {run|start|up|cli} -x
 ```
 
 Find more more information on debugging with Xdebug in [Debugging Setup in Docker](https://documentation.spryker.com/docs/debugging-setup-in-docker).
