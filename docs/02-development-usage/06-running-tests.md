@@ -30,62 +30,45 @@ The structure below is just a reference. We encourage you to add subsections, ch
 
 ### What is a testing mode?
 
-Docker SDK provides you to run application in a specially prepared environment where you can check that your system functional correctly
+Docker SDK allows you to run application in an environment configured for testing.
 
-#### How is the testing mode different from the usual mode?
+In the testing mode, docker/sdk generates an environment file and a set of containers designed for testing. For example, the environment does not have SSL encryption, there is no scheduler container, but the webdriver container is present. 
 
-By default, testing mode different from usual is generates specific env file with variables(e.g. without SSL) and container set(e.g. with webdriver and without a scheduler).
 
-#### How do I turn on the testing mode?
+#### How do I run the testing mode?
 
-You have two ways of running a testing mode:
-* running `docker/sdk up` with `-t` flag, this command restarts all your containers in the testing environment;
-* running  `docker/sdk testing`, starts a new container where you can run CLI commands in the testing environment.
+There are two ways to run the test mode:
+* To restart all containers in the testing environment, run `docker/sdk up -t`.
+* To start a new container where you can run CLI commands in the testing environment, run  `docker/sdk testing`. 
 
 ### How do I run tests?
 
-The test running process in docker doesn't have any difference from local environment. All you need is to run `codecept run` in CLI container.
+To run tests, you need to run the `codecept run` command in a CLI container.
 
-You have a few ways:
+There are several ways to do that:
 * if you run `docker/sdk up` with `-t` flag, you need to go in CLI container(`docker/sdk cli`) and run test;
 * if you start CLI container in testing mode(`docker/sdk testing`), you need is run `codecept run`;
 * you can run `docker/sdk testing codecept run`.
 
 ### How do I choose a webdriver?
 
-docker/sdk uses Chromedriver as the default one.
+To choose a webdriver, update your `deploy.*.yml`.
 
-Chromedriver (Headless Chromium).
+Chromedriver is the default webdriver shipped with docker/sdk. 
 
-A modern and productive solution that allows you to directly use the Chrome / Chromium functionality
-
-Pros:
-* Higher execution speed and less memory consumption in comparison with PhantomJS;
-* Supported by Google;
-* Uses driver with Codeception out of the box;
-* No need for additional development activities;
-* Open-source solution.
-
-Cons:
-* Emulation capabilities limited to one browser.
-
-PhantomJS (Scriptable Headless Browser).
-
-Pros:
-* Default driver with Codeception
-
-Cons:
-* Not supportable anymore.
-
-For choosing webdriver, you need to update your `deploy.yml`
-
+The Chromedriver configuration looks as follows in the deploy file:
 ```yaml
 services:
     webdriver:
         engine: chromedriver
 ```        
 
-### How do I configure codeception?
+See [webdriver:](https://documentation.spryker.com/docs/deploy-file-reference-10#webdriver-) to learn more about webdriver configuration in the deploy file. 
+
+### How do I configure Codeception?
+
+To configure Codeception:
+
 1. Prepare required environment variables:
 ```yaml
 SPRYKER_TESTING_ENABLED: false
@@ -96,7 +79,7 @@ SPRYKER_TEST_BROWSER_BIN: '/usr/local/bin/chrome'
 SPRYKER_TEST_WEB_DRIVER_BIN: 'vendor/bin/chromedriver'
 ```
 
-2. Configure codeception.*.yml:
+2. Configure `codeception.*.yml`:
 ```yaml
 extensions:
     enabled:
