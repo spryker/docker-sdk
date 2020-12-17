@@ -46,7 +46,7 @@ There are two ways to run the test mode:
 To run tests, you need to run the `codecept run` command in a CLI container.
 
 There are several ways to do that:
-* if you run `docker/sdk up` with `-t` flag, you need to go in CLI container(`docker/sdk cli`) and run test;
+* if you run `docker/sdk up` with `-t` flag, you need to go in CLI container(`docker/sdk cli`) and run test(`codecept run`);
 * if you start CLI container in testing mode(`docker/sdk testing`), you need is run `codecept run`;
 * you can run `docker/sdk testing codecept run`.
 
