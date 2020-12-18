@@ -29,11 +29,13 @@ Follow the steps to install and configure the required software:
 ```shell
 /etc/init.d/docker restart
 ```
-4. Install Docker-compose:
+4. Optional: Configure the `docker` group to manage Docker as a non-root user. See [Manage Docker as a non-root user](https://docs.docker.com/engine/install/linux-postinstall/#manage-docker-as-a-non-root-user) for configuration instructions.
+
+5. Install Docker-compose:
 ```shell
 sudo curl -L "https://github.com/docker/compose/releases/download/1.24.0/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
 ```
-5. Apply executable permissions to the binary:
+6. Apply executable permissions to the binary:
 ```shell
 sudo chmod +x /usr/local/bin/docker-compose
 ```
@@ -41,7 +43,7 @@ sudo chmod +x /usr/local/bin/docker-compose
 ## What's next?
 See [Modes Overview](https://documentation.spryker.com/docs/modes-overview) to learn about installation modes of Spryker in Docker.
 If you've already selected an installation mode, follow one of the guides below:
-* [Installation Guide - Development Mode](https://documentation.spryker.com/v4/docs/installation-guide-development-mode)
-* [Installation Guide- Demo Mode](https://documentation.spryker.com/v4/docs/installation-guide-demo-mode)
-* [Integrating Docker into Existing Projects](https://documentation.spryker.com/v4/docs/integrating-docker-into-existing-projects)
-* [Running Production](https://documentation.spryker.com/v4/docs/running-production)
+* [Installation Guide - Development Mode](https://documentation.spryker.com/docs/installation-guide-development-mode)
+* [Installation Guide- Demo Mode](https://documentation.spryker.com/docs/installation-guide-demo-mode)
+* [Integrating Docker into Existing Projects](https://documentation.spryker.com/docs/integrating-docker-into-existing-projects)
+* [Running Production](https://documentation.spryker.com/docs/running-production)
