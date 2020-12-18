@@ -33,7 +33,7 @@ The structure below is just a reference. We encourage you to add subsections, ch
 
 This document contains solutions to the most common issues related to docker/sdk.
 
-### Installation
+### Troubleshooting installation
 
 #### Docker daemon is not running
 
@@ -147,7 +147,7 @@ Re-load demo data:
 docker/sdk clean-data && docker/sdk up && docker/sdk console q:w:s -v -s
 ```
 
-### Running applications
+### Troubleshooting running applications
 
 #### Port is already occupied on host
 
@@ -225,7 +225,7 @@ unable to reconcile Mutagen sessions: unable to create synchronization session (
 1. Restart your OS.
 2. If the error persists: Check [Mutagen documentation](https://mutagen.io/documentation/introduction).
 
-### Debugging
+### Troubleshooting debugging
 
 **when**
 Xdebug does not work.
