@@ -35,19 +35,45 @@ Docker SDK allows you to run application in an environment configured for testin
 In the testing mode, docker/sdk generates an environment file and a set of containers designed for testing. For example, the environment does not have SSL encryption, there is no scheduler container, but the webdriver container is present. 
 
 
-#### How do I run the testing mode?
 
-There are two ways to run the test mode:
-* To restart all containers in the testing environment, run `docker/sdk up -t`.
-* To start a new container where you can run CLI commands in the testing environment, run  `docker/sdk testing`. 
+### How do I run tests in the testing mode?
 
-### How do I run tests?
-
-To run tests, you need to run the `codecept run` command in a CLI container.
+To run tests, you need to run the test mode and run the `codecept run` command in a CLI container.
 
 There are several ways to do that:
-* if you run `docker/sdk up` with `-t` flag, you need to go in CLI container(`docker/sdk cli`) and run test(`codecept run`);
-* if you start CLI container in testing mode(`docker/sdk testing`), you need is run `codecept run`;
+
+#### Running tests with all containers in testing mode
+
+To run tests with all containers in testing mode:
+
+1. Restart all containers in the testing mode:
+
+```bash
+docker/sdk up -t
+```
+2. Switch to the CLI container:
+```bash
+docker/sdk cli
+```
+3. Run tests:
+```bash
+codecept run
+```
+
+#### Running tests in a dedicated testing container
+
+To run tests in a dedicated testing container:
+
+1. Start a new container in the testing mode:
+```bash
+docker/sdk testing
+```
+
+2. Run tests:
+```bash
+codecept run
+```
+
 * you can run `docker/sdk testing codecept run`.
 
 ### How do I choose a webdriver?
