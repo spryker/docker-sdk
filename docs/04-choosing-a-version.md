@@ -1,19 +1,17 @@
 > Audience:
 >
-> - Everybody who start to use docker/sdk for developing and production.
+> - Everyone who starts using the Docker SDK for development and production.
 >
 > Outcome:
-> - You know possibilities on how to link your project to the specific docker/sdk version.
-> - You know how to choose a docker/sdk versioning approach and link it to your project.
+> - You know how to choose a Docker SDK versioning approach.
+> - You know how to link your project to a particular version of the Docker SDK.
 
 
 
+This document describes why and how to select a particular version of the Docker SDK and use it in your project.
 
 
-This document describes why and how to select a particular version of docker/sdk and use it in your project.
-
-
-## Why should you use a particular docker/sdk version?
+## Why should I use a particular version of Docker SDK?
 
 You should link use a particular docker/sdk version for:
 - Compatibility: project configuration is compatible with the selected docker/sdk version.
@@ -21,9 +19,9 @@ You should link use a particular docker/sdk version for:
 - Control: control when and how you switch the docker/sdk version of the project.
 - Stability: avoid unexpected behavior in pipelines.
 
-## How do you choose a docker/sdk version?
+## Choosing a versioning approach
 
-To choose a version, consider the following:
+To choose a versioning approach, consider the following:
 - What kind of project do you have? For example, Long-term, short-term, production, demo.
 - What will you use docker/sdk for? For example, for development, operations, CI/CD management.
 - Do you need to customize docker/sdk?
@@ -43,9 +41,9 @@ Depending on your project requirements, choose on of the versioning approaches:
 Spryker Cloud does not support forks of `spryker/docker-sdk`.
 :::
 
-## 2. How do you configure a project to use a chosen version of docker/sdk?
+## Сonfiguring a project to use the chosen version of Docker SDK
 
-Depending on your project requirements, choose one of the following ways to configure a chosen docker/sdk version:
+Depending on your project requirements, choose one of the following ways to configure a Docker SDK version:
 
 * Git submodule:
   * To contribute into docker/sdk.
@@ -55,7 +53,7 @@ Depending on your project requirements, choose one of the following ways to conf
   * To use a branch as a versioning approach.
   * When Git Submodlue is not supported.
 
-### Git submodule
+### Configuring git submodule
 
 To configure git submodule:
 
@@ -88,16 +86,16 @@ git push
 See [7.11 Git Tools - Submodules](https://www.git-scm.com/book/en/v2/Git-Tools-Submodules) and [git-submodule reference](https://git-scm.com/docs/git-submodule) for more information about git submodule.
 
 
-#### How do you use git submodule to stick to the chosen version?
+#### Using git submodule to stick to the chosen version
 
-To fetch a chosen version of docker/sdk, init or update the docker/sdk submodule:
+To fetch a chosen version of the Docker SDK, init or update the Docker SDK submodule:
 ```bash
 git submodule update --init --force docker
 ```
 
 
 
-### Reference file
+### Configuring a reference file
 
 To configure a reference file:
 
@@ -121,22 +119,22 @@ git commit -m "Added .git.docker"
 git push
 ```
 
-Commit and push the reference file each time you want to start using new version of docker/sdk:
+Commit and push the reference file each time you want to start using new version of the Docker SDK:
 ```bash
 git add .git.docker
 git commit -m "Updated .git.docker"
 git push
 ```
 
-#### How do you use a reference file to stick to the chosen version?
+#### Using a reference file to stick to the chosen version
 
-Do the following to fetch a chosen version of docker/sdk:
+Do the following to fetch a chosen version of the Docker SDK:
 
   1. Clone the docker/sdk repository.
   2. Read the reference from the file.
   3. According to the reference, checkout the local clone of the repository to the hash, branch, or tag.
 
- Example of a pipeline to fetch the chosen version of docker/sdk:
+ Example of a pipeline to fetch the chosen version of the Docker SDK:
   ```bash
   git clone git@github.com:spryker/docker-sdk.git .docker
   cd docker
