@@ -32,21 +32,21 @@ The structure below is just a reference. We encourage you to add subsections, ch
 
 Docker SDK allows you to run application in an environment configured for testing.
 
-In the testing mode, docker/sdk generates an environment file and a set of containers designed for testing. For example, the environment does not have SSL encryption, there is no scheduler container, but the webdriver container is present. 
+In the testing mode, docker/sdk generates an environment file and a set of containers configured for testing. For example, the environment does not have SSL encryption, there is no scheduler container, but the webdriver container is present. 
 
 
 
 ### How do I run tests in the testing mode?
 
-To run tests, you need to run the test mode and run the `codecept run` command in a CLI container.
+To run tests, you need to run Codeception in a CLI container.
 
-There are several ways to do that:
+There are several ways to do that.
 
 #### Running tests with all containers in testing mode
 
 To run tests with all containers in testing mode:
 
-1. Restart all containers in the testing mode:
+1. Restart all containers in testing mode:
 
 ```bash
 docker/sdk up -t
@@ -55,7 +55,7 @@ docker/sdk up -t
 ```bash
 docker/sdk cli
 ```
-3. Run tests:
+3. Run Codeception:
 ```bash
 codecept run
 ```
@@ -64,23 +64,31 @@ codecept run
 
 To run tests in a dedicated testing container:
 
-1. Start a new container in the testing mode:
+1. Start a new container in testing mode:
 ```bash
 docker/sdk testing
 ```
 
-2. Run tests:
+2. Run Codeception:
 ```bash
 codecept run
 ```
 
-* you can run `docker/sdk testing codecept run`.
+#### Running tests in a dedicated testing container with a single command
+
+To run tests in a dedicated testing container with a single command, run `docker/sdk testing codecept run`.
+
+The command runs tests as follows:
+
+1. Start a new container in testing mode.
+2. Run Codeception.
+3. Stop the container.
 
 ### How do I choose a webdriver?
 
-To choose a webdriver, update your `deploy.*.yml`.
+To choose a webdriver, update `deploy.*.yml`.
 
-Chromedriver is the default webdriver shipped with docker/sdk. 
+Chromedriver is the default webdriver shipped with Docker SDK. 
 
 The Chromedriver configuration looks as follows in the deploy file:
 ```yaml
