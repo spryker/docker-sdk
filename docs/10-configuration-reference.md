@@ -2,18 +2,10 @@ This document is a draft. See [Docker SDK](https://documentation.spryker.com/doc
 
 > Audience:
 >
-> - Everybody who doesn't know how to configure docker/sdk in particular cases.
+> - Everyone who wants to know how to configure the Docker SDK.
 >
 > Outcome:
-> - You have a handbook of common cases that could be helpful.
-
-## Outline
-
-1. List all common configuration cases we have faced in the community channel, etc.
-
-
-## Structure
-
+> - You have a handbook with configuration instructions for common cases.
 
 
 This document is a quick reference for the most common configuration options of docker/sdk. 
@@ -22,7 +14,7 @@ The configuration parameters in this document are examplary. You may need to adj
 
 
 
-### Сonfigure Opcache
+## Сonfiguring Opcache
 
 To configure Opcache, adjust `deploy.*.yml` as follows:
 
@@ -37,7 +29,7 @@ image:
             ...
 ```
 
-### Define a memory limit
+## Defining a memory limit
 
 To define a memory limit, adjust `deploy.*.yml` as follows:
 
@@ -49,7 +41,7 @@ image:
             "memory_limit": 512m
 ```
 
-### Provide custom environment variables to Spryker applications
+## Providing custom environment variables to Spryker applications
 
 To provide custom environment variables to Spryker applications, adjust `deploy.*.yml` as follows:
 
