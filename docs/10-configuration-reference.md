@@ -1,5 +1,3 @@
-This document is a draft. See [Docker SDK](https://documentation.spryker.com/docs/docker-sdk) for the official documentation.
-
 > Audience:
 >
 > - Everyone who wants to know how to configure the Docker SDK.
