@@ -36,7 +36,7 @@ This document describes configuration options of the services shipped with Spryk
 *     MailHog
 *     Blackfire
 *     New Relic
-*     ChromeDriver
+*     WebDriver
 *     Dashboard
 *     Tideways
 
@@ -71,7 +71,7 @@ git clone https://github.com/spryker/docker-sdk.git ./docker
 See [MariaDB knowledge base](https://mariadb.com/kb/en/) for more details.
 
 :::(Warning) (Default service)
-MariaDB is provided as a service by default. You may only need to use this configuration if you are running an older version of Docker SDK or if you've previously switched to another database engine.
+MariaDB is provided as a service by default. You may only need to use this configuration if you are running an older version of the Docker SDK or if you've previously switched to another database engine.
 :::
 
 #### Configuration
@@ -441,20 +441,41 @@ NEWRELIC_LICENSE={new_relic_license} docker/sdk up
 You can pass the New Relic license only with the `docker/sdk up` command.
 :::
 
+## Webdriver
+ChromeDriver is provided as a webdriver service by default, but you can switch to PhantomJS as described below.
 
-## ChromeDriver
+
+### ChromeDriver
 
 [ChromeDriver](https://chromedriver.chromium.org/) is a thin wrapper on WebDriver and [Chromium](https://chromedriver.chromium.org/) headless browser. It is used for automating web page interaction, JavaScript execution, and other testing-related activities. It provides full-control API to make end-to-end testing flexible and comfortable.  
 
  
+:::(Warning) (Default service)
+Chromedriver is provided as a service by default. You may only need to use this configuration if you are running an older version of the Docker SDK or if you've previously switched to another WebDriver.
+:::
 
-### Configuration
-To enable Chromedriver, in `deploy.*.yml`, add a new `webdriver` service with the `chromedriver` engine:
+#### Configuration
+To enable Chromedriver, adjust `deploy.*.yml` as follows:
 
 ```yaml
 services:
     webdriver:
         engine: chromedriver
+```
+
+
+### PhantomJS
+
+[PhantomJS](https://phantomjs.org/) is a headless browser for automating web page interaction. It ships with a WebDriver based on [Selenium](https://www.selenium.dev/).
+
+#### Configuration 
+
+To enable PhantomJS, adjust `deploy.*.yml` as follows:
+
+```yaml
+services:
+    webdriver:
+        engine: phantomjs
 ```
 
 
