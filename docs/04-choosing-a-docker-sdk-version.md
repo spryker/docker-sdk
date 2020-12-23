@@ -38,7 +38,7 @@ Depending on your project requirements, choose on of the versioning approaches:
 | Fork of `spryker/docker-sdk` | + | + | + | +  | Customization of the Docker SDK. |
 
 :::(Info) (Fork)
-Spryker Cloud does not support forks of `spryker/docker-sdk`.
+[Spryker Cloud](https://cloud.spryker.com/) does not support forks of `spryker/docker-sdk`.
 :::
 
 ## Сonfiguring a project to use the chosen version of the Docker SDK
