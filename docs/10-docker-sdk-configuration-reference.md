@@ -54,3 +54,29 @@ image:
 :::(Info) ()
 The environment variables defined in `environment:` are embedded into all application images.
 :::
+
+## Increasing maximum upload size
+
+To increase maximum upload size, update `deploy.*.yml` as follows:
+
+1. In Nginx configuration, update maximum request body size:
+```yaml
+...
+		applications:
+			zed:
+				application: zed
+				http:
+					max-request-body-size: {request_body_size_value}
+				...
+```
+
+2. Update PHP memory limit:
+
+```yaml
+image:
+    ...
+    php:
+        ini:
+            memory_limit: {memroy_limit_value}
+            ...
+```
