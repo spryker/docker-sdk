@@ -1,32 +1,12 @@
-This document is a draft. See [Docker SDK](https://documentation.spryker.com/docs/docker-sdk) for official documentation.
-
-## Description
-Read the description below and, in the *Structure* section, fill out the document by answering the questions directly.
-We may have added some existing content and encourage you to update, remove or restructure it if needed. 
 
 > Audience:
 >
-> - Everybody who uses
+> - Everybody who uses the Docker SDK.
 >
 > Outcome:
-> - You understand the difference between modes and know what mode to choose in a particular case.
-
-## Outline
-
-1. [Port the existing document]
-2. Describe a case when changes in demo mode can be seen in 2 minutes using docker/sdk up. (You would not need dev mode if you only need to make small changes).
-
-## Important points to cover
-
-* Emphasize that demo mode is closer to production one, so it is better to use for QA and demo.
-* Dev mode is better to use when changes in the codebase must be seen instantly.
+> - You understand the difference between modes and can choose one.
 
 
-## Structure
-
-:::(Info)(Structure)
-The structure below is just a reference. We encourage you to add subsections, change or swap the provided sections if needed.
-:::
 
 In this section, you can find installation guides for Spryker in Docker. Spryker provides several installation modes. Currently, you can install Spryker in the following ways:
 * Install Spryker in Development mode.
@@ -34,7 +14,7 @@ In this section, you can find installation guides for Spryker in Docker. Spryker
 * Integrate Docker into an exiting project.
 * Generate Docker images and assets for a production environement.
 
-### Configuration
+## Configuration
 You can switch between Demo ( `DEMO`) and Development ( `DEV`) modes, but, usually, only one mode is used.
 
 The mode is defined in one of the [Deploy files](https://documentation.spryker.com/docs/deploy-file-reference-10): 
