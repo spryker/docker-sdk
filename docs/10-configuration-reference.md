@@ -6,7 +6,7 @@
 > - You have a handbook with configuration instructions for common cases.
 
 
-This document is a quick reference for the most common configuration options of docker/sdk. 
+This document is a quick reference for the most common configuration options of the Docker SDK. 
 
 The configuration parameters in this document are examplary. You may need to adjust them per your project requirements.
 
