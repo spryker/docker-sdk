@@ -95,7 +95,7 @@ You get an error similar to `vendor/bin/console: not found`.
 **then**
 Re-build basic images, assets, and codebase:
 ```bash
-docker/sdk up --build
+docker/sdk up --build --assets
 ```
 
 #### An error during front end setup
@@ -141,10 +141,10 @@ docker/sdk boot && docker/sdk up
 **when**
 Demo data was imported incorrectly.
 
-**then** 
+**then**
 Re-load demo data:
 ```bash
-docker/sdk clean-data && docker/sdk up && docker/sdk console q:w:s -v -s
+docker/sdk clean-data && docker/sdk up --data && docker/sdk console q:w:s -v -s
 ```
 
 ### Troubleshooting running applications
@@ -213,10 +213,10 @@ docker:
         enabled: false
 ```
 
-#### Mutagen 
+#### Mutagen
 
-**when** 
-You get the error: 
+**when**
+You get the error:
 ```bash
 unable to reconcile Mutagen sessions: unable to create synchronization session (spryker-dev-codebase): unable to connect to beta: unable to connect to endpoint: unable to dial agent endpoint: unable to create agent command: unable to probe container: container probing failed under POSIX hypothesis (signal: killed) and Windows hypothesis (signal: killed)
 ```
@@ -231,31 +231,7 @@ unable to reconcile Mutagen sessions: unable to create synchronization session (
 Xdebug does not work.
 
 **then**
-1. Ensure that IDE is listening to the port 9000.
-2. Get into any application container:
-```bash
-$ docker exec -i spryker_zed_1 bash
-```
-3. Check that the `xdebug` extension is active:
-```bash
-$ docker/sdk cli php -m
-```
-4. Check if the host is accessible from the container:
-```bash
-$ nc -zv ${SPRYKER_XDEBUG_HOST_IP} 9000
-```
-
-**when**
-PHP `xdebug` extension is not active in CLI.
-
-**then**
-Exit the CLI session and run `docker/sdk cli -x`.
-
-**when**
-PHP `xdebug` extension is not active in the browser.
-
-**then**
-1. In `deploy.*.yml`, ensure that Xdebug is enabled:
+1. Ensure that Xdebug is enabled in `deploy.*.yml` you use:
 ```
 ```yaml
 docker:
@@ -264,12 +240,11 @@ docker:
       xdebug:
         enabled: true
 ```
-2. Try the following:
-    * Set the `XDEBUG_SESSION=spryker` cookie  for the request.
-    * Run the following command:
-    ```bash
-    docker/sdk run -x
-    ```
+2. Ensure that IDE is listening to the port 9000.
+3. Check if the host is accessible from the container:
+```bash
+$ docker/sdk cli -x bash -c 'nc -zv ${SPRYKER_XDEBUG_HOST_IP} 9000'
+```
 
 **when**
 `nc` command does not give any output.
@@ -277,14 +252,30 @@ docker:
 **then**
 [Contact us](https://support.spryker.com/hc/en-us).
 
-
 **when**
 `nc` command tells that the port is opened.
 
 **then**
-1. Exit the container.
-2. Check what process occupies the port by running the command:
+1. Check what process occupies the port by running the command on the host:
 ```bash
 sudo lsof -nPi:9000 | grep LISTEN
 ```
-3. Make sure it is your IDE.
+2. Make sure it is your IDE. If not, free the 9000 port to be used by IDE.
+
+**when**
+PHP `xdebug` extension is not active in CLI.
+
+**then**
+Exit the CLI session and use `-x` argument, e.g. `docker/sdk cli -x` or `docker/sdk testing -x`.
+
+**when**
+PHP `xdebug` extension is not active when accessing the website via the browser or CURL.
+
+**then**
+
+Try the following:
+* Set the `XDEBUG_SESSION=spryker` cookie for the request. You can use browser extensions like this [one](https://chrome.google.com/webstore/detail/xdebug-helper/eadndfjplgieldjbigjakmdgkmoaaaoc).
+* Or run the following command to switch debug mode for all applications:
+    ```bash
+    docker/sdk run -x
+    ```
