@@ -6,10 +6,10 @@ We may have added some existing content and encourage you to update, remove or r
 
 > Audience:
 >
-> - Everybody who have a problem running docker/sdk locally.
+> - Everyone who has an issue running the Docker SDK locally.
 >
 > Outcome:
-> - You may find a solution for your particular problem with docker/sdk.
+> - You can find a solution for your issue with the Docker SDK.
 
 ## Outline
 
@@ -31,7 +31,7 @@ The structure below is just a reference. We encourage you to add subsections, ch
 
 ***
 
-This document contains solutions to the most common issues related to docker/sdk.
+This document contains solutions to the most common issues related to the Docker SDK.
 
 ### Troubleshooting installation
 
@@ -231,7 +231,7 @@ unable to reconcile Mutagen sessions: unable to create synchronization session (
 Xdebug does not work.
 
 **then**
-1. Ensure that Xdebug is enabled in `deploy.*.yml` you use:
+1. Ensure that Xdebug is enabled in `deploy.*.yml`:
 ```
 ```yaml
 docker:
@@ -243,7 +243,7 @@ docker:
 2. Ensure that IDE is listening to the port 9000.
 3. Check if the host is accessible from the container:
 ```bash
-$ docker/sdk cli -x bash -c 'nc -zv ${SPRYKER_XDEBUG_HOST_IP} 9000'
+docker/sdk cli -x bash -c 'nc -zv ${SPRYKER_XDEBUG_HOST_IP} 9000'
 ```
 
 **when**
@@ -256,26 +256,28 @@ $ docker/sdk cli -x bash -c 'nc -zv ${SPRYKER_XDEBUG_HOST_IP} 9000'
 `nc` command tells that the port is opened.
 
 **then**
-1. Check what process occupies the port by running the command on the host:
+1. Check what process occupies the port 9000 by running the command on the host:
 ```bash
 sudo lsof -nPi:9000 | grep LISTEN
 ```
-2. Make sure it is your IDE. If not, free the 9000 port to be used by IDE.
+2. If it's not your IDE, free up the port to be used by the IDE.
 
 **when**
 PHP `xdebug` extension is not active in CLI.
 
 **then**
-Exit the CLI session and use `-x` argument, e.g. `docker/sdk cli -x` or `docker/sdk testing -x`.
+Exit the CLI session and enter it with the `-x` argument:
+* `docker/sdk cli -x`
+* `docker/sdk testing -x`
 
 **when**
-PHP `xdebug` extension is not active when accessing the website via the browser or CURL.
+PHP `xdebug` extension is not active when accessing the website via a browser or curl.
 
 **then**
 
 Try the following:
-* Set the `XDEBUG_SESSION=spryker` cookie for the request. You can use browser extensions like this [one](https://chrome.google.com/webstore/detail/xdebug-helper/eadndfjplgieldjbigjakmdgkmoaaaoc).
-* Or run the following command to switch debug mode for all applications:
+* Set the `XDEBUG_SESSION=spryker` cookie for the request. You can use a browser extension like [Xdebug helper](https://chrome.google.com/webstore/detail/xdebug-helper/eadndfjplgieldjbigjakmdgkmoaaaoc).
+* Run the following command to switch all applications to debug mode:
     ```bash
     docker/sdk run -x
     ```
