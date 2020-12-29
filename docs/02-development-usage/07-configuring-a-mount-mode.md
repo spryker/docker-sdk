@@ -5,10 +5,10 @@ Read the description below and, in the *Structure* section, fill out the documen
 
 > Audience:
 >
-> - Developers who are developing with docker/sdk.
+> - Developers who are developing with the Docker SDK.
 >
 > Outcome:
-> - You know how install and use source code synchronization tools based on the required platform.
+> - You know how install and configure synchronization tools based on OS.
 
 ## Outline
 1. Short description how to set up the environment for developing purpose.
@@ -30,7 +30,7 @@ docker:
 
 ```
 
-3. Bootstrap docker/sdk:
+3. Bootstrap the Docker SDK:
 ```bash
 docker/sdk boot
 ```
@@ -71,7 +71,7 @@ docker:
                - macos
 ```
 
-5. Bootstrap docker/sdk:
+5. Bootstrap the Docker SDK:
 ```bash
 docker/sdk boot
 ```
@@ -99,7 +99,7 @@ docker:
                - linux
 ```
 
-3. Bootstrap docker/sdk:
+3. Bootstrap the Docker SDK:
 ```bash
 docker/sdk boot
 ```
@@ -113,12 +113,12 @@ docker/sdk up --build --data --assets
 
 ### Configuring docker-sync mount mode on Windows with WSL1
 
-To configure docker-sync mount mode on Windows with Windows Subsystem for Linux 1 (WSL1):
-
-:::(Warning) (Important)
-Always put your project files on the Windows file system: e.g. `C:/my-project` and use `/c/my-project` as a working directory.
-Kindly find details [here](https://nickjanetakis.com/blog/setting-up-docker-for-windows-and-wsl-to-work-flawlessly).
+:::(Warning) (Location of project files)
+Docker for Windows requires project files to be stored in the Windows file system. For example, you can store project files in `C:/my-project` and use `/c/my-project` as a working directory.
+Find more details about it in [Ensure Volume Mounts Work](https://nickjanetakis.com/blog/setting-up-docker-for-windows-and-wsl-to-work-flawlessly).
 :::
+
+To configure docker-sync mount mode on Windows with Windows Subsystem for Linux 1 (WSL1):
 
 1. [Install Docker Desktop Stable](https://docs.docker.com/docker-for-windows/install/) 2.3.0.2 or higher.
 
@@ -181,7 +181,7 @@ Kindly find details [here](https://nickjanetakis.com/blog/setting-up-docker-for-
     ```
 6. Set your Docker for Windows host as an environment variable:
 
-    1. In Docker for Windows settings, check **Expose daemon on tcp://localhost:2375 without TLS**.
+    1. In Docker for Windows settings, select **Expose daemon on tcp://localhost:2375 without TLS**.
 
     2. To update the profile with the environment variable, in your WSL shell, run the command:
     ```bash
@@ -254,7 +254,7 @@ docker:
                - windows
 ```
 
-10. Bootstrap docker/sdk:
+10. Bootstrap the Docker SDK:
 ```bash
 docker/sdk boot
 ```
@@ -323,7 +323,7 @@ To configure native mount mode for Windows with Windows Subsystem for Linux 2 (W
     ```bash
     sudo chmod +x /usr/local/bin/docker-compose
     ```
-5. Bootstrap docker/sdk:
+5. Bootstrap the Docker SDK:
 ```bash
 docker/sdk boot
 ```
