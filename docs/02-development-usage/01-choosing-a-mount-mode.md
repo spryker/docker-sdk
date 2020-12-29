@@ -4,7 +4,7 @@
 >
 > Outcome:
 > - You know how to choose a mount mode based on an OS.
-> - You understand how synchronization file mode works.
+> - You understand how synchronization mount modes work.
 
 This document describes mount modes and how you can choose one. 
 
