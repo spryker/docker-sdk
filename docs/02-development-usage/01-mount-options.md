@@ -45,26 +45,26 @@ Depending on your operating system (OS), choose one of the mount options in the 
 
 docker/sdk supports the following mount modes:
 
-* baked
+* `baked`
 Copies source files into image, so they *cannot* be changed from host machine.
 The file or directory is referenced by its absolute path on the host machine.
 This mount option is default for the Demo mode.
 
-* native
+* `native`
 Mounts source files directly from host machine into containers.
 Works perfectly with Linux and Windows (WSL2).
 
-* docker-sync
+* `docker-sync`
 Synchronizes source files from host machine into running containers.
 This mount option is stable with MacOS and Windows (WSL1).
 
-* mutagen
+* `mutagen`
 Synchronizes source files between your host machine and a container in an effective real-time way that combines the performance of the rsync algorithm with bidirectionality and low-latency filesystem watching.
 This mount option is stable with MacOS.
 
-### Changing a mount mode
+### Changing a mount mode for development
 
-To change a mount mode, in `deploy.*.yaml`, define your OS for the desired mount mode:
+To set a mount mode define your OS for the desired mount mode in `deploy.dev.yml`:
 
 ```yaml
 docker:
@@ -89,24 +89,29 @@ docker:
 If the same OS is defined for multiple mount modes, the first mount mode matching the OS in descending order is selected.
 :::
 
-## Configuring a mount mode
+### Configuring a mount mode
 
-To configure a mount mode, see [Mount-modes-configuration.md].
+To configure a mount mode, see [Mount modes configuration](07-mount-modes-configuration.md).
 
-### Sync modes and their downsides
-File synchronization uses a novel algorithm that combines the performance and low-latency filesystem watching.
-It uses to synchronize code between host machine and a remote container in effective real-time, allowing you to edit code with your editor of choice and have it pushed to the remote container almost instantly.
+### Synchronisation mode and its features
 
-Sync modes downsides:
-* Logs monitoring
-* In general not stable solutions
+File synchronization tools, such as Mutagen.io or docker-sync, use some algorithms to synchronise your code between host machine and a docker volume. That allows you to run your application at full speed avoiding file system mount latency.
 
-To be updated by Mike.
+![](../images/mutagen-diagram.png)
+
+- A daemon listens to the host file system changes
+- A sidecar container listens to the VM file system changes.
+- The Daemon and the sidecar interact with each other and updates files on each side.
+- The applications work with the docker volume directly that is almost equal to direct file system access.
+
+#### What should I keep in my mind using a synchronisation mode?
+* A few seconds delay when I change one or several files.
+* It could take a while when I perform massive file operations, like `git checkout` or `composer install` I should wait for synchronization by looking on the synchronization status.
+* I can use `docker/sdk sync logs` that shows the current status of the synchronisation session. It works for `docker-sync` and `mutagen`.
+* I should use `docker/sdk down` to terminate my synchronization session when I finish my work.
 
 ### See also
 
 * [Manage data in Docker](https://docs.docker.com/storage/)
-
 * [Mutagen documentation](https://mutagen.io/documentation/introduction)
-
 * [Docker-sync documentation](https://docker-sync.readthedocs.io/)
