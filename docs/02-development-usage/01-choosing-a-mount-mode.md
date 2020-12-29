@@ -111,7 +111,7 @@ Synchronization mount modes, such as mutagen or docker-sync, use algorithms to s
 - The daemon and the sidecar interact and update files on each side.
 - Applications work with the docker volume directly, which is almost equal to a direct file system access.
 
-#### What should I keep in my mind when using synchronization mount modes?
+#### What should I keep in mind when using synchronization mount modes?
 
 Keep the following in mind:
 * When you change one or more files, it may take several seconds to synchronize them.
