@@ -11,6 +11,9 @@
 This document contains solutions to the most common issues related to the Docker SDK.
 
 ## Troubleshooting installation
+This section describes common issues related to installation.
+
+
 
 ### Docker daemon is not running
 
@@ -126,6 +129,9 @@ docker/sdk clean-data && docker/sdk up --data && docker/sdk console q:w:s -v -s
 
 ## Troubleshooting running applications
 
+This section describes common issues related to running applications.
+
+
 ### Port is already occupied on host
 
 **when**
@@ -203,6 +209,10 @@ unable to reconcile Mutagen sessions: unable to create synchronization session (
 2. If the error persists: Check [Mutagen documentation](https://mutagen.io/documentation/introduction).
 
 ## Troubleshooting debugging
+
+This section describes common issues related to debugging.
+
+
 
 **when**
 Xdebug does not work.
