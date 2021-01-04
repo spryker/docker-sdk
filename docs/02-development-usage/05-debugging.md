@@ -57,32 +57,7 @@ To configure servers:
     3. Select the **Use path mappings** checkbox.
     4. Set the absolute path to the `/data` folder on the server for the folder with your Spryker project files.
     ![Servers config](https://spryker.s3.eu-central-1.amazonaws.com/docs/Developer+Guide/Installation/Spryker+in+Docker/Debugging+Setup+in+Docker/servers-confg.png){height="" width=""}
-
-
-## Configuring Xdebug in PhpStorm - optional configuration
-This section describes the optional configuration for Xdebug in PHPStorm.
-
-### Configuring remote PHP interpreter
-To add a PHP interpreter:
-1. Open **Preferences** > **Languages & Frameworks** > **PHP**.
-2. To add a new remote PHP interpreter:
-    1. For **Server**, enter *Docker*.
-    2. For **Image name**, enter *spryker_app:latest*.
-    3. For **PHP interpreter path**, select **php**. 
-
-![Remote php interpreter](https://spryker.s3.eu-central-1.amazonaws.com/docs/Developer+Guide/Installation/Spryker+in+Docker/Debugging+Setup+in+Docker/remote-php-interpreter.png){height="" width=""}
-
-### Configuring PHP Remote Debug 
-To add a PHP Remote Debug configuration:
-1. Go to **Run** > **Edit Configurations...**.
-![Edit configurations](https://spryker.s3.eu-central-1.amazonaws.com/docs/Developer+Guide/Installation/Spryker+in+Docker/Debugging+Setup+in+Docker/edit-configs.png){height="" width=""}
-
-2. Add a new **PHP Remote Debug** configuration.
-![PHP remote debug](https://spryker.s3.eu-central-1.amazonaws.com/docs/Developer+Guide/Installation/Spryker+in+Docker/Debugging+Setup+in+Docker/php-remote-debug.png){height="" width=""}
-
-3. Set the name to "spryker".
-4. Select the **spryker** server.
-5. Set the **PHPSTORM** IDE key.
+       
 
 ## Debugging with Xdebug
 
@@ -95,3 +70,23 @@ To debug an application:
 3. Open the application in a browser.
 4. Navigate to the action you have configured the breakpoint for in step 1. The debugging process should be running in the IDE:
 ![Debug process](https://spryker.s3.eu-central-1.amazonaws.com/docs/Developer+Guide/Installation/Spryker+in+Docker/Debugging+Setup+in+Docker/debug-process.png)
+
+
+## How to switch to debugging mode: cookie, CLI or running in debug mode.
+
+1. cookie - need to pass `XDEBUG_SESSION` cookie with any value. Or if  you use `Xdebug helper` extension in your browser, you need to turn on `debug`
+2. `-x` mode - way for using debug mode in all applications
+3. cli - if you need to debug some console command, you need to run `cli -x`. This command run cli with debug mode
+
+## Timeouts
+
+Warning: browser can stop the connection.
+
+To avoid Zed Request timeout, you need to adjust configuration with:
+```php
+$config[ZedRequestConstants::CLIENT_OPTIONS] = [
+    'timeout' => 0,
+];
+```
+
+[Link to the troubleshooting page](../09-troubleshooting.md)
