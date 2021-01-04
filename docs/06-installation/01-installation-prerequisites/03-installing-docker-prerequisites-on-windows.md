@@ -1,9 +1,9 @@
 
 This article describes Docker installation prerequisites for Windows.
+ 
+@(Warning)()(When running commands described in this document, use absolute paths. For example: `mkdir /d/spryker && cd $_` or `mkdir /c/Users/spryker && cd $_`.)
 
-@(Warning)()(When running commands, you should use absolute paths. For example: `mkdir /d/spryker && cd $_` or `mkdir /c/Users/spryker && cd $_`.)
-
-## Minimum System Requirements
+## Minimum system requirements
 
 Review the minimum system requirements in the table:
 
@@ -15,18 +15,21 @@ Review the minimum system requirements in the table:
 | RAM: 4GB | This is a minimum requirement. The value can be higher than 4GB. A lower value is not sufficient for installation purposes. |
 | vCPU: 2 | This is a minimum requirement. The value can be higher than 2. A lower value is not sufficient for running the application. |
 
-## Required Software and Configuration
+## Installing and configuring required software
 Follow the steps below to install and configure the required software.
 
 ### Install Docker Desktop    
 
-1. Download <a href="https://download.docker.com/win/stable/Docker for Windows Installer.exe"> Docker Desktop</a>.
+Install Docker Desktop:
 
+1. Download <a href="https://download.docker.com/win/stable/Docker for Windows Installer.exe">Docker Desktop for Windows</a>.
+    
 2. Open the installation file and follow the instructions of the wizard.
 
-#### Enable Docker Experimental Features
+#### Enable Docker experimental features
 
 Experimental features are provided for testing and evaluation purposes.
+
 Follow the steps to enable them:
 1. Right-click the **Docker** icon in the tray and select **Settings**.
 2. Select the **Daemon** tab.
@@ -46,7 +49,7 @@ Follow the steps to enable them:
 
 WSL is a Windows Subsystem for Linux. It allows Linux programs to run on Windows.
 
-Follow the steps to enable WSL:
+To enable WSL:
 
 1. Open **Windows Control Panel** → **Programs** → **Programs and Features**.
 2. Select **Turn Windows features on or off**  hyperlink.
@@ -55,7 +58,7 @@ Follow the steps to enable WSL:
 3. Check **Windows Subsystem for Linux** and click **OK**.
 ![step 3](https://spryker.s3.eu-central-1.amazonaws.com/docs/Developer+Guide/Installation/Spryker+in+Docker/Docker+Install+Prerequisites+-+Windows/windows-subsystem.png){height="" width=""}
 
-### Install and Update Ubuntu
+### Install and update Ubuntu
 
 Install Ubuntu:
 
@@ -80,13 +83,14 @@ mountFsTab = false
 ```
 5. Restart Ubuntu.
 
-### Install Docker
-Follow the steps to install Docker:
+### Install Docker 
+
+Install Docker:
 1. Update the apt package:
 ```bash
 sudo apt-get update
 ```
-
+    
 2. Install packages to allow apt to use a repository over HTTPS:
 ```bash
 sudo apt-get install \
@@ -101,7 +105,7 @@ software-properties-common
 ```bash
     curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
 ```
-
+    
 4. Set up a stable repository:
 ```bash
 sudo add-apt-repository \
@@ -109,14 +113,15 @@ sudo add-apt-repository \
 $(lsb_release -cs) \
 stable"
 ```
-
+    
 5. Install the latest version of Docker CE:
 ```bash
 sudo apt-get install docker-ce docker-ce-cli containerd.io
 ```
 
-### Docker Compose
-Follow the steps to install Docker Compose:
+### Install Docker Compose
+
+Install Docker Compose:
 1. Download the current stable release of Docker Compose:
 ```bash
 sudo curl -L "https://github.com/docker/compose/releases/download/1.24.0/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
@@ -126,8 +131,10 @@ sudo curl -L "https://github.com/docker/compose/releases/download/1.24.0/docker-
 sudo chmod +x /usr/local/bin/docker-compose
 ```
 
-### Docker Sync
-Follow the steps to install docker-sync:
+### Install Docker Sync
+
+Install docker-sync:
+
 1. Install Ruby and Ruby -dev:
 ```bash
 sudo apt-get install ruby ruby-dev
@@ -145,10 +152,10 @@ echo "export DOCKER_HOST=tcp://127.0.0.1:2375" >> ~/.bashrc
 ```
 ### Install OCaml
 :::(Warning) (OCaml version)
-Make sure to check the [OCaml release changelog](https://github.com/ocaml/ocaml/releases) and ensure that the OCaml version that you are going to install is compatible. In the examplary procedure below, we are using the version 4.06.0.
+Make sure to check the [OCaml release changelog](https://github.com/ocaml/ocaml/releases) and ensure that the OCaml version that you are going to install is compatible. In the procedure below, we are using the version 4.06.0.
 :::
 
-Follow the steps to install OCaml:
+Install OCaml:
 1. Install the build script:
 ```bash
 sudo apt-get install build-essential make
@@ -178,11 +185,9 @@ sudo make install
 sudo make clean
 ```
 ## Install Unison
-:::(Warning) (OCaml version)
-Make sure to check the latest available Unison version. In the examplary procedure below, we are using the version 2.51.2.
-:::
-Follow the steps to install Unison:
 
+Follow the steps to install Unison:
+    
 1. Download the source code of the latest Unison version.
 2. Compile and install it:
     1 . Download the Unison archive:
@@ -205,11 +210,12 @@ Follow the steps to install Unison:
     $ sudo cp src/unison /usr/local/bin/unison
     $ sudo cp src/unison-fsmonitor /usr/local/bin/unison-fsmonitor
     ```
+    
+## Next steps
 
-## What's next?
-See [Modes Overview](https://documentation.spryker.com/docs/modes-overview) to learn about installation modes of Spryker in Docker.
+See [Chossing an installation mode](https://documentation.spryker.com/docs/choosing-an-installation-mode) to choose an installation mode.
 If you've already selected an installation mode, follow one of the guides below:
-* [Installation Guide - Development Mode](https://documentation.spryker.com/v4/docs/installation-guide-development-mode)
-* [Installation Guide- Demo Mode](https://documentation.spryker.com/v4/docs/installation-guide-demo-mode)
-* [Integrating Docker into Existing Projects](https://documentation.spryker.com/v4/docs/integrating-docker-into-existing-projects)
-* [Running Production](https://documentation.spryker.com/v4/docs/running-production)
+* [Installing in Development mode](https://documentation.spryker.com/docs/installing-in-development-mode)
+* [Installing in Demo mode](https://documentation.spryker.com/docs/installing-in-demo-mode)
+* [Integrating Docker into existing projects](https://documentation.spryker.com/docs/integrating-docker-into-existing-projects)
+* [Running production](https://documentation.spryker.com/docs/running-production)
