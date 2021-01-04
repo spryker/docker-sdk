@@ -23,19 +23,21 @@ This document describes how to configure debugging of Spryker in Docker.
 ```bash
 docker/sdk {run|start|up} -x
 ``` 
-## Configuring Xdebug in PhpStorm - required configuration
 
-This section describes the required configuration for Xdebug in PHPStorm.
+## Configuring Xdebug in PhpStorm
+
+This section describes the required configuration for Xdebug in PhpStorm.
 
 ### Configuring Xdebug
+
 To configure Xdebug in PhpStorm:
 1. Go to **Preferences** > **Languages & Frameworks** > **PHP** > **Debug**.
 
 2. In the *Xdebug* section:
 
-      1. Depending on your requirements, change the **Debug port** value. It is set to "9000" by default.
-      2. If not selected, select the **Can accept external connections** checkbox.
-      3. If selected, clear the **Force break at first line when no path mapping specified** and **Force break at first line when a script is outside the project** checkboxes.
+      1. Depending on your requirements, enter a **Debug port**.
+      2. Select the **Can accept external connections** checkbox.
+      3. Clear the **Force break at first line when no path mapping specified** and **Force break at first line when a script is outside the project** checkboxes.
 
 ![xdebug-xdebug-configuration](https://spryker.s3.eu-central-1.amazonaws.com/docs/Developer+Guide/Installation/Spryker+in+Docker/Debugging+Setup+in+Docker/xdebug-xdebug-configuration.png){height="" width=""}
 
@@ -67,26 +69,34 @@ To debug an application:
 ![Breakpoint](https://spryker.s3.eu-central-1.amazonaws.com/docs/Developer+Guide/Installation/Spryker+in+Docker/Debugging+Setup+in+Docker/breakpoint.png)
 
 2. Select *Start listening* ![Start listening](https://spryker.s3.eu-central-1.amazonaws.com/docs/Developer+Guide/Installation/Spryker+in+Docker/Debugging+Setup+in+Docker/start-listening.png).
+
 3. Open the application in a browser.
+
 4. Navigate to the action you have configured the breakpoint for in step 1. The debugging process should be running in the IDE:
 ![Debug process](https://spryker.s3.eu-central-1.amazonaws.com/docs/Developer+Guide/Installation/Spryker+in+Docker/Debugging+Setup+in+Docker/debug-process.png)
 
 
-## How to switch to debugging mode: cookie, CLI or running in debug mode.
+## Switching to the debugging mode
+There are several ways to switch to the debugging mode:
 
-1. cookie - need to pass `XDEBUG_SESSION` cookie with any value. Or if  you use `Xdebug helper` extension in your browser, you need to turn on `debug`
-2. `-x` mode - way for using debug mode in all applications
-3. cli - if you need to debug some console command, you need to run `cli -x`. This command run cli with debug mode
+* Pass the `XDEBUG_SESSION` cookie with any string value. If you are using the Xdebug helper browser extension, just select   **debug**
+* To run all applications in the debugging mode, run `docker/sdk {run|start|up} -x`.
+* To debug a console command in cli, run `{command} -x`.
 
-## Timeouts
+## Avoiding timeouts
 
-Warning: browser can stop the connection.
+A browser may stop a connection during a debugging session due to Zed Request timeouts. 
 
-To avoid Zed Request timeout, you need to adjust configuration with:
+To avoid Zed Request timeouts, adjust your configuration as follows:
 ```php
 $config[ZedRequestConstants::CLIENT_OPTIONS] = [
-    'timeout' => 0,
+    'timeout' => 300,
 ];
 ```
+
+The `timeout` value is defined in seconds. 300 seconds is a recommended value which you can adjust to your needs. If needed, set the value to `0` to make it unlimited. 
+
+:::(Warning) (Unlimited timout)
+If you set unlitmited timout, this affects all Zed Requests, not only debugging ones. 
 
 [Link to the troubleshooting page](../09-troubleshooting.md)
