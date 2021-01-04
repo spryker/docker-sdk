@@ -1,38 +1,14 @@
-This document is a draft. See [Docker SDK](https://documentation.spryker.com/docs/docker-sdk) for official documentation.
-
-## Description
-Read the description below and, in the *Structure* section, fill out the document by answering the questions directly.
-
 > Audience:
 >
 > - Developers who are developing with the Docker SDK.
 >
 > Outcome:
 > - You know how to choose a mount mode based on an OS.
-> - You understand how synchronization file mode works.
-
-## Outline
-
-1. Short description of every mount mode docker/sdk support.
-2. How sync modes work and what their downsides are. Figure: https://spryker.atlassian.net/wiki/spaces/PS/pages/1098088730/Mounting+for+development+in+MacOS+Windows
-
-### Important points to cover
-
-* Description of mount modes should include information on what mode is preferable for what actions and what platform.
-* Provide links to the official docs of Docker Desktop and GitHub where file sharing is described.
-
-## Structure
-
-:::(Info)(Structure)
-The structure below is just a reference. We encourage you to add subsections, change or swap the provided sections if needed.
-:::
-
-
+> - You understand how synchronization mount modes work.
 
 This document describes mount modes and how you can choose one. 
 
-
-### Selecting a mount mode for development
+## Selecting a mount mode for development
 
 Depending on your operating system (OS), choose one of the mount modes in the table.
 
@@ -41,12 +17,12 @@ Depending on your operating system (OS), choose one of the mount modes in the ta
 | native       | :ballot_box_with_check: | :heavy_check_mark: | :ballot_box_with_check: | :heavy_check_mark: |
 | mutagen      | :heavy_check_mark:      |                    |                         |                    |
 | docker-sync  | :white_check_mark:      |                    | :heavy_check_mark:      |                    |
-
+☑️
 * (:heavy_check_mark:) - recommended solution
 * (:white_check_mark:) - supported solution
 * (:ballot_box_with_check:) - supported solution with very slow performance
 
-### Supported mount modes
+## Supported mount modes
 
 The Docker SDK supports the following mount modes:
 
@@ -69,7 +45,7 @@ This mount mode is stable with MacOS and Windows (WSL1).
 
 
 
-### Changing a mount mode for development
+## Changing a mount mode for development
 
 To set a mount mode, in `deploy.dev.yml`, define your OS for the desired mount mode:
 
@@ -92,15 +68,16 @@ docker:
                 - macos
 ```
 
-:::(Info)(Multiple mount modes)
+:::(Info) (Multiple mount modes)
 If the same OS is defined for multiple mount modes, the first mount mode matching the OS in descending order is selected.
 :::
 
-### Configuring a mount mode
+## Configuring a mount mode
 
 To configure a mount mode, see [Configuring a mount mode](07-configuring-a-mount-mode.md).
 
-### Synchronization mount modes
+
+## Synchronization mount modes
 
 Synchronization mount modes, such as mutagen or docker-sync, use algorithms to synchronize your code between host machine and a docker volume. This allows you to run applications at full speed avoiding file system mount latency.
 
@@ -111,7 +88,7 @@ Synchronization mount modes, such as mutagen or docker-sync, use algorithms to s
 - The daemon and the sidecar interact and update files on each side.
 - Applications work with the docker volume directly, which is almost equal to a direct file system access.
 
-#### What should I keep in my mind when using synchronization mount modes?
+### What should I keep in mind when using synchronization mount modes?
 
 Keep the following in mind:
 * When you change one or more files, it may take several seconds to synchronize them.
@@ -119,7 +96,7 @@ Keep the following in mind:
 * To check synchronisation session status, use `docker/sdk sync logs`. It works for mutagen and docker-sync.
 * When you finish working, make sure to terminate the synchronization session by running `docker/sdk down`.
 
-### See also
+## See also
 
 * [Manage data in Docker](https://docs.docker.com/storage/)
 * [Mutagen documentation](https://mutagen.io/documentation/introduction)

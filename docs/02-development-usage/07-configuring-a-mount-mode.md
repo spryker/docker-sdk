@@ -1,19 +1,13 @@
-This document is a draft. See [Docker SDK](https://documentation.spryker.com/docs/docker-sdk) for official documentation.
-
-## Description
-Read the description below and, in the *Structure* section, fill out the document by answering the questions directly.
-
 > Audience:
 >
 > - Developers who are developing with the Docker SDK.
 >
 > Outcome:
-> - You know how install and configure synchronization tools based on OS.
+> - You know how install and configure synchronization tools based on an OS.
 
-## Outline
-1. Short description how to set up the environment for developing purpose.
+This document describes how to configure mount modes.
 
-### Configuring mutagen mount mode on MacOS
+## Configuring mutagen mount mode on MacOS
 
 To configure mutagen mount mode on MacOS:
 
@@ -42,7 +36,8 @@ docker/sdk boot
 docker/sdk up --build --data --assets
 ```
 
-### Configuring docker-sync mount mode on MacOS
+
+## Configuring docker-sync mount mode on MacOS
 
 To configure docker-sync mount mode on MacOS:
 
@@ -83,7 +78,8 @@ docker/sdk boot
 docker/sdk up --build --data --assets
 ```
 
-### Configuring native mount mode on Linux
+
+## Configuring native mount mode on Linux
 
 To configure native mount mode on Linux:
 
@@ -111,7 +107,8 @@ docker/sdk boot
 docker/sdk up --build --data --assets
 ```
 
-### Configuring docker-sync mount mode on Windows with WSL1
+
+## Configuring docker-sync mount mode on Windows with WSL1
 
 :::(Warning) (Location of project files)
 Docker for Windows requires project files to be stored in the Windows file system. For example, you can store project files in `C:/my-project` and use `/c/my-project` as a working directory.
@@ -157,18 +154,16 @@ To configure docker-sync mount mode on Windows with Windows Subsystem for Linux 
     1. Check the latest stable [release of Docker Compose](https://github.com/docker/compose/releases).
 
     2. Download Docker Compose:
-:::(Info) (Docker Compose version)
+    :::(Info) (Docker Compose version)
     Replace `{docker-compose-release}` in the command parameter with the version you have selected in the previous step.
     :::
     ```bash
     sudo curl -L "https://github.com/docker/compose/releases/download/{docker-compose-release}/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
     ```
-
     3. Apply executable permissions to the binary:
     ```bash
     sudo chmod +x /usr/local/bin/docker-compose
     ```
-
 5. Install docker-sync:
     1. Install ruby and ruby-dev:
     ```bash
@@ -266,7 +261,7 @@ docker/sdk boot
 docker/sdk up --build --data --assets
 ```
 
-### Configuring native mount mode for Windows with WSL2
+## Configuring native mount mode for Windows with WSL2
 
 To configure native mount mode for Windows with Windows Subsystem for Linux 2 (WSL2):
 
@@ -332,3 +327,16 @@ docker/sdk boot
 ```bash
 docker/sdk up --build --data --assets
 ```
+
+
+
+
+
+
+
+
+
+
+
+
+
