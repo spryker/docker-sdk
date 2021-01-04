@@ -1,4 +1,4 @@
-This document describes the procedure of installing Spryker in [Demo Mode](https://documentation.spryker.com/docs/modes-overview#demo-mode).
+This document describes the procedure of installing Spryker in [Demo Mode](https://documentation.spryker.com/docs/choosing-an-installation-mode#demo-mode).
 
 ## Installing Docker prerequisites
 
@@ -84,7 +84,7 @@ echo "127.0.0.1 zed.de.spryker.local yves.de.spryker.local glue.de.spryker.local
     6. Put the following path into the address line: `C:\Windows\System32\drivers\etc`.
     7. In the **File name** line, enter `hosts` and select **Open**.
     The hosts file opens in the drop-down.
-    7. Add the following line into the file:
+    8. Add the following line into the file:
     ```text
     127.0.0.1   zed.de.spryker.local glue.de.spryker.local yves.de.spryker.local scheduler.spryker.local mail.spryker.local queue.spryker.local
     ```
