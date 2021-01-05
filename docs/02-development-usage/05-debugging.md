@@ -79,13 +79,13 @@ To debug an application:
 ## Switching to the debugging mode
 There are several ways to switch to the debugging mode:
 
-* Pass the `XDEBUG_SESSION` cookie with any string value. If you are using the Xdebug helper browser extension, just select   **debug**
+* To debug a web application, pass the `XDEBUG_SESSION` cookie with any string value. If you are using the Xdebug helper browser extension, in the extension menu, select **debug**.
 * To run all applications in the debugging mode, run `docker/sdk {run|start|up} -x`.
 * To debug a console command in cli, run `{command} -x`.
 
 ## Avoiding timeouts
 
-A browser may stop a connection during a debugging session due to Zed Request timeouts. 
+The default Zed Eequest timout is 60 seconds. Often debugging requests take more than 60 seconds to complete. In this case, a browser stops the connection. 
 
 To avoid Zed Request timeouts, adjust your configuration as follows:
 ```php
@@ -94,7 +94,7 @@ $config[ZedRequestConstants::CLIENT_OPTIONS] = [
 ];
 ```
 
-The `timeout` value is defined in seconds. 300 seconds is a recommended value which you can adjust to your needs. If needed, set the value to `0` to make it unlimited. 
+300 seconds should suit most cases, but you can increase it or even make it unlimited by defining the value as `0`.
 
 :::(Warning) (Unlimited timout)
 If you set unlitmited timout, this affects all Zed Requests, not only debugging ones. 
