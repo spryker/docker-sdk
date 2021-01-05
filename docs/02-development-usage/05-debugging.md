@@ -1,9 +1,10 @@
 > Audience:
 >
-> - Developers who debug using docker/sdk.
+> - Developers who debug using the Docker SDK.
 >
 > Outcome:
-> - You know how to debug frontend websites, API and console commands.
+> - You know how to configure debugging.
+> - You know how to debug web applications, API, and console commands.
 
 ## Outline
 
@@ -61,6 +62,16 @@ To configure servers:
     ![Servers config](https://spryker.s3.eu-central-1.amazonaws.com/docs/Developer+Guide/Installation/Spryker+in+Docker/Debugging+Setup+in+Docker/servers-confg.png){height="" width=""}
        
 
+## Switching to the debugging mode
+There are several ways to switch to the debugging mode:
+
+* To debug a web application, pass the `XDEBUG_SESSION` cookie with a string value. If you are using the Xdebug helper browser extension, in the extension menu, select **debug**.
+* To run all applications in the debugging mode, run `docker/sdk {run|start|up} -x`.
+* To debug a console command in cli, run `{command} -x`.
+
+
+
+
 ## Debugging with Xdebug
 
 To debug an application:
@@ -76,16 +87,11 @@ To debug an application:
 ![Debug process](https://spryker.s3.eu-central-1.amazonaws.com/docs/Developer+Guide/Installation/Spryker+in+Docker/Debugging+Setup+in+Docker/debug-process.png)
 
 
-## Switching to the debugging mode
-There are several ways to switch to the debugging mode:
 
-* To debug a web application, pass the `XDEBUG_SESSION` cookie with any string value. If you are using the Xdebug helper browser extension, in the extension menu, select **debug**.
-* To run all applications in the debugging mode, run `docker/sdk {run|start|up} -x`.
-* To debug a console command in cli, run `{command} -x`.
 
 ## Avoiding timeouts
 
-The default Zed Eequest timout is 60 seconds. Often debugging requests take more than 60 seconds to complete. In this case, a browser stops the connection. 
+The default Zed Eequest timout is 60 seconds. Debugging requests often take more than 60 seconds to complete. In this case, a browser stops the connection. 
 
 To avoid Zed Request timeouts, adjust your configuration as follows:
 ```php
@@ -99,4 +105,6 @@ $config[ZedRequestConstants::CLIENT_OPTIONS] = [
 :::(Warning) (Unlimited timout)
 If you set unlitmited timout, this affects all Zed Requests, not only debugging ones. 
 
-[Link to the troubleshooting page](../09-troubleshooting.md)
+
+**Related articles**
+[Troubleshooting](../09-troubleshooting.md)
