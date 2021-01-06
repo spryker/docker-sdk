@@ -7,14 +7,16 @@ We may have added some existing content and encourage you to update, remove or r
 
 > Audience:
 >
-> - Everybody who need access to private repositories when using docker/sdk for developing and production.
+> - Everyone who needs access to private repositories for development or running production with the Docker SDK.
 >
 > Outcome:
-> - You know how to configure environment to allow docker/sdk accessing your private repositories.
+> - You know how to configure an environment to allow the Docker SDK access private repositories.
 
-### When do I need to take care of private repositories?
+This document describes how to configure an environment to allow the Docker SDK access provider repositories.
 
-1. I have a private repository mentioned in my composer.json:
+### In what cases do I need to configure access to private repositories?
+
+1. I have a private repository mentioned in my `composer.json`:
 ```json
 {
     "require": {
@@ -29,7 +31,7 @@ We may have added some existing content and encourage you to update, remove or r
 }
 ```
 
-2. I get an error message running `docker/sdk up`:
+2. Running `docker/sdk up` returns an error similar to the following:
 ```
 Cloning into '/data/vendor/my-org/my-repo'...
 git@github.com: Permission denied (publickey).
@@ -39,43 +41,53 @@ Please make sure you have the correct access rights
 and the repository exists.
 ```
 
-### How to configure environment to allow access to private repositories?
+### Configuring an environment to access private repositories
 
-1. Add a file `.known_hosts` into the project root with the list of domains of VCS services like in the example below.
+To configure an environment to access private reporitories:
+
+1. Add the `.known_hosts` file with the list of domains of VCS services into the project root. Example:
 ```
 github.com
 bitbucket.org
 gitlab.my-org.com
 ```
 
-2. Choose an approach how Composer authenticates to VSC services.
+2. Configure authentication of Composer to VCS services using one of the following options:
+* Configuring SSH agent authentication for Composer. We recommend this option for development purposes.
+* Configuring Composer authentication environment variable. We recommend this option for setting up CI/CD pipelines.
 
-| Approach | Development | CI pipelines | CD pipelines |
-|---|---|---|---|
-| SSH Agent | Recommended | + | + |
-| COMPOSER_AUTH | + | Recommended | Recommended |
 
-### Option 1. SSH agent
+#### Configuring SSH agent authentication for Composer
 
-1. Make sure `GITHUB_TOKEN` or `COMPOSER_AUTH` environment variables are not set.
-2. Prepare SSH agent by adding your private keys using `ssh-add` command.
-3. Run `docker/sdk up --build`
+To configure SSH agent:
 
-```
+1. Ensure that `GITHUB_TOKEN` and `COMPOSER_AUTH` environment variables are not set.
+```bash
 unset GITHUB_TOKEN
 unset COMPOSER_AUTH
+```
+
+2. Prepare SSH agent by adding your private keys using the `ssh-add` command.
+```bash
 eval $(ssh-agent)
 ssh-add -K ~/.ssh/id_rsa
+```
+
+3. MacOS and Windows: For Docker Desktop to fetch the changes, restart the OS. 
+
+
+4. Re-build the application:
+```bash
 docker/sdk up --build
 ```
 
-> Note for MacOS and Windows users: It may be necessary to restart your OS after adding keys into SSH agent for Docker Desktop to catch them up.
+### Configuring the Composer authentication environment variable
 
-### Option 2. COMPOSER_AUTH environment variable
+To configure the Composer authentication environment variable:
 
 1. Create access tokens in your VSC services.
-2. Prepare `COMPOSER_AUTH` environment variable in JSON format including tokens you've created.
-Please, refer to the Composer official documentation: [COMPOSER_AUTH](https://getcomposer.org/doc/03-cli.md#composer-auth) and [Custom token authentication](https://getcomposer.org/doc/articles/authentication-for-private-packages.md#custom-token-authentication)
+2. Prepare a `COMPOSER_AUTH` environment variable with the VCS tokens you've created in JSON format.
+To learn about Composer authentication variables, see [COMPOSER_AUTH](https://getcomposer.org/doc/03-cli.md#composer-auth) and [Custom token authentication](https://getcomposer.org/doc/articles/authentication-for-private-packages.md#custom-token-authentication)
 
 For GitHub:
 ```json
@@ -107,11 +119,14 @@ For GitLab
 }
 ```
 
-3. Export `COMPOSER_AUTH` environment variable taking Bash escaping rules into in consideration.
-4. Run `docker/sdk up --build`
-
-```
+3. Export the `COMPOSER_AUTH` environment variable taking Bash escaping rules into consideration:
+```bash
 export COMPOSER_AUTH="{\"github-oauth\":{\"github.com\":\"MY_GITHUB_TOKEN\"},\"gitlab-oauth\":{\"gitlab.com\":\"MY_GITLAB_PRIVATE_TOKEN\"},\"bitbucket-oauth\":{\"bitbucket.org\": {\"consumer-key\": \"MY_BITBUCKET_KEY\", \"consumer-secret\": \"MY_BITBUCLET_SECRET\"}}}"
+```
+
+4. Re-build the application:
+
+```bash
 docker/sdk up --build
 ```
 
