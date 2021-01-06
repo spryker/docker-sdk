@@ -6,10 +6,10 @@ Read the description below and, in the *Structure* section, fill out the documen
 
 > Audience:
 >
-> - Everybody who is not familiar with docker/sdk.
+> - Everyone who is not familiar with the Docker SDK.
 >
 > Outcome:
-> - You have a list of steps on how to quickly run Spryker in local environment.
+> - You know how to quickly set up Spryker in a local environment.
 
 ## Outline
 
@@ -23,15 +23,18 @@ Read the description below and, in the *Structure* section, fill out the documen
 The structure below is just a reference. We encourage you to add subsections, change or swap the provided sections if needed.
 :::
 
-### Running docker/sdk in a local environment
+### Running the Docker SDK in a local environment
 
-#### Docker installation
+#### Installing Docker
 
-For Docker installation instructions, see [03.installation.md].
+For Docker installation instructions, see one of the following:
+* [Installing Docker prerequisites on MacOS](https://documentation.spryker.com/docs/installing-docker-prerequisites-on-macos)
+* [Installing Docker prerequisites on Linux](https://documentation.spryker.com/docs/installing-docker-prerequisites-on-linux)
+* [Installing Docker prerequisites on Windows](https://documentation.spryker.com/docs/installing-docker-prerequisites-on-windows)
 
-#### Project setup with docker/sdk
+#### Setting up a project with the Docker SDK
 
-To set up your project with docker/sdk locally:
+To set up a local project with the Docker SDK:
 
 1. Create the project directory and clone the source:
 ```bash
@@ -39,15 +42,14 @@ mkdir {project-name} && cd {project-name}
 git clone https://github.com/{project-url} ./
 ```
 
-2. Clone the latest version of docker/sdk:
+2. Clone the latest version of the Docker SDK:
 
 ```bash
-
 git clone git@github.com:spryker/docker-sdk.git docker
 ```
 
 
-### Developer environment setup
+### Setting up a developer environemnt
 
 To set up developer environment:
 
@@ -58,7 +60,7 @@ docker/sdk boot deploy.dev.yml
 docker/sdk up
 ```
 
-2. Switch your project branch, re-build the application with assets and demo data from the new branch:
+2. Switch to your project branch, re-build the application with assets and demo data from the new branch:
 
 ```bash
 git checkout {your_branch}
@@ -69,10 +71,10 @@ docker/sdk up --build --assets --data
 Depending on your requirements, you can select any combination of the following `up` command attributes. To fetch all the changes from the branch you switch to, we recommend running the command with all of them:
 - `--build` - update composer, generate transfer objects, etc.
 - `--assets` - build assets
-- `--data` - get new demo data
+- `--data` - fetch new demo data
 
 
-### Production-like environment setup
+### Setting up a production-like environment
 
 To set up a production-like environment:
 
@@ -83,7 +85,7 @@ docker/sdk boot deploy.*.yml
 docker/sdk up
 ```
 
-2. Switch your project branch, re-build the application with assets and demo data from the new branch:
+2. Switch to your project branch, re-build the application with assets and demo data from the new branch:
 
 ```bash
 git checkout {your_branch_name}
@@ -99,7 +101,7 @@ Depending on your requirements, you can select any combination of the following 
 
 ### Troubleshooting
 
-For solutions to common issues, see [Troubleshooting].
+For solutions to common issues, see [Troubleshooting](https://documentation.spryker.com/docs/spryker-in-docker-troubleshooting).
 
 
 ### What documents should I use to start developing and configuring my project?
