@@ -67,7 +67,7 @@ unset GITHUB_TOKEN
 unset COMPOSER_AUTH
 ```
 
-2. Prepare SSH agent by adding your private keys using the `ssh-add` command.
+2. Prepare SSH agent by adding your private keys:
 ```bash
 eval $(ssh-agent)
 ssh-add -K ~/.ssh/id_rsa
@@ -85,7 +85,7 @@ docker/sdk up --build
 
 To configure the Composer authentication environment variable:
 
-1. Create access tokens in your VSC services.
+1. Create access tokens in your VCS services.
 2. Prepare a `COMPOSER_AUTH` environment variable with the VCS tokens you've created in JSON format.
 To learn about Composer authentication variables, see [COMPOSER_AUTH](https://getcomposer.org/doc/03-cli.md#composer-auth) and [Custom token authentication](https://getcomposer.org/doc/articles/authentication-for-private-packages.md#custom-token-authentication)
 
@@ -93,7 +93,7 @@ For GitHub:
 ```json
 {
     "github-oauth": {
-        "github.com": "token"
+        "github.com": "{token}"
     }
 }
 ```
@@ -103,8 +103,8 @@ For BitBucket:
 {
     "bitbucket-oauth": {
         "bitbucket.org": {
-            "consumer-key": "key",
-            "consumer-secret": "secret"
+            "consumer-key": "{key}",
+            "consumer-secret": "{SECRET}"
         }
     }
 }
@@ -114,20 +114,23 @@ For GitLab
 ```json
 {
     "gitlab-token": {
-        "example.org": "token"
+        "example.org": "{token}"
     }
 }
 ```
 
 3. Export the `COMPOSER_AUTH` environment variable taking Bash escaping rules into consideration:
-```bash
-export COMPOSER_AUTH="{\"github-oauth\":{\"github.com\":\"MY_GITHUB_TOKEN\"},\"gitlab-oauth\":{\"gitlab.com\":\"MY_GITLAB_PRIVATE_TOKEN\"},\"bitbucket-oauth\":{\"bitbucket.org\": {\"consumer-key\": \"MY_BITBUCKET_KEY\", \"consumer-secret\": \"MY_BITBUCLET_SECRET\"}}}"
-```
 
-4. Re-build the application:
+*
+```bash
+export COMPOSER_AUTH="{\"github-oauth\":{\"github.com\":\"MY_GITHUB_TOKEN\"},\"gitlab-oauth\":{\"gitlab.com\":\"MY_GITLAB_PRIVATE_TOKEN\"},\"bitbucket-oauth\":{\"bitbucket.org\": {\"consumer-key\": \"MY_BITBUCKET_KEY\", \"consumer-secret\": \"{SECRET}\"}}}"
+```
+* You can add `export COMPOSER_AUTH=...` into ~/.bash_profile or ~/.zshenv for your development environment.
+
+5. Re-build the application:
 
 ```bash
 docker/sdk up --build
 ```
 
-> You can add `export COMPOSER_AUTH=...` into ~/.bash_profile or ~/.zshenv for your development environment.
+
