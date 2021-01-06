@@ -208,6 +208,22 @@ unable to reconcile Mutagen sessions: unable to create synchronization session (
 1. Restart your OS.
 2. If the error persists: Check [Mutagen documentation](https://mutagen.io/documentation/introduction).
 
+
+**when**
+There is a synchronization issue.
+
+**then**
+
+* Restart your OS.
+* Run the commands:
+```
+docker/sdk trouble
+mutagen sync list
+mutagen sync terminate <all sessions in the list>
+docker/sdk up
+```
+
+
 ## Troubleshooting debugging
 
 This section describes common issues related to debugging.
