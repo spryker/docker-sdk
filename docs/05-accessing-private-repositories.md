@@ -16,7 +16,9 @@ This document describes how to configure an environment to allow the Docker SDK 
 
 ### In what cases do I need to configure access to private repositories?
 
-1. I have a private repository mentioned in my `composer.json`:
+You need to configure access to private repositories in the following cases:
+
+1. You have a private repository mentioned in `composer.json`:
 ```json
 {
     "require": {
@@ -53,8 +55,8 @@ gitlab.my-org.com
 ```
 
 2. Configure authentication of Composer to VCS services using one of the following options:
-* Configuring SSH agent authentication for Composer. We recommend this option for development purposes.
-* Configuring Composer authentication environment variable. We recommend this option for setting up CI/CD pipelines.
+* [Configuring SSH agent authentication for Composer](#configuring-ssh-agent-authentication-for-composer). We recommend this option for development purposes.
+* [Configuring the Composer authentication environment variable](#configuring-the-composer-authentication-environment-variable). We recommend this option for setting up CI/CD pipelines.
 
 
 #### Configuring SSH agent authentication for Composer
