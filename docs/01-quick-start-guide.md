@@ -89,7 +89,7 @@ Depending on your requirements, you can select any combination of the following 
 For solutions to common issues, see [Spryker in Docker troubleshooting](https://documentation.spryker.com/docs/spryker-in-docker-troubleshooting).
 
 
-### What documents should I use to start developing and configuring my project?
+## What documents should I use to start developing and configuring my project?
 [02-development-usage]
 [99-deploy.file.reference.v1.md]
 [10-docker-sdk-configuration-reference.md]
