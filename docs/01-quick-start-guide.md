@@ -92,5 +92,5 @@ For solutions to common issues, see [Spryker in Docker troubleshooting](https://
 ### What documents should I use to start developing and configuring my project?
 [02-development-usage]
 [99-deploy.file.reference.v1.md]
-[10-how-to-configure.md]
-[06-services.md]
+[10-docker-sdk-configuration-reference.md]
+[06-configuring-services.md]
