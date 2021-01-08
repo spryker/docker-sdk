@@ -1,38 +1,23 @@
-This document is a draft. See [Docker SDK](https://documentation.spryker.com/docs/docker-sdk) for official documentation.
-
-## Description
-Read the description below and, in the *Structure* section, fill out the document by answering the questions directly.
-
-
 > Audience:
->
 > - Everyone who is not familiar with the Docker SDK.
 >
 > Outcome:
 > - You know how to quickly set up Spryker in a local environment.
 
-## Outline
+This document describes how you can quickly set up a local environment with the Docker SDK.
 
-1. Getting started steps.
-2. Links to other documents for whom wants more details.
+## Running the Docker SDK in a local environment
 
+To run the Docker SDK in a local environment, follow the instructions below.
 
-## Structure
-
-:::(Info)(Structure)
-The structure below is just a reference. We encourage you to add subsections, change or swap the provided sections if needed.
-:::
-
-### Running the Docker SDK in a local environment
-
-#### Installing Docker
+### Installing Docker
 
 For Docker installation instructions, see one of the following:
 * [Installing Docker prerequisites on MacOS](https://documentation.spryker.com/docs/installing-docker-prerequisites-on-macos)
 * [Installing Docker prerequisites on Linux](https://documentation.spryker.com/docs/installing-docker-prerequisites-on-linux)
 * [Installing Docker prerequisites on Windows](https://documentation.spryker.com/docs/installing-docker-prerequisites-on-windows)
 
-#### Setting up a project with the Docker SDK
+### Setting up a project with the Docker SDK
 
 To set up a local project with the Docker SDK:
 
@@ -49,7 +34,7 @@ git clone git@github.com:spryker/docker-sdk.git docker
 ```
 
 
-### Setting up a developer environemnt
+## Setting up a developer environemnt
 
 To set up a developer environment:
 
@@ -74,7 +59,7 @@ Depending on your requirements, you can select any combination of the following 
 - `--data` - fetch new demo data
 
 
-### Setting up a production-like environment
+## Setting up a production-like environment
 
 To set up a production-like environment:
 
@@ -99,9 +84,9 @@ Depending on your requirements, you can select any combination of the following 
 - `--data` - get new demo data
 
 
-### Troubleshooting
+## Troubleshooting
 
-For solutions to common issues, see [Troubleshooting](https://documentation.spryker.com/docs/spryker-in-docker-troubleshooting).
+For solutions to common issues, see [Spryker in Docker troubleshooting](https://documentation.spryker.com/docs/spryker-in-docker-troubleshooting).
 
 
 ### What documents should I use to start developing and configuring my project?
