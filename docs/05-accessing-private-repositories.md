@@ -86,48 +86,52 @@ docker/sdk up --build
 To configure the Composer authentication environment variable:
 
 1. Create access tokens in your VCS services.
-2. Prepare a `COMPOSER_AUTH` environment variable with the VCS tokens you've created in JSON format.
-To learn about Composer authentication variables, see [COMPOSER_AUTH](https://getcomposer.org/doc/03-cli.md#composer-auth) and [Custom token authentication](https://getcomposer.org/doc/articles/authentication-for-private-packages.md#custom-token-authentication)
+2. Prepare a `COMPOSER_AUTH` environment variable with the VCS tokens you've created in JSON:
 
-For GitHub:
-```json
-{
-    "github-oauth": {
-        "github.com": "{token}"
-    }
-}
-```
-
-For BitBucket:
-```json
-{
-    "bitbucket-oauth": {
-        "bitbucket.org": {
-            "consumer-key": "{key}",
-            "consumer-secret": "{SECRET}"
+   * GitHub:
+    ```json
+    {
+        "github-oauth": {
+            "github.com": "{GITHUB_TOKEN}"
         }
     }
-}
-```
+    ```
 
-For GitLab
-```json
-{
-    "gitlab-token": {
-        "example.org": "{token}"
+   * BitBucket:
+    ```json
+    {
+        "bitbucket-oauth": {
+            "bitbucket.org": {
+                "consumer-key": "{BITBUCKET_KEY}",
+                "consumer-secret": "{BITBUCKET_SECRET}"
+            }
+        }
     }
-}
-```
+    ```
 
-3. Export the `COMPOSER_AUTH` environment variable taking Bash escaping rules into consideration:
+    * GitLab
+    ```json
+    {
+        "gitlab-token": {
+            "example.org": "{GITLAB_TOKEN}"
+        }
+    }
+    ```
 
-*
+To learn about Composer authentication variables, see [COMPOSER_AUTH](https://getcomposer.org/doc/03-cli.md#composer-auth) and [Custom token authentication](https://getcomposer.org/doc/articles/authentication-for-private-packages.md#custom-token-authentication)
+
+3. Enable the environment variable:
+
+* Export the environment variable taking Bash escaping rules into consideration:
 ```bash
-export COMPOSER_AUTH="{\"github-oauth\":{\"github.com\":\"MY_GITHUB_TOKEN\"},\"gitlab-oauth\":{\"gitlab.com\":\"MY_GITLAB_PRIVATE_TOKEN\"},\"bitbucket-oauth\":{\"bitbucket.org\": {\"consumer-key\": \"MY_BITBUCKET_KEY\", \"consumer-secret\": \"{SECRET}\"}}}"
+export COMPOSER_AUTH="{\"github-oauth\":{\"github.com\":\"{GITHUB_TOKEN}\"},\"gitlab-oauth\":{\"gitlab.com\":\"{GITLAB_TOKEN}\"},\"bitbucket-oauth\":{\"bitbucket.org\": {\"consumer-key\": \"{BITBUCKET_KEY}\", \"consumer-secret\": \"{BITBUCKET_SECRET}\"}}}"
 ```
-* You can add `export COMPOSER_AUTH=...` into ~/.bash_profile or ~/.zshenv for your development environment.
+* Add the environment variable to your development environment by editing `~/.bash_profile` or `~/.zshenv`:
+```bash
+export COMPOSER_AUTH="{\"github-oauth\":{\"github.com\":\"{GITHUB_TOKEN}\"},\"gitlab-oauth\":{\"gitlab.com\":\"{GITLAB_TOKEN}\"},\"bitbucket-oauth\":{\"bitbucket.org\": {\"consumer-key\": \"{BITBUCKET_KEY}\", \"consumer-secret\": \"{BITBUCKET_SECRET}\"}}}"
+```
 
-5. Re-build the application:
+4. Re-build the application:
 
 ```bash
 docker/sdk up --build
