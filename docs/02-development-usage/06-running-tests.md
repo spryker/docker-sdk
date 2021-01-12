@@ -88,25 +88,25 @@ The command runs tests as follows:
 2. Run Codeception.
 3. Stop the container.
 
-#### Running specific tests category
+#### Running a specific category of tests
 
-All spryker tests fall into three categories:
-1. acceptance
-2. functional
-3. api
+There are three categories of Spryker tests:
+* Acceptance
+* Functional
+* Api
 
-To run one of those, run `codecept` with specific config file:
-`codecept run -c codeception.{acceptance|functional|api}.yml`
+To run a specific category, run `codecept` with the respective configuration file:
+```bash
+codecept run -c codeception.{acceptance|functional|api}.yml
+```
 
-#### Running specific group of tests
+#### Running a group of tests
 
-To run one or several specific group of test, run 
-`codecept run -g {Tax} -g {Customer}`
+To run one or more groups of tests, run `codecept run -g {Tax} -g {Customer}`.
 
-#### Exclude specific group of tests
+#### Excluding a group of tests
 
-To exclude one or several specific group of test, run
-`codecept run -x {Tax} -x {Customer}`
+To exclude one or more groups of tests, run `codecept run -x {Tax} -x {Customer}`.
 
 
 ### How do I choose a webdriver?
