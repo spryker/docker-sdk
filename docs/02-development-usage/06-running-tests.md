@@ -32,7 +32,9 @@ The structure below is just a reference. We encourage you to add subsections, ch
 
 Docker SDK allows you to run application in an environment configured for testing.
 
-In the testing mode, docker/sdk generates an environment file and a set of containers configured for testing. For example, the environment does not have SSL encryption, there is no scheduler container, but the webdriver container is present. 
+In the testing mode, docker/sdk set of containers configured for testing. For example:
+1. background jobs are disabled;
+2. the webdriver container is present. 
 
 
 
@@ -44,6 +46,8 @@ There are several ways to do that.
 
 #### Running tests with all containers in testing mode
 
+To save computer resources, recommended running all containers in testing mode. This mode turns off all background processes.
+
 To run tests with all containers in testing mode:
 
 1. Restart all containers in testing mode:
@@ -53,7 +57,7 @@ docker/sdk up -t
 ```
 2. Switch to the CLI container:
 ```bash
-docker/sdk cli
+docker/sdk testing
 ```
 3. Run Codeception:
 ```bash
@@ -83,6 +87,27 @@ The command runs tests as follows:
 1. Start a new container in testing mode.
 2. Run Codeception.
 3. Stop the container.
+
+#### Running specific tests category
+
+All spryker tests fall into three categories:
+1. acceptance
+2. functional
+3. api
+
+To run one of those, run `codecept` with specific config file:
+`codecept run -c codeception.{acceptance|functional|api}.yml`
+
+#### Running specific group of tests
+
+To run one or several specific group of test, run 
+`codecept run -g {Tax} -g {Customer}`
+
+#### Exclude specific group of tests
+
+To exclude one or several specific group of test, run
+`codecept run -x {Tax} -x {Customer}`
+
 
 ### How do I choose a webdriver?
 
