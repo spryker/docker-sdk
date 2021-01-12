@@ -7,7 +7,7 @@
 
 This document describes how to configure an environment to allow the Docker SDK access provider repositories.
 
-### In what cases do I need to configure access to private repositories?
+## In what cases do I need to configure access to private repositories?
 
 You need to configure access to private repositories in the following cases:
 
@@ -36,7 +36,7 @@ Please make sure you have the correct access rights
 and the repository exists.
 ```
 
-### Configuring an environment to access private repositories
+## Configuring an environment to access private repositories
 
 To configure an environment to access private reporitories:
 
@@ -52,7 +52,7 @@ gitlab.my-org.com
 * [Configuring the Composer authentication environment variable](#configuring-the-composer-authentication-environment-variable). We recommend this option for setting up CI/CD pipelines.
 
 
-#### Configuring SSH agent authentication for Composer
+### Configuring SSH agent authentication for Composer
 
 To configure SSH agent:
 
