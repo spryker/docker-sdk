@@ -5,7 +5,7 @@
 > Outcome:
 > - You know how to configure an environment to allow the Docker SDK access private repositories.
 
-This document describes how to configure an environment to allow the Docker SDK access provider repositories.
+This document describes how to configure an environment to allow the Docker SDK access private repositories.
 
 ## In what cases do I need to configure access to private repositories?
 
@@ -56,7 +56,7 @@ gitlab.my-org.com
 
 To configure SSH agent:
 
-1. Ensure that `GITHUB_TOKEN` and `COMPOSER_AUTH` environment variables are not set.
+1. Ensure that `GITHUB_TOKEN` and `COMPOSER_AUTH` environment variables are not set:
 ```bash
 unset GITHUB_TOKEN
 unset COMPOSER_AUTH
@@ -115,7 +115,7 @@ To configure the Composer authentication environment variable:
 
 To learn about Composer authentication variables, see [COMPOSER_AUTH](https://getcomposer.org/doc/03-cli.md#composer-auth) and [Custom token authentication](https://getcomposer.org/doc/articles/authentication-for-private-packages.md#custom-token-authentication)
 
-3. Enable the environment variable:
+3. Enable the environment variable using one of the following options:
 
 * Export the environment variable taking Bash escaping rules into consideration:
 ```bash
