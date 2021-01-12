@@ -1,3 +1,8 @@
+This document is a draft. See [Docker SDK](https://documentation.spryker.com/docs/docker-sdk) for official documentation.
+
+## Description
+Read the description below and, in the *Structure* section, fill out the document by answering the questions directly.
+
 > Audience:
 >
 > - Devops who use docker/sdk for production or staging environments.
@@ -23,3 +28,22 @@ image:
  - Use application image where particular env variables are set.
  - Run "${SPRYKER_HOOK_BEFORE_DEPLOY}" or other env depends on a step.
  - Examples for AWS pipelines.
+
+
+## Structure
+
+:::(Info)(Structure)
+The structure below is just a reference. We encourage you to add subsections, change or swap the provided sections if needed.
+:::
+
+### What is this document about?
+
+
+### What would be an example of a deployment pipeline?
+
+
+### How do I configure a deployment pipeline in deploy file?
+#### What would be examples of deployment pipelines in deploy file?
+
+
+### How do I run pipeline steps during deployment?

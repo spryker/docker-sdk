@@ -1,25 +1,19 @@
-This document is a draft. See [Docker SDK](https://documentation.spryker.com/docs/docker-sdk) for official documentation.
-
-## Description
-Read the description below and, in the *Structure* section, fill out the document by answering the questions directly.
-
 > Audience:
 >
-> - Developers who are developing with docker/sdk.
+> - Developers who are developing with the Docker SDK.
 >
 > Outcome:
-> - You know how install and use source code synchronization tools based on the required platform.
+> - You know how install and configure synchronization tools based on an OS.
 
-## Outline
-1. Short description how to set up the environment for developing purpose.
+This document describes how to configure mount modes.
 
-### How to configure mutagen mount mode on MacOS
+## Configuring mutagen mount mode on MacOS
 
-To configure Mutagen mount mode on MacOS:
+To configure mutagen mount mode on MacOS:
 
-1. Ensure that you run a stable version of [Docker Desktop for Mac](https://docs.docker.com/docker-for-mac/install/).
+1. [Install or update Docker Desktop for Mac](https://docs.docker.com/docker-for-mac/install/) to the latest stable version.
 
-2. Adjust the mount section of `deploy.local.yml` as follows:
+2. Adjust the `mount:` section of `deploy.local.yml` as follows:
 ```yaml
 docker:
 ...
@@ -30,35 +24,34 @@ docker:
 
 ```
 
-3. Bootstrap docker/sdk:
+3. Bootstrap the Docker SDK:
 ```bash
 docker/sdk boot
 ```
 
-* Follow installation instructions displayed in the grey block during the execution of the previous command and execute:
- - `brew install mutagen-io/mutagen/mutagen-beta`
- - Adjust host file.
- 
-* Build and run Spryker application based on demo data:
+4. Follow the installation instructions displayed in the grey block of the output of the command you have run in the previous step.
+
+5. Build and run Spryker application based on demo data:
 ```bash
 docker/sdk up --build --data --assets
 ```
 
-### How to configure docker-sync mount mode on MacOS
+
+## Configuring docker-sync mount mode on MacOS
 
 To configure docker-sync mount mode on MacOS:
 
-1. Install ruby and ruby-dev. Make sure you use Ruby version `2.7.0preview1` or higher:
+1. Install ruby and ruby-dev 2.7.0preview1 or higher:
 ```bash
 sudo apt-get install ruby ruby-dev
 ```
 
-2. Install Unison. Make sure you use Unison version `2.51.2` or higher:
+2. Install Unison 2.51.2 or higher:
 ```bash
 brew install unison
 ```
 
-3. Install docker-sync. Make sure you use docker-sync version `0.5.11` or higher:
+3. Install docker-sync 0.5.11 or higher:
 ```bash
 sudo gem install docker-sync
 ```
@@ -73,25 +66,26 @@ docker:
                - macos
 ```
 
-5. Bootstrap docker/sdk:
+5. Bootstrap the Docker SDK:
 ```bash
 docker/sdk boot
 ```
 
-6. Follow installation instructions displayed in the grey block during the execution of the previous command.
+6. Follow the installation instructions displayed in the grey block of the output of the command you have run in the previous step.
 
 7. Build and run Spryker application based on demo data:
 ```bash
 docker/sdk up --build --data --assets
 ```
 
-### How to configure native mount mode on Linux
+
+## Configuring native mount mode on Linux
 
 To configure native mount mode on Linux:
 
-1. Ensure that you run a stable version of Docker for Linux.
+1. Install or update Docker for Linux to the latest stable version.
 
-2. Adjust the mount section of `deploy.local.yml` as follows:
+2. Adjust the `mount:` section of `deploy.local.yml` as follows:
 ```yaml
 docker:
 ...
@@ -100,24 +94,35 @@ docker:
            platforms:
                - linux
 ```
-3. Bootstrap docker/sdk:
+
+3. Bootstrap the Docker SDK:
 ```bash
 docker/sdk boot
 ```
-4. Follow installation instructions displayed in the grey block during the execution of the previous command.
+
+4. Follow the installation instructions displayed in the grey block of the output of the command you have run in the previous step.
+
 5. Build and run Spryker application based on demo data:
 ```bash
 docker/sdk up --build --data --assets
 ```
 
-### How to configure docker-sync mount mode for Windows with WSL1
 
-To configure docker-sync mount mode:
+## Configuring docker-sync mount mode on Windows with WSL1
 
-1. Download and install Docker Desktop Stable 2.3.0.2 or a later release. See [Install Docker Desktop on Windows](https://docs.docker.com/docker-for-windows/install/) to learn more.
-2. Enable Windows Subsystem for Linux 1 (WSL1) by following [Windows Subsystem for Linux Installation Guide for Windows 10](https://docs.microsoft.com/en-us/windows/wsl/install-win10).
+:::(Warning) (Location of project files)
+Docker for Windows requires project files to be stored in the Windows file system. For example, you can store project files in `C:/my-project` and use `/c/my-project` as a working directory.
+Find more details about it in [Ensure Volume Mounts Work](https://nickjanetakis.com/blog/setting-up-docker-for-windows-and-wsl-to-work-flawlessly).
+:::
+
+To configure docker-sync mount mode on Windows with Windows Subsystem for Linux 1 (WSL1):
+
+1. [Install Docker Desktop Stable](https://docs.docker.com/docker-for-windows/install/) 2.3.0.2 or higher.
+
+2. [Enable WSL1](https://docs.microsoft.com/en-us/windows/wsl/install-win10).
+
 3. In WSL, install the latest version of Docker:
-    1. Update the packages to the latest versions:
+    1. Update packages to the latest versions:
      ```bash
     sudo apt-get update
     ```
@@ -141,14 +146,17 @@ To configure docker-sync mount mode:
     $(lsb_release -cs) \
     stable"
     ```
-4. Install the latest version of Docker Communitiy Edition:
-```bash
-sudo apt-get install docker-ce docker-ce-cli containerd.io
-```
-5. Install Docker Compose:
-    
-    1. Check the latest stable release of Docker Compose in [Docker Compose releases](https://github.com/docker/compose/releases).
-    2. To download the version you have selected, replace `{docker-compose-release}` in the command parameter below and run it:
+    5. Install the latest version of Docker Communitiy Edition:
+    ```bash
+    sudo apt-get install docker-ce docker-ce-cli containerd.io
+    ```
+4. Install Docker Compose:
+    1. Check the latest stable [release of Docker Compose](https://github.com/docker/compose/releases).
+
+    2. Download Docker Compose:
+    :::(Info) (Docker Compose version)
+    Replace `{docker-compose-release}` in the command parameter with the version you have selected in the previous step.
+    :::
     ```bash
     sudo curl -L "https://github.com/docker/compose/releases/download/{docker-compose-release}/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
     ```
@@ -156,7 +164,7 @@ sudo apt-get install docker-ce docker-ce-cli containerd.io
     ```bash
     sudo chmod +x /usr/local/bin/docker-compose
     ```
-6. Install docker-sync:
+5. Install docker-sync:
     1. Install ruby and ruby-dev:
     ```bash
     sudo apt-get install ruby ruby-dev
@@ -166,24 +174,27 @@ sudo apt-get install docker-ce docker-ce-cli containerd.io
     ```bash
     sudo gem install docker-sync
     ```
-7. Set your Docker for Windows host as an environment variable:
-    1. In Docker for Windows settings, check Expose daemon on `tcp://localhost:2375` without TLS.
+6. Set your Docker for Windows host as an environment variable:
+
+    1. In Docker for Windows settings, select **Expose daemon on tcp://localhost:2375 without TLS**.
+
     2. To update the profile with the environment variable, in your WSL shell, run the command:
     ```bash
     echo "export DOCKER_HOST=tcp://127.0.0.1:2375" >> ~/.bashrc
     ```
-8. Compile and install OCaml:
+7. Compile and install OCaml:
     1. Install the build script:
     ```bash
     sudo apt-get install build-essential make
     ```
-    2. Check the latest compatible OCaml version in [OCaml release changelog](https://github.com/ocaml/ocaml/releases). 
+    2. Check the latest compatible [OCaml release](https://github.com/ocaml/ocaml/releases).
     In the next steps, replace `{ocaml-version}` in command parameters with the version you choose.
+
     3. Download the OCaml archive:
     ```bash
     wget http://caml.inria.fr/pub/distrib/ocaml-{ocaml-version}/ocaml-{ocaml-version}.tar.gz
     ```
-    4. Extract the downloaded archive:
+    4. Extract the archive:
     ```bash
     tar xvf ocaml-{ocaml-version}.tar.gz
     ```
@@ -191,7 +202,7 @@ sudo apt-get install docker-ce docker-ce-cli containerd.io
     ```bash
     cd ocaml-{ocaml-version}
     ```
-    6. Configure and compile ocaml:
+    6. Configure and compile OCaml:
     ```bash
     ./configure
     make world
@@ -203,28 +214,32 @@ sudo apt-get install docker-ce docker-ce-cli containerd.io
     sudo make install
     sudo make clean
     ```
-9. Compile and Install Unison:
-    1. Check the latest version of Unison in [Unison releases](https://github.com/bcpierce00/unison/releases).
+8. Compile and install Unison:
+    1. Check the latest [release of Unison](https://github.com/bcpierce00/unison/releases).
     In the next steps, replace `{unison-version}` in command parameters with the version you choose.
+
     2. Download the Unison archive:
     ```bash
     wget https://github.com/bcpierce00/unison/archive/{unison-version}.tar.gz
     ```
+
     3. Extract the archive:
     ```bash
     tar xvf {unison-version}.tar.gz
     ```
+
     4. Change the directory:
     ```bash
     cd unison-{unison-version}
     ```
+
     5. Compile and install Unison:
     ```bash
     make UISTYLE=text
     sudo cp src/unison /usr/local/bin/unison
     sudo cp src/unison-fsmonitor /usr/local/bin/unison-fsmonitor
     ```
-10. Adjust the `mount:` section of `deploy.local.yml` as follows:
+9. Adjust the `mount:` section of `deploy.local.yml` as follows:
 ```yaml
 docker:
 ...
@@ -233,28 +248,33 @@ docker:
            platforms:
                - windows
 ```
-11. Bootstrap docker/sdk:
+
+10. Bootstrap the Docker SDK:
 ```bash
 docker/sdk boot
 ```
-12. Optional: Follow the installation instructions displayed in the grey block of the output of the previous command.
-13. Build and run Spryker application based on demo data:
+
+11. Follow the installation instructions displayed in the grey block of the output of the command you have run in the previous step.
+
+12. Build and run Spryker application based on demo data:
 ```bash
 docker/sdk up --build --data --assets
 ```
 
-### How to configure native mount mode for Windows with WSL2
+## Configuring native mount mode for Windows with WSL2
 
-To configure native mount mode for Windows with WSL2:
+To configure native mount mode for Windows with Windows Subsystem for Linux 2 (WSL2):
 
-1. Download and install Docker Desktop Stable 2.3.0.2 or a later release. See [Install Docker Desktop on Windows](https://docs.docker.com/docker-for-windows/install/) to learn more.
-2. Enable Windows Subsystem for Linux 2 (WSL2) by following [Windows Subsystem for Linux Installation Guide for Windows 10](https://docs.microsoft.com/en-us/windows/wsl/install-win10).
-3. Install Docker in WSL:
+1. [Download and install Docker Desktop Stable](https://docs.docker.com/docker-for-windows/install/) 2.3.0.2 or higher.
+
+2. [Enable WSL2](https://docs.microsoft.com/en-us/windows/wsl/install-win10).
+
+3. In WSL, install Docker:
     1. Update packages to the latest version:
      ```bash
      sudo apt-get update
      ```
-    
+
     2. Install packages to allow apt to access repositories via HTTPS:
       ```bash
       sudo apt-get install \
@@ -264,12 +284,12 @@ To configure native mount mode for Windows with WSL2:
       gnupg-agent \
       software-properties-common
       ```
-    
+
     3. Add Docker's official GNU Privacy Guard key:
       ```bash
       curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
       ```
-    
+
     4. Set up a stable repository:
       ```bash
       sudo add-apt-repository \
@@ -277,27 +297,46 @@ To configure native mount mode for Windows with WSL2:
       $(lsb_release -cs) \
       stable"
       ```
+
     5. Install the latest version of Docker Community Edition:
       ```bash
       sudo apt-get install docker-ce docker-ce-cli containerd.io
       ```
-    
-    6. Install Docker Compose:
-    1. Check the latest stable release of Docker Compose in [Docker Compose releases](https://github.com/docker/compose/releases).
-    2. To download the version you have selected, replace `{docker-compose-release}` in the command parameter below and run it:
+
+4. Install Docker Compose:
+    1. Check the latest stable [release of Docker Compose](https://github.com/docker/compose/releases).
+
+    2. Download Docker Compose:
+    :::(Info) (Docker Compose version)
+    Replace `{docker-compose-release}` in the command parameter with the version you have selected in the previous step.
+    :::
     ```bash
     sudo curl -L "https://github.com/docker/compose/releases/download/{docker-compose-release}/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
     ```
+
     3. Apply executable permissions to the binary:
     ```bash
     sudo chmod +x /usr/local/bin/docker-compose
     ```
-4. Bootstrap docker/sdk.
+5. Bootstrap the Docker SDK:
 ```bash
 docker/sdk boot
 ```
-5. Follow installation instructions displayed in the grey block during the execution of the previous command and execute them.
-6. Build and run Spryker application based on demo data.
+6. Follow the installation instructions displayed in the grey block of the output of the command you have run in the previous step.
+7. Build and run Spryker application based on demo data.
 ```bash
 docker/sdk up --build --data --assets
 ```
+
+
+
+
+
+
+
+
+
+
+
+
+

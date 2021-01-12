@@ -1,41 +1,21 @@
-This document is a draft. See [Docker SDK](https://documentation.spryker.com/docs/docker-sdk) for official documentation.
-
-## Description
-Read the description below and, in the *Structure* section, fill out the document by answering the questions directly.
-We may have added some existing content and encourage you to update, remove or restructure it if needed.
 
 > Audience:
 >
-> - Everybody who have a problem running docker/sdk locally.
+> - Everyone who has an issue running the Docker SDK locally.
 >
 > Outcome:
-> - You may find a solution for your particular problem with docker/sdk.
+> - You can find a solution for your issue with the Docker SDK.
 
-## Outline
 
-1. Copy the existing items here
-2. Divide all the items by categories:
-- Installation
-- Running
-- Debugging
-- Running tests (if any)
-4. Debugging troubleshooting is quite outdated and needs update.
 
-## Important points to cover
+This document contains solutions to the most common issues related to the Docker SDK.
 
-## Structure
+## Troubleshooting installation
+This section describes common issues related to installation.
 
-:::(Info)(Structure)
-The structure below is just a reference. We encourage you to add subsections, change or swap the provided sections if needed.
-:::
 
-***
 
-This document contains solutions to the most common issues related to docker/sdk.
-
-### Installation
-
-#### Docker daemon is not running
+### Docker daemon is not running
 
 **when**
 Running the `docker/sdk up` console command returns a similar error:
@@ -48,7 +28,7 @@ Error response from daemon: Bad response from Docker engine
 2. Run `docker/sdk up` again.
 
 
-#### docker-sync cannot start
+### docker-sync cannot start
 
 **when**
 Running `docker-sync clean` returns an error similar to the following:
@@ -74,7 +54,7 @@ Update docker-sync:
 gem install docker-sync
 ```
 
-#### Setup of new indexes throws an exception
+### Setup of new indexes throws an exception
 
 **when**
 Running the command `setup-search-create-sources [vendor/bin/console search:setup:sources]` returns the exception:
@@ -87,7 +67,7 @@ in /data/vendor/ruflin/elastica/lib/Elastica/Transport/Http.php (190)
 Increase RAM for Docker usage.
 
 
-#### Vendor folder synchronization error
+### Vendor folder synchronization error
 
 **when**
 You get an error similar to `vendor/bin/console: not found`.
@@ -95,10 +75,10 @@ You get an error similar to `vendor/bin/console: not found`.
 **then**
 Re-build basic images, assets, and codebase:
 ```bash
-docker/sdk up --build
+docker/sdk up --build --assets
 ```
 
-#### An error during front end setup
+### An error during front end setup
 
 **when**
 The `frontend:project:install-dependencies` command returns an error similar to the following:
@@ -136,9 +116,23 @@ image:
 docker/sdk boot && docker/sdk up
 ```
 
-### Running applications
+### Demo data was imported incorrectly
 
-#### Port is already occupied on host
+**when**
+Demo data was imported incorrectly.
+
+**then**
+Re-load demo data:
+```bash
+docker/sdk clean-data && docker/sdk up --data && docker/sdk console q:w:s -v -s
+```
+
+## Troubleshooting running applications
+
+This section describes common issues related to running applications.
+
+
+### Port is already occupied on host
 
 **when**
 Running the `docker/sdk up` console command returns an error similar to the following:
@@ -155,7 +149,7 @@ sudo lsof -nPi:80 | grep LISTEN
 3. Run `docker/sdk up` again.
 
 
-#### 413 Request Entity Too Large
+### 413 Request Entity Too Large
 
 **when**
 You get the `413 Request Entity Too Large` error.
@@ -171,7 +165,7 @@ docker/sdk bootstrap
 docker/sdk up
 ```
 
-#### Nginx welcome page
+### Nginx welcome page
 
 **when**
 You get the Nginx welcome page by opening an application in the browser.
@@ -189,7 +183,7 @@ docker pull nginx:alpine
 docker/sdk up
 ```
 
-#### An application is not reachable via http
+### An application is not reachable via http
 
 **when**
 An application like Yves, Zed, or Glue is not reachable after installation.
@@ -202,10 +196,10 @@ docker:
         enabled: false
 ```
 
-#### Mutagen 
+### Mutagen
 
-**when** 
-You get the error: 
+**when**
+You get the error:
 ```bash
 unable to reconcile Mutagen sessions: unable to create synchronization session (spryker-dev-codebase): unable to connect to beta: unable to connect to endpoint: unable to dial agent endpoint: unable to create agent command: unable to probe container: container probing failed under POSIX hypothesis (signal: killed) and Windows hypothesis (signal: killed)
 ```
@@ -214,37 +208,33 @@ unable to reconcile Mutagen sessions: unable to create synchronization session (
 1. Restart your OS.
 2. If the error persists: Check [Mutagen documentation](https://mutagen.io/documentation/introduction).
 
-### Debugging
+
+**when**
+There is a synchronization issue.
+
+**then**
+
+* Restart your OS.
+* Run the commands:
+```
+docker/sdk trouble
+mutagen sync list
+mutagen sync terminate <all sessions in the list>
+docker/sdk up
+```
+
+
+## Troubleshooting debugging
+
+This section describes common issues related to debugging.
+
+
 
 **when**
 Xdebug does not work.
 
 **then**
-1. Ensure that IDE is listening to the port 9000.
-2. Get into any application container:
-```bash
-$ docker exec -i spryker_zed_1 bash
-```
-3. Check that the `xdebug` extension is active:
-```bash
-$ docker/sdk cli php -m
-```
-4. Check if the host is accessible from the container:
-```bash
-$ nc -zv ${SPRYKER_XDEBUG_HOST_IP} 9000
-```
-
-**when**
-PHP `xdebug` extension is not active in CLI.
-
-**then**
-Exit the CLI session and run `docker/sdk cli -x`.
-
-**when**
-PHP `xdebug` extension is not active in the browser.
-
-**then**
-1. In `deploy.*.yml`, ensure that Xdebug is enabled:
+1. Ensure that Xdebug is enabled in `deploy.*.yml`:
 ```
 ```yaml
 docker:
@@ -253,12 +243,11 @@ docker:
       xdebug:
         enabled: true
 ```
-2. Try the following:
-    * Set the `XDEBUG_SESSION=spryker` cookie  for the request.
-    * Run the following command:
-    ```bash
-    docker/sdk run -x
-    ```
+2. Ensure that IDE is listening to the port 9000.
+3. Check if the host is accessible from the container:
+```bash
+docker/sdk cli -x bash -c 'nc -zv ${SPRYKER_XDEBUG_HOST_IP} 9000'
+```
 
 **when**
 `nc` command does not give any output.
@@ -266,14 +255,32 @@ docker:
 **then**
 [Contact us](https://support.spryker.com/hc/en-us).
 
-
 **when**
 `nc` command tells that the port is opened.
 
 **then**
-1. Exit the container.
-2. Check what process occupies the port by running the command:
+1. Check what process occupies the port 9000 by running the command on the host:
 ```bash
 sudo lsof -nPi:9000 | grep LISTEN
 ```
-3. Make sure it is your IDE.
+2. If it's not your IDE, free up the port to be used by the IDE.
+
+**when**
+PHP `xdebug` extension is not active in CLI.
+
+**then**
+Exit the CLI session and enter it with the `-x` argument:
+* `docker/sdk cli -x`
+* `docker/sdk testing -x`
+
+**when**
+PHP `xdebug` extension is not active when accessing the website via a browser or curl.
+
+**then**
+
+Try the following:
+* Set the `XDEBUG_SESSION=spryker` cookie for the request. You can use a browser extension like [Xdebug helper](https://chrome.google.com/webstore/detail/xdebug-helper/eadndfjplgieldjbigjakmdgkmoaaaoc).
+* Run the following command to switch all applications to debug mode:
+    ```bash
+    docker/sdk run -x
+    ```
