@@ -68,4 +68,5 @@ To start working with Spryker in Docker, see [Docker SDK](https://documentation.
 | swagger  | swagger-ui  | v3.24  |
 | kibana  | kibana  | 5.6* |
 |   |   | 6.8 |
+|   |   | 7.6 |
 | blackfire  | blackfire  | latest |

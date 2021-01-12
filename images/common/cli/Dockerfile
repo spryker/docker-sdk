@@ -21,6 +21,15 @@ RUN --mount=type=cache,id=aptlib,sharing=locked,target=/var/lib/apt \
      git \
      redis-tools \
      ; fi'
+# Debian contains outdated Yarn package
+RUN --mount=type=cache,id=aptlib,sharing=locked,target=/var/lib/apt \
+    --mount=type=cache,id=aptcache,sharing=locked,target=/var/cache/apt \
+  bash -c 'if [ ! -z "$(which apt)" ]; then \
+     curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add - && \
+     echo "deb https://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources.list.d/yarn.list && \
+     apt-get update && apt-get install -y \
+     yarn \
+     ; fi'
 # Debian contains outdated NPM package
 RUN --mount=type=cache,id=npm,sharing=locked,target=/root/.npm \
   bash -c 'if [ ! -z "$(which apt)" ]; then npm install npm@latest -g; fi'
@@ -35,6 +44,7 @@ RUN --mount=type=cache,id=apk,sharing=locked,target=/var/cache/apk mkdir -p /etc
      ncurses \
      git \
      redis \
+     yarn \
      ; fi'
 
 # TODO Not-available feature: autoload-cache. Should be switchable

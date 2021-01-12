@@ -4,9 +4,14 @@ function Service::Broker::install() {
     Runtime::waitFor broker
 
     Console::start "${INFO}Configuring broker...${NC}"
+
+    local output
+    local tty
+    [ -t -0 ] && tty='' || tty='-T'
+
     # shellcheck disable=SC2016
-    local output=$(
-        Compose::command exec \
+    output=$(
+        Compose::command exec ${tty} \
             -e SPRYKER_RABBITMQ_VIRTUAL_HOSTS="${SPRYKER_RABBITMQ_VIRTUAL_HOSTS}" \
             -e SPRYKER_RABBITMQ_API_USERNAME="${SPRYKER_RABBITMQ_API_USERNAME}" \
             broker \
