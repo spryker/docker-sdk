@@ -30,12 +30,12 @@ This reference page describes version 1 of the Deploy file format. This is the n
  <dd>An external storage or utility service. Represents service type and configuration. The configuration can be defined on different levels: project-wide, region-wide, store-specific or endpoint-specific with limitations based on the service type.</dd>
 
  <dt>Endpoint</dt>
- <dd>A point of access to <i>Application</i> or <i>Service</i>. The key format is `domain[:port]`. By default, the port for HTTP endpoints is 80 . Port is mandatory for TCP endpoints.</dd>
+ <dd>A point of access to <i>Application</i> or <i>Service</i>. The key format is <code>domain[:port]</code>. By default, the port for HTTP endpoints is 80 . Port is mandatory for TCP endpoints.</dd>
 
 </dl>
 </div>
 
-## Deploy File Structure
+## Deploy file structure
 
 The topics below are organized alphabetically for top-level keys and sub-level keys to describe the hierarchy.
 
@@ -195,7 +195,7 @@ image:
 ***
 ### assets:
 
-Defines the setting of **Assets**.
+Defines the setting of *Assets*.
 * `assets: image:` - defines a docker image for a front-end container. If not specified, the default value applies:
 `assets: image: nginx:alpine`.
 * `assets: mode:` - defines a mode for running a static build section from the install recipe. Possible values are `production` and `development`. This variable is optional with the default value of `development`.
@@ -212,11 +212,11 @@ Defines the list of *Regions*.
 
 <a name="regions-services"></a>
 * `regions: services:` - defines settings for *Region*-specific `services:`. Only `database:` and `mail: sender:` are allowed here.
-	* `regions: services: database:` - see [database](#database)
+	* `regions: services: database:` - see [database:](#database-).
 	* `regions: services: mail: sender:` - defines the mail sender configuration. Possible values are `name:` and `email:`.
 * `regions: stores:` - defines the list of *Stores*.
 <a name="regions-stores-services"></a>
-* `regions: stores: services:` - defines application-wide, *Store*-specific settings for *Services*. Only `broker:`, `key_value_store:` and `search:` are currently allowed here. See [services:](#services-reference) to learn more.
+* `regions: stores: services:` - defines application-wide, *Store*-specific settings for *Services*. Only `broker:`, `key_value_store:` and `search:` are currently allowed here. See [services:](#services-) to learn more.
 
 ```yaml
 version: "1.0"
@@ -243,7 +243,7 @@ regions:
 Defines the list of *Groups**.
 
 * `groups: region:` - defines the relation to a *Region* by key.
-* `groups: applications:` - defines the list of *Applications*. See [groups: applications:](#groups-applications) to learn more.
+* `groups: applications:` - defines the list of *Applications*. See [groups: applications:](#groups-applications-) to learn more.
 
 ```yaml
 version: "1.0"
@@ -309,7 +309,6 @@ groups:
  ```
 
 ***
-<a name="groups-applications"></a>
 
 ### groups: applications:
 
@@ -320,7 +319,7 @@ The key must be project-wide unique.
 Obligatory parameters for `application:`:
 
 * `groups: applications: application:` - defines the type of *Application*. Possible values are `zed`, `yves`, and `glue`.
-* `groups: applications: endpoints:` - defines the list of *Endpoints* to access the *Application*. See [groups: applications: endpoints:](#groups-applications-endpoints) to learn more.
+* `groups: applications: endpoints:` - defines the list of *Endpoints* to access the *Application*. See [groups: applications: endpoints:](#groups-applications-endpoints-) to learn more.
 
 Optional parameters for `application:`:
 * `groups: applications: application: application:` - defines if the application is static. Only `static` is allowed here.
@@ -367,7 +366,7 @@ To disable the validation of request body size against this parameter, set it to
 
 
 ***
-<a name="services-reference"></a>
+
 ### services:
 
 Defines the list of *Services* and their project-wide settings.
@@ -379,7 +378,7 @@ Find common settings for all services below:
 * `engine:` - defines a third-party application supported by Spryker that does the job specific for the *Service*. For example, you can currently set `database:engine:` to `postgres` or `mysql`.
 * `endpoints:` - defines the list of *Endpoints* that point to the *Service* web interface or port.
 * `version:` - defines the version of the service to be installed. If `database:engine:` is set to `mysql`, also defines if MySQL or MariaDB is used according to the [version](https://github.com/spryker/docker-sdk#supported-services). See [Database](https://documentation.spryker.com/docs/services#database) for detailed configuration instructions.
-@(Info)(Optional variable)(If not specified, the [default version](https://github.com/spryker/docker-sdk#supported-services) applies.)
+This variable is optional. If not specified, the [default version](https://github.com/spryker/docker-sdk#supported-services) applies.
 
 ```yaml
 services:
@@ -432,10 +431,9 @@ docker/sdk clean-data
 docker/sdk demo-data
 ```
 :::
-Service settings can be extended on other levels for specific contexts. See [regions: services:](#regions-services), [regions: stores: services:](#regions-stores-services) and [groups: applications: endpoints: services:](#groups-applications-endpoints-services) to learn more.
+You can extend service settings on other levels for specific contexts. See [regions: services:](#regions-), [regions: stores: services:](#regions-) and [groups: applications: endpoints: services:](#groups-applications-endpoints-) to learn more.
 
 ***
-<a name="groups-applications-endpoints"></a>
 
 ### groups: applications: endpoints:
 
@@ -443,7 +441,6 @@ Defines the list of *Endpoints* to access the *Application*.
 
 The format of the key  is `domain[:port]`. The key must be project-wide unique.
 * `groups: applications: endpoints: store:` defines the *Store* as context to process requests within.
-<a name="groups-applications-endpoints-services"></a>
 * `groups: applications: endpoints: services:` defines the *Store*-specific settings for services. Only `session:` is currently allowed here. See [Services](#services) to learn more.
 * `groups: applications: endpoints: cors-allow-origin:` defines a CORS header. It is allowed for `glue` application only. Possible values are `single domain as string` or `*` to allow all domains.
 
@@ -478,11 +475,12 @@ docker:
 
 ### docker: docker-machine:
 Defines the virtualization engine to be used for the overall development environment. Possible values are:
-1. `docker:`.
-2. `parallels:`
-[Parallels](https://www.parallels.com/) requires a paid license to be used.
+* `docker:`
+* `parallels:`
 
-When no engine is defined in `deploy.yml`, the Docker Engine is used.
+You need a paid license to use [Parallels](https://www.parallels.com/).
+
+This variable is optional with the default value of `docker:`.
 ***
 
 ### docker: newrelic:
