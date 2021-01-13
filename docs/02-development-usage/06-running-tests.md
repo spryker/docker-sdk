@@ -28,7 +28,7 @@ The structure below is just a reference. We encourage you to add subsections, ch
 :::
 
 
-### What is a testing mode?
+## What is a testing mode?
 
 Docker SDK allows you to run application in an environment configured for testing.
 
@@ -38,15 +38,37 @@ In the testing mode, docker/sdk set of containers configured for testing. For ex
 
 
 
-### How do I run tests in the testing mode?
+## Running tests in the testing mode
 
 To run tests, you need to run Codeception in a CLI container.
 
-There are several ways to do that.
+There are several similar ways to do that. Use the most suitable way for you.
 
-#### Running tests with all containers in testing mode
+### Running tests in a dedicated testing container
 
-To save computer resources, recommended running all containers in testing mode. This mode turns off all background processes.
+To run tests in a dedicated testing container:
+
+1. Start a new container in testing mode:
+```bash
+docker/sdk testing
+```
+
+2. Run Codeception:
+```bash
+codecept run
+```
+
+### Running tests in a dedicated testing container with a single command
+
+To run tests in a dedicated testing container with a single command, run `docker/sdk testing codecept run`.
+
+The command runs tests as follows:
+
+1. Start a new container in testing mode.
+2. Run Codeception.
+3. Stop the container.
+
+### Running tests with all containers in the testing mode
 
 To run tests with all containers in testing mode:
 
@@ -64,31 +86,8 @@ docker/sdk testing
 codecept run
 ```
 
-#### Running tests in a dedicated testing container
 
-To run tests in a dedicated testing container:
-
-1. Start a new container in testing mode:
-```bash
-docker/sdk testing
-```
-
-2. Run Codeception:
-```bash
-codecept run
-```
-
-#### Running tests in a dedicated testing container with a single command
-
-To run tests in a dedicated testing container with a single command, run `docker/sdk testing codecept run`.
-
-The command runs tests as follows:
-
-1. Start a new container in testing mode.
-2. Run Codeception.
-3. Stop the container.
-
-#### Running a specific category of tests
+## Running a specific category of tests
 
 There are three categories of Spryker tests:
 * Acceptance
@@ -100,16 +99,16 @@ To run a specific category, run `codecept` with the respective configuration fil
 codecept run -c codeception.{acceptance|functional|api}.yml
 ```
 
-#### Running a group of tests
+### Running a group of tests
 
 To run one or more groups of tests, run `codecept run -g {Tax} -g {Customer}`.
 
-#### Excluding a group of tests
+### Excluding a group of tests
 
 To exclude one or more groups of tests, run `codecept run -x {Tax} -x {Customer}`.
 
 
-### How do I choose a webdriver?
+## Configuring a webdriver
 
 To choose a webdriver, update `deploy.*.yml`.
 
@@ -124,7 +123,7 @@ services:
 
 See [webdriver:](https://documentation.spryker.com/docs/deploy-file-reference-10#webdriver-) to learn more about webdriver configuration in the deploy file. 
 
-### How do I configure Codeception?
+## Configure Codeception
 
 To configure Codeception:
 
