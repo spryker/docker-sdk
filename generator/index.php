@@ -39,7 +39,7 @@ $envVarEncoder = new class() {
     public function encode($value)
     {
         if ($this->isActive) {
-            return json_encode((string)$value);
+            return json_encode((string)$value, JSON_UNESCAPED_SLASHES);
         }
 
         return $value;
