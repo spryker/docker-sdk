@@ -1,40 +1,10 @@
-This document is a draft. See [Docker SDK](https://documentation.spryker.com/docs/docker-sdk) for official documentation.
-
-## Description
-Read the description below and, in the *Structure* section, fill out the document by answering the questions directly.
-We may have added some existing content and encourage you to update, remove or restructure it if needed.
-
 > Audience:
 >
-> - Devops who use docker/sdk for CI and CD.
-> - Developers who use docker/sdk for development.
+> - Devops engineers who use the Docker SDK for CI and CD.
+> - Developers who use the Docker SDK for development.
 >
 > Outcome:
-> - You have a description of all components of the `Deploy file`.
-
-# Outline
-
-1. Port the existing reference
-2. New section at the beginning: How to read this reference. Describes the order and reference format ('image: php: ini').
-3. Extend the reference with the following features:
-- SC-3135: Release Docker-SDK
-- SC-3116: Cache Busting Mechanism
-- SC-3435: DD integration
-- SC-3445: Provision of Developer Tooling
-- SC-4606: Sender's email and name are defined in deploy.yml
-- SC-4432: Mutagen as file synchronization alternative
-- SC-4805: Xdebug can be excluded from images
-- SC-4807: Define cors-allow-origin via deploy.yml
-- SC-4434: SSH Agent is supported
-4. Make each item as header to be able to have a link.
-
-
-## Structure
-
-:::(Info)(Structure)
-The structure below is just a reference. We encourage you to add subsections, change or swap the provided sections if needed.
-:::
-
+> - You know how to configure configure the parameters in the Deploy file.
 
 
 This reference page describes version 1 of the Deploy file format. This is the newest version.
