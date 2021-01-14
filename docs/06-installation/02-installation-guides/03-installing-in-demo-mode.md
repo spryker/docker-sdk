@@ -122,7 +122,7 @@ To get the full and up-to-date list of commands, run `docker/sdk help`.
 
 ## Next steps
 
-* [Troubleshooting](../../troubleshooting.md)
+* [Troubleshooting](../../09-troubleshooting.md)
 * [Configuring debugging](../../02-development-usage/05-configuring-debugging.md)
 * [Deploy File Reference - 1.0](../../99-deploy.file.reference.v1.md) 
 * [Configuring services](../../06-configuring-services.md)
