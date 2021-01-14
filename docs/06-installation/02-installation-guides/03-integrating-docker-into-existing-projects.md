@@ -1,15 +1,15 @@
-This page describes how you can convert a non-Docker based project into a Docker based one. If you want to install Spryker in Docker from scratch, start with [Development Mode](https://documentation.spryker.com/docs/modes-overview#development-mode) or [Demo Mode](https://documentation.spryker.com/docs/modes-overview#demo-mode).
+This page describes how you can convert a non-Docker based project into a Docker based one. If you want to install Spryker in Docker from scratch, start with [Development Mode](01-choosing-an-installation-mode.md#development-mode) or [Demo Mode](01-choosing-an-installation-mode.md#demo-mode).
 
 ## Prerequisites
 
 To start integrating Docker into your project:
 
-1. Follow the [Docker installation prerequisites](https://documentation.spryker.com/docs/docker-installation-prerequisites).
-2. Overview and install the necessary features:
+1. Follow the one of the Docker installation prerequisites:
 
-| Name | Version |
-| --- | --- |
-| [Spryker Core](https://documentation.spryker.com/docs/spryker-core-feature-integration) | master |
+* [Installing Docker prerequisites on MacOS](../01-installation-prerequisites/01-installing-docker-prerequisites-on-macos.md)
+* [Installing Docker prerequisites on Linux](../01-installation-prerequisites/01-installing-docker-prerequisites-on-linux.md)
+* [Installing Docker prerequisites on Windows](../01-installation-prerequisites/01-installing-docker-prerequisites-on-windows.md)
+2. Integrate the [Spryker Core](https://documentation.spryker.com/docs/spryker-core-feature-integration) feature into your project. 
 
 ## Set up .dockerignore
 
@@ -33,35 +33,31 @@ node_modules
 ```
 See [.dockerignore file](https://docs.docker.com/engine/reference/builder/#dockerignore-file) to learn more about the structure of the file.
 
-## Set up Configuration
+## Set up configuration
 
-Under `config/Shared`, adjust or create a configuration file that depends on the environment name. See  [config_default-docker.php](https://github.com/spryker-shop/b2c-demo-shop/blob/master/config/Shared/config_default-docker.php) as an example.
+In `config/Shared`, adjust or create a configuration file. The name of the file should correspond to your environment. See  [config_default-docker.php](https://github.com/spryker-shop/b2c-demo-shop/blob/master/config/Shared/config_default-docker.php) as an example. 
 
 Make sure to adjust the configuration for each separate store. See [config_default-docker_DE.php](https://github.com/spryker-shop/b2c-demo-shop/blob/master/config/Shared/config_default-docker_DE.php) as an example.
 
-## Set up Deploy File
+## Set up a Deploy file
 
-[Deploy file](https://documentation.spryker.com/docs/deploy-file-reference-10) is a YAML file defining Spryker infrastructure and services for Spryker tools used to deploy Spryker applications in different environments.
-
-It's possible to create an unlimited amount of deployment files with different configuration settings: `deploy.yml` for Demo mode, `deploy.dev.yml` for Development mode.
-
-Set up a deploy file per your infruscturcure requirements using the deploy file examples in the table:
+Set up a [Deploy file](https://documentation.spryker.com/docs/deploy-file-reference-10) per your infruscturcure requirements using the examples in the table:
 
 | Development mode | Demo mode |
 | --- | --- |
 | [B2C Demo Shop deploy file](https://github.com/spryker-shop/b2c-demo-shop/blob/master/deploy.dev.yml) | [B2C Demo Shop deploy file](https://github.com/spryker-shop/b2c-demo-shop/blob/master/deploy.yml) |
 | [B2B Demo Shop deploy file](https://github.com/spryker-shop/b2b-demo-shop/blob/master/deploy.dev.yml) | [B2B Demo Shop deploy file](https://github.com/spryker-shop/b2b-demo-shop/blob/master/deploy.yml) |
 
-## Set up Installation Script
+## Set up the installation script
 
-Under `config/Shared`, prepare the installation recipe that defines the way Spryker should be installed.
+In `config/Shared`, prepare the installation recipe that defines the way Spryker should be installed.
 
-Find installation recipe examples below:
+Use the following recipe examples:
 * [B2B Demo Shop installation recipe](https://github.com/spryker-shop/b2b-demo-shop/blob/master/deploy.yml)
 * [B2C Demo Shop installation recipe](https://github.com/spryker-shop/b2c-demo-shop/blob/master/deploy.yml)
 
-## Install Docker SDK
-Follow the steps to install Docker SDK:
+## Install the Docker SDK
+Follow the steps to install the Docker SDK:
 1. Fetch Docker SDK tools:
 ```bash
 git clone https://github.com/spryker/docker-sdk.git ./docker
@@ -96,24 +92,32 @@ Ensure that, in the `hosts` file in the local environment, all the domains from 
 
 ## Endpoints
 
-Ensure that you can open the following endpoints:
+To ensure that the installation is successful, make sure you can access the following endpoints.
 
-* yves.de.spryker.local, yves.at.spryker.local, yves.us.spryker.local - Shop UI (*Storefront*)
-* zed.de.spryker.local, zed.at.spryker.local, zed.us.spryker.local - Back-office UI (*the Back Office*)
-* glue.de.spryker.local, glue.at.spryker.local, glue.us.spryker.local - API endpoints
-* scheduler.spryker.local - Jenkins (*scheduler*)
-* queue.spryker.local - RabbitMQ UI (*queue*).
-@(Info)()(Use "spryker" as a username and "secret" as a password. These credentials are defined and can be changed in `deploy.yml` or `deploy.dev.yml`.)
-* mail.spryker.local - Mailhog UI (*email catcher*)
+| Application | endpoints |
+| --- | --- |
+| The Storefront |  yves.de.spryker.local, yves.at.spryker.local, yves.us.spryker.local |
+| the Back Office | zed.de.spryker.local, zed.at.spryker.local, zed.us.spryker.local |
+| Glue API | glue.de.spryker.local, glue.at.spryker.local, glue.us.spryker.local |
+| Jenkins (scheduler) | scheduler.spryker.local |
+| RabbitMQ UI (queue manager) | queue.spryker.local |
+| Mailhog UI (email catcher) | mail.spryker.local |
 
-## Useful Commands
+:::(Info) (RabbitMQ UI credentials)
+To access RabbitMQ UI, use `spryker` as a username and `secret` as a password. You can adjust the credentials in `deploy.yml`. See [Deploy File Reference - 1.0](https://documentation.spryker.com/docs/deploy-file-reference-10#deploy-file-reference---1-0) to learn about the Deploy file.
+:::
 
-Run the `docker/sdk help` command to get the full and up-to-date list of commands.
 
-## What's next?
-* [Troubleshooting](https://documentation.spryker.com/docs/spryker-in-docker-troubleshooting)
-* [Debugging Setup in Docker](https://documentation.spryker.com/docs/debugging-setup-in-docker)
-* [Deploy File Reference - 1.0](https://documentation.spryker.com/docs/deploy-file-reference-10)
-* [Services](https://documentation.spryker.com/docs/services)
-* [Self-signed SSL Certificate Setup](https://documentation.spryker.com/docs/self-signed-ssl-certificate-setup)
-* [Additional DevOPS Guidelines](https://documentation.spryker.com/docs/additional-devops-guidelines)
+
+## Getting the list of useful commands
+
+To get the full and up-to-date list of commands, run `docker/sdk help`.
+
+## Next steps
+
+* [Troubleshooting](../../troubleshooting.md)
+* [Configuring debugging](../../02-development-usage/05-configuring-debugging.md)
+* [Deploy File Reference - 1.0](../../99-deploy.file.reference.v1.md) 
+* [Configuring services](../../06-configuring-services.md)
+* [Setting up a self-signed SSL certificate](https://documentation.spryker.com/docs/setting-up-a-self-signed-ssl-certificate) 
+* [Additional DevOPS guidelines](https://documentation.spryker.com/docs/additional-devops-guidelines)
