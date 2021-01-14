@@ -132,4 +132,5 @@ export COMPOSER_AUTH="{\"github-oauth\":{\"github.com\":\"{GITHUB_TOKEN}\"},\"gi
 docker/sdk up --build
 ```
 
+You've configured authentication to your private repositories.
 
