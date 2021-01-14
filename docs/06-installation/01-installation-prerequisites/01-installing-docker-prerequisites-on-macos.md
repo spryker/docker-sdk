@@ -33,17 +33,17 @@ Follow the steps to install and configure the required software:
 
 @(Warning)()(You can set lower **Memory:** and **Swap:** limit values. However, the default limits won't be sufficient to run the application, so make sure to increase them. )
 
-5. [Development mode](https://documentation.spryker.com/docs/modes-overview#development-mode): Install Mutagen:
+5. [Development mode](../02-installation-guides/01-choosing-an-installation-mode.md#development-mode): Install Mutagen:
 ```shell
 brew install mutagen-io/mutagen/mutagen-beta
 ```
 
 ## Next steps
 
-See [Chossing an installation mode](https://documentation.spryker.com/docs/choosing-an-installation-mode) to choose an installation mode.
+See [Chossing an installation mode](../02-installation-guides/01-choosing-an-installation-mode.md) to choose an installation mode.
 If you've already selected an installation mode, follow one of the guides below:
-* [Installing in Development mode](https://documentation.spryker.com/docs/installing-in-development-mode)
-* [Installing in Demo mode](https://documentation.spryker.com/docs/installing-in-demo-mode)
-* [Integrating Docker into existing projects](https://documentation.spryker.com/docs/integrating-docker-into-existing-projects)
-* [Running production](https://documentation.spryker.com/docs/running-production)
+* [Installing in Development mode](../02-installation-guides/02-installing-in-development-mode.md)
+* [Installing in Demo mode](../02-installation-guides/03-installing-in-demo-mode.md)
+* [Integrating Docker into existing projects](../02-installation-guides/04-integrating-docker-into-existing-projects.md)
+* [Running production](../02-installation-guides/05-running-production.md)
 
