@@ -91,7 +91,7 @@ To debug an application:
 
 ## Avoiding timeouts
 
-The default Zed Eequest timout is 60 seconds. Debugging requests often take more than 60 seconds to complete. In this case, a browser stops the connection. 
+The default Zed Request timout is 60 seconds. Debugging requests often take more than 60 seconds to complete. In this case, a browser stops the connection. 
 
 To avoid Zed Request timeouts, adjust your configuration as follows:
 ```php
