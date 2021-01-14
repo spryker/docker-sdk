@@ -86,7 +86,7 @@ Depending on your requirements, you can select any combination of the following 
 
 ## Troubleshooting
 
-For solutions to common issues, see [Spryker in Docker troubleshooting](https://documentation.spryker.com/docs/spryker-in-docker-troubleshooting).
+For solutions to common issues, see [Troubleshooting](09-troubleshooting.md).
 
 
 ## What documents should I use to start developing and configuring my project?
