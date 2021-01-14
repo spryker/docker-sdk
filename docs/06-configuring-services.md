@@ -1,6 +1,6 @@
 > Audience:
 >
-> - Devops and developers who define services in a Spryker project infrastructure.
+> - DevOps engineers and developers who define services in a Spryker project infrastructure.
 >
 > Outcome:
 > - You know about all the services provided by the Docker SDK.
