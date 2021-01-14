@@ -1,6 +1,6 @@
-This document describes the procedure of generating images and assets suitable for a [production environment](https://documentation.spryker.com/docs/installation-modes#running-production). After going through all the steps, it's up to you how to proceed further.
+This document describes the procedure of generating images and assets suitable for a production environment. After going through all the steps, it's up to you how to proceed further.
 
-@(Info)()(This functionality is available in Docker SDK starting from version 1.7.2.)
+@(Info)()(This functionality is available in the Docker SDK from version 1.7.2.)
 
 Follow the steps to generate Docker images and assests for a production environment:
 
