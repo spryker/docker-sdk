@@ -13,9 +13,9 @@ To run the Docker SDK in a local environment, follow the instructions below.
 ### Installing Docker
 
 For Docker installation instructions, see one of the following:
-* [Installing Docker prerequisites on MacOS](https://documentation.spryker.com/docs/installing-docker-prerequisites-on-macos)
-* [Installing Docker prerequisites on Linux](https://documentation.spryker.com/docs/installing-docker-prerequisites-on-linux)
-* [Installing Docker prerequisites on Windows](https://documentation.spryker.com/docs/installing-docker-prerequisites-on-windows)
+* [Installing Docker prerequisites on MacOS](06-installation/01-installation-prerequisites/01-installing-docker-prerequisites-on-macos.md)
+* [Installing Docker prerequisites on Linux](06-installation/01-installation-prerequisites/01-installing-docker-prerequisites-on-linux.md)
+* [Installing Docker prerequisites on Windows](06-installation/01-installation-prerequisites/01-installing-docker-prerequisites-on-windows.md)
 
 ### Setting up a project with the Docker SDK
 
