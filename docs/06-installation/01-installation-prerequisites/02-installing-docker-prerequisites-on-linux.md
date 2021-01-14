@@ -41,7 +41,7 @@ sudo curl -L "https://github.com/docker/compose/releases/download/1.24.0/docker-
 sudo chmod +x /usr/local/bin/docker-compose
 ```
 
-You've installed all the required prerequisites for Linux.
+You've installed and configured the required software. 
 
 ## Next steps
 
