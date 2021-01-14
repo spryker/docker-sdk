@@ -111,7 +111,7 @@ To ensure that the installation is successful, make sure you can access the foll
 | Mailhog UI (email catcher) | mail.spryker.local |
 
 :::(Info) (RabbitMQ UI credentials)
-To access RabbitMQ UI, use `spryker` as a username and `secret` as a password. You can adjust the credentials in `deploy.yml`. See [Deploy File Reference - 1.0](https://documentation.spryker.com/docs/deploy-file-reference-10#deploy-file-reference---1-0) to learn about the Deploy file.
+To access RabbitMQ UI, use `spryker` as a username and `secret` as a password. You can adjust the credentials in `deploy.yml`. See [Deploy File Reference - 1.0](../../99-deploy.file.reference.v1.md) to learn about the Deploy file.
 :::
 
 
