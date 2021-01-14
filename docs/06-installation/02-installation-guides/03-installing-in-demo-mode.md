@@ -1,11 +1,13 @@
-This document describes the procedure of installing Spryker in [Demo Mode](https://documentation.spryker.com/docs/choosing-an-installation-mode#demo-mode).
+This document describes the procedure of installing Spryker in [Demo Mode](01-choosing-an-installation-mode.md#demo-mode).
 
 ## Installing Docker prerequisites
 
 To install Docker prerequisites, follow one of the guides:
-* [Installing Docker prerequisites on MacOS](https://documentation.spryker.com/docs/installing-docker-prerequisites-on-macos)
-* [Installing Docker prerequisites on Linux](https://documentation.spryker.com/docs/installing-docker-prerequisites-on-linux)
-* [Installing Docker prerequisites on Windows](https://documentation.spryker.com/docs/installing-docker-prerequisites-on-windows)
+
+* [Installing Docker prerequisites on MacOS](../01-installation-prerequisites/01-installing-docker-prerequisites-on-macos.md)
+* [Installing Docker prerequisites on Linux](../01-installation-prerequisites/01-installing-docker-prerequisites-on-linux.md)
+* [Installing Docker prerequisites on Windows](../01-installation-prerequisites/01-installing-docker-prerequisites-on-windows.md)
+
 
 ## Installing Spryker in Demo mode
 
@@ -120,9 +122,9 @@ To get the full and up-to-date list of commands, run `docker/sdk help`.
 
 ## Next steps
 
-* [Spryker in Docker troubleshooting](https://documentation.spryker.com/docs/spryker-in-docker-troubleshooting)
-* [Configuring debugging in Docker](https://documentation.spryker.com/docs/configuring-debugging-in-docker)
-* [Deploy File Reference - 1.0](https://documentation.spryker.com/docs/deploy-file-reference-10) 
-* [Configuring services](https://documentation.spryker.com/docs/configuring-services)
+* [Troubleshooting](../../troubleshooting.md)
+* [Configuring debugging](../../02-development-usage/05-configuring-debugging.md)
+* [Deploy File Reference - 1.0](../../99-deploy.file.reference.v1.md) 
+* [Configuring services](../../06-configuring-services.md)
 * [Setting up a self-signed SSL certificate](https://documentation.spryker.com/docs/setting-up-a-self-signed-ssl-certificate) 
 * [Additional DevOPS guidelines](https://documentation.spryker.com/docs/additional-devops-guidelines)
