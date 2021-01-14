@@ -1,29 +1,12 @@
-This document is a draft. See [Docker SDK](https://documentation.spryker.com/docs/docker-sdk) for official documentation.
-
-## Description
-Read the description below and, in the *Structure* section, fill out the document by answering the questions directly.
-We may have added some existing content and encourage you to update, remove or restructure it if needed. 
-
-
 > Audience:
 >
 > - Devops and developers who define services in a Spryker project infrastructure.
 >
 > Outcome:
-> - You have a list of all services provided by docker/sdk.
-> - You have instructions on how to configure each service.
-
-## Outline
-
-1. [Port the existing document]
-2. Divide services by 2 categories:
-  - Mandatory services
-  - Optional services
+> - You know about all the services provided by the Docker SDK.
+> - You know how to configure services.
 
 
-## Structure
-
-## General Information
 This document describes configuration options of the services shipped with Spryker in Docker by default.  Find the list of the services below:
 
 *     Database
@@ -42,7 +25,7 @@ This document describes configuration options of the services shipped with Spryk
 
 
 :::(Info) ()
-* Before you start configuring a service, make sure to install or update Docker SDK to the latest version:
+* Before you start configuring a service, make sure to install or update the Docker SDK to the latest version:
 ```bash
 git clone https://github.com/spryker/docker-sdk.git ./docker
 ```
@@ -151,7 +134,7 @@ docker/sdk demo-data
 [Elasticsearch](https://www.elastic.co/elasticsearch/) is a search engine based on the Lucene library. It provides a distributed, multitenant-capable full-text search engine with an HTTP web interface and schema-free JSON documents. 
 
 See:
-* [Configuring Elasticsearch](https://documentation.spryker.com/v4/docs/search-configure-elasticsearch) to learn more about Elastcisearch configuration in Spryker.
+* [Configuring Elasticsearch](https://documentation.spryker.com/docs/search-configure-elasticsearch) to learn more about Elastcisearch configuration in Spryker.
 * [Elasticsearch documentation](https://www.elastic.co/guide/en/elasticsearch/reference/current/index.html) for more information on Elasticsearch.
 
 ### Configuration
