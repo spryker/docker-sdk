@@ -92,5 +92,5 @@ For solutions to common issues, see [Troubleshooting](09-troubleshooting.md).
 ## What documents should I use to start developing and configuring my project?
 [02-development-usage]
 [99-deploy.file.reference.v1.md]
-[10-docker-sdk-configuration-reference.md]
+[10-configuration-reference.md]
 [06-configuring-services.md]
