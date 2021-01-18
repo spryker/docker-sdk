@@ -473,15 +473,6 @@ docker:
 
 ***
 
-### docker: docker-machine:
-Defines the virtualization engine to be used for the overall development environment. Possible values are:
-* `docker:`
-* `parallels:`
-
-You need a paid license to use [Parallels](https://www.parallels.com/).
-
-This variable is optional with the default value of `docker:`.
-***
 
 ### docker: newrelic:
 
