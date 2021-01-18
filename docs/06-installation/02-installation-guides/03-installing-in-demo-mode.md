@@ -115,7 +115,7 @@ echo "127.0.0.1 zed.de.spryker.local yves.de.spryker.local glue.de.spryker.local
 
 To ensure that the installation is successful, make sure you can access the following endpoints.
 
-| Application | endpoints |
+| Application | Endpoints |
 | --- | --- |
 | The Storefront |  yves.de.spryker.local, yves.at.spryker.local, yves.us.spryker.local |
 | the Back Office | zed.de.spryker.local, zed.at.spryker.local, zed.us.spryker.local |

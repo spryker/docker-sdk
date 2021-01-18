@@ -9,7 +9,7 @@ To start integrating Docker into your project:
 * [Installing Docker prerequisites on MacOS](../01-installation-prerequisites/01-installing-docker-prerequisites-on-macos.md)
 * [Installing Docker prerequisites on Linux](../01-installation-prerequisites/01-installing-docker-prerequisites-on-linux.md)
 * [Installing Docker prerequisites on Windows](../01-installation-prerequisites/01-installing-docker-prerequisites-on-windows.md)
-2. Integrate the [Spryker Core](https://documentation.spryker.com/docs/spryker-core-feature-integration) feature into your project. 
+2. Integrate the [Spryker Core](https://documentation.spryker.com/docs/spryker-core-feature-integration) feature into your project.
 
 ## Set up .dockerignore
 
@@ -35,7 +35,7 @@ See [.dockerignore file](https://docs.docker.com/engine/reference/builder/#docke
 
 ## Set up configuration
 
-In `config/Shared`, adjust or create a configuration file. The name of the file should correspond to your environment. See  [config_default-docker.php](https://github.com/spryker-shop/b2c-demo-shop/blob/master/config/Shared/config_default-docker.php) as an example. 
+In `config/Shared`, adjust or create a configuration file. The name of the file should correspond to your environment. See  [config_default-docker.php](https://github.com/spryker-shop/b2c-demo-shop/blob/master/config/Shared/config_default-docker.php) as an example.
 
 Make sure to adjust the configuration for each separate store. See [config_default-docker_DE.php](https://github.com/spryker-shop/b2c-demo-shop/blob/master/config/Shared/config_default-docker_DE.php) as an example.
 
@@ -94,7 +94,7 @@ Ensure that, in the `hosts` file in the local environment, all the domains from 
 
 To ensure that the installation is successful, make sure you can access the following endpoints.
 
-| Application | endpoints |
+| Application | Endpoints |
 | --- | --- |
 | The Storefront |  yves.de.spryker.local, yves.at.spryker.local, yves.us.spryker.local |
 | the Back Office | zed.de.spryker.local, zed.at.spryker.local, zed.us.spryker.local |
@@ -117,7 +117,7 @@ To get the full and up-to-date list of commands, run `docker/sdk help`.
 
 * [Troubleshooting](../../troubleshooting.md)
 * [Configuring debugging](../../02-development-usage/05-configuring-debugging.md)
-* [Deploy File Reference - 1.0](../../99-deploy.file.reference.v1.md) 
+* [Deploy File Reference - 1.0](../../99-deploy.file.reference.v1.md)
 * [Configuring services](../../06-configuring-services.md)
-* [Setting up a self-signed SSL certificate](https://documentation.spryker.com/docs/setting-up-a-self-signed-ssl-certificate) 
+* [Setting up a self-signed SSL certificate](https://documentation.spryker.com/docs/setting-up-a-self-signed-ssl-certificate)
 * [Additional DevOPS guidelines](https://documentation.spryker.com/docs/additional-devops-guidelines)
