@@ -167,7 +167,7 @@ version: 1.0
 
 image:
   environment:
-	      {env_variable}: {env_variable_value}
+        {env_variable}: {env_variable_value}
 ```
 ***
 
@@ -222,17 +222,17 @@ Defines the list of *Regions*.
 version: "1.0"
 
 regions:
-	REGION-1:
-		services:
-			# Region-specific services settings
+  REGION-1:
+    services:
+      # Region-specific services settings
 
-		stores:
-			STORE-1:
-				services:
-					# Store-specific services settings
-			STORE-2:
-				services:
-					# Store-specific services settings
+    stores:
+      STORE-1:
+        services:
+          # Store-specific services settings
+      STORE-2:
+        services:
+          # Store-specific services settings
 
  ```
 
@@ -249,41 +249,41 @@ Defines the list of *Groups**.
 version: "1.0"
 
 groups:
-	BACKEND-1:
-		region: REGION-1
-		applications:
-			zed_1:
-				application: zed
-				endpoints:
-					zed.store1.spryker.local:
-						store: STORE-1
-						services:
-							# Application-Store-specific services settings
-					zed.store2.spryker.local:
-						store: STORE-2
-						services:
-							# Application-Store-specific services settings
-	STOREFRONT-1:
-		region: REGION-1
-		applications:
-			yves_1:
-				application: yves
-				endpoints:
-					yves.store1.spryker.local:
-						store: STORE-1
-						services:
-							# Application-Store-specific services settings
-					yves.astore2t.spryker.local:
-						store: STORE-2
-						services:
-							# Application-Store-specific services settings
-			glue_1:
-				application: glue
-				endpoints:
-					glue.store1.spryker.local:
-						store: STORE-1
-					glue.store2.spryker.local:
-						store: STORE-2
+  BACKEND-1:
+    region: REGION-1
+    applications:
+      zed_1:
+        application: zed
+        endpoints:
+          zed.store1.spryker.local:
+            store: STORE-1
+            services:
+              # Application-Store-specific services settings
+          zed.store2.spryker.local:
+            store: STORE-2
+            services:
+              # Application-Store-specific services settings
+  STOREFRONT-1:
+    region: REGION-1
+    applications:
+      yves_1:
+        application: yves
+        endpoints:
+          yves.store1.spryker.local:
+            store: STORE-1
+            services:
+              # Application-Store-specific services settings
+          yves.astore2t.spryker.local:
+            store: STORE-2
+            services:
+              # Application-Store-specific services settings
+      glue_1:
+        application: glue
+        endpoints:
+          glue.store1.spryker.local:
+            store: STORE-1
+          glue.store2.spryker.local:
+            store: STORE-2
 
  ```
 
@@ -292,19 +292,19 @@ Applications can be defined as *Store*-agnostic, as in the example above. Also, 
 version: "1.0"
 
 groups:
-	BACKEND-1:
-		region: REGION-1
-		applications:
-			zed_store_1:
-				application: zed
-				endpoints:
-					zed.store1.spryker.local:
-						store: STORE-1
-			zed_store_2:
-				application: zed
-				endpoints:
-					zed.store2.spryker.local:
-						store: STORE-2
+  BACKEND-1:
+    region: REGION-1
+    applications:
+      zed_store_1:
+        application: zed
+        endpoints:
+          zed.store1.spryker.local:
+            store: STORE-1
+      zed_store_2:
+        application: zed
+        endpoints:
+          zed.store2.spryker.local:
+            store: STORE-2
 
  ```
 
@@ -347,14 +347,14 @@ Optional parameters for `application:`:
 
 ```yaml
 ...
-		applications:
-			zed:
-				application: zed
-				http:
-					max-request-body-size: 20m
-				endpoints:
-					zed.store1.spryker.local:
-						store: STORE-1
+    applications:
+      zed:
+        application: zed
+        http:
+          max-request-body-size: 20m
+        endpoints:
+          zed.store1.spryker.local:
+            store: STORE-1
  ```
 
 :::(Info) ()
@@ -397,27 +397,27 @@ services:
         endpoints:
             queue.spryker.local:
 
-	session:
-		engine: redis
-		version: 5.0
+  session:
+    engine: redis
+    version: 5.0
 
-	key_value_store:
-		engine: redis
+  key_value_store:
+    engine: redis
 
-	search:
-		engine: elastic
-		version: 6.8
+  search:
+    engine: elastic
+    version: 6.8
 
-	scheduler:
-		engine: jenkins
-		version: 2.176
-		endpoints:
-			scheduler.spryker.local:
+  scheduler:
+    engine: jenkins
+    version: 2.176
+    endpoints:
+      scheduler.spryker.local:
 
-	mail_catcher:
-		engine: mailhog
-		endpoints:
-			mail.spryker.local:
+  mail_catcher:
+    engine: mailhog
+    endpoints:
+      mail.spryker.local:
  ```
 :::(Warning)
 After changing a service version, make sure to re-import demo data:
@@ -460,28 +460,19 @@ version: 1.0
 
 docker:
 
-	ssl:
-		enabled: true
+  ssl:
+    enabled: true
 
-	testing:
-		store: STORE-1
+  testing:
+    store: STORE-1
 
-	mount:
-		baked:
+  mount:
+    baked:
 
  ```
 
 ***
 
-### docker: docker-machine:
-Defines the virtualization engine to be used for the overall development environment. Possible values are:
-* `docker:`
-* `parallels:`
-
-You need a paid license to use [Parallels](https://www.parallels.com/).
-
-This variable is optional with the default value of `docker:`.
-***
 
 ### docker: newrelic:
 
@@ -511,8 +502,8 @@ This variable is optional. If not specified, the default value applies: `enabled
 version: 1.0
 
 docker:
-	ssl:
-		enabled: true
+  ssl:
+    enabled: true
 
  ```
 :::(Info) ()
@@ -533,8 +524,8 @@ If `docker: debug: enabled:` is set to `true`, all applications work in debuggin
 version: 1.0
 
 docker:
-	debug:
-		enabled: true
+  debug:
+    enabled: true
 
  ```
 * `docker: debug: xdebug: enabled:` - defines if Xdebug is enabled.
@@ -570,16 +561,16 @@ The first mount mode matching the host platform is selected by default.
 version: 1.0
 
 docker:
-	mount:
-		native:
-			platforms:
-				- linux
+  mount:
+    native:
+      platforms:
+        - linux
         mutagen:
             platforms:
                 - macos
-		docker-sync:
-			platforms:
-				- windows
+    docker-sync:
+      platforms:
+        - windows
 
  ```
  ***

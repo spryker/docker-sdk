@@ -55,20 +55,14 @@ $ docker-compose --version
 ```
 :::
 
-7. Windows: In Ubuntu, change line 7 of `{shop_name}/docker/context/php/debug/etc/php/debug.conf.d/69-xdebug.ini` to the following:
-
-```text
-xdebug.remote_host=host.docker.internal
-```
-
-8. Windows: Add your user to the `docker` group:
+7. Windows: Add your user to the `docker` group:
 
 ```bash
 sudo usermod -aG docker $USER
 ```
 
 
-9. Bootstrap the local Docker setup for demo:
+8. Bootstrap the local Docker setup for demo:
 ```shell
 docker/sdk bootstrap
 ```
@@ -79,11 +73,11 @@ Once you finish the setup, you don't need to run `bootstrap` to start the instan
 * Docker SDK version update;
 * Deploy file update.
 :::
-10. Once the job finishes, build and start the instance:
+9. Once the job finishes, build and start the instance:
 ```shell
 docker/sdk up
 ```
-11. Update the `hosts` file:
+10. Update the `hosts` file:
 
   - Linux/MacOS:
 ```bash
