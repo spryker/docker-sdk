@@ -327,16 +327,3 @@ docker/sdk boot
 ```bash
 docker/sdk up --build --data --assets
 ```
-
-
-
-
-
-
-
-
-
-
-
-
-

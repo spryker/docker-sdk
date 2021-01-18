@@ -6,7 +6,7 @@
 > - You have a handbook with configuration instructions for common cases.
 
 
-This document is a quick reference for the most common configuration options of the Docker SDK. 
+This document is a quick reference for the most common configuration options of the Docker SDK.
 
 The configuration parameters in this document are examplary. You may need to adjust them per your project requirements.
 
@@ -62,12 +62,12 @@ To increase maximum upload size, update `deploy.*.yml` as follows:
 1. In Nginx configuration, update maximum request body size:
 ```yaml
 ...
-		applications:
-			zed:
-				application: zed
-				http:
-					max-request-body-size: {request_body_size_value}
-				...
+    applications:
+      zed:
+        application: zed
+        http:
+          max-request-body-size: {request_body_size_value}
+        ...
 ```
 
 2. Update PHP memory limit:

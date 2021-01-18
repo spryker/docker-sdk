@@ -42,7 +42,7 @@ Follow the steps to install Spryker in Demo Mode:
 Make sure that you are in the correct folder by running the `pwd` command.
 :::
 
-6. Clone the Docker repository into the same folder:
+6. Clone the Docker SDK repository into the same folder:
 ```shell
 git clone git@github.com:spryker/docker-sdk.git --single-branch docker
 ```
@@ -54,22 +54,36 @@ $ docker version
 $ docker-compose --version
 ```
 :::
-7. Bootstrap the local Docker setup for demo:
+
+7. Windows: In Ubuntu, change line 7 of `{shop_name}/docker/context/php/debug/etc/php/debug.conf.d/69-xdebug.ini` to the following:
+
+```text
+xdebug.remote_host=host.docker.internal
+```
+
+8. Windows: Add your user to the `docker` group:
+
+```bash
+sudo usermod -aG docker $USER
+```
+
+
+9. Bootstrap the local Docker setup for demo:
 ```shell
 docker/sdk bootstrap
 ```
 
- 
+
 :::(Warning) (Bootstrap)
 Once you finish the setup, you don't need to run `bootstrap` to start the instance. You only need to run it after:
 * Docker SDK version update;
 * Deploy file update.
 :::
-8. Once the job finishes, build and start the instance:
+10. Once the job finishes, build and start the instance:
 ```shell
 docker/sdk up
 ```
-9. Update the `hosts` file:
+11. Update the `hosts` file:
 
   - Linux/MacOS:
 ```bash
@@ -124,7 +138,7 @@ To get the full and up-to-date list of commands, run `docker/sdk help`.
 
 * [Troubleshooting](../../09-troubleshooting.md)
 * [Configuring debugging](../../02-development-usage/05-configuring-debugging.md)
-* [Deploy File Reference - 1.0](../../99-deploy.file.reference.v1.md) 
+* [Deploy File Reference - 1.0](../../99-deploy.file.reference.v1.md)
 * [Configuring services](../../06-configuring-services.md)
-* [Setting up a self-signed SSL certificate](https://documentation.spryker.com/docs/setting-up-a-self-signed-ssl-certificate) 
+* [Setting up a self-signed SSL certificate](https://documentation.spryker.com/docs/setting-up-a-self-signed-ssl-certificate)
 * [Additional DevOPS guidelines](https://documentation.spryker.com/docs/additional-devops-guidelines)

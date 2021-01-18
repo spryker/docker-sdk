@@ -41,7 +41,7 @@ sudo curl -L "https://github.com/docker/compose/releases/download/1.24.0/docker-
 sudo chmod +x /usr/local/bin/docker-compose
 ```
 
-You've installed and configured the required software. 
+You've installed and configured the required software.
 
 ## Next steps
 
@@ -49,5 +49,5 @@ See [Chossing an installation mode](../02-installation-guides/01-choosing-an-ins
 If you've already selected an installation mode, follow one of the guides below:
 * [Installing in Development mode](../02-installation-guides/02-installing-in-development-mode.md)
 * [Installing in Demo mode](../02-installation-guides/03-installing-in-demo-mode.md)
-* [Integrating Docker into existing projects](../02-installation-guides/04-integrating-docker-into-existing-projects.md)
+* [Integrating the Docker SDK into existing projects](../02-installation-guides/04-integrating-the-docker-sdk-into-existing-projects.md)
 * [Running production](../02-installation-guides/05-running-production.md)

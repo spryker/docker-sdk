@@ -29,7 +29,7 @@ Follow the steps to install and configure the required software:
     4. Set **Swap:** to "2.00 GB" or higher.
     5. Set the desired **Disk image size:**.
     6. Select the desired **Disk image location**.
-    7. Click **Apply & Restart**. 
+    7. Click **Apply & Restart**.
 
 @(Warning)()(You can set lower **Memory:** and **Swap:** limit values. However, the default limits won't be sufficient to run the application, so make sure to increase them. )
 
@@ -44,6 +44,5 @@ See [Chossing an installation mode](../02-installation-guides/01-choosing-an-ins
 If you've already selected an installation mode, follow one of the guides below:
 * [Installing in Development mode](../02-installation-guides/02-installing-in-development-mode.md)
 * [Installing in Demo mode](../02-installation-guides/03-installing-in-demo-mode.md)
-* [Integrating Docker into existing projects](../02-installation-guides/04-integrating-docker-into-existing-projects.md)
+* [Integrating the Docker SDK into existing projects](../02-installation-guides/04-integrating-the-docker-sdk-into-existing-projects.md)
 * [Running production](../02-installation-guides/05-running-production.md)
-

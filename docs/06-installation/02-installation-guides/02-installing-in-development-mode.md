@@ -17,7 +17,7 @@ Follow the steps to install Spryker in Development mode:
 2. Open a terminal.
 3. Create a new folder and navigate into it.
 4. Depending on the desired [Demo Shop](https://documentation.spryker.com/docs/en/about-spryker#spryker-b2b-b2c-demo-shops):
-   
+
     a. Clone the B2C repository:
 
     ```bash
@@ -49,7 +49,7 @@ Make sure that you are in the correct folder by running the `pwd` command.
 image: spryker/php:7.3-alpine3.12
 ```
 
-7. Clone the Docker repository:
+7. Clone the Docker SDK repository:
 ```bash
 git clone https://github.com/spryker/docker-sdk.git --single-branch docker
 ```
@@ -62,7 +62,20 @@ $ docker version
 $ docker-compose --version
 ```
 :::
-8. Bootstrap local docker setup:
+
+8. Windows: In Ubuntu, change line 7 of `{shop_name}/docker/context/php/debug/etc/php/debug.conf.d/69-xdebug.ini` to the following:
+
+```text
+xdebug.remote_host=host.docker.internal
+```
+
+9. Windows: Add your user to the `docker` group:
+
+```bash
+sudo usermod -aG docker $USER
+```
+
+10. Bootstrap local docker setup:
 ```bash
 docker/sdk bootstrap deploy.dev.yml
 ```
@@ -70,12 +83,12 @@ docker/sdk bootstrap deploy.dev.yml
 Once you finish the setup, you don't need to run `bootstrap` to start the instance. You only need to run it after you update the Docker SDK or the deploy file.
 :::
 
-9. Once the job finishes, build and start the instance:
+11. Once the job finishes, build and start the instance:
 ```bash
 docker/sdk up
 ```
 
-10. Update the `hosts` file:
+12. Update the `hosts` file:
 
   - Linux/MacOS:				
 ```bash
@@ -127,8 +140,7 @@ To get the full and up-to-date list of commands, run `docker/sdk help`.
 
 * [Troubleshooting](../../troubleshooting.md)
 * [Configuring debugging](../../02-development-usage/05-configuring-debugging.md)
-* [Deploy File Reference - 1.0](../../99-deploy.file.reference.v1.md) 
+* [Deploy File Reference - 1.0](../../99-deploy.file.reference.v1.md)
 * [Configuring services](../../06-configuring-services.md)
-* [Setting up a self-signed SSL certificate](https://documentation.spryker.com/docs/setting-up-a-self-signed-ssl-certificate) 
+* [Setting up a self-signed SSL certificate](https://documentation.spryker.com/docs/setting-up-a-self-signed-ssl-certificate)
 * [Additional DevOPS guidelines](https://documentation.spryker.com/docs/additional-devops-guidelines)
-
