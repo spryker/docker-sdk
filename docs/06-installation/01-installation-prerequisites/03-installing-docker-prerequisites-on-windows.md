@@ -17,7 +17,7 @@ Review the minimum system requirements in the table:
 
 ## Installing and configuring the required software with WSL2
 
-Follow the steps below to install and configure the required software with WSL1:
+Follow the steps below to install and configure the required software with WSL2:
 
 1. [Enable WSL2 and install Docker Desktop](https://docs.docker.com/docker-for-windows/wsl/).
 
@@ -44,7 +44,7 @@ You've installed and configured the required software.
 We highly recommend [installing and configuring the required software with WSL2](#installing-and-configuring-the-required-software-with-WSL2) since WSL1 is outdated, and you may get multiple issues with its configuration. Use it only if you can't use WSL2.
 :::
 
-Follow the steps below to install and configure the required software.
+Follow the steps below to install and configure the required software with WSL1.
 
 ### Install Docker Desktop    
 
