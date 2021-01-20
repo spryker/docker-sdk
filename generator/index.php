@@ -111,6 +111,23 @@ if (!empty($projectData['services']['dashboard'])) {
     );
 }
 
+if (!empty($projectData['services']['database']['slaves'])) {
+    $slaves = (int)$projectData['services']['database']['slaves'];
+    $projectData['services']['database']['slave-services'] = array_map(function ($index) {
+        return 'slave' . $index;
+    }, range(1, $slaves));
+
+    $database_replicas = [];
+    foreach ($projectData['services']['database']['slave-services'] as $slave) {
+        $database_replicas[] = [
+            'ZED_DB_HOST' => 'database_' . $slave,
+            'ZED_DB_PORT' => '3306'
+        ];
+    }
+
+    $projectData['services']['database']['replicas'] = json_encode($database_replicas, JSON_UNESCAPED_SLASHES);
+}
+
 // Enhancing redis master/slaves configuration
 if (!empty($projectData['services']['key_value_store']['slaves'])) {
     $slaves = (int)$projectData['services']['key_value_store']['slaves'];
