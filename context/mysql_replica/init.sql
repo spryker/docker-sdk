@@ -2,5 +2,7 @@ CHANGE MASTER TO
   MASTER_HOST='database',
   MASTER_USER='root',
   MASTER_PASSWORD='secret',
-  master_use_gtid=slave_pos;
+  MASTER_LOG_FILE='master-bin.000001';
+
+CHANGE MASTER TO MASTER_USE_GTID = slave_pos;
 START SLAVE;
