@@ -44,6 +44,8 @@ Service::Scheduler::unpause() {
 
     # shellcheck disable=SC2016
     Compose::exec 'curl -sLI -X POST ${SPRYKER_SCHEDULER_HOST}:${SPRYKER_SCHEDULER_PORT}/cancelQuietDown' >/dev/null || true
+
+    Console::end "[DONE]"
 }
 
 function Service::Scheduler::start() {

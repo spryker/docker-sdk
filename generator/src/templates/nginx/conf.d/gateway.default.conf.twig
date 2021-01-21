@@ -25,6 +25,11 @@ map "${SPRYKER_XDEBUG_ENABLE}" $xdebug_mode {
     default "$xdebug_mode_from_cookie";
 }
 
+map "${SPRYKER_TESTING_ENABLE}" $testing_mode {
+    "1"      "1";
+    default "";
+}
+
 server {
     server_name _ default_ssl; # This is just an invalid value which will never trigger on a real hostname.
     listen 443 ssl http2;
@@ -57,7 +62,7 @@ upstream {{ upstream }}_xdebug {
     server frontend:{{ debugPort }};
 }
 {% endif %}
-{% include "nginx/http/gateway/server.conf.twig" with {
+{% include "nginx/http/gateway/#{applicationData['application']}.server.conf.twig" with {
     ssl: ssl,
     endpoint: endpoint,
     endpointData: endpointData,
@@ -67,7 +72,7 @@ upstream {{ upstream }}_xdebug {
 
 {% if applicationData['application'] != 'static' %}
 # Debug: {{ endpoint }}
-{% include "nginx/http/gateway/server.conf.twig" with {
+{% include "nginx/http/gateway/#{applicationData['application']}.server.conf.twig" with {
     portToListen: debugPort,
     ssl: ssl,
     endpoint: endpoint,

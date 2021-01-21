@@ -5,10 +5,95 @@ const http = require('http');
 const {promisify} = require('util');
 const {spawn} = require('child_process');
 
+class Dispatcher {
+
+    dispatch(request, response, requestBody) {
+        const command = '_' + request.method.toLowerCase() +  '_' + request.url.replace(/[^a-zA-Z0-9]/g, "");
+
+        if (typeof this[command] !== 'undefined') {
+            this[command](request, response, requestBody);
+            return true;
+        }
+
+        response.statusCode = 404;
+        response.end();
+
+        return false;
+    }
+
+    _post_console(request, response, requestBody) {
+
+        response.setHeader('Content-Type', 'text/plain');
+
+        let child;
+        try {
+            child = spawn('bash', ['-c', requestBody]);
+        } catch (error) {
+            console.error(error);
+            response.write(error.message);
+            response.statusCode = 400;
+            response.end();
+            return;
+        }
+
+        console.info(requestBody);
+        child.stdout.on('data', (chunk) => {
+            response.write(chunk.toString());
+        });
+        child.on('close', (code) => {
+            response.statusCode = code === 0 ? 200 : 400;
+            response.end();
+        });
+
+        child.on('error', (error) => {
+            console.error(error);
+            response.write(error.message);
+            response.statusCode = 400;
+            response.end();
+        });
+    }
+
+    _options_glueSchema(request, response) {
+        response.setHeader('Access-Control-Allow-Origin', '*');
+        response.setHeader('Access-Control-Allow-Methods', 'GET');
+        response.statusCode = 201;
+        response.end();
+    }
+
+    _get_glueSchema(request, response) {
+        const fileLocation = process.env.SPRYKER_REST_API_SCHEMA_PATH || 'src/Generated/Glue/Specification/spryker_rest_api.schema.yml';
+        const baseUrl = request.headers['x-schema-base-url'] || '';
+
+        fs.readFile(process.env.PWD + '/' + fileLocation, 'utf8', function (error,schemaContent) {
+
+            response.setHeader('Access-Control-Allow-Origin', '*');
+            response.setHeader('Access-Control-Allow-Methods', 'GET');
+
+            if (error) {
+                response.setHeader('Content-Type', 'text/plain');
+                response.write(error.toString());
+                response.statusCode = 500;
+                response.end();
+                return;
+            }
+
+            if (baseUrl !== '') {
+                schemaContent = schemaContent.replace(/(servers:\s*-\s*url:\s*['"])[^'"]*?(['"])/gm, '$1' + baseUrl + '$2');
+            }
+
+            response.setHeader('Content-Type', 'text/yaml');
+            response.write(schemaContent);
+            response.statusCode = 200;
+            response.end();
+        });
+    }
+}
+
 class Server {
 
-    constructor() {
+    constructor(dispatcher) {
         this._server = http.createServer(this._onRequest.bind(this));
+        this._dispatcher = dispatcher;
     }
 
     listen(port, host) {
@@ -21,36 +106,8 @@ class Server {
     }
 
     _onRequest(request, response) {
-        response.setHeader('Content-Type', 'text/plain');
-
         this._readRequest(request, response, requestBody => {
-
-            let child;
-            try {
-                child = spawn('bash', ['-c', requestBody]);
-            } catch (error) {
-                console.error(error);
-                response.write(error.message);
-                response.statusCode = 400;
-                response.end();
-                return;
-            }
-
-            console.info(requestBody);
-            child.stdout.on('data', (chunk) => {
-                response.write(chunk.toString());
-            });
-            child.on('close', (code) => {
-                response.statusCode = code === 0 ? 200 : 400;
-                response.end();
-            });
-
-            child.on('error', (error) => {
-                console.error(error);
-                response.write(error.message);
-                response.statusCode = 400;
-                response.end();
-            });
+            this._dispatcher.dispatch(request, response, requestBody);
         });
     }
 
@@ -87,7 +144,7 @@ class Logger {
     }
 }
 
-const server = new Server();
+const server = new Server(new Dispatcher());
 server.listen(9000, '0.0.0.0');
 
 const logger = new Logger();
