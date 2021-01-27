@@ -258,11 +258,14 @@ foreach ($projectData['groups'] ?? [] as $groupName => $groupData) {
             }
 
             if ($applicationData['application'] === 'zed') {
+                $services = [];
 
-                $services = array_replace_recursive(
-                    $projectData['regions'][$groupData['region']]['stores'][$endpointData['store']]['services'],
-                    $endpointData['services'] ?? []
-                );
+                if (array_key_exists('store', $endpointData)) {
+                    $services = array_replace_recursive(
+                        $projectData['regions'][$groupData['region']]['stores'][$endpointData['store']]['services'],
+                        $endpointData['services'] ?? []
+                    );
+                }
 
                 $envVarEncoder->setIsActive(true);
                 file_put_contents(
@@ -298,11 +301,14 @@ foreach ($projectData['groups'] ?? [] as $groupName => $groupData) {
             }
 
             if ($applicationData['application'] === 'yves') {
+                $services = [];
 
-                $services = array_replace_recursive(
-                    $projectData['regions'][$groupData['region']]['stores'][$endpointData['store']]['services'],
-                    $endpointData['services'] ?? []
-                );
+                if (array_key_exists('store', $endpointData)) {
+                    $services = array_replace_recursive(
+                        $projectData['regions'][$groupData['region']]['stores'][$endpointData['store']]['services'],
+                        $endpointData['services'] ?? []
+                    );
+                }
 
                 if ($endpointData['store'] === ($projectData['docker']['testing']['store'] ?? '')) {
                     $envVarEncoder->setIsActive(true);
