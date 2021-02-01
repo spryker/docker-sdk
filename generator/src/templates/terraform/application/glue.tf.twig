@@ -5,7 +5,8 @@
 } %}
 {% include "terraform/search/#{project['services']['search']['engine']}.tf.twig" with {
     serviceData: project['services']['search'],
-    serviceName: 'search'
+    serviceName: 'search',
+    project: project
 } %}
 {% include "terraform/mail/mail.tf.twig" with {
     serviceData: regionData['services']['mail']

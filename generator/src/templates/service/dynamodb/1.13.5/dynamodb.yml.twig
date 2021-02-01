@@ -1,0 +1,18 @@
+  {{ serviceName }}:
+    image: amazon/dynamodb-local:1.13.5
+    networks:
+      - private
+    labels:
+      'spryker.app.name': dynamodb
+      'spryker.app.type': aws
+      'spryker.project': ${SPRYKER_DOCKER_PREFIX}:${SPRYKER_DOCKER_TAG}
+    working_dir: /home/dynamodblocal
+    command: "-jar DynamoDBLocal.jar -sharedDb -dbPath ."
+    healthcheck:
+        test: ["CMD-SHELL", "curl -f http://key_value_store:8000/shell/ || exit 1"]
+        interval: 1s
+        timeout: 10s
+        retries: 3
+    volumes:
+      - {{ serviceName }}-{{ serviceData['engine'] }}-data:/home/dynamodblocal
+{% include "application-volumes.yml.twig" with project %}
