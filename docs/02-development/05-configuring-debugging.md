@@ -25,7 +25,7 @@ To configure Xdebug in PhpStorm:
 
 2. In the *Xdebug* section:
 
-      1. Depending on your requirements, enter a **Debug port**.
+      1. Depending on your requirements, enter a **Debug ports**. As an example: `9000,9003`, to support Xdebug v2 and v3.
       2. Select the **Can accept external connections** checkbox.
       3. Clear the **Force break at first line when no path mapping specified** and **Force break at first line when a script is outside the project** checkboxes.
 
