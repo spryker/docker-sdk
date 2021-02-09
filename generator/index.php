@@ -303,14 +303,15 @@ foreach ($projectData['groups'] ?? [] as $groupName => $groupData) {
             if ($applicationData['application'] === 'yves') {
                 $services = [];
 
-                if (array_key_exists('store', $endpointData)) {
+                $isEndpointDataHasStore = array_key_exists('store', $endpointData);
+                if ($isEndpointDataHasStore) {
                     $services = array_replace_recursive(
                         $projectData['regions'][$groupData['region']]['stores'][$endpointData['store']]['services'],
                         $endpointData['services'] ?? []
                     );
                 }
 
-                if ($endpointData['store'] === ($projectData['docker']['testing']['store'] ?? '')) {
+                if ($isEndpointDataHasStore && $endpointData['store'] === ($projectData['docker']['testing']['store'] ?? '')) {
                     $envVarEncoder->setIsActive(true);
                     file_put_contents(
                         $deploymentDir . DS . 'env' . DS . 'cli' . DS . 'testing.env',
