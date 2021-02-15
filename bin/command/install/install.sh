@@ -16,8 +16,8 @@ function Command::install() {
         return "${TRUE}"
     fi
 
-    Console::info "${INFO}Please, run the following commands in order to prepare the environment:" >/dev/stderr
-    Console::log "${BLOCKDARK}${output}\n${NC}\n\n" >/dev/stderr
+    Console::info "${INFO}Please, run the following commands in order to prepare the environment:" >&2
+    Console::log "${BLOCKDARK}${output}\n${NC}\n\n" >&2
 
     return "${TRUE}"
 }
