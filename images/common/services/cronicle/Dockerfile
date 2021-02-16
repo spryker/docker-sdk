@@ -3,10 +3,6 @@ ARG SPRYKER_PARENT_IMAGE
 
 FROM ${SPRYKER_PARENT_IMAGE} AS scheduler
 
-ARG CRONICLE_VERSION='0.8.49'
-ENV CRONICLE_echo=1
-ENV CRONICLE_foreground=1
-
 USER root
 
 RUN --mount=type=cache,id=aptlib,sharing=locked,target=/var/lib/apt \
@@ -45,11 +41,10 @@ RUN --mount=type=cache,id=npm,sharing=locked,target=/root/.npm \
   /usr/bin/install -d -m 777 /home/spryker/cronicle \
   && cd /home/spryker/cronicle \
   && mkdir -p data logs plugins \
-  && curl -L "https://github.com/sprymiker/Cronicle/archive/proto.tar.gz" | tar zxvf - --strip-components 1 \
+  && curl -L "https://github.com/spryker-sdk/Cronicle/archive/feature/sc-5888/master-light-weight-scheduler.tar.gz" | tar zxvf - --strip-components 1 \
   && npm install \
   && node bin/build.js dist
 
-COPY --chown=spryker cronicle/bin /home/spryker/cronicle/bin
 COPY --chown=spryker cronicle/conf /home/spryker/cronicle/conf
 ADD cronicle/entrypoint.sh /home/spryker/cronicle/entrypoint.sh
 
