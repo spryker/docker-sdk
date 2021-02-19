@@ -76,6 +76,8 @@ function Command::bootstrap() {
     local USER_FULL_ID=$(Environment::getFullUserId)
 
     Console::verbose::start "Building generator..."
+
+    Console::verbose "${INFO}> Build image 'spryker_docker_sdk'${NC}"
     docker build -t spryker_docker_sdk \
         -f "${SOURCE_DIR}/generator/Dockerfile" \
         --progress="${PROGRESS_TYPE:-auto}" \
