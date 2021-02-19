@@ -443,6 +443,19 @@ The format of the key  is `domain[:port]`. The key must be project-wide unique.
 * `groups: applications: endpoints: store:` defines the *Store* as context to process requests within.
 * `groups: applications: endpoints: services:` defines the *Store*-specific settings for services. Only `session:` is currently allowed here. See [Services](#services) to learn more.
 * `groups: applications: endpoints: cors-allow-origin:` defines a CORS header. It is allowed for `glue` application only. Possible values are `single domain as string` or `*` to allow all domains.
+* `groups: applications: endpoints: internalHostEndpoint:` defines an internal host endpoint. It is allowed for `zed` application only. All other application will get the internal host instead of the the public endpoint (`zedHost`). Example, if `yves` and `zed` are in the same network they can talk to each other internally without to leave the internal network.  
+
+```yaml
+groups:
+  GROUP:
+    applications:
+      Zed:
+        application: zed
+        endpoints:
+          spryker-zed.domain.com:
+            internalHostEndpoint: spryker-zed-internal:80
+            store: B2B
+```
 
 ### services: endpoints:
 Defines the list of *Endpoints* to access a *Service* for development or monitoring needs. The format of the key  is `domain[:port]`. The key must be project-wide unique.

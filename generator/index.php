@@ -153,9 +153,11 @@ foreach ($projectData['groups'] ?? [] as $groupName => $groupData) {
                         $applicationName,
                         $application,
                         $endpoint,
+                        $endpointData,
                         $store
                     ) {
                         $projectData['_endpointMap'][$store][$application] = $endpoint;
+                        $projectData['_endpointMap'][$store][$application . '_internalHostEndpoint'] = $endpointData['internalHostEndpoint'] ?? '';
                         $projectData['groups'][$groupName]['applications'][$applicationName]['endpoints'][$endpoint]['primal'] = true;
                     };
                 }
