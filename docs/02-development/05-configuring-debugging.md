@@ -122,31 +122,6 @@ Set up a new `Launch.json`:
 }
 ```
 
-## Switching to the debugging mode
-There are several ways to switch to the debugging mode:
-
-* To debug a web application, pass the `XDEBUG_SESSION` cookie with a string value. If you are using the Xdebug helper browser extension, in the extension menu, select **debug**.
-* To run all applications in the debugging mode, run `docker/sdk {run|start|up} -x`.
-* To debug a console command in cli, run `{command} -x`.
-
-
-
-
-## Debugging with Xdebug
-
-To debug an application:
-
-1. Make a breakpoint:
-![Breakpoint](https://spryker.s3.eu-central-1.amazonaws.com/docs/Developer+Guide/Docker+SDK/Configuring+debugging+in+Docker/breakpoint.png)
-
-2. Select *Start listening* ![Start listening](https://spryker.s3.eu-central-1.amazonaws.com/docs/Developer+Guide/Installation/Spryker+in+Docker/Debugging+Setup+in+Docker/start-listening.png).
-
-3. Open the application in a browser.
-
-4. Navigate to the action you have configured the breakpoint for in step 1. The debugging process should be running in the IDE:
-![Debug process](https://spryker.s3.eu-central-1.amazonaws.com/docs/Developer+Guide/Docker+SDK/Configuring+debugging+in+Docker/debug-process.png)
-
-
 
 ## Avoiding timeouts
 
@@ -163,3 +138,40 @@ $config[ZedRequestConstants::CLIENT_OPTIONS] = [
 
 :::(Warning) (Unlimited timeout)
 If you set unlimited timeout, this affects all Zed Requests, not only debugging ones.
+:::
+
+
+## Switching to the debugging mode
+There are several ways to switch to the debugging mode:
+
+* To debug a web application, pass the `XDEBUG_SESSION` cookie with a string value. If you are using the Xdebug helper browser extension, in the extension menu, select **debug**.
+* To run all applications in the debugging mode, run `docker/sdk {run|start|up} -x`.
+* To debug a console command in cli, run it with the `-x` option.
+
+## Debugging with Xdebug
+
+This section describes how to debug with Xdebug.
+
+### Debbugging applications with Xdebug
+
+To debug an application:
+
+1. Make a breakpoint:
+![Breakpoint](https://spryker.s3.eu-central-1.amazonaws.com/docs/Developer+Guide/Docker+SDK/Configuring+debugging+in+Docker/breakpoint.png)
+
+2. Select *Start listening* ![Start listening](https://spryker.s3.eu-central-1.amazonaws.com/docs/Developer+Guide/Installation/Spryker+in+Docker/Debugging+Setup+in+Docker/start-listening.png).
+
+3. Open the application in a browser.
+
+4. Navigate to the action you have configured the breakpoint for in step 1. The debugging process should be running in the IDE:
+![Debug process](https://spryker.s3.eu-central-1.amazonaws.com/docs/Developer+Guide/Docker+SDK/Configuring+debugging+in+Docker/debug-process.png)
+
+### Debugging console commands and tests with Xdebug
+
+To debug a console command or a test in a debugging mode, run it with the `-x` option.
+
+Find several examples below:
+* `docker/sdk cli -x`
+* `docker/sdk cli -x console queue:worker:start`
+* `docker/sdk console -x queue:worker:start`
+* `docker/sdk testing -x codecept run -codeception.yml`
