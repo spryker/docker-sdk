@@ -20,7 +20,10 @@ $loaders = new ChainLoader([
     new FilesystemLoader(APPLICATION_SOURCE_DIR . DS . 'templates'),
     new FilesystemLoader($deploymentDir),
 ]);
-$twig = new Environment($loaders);
+$twig = new Environment($loaders, [
+    'debug' => true,
+]);
+$twig->addExtension(new \Twig\Extension\DebugExtension());
 $nginxVarEncoder = new class() {
     public function encode($value)
     {
@@ -139,10 +142,15 @@ foreach ($projectData['groups'] ?? [] as $groupName => $groupData) {
                 $port = $applicationData['endpoints'][$host] ?: '';
                 $apiKey = generateToken(32);
 
-                $projectData['_schedulers'][$groupName][$applicationData['scheduler-id']] = [
-                    'base_url' => sprintf('%s://%s:%s', getCurrentScheme($projectData), $host, $port),
+                $schedulerData = [
+                    'base_url' => rtrim(sprintf('%s://%s:%s', getCurrentScheme($projectData), $host, $port), ':'),
                     'api_key' => $apiKey,
                 ];
+
+                $projectData['_schedulers'][$groupName][$applicationData['scheduler-id']] = $schedulerData;
+
+                $schedulerData['app_name'] = $applicationName;
+                $projectData['_schedulers']['available_schedulers'][] = $schedulerData;
             }
 
             $entryPoint = $endpointData['entry-point'] ?? ucfirst(strtolower($applicationData['application']));

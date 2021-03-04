@@ -135,7 +135,7 @@ function Compose::up() {
     Registry::Flow::runAfterUp
 
     Data::load ${noCache} ${doData}
-#     Service::Scheduler::start ${noCache} ${doJobs}
+    Service::Scheduler::start ${noCache} ${doJobs}
 }
 
 function Compose::run() {
@@ -143,10 +143,21 @@ function Compose::run() {
 
     Console::verbose "${INFO}Running Spryker containers${NC}"
     sync start
-    Compose::command up -d --remove-orphans \
-      --scale "webdriver=$([ -n "${SPRYKER_TESTING_ENABLE}" ] && echo 1 || echo 0)" \
-      --scale "scheduler=$([ -n "${SPRYKER_TESTING_ENABLE}" ] && echo 0 || echo 1)" \
-      "${@}"
+
+    local webdriverServices="--scale \"webdriver=$([ -n "${SPRYKER_TESTING_ENABLE}" ] && echo '1' || echo '0')\" "
+    local schedulerServices="--scale \"scheduler=$([ -n "${SPRYKER_TESTING_ENABLE}" ] && echo '0' || echo '1')\" "
+    local schedulerApplications=""
+
+    local schedulerImage="${SPRYKER_DOCKER_PREFIX}_scheduler_app:${SPRYKER_DOCKER_TAG}"
+
+    if [ ! -z "${SPRYKER_SCHEDULER_APP_ENABLED}" ] && [ "${SPRYKER_SCHEDULER_APP_ENABLED}" -eq "1" ]; then
+       for scheduler in "${SPRYKER_AVAILABLE_SCHEDULERS[@]}"; do
+          eval "${scheduler}"
+
+          schedulerApplications+="--scale \"${APP_NAME}=$([ -n "${SPRYKER_TESTING_ENABLE}" ] && echo '0' || echo '1')\" "
+       done
+    fi
+    Compose::command up -d --remove-orphans ${webdriverServices}${schedulerServices}${schedulerApplications} "${@}"
 
     # Note: Compose::run can be used for running only one container, e.g. CLI.
     Registry::Flow::runAfterRun

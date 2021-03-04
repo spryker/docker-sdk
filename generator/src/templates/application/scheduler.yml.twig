@@ -28,6 +28,9 @@
     env_file:
         - ${DEPLOYMENT_PATH}/env/{{ applicationName }}.env
     volumes:
+        - /Users/sushko/Projects/Cronicle/bin:/home/spryker/cronicle/bin
+        - /Users/sushko/Projects/Cronicle/lib:/home/spryker/cronicle/lib
+        - /Users/sushko/Projects/Cronicle/htdocs:/home/spryker/cronicle/htdocs
         - {{ applicationName }}-data:/home/spryker/cronicle/data
         - logs:${SPRYKER_LOG_DIRECTORY}:rw
 {% if _mountMode != 'baked' %}

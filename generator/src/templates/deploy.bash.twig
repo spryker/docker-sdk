@@ -133,6 +133,10 @@ readonly SPRYKER_BUILD_DATE="${SPRYKER_BUILD_DATE}"
 readonly SPRYKER_REPOSITORY_HASH="${SPRYKER_BUILD_HASH:-"$(git rev-parse --verify HEAD 2>/dev/null || echo "head")"}"
 readonly SPRYKER_SCHEDULER_APP_ENABLED="{{ services['scheduler']['engine'] is not defined ? '1' : '' }}"
 
+{% if services['scheduler']['engine'] is not defined %}
+readonly SPRYKER_AVAILABLE_SCHEDULERS=({{ _schedulers['available_schedulers'] | map((scheduler) =>  "'local APP_NAME=\"" ~ scheduler['app_name'] ~ "\"; local BASE_URL=\"" ~ scheduler['base_url'] ~ "\"; local API_KEY=\"" ~ scheduler['api_key'] ~ "\"'")| join(' ') | raw }})
+{% endif %}
+
 # Specific variables
 {% for serviceName, serviceData in services %}
 {% set engine = serviceData['engine'] | lower %}

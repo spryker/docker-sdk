@@ -1,91 +1,97 @@
 #!/bin/bash
 
 function Service::Scheduler::isInstalled() {
-    true
-#    [ "${SPRYKER_TESTING_ENABLE}" -eq 1 ] && return "${TRUE}"
-#
-#    Runtime::waitFor scheduler
-#    Console::start -n "Checking jobs are installed..."
-#
-#    # shellcheck disable=SC2016
-#    local jobsCount=$(Compose::exec 'curl -sL ${SPRYKER_SCHEDULER_HOST}:${SPRYKER_SCHEDULER_PORT}/scriptText -d "script=println Jenkins.instance.projects.collect{ it.name }.size" | tail -n 1' | tr -d " \n\r")
-#    [ "${jobsCount}" -gt 0 ] && Console::end "[INSTALLED]" && return "${TRUE}" || return "${FALSE}"
+   true
 }
 
 Service::Scheduler::pause() {
-    true
-#    [ "${SPRYKER_TESTING_ENABLE}" -eq 1 ] && return "${TRUE}"
-#
-#    Runtime::waitFor scheduler
-#    Console::start -n "Suspending scheduler..."
-#
-#    # shellcheck disable=SC2016
-#    Compose::exec 'curl -sLI -X POST ${SPRYKER_SCHEDULER_HOST}:${SPRYKER_SCHEDULER_PORT}/quietDown' >/dev/null || true
-#
-#    # TODO Send SIGTERM in cli-rpc.js
-#    local counter=1
-#    local interval=2
-#    local waitFor=60
-#    while :; do
-#        # shellcheck disable=SC2016
-#        local runningJobsCount=$(Compose::exec 'curl -sL ${SPRYKER_SCHEDULER_HOST}:${SPRYKER_SCHEDULER_PORT}/computer/api/xml?xpath=*/busyExecutors/text\(\) | tail -n 1' | tr -d " \n\r")
-#        [ "${runningJobsCount}" -eq 0 ] && break
-#        [ "${counter}" -ge "${waitFor}" ] && break
-#        counter=$((counter + interval))
-#        sleep "${interval}"
-#    done
-#
-#    Console::end "[DONE]"
+   [ ! -z "${SPRYKER_TESTING_ENABLE}" ] && [ "${SPRYKER_TESTING_ENABLE}" -eq "1" ] && return "${TRUE}"
+
+   Runtime::waitFor scheduler
+   Console::start -n "Suspending scheduler..."
+
+   local masterStateUri="/api/app/update_master_state"
+
+   for scheduler in "${SPRYKER_AVAILABLE_SCHEDULERS[@]}"; do
+     eval "${scheduler}"
+
+     local response=$(Compose::exec 'curl -sL -X POST '${BASE_URL}${masterStateUri}' --header "X-API-Key: '${API_KEY}'" --header "Content-Type: application/json" --data "{\"enabled\": 0}"' | jq .code)
+     [ "${response}" -gt 0 ] && return "${FALSE}"
+   done
+
+   local counter=1
+   local interval=2
+   local waitFor=60
+
+   local jobsActiveUri="/api/app/get_active_jobs/v1"
+
+   for scheduler in "${SPRYKER_AVAILABLE_SCHEDULERS[@]}"; do
+      eval "${scheduler}"
+
+      local runningJobsCount=$(Compose::exec 'curl -sL '${BASE_URL}${jobsActiveUri}' --header "X-API-Key: '${API_KEY}'" | jq -r '.jobs' | jq length')
+
+      [ "${runningJobsCount}" -eq "0" ] && break
+      [ "${counter}" -ge "${waitFor}" ] && break
+      counter=$((counter + interval))
+      sleep "${interval}"
+   done
+
+   Console::end "[DONE]"
 }
 
 Service::Scheduler::unpause() {
-    true
-#    [ "${SPRYKER_TESTING_ENABLE}" -eq 1 ] && return "${TRUE}"
-#
-#    Runtime::waitFor scheduler
-#    Console::start -n "Resuming scheduler..."
-#
-#    # shellcheck disable=SC2016
-#    Compose::exec 'curl -sLI -X POST ${SPRYKER_SCHEDULER_HOST}:${SPRYKER_SCHEDULER_PORT}/cancelQuietDown' >/dev/null || true
+   [ ! -z "${SPRYKER_TESTING_ENABLE}" ] && [ "${SPRYKER_TESTING_ENABLE}" -eq "1" ] && return "${TRUE}"
+
+   Runtime::waitFor scheduler
+   Console::start -n "Resuming scheduler..."
+
+   local masterStateUri="/api/app/update_master_state"
+
+   for scheduler in "${SPRYKER_AVAILABLE_SCHEDULERS[@]}"; do
+     eval "${scheduler}"
+     local response=$(Compose::exec 'curl -sL -X POST '${BASE_URL}${masterStateUri}' --header "X-API-Key: '${API_KEY}'" --header "Content-Type: application/json" --data "{\"enabled\": 1}"' | jq .code)
+     [ "${response}" -gt 0 ] && return "${FALSE}"
+   done
+
+   Compose::exec 'curl -sLI -X POST ${SPRYKER_SCHEDULER_HOST}:${SPRYKER_SCHEDULER_PORT}/cancelQuietDown' >/dev/null || true
 }
 
 function Service::Scheduler::start() {
-    true
-#
-#    local force=''
-#    if [ "$1" == '--force' ]; then
-#        force=1
-#        shift || true
-#    fi
-#
-#    if [ -z "${force}" ] && Service::Scheduler::isInstalled; then
-#        return "${TRUE}"
-#    fi
-#
-#    Service::Scheduler::_run setup "Creating"
+   Service::Scheduler::isInstalled
+
+   local force=''
+   if [ "$1" == '--force' ]; then
+       force=1
+       shift || true
+   fi
+
+   if [ -z "${force}" ] && Service::Scheduler::isInstalled; then
+       return "${TRUE}"
+   fi
+
+   Service::Scheduler::_run setup "Creating"
 }
 
 function Service::Scheduler::stop() {
-    true
-#    Service::Scheduler::_run suspend "Suspending"
+   Service::Scheduler::_run suspend "Suspending"
 }
 
 function Service::Scheduler::clean() {
-    true
-#    Service::Scheduler::_run clean "Cleaning"
+   true
 }
 
-#function Service::Scheduler::_run() {
-#    [ "${SPRYKER_TESTING_ENABLE}" -eq 1 ] && return "${TRUE}"
-#
-#    Runtime::waitFor scheduler
-#
-#    for region in "${SPRYKER_STORES[@]}"; do
-#        eval "${region}"
-#        for store in "${STORES[@]}"; do
-#            SPRYKER_CURRENT_STORE="${store}"
-#            Console::info "${2} scheduler jobs for ${SPRYKER_CURRENT_STORE} store."
-#            Compose::exec "vendor/bin/install -r ${SPRYKER_PIPELINE} -s scheduler-${1}"
-#        done
-#    done
-#}
+function Service::Scheduler::_run() {
+   [ ! -z "${SPRYKER_TESTING_ENABLE}" ] && [ "${SPRYKER_TESTING_ENABLE}" -eq "1" ] && return "${TRUE}"
+
+   Runtime::waitFor scheduler
+
+   for region in "${SPRYKER_STORES[@]}"; do
+       eval "${region}"
+
+       for store in "${STORES[@]}"; do
+           SPRYKER_CURRENT_STORE="${store}"
+           Console::info "${2} scheduler jobs for ${SPRYKER_CURRENT_STORE} store."
+           Compose::exec "vendor/bin/install -r ${SPRYKER_PIPELINE} -s scheduler-${1}"
+       done
+   done
+}

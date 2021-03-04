@@ -17,10 +17,10 @@
 		[ "listPush", "global/users", { "username": "admin" } ],
 		[ "listCreate", "global/plugins", {} ],
 		[ "listPush", "global/plugins", {
-			"id": "shellplug",
-			"title": "Shell Script",
+			"id": "sprykershellplug",
+			"title": "Spryker Shell Script",
 			"enabled": 1,
-			"command": "bin/shell-plugin.js",
+			"command": "bin/spryker-shell-plugin.js",
 			"username": "admin",
 			"modified": 1434125333,
 			"created": 1434125333,
