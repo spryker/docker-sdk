@@ -55,6 +55,7 @@ To start working with Spryker in Docker, see [Docker SDK](https://documentation.
 |   |   | mariadb-10.2  |
 |   |   | mariadb-10.3  |
 |   |   | mariadb-10.4  |
+|   |   | mariadb-10.5  |
 | broker  | rabbitmq  | 3.7  |
 | session  | redis  | 5.0  |
 | key_value_store  | redis  | 5.0  |
