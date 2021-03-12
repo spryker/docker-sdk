@@ -53,7 +53,7 @@ Service::Scheduler::unpause() {
      [ "${response}" -gt 0 ] && return "${FALSE}"
    done
 
-   Compose::exec 'curl -sLI -X POST ${SPRYKER_SCHEDULER_HOST}:${SPRYKER_SCHEDULER_PORT}/cancelQuietDown' >/dev/null || true
+   return "${TRUE}"
 }
 
 function Service::Scheduler::start() {

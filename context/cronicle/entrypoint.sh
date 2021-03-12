@@ -36,5 +36,8 @@ then
   touch "$DATA_DIR/.setup_done"
 fi
 
+Run hook before Cronicle start
+node "$BIN_DIR/hook.js" before-start
+
 # Run cronicle
 bash "$BIN_DIR/control.sh" start
