@@ -1,19 +1,16 @@
-This document describes how to install Spryker in [Development Mode](01-choosing-an-installation-mode.md#development-mode).
+This document describes how to install Spryker in [Development Mode](01-choosing-an-installation-mode.md#development-mode) on Windows.
 
-## Installing Docker prerequisites
+## Installing Docker prerequisites on Windows
 
-To install Docker prerequisites, follow one of the guides:
-* [Installing Docker prerequisites on MacOS](../01-installation-prerequisites/01-installing-docker-prerequisites-on-macos.md)
-* [Installing Docker prerequisites on Linux](../01-installation-prerequisites/01-installing-docker-prerequisites-on-linux.md)
-* [Installing Docker prerequisites on Windows](../01-installation-prerequisites/01-installing-docker-prerequisites-on-windows.md)
+To install Docker prerequisites for Windows, follow [Installing Docker prerequisites on Windows](../01-installation-prerequisites/01-installing-docker-prerequisites-on-windows.md).
 
 
 
 
-## Installing Spryker in Development mode
+## Installing Spryker in Development mode on Windows
 Follow the steps to install Spryker in Development mode:
 
-1. Windows: Open Ubuntu.
+1. Open Ubuntu.
 2. Open a terminal.
 3. Create a new folder and navigate into it.
 4. Depending on the desired [Demo Shop](https://documentation.spryker.com/docs/en/about-spryker#spryker-b2b-b2c-demo-shops):
@@ -63,13 +60,13 @@ $ docker-compose --version
 ```
 :::
 
-8. Windows: In Ubuntu, change line 7 of `{shop_name}/docker/context/php/debug/etc/php/debug.conf.d/69-xdebug.ini` to the following:
+8. Change line 7 of `{shop_name}/docker/context/php/debug/etc/php/debug.conf.d/69-xdebug.ini` to the following:
 
 ```text
 xdebug.remote_host=host.docker.internal
 ```
 
-9. Windows: Add your user to the `docker` group:
+9. Add your user to the `docker` group:
 
 ```bash
 sudo usermod -aG docker $USER
@@ -89,13 +86,6 @@ docker/sdk up
 ```
 
 12. Update the `hosts` file:
-
-  - Linux/MacOS:				
-```bash
-echo "127.0.0.1 zed.de.spryker.local yves.de.spryker.local glue.de.spryker.local zed.at.spryker.local yves.at.spryker.local glue.at.spryker.local zed.us.spryker.local yves.us.spryker.local glue.us.spryker.local mail.spryker.local scheduler.spryker.local queue.spryker.local" | sudo tee -a /etc/hosts
-```
-@(Info)()(If needed, add corresponding entries for other stores. For example, if you are going to have a US store, add the following entries: `zed.us.spryker.local glue.us.spryker.local yves.us.spryker.local`)
-  - Windows:
     1. Open the Start menu.
     2. In the search field, enter `Notepad`.
     3. Right-click *Notepad* and select **Run as administrator**.
@@ -129,7 +119,7 @@ To ensure that the installation is successful, make sure you can access the foll
 | Mailhog UI (email catcher) | mail.spryker.local |
 
 :::(Info) (RabbitMQ UI credentials)
-To access RabbitMQ UI, use `spryker` as a username and `secret` as a password. You can adjust the credentials in `deploy.yml`. See [Deploy File Reference - 1.0](../../99-deploy.file.reference.v1.md) to learn about the Deploy file.
+To access RabbitMQ UI, use `spryker` as a username and `secret` as a password. You can adjust the credentials in `deploy.yml`. See [Deploy file reference - 1.0](../../99-deploy.file.reference.v1.md) to learn about the Deploy file.
 :::
 
 ## Getting the list of useful commands
@@ -140,7 +130,7 @@ To get the full and up-to-date list of commands, run `docker/sdk help`.
 
 * [Troubleshooting](../../troubleshooting.md)
 * [Configuring debugging](../../02-development-usage/05-configuring-debugging.md)
-* [Deploy File Reference - 1.0](../../99-deploy.file.reference.v1.md)
+* [Deploy file reference - 1.0](../../99-deploy.file.reference.v1.md)
 * [Configuring services](../../06-configuring-services.md)
 * [Setting up a self-signed SSL certificate](https://documentation.spryker.com/docs/setting-up-a-self-signed-ssl-certificate)
 * [Additional DevOPS guidelines](https://documentation.spryker.com/docs/additional-devops-guidelines)
