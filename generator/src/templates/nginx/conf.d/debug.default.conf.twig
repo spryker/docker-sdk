@@ -2,7 +2,7 @@
 {% for applicationName, applicationData in groupData['applications'] %}
 {% for endpoint, endpointData in applicationData['endpoints'] %}
 {% if applicationData['application'] != 'static' %}
-{% set zedHost = _endpointMap[endpointData['store']]['zed-gateway'] | default('') %}
+{% set zedHost = _endpointMap[endpointData['store']]['backend-gateway'] | default('') %}
 
 {% include "nginx/http/#{applicationData['application']}.server.conf.twig" with {
     portToListen: _endpointDebugMap[endpoint],

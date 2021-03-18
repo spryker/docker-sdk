@@ -2,7 +2,7 @@
 {% block server %}
 {{ parent() }}
 
-{% include "nginx/vhost.d/zed-backoffice.default.conf.twig" with _context %}
+{% include "nginx/vhost.d/backoffice.default.conf.twig" with _context %}
 {% include "nginx/vhost.d/timeouts.conf.twig" with { timeout: timeout | default('1m') } %}
 {% endblock server %}
 

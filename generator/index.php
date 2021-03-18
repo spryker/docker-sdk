@@ -129,12 +129,12 @@ verbose('Generating ENV files... [DONE]');
 const YVES_APP = 'yves';
 const ZED_APP = 'zed';
 const GLUE_APP = 'glue';
-const ZED_BACKOFFICE_APP = 'zed-backoffice';
-const ZED_GATEWAY_APP = 'zed-gateway';
+const BACKOFFICE_APP = 'backoffice';
+const BACKEND_GATEWAY_APP = 'backend-gateway';
 
 const ENTRY_POINTS = [
-    ZED_GATEWAY_APP => 'Zed',
-    ZED_BACKOFFICE_APP => 'Zed',
+    BACKOFFICE_APP => 'Backoffice',
+    BACKEND_GATEWAY_APP => 'BackendGateway',
     ZED_APP => 'Zed',
     YVES_APP => 'Yves',
     GLUE_APP => 'Glue',
@@ -219,8 +219,8 @@ $environment = [
 function mapZedEndpoints(array $endpointMap): array
 {
     $zedApplicationsToCheck = [
-        ZED_BACKOFFICE_APP,
-        ZED_GATEWAY_APP,
+        BACKOFFICE_APP,
+        BACKEND_GATEWAY_APP,
     ];
 
     foreach ($zedApplicationsToCheck as $zedApplicationToCheck) {
@@ -228,7 +228,7 @@ function mapZedEndpoints(array $endpointMap): array
             if (array_key_exists($zedApplicationToCheck, $storeEndpointMap)) {
                 continue;
             }
-            $defaultZedApp = $storeEndpointMap[ZED_APP] ?? $storeEndpointMap[ZED_BACKOFFICE_APP];
+            $defaultZedApp = $storeEndpointMap[ZED_APP] ?? $storeEndpointMap[BACKOFFICE_APP];
             $endpointMap[$store][$zedApplicationToCheck] = $defaultZedApp;
         }
     }
@@ -299,8 +299,8 @@ foreach ($projectData['groups'] ?? [] as $groupName => $groupData) {
             }
 
             if ($applicationData['application'] === ZED_APP
-                || $applicationData['application'] === ZED_GATEWAY_APP
-                || $applicationData['application'] === ZED_BACKOFFICE_APP
+                || $applicationData['application'] === BACKEND_GATEWAY_APP
+                || $applicationData['application'] === BACKOFFICE_APP
             ) {
                 $services = array_replace_recursive(
                     $projectData['regions'][$groupData['region']]['stores'][$endpointData['store']]['services'],
