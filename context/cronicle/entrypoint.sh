@@ -8,6 +8,9 @@ DATA_DIR=$ROOT_DIR/data
 # PLUGINS_DIR needs to be the same as the exposed Docker volume in Dockerfile
 PLUGINS_DIR=$ROOT_DIR/plugins
 
+SPRYKER_CRONICLE_MODULE_NONSPLIT_DIR=/data/vendor/spryker/spryker/Bundles/SchedulerCronicle
+SPRYKER_CRONICLE_MODULE_SPLIT_DIR=/data/vendor/spryker/scheduler-cronicle
+
 rm -f "${ROOT_DIR}/logs/cronicled.pid"
 
 # The env variables below are needed for Docker and cannot be overwritten
@@ -19,15 +22,10 @@ export CRONICLE_foreground=1
 # Only run setup when setup needs to be done
 if [ ! -f "$DATA_DIR/.setup_done" ]
 then
-  bash "$BIN_DIR/control.sh" setup
+  cp -a "${SPRYKER_CRONICLE_MODULE_NONSPLIT_DIR}"/resource/* "${ROOT_DIR}" || true
+  cp -a "${SPRYKER_CRONICLE_MODULE_SPLIT_DIR}"/resource/* "${ROOT_DIR}" || true
 
-#  cp "$CONF_DIR/config.json" "$CONF_DIR/config.json.origin"
-#
-#  if [ -f "$DATA_DIR/config.json.import" ]
-#  then
-#    # Move in custom configuration
-#    cp "$DATA_DIR/config.json.import" "$CONF_DIR/config.json"
-#  fi
+  bash "$BIN_DIR/control.sh" setup
 
   # Create plugins directory
   mkdir -p "$PLUGINS_DIR"
