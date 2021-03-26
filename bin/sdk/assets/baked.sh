@@ -92,6 +92,7 @@ function Assets::build() {
     local cliImage="${SPRYKER_DOCKER_PREFIX}_cli:${SPRYKER_DOCKER_TAG}"
     local mode=${SPRYKER_ASSETS_MODE:-development}
 
+    Console::verbose "${INFO}> Building image '${builderAssetsImage}' with mode '${mode}'${NC}"
     docker build \
         -t "${builderAssetsImage}" \
         -f "${DEPLOYMENT_PATH}/images/baked/assets/Dockerfile" \

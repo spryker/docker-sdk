@@ -44,6 +44,7 @@ function Images::_buildApp() {
 
     Console::verbose "${INFO}Building Application images${NC}"
 
+    Console::verbose "${INFO}> Building image '${baseAppImage}'${NC}"
     docker build \
         -t "${baseAppImage}" \
         -f "${DEPLOYMENT_PATH}/images/common/application/Dockerfile" \
@@ -58,6 +59,7 @@ function Images::_buildApp() {
         --build-arg "SPRYKER_BUILD_STAMP=${SPRYKER_BUILD_STAMP:-""}" \
         "${DEPLOYMENT_PATH}/context" 1>&2
 
+    Console::verbose "${INFO}> Building image '${appImage}'${NC}"
     docker build \
         -t "${appImage}" \
         -f "${DEPLOYMENT_PATH}/images/${folder}/application/Dockerfile" \
@@ -78,6 +80,7 @@ function Images::_buildApp() {
         --build-arg "SPRYKER_BUILD_STAMP=${SPRYKER_BUILD_STAMP:-""}" \
         . 1>&2
 
+    Console::verbose "${INFO}> Building image '${localAppImage}'${NC}"
     docker build \
         -t "${localAppImage}" \
         -t "${runtimeImage}" \
@@ -87,6 +90,7 @@ function Images::_buildApp() {
         "${DEPLOYMENT_PATH}/context" 1>&2
 
     if [ -n "${SPRYKER_XDEBUG_MODE_ENABLE}" ]; then
+        Console::verbose "${INFO}> Building image '${runtimeImage}', because SPRYKER_XDEBUG_MODE_ENABLE is enabled${NC}"
         docker build \
             -t "${runtimeImage}" \
             -f "${DEPLOYMENT_PATH}/images/debug/application/Dockerfile" \
@@ -97,6 +101,7 @@ function Images::_buildApp() {
 
     Console::verbose "${INFO}Building CLI images${NC}"
 
+    Console::verbose "${INFO}> Building image '${baseCliImage}'${NC}"
     docker build \
         -t "${baseCliImage}" \
         -f "${DEPLOYMENT_PATH}/images/common/cli/Dockerfile" \
@@ -104,6 +109,7 @@ function Images::_buildApp() {
         --build-arg "SPRYKER_PARENT_IMAGE=${localAppImage}" \
         "${DEPLOYMENT_PATH}/context" 1>&2
 
+    Console::verbose "${INFO}> Building image '${cliImage}'${NC}"
     docker build \
         -t "${cliImage}" \
         -t "${runtimeCliImage}" \
@@ -119,6 +125,7 @@ function Images::_buildApp() {
         .  1>&2
 
     if [ -n "${SPRYKER_XDEBUG_MODE_ENABLE}" ]; then
+        Console::verbose "${INFO}> Building image '${runtimeCliImage}', because SPRYKER_XDEBUG_MODE_ENABLE is enabled${NC}"
         docker build \
             -t "${runtimeCliImage}" \
             -f "${DEPLOYMENT_PATH}/images/debug/cli/Dockerfile" \
@@ -140,6 +147,7 @@ function Images::_buildFrontend() {
 
     Console::verbose "${INFO}Building Frontend images${NC}"
 
+    Console::verbose "${INFO}> Building image '${baseFrontendImage}'${NC}"
     docker build \
         -t "${baseFrontendImage}" \
         -f "${DEPLOYMENT_PATH}/images/common/frontend/Dockerfile" \
@@ -149,6 +157,7 @@ function Images::_buildFrontend() {
         --build-arg "SPRYKER_BUILD_STAMP=${SPRYKER_BUILD_STAMP:-""}" \
         "${DEPLOYMENT_PATH}/context" 1>&2
 
+    Console::verbose "${INFO}> Building image '${frontendImage}'${NC}"
     docker build \
         -t "${frontendImage}" \
         -t "${runtimeFrontendImage}" \
@@ -159,6 +168,7 @@ function Images::_buildFrontend() {
         "${DEPLOYMENT_PATH}/context" 1>&2
 
     if [ -n "${SPRYKER_XDEBUG_MODE_ENABLE}" ]; then
+        Console::verbose "${INFO}> Building image '${runtimeFrontendImage}', because SPRYKER_XDEBUG_MODE_ENABLE is enabled${NC}"
         docker build \
             -t "${runtimeFrontendImage}" \
             -f "${DEPLOYMENT_PATH}/images/debug/frontend/Dockerfile" \
@@ -173,6 +183,7 @@ function Images::_buildGateway() {
 
     Console::verbose "${INFO}Building Gateway image${NC}"
 
+    Console::verbose "${INFO}> Building image '${gatewayImage}'${NC}"
     docker build \
         -t "${gatewayImage}" \
         -f "${DEPLOYMENT_PATH}/images/common/gateway/Dockerfile" \
@@ -187,11 +198,13 @@ function Images::_tagByApp() {
     local applicationPrefix="$(echo "$applicationName" | tr '[:upper:]' '[:lower:]')"
     local tag="${imageName}-${applicationPrefix}"
 
+    Console::verbose "${INFO}>> Tagging '${baseImageName}' with tag '${tag}'${NC}"
     docker tag "${baseImageName}" "${tag}"
 }
 
 function Images::tagApplications() {
     local tag=${1:-${SPRYKER_DOCKER_TAG}}
+    Console::verbose "${INFO}> Tag applications now with tag '${tag}'${NC}"
 
     for application in "${SPRYKER_APPLICATIONS[@]}"; do
         Images::_tagByApp "${application}" "${SPRYKER_DOCKER_PREFIX}_app:${tag}" "${SPRYKER_DOCKER_PREFIX}_app:${SPRYKER_DOCKER_TAG}"
@@ -201,12 +214,14 @@ function Images::tagApplications() {
 
 function Images::tagFrontend() {
     local tag=${1:-${SPRYKER_DOCKER_TAG}}
+    Console::verbose "${INFO}> Tag frontend now with tag '${tag}'${NC}"
 
     Images::_tagByApp frontend "${SPRYKER_DOCKER_PREFIX}_frontend:${tag}" "${SPRYKER_DOCKER_PREFIX}_frontend:${SPRYKER_DOCKER_TAG}"
 }
 
 function Images::printAll() {
     local tag=${1:-${SPRYKER_DOCKER_TAG}}
+    Console::verbose "${INFO}> All generated images with tag '${tag}'${NC}"
 
     for application in "${SPRYKER_APPLICATIONS[@]}"; do
         local applicationPrefix=$(echo "${application}" | tr '[:upper:]' '[:lower:]')
