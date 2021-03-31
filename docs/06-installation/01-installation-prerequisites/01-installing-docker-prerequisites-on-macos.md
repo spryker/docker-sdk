@@ -42,7 +42,7 @@ brew install mutagen-io/mutagen/mutagen-beta
 
 See [Chossing an installation mode](../02-installation-guides/01-choosing-an-installation-mode.md) to choose an installation mode.
 If you've already selected an installation mode, follow one of the guides below:
-* [Installing in Development mode](../02-installation-guides/02-installing-in-development-mode.md)
-* [Installing in Demo mode](../02-installation-guides/03-installing-in-demo-mode.md)
-* [Integrating the Docker SDK into existing projects](../02-installation-guides/04-integrating-the-docker-sdk-into-existing-projects.md)
-* [Running production](../02-installation-guides/05-running-production.md)
+* [Installing in Development mode on MacOS and Linux](../02-installation-guides/02-installing-in-development-mode-on-macos-and-linux.md)
+* [Installing in Demo mode on MacOS and Linux](../02-installation-guides/04-installing-in-demo-mode-on-macos-and-linux.md)
+* [Integrating the Docker SDK into existing projects](../02-installation-guides/06-integrating-the-docker-sdk-into-existing-projects.md)
+* [Running production](../02-installation-guides/07-running-production.md)
