@@ -330,12 +330,12 @@ Optional parameters for `application:`:
 
 * `groups: applications: application: endpoints: real-ip: from:` - defines gateway IP addresses to fetch the real IP address.
 * `groups: applications: application: endpoints: auth:` - defines the basic auth.
-* `groups: applications: application: endpoints: auth: engine:` - defines an engine for the basic auth. Allowed values are `basic` and `whitelist`.
+* `groups: applications: application: endpoints: auth: engine:` - defines an engine for the basic auth. Only one of the following is allowed per an endpoint: `basic` or `whitelist`.
   * Basic auth variables:
     * `groups: applications: application: endpoints: auth: users:` - defines user credentials for basic auth.
     	* `groups: applications: application: endpoints: auth: users: username:` - defines a username for basic auth.
-	* `groups: applications: application: endpoints: auth: users: password:` - defines a password for basic auth.
-    * `groups: applications: application: endpoints: auth: exclude:` - defines the IPs to allow access from.
+	    * `groups: applications: application: endpoints: auth: users: password:` - defines a password for basic auth.
+    * `groups: applications: application: endpoints: auth: exclude:` - defines the IPs from which clients can access the endpoint bypassing the basic auth.
   * Whitelist auth variables:
     * `groups: applications: application: endpoints: auth: include:` - defines the IPs to allow access from.
 
