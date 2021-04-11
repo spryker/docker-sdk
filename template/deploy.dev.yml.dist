@@ -1,6 +1,6 @@
 version: "0.1"
 
-namespace: spryker_b2c_dev
+namespace: spryker_project_dev
 tag: 'dev'
 
 environment: docker.dev
