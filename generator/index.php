@@ -203,7 +203,7 @@ foreach ($primal as $callbacks) {
     }
 }
 
-$endpointMap = $projectData['_endpointMap'] = mapZedEndpoints($projectData['_endpointMap']);
+$endpointMap = $projectData['_endpointMap'] = mapBackendEndpointsWithFallbackZed($projectData['_endpointMap']);
 
 $projectData['_applications'] = [];
 $frontend = [];
@@ -216,7 +216,7 @@ $environment = [
  *
  * @return array
  */
-function mapZedEndpoints(array $endpointMap): array
+function mapBackendEndpointsWithFallbackZed(array $endpointMap): array
 {
     $zedApplicationsToCheck = [
         BACKOFFICE_APP,
@@ -228,8 +228,7 @@ function mapZedEndpoints(array $endpointMap): array
             if (array_key_exists($zedApplicationToCheck, $storeEndpointMap)) {
                 continue;
             }
-            $defaultZedApp = $storeEndpointMap[ZED_APP] ?? $storeEndpointMap[BACKOFFICE_APP];
-            $endpointMap[$store][$zedApplicationToCheck] = $defaultZedApp;
+            $endpointMap[$store][$zedApplicationToCheck] = $storeEndpointMap[ZED_APP];
         }
     }
 
