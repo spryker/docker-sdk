@@ -8,10 +8,6 @@
     serviceName: 'search',
     searchIndexPrefix: project['namespace']
 } %}
-{% include "terraform/session-be/#{project['services']['session']['engine']}.tf.twig" with {
-    serviceData: project['services']['session'],
-    serviceName: 'session'
-} %}
 {% include "terraform/database/#{project['services']['database']['engine']}.tf.twig" with {
     serviceData: project['services']['database'],
     regionData: regionData['services']['database'],
