@@ -1,3 +1,6 @@
+# Installing in Development mode on Windows
+
+
 This document describes how to install Spryker in [Development Mode](01-choosing-an-installation-mode.md#development-mode) on Windows.
 
 ## Installing Docker prerequisites on Windows

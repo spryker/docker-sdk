@@ -1,12 +1,4 @@
-> Audience:
->
-> - Everyone who starts using the Docker SDK for development and production.
->
-> Outcome:
-> - You know how to choose a Docker SDK versioning approach.
-> - You know how to link your project to a particular version of the Docker SDK.
-
-
+# Choosing a Docker SDK version
 
 This document describes why and how to select a particular version of the Docker SDK and use it in your project.
 

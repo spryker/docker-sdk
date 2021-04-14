@@ -1,11 +1,4 @@
-> Audience:
->
-> - DevOps engineers and developers who define services in a Spryker project infrastructure.
->
-> Outcome:
-> - You know about all the services provided by the Docker SDK.
-> - You know how to configure services.
-
+# Configuring services
 
 This document describes configuration options of the services shipped with Spryker in Docker by default.  Find the list of the services below:
 

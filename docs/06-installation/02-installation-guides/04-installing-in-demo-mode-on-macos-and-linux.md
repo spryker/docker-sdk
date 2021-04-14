@@ -1,3 +1,7 @@
+# Installing in Demo mode on MacOS and Linux
+
+
+
 This document describes the procedure of installing Spryker in [Demo Mode](01-choosing-an-installation-mode.md#demo-mode) on MacOS and Linux.
 
 ## Installing Docker prerequisites on MacOS and Linux

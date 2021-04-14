@@ -1,11 +1,6 @@
-> Audience:
->
-> - Developers who run tests using the Docker SDK.
-> - DevOps engineers who set up CI using the Docker SDK.
->
-> Outcome:
-> - You know how to run functional, API, and E2E tests locally or on CI using the Docker SDK.
+# Running tests
 
+This document describes how to run tests in different ways.
 
 ## What is a testing mode?
 

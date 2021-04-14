@@ -1,12 +1,4 @@
-> Audience:
->
-> - Devops engineers who use the Docker SDK for CI and CD.
-> - Developers who use the Docker SDK for development.
->
-> Outcome:
-> - You know how to configure configure the parameters in the Deploy file.
-
-
+# Deploy file reference — version 1
 This reference page describes version 1 of the Deploy file format. This is the newest version.
 <div class="bg-section">
 <h2> Glossary</h2>

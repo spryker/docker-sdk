@@ -1,9 +1,4 @@
-> Audience:
->
-> - Everyone who needs access to private repositories for development or running production with the Docker SDK.
->
-> Outcome:
-> - You know how to configure an environment to allow the Docker SDK access private repositories.
+# Configuring access to private repositories
 
 This document describes how to configure an environment to allow the Docker SDK access private repositories.
 
@@ -68,7 +63,7 @@ eval $(ssh-agent)
 ssh-add -K ~/.ssh/id_rsa
 ```
 
-3. MacOS and Windows: For Docker Desktop to fetch the changes, restart the OS. 
+3. MacOS and Windows: For Docker Desktop to fetch the changes, restart the OS.
 
 
 4. Re-build the application:
@@ -133,4 +128,3 @@ docker/sdk up --build
 ```
 
 You've configured authentication to your private repositories.
-
