@@ -144,8 +144,8 @@ function Compose::run() {
     Console::verbose "${INFO}Running Spryker containers${NC}"
     sync start
 
-    local webdriverServices="--scale \"webdriver=$([ -n "${SPRYKER_TESTING_ENABLE}" ] && echo '1' || echo '0')\" "
-    local schedulerServices="--scale \"scheduler=$([ -n "${SPRYKER_TESTING_ENABLE}" ] && echo '0' || echo '1')\" "
+    local webdriverServices="--scale webdriver=$([ -n "${SPRYKER_TESTING_ENABLE}" ] && echo '1' || echo '0') "
+    local schedulerServices="--scale scheduler=$([ -n "${SPRYKER_TESTING_ENABLE}" ] && echo '0' || echo '1') "
     local schedulerApplications=""
 
     local schedulerImage="${SPRYKER_DOCKER_PREFIX}_scheduler_app:${SPRYKER_DOCKER_TAG}"
@@ -154,7 +154,7 @@ function Compose::run() {
        for scheduler in "${SPRYKER_AVAILABLE_SCHEDULERS[@]}"; do
           eval "${scheduler}"
 
-          schedulerApplications+="--scale \"${APP_NAME}=$([ -n "${SPRYKER_TESTING_ENABLE}" ] && echo '0' || echo '1')\" "
+          schedulerApplications+="--scale ${APP_NAME}=$([ -n "${SPRYKER_TESTING_ENABLE}" ] && echo '0' || echo '1') "
        done
     fi
     Compose::command up -d --remove-orphans ${webdriverServices}${schedulerServices}${schedulerApplications} "${@}"
