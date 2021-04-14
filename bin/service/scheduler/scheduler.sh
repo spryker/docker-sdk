@@ -5,55 +5,11 @@ function Service::Scheduler::isInstalled() {
 }
 
 Service::Scheduler::pause() {
-   [ ! -z "${SPRYKER_TESTING_ENABLE}" ] && [ "${SPRYKER_TESTING_ENABLE}" -eq "1" ] && return "${TRUE}"
-
-   Runtime::waitFor scheduler
-   Console::start -n "Suspending scheduler..."
-
-   local masterStateUri="/api/app/update_master_state"
-
-   for scheduler in "${SPRYKER_AVAILABLE_SCHEDULERS[@]}"; do
-     eval "${scheduler}"
-
-     local response=$(Compose::exec 'curl -sL -X POST '${BASE_URL}${masterStateUri}' --header "X-API-Key: '${API_KEY}'" --header "Content-Type: application/json" --data "{\"enabled\": 0}"' | jq .code)
-     [ "${response}" -gt 0 ] && return "${FALSE}"
-   done
-
-   local counter=1
-   local interval=2
-   local waitFor=60
-
-   local jobsActiveUri="/api/app/get_active_jobs/v1"
-
-   for scheduler in "${SPRYKER_AVAILABLE_SCHEDULERS[@]}"; do
-      eval "${scheduler}"
-
-      local runningJobsCount=$(Compose::exec 'curl -sL '${BASE_URL}${jobsActiveUri}' --header "X-API-Key: '${API_KEY}'" | jq -r '.jobs' | jq length')
-
-      [ "${runningJobsCount}" -eq "0" ] && break
-      [ "${counter}" -ge "${waitFor}" ] && break
-      counter=$((counter + interval))
-      sleep "${interval}"
-   done
-
-   Console::end "[DONE]"
+  Service::Scheduler::_run suspend "Suspending"
 }
 
 Service::Scheduler::unpause() {
-   [ ! -z "${SPRYKER_TESTING_ENABLE}" ] && [ "${SPRYKER_TESTING_ENABLE}" -eq "1" ] && return "${TRUE}"
-
-   Runtime::waitFor scheduler
-   Console::start -n "Resuming scheduler..."
-
-   local masterStateUri="/api/app/update_master_state"
-
-   for scheduler in "${SPRYKER_AVAILABLE_SCHEDULERS[@]}"; do
-     eval "${scheduler}"
-     local response=$(Compose::exec 'curl -sL -X POST '${BASE_URL}${masterStateUri}' --header "X-API-Key: '${API_KEY}'" --header "Content-Type: application/json" --data "{\"enabled\": 1}"' | jq .code)
-     [ "${response}" -gt 0 ] && return "${FALSE}"
-   done
-
-   return "${TRUE}"
+  Service::Scheduler::_run resume "Resuming"
 }
 
 function Service::Scheduler::start() {
