@@ -19,23 +19,21 @@ export NODE_EXTRA_CA_CERTS=/etc/ssl/certs/ca-certificates.crt
 export CRONICLE_echo=1
 export CRONICLE_foreground=1
 
-if [ -d "${SPRYKER_CRONICLE_MODULE_NONSPLIT_DIR}" ]
-then
-  cp -a "${SPRYKER_CRONICLE_MODULE_NONSPLIT_DIR}"/resource/* "${ROOT_DIR}"
+if [ -d "${SPRYKER_CRONICLE_MODULE_NONSPLIT_DIR}" ]; then
+    cp -a "${SPRYKER_CRONICLE_MODULE_NONSPLIT_DIR}"/resource/* "${ROOT_DIR}"
 else
-  cp -a "${SPRYKER_CRONICLE_MODULE_SPLIT_DIR}"/resource/* "${ROOT_DIR}"
+    cp -a "${SPRYKER_CRONICLE_MODULE_SPLIT_DIR}"/resource/* "${ROOT_DIR}"
 fi
 
 # Only run setup when setup needs to be done
-if [ ! -f "$DATA_DIR/.setup_done" ]
-then
-  bash "$BIN_DIR/control.sh" setup
+if [ ! -f "$DATA_DIR/.setup_done" ]; then
+    bash "$BIN_DIR/control.sh" setup
 
-  # Create plugins directory
-  mkdir -p "$PLUGINS_DIR"
+    # Create plugins directory
+    mkdir -p "$PLUGINS_DIR"
 
-  # Marking setup done
-  touch "$DATA_DIR/.setup_done"
+    # Marking setup done
+    touch "$DATA_DIR/.setup_done"
 fi
 
 # Run hook before Cronicle start
