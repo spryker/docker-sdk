@@ -9,7 +9,7 @@ Service::Scheduler::pause() {
 }
 
 Service::Scheduler::unpause() {
-    Service::Scheduler::_run resume "Resuming"
+    Service::Scheduler::_run setup "Resuming"
 }
 
 function Service::Scheduler::start() {
