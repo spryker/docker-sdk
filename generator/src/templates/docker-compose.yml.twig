@@ -76,7 +76,7 @@ services:
 {% endif %}
 {% for group in groups %}
 {% for applicationName, applicationData in group['applications'] %}
-{% if applicationData['application'] == 'scheduler' %}
+{% if applicationData['application'] == 'worker' %}
       SPRYKER_NGINX_CGI_{{ applicationName | upper }}: {{ applicationName | lower }}:3012
 {% elseif applicationData['application'] != 'static' %}
       SPRYKER_NGINX_CGI_{{ applicationName | upper }}: {{ applicationName | lower }}:9000

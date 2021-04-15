@@ -1,7 +1,7 @@
 {% set schema = _project['docker']['ssl']['enabled'] ? 'https://' : 'http://' %}
 {% set hostname = applicationData['endpoints'] | keys | first | split(':') | first %}
   {{ applicationName | lower }}:
-    image: ${SPRYKER_DOCKER_PREFIX}_scheduler_app:${SPRYKER_DOCKER_TAG}
+    image: ${SPRYKER_DOCKER_PREFIX}_worker_app:${SPRYKER_DOCKER_TAG}
     hostname: {{ hostname }}
     depends_on:
         - database

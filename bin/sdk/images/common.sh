@@ -34,7 +34,7 @@ function Images::_buildApp() {
     local baseCliImage="${SPRYKER_DOCKER_PREFIX}_base_cli:${SPRYKER_DOCKER_TAG}"
     local cliImage="${SPRYKER_DOCKER_PREFIX}_cli:${SPRYKER_DOCKER_TAG}"
     local runtimeCliImage="${SPRYKER_DOCKER_PREFIX}_run_cli:${SPRYKER_DOCKER_TAG}"
-    local schedulerImage="${SPRYKER_DOCKER_PREFIX}_scheduler_app:${SPRYKER_DOCKER_TAG}"
+    local schedulerImage="${SPRYKER_DOCKER_PREFIX}_worker_app:${SPRYKER_DOCKER_TAG}"
 
     if [ -n "${SSH_AUTH_SOCK_IN_CLI}" ]; then
         sshArgument=('--ssh' 'default')
@@ -101,7 +101,7 @@ function Images::_buildApp() {
 
         docker build \
             -t "${schedulerImage}" \
-            -f "${DEPLOYMENT_PATH}/images/common/services/cronicle/Dockerfile" \
+            -f "${DEPLOYMENT_PATH}/images/common/worker/Dockerfile" \
             --progress="${PROGRESS_TYPE}" \
             --build-arg "SPRYKER_PARENT_IMAGE=${appImage}" \
             "${DEPLOYMENT_PATH}/context" 1>&2
@@ -206,8 +206,8 @@ function Images::tagApplications() {
     local tag=${1:-${SPRYKER_DOCKER_TAG}}
 
     for application in "${SPRYKER_APPLICATIONS[@]}"; do
-        if [[ -n "${SPRYKER_SCHEDULER_APP_ENABLED}" && "${application}" == *"scheduler"* ]]; then
-            Images::_tagByApp "${application}" "${SPRYKER_DOCKER_PREFIX}_scheduler_app:${tag}" "${SPRYKER_DOCKER_PREFIX}_scheduler_app:${SPRYKER_DOCKER_TAG}"
+        if [[ -n "${SPRYKER_SCHEDULER_APP_ENABLED}" && "${application}" == *"worker"* ]]; then
+            Images::_tagByApp "${application}" "${SPRYKER_DOCKER_PREFIX}_worker_app:${tag}" "${SPRYKER_DOCKER_PREFIX}_worker_app:${SPRYKER_DOCKER_TAG}"
         else
             Images::_tagByApp "${application}" "${SPRYKER_DOCKER_PREFIX}_app:${tag}" "${SPRYKER_DOCKER_PREFIX}_app:${SPRYKER_DOCKER_TAG}"
             Images::_tagByApp "${application}" "${SPRYKER_DOCKER_PREFIX}_run_app:${tag}" "${SPRYKER_DOCKER_PREFIX}_run_app:${SPRYKER_DOCKER_TAG}"

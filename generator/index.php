@@ -134,20 +134,20 @@ foreach ($projectData['groups'] ?? [] as $groupName => $groupData) {
                 $endpointData = [];
             }
 
-            if ($applicationData['application'] === 'scheduler') {
+            if ($applicationData['application'] === 'worker') {
                 $host = array_key_first($applicationData['endpoints']);
                 $port = $applicationData['endpoints'][$host] ?: '';
                 $apiKey = generateToken(32);
 
-                $schedulerData = [
+                $workerData = [
                     'base_url' => rtrim(sprintf('%s://%s:%s', getCurrentScheme($projectData), $host, $port), ':'),
                     'api_key' => $apiKey,
                 ];
 
-                $projectData['_schedulers'][$groupName][$applicationData['scheduler-id']] = $schedulerData;
+                $projectData['_schedulers'][$groupName][$applicationData['worker-id']] = $workerData;
 
-                $schedulerData['app_name'] = $applicationName;
-                $projectData['_schedulers']['available_schedulers'][] = $schedulerData;
+                $workerData['app_name'] = $applicationName;
+                $projectData['_schedulers']['available_schedulers'][] = $workerData;
             }
 
             $entryPoint = $endpointData['entry-point'] ?? ucfirst(strtolower($applicationData['application']));
@@ -231,9 +231,9 @@ foreach ($projectData['groups'] ?? [] as $groupName => $groupData) {
                 'enabledSchedulerStores' => json_encode($schedulerEnabledStores),
             ];
 
-            if ($applicationData['application'] === 'scheduler') {
+            if ($applicationData['application'] === 'worker') {
                 $projectData['_schedulers']['enabledStores'][$groupName] = $schedulerEnabledStores;
-                $data['applicationData']['cronicleApiKey'] = $projectData['_schedulers'][$groupName][$applicationData['scheduler-id']]['api_key'];
+                $data['applicationData']['cronicleApiKey'] = $projectData['_schedulers'][$groupName][$applicationData['worker-id']]['api_key'];
             }
 
             file_put_contents(

@@ -148,7 +148,7 @@ function Compose::run() {
     local schedulerServices="--scale scheduler=$([ -n "${SPRYKER_TESTING_ENABLE}" ] && echo '0' || echo '1') "
     local schedulerApplications=""
 
-    local schedulerImage="${SPRYKER_DOCKER_PREFIX}_scheduler_app:${SPRYKER_DOCKER_TAG}"
+    local schedulerImage="${SPRYKER_DOCKER_PREFIX}_worker_app:${SPRYKER_DOCKER_TAG}"
 
     if [ ! -z "${SPRYKER_SCHEDULER_APP_ENABLED}" ] && [ "${SPRYKER_SCHEDULER_APP_ENABLED}" -eq "1" ]; then
        for scheduler in "${SPRYKER_AVAILABLE_SCHEDULERS[@]}"; do

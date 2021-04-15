@@ -39,7 +39,7 @@ function Service::Scheduler::clean() {
 function Service::Scheduler::_run() {
     [ ! -z "${SPRYKER_TESTING_ENABLE}" ] && [ "${SPRYKER_TESTING_ENABLE}" -eq "1" ] && return "${TRUE}"
 
-    Runtime::waitFor scheduler
+    Runtime::waitFor worker
 
     for region in "${SPRYKER_STORES[@]}"; do
         eval "${region}"
