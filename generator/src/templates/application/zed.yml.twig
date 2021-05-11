@@ -20,4 +20,40 @@
       TIDEWAYS_APIKEY: ${TIDEWAYS_APIKEY}
       TIDEWAYS_CLI_ENABLED: ${TIDEWAYS_CLI_ENABLED}
       TIDEWAYS_ENVIRONMENT_NAME: ${TIDEWAYS_ENVIRONMENT_NAME}
-    <<: *app-volumes
+
+      SPRYKER_ROAD_RUNNER_CONFIG_PATH: public/Zed/.rr.yml
+
+{% set endpointName = applicationData['endpoints'] | keys | first %}
+{% set endpointData = applicationData['endpoints'] | first %}
+      SPRYKER_ZED_HOST: "zed.calls.are.forbidden.from.zed"
+      SPRYKER_BE_HOST: "{{ host }}"
+
+{% set storeServices = project['regions'][regionName]['stores'][endpointData['store']]['services'] | default([]) %}
+      APPLICATION_STORE: "{{ endpointData['store'] }}"
+      SPRYKER_SEARCH_NAMESPACE: "{{ storeServices['search']['namespace'] | default(endpointData['services']['search']['namespace'])  }}"
+      SPRYKER_KEY_VALUE_STORE_NAMESPACE: "{{ storeServices['key_value_store']['namespace'] | default(endpointData['services']['key_value_store']['namespace'])  }}"
+      SPRYKER_BROKER_NAMESPACE: "{{ storeServices['broker']['namespace'] | default(endpointData['services']['broker']['namespace'])  }}"
+      SPRYKER_SESSION_BE_NAMESPACE: "{{ storeServices['session']['namespace'] | default(endpointData['services']['session']['namespace']) }}"
+
+      SPRYKER_SSL_ENABLE: {{ (project['docker']['ssl']['enabled'] | default(false)) ? 1 : 0 }}
+      SPRYKER_ZED_SSL_ENABLED: {{ (project['docker']['ssl']['enabled'] | default(false)) ? 1 : 0 }}
+      HTTPS: {{ (project['docker']['ssl']['enabled'] | default(false)) ? '"on"' : '"off"' }}
+
+{% if storeServices['mail']['sender']['email'] is not empty %}
+      SPRYKER_MAIL_SENDER_EMAIL: "{{ storeServices['mail']['sender']['email'] }}"
+{% endif %}
+{% if storeServices['mail']['sender']['name'] is not empty %}
+      SPRYKER_MAIL_SENDER_NAME: "{{ storeServices['mail']['sender']['name'] }}"
+{% endif %}
+
+{% if project['_endpointMap'][endpointData['store']]['yves'] is not empty %}
+      SPRYKER_FE_HOST: "{{ project['_endpointMap'][endpointData['store']]['yves'] }}"
+{% endif %}
+
+{% if project['_endpointMap'][endpointData['store']]['glue'] is not empty %}
+      SPRYKER_API_HOST: "{{ project['_endpointMap']['DE']['glue'] }}"
+{% endif %}
+    volumes:
+{#      - ./${DEPLOYMENT_PATH}/public/Zed/.rr.yml:/data/public/Zed/.rr.yml#}
+{#      - ./${DEPLOYMENT_PATH}/public/Zed/roadrunner.php:/data/public/Zed/roadrunner.php#}
+{% include "application-volumes.yml.twig" with _context %}
