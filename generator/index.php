@@ -301,10 +301,14 @@ foreach ($projectData['groups'] ?? [] as $groupName => $groupData) {
                 || $applicationData['application'] === BACKEND_GATEWAY_APP
                 || $applicationData['application'] === BACKOFFICE_APP
             ) {
-                $services = array_replace_recursive(
-                    $projectData['regions'][$groupData['region']]['stores'][$endpointData['store']]['services'],
-                    $endpointData['services'] ?? []
-                );
+                $services = [];
+
+                if (array_key_exists('store', $endpointData)) {
+                    $services = array_replace_recursive(
+                        $projectData['regions'][$groupData['region']]['stores'][$endpointData['store']]['services'],
+                        $endpointData['services'] ?? []
+                    );
+                }
 
                 $envVarEncoder->setIsActive(true);
                 file_put_contents(
@@ -340,13 +344,17 @@ foreach ($projectData['groups'] ?? [] as $groupName => $groupData) {
             }
 
             if ($applicationData['application'] === YVES_APP) {
+                $services = [];
 
-                $services = array_replace_recursive(
-                    $projectData['regions'][$groupData['region']]['stores'][$endpointData['store']]['services'],
-                    $endpointData['services'] ?? []
-                );
+                $isEndpointDataHasStore = array_key_exists('store', $endpointData);
+                if ($isEndpointDataHasStore) {
+                    $services = array_replace_recursive(
+                        $projectData['regions'][$groupData['region']]['stores'][$endpointData['store']]['services'],
+                        $endpointData['services'] ?? []
+                    );
+                }
 
-                if ($endpointData['store'] === ($projectData['docker']['testing']['store'] ?? '')) {
+                if ($isEndpointDataHasStore && $endpointData['store'] === ($projectData['docker']['testing']['store'] ?? '')) {
                     $envVarEncoder->setIsActive(true);
                     file_put_contents(
                         $deploymentDir . DS . 'env' . DS . 'cli' . DS . 'testing.env',
