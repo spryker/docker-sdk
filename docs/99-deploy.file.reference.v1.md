@@ -357,6 +357,18 @@ Optional parameters for `application:`:
             store: STORE-1
  ```
 
+* `groups: applications: application: limits: workers` - defines the maximum number of concurrent child processes that will be served simultaneously by process manager.
+
+```yaml
+...
+    applications:
+      zed:
+        application: zed
+        limits:
+            workers: 4
+        ...
+```
+
 :::(Info) ()
 To disable the validation of request body size against this parameter, set it to `0`. We do not recommended disabling it.
 :::
