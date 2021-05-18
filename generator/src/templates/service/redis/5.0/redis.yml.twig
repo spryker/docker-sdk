@@ -15,9 +15,9 @@
     volumes:
       - {{ serviceName }}-{{ serviceData['engine'] }}-data:/data
 
-{% if serviceData['slave-services'] is defined %}
-{% for slave in serviceData['slave-services'] %}
-  {{ serviceName }}_{{ slave }}:
+{% if serviceData['replica-services'] is defined %}
+{% for replica in serviceData['replica-services'] %}
+  {{ serviceName }}_{{ replica }}:
       image: redis:5.0-alpine
       command: "redis-server --slaveof {{ serviceName }} 6379"
       depends_on:

@@ -673,6 +673,7 @@ A key-value store *Service* for storing business data.
 * Project-wide
 
   * `key_value_store: engine:` - possible value is: `redis`.
+  * `key_value_store: replicas:` - defines the number of replica instances.
   * `session: endpoints:` - defines the service's port that can be accessed via given endpoints.
 
 * Store-specific
