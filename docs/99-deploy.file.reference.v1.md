@@ -126,16 +126,7 @@ Defines the Docker image configuraion to run Spryker applications in.
 ***
 ### image:tag
 
-Defines the image tag according to the `spryker/php` images located at [Docker Hub](https://hub.docker.com/r/spryker/php/tags). Possible values are:
-1. `spryker/php:7.3` - applies the default image (currently, it is Debian).
-
-2. `spryker/php:7.3-debian` - applies Debian as a base image.
-
-3. `spryker/php:7.3-alpine` - applies Alpine as a base image. The Alpine images are smaller, but you may have issues with:
-    * iconv
-    * NFS
-    * Non-lating languages
-    * Tideways
+Defines the image tag according to the `spryker/php` images located at [Docker Hub](https://hub.docker.com/r/spryker/php/tags).
 
 
 This variable is optional. If not specified, the default value applies: `image: spryker/php:7.3`.
