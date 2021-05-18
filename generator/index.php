@@ -336,6 +336,25 @@ foreach ($projectData['groups'] ?? [] as $groupName => $groupData) {
     }
 }
 
+if (!empty($projectData['services']['key_value_store']['slaves'])) {
+    $slaves = (int)$projectData['services']['key_value_store']['slaves'];
+    $projectData['services']['key_value_store']['slave-services'] = array_map(function ($index) {
+        return 'slave' . $index;
+    }, range(1, $slaves));
+    $projectData['services']['key_value_store']['options'] = json_encode([
+        'replication' => 'predis',
+    ], JSON_UNESCAPED_SLASHES);
+
+    $sources = [
+        'tcp://key_value_store?role=master', 'tcp://key_value_store'
+    ];
+    foreach ($projectData['services']['key_value_store']['slave-services'] as $slave) {
+        $sources[] = 'tcp://key_value_store_' . $slave;
+    }
+
+    $projectData['services']['key_value_store']['sources'] = json_encode($sources, JSON_UNESCAPED_SLASHES);
+}
+
 foreach ($projectData['services'] ?? [] as $serviceName => $serviceData) {
     $httpEndpoints = array_filter(
         $serviceData['endpoints'] ?? [],
