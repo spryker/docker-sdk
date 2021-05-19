@@ -25,6 +25,10 @@ RUN chown spryker:spryker -R /home/spryker/.ssh
 # PHP-FPM environment variables
 ENV PHP_FPM_PM=dynamic
 ENV PHP_FPM_PM_MAX_CHILDREN=4
+ENV PHP_FPM_PM_START_SERVERS=2
+ENV PHP_FPM_PM_MIN_SPARE_SERVERS=1
+ENV PHP_FPM_PM_MAX_SPARE_SERVERS=2
+ENV PHP_FPM_PM_MAX_REQUESTS=500
 
 # PHP configuration
 COPY php/php-fpm.d/worker.conf /usr/local/etc/php-fpm.d/worker.conf
