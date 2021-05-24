@@ -1,3 +1,6 @@
+# Integrating the Docker SDK into existing projects
+
+
 This page describes how you can convert a non-Docker based project into a Docker based one. If you want to install Spryker in Docker from scratch, start with [Development Mode](01-choosing-an-installation-mode.md#development-mode) or [Demo Mode](01-choosing-an-installation-mode.md#demo-mode).
 
 ## Prerequisites

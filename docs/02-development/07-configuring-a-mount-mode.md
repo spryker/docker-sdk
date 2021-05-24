@@ -1,11 +1,6 @@
-> Audience:
->
-> - Developers who are developing with the Docker SDK.
->
-> Outcome:
-> - You know how install and configure synchronization tools based on an OS.
+# Configuring a mount mode
 
-This document describes how to configure mount modes.
+This document describes how to configure a mount mode.
 
 ## Configuring mutagen mount mode on MacOS
 
@@ -79,9 +74,9 @@ docker/sdk up --build --data --assets
 ```
 
 
-## Configuring native mount mode on Linux
+## Configuring a native mount mode on Linux
 
-To configure native mount mode on Linux:
+To configure a native mount mode on Linux:
 
 1. Install or update Docker for Linux to the latest stable version.
 
