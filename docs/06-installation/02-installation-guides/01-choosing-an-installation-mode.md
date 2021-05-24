@@ -74,7 +74,7 @@ Learn how to convert a project into a Docker based instance in [Integrating the 
 
 ## Running production
 
-Currently, there is no installation guide for deploying Spryker in Docker in a production environment. But you can generate the images suitable for a production environment and the archives with assets for each application - Yves, Zed and Glue.
+Currently, there is no installation guide for deploying Spryker in Docker in a production environment. But you can generate the images suitable for a production environment and the archives with assets for each application - Yves, Zed, Glue, and MerchantPortal.
 
 Learn how to generate Docker images and assets for a production environment in [Running production](07-running-production.md).
 

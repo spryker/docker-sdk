@@ -75,7 +75,7 @@ Once you finish the setup, you don't need to run `bootstrap` to start the instan
 docker/sdk up
 ```
 
-9. Update the `hosts` file:			
+9. Update the `hosts` file:
 ```bash
 echo "127.0.0.1 zed.de.spryker.local yves.de.spryker.local glue.de.spryker.local zed.at.spryker.local yves.at.spryker.local glue.at.spryker.local zed.us.spryker.local yves.us.spryker.local glue.us.spryker.local mail.spryker.local scheduler.spryker.local queue.spryker.local" | sudo tee -a /etc/hosts
 ```
@@ -90,8 +90,9 @@ To ensure that the installation is successful, make sure you can access the foll
 | Application | Endpoints |
 | --- | --- |
 | The Storefront |  yves.de.spryker.local, yves.at.spryker.local, yves.us.spryker.local |
-| the Back Office | zed.de.spryker.local, zed.at.spryker.local, zed.us.spryker.local |
+| The Back Office | zed.de.spryker.local, zed.at.spryker.local, zed.us.spryker.local |
 | Glue API | glue.de.spryker.local, glue.at.spryker.local, glue.us.spryker.local |
+| The Merchant Portal | mp.de.spryker.local, mp.at.spryker.local, mp.us.spryker.local |
 | Jenkins (scheduler) | scheduler.spryker.local |
 | RabbitMQ UI (queue manager) | queue.spryker.local |
 | Mailhog UI (email catcher) | mail.spryker.local |
