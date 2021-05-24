@@ -1,6 +1,5 @@
 # Installing in Development mode on MacOS and Linux
 
-
 This document describes how to install Spryker in [Development Mode](01-choosing-an-installation-mode.md#development-mode) on MacOS and Linux.
 
 ## Installing Docker prerequisites on MacOS and Linux
