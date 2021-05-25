@@ -337,7 +337,7 @@ foreach ($projectData['groups'] ?? [] as $groupName => $groupData) {
 }
 
 if (!empty($projectData['services']['key_value_store']['replicas'])) {
-    $replicas = $projectData['services']['key_value_store']['replicas']['count'] ?? 1;
+    $replicas = $projectData['services']['key_value_store']['replicas']['number'] ?? 1;
     $projectData['services']['key_value_store']['replica-services'] = array_map(function ($index) {
         return 'replica' . $index;
     }, range(1, (int)$replicas));
