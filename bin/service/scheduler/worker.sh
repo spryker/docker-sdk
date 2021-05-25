@@ -5,11 +5,11 @@ function Service::Scheduler::isInstalled() {
 }
 
 Service::Scheduler::pause() {
-    Service::Scheduler::_run suspend "Suspending"
+    true
 }
 
 Service::Scheduler::unpause() {
-    Service::Scheduler::_run setup "Resuming"
+    true
 }
 
 function Service::Scheduler::start() {

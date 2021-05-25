@@ -1,15 +1,12 @@
 #!/bin/bash
 
-ROOT_DIR=/home/spryker/cronicle
+ROOT_DIR=${SPRYKER_CRONICLE_BASE_PATH}/cronicle
 CONF_DIR=$ROOT_DIR/conf
 BIN_DIR=$ROOT_DIR/bin
 # DATA_DIR needs to be the same as the exposed Docker volume in Dockerfile
 DATA_DIR=$ROOT_DIR/data
 # PLUGINS_DIR needs to be the same as the exposed Docker volume in Dockerfile
 PLUGINS_DIR=$ROOT_DIR/plugins
-
-SPRYKER_CRONICLE_MODULE_NONSPLIT_DIR=/data/vendor/spryker/spryker/Bundles/SchedulerCronicle
-SPRYKER_CRONICLE_MODULE_SPLIT_DIR=/data/vendor/spryker/scheduler-cronicle
 
 rm -f "${ROOT_DIR}/logs/cronicled.pid"
 
@@ -19,25 +16,21 @@ export NODE_EXTRA_CA_CERTS=/etc/ssl/certs/ca-certificates.crt
 export CRONICLE_echo=1
 export CRONICLE_foreground=1
 
-if [ -d "${SPRYKER_CRONICLE_MODULE_NONSPLIT_DIR}" ]; then
-    cp -a "${SPRYKER_CRONICLE_MODULE_NONSPLIT_DIR}"/resource/* "${ROOT_DIR}"
-else
-    cp -a "${SPRYKER_CRONICLE_MODULE_SPLIT_DIR}"/resource/* "${ROOT_DIR}"
-fi
-
 # Only run setup when setup needs to be done
 if [ ! -f "$DATA_DIR/.setup_done" ]; then
+	/data/vendor/bin/console cronicle:setup ${SPRYKER_CRONICLE_BASE_PATH} --install
+
     bash "$BIN_DIR/control.sh" setup
 
     # Create plugins directory
-    mkdir -p "$PLUGINS_DIR"
+#     mkdir -p "$PLUGINS_DIR"
 
     # Marking setup done
     touch "$DATA_DIR/.setup_done"
 fi
 
 # Run hook before Cronicle start
-node "$BIN_DIR/hook.js" before-start
+# node "$BIN_DIR/hook.js" before-start
 
 # Run cronicle
 bash "$BIN_DIR/control.sh" start

@@ -101,7 +101,7 @@ function Images::_buildApp() {
 
         docker build \
             -t "${schedulerImage}" \
-            -f "${DEPLOYMENT_PATH}/images/common/worker/Dockerfile" \
+            -f "${DEPLOYMENT_PATH}/images/${folder}/worker/Dockerfile" \
             --progress="${PROGRESS_TYPE}" \
             --build-arg "SPRYKER_PARENT_IMAGE=${appImage}" \
             "${DEPLOYMENT_PATH}/context" 1>&2

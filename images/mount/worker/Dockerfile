@@ -35,15 +35,30 @@ RUN --mount=type=cache,id=apk,sharing=locked,target=/var/cache/apk mkdir -p /etc
 
 USER spryker
 
+#WORKDIR /data
+## Install composer modules for Spryker
+#COPY --chown=spryker:spryker cronicle/composer.json cronicle/composer.lock ${srcRoot}/
+#COPY --chown=spryker:spryker cronicle/package.json cronicle/package-lock.json ${srcRoot}/
+#
+#ARG SPRYKER_COMPOSER_MODE
+#RUN --mount=type=cache,id=composer,sharing=locked,target=/home/spryker/.composer/cache,uid=1000 \
+#  --mount=type=ssh,uid=1000 --mount=type=secret,id=secrets-env,uid=1000 \
+#  set -o allexport && . /run/secrets/secrets-env && set +o allexport \
+#  && composer install --no-scripts --no-interaction ${SPRYKER_COMPOSER_MODE} \
+#  && composer dump-autoload ${SPRYKER_COMPOSER_AUTOLOAD} \
+#  && npm install
+
 ENV PATH=/home/spryker/bin:$PATH
 
 RUN --mount=type=cache,id=npm,sharing=locked,target=/root/.npm \
   /usr/bin/install -d -m 777 /home/spryker/cronicle \
   && cd /home/spryker/cronicle \
-  && mkdir -p data logs plugins \
-  && curl -L "https://github.com/spryker-sdk/Cronicle/archive/feature/sc-5888/master-light-weight-scheduler.tar.gz" | tar zxvf - --strip-components 1 \
-  && npm install \
-  && node bin/build.js dist
+  && mkdir -p data logs plugins
+
+#RUN vendor/bin/install -r ${SPRYKER_PIPELINE} -s cronicle
+
+#RUN rm -rf vendor
+#RUN rm -rf node_module
 
 ADD cronicle/entrypoint.sh /home/spryker/cronicle/entrypoint.sh
 
