@@ -1,0 +1,4 @@
+{% if applicationData['limits'] is defined %}
+      PHP_FPM_PM = {{ 'static' | tf_var }}
+      PHP_FPM_PM_MAX_CHILDREN = {{ applicationData['limits']['workers'] | default(4) | tf_var }}
+{% endif %}
