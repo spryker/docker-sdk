@@ -1,12 +1,4 @@
-> Audience:
->
-> - Devops engineers who use the Docker SDK for CI and CD.
-> - Developers who use the Docker SDK for development.
->
-> Outcome:
-> - You know how to configure configure the parameters in the Deploy file.
-
-
+# Deploy file reference — version 1
 This reference page describes version 1 of the Deploy file format. This is the newest version.
 <div class="bg-section">
 <h2> Glossary</h2>
@@ -134,16 +126,7 @@ Defines the Docker image configuraion to run Spryker applications in.
 ***
 ### image:tag
 
-Defines the image tag according to the `spryker/php` images located at [Docker Hub](https://hub.docker.com/r/spryker/php/tags). Possible values are:
-1. `spryker/php:7.3` - applies the default image (currently, it is Debian).
-
-2. `spryker/php:7.3-debian` - applies Debian as a base image.
-
-3. `spryker/php:7.3-alpine` - applies Alpine as a base image. The Alpine images are smaller, but you may have issues with:
-    * iconv
-    * NFS
-    * Non-lating languages
-    * Tideways
+Defines the image tag according to the `spryker/php` images located at [Docker Hub](https://hub.docker.com/r/spryker/php/tags).
 
 
 This variable is optional. If not specified, the default value applies: `image: spryker/php:7.3`.
@@ -330,12 +313,12 @@ Optional parameters for `application:`:
 
 * `groups: applications: application: endpoints: real-ip: from:` - defines gateway IP addresses to fetch the real IP address.
 * `groups: applications: application: endpoints: auth:` - defines the basic auth.
-* `groups: applications: application: endpoints: auth: engine:` - defines an engine for the basic auth. Allowed values are `basic` and `whitelist`.
+* `groups: applications: application: endpoints: auth: engine:` - defines an engine for the basic auth. Only one of the following is allowed per an endpoint: `basic` or `whitelist`.
   * Basic auth variables:
     * `groups: applications: application: endpoints: auth: users:` - defines user credentials for basic auth.
     	* `groups: applications: application: endpoints: auth: users: username:` - defines a username for basic auth.
-	* `groups: applications: application: endpoints: auth: users: password:` - defines a password for basic auth.
-    * `groups: applications: application: endpoints: auth: exclude:` - defines the IPs to allow access from.
+	    * `groups: applications: application: endpoints: auth: users: password:` - defines a password for basic auth.
+    * `groups: applications: application: endpoints: auth: exclude:` - defines the IPs from which clients can access the endpoint bypassing the basic auth.
   * Whitelist auth variables:
     * `groups: applications: application: endpoints: auth: include:` - defines the IPs to allow access from.
 
@@ -356,6 +339,18 @@ Optional parameters for `application:`:
           zed.store1.spryker.local:
             store: STORE-1
  ```
+
+* `groups: applications: application: limits: workers` - defines the maximum number of concurrent child processes a process manager can serve simultaneously.
+
+```yaml
+...
+    applications:
+      zed:
+        application: zed
+        limits:
+            workers: 4
+        ...
+```
 
 :::(Info) ()
 To disable the validation of request body size against this parameter, set it to `0`. We do not recommended disabling it.
@@ -673,6 +668,7 @@ A key-value store *Service* for storing business data.
 * Project-wide
 
   * `key_value_store: engine:` - possible value is: `redis`.
+  * `key_value_store: replicas: number:` - defines the number of replicas. The default value is 0.
   * `session: endpoints:` - defines the service's port that can be accessed via given endpoints.
 
 * Store-specific
