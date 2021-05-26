@@ -33,4 +33,15 @@ function Codebase::build() {
 
         Compose::exec "vendor/bin/install -r ${SPRYKER_PIPELINE} -s cronicle-development"
     fi
+
+    if [ -n "${SPRYKER_SCHEDULER_APP_ENABLED}" ]; then
+        Console::verbose "${INFO}Running build worker codebase${NC}"
+
+        local cronicleDir=$(Compose::exec '[ ! -d /data/node_modules/Cronicle ] && echo 0 || echo 1 | tail -n 1' | tr -d " \n\r")
+        if [ "$1" = "--force" ] || [ "${cronicleDir}" == "0" ]; then
+            Compose::exec "echo y | npm install --silent"
+        fi
+
+        Compose::exec "vendor/bin/install -r ${SPRYKER_PIPELINE} -s cronicle-development"
+    fi
 }

@@ -42,6 +42,11 @@ RUN --mount=type=cache,id=npm,sharing=locked,target=/root/.npm \
   && cd /home/spryker/cronicle \
   && mkdir -p data logs plugins
 
+RUN npm i
+RUN vendor/bin/install -r ${SPRYKER_PIPELINE} -s cronicle
+RUN touch /home/spryker/cronicle/data/.baked
+
+ADD cronicle/setup.sh /home/spryker/cronicle/setup.sh
 ADD cronicle/entrypoint.sh /home/spryker/cronicle/entrypoint.sh
 
 EXPOSE 3012 3014
