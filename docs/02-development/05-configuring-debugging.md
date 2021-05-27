@@ -1,11 +1,4 @@
-> Audience:
->
-> - Developers who debug using the Docker SDK.
->
-> Outcome:
-> - You know how to configure debugging.
-> - You know how to debug web applications, API, and console commands.
-
+# Configuring debugging
 
 This document describes how to configure debugging of Spryker in Docker.
 

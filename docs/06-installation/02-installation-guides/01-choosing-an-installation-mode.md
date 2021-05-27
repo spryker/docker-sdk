@@ -1,12 +1,4 @@
-
-> Audience:
->
-> - Everybody who uses the Docker SDK.
->
-> Outcome:
-> - You understand the difference between modes and can choose one.
-
-
+# Choosing an installation mode
 
 In this section, you can find installation guides for Spryker in Docker. Currently, you can install Spryker in the following ways:
 * Install Spryker in Development mode.

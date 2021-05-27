@@ -1,12 +1,6 @@
-> Audience:
->
-> - Developers who are developing with the Docker SDK.
->
-> Outcome:
-> - You know how to choose a mount mode based on an OS.
-> - You understand how synchronization mount modes work.
+# Choosing a mount mode
 
-This document describes mount modes and how you can choose one. 
+This document describes mount modes and how you can choose one.
 
 ## Selecting a mount mode for development
 

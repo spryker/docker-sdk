@@ -1,3 +1,5 @@
+# Running production
+
 This document describes the procedure of generating images and assets suitable for a production environment. After going through all the steps, it's up to you how to proceed further.
 
 @(Info)()(This functionality is available in the Docker SDK from version 1.7.2.)

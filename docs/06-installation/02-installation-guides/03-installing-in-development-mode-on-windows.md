@@ -1,3 +1,6 @@
+# Installing in Development mode on Windows
+
+
 This document describes how to install Spryker in [Development Mode](01-choosing-an-installation-mode.md#development-mode) on Windows.
 
 ## Installing Docker prerequisites on Windows
@@ -18,13 +21,13 @@ Follow the steps to install Spryker in Development mode:
     a. Clone the B2C repository:
 
     ```bash
-    git clone https://github.com/spryker-shop/b2c-demo-shop.git -b 202009.0-p1 --single-branch ./
+    git clone https://github.com/spryker-shop/b2c-demo-shop.git -b 202009.0-p1 --single-branch ./b2c-demo-shop
     ```
 
     b. Clone the B2B repository:
 
     ```bash
-    git clone https://github.com/spryker-shop/b2b-demo-shop.git -b 202009.0-p1 --single-branch ./
+    git clone https://github.com/spryker-shop/b2b-demo-shop.git -b 202009.0-p1 --single-branch ./b2b-demo-shop
     ```
 
 5. Depending on the repository you've cloned, navigate into the cloned folder:
