@@ -24,7 +24,7 @@ This reference page describes version 1 of the Deploy file format. This is the n
  <dd>A store related context a request is processed in.</dd>
 
  <dt>Application</dt>
- <dd>A Spryker application, like Backoffice(Zed), Yves or Glue.</dd>
+ <dd>A Spryker application, like Backoffice(Zed), Backend-Gateway, Yves or Glue.</dd>
 
  <dt>Service</dt>
  <dd>An external storage or utility service. Represents service type and configuration. The configuration can be defined on different levels: project-wide, region-wide, store-specific or endpoint-specific with limitations based on the service type.</dd>
@@ -318,7 +318,7 @@ The key must be project-wide unique.
 
 Obligatory parameters for `application:`:
 
-* `groups: applications: application:` - defines the type of *Application*. Possible values are `backoffice(zed)`, `yves`, and `glue`.
+* `groups: applications: application:` - defines the type of *Application*. Possible values are `backoffice(zed)`, `backend-gateway`, `yves`, and `glue`.
 * `groups: applications: endpoints:` - defines the list of *Endpoints* to access the *Application*. See [groups: applications: endpoints:](#groups-applications-endpoints-) to learn more.
 
 Optional parameters for `application:`:
