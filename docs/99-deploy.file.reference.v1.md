@@ -16,7 +16,7 @@ This reference page describes version 1 of the Deploy file format. This is the n
  <dd>A store related context a request is processed in.</dd>
 
  <dt>Application</dt>
- <dd>A Spryker application, like Zed, Yves or Glue.</dd>
+ <dd>A Spryker application, like Backoffice(Zed), Backend-Gateway, Yves, Glue or MerchantPortal.</dd>
 
  <dt>Service</dt>
  <dd>An external storage or utility service. Represents service type and configuration. The configuration can be defined on different levels: project-wide, region-wide, store-specific or endpoint-specific with limitations based on the service type.</dd>
@@ -235,14 +235,25 @@ groups:
   BACKEND-1:
     region: REGION-1
     applications:
-      zed_1:
-        application: zed
+      backoffice_1:
+        application: backoffice
         endpoints:
-          zed.store1.spryker.local:
+          backoffice.store1.spryker.local:
             store: STORE-1
             services:
               # Application-Store-specific services settings
-          zed.store2.spryker.local:
+          backoffice.store2.spryker.local:
+            store: STORE-2
+            services:
+              # Application-Store-specific services settings
+      merchant_portal_1:
+        application: merchant-portal
+        endpoints:
+          mp.store1.spryker.local:
+            store: STORE-1
+            services:
+              # Application-Store-specific services settings
+          mp.store2.spryker.local:
             store: STORE-2
             services:
               # Application-Store-specific services settings
@@ -256,7 +267,7 @@ groups:
             store: STORE-1
             services:
               # Application-Store-specific services settings
-          yves.astore2t.spryker.local:
+          yves.store2.spryker.local:
             store: STORE-2
             services:
               # Application-Store-specific services settings
@@ -278,15 +289,15 @@ groups:
   BACKEND-1:
     region: REGION-1
     applications:
-      zed_store_1:
-        application: zed
+      backoffice_store_1:
+        application: backoffice
         endpoints:
-          zed.store1.spryker.local:
+          backoffice.store1.spryker.local:
             store: STORE-1
-      zed_store_2:
-        application: zed
+      backoffice_store_2:
+        application: backoffice
         endpoints:
-          zed.store2.spryker.local:
+          backoffice.store2.spryker.local:
             store: STORE-2
 
  ```
@@ -301,7 +312,7 @@ The key must be project-wide unique.
 
 Obligatory parameters for `application:`:
 
-* `groups: applications: application:` - defines the type of *Application*. Possible values are `zed`, `yves`, and `glue`.
+* `groups: applications: application:` - defines the type of *Application*. Possible values are `backoffice(zed)`, `backend-gateway`, `yves`, `glue` and `merchant-portal`.
 * `groups: applications: endpoints:` - defines the list of *Endpoints* to access the *Application*. See [groups: applications: endpoints:](#groups-applications-endpoints-) to learn more.
 
 Optional parameters for `application:`:
@@ -324,19 +335,20 @@ Optional parameters for `application:`:
 
 * `groups: applications: application: endpoints: primal:` - defines if a ZED endpoint is primal for a store. Yves and Glue applications send Zed RPC calls to the primal endpoint. This variable is optional with the default value of `false`. If no endpoint is defined as primal for a store, the first endpoint in descending order is considered primal.
 * `groups: applications: application: http: max-request-body-size:` - defines the maximum allowed size of the request body that can be sent to the application, in MB. If not specified, the default values apply:
-	* `zed` - `10m`
+	* `backoffice` - `10m`
+    * `merchant-portal` - `10m`
 	* `glue` - `2m`
 	* `yves` - `1m`
 
 ```yaml
 ...
     applications:
-      zed:
-        application: zed
+      backoffice:
+        application: backoffice
         http:
           max-request-body-size: 20m
         endpoints:
-          zed.store1.spryker.local:
+          backoffice.store1.spryker.local:
             store: STORE-1
  ```
 
@@ -345,8 +357,8 @@ Optional parameters for `application:`:
 ```yaml
 ...
     applications:
-      zed:
-        application: zed
+      backoffice:
+        application: backoffice
         limits:
             workers: 4
         ...

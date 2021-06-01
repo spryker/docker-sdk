@@ -178,7 +178,7 @@ docker/sdk up
 ### An application is not reachable via http
 
 **when**
-An application like Yves, Zed, or Glue is not reachable after installation.
+An application like Yves, BackOffice(Zed), Glue, or MerchantPortal is not reachable after installation.
 
 **then**
 In `deploy.*.yml`, ensure that SSL encryption is disabled:
