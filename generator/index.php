@@ -132,7 +132,7 @@ foreach ($projectData['groups'] ?? [] as $groupName => $groupData) {
             if ($endpointData === null) {
                 $endpointData = [];
             }
-            $entryPoint = $endpointData['entry-point'] ?? ucfirst(strtolower($applicationData['application']));
+            $entryPoint = $endpointData['entry-point'] ?? str_replace('-', '', ucwords(strtolower($applicationData['application']), '-'));
             $projectData['_entryPoints'][$entryPoint] = $entryPoint;
             $projectData['groups'][$groupName]['applications'][$applicationName]['endpoints'][$endpoint]['entry-point'] = $entryPoint;
 
@@ -257,7 +257,7 @@ foreach ($projectData['groups'] ?? [] as $groupName => $groupData) {
                 );
             }
 
-            if ($applicationData['application'] === 'zed') {
+            if ($applicationData['application'] === 'zed' || $applicationData['application'] === 'merchant-portal') {
                 $services = [];
 
                 if (array_key_exists('store', $endpointData)) {
