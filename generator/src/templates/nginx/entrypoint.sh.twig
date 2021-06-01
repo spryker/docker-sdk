@@ -1,5 +1,5 @@
 #!/bin/sh
-{% set envVariables = ["\$ALLOWED_IP"] %}
+{% set envVariables = ["\$ALLOWED_IP","\$SPRYKER_GATEWAY01_IP","\$SPRYKER_GATEWAY02_IP","\$SPRYKER_GATEWAY03_IP","\$SPRYKER_GATEWAY04_IP","\$SPRYKER_GATEWAY05_IP","\$SPRYKER_GATEWAY06_IP","\$SPRYKER_GATEWAY07_IP","\$SPRYKER_GATEWAY08_IP","\$SPRYKER_GATEWAY09_IP"] %}
 {% for groupData in groups %}
 {% for applicationName, applicationData in groupData['applications'] %}
 {% if applicationData['application'] != 'static' %}
@@ -8,6 +8,17 @@ export SPRYKER_NGINX_CGI_{{ applicationName | upper}}=${SPRYKER_NGINX_CGI_{{ (ap
 {% endif %}
 {% endfor %}
 {% endfor %}
+
+export ALLOWED_IP="${ALLOWED_IP}:-127.0.0.1"
+export $SPRYKER_GATEWAY01_IP="${$SPRYKER_GATEWAY01_IP}:-127.0.0.1"
+export $SPRYKER_GATEWAY02_IP="${$SPRYKER_GATEWAY02_IP}:-127.0.0.1"
+export $SPRYKER_GATEWAY03_IP="${$SPRYKER_GATEWAY03_IP}:-127.0.0.1"
+export $SPRYKER_GATEWAY04_IP="${$SPRYKER_GATEWAY04_IP}:-127.0.0.1"
+export $SPRYKER_GATEWAY05_IP="${$SPRYKER_GATEWAY05_IP}:-127.0.0.1"
+export $SPRYKER_GATEWAY06_IP="${$SPRYKER_GATEWAY06_IP}:-127.0.0.1"
+export $SPRYKER_GATEWAY07_IP="${$SPRYKER_GATEWAY07_IP}:-127.0.0.1"
+export $SPRYKER_GATEWAY08_IP="${$SPRYKER_GATEWAY08_IP}:-127.0.0.1"
+export $SPRYKER_GATEWAY09_IP="${$SPRYKER_GATEWAY09_IP}:-127.0.0.1"
 
 envsubst '{{ envVariables | join(' ') }}' < /etc/nginx/template/default.conf.tmpl > /etc/nginx/conf.d/default.conf
 
