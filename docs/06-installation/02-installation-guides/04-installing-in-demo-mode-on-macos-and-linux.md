@@ -1,3 +1,7 @@
+# Installing in Demo mode on MacOS and Linux
+
+
+
 This document describes the procedure of installing Spryker in [Demo Mode](01-choosing-an-installation-mode.md#demo-mode) on MacOS and Linux.
 
 ## Installing Docker prerequisites on MacOS and Linux
@@ -19,13 +23,13 @@ Follow the steps to install Spryker in Demo Mode:
     a. Clone the B2C repository:
 
     ```shell
-    git clone https://github.com/spryker-shop/b2c-demo-shop.git -b 202009.0-p1 --single-branch ./
+    git clone https://github.com/spryker-shop/b2c-demo-shop.git -b 202009.0-p1 --single-branch ./b2c-demo-shop
     ```
 
     b. Clone the B2B repository:
 
     ```shell
-    git clone https://github.com/spryker-shop/b2b-demo-shop.git -b 202009.0-p1 --single-branch ./
+    git clone https://github.com/spryker-shop/b2b-demo-shop.git -b 202009.0-p1 --single-branch ./b2b-demo-shop
     ```
 4. Depending on the cloned repository, navigate into the cloned folder:
     * B2C repository:
@@ -88,6 +92,7 @@ To ensure that the installation is successful, make sure you can access the foll
 | The Storefront |  yves.de.spryker.local, yves.at.spryker.local, yves.us.spryker.local |
 | the Back Office | backoffice.de.spryker.local, backoffice.at.spryker.local, backoffice.us.spryker.local |
 | Glue API | glue.de.spryker.local, glue.at.spryker.local, glue.us.spryker.local |
+| The Merchant Portal | mp.de.spryker.local, mp.at.spryker.local, mp.us.spryker.local |
 | Jenkins (scheduler) | scheduler.spryker.local |
 | RabbitMQ UI (queue manager) | queue.spryker.local |
 | Mailhog UI (email catcher) | mail.spryker.local |

@@ -146,7 +146,7 @@ foreach ($projectData['groups'] ?? [] as $groupName => $groupData) {
             if ($endpointData === null) {
                 $endpointData = [];
             }
-            $entryPoint = $endpointData['entry-point'] ?? ENTRY_POINTS[$applicationData['application']];
+            $entryPoint = $endpointData['entry-point'] ?? str_replace('-', '', ucwords(strtolower(ENTRY_POINTS[$applicationData['application']]), '-'));
             $projectData['_entryPoints'][$entryPoint] = $entryPoint;
             $projectData['groups'][$groupName]['applications'][$applicationName]['endpoints'][$endpoint]['entry-point'] = $entryPoint;
 
@@ -300,6 +300,7 @@ foreach ($projectData['groups'] ?? [] as $groupName => $groupData) {
             if ($applicationData['application'] === ZED_APP
                 || $applicationData['application'] === BACKEND_GATEWAY_APP
                 || $applicationData['application'] === BACKOFFICE_APP
+                || $applicationData['application'] === 'merchant-portal'
             ) {
                 $services = [];
 
@@ -377,6 +378,25 @@ foreach ($projectData['groups'] ?? [] as $groupName => $groupData) {
             }
         }
     }
+}
+
+if (!empty($projectData['services']['key_value_store']['replicas'])) {
+    $replicas = $projectData['services']['key_value_store']['replicas']['number'] ?? 1;
+    $projectData['services']['key_value_store']['replica-services'] = array_map(function ($index) {
+        return 'replica' . $index;
+    }, range(1, (int)$replicas));
+    $projectData['services']['key_value_store']['options'] = json_encode([
+        'replication' => 'predis',
+    ], JSON_UNESCAPED_SLASHES);
+
+    $sources = [
+        'tcp://key_value_store?role=master', 'tcp://key_value_store'
+    ];
+    foreach ($projectData['services']['key_value_store']['replica-services'] as $replica) {
+        $sources[] = 'tcp://key_value_store_' . $replica;
+    }
+
+    $projectData['services']['key_value_store']['sources'] = json_encode($sources, JSON_UNESCAPED_SLASHES);
 }
 
 foreach ($projectData['services'] ?? [] as $serviceName => $serviceData) {

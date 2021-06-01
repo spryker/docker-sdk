@@ -1,3 +1,6 @@
+# Integrating the Docker SDK into existing projects
+
+
 This page describes how you can convert a non-Docker based project into a Docker based one. If you want to install Spryker in Docker from scratch, start with [Development Mode](01-choosing-an-installation-mode.md#development-mode) or [Demo Mode](01-choosing-an-installation-mode.md#demo-mode).
 
 ## Prerequisites
@@ -99,6 +102,7 @@ To ensure that the installation is successful, make sure you can access the foll
 | The Storefront |  yves.de.spryker.local, yves.at.spryker.local, yves.us.spryker.local |
 | the Back Office | backoffice.de.spryker.local, backoffice.at.spryker.local, backoffice.us.spryker.local |
 | Glue API | glue.de.spryker.local, glue.at.spryker.local, glue.us.spryker.local |
+| The Merchant Portal | mp.de.spryker.local, mp.at.spryker.local, mp.us.spryker.local |
 | Jenkins (scheduler) | scheduler.spryker.local |
 | RabbitMQ UI (queue manager) | queue.spryker.local |
 | Mailhog UI (email catcher) | mail.spryker.local |
