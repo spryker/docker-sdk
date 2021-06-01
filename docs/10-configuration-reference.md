@@ -57,8 +57,8 @@ To increase maximum upload size, update `deploy.*.yml` as follows:
 ```yaml
 ...
     applications:
-      zed:
-        application: zed
+      backoffice:
+        application: backoffice
         http:
           max-request-body-size: {request_body_size_value}
         ...

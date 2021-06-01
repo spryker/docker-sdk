@@ -126,13 +126,29 @@ $projectData['_endpointDebugMap'] = [];
 
 verbose('Generating ENV files... [DONE]');
 
+const YVES_APP = 'yves';
+const ZED_APP = 'zed';
+const GLUE_APP = 'glue';
+const BACKOFFICE_APP = 'backoffice';
+const BACKEND_GATEWAY_APP = 'backend-gateway';
+const MERCHANT_PORTAL = 'merchant-portal';
+
+const ENTRY_POINTS = [
+    BACKOFFICE_APP => 'Backoffice',
+    BACKEND_GATEWAY_APP => 'BackendGateway',
+    ZED_APP => 'Zed',
+    YVES_APP => 'Yves',
+    GLUE_APP => 'Glue',
+    MERCHANT_PORTAL => 'MerchantPortal',
+];
+
 foreach ($projectData['groups'] ?? [] as $groupName => $groupData) {
     foreach ($groupData['applications'] ?? [] as $applicationName => $applicationData) {
         foreach ($applicationData['endpoints'] ?? [] as $endpoint => $endpointData) {
             if ($endpointData === null) {
                 $endpointData = [];
             }
-            $entryPoint = $endpointData['entry-point'] ?? str_replace('-', '', ucwords(strtolower($applicationData['application']), '-'));
+            $entryPoint = $endpointData['entry-point'] ?? str_replace('-', '', ucwords(strtolower(ENTRY_POINTS[$applicationData['application']]), '-'));
             $projectData['_entryPoints'][$entryPoint] = $entryPoint;
             $projectData['groups'][$groupName]['applications'][$applicationName]['endpoints'][$endpoint]['entry-point'] = $entryPoint;
 
@@ -189,12 +205,38 @@ foreach ($primal as $callbacks) {
     }
 }
 
-$endpointMap = $projectData['_endpointMap'];
+$endpointMap = $projectData['_endpointMap'] = mapBackendEndpointsWithFallbackZed($projectData['_endpointMap']);
+
 $projectData['_applications'] = [];
 $frontend = [];
 $environment = [
     'project' => $projectData['namespace'],
 ];
+
+/**
+ * @param array $endpointMap
+ *
+ * @return array
+ */
+function mapBackendEndpointsWithFallbackZed(array $endpointMap): array
+{
+    $zedApplicationsToCheck = [
+        BACKOFFICE_APP,
+        BACKEND_GATEWAY_APP,
+    ];
+
+    foreach ($zedApplicationsToCheck as $zedApplicationToCheck) {
+        foreach ($endpointMap as $store => $storeEndpointMap) {
+            if (array_key_exists($zedApplicationToCheck, $storeEndpointMap)) {
+                continue;
+            }
+            $endpointMap[$store][$zedApplicationToCheck] = $storeEndpointMap[ZED_APP];
+        }
+    }
+
+    return $endpointMap;
+}
+
 foreach ($projectData['groups'] ?? [] as $groupName => $groupData) {
     foreach ($groupData['applications'] ?? [] as $applicationName => $applicationData) {
         if ($applicationData['application'] !== 'static') {
@@ -257,7 +299,11 @@ foreach ($projectData['groups'] ?? [] as $groupName => $groupData) {
                 );
             }
 
-            if ($applicationData['application'] === 'zed' || $applicationData['application'] === 'merchant-portal') {
+            if ($applicationData['application'] === ZED_APP
+                || $applicationData['application'] === BACKEND_GATEWAY_APP
+                || $applicationData['application'] === BACKOFFICE_APP
+                || $applicationData['application'] === MERCHANT_PORTAL
+            ) {
                 $services = [];
 
                 if (array_key_exists('store', $endpointData)) {
@@ -300,7 +346,7 @@ foreach ($projectData['groups'] ?? [] as $groupName => $groupData) {
                 $envVarEncoder->setIsActive(false);
             }
 
-            if ($applicationData['application'] === 'yves') {
+            if ($applicationData['application'] === YVES_APP) {
                 $services = [];
 
                 $isEndpointDataHasStore = array_key_exists('store', $endpointData);
