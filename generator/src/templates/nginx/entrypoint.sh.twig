@@ -9,7 +9,7 @@ export SPRYKER_NGINX_CGI_{{ applicationName | upper}}=${SPRYKER_NGINX_CGI_{{ (ap
 {% endfor %}
 {% endfor %}
 
-export ALLOWED_IP="${ALLOWED_IP}:-127.0.0.1"
+export ALLOWED_IP="${ALLOWED_IP:-127.0.0.1}"
 export $SPRYKER_GATEWAY01_IP="${SPRYKER_GATEWAY01_IP:-127.0.0.1}"
 export $SPRYKER_GATEWAY02_IP="${SPRYKER_GATEWAY02_IP:-127.0.0.1}"
 export $SPRYKER_GATEWAY03_IP="${SPRYKER_GATEWAY03_IP:-127.0.0.1}"
