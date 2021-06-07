@@ -1,7 +1,7 @@
 #!/bin/bash
 
 function Service::Scheduler::isInstalled() {
-    [ "${SPRYKER_TESTING_ENABLE}" -eq 1 ] && return "${TRUE}"
+    [ -n "${SPRYKER_TESTING_ENABLE}" ] && return "${TRUE}"
 
     Runtime::waitFor scheduler
     Console::start -n "Checking jobs are installed..."
@@ -12,7 +12,7 @@ function Service::Scheduler::isInstalled() {
 }
 
 Service::Scheduler::pause() {
-    [ "${SPRYKER_TESTING_ENABLE}" -eq 1 ] && return "${TRUE}"
+    [ -n "${SPRYKER_TESTING_ENABLE}" ] && return "${TRUE}"
 
     Runtime::waitFor scheduler
     Console::start -n "Suspending scheduler..."
@@ -37,7 +37,7 @@ Service::Scheduler::pause() {
 }
 
 Service::Scheduler::unpause() {
-    [ "${SPRYKER_TESTING_ENABLE}" -eq 1 ] && return "${TRUE}"
+    [ -n "${SPRYKER_TESTING_ENABLE}" ] && return "${TRUE}"
 
     Runtime::waitFor scheduler
     Console::start -n "Resuming scheduler..."
@@ -49,7 +49,6 @@ Service::Scheduler::unpause() {
 }
 
 function Service::Scheduler::start() {
-
     local force=''
     if [ "$1" == '--force' ]; then
         force=1
@@ -72,7 +71,7 @@ function Service::Scheduler::clean() {
 }
 
 function Service::Scheduler::_run() {
-    [ "${SPRYKER_TESTING_ENABLE}" -eq 1 ] && return "${TRUE}"
+    [ -n "${SPRYKER_TESTING_ENABLE}" ] && return "${TRUE}"
 
     Runtime::waitFor scheduler
 
