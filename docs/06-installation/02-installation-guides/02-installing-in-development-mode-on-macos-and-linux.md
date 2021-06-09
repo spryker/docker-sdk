@@ -86,7 +86,7 @@ docker/sdk up
 
 ## Endpoints
 
-To ensure that the installation is successful, make sure you can access configured endpoints from the installation instructions.
+To ensure that the installation is successful, make sure you can access configured endpoints from the deploy file reference.
 
 :::(Info) (RabbitMQ UI credentials)
 To access RabbitMQ UI, use `spryker` as a username and `secret` as a password. You can adjust the credentials in `deploy.yml`. See [Deploy file reference - 1.0](../../99-deploy.file.reference.v1.md) to learn about the Deploy file.
