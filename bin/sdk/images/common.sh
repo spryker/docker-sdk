@@ -226,11 +226,20 @@ function Images::tagFrontend() {
 }
 
 function Images::printAll() {
+    local allDockerImages=($(docker image ls --format "{{.Repository}}:{{.Tag}}"))
     local tag=${1:-${SPRYKER_DOCKER_TAG}}
+    local excludedAppTemplates=("_run_app")
 
     for application in "${SPRYKER_APPLICATIONS[@]}"; do
         local applicationPrefix=$(echo "${application}" | tr '[:upper:]' '[:lower:]')
-        printf "%s %s_app:%s\n" "${application}" "${SPRYKER_DOCKER_PREFIX}" "${tag}-${applicationPrefix}"
+
+        for image in "${allDockerImages[@]}"; do
+            for excludedAppTemplates in "${excludedAppTemplates}"; do
+                if [[ "${image}" == *"${tag}-${applicationPrefix}"* ]] && [[ "${image}" != *"${excludedAppTemplates}"*  ]]; then
+                   printf "%s %s\n" "${application}" "${image}"
+                fi
+            done
+        done
     done
 
     printf "%s %s_frontend:%s\n" "frontend" "${SPRYKER_DOCKER_PREFIX}" "${tag}-frontend"
