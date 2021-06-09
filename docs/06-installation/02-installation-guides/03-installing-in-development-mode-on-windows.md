@@ -93,7 +93,7 @@ Once you finish the setup, you don't need to run `bootstrap` to start the instan
     7. In the **File name** line, enter `hosts` and select **Open**.
     The hosts file opens in the drop-down.
     8. Follow the installation instructions in the white box from the `docker/sdk bootstrap` command execution results to prepare the environment.
-    Note: You may run `docker/sdk install` after `bootstrap` to view list of instructions.
+    Note: You may run `docker/sdk install` after `bootstrap` to list the instructions.
     9. Select **File** > **Save**.
     10. Close the file.
 
@@ -107,7 +107,7 @@ docker/sdk up
 
 ## Endpoints
 
-To ensure that the installation is successful, make sure you can access configured endpoints from the deploy file reference.
+To ensure that the installation is successful, make sure you can access configured endpoints from the deploy file.
 
 :::(Info) (RabbitMQ UI credentials)
 To access RabbitMQ UI, use `spryker` as a username and `secret` as a password. You can adjust the credentials in `deploy.yml`. See [Deploy file reference - 1.0](../../99-deploy.file.reference.v1.md) to learn about the Deploy file.
