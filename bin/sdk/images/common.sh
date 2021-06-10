@@ -208,12 +208,16 @@ function Images::tagApplications() {
     local tag=${1:-${SPRYKER_DOCKER_TAG}}
 
     for application in "${SPRYKER_APPLICATIONS[@]}"; do
-        if [[ -n "${SPRYKER_SCHEDULER_APP_ENABLED}" && "${application}" == *"worker"* ]]; then
-            Images::_tagByApp "${application}" "${SPRYKER_DOCKER_PREFIX}_worker_app:${tag}" "${SPRYKER_DOCKER_PREFIX}_worker_app:${SPRYKER_DOCKER_TAG}"
-        else
-            Images::_tagByApp "${application}" "${SPRYKER_DOCKER_PREFIX}_app:${tag}" "${SPRYKER_DOCKER_PREFIX}_app:${SPRYKER_DOCKER_TAG}"
-            Images::_tagByApp "${application}" "${SPRYKER_DOCKER_PREFIX}_run_app:${tag}" "${SPRYKER_DOCKER_PREFIX}_run_app:${SPRYKER_DOCKER_TAG}"
-        fi
+        eval "${application}"
+
+        for applicationName in ${APP_NAMES[@]}; do
+            if [[ -n "${SPRYKER_SCHEDULER_APP_ENABLED}" ]] && [[ "${APP_TYPE}" == "worker" ]]; then
+                Images::_tagByApp "${applicationName}" "${SPRYKER_DOCKER_PREFIX}_worker_app:${tag}" "${SPRYKER_DOCKER_PREFIX}_worker_app:${SPRYKER_DOCKER_TAG}"
+            else
+                Images::_tagByApp "${applicationName}" "${SPRYKER_DOCKER_PREFIX}_app:${tag}" "${SPRYKER_DOCKER_PREFIX}_app:${SPRYKER_DOCKER_TAG}"
+                Images::_tagByApp "${applicationName}" "${SPRYKER_DOCKER_PREFIX}_run_app:${tag}" "${SPRYKER_DOCKER_PREFIX}_run_app:${SPRYKER_DOCKER_TAG}"
+            fi
+        done
     done
 
     Images::_tagByApp pipeline "${SPRYKER_DOCKER_PREFIX}_pipeline:${tag}" "${SPRYKER_DOCKER_PREFIX}_pipeline:${SPRYKER_DOCKER_TAG}"
@@ -226,19 +230,19 @@ function Images::tagFrontend() {
 }
 
 function Images::printAll() {
-    local allDockerImages=($(docker image ls --format "{{.Repository}}:{{.Tag}}"))
     local tag=${1:-${SPRYKER_DOCKER_TAG}}
-    local excludedAppTemplates=("_run_app")
 
     for application in "${SPRYKER_APPLICATIONS[@]}"; do
-        local applicationPrefix=$(echo "${application}" | tr '[:upper:]' '[:lower:]')
+        eval "${application}"
 
-        for image in "${allDockerImages[@]}"; do
-            for excludedAppTemplates in "${excludedAppTemplates}"; do
-                if [[ "${image}" == *"${tag}-${applicationPrefix}"* ]] && [[ "${image}" != *"${excludedAppTemplates}"*  ]]; then
-                   printf "%s %s\n" "${application}" "${image}"
-                fi
-            done
+        for applicationName in "${APP_NAMES[@]}"; do
+            local applicationPrefix=$(echo "${applicationName}" | tr '[:upper:]' '[:lower:]')
+
+            if [[ ${APP_TYPE} == "worker" ]]; then
+                printf "%s %s_app:%s\n" "${APP_TYPE}" "${SPRYKER_DOCKER_PREFIX}_worker" "${tag}-${applicationPrefix}"
+            else
+                printf "%s %s_app:%s\n" "${APP_TYPE}" "${SPRYKER_DOCKER_PREFIX}" "${tag}-${applicationPrefix}"
+            fi
         done
     done
 

@@ -1,7 +1,7 @@
 {% set schema = _project['docker']['ssl']['enabled'] ? 'https://' : 'http://' %}
 {% set hostname = applicationData['endpoints'] | keys | first | split(':') | first %}
   {{ applicationName | lower }}:
-    image: ${SPRYKER_DOCKER_PREFIX}_worker_app:${SPRYKER_DOCKER_TAG}
+    image: ${SPRYKER_DOCKER_PREFIX}_worker_app:${SPRYKER_DOCKER_TAG}-{{ applicationName | lower }}
     hostname: {{ hostname }}
     depends_on:
         - database
@@ -28,7 +28,7 @@
     env_file:
         - ${DEPLOYMENT_PATH}/env/{{ applicationName }}.env
     volumes:
-        - {{ applicationName }}-data:/home/spryker/cronicle/data
+        - {{ applicationName | lower }}-data:/home/spryker/cronicle/data
         - logs:${SPRYKER_LOG_DIRECTORY}:rw
 {% if _mountMode != 'baked' %}
 {% if _mountMode == 'native' %}

@@ -260,7 +260,7 @@ function mapBackendEndpointsWithFallbackZed(array $endpointMap): array
 foreach ($projectData['groups'] ?? [] as $groupName => $groupData) {
     foreach ($groupData['applications'] ?? [] as $applicationName => $applicationData) {
         if ($applicationData['application'] !== 'static') {
-            $projectData['_applications'][] = $applicationName;
+            $projectData['_applications'][$applicationData['application']][] = $applicationName;
 
             $schedulerEnabledStores = array_keys($projectData['regions'][$groupData['region']]['stores']) ?? [];
             $data = [
