@@ -95,20 +95,10 @@ Ensure that, in the `hosts` file in the local environment, all the domains from 
 
 ## Endpoints
 
-To ensure that the installation is successful, make sure you can access the following endpoints.
-
-| Application | Endpoints |
-| --- | --- |
-| The Storefront |  yves.de.spryker.local, yves.at.spryker.local, yves.us.spryker.local |
-| the Back Office | backoffice.de.spryker.local, backoffice.at.spryker.local, backoffice.us.spryker.local |
-| Glue API | glue.de.spryker.local, glue.at.spryker.local, glue.us.spryker.local |
-| The Merchant Portal | mp.de.spryker.local, mp.at.spryker.local, mp.us.spryker.local |
-| Jenkins (scheduler) | scheduler.spryker.local |
-| RabbitMQ UI (queue manager) | queue.spryker.local |
-| Mailhog UI (email catcher) | mail.spryker.local |
+To ensure that the installation is successful, make sure you can access the configured endpoints from the Deploy file. See [Deploy file reference - 1.0](https://documentation.spryker.com/docs/deploy-file-reference-10) to learn about the Deploy file.
 
 :::(Info) (RabbitMQ UI credentials)
-To access RabbitMQ UI, use `spryker` as a username and `secret` as a password. You can adjust the credentials in `deploy.yml`. See [Deploy File Reference - 1.0](https://documentation.spryker.com/docs/deploy-file-reference-10#deploy-file-reference---1-0) to learn about the Deploy file.
+To access RabbitMQ UI, use `spryker` as a username and `secret` as a password. You can adjust the credentials in `deploy.yml`.
 :::
 
 

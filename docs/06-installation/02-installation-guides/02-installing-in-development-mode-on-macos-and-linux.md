@@ -65,6 +65,7 @@ $ docker-compose --version
 :::
 
 7. Bootstrap local docker setup:
+   
 ```bash
 docker/sdk bootstrap deploy.dev.yml
 ```
@@ -72,35 +73,27 @@ docker/sdk bootstrap deploy.dev.yml
 Once you finish the setup, you don't need to run `bootstrap` to start the instance. You only need to run it after you update the Docker SDK or the deploy file.
 :::
 
-8. Once the job finishes, build and start the instance:
+8. Update the `hosts` file:
+Follow the installation instructions in the white box from the `docker/sdk bootstrap` command execution results to prepare the environment.
+
+:::(Info) ()
+ You can run `docker/sdk install` after `bootstrap` to get the list of the instructions.
+:::
+
+9. Once the job finishes, build and start the instance:
+    
 ```bash
 docker/sdk up
 ```
-
-9. Update the `hosts` file:
-```bash
-echo "127.0.0.1 backoffice.de.spryker.local backend-gateway.de.spryker.local backend-api.de.spryker.local yves.de.spryker.local glue.de.spryker.local backoffice.at.spryker.local backend-gateway.at.spryker.local backend-api.at.spryker.local yves.at.spryker.local glue.at.spryker.local backoffice.us.spryker.local backend-gateway.us.spryker.local backend-api.us.spryker.local yves.us.spryker.local glue.us.spryker.local mail.spryker.local scheduler.spryker.local queue.spryker.local" | sudo tee -a /etc/hosts
-```
-@(Info)()(If needed, add corresponding entries for other stores. For example, if you are going to have a US store, add the following entries: `backoffice.us.spryker.local backend-gateway.us.spryker.local backend-api.us.spryker.local glue.us.spryker.local yves.us.spryker.local`)
 
 @(Warning)()(Depending on the hardware performance, the first project launch can take up to 20 minutes.)
 
 ## Endpoints
 
-To ensure that the installation is successful, make sure you can access the following endpoints.
-
-| Application | Endpoints |
-| --- | --- |
-| The Storefront |  yves.de.spryker.local, yves.at.spryker.local, yves.us.spryker.local |
-| the Back Office | backoffice.de.spryker.local, backoffice.at.spryker.local, backoffice.us.spryker.local |
-| Glue API | glue.de.spryker.local, glue.at.spryker.local, glue.us.spryker.local |
-| The Merchant Portal | mp.de.spryker.local, mp.at.spryker.local, mp.us.spryker.local |
-| Jenkins (scheduler) | scheduler.spryker.local |
-| RabbitMQ UI (queue manager) | queue.spryker.local |
-| Mailhog UI (email catcher) | mail.spryker.local |
+To ensure that the installation is successful, make sure you can access the configured endpoints from the Deploy file. See [Deploy file reference - 1.0](../../99-deploy.file.reference.v1.md) to learn about the Deploy file.
 
 :::(Info) (RabbitMQ UI credentials)
-To access RabbitMQ UI, use `spryker` as a username and `secret` as a password. You can adjust the credentials in `deploy.yml`. See [Deploy file reference - 1.0](../../99-deploy.file.reference.v1.md) to learn about the Deploy file.
+To access RabbitMQ UI, use `spryker` as a username and `secret` as a password. You can adjust the credentials in `deploy.yml`. 
 :::
 
 ## Getting the list of useful commands
