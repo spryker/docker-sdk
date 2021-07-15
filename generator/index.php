@@ -151,7 +151,7 @@ foreach ($projectData['groups'] ?? [] as $groupName => $groupData) {
             if ($endpointData === null) {
                 $endpointData = [];
             }
-            $entryPoint = $endpointData['entry-point'] ?? str_replace('-', '', ucwords(strtolower(ENTRY_POINTS[$applicationData['application']]), '-'));
+            $entryPoint = $endpointData['entry-point'] ?? ENTRY_POINTS[$applicationData['application']] ?? str_replace('-', '', ucwords(strtolower($applicationName), '-'));
 
             if ($applicationData['application'] === 'worker') {
                 $host = array_key_first($applicationData['endpoints']);
@@ -260,28 +260,40 @@ function mapBackendEndpointsWithFallbackZed(array $endpointMap): array
 foreach ($projectData['groups'] ?? [] as $groupName => $groupData) {
     foreach ($groupData['applications'] ?? [] as $applicationName => $applicationData) {
         if ($applicationData['application'] !== 'static') {
-            $projectData['_applications'][$applicationData['application']][] = $applicationName;
+            $projectData['_applications'][] = $applicationName;
+//            $projectData['_applications'][$applicationData['application']][] = $applicationName;
 
-            $schedulerEnabledStores = array_keys($projectData['regions'][$groupData['region']]['stores']) ?? [];
-            $data = [
-                'applicationName' => $applicationName,
-                'applicationData' => $applicationData,
-                'project' => $projectData,
-                'regionName' => $groupData['region'],
-                'regionData' => $projectData['regions'][$groupData['region']],
-                'brokerConnections' => getBrokerConnections($projectData),
-                'enabledSchedulers' => json_encode($projectData['_schedulers'][$groupName] ?? [], JSON_UNESCAPED_SLASHES),
-                'enabledSchedulerStores' => json_encode($schedulerEnabledStores),
-            ];
-
-            if ($applicationData['application'] === 'worker') {
-                $projectData['_schedulers']['enabledStores'][$groupName] = $schedulerEnabledStores;
-                $data['applicationData']['cronicleApiKey'] = $projectData['_schedulers'][$groupName][$applicationData['worker-id']]['api_key'];
-            }
-
+//            $schedulerEnabledStores = array_keys($projectData['regions'][$groupData['region']]['stores']) ?? [];
+//            $data = [
+//                'applicationName' => $applicationName,
+//                'applicationData' => $applicationData,
+//                'project' => $projectData,
+//                'regionName' => $groupData['region'],
+//                'regionData' => $projectData['regions'][$groupData['region']],
+//                'brokerConnections' => getBrokerConnections($projectData),
+//                'enabledSchedulers' => json_encode($projectData['_schedulers'][$groupName] ?? [], JSON_UNESCAPED_SLASHES),
+//                'enabledSchedulerStores' => json_encode($schedulerEnabledStores),
+//            ];
+//
+//            if ($applicationData['application'] === 'worker') {
+//                $projectData['_schedulers']['enabledStores'][$groupName] = $schedulerEnabledStores;
+//                $data['applicationData']['cronicleApiKey'] = $projectData['_schedulers'][$groupName][$applicationData['worker-id']]['api_key'];
+//            }
+//
+//            file_put_contents(
+//                $deploymentDir . DS . 'env' . DS . $applicationName . '.env',
+//                $twig->render(sprintf('env/application/%s.env.twig', $applicationData['application']), $data)
+//            );
             file_put_contents(
                 $deploymentDir . DS . 'env' . DS . $applicationName . '.env',
-                $twig->render(sprintf('env/application/%s.env.twig', $applicationData['application']), $data)
+                $twig->render(sprintf('env/application/%s.env.twig', $applicationData['application']), [
+                    'applicationName' => $applicationName,
+                    'applicationData' => $applicationData,
+                    'project' => $projectData,
+                    'regionName' => $groupData['region'],
+                    'regionData' => $projectData['regions'][$groupData['region']],
+                    'brokerConnections' => getBrokerConnections($projectData),
+                ])
             );
         }
 
@@ -480,7 +492,6 @@ file_put_contents(
 );
 
 $envVarEncoder->setIsActive(true);
-
 file_put_contents(
     $deploymentDir . DS . 'terraform/environment.tf',
     $twig->render('terraform/environment.tf.twig', [
