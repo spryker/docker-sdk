@@ -260,40 +260,28 @@ function mapBackendEndpointsWithFallbackZed(array $endpointMap): array
 foreach ($projectData['groups'] ?? [] as $groupName => $groupData) {
     foreach ($groupData['applications'] ?? [] as $applicationName => $applicationData) {
         if ($applicationData['application'] !== 'static') {
-            $projectData['_applications'][] = $applicationName;
-//            $projectData['_applications'][$applicationData['application']][] = $applicationName;
+            $projectData['_applications'][$applicationData['application']][] = $applicationName;
 
-//            $schedulerEnabledStores = array_keys($projectData['regions'][$groupData['region']]['stores']) ?? [];
-//            $data = [
-//                'applicationName' => $applicationName,
-//                'applicationData' => $applicationData,
-//                'project' => $projectData,
-//                'regionName' => $groupData['region'],
-//                'regionData' => $projectData['regions'][$groupData['region']],
-//                'brokerConnections' => getBrokerConnections($projectData),
-//                'enabledSchedulers' => json_encode($projectData['_schedulers'][$groupName] ?? [], JSON_UNESCAPED_SLASHES),
-//                'enabledSchedulerStores' => json_encode($schedulerEnabledStores),
-//            ];
-//
-//            if ($applicationData['application'] === 'worker') {
-//                $projectData['_schedulers']['enabledStores'][$groupName] = $schedulerEnabledStores;
-//                $data['applicationData']['cronicleApiKey'] = $projectData['_schedulers'][$groupName][$applicationData['worker-id']]['api_key'];
-//            }
-//
-//            file_put_contents(
-//                $deploymentDir . DS . 'env' . DS . $applicationName . '.env',
-//                $twig->render(sprintf('env/application/%s.env.twig', $applicationData['application']), $data)
-//            );
+            $schedulerEnabledStores = array_keys($projectData['regions'][$groupData['region']]['stores']) ?? [];
+            if ($applicationData['application'] === 'worker') {
+                $projectData['_schedulers']['enabledStores'][$groupName] = $schedulerEnabledStores;
+                $data['applicationData']['cronicleApiKey'] = $projectData['_schedulers'][$groupName][$applicationData['worker-id']]['api_key'];
+            }
+
+            $data = [
+                'applicationName' => $applicationName,
+                'applicationData' => $applicationData,
+                'project' => $projectData,
+                'regionName' => $groupData['region'],
+                'regionData' => $projectData['regions'][$groupData['region']],
+                'brokerConnections' => getBrokerConnections($projectData),
+                'enabledSchedulers' => json_encode($projectData['_schedulers'][$groupName] ?? [], JSON_UNESCAPED_SLASHES),
+                'enabledSchedulerStores' => json_encode($schedulerEnabledStores),
+            ];
+
             file_put_contents(
                 $deploymentDir . DS . 'env' . DS . $applicationName . '.env',
-                $twig->render(sprintf('env/application/%s.env.twig', $applicationData['application']), [
-                    'applicationName' => $applicationName,
-                    'applicationData' => $applicationData,
-                    'project' => $projectData,
-                    'regionName' => $groupData['region'],
-                    'regionData' => $projectData['regions'][$groupData['region']],
-                    'brokerConnections' => getBrokerConnections($projectData),
-                ])
+                $twig->render(sprintf('env/application/%s.env.twig', $applicationData['application']), $data)
             );
         }
 
