@@ -63,10 +63,13 @@ $ docker-compose --version
 ```
 :::
 
-8. Change line 7 of `{shop_name}/docker/context/php/debug/etc/php/debug.conf.d/69-xdebug.ini` to the following:
+8. In `{shop_name}/docker/context/php/debug/etc/php/debug.conf.d/69-xdebug.ini`, set `xdebug.remote_host` and `xdebug.client_host` to `host.docker.internal`:
 
 ```text
+...
 xdebug.remote_host=host.docker.internal
+...
+xdebug.client_host=host.docker.internal
 ```
 
 9. Add your user to the `docker` group:
@@ -100,7 +103,7 @@ Once you finish the setup, you don't need to run `bootstrap` to start the instan
     10. Close the file.
 
 12. Once the job finishes, build and start the instance:
-    
+
 ```bash
 docker/sdk up
 ```

@@ -312,7 +312,7 @@ The key must be project-wide unique.
 
 Obligatory parameters for `application:`:
 
-* `groups: applications: application:` - defines the type of *Application*. Possible values are `backoffice(zed)`, `backend-gateway`, `yves`, `glue` and `merchant-portal`.
+* `groups: applications: application:` - defines the type of *Application*. Possible values are `backoffice`, `backend-gateway`, `zed`, `yves`, `glue` and `merchant-portal`.
 * `groups: applications: endpoints:` - defines the list of *Endpoints* to access the *Application*. See [groups: applications: endpoints:](#groups-applications-endpoints-) to learn more.
 
 Optional parameters for `application:`:
@@ -449,7 +449,14 @@ Defines the list of *Endpoints* to access the *Application*.
 The format of the key  is `domain[:port]`. The key must be project-wide unique.
 * `groups: applications: endpoints: store:` defines the *Store* as context to process requests within.
 * `groups: applications: endpoints: services:` defines the *Store*-specific settings for services. Only `session:` is currently allowed here. See [Services](#services) to learn more.
-* `groups: applications: endpoints: cors-allow-origin:` defines a CORS header. It is allowed for `glue` application only. Possible values are `single domain as string` or `*` to allow all domains.
+* `groups: applications: endpoints: cors-allow-origin:` defines a [CORS header](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Allow-Origin). It is allowed for `glue` application only. Possible values are:
+  * Single domain as a string
+  * `*` – allows all domains
+  :::(Info) (Allowing all domains)
+  For security reasons, we recommend allowing all domains only as a temporary workaround. As a permanent solution:
+  * Define the desired domains as separate endpoints with separate CORS headers. 
+  * Define the desired domains on the application level
+  :::
 
 ### services: endpoints:
 Defines the list of *Endpoints* to access a *Service* for development or monitoring needs. The format of the key  is `domain[:port]`. The key must be project-wide unique.
@@ -680,7 +687,7 @@ A key-value store *Service* for storing business data.
 * Project-wide
 
   * `key_value_store: engine:` - possible value is: `redis`.
-  * `key_value_store: replicas: number:` - defines the number of replicas. The default value is 0.
+  * `key_value_store: replicas: number:` - defines the number of replicas. The default value is `0`.
   * `session: endpoints:` - defines the service's port that can be accessed via given endpoints.
 
 * Store-specific
