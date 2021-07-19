@@ -3,11 +3,13 @@ ARG SPRYKER_PARENT_IMAGE
 
 FROM ${SPRYKER_PARENT_IMAGE} AS scheduler
 
+ENV NODEJS_VERSION='12'
 USER root
 
 RUN --mount=type=cache,id=aptlib,sharing=locked,target=/var/lib/apt \
     --mount=type=cache,id=aptcache,sharing=locked,target=/var/cache/apt \
-  bash -c 'if [ ! -z "$(which apt)" ]; then apt-get update && apt-get install -y \
+  bash -c 'if [ ! -z "$(which apt)" ]; then curl -fsSL https://deb.nodesource.com/setup_$NODEJS_VERSION.x | bash - ; \
+     apt-get update && apt-get install -y \
      nodejs \
      npm \
      netcat-openbsd \
@@ -16,12 +18,10 @@ RUN --mount=type=cache,id=aptlib,sharing=locked,target=/var/lib/apt \
      procps \
      tini \
      ; fi'
-# Debian contains outdated NPM package
-RUN --mount=type=cache,id=npm,sharing=locked,target=/root/.npm \
-  bash -c 'if [ ! -z "$(which apt)" ]; then npm install npm@latest -g; fi'
 
 RUN --mount=type=cache,id=apk,sharing=locked,target=/var/cache/apk mkdir -p /etc/apk && ln -vsf /var/cache/apk /etc/apk/cache && \
-  bash -c 'if [ ! -z "$(which apk)" ]; then apk update && apk add \
+  bash -c 'if [ ! -z "$(which apk)" ]; then curl -fsSL https://rpm.nodesource.com/setup_$NODEJS_VERSION.x | bash - ; \
+     apk update && apk add \
      nodejs \
      npm \
      netcat-openbsd \
