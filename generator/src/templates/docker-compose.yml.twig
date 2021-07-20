@@ -76,8 +76,10 @@ services:
 {% endif %}
 {% for group in groups %}
 {% for applicationName, applicationData in group['applications'] %}
-{% if applicationData['application'] != 'static' %}
-      SPRYKER_NGINX_CGI_HOST_{{ applicationName | upper }}: {{ applicationName | lower }}
+{% if applicationData['application'] == 'worker' %}
+      SPRYKER_NGINX_CGI_{{ applicationName | upper }}: {{ applicationName | lower }}:3012
+{% elseif applicationData['application'] != 'static' %}
+      SPRYKER_NGINX_CGI_{{ applicationName | upper }}: {{ applicationName | lower }}:9000
 {% endif %}
 {% endfor %}
 {% endfor %}
@@ -152,6 +154,12 @@ volumes:
 {% for service, serviceData in services %}
   {{ service }}-{{ serviceData['engine'] }}-data:
     external: false
+{% endfor %}
+{% for group in groups %}
+{% for applicationName, applicationData in group['applications'] %}
+  {{ applicationName | lower }}-data:
+    external: false
+{% endfor %}
 {% endfor %}
 
   ssh-relay:

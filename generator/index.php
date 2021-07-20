@@ -123,6 +123,7 @@ $projectData['_endpointMap'] = [];
 $projectData['_storeSpecific'] = getStoreSpecific($projectData);
 $debugPortIndex = 10000;
 $projectData['_endpointDebugMap'] = [];
+$projectData['_schedulers'] = [];
 
 verbose('Generating ENV files... [DONE]');
 
@@ -132,6 +133,7 @@ const GLUE_APP = 'glue';
 const BACKOFFICE_APP = 'backoffice';
 const BACKEND_GATEWAY_APP = 'backend-gateway';
 const MERCHANT_PORTAL = 'merchant-portal';
+const WORKER_APP = 'worker';
 
 const ENTRY_POINTS = [
     BACKOFFICE_APP => 'Backoffice',
@@ -140,6 +142,7 @@ const ENTRY_POINTS = [
     YVES_APP => 'Yves',
     GLUE_APP => 'Glue',
     MERCHANT_PORTAL => 'MerchantPortal',
+    WORKER_APP => 'Worker',
 ];
 
 foreach ($projectData['groups'] ?? [] as $groupName => $groupData) {
@@ -149,6 +152,23 @@ foreach ($projectData['groups'] ?? [] as $groupName => $groupData) {
                 $endpointData = [];
             }
             $entryPoint = $endpointData['entry-point'] ?? ENTRY_POINTS[$applicationData['application']] ?? str_replace('-', '', ucwords(strtolower($applicationName), '-'));
+
+            if ($applicationData['application'] === 'worker') {
+                $host = array_key_first($applicationData['endpoints']);
+                $port = $applicationData['endpoints'][$host] ?: '';
+                $apiKey = generateToken(32);
+
+                $workerData = [
+                    'base_url' => rtrim(sprintf('%s://%s:%s', getCurrentScheme($projectData), $host, $port), ':'),
+                    'api_key' => $apiKey,
+                ];
+
+                $projectData['_schedulers'][$groupName][$applicationData['worker-id']] = $workerData;
+
+                $workerData['app_name'] = $applicationName;
+                $projectData['_schedulers']['available_schedulers'][] = $workerData;
+            }
+
             $projectData['_entryPoints'][$entryPoint] = $entryPoint;
             $projectData['groups'][$groupName]['applications'][$applicationName]['endpoints'][$endpoint]['entry-point'] = $entryPoint;
 
@@ -240,18 +260,28 @@ function mapBackendEndpointsWithFallbackZed(array $endpointMap): array
 foreach ($projectData['groups'] ?? [] as $groupName => $groupData) {
     foreach ($groupData['applications'] ?? [] as $applicationName => $applicationData) {
         if ($applicationData['application'] !== 'static') {
-            $projectData['_applications'][] = $applicationName;
+            $projectData['_applications'][$applicationData['application']][] = $applicationName;
+
+            $schedulerEnabledStores = array_keys($projectData['regions'][$groupData['region']]['stores']) ?? [];
+            if ($applicationData['application'] === 'worker') {
+                $projectData['_schedulers']['enabledStores'][$groupName] = $schedulerEnabledStores;
+                $data['applicationData']['cronicleApiKey'] = $projectData['_schedulers'][$groupName][$applicationData['worker-id']]['api_key'];
+            }
+
+            $data = [
+                'applicationName' => $applicationName,
+                'applicationData' => $applicationData,
+                'project' => $projectData,
+                'regionName' => $groupData['region'],
+                'regionData' => $projectData['regions'][$groupData['region']],
+                'brokerConnections' => getBrokerConnections($projectData),
+                'enabledSchedulers' => json_encode($projectData['_schedulers'][$groupName] ?? [], JSON_UNESCAPED_SLASHES),
+                'enabledSchedulerStores' => json_encode($schedulerEnabledStores),
+            ];
 
             file_put_contents(
                 $deploymentDir . DS . 'env' . DS . $applicationName . '.env',
-                $twig->render(sprintf('env/application/%s.env.twig', $applicationData['application']), [
-                    'applicationName' => $applicationName,
-                    'applicationData' => $applicationData,
-                    'project' => $projectData,
-                    'regionName' => $groupData['region'],
-                    'regionData' => $projectData['regions'][$groupData['region']],
-                    'brokerConnections' => getBrokerConnections($projectData),
-                ])
+                $twig->render(sprintf('env/application/%s.env.twig', $applicationData['application']), $data)
             );
         }
 
@@ -326,6 +356,7 @@ foreach ($projectData['groups'] ?? [] as $groupName => $groupData) {
                         'storeName' => $endpointData['store'],
                         'services' => $services,
                         'endpointMap' => $endpointMap,
+                        'enabledSchedulers' => json_encode($projectData['_schedulers'][$groupName] ?? [], JSON_UNESCAPED_SLASHES)
                     ])
                 );
 

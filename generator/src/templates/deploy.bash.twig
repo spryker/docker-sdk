@@ -82,7 +82,7 @@ import installer/autoload-cache.sh
 # Services
 import service/database/{{ services['database']['engine'] }}.sh
 import service/broker/{{ services['broker']['engine'] }}.sh
-import service/scheduler/{{ services['scheduler']['engine'] }}.sh
+import service/scheduler/{{ services['scheduler']['engine'] | default('worker') }}.sh
 
 # Implementation
 import sdk/compose.sh
@@ -106,7 +106,7 @@ VERBOSE=${VERBOSE:-0}
 
 # Predefined constants
 readonly APPLICATION_ENV="{{ environment | default('docker') }}"
-declare -a -r SPRYKER_APPLICATIONS=({{ _applications | join(' ') | raw }})
+declare -a -r SPRYKER_APPLICATIONS=({{ _applications | map((appplicationNames, applicationType) => "'local APP_TYPE=" ~ '"' ~ applicationType ~ '"' ~ "; local APP_NAMES=(" ~ (appplicationNames | join(' ')) ~ ")'") | join(' ') | raw }})
 declare -a -r SPRYKER_ENTRYPOINTS=({{ _entryPoints | join(' ') | raw }})
 readonly COMPOSE_PROJECT_NAME={{ namespace | default('spryker') }}
 readonly SPRYKER_PIPELINE=${SPRYKER_PIPELINE:-{{ pipeline | default('docker') }}}
@@ -131,6 +131,11 @@ readonly KNOWN_HOSTS="{{ _knownHosts | default("") }}"
 readonly SPRYKER_BUILD_HASH="${SPRYKER_BUILD_HASH}"
 readonly SPRYKER_BUILD_DATE="${SPRYKER_BUILD_DATE}"
 readonly SPRYKER_REPOSITORY_HASH="${SPRYKER_BUILD_HASH:-"$(git rev-parse --verify HEAD 2>/dev/null || echo "head")"}"
+readonly SPRYKER_SCHEDULER_APP_ENABLED="{{ services['scheduler']['engine'] is not defined ? '1' : '' }}"
+
+{% if services['scheduler']['engine'] is not defined %}
+readonly SPRYKER_AVAILABLE_SCHEDULERS=({{ _schedulers['available_schedulers'] | map((scheduler) =>  "'local APP_NAME=\"" ~ scheduler['app_name'] ~ "\"; local BASE_URL=\"" ~ scheduler['base_url'] ~ "\"; local API_KEY=\"" ~ scheduler['api_key'] ~ "\"'")| join(' ') | raw }})
+{% endif %}
 
 # Specific variables
 {% for serviceName, serviceData in services %}

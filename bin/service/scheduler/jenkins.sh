@@ -49,7 +49,6 @@ Service::Scheduler::unpause() {
 }
 
 function Service::Scheduler::start() {
-
     local force=''
     if [ "$1" == '--force' ]; then
         force=1

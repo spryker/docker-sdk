@@ -13,6 +13,7 @@
     storeServices: regions[groupData['region']]['stores'][endpointData['store']]['services'] | default([]),
     upstream: (applicationName | lower) ~ ":9001",
     zedHost: (zedHost | split(':') | first) ~ ':' ~ (_endpointDebugMap[zedEndpoint]),
+    fast_cgi_upstream: (applicationName | lower) ~ ":9001",
     timeout: '60m',
     project: _context
 } %}
