@@ -3,6 +3,7 @@ ARG SPRYKER_PARENT_IMAGE
 
 FROM ${SPRYKER_PARENT_IMAGE} AS scheduler
 
+ENV NODEJS_VERSION='12'
 USER root
 
 RUN --mount=type=cache,id=aptlib,sharing=locked,target=/var/lib/apt \
