@@ -118,6 +118,7 @@ readonly SPRYKER_COMPOSER_MODE="{{ composer.mode | default('') }}"
 readonly SPRYKER_COMPOSER_AUTOLOAD="{{ composer.autoload | default('') }}"
 readonly SPRYKER_LOG_DIRECTORY="{{ docker['logs']['path'] | default('/var/log/spryker') }}"
 readonly SPRYKER_ASSETS_MODE="{{ assets['mode'] | default('development') }}"
+readonly SPRYKER_NODEJS_VERSION="{{ assets['nodejs']['version'] | default('12') }}"
 readonly SPRYKER_DB_ENGINE="{{ services['database']['engine'] == 'mysql' ? 'mysql' : 'pgsql' }}"
 readonly SPRYKER_STORES=({{ regions | map((regionData, region) => "'local REGION=" ~ '"' ~ region ~ '"' ~ "; local STORES=(" ~ (regionData['stores'] | keys | join(' ')) ~ ")'") | join(' ') | raw }})
 readonly SPRYKER_DEFAULT_STORE="{{ (regions | first)['stores'] | keys | first }}"

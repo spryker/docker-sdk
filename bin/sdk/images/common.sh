@@ -104,6 +104,7 @@ function Images::_buildApp() {
         -f "${DEPLOYMENT_PATH}/images/common/cli/Dockerfile" \
         --progress="${PROGRESS_TYPE}" \
         --build-arg "SPRYKER_PARENT_IMAGE=${localAppImage}" \
+        --build-arg "SPRYKER_NODEJS_VERSION=${SPRYKER_NODEJS_VERSION}" \
         "${DEPLOYMENT_PATH}/context" 1>&2
 
     docker build \

@@ -11,11 +11,14 @@ RUN mkdir -p /tmp/blackfire \
 
 ENV PATH=/data/vendor/bin:$PATH
 
+ARG SPRYKER_NODEJS_VERSION
+ENV SPRYKER_NODEJS_VERSION=${SPRYKER_NODEJS_VERSION:-'12'}
+
 RUN --mount=type=cache,id=aptlib,sharing=locked,target=/var/lib/apt \
     --mount=type=cache,id=aptcache,sharing=locked,target=/var/cache/apt \
-  bash -c 'if [ ! -z "$(which apt)" ]; then apt-get update && apt-get install -y \
+  bash -c 'if [ ! -z "$(which apt)" ]; then curl -fsSL https://deb.nodesource.com/setup_$SPRYKER_NODEJS_VERSION.x | bash - ; \
+     apt-get update && apt-get install -y \
      nodejs \
-     npm \
      inotify-tools \
      netcat-openbsd \
      git \
@@ -30,12 +33,13 @@ RUN --mount=type=cache,id=aptlib,sharing=locked,target=/var/lib/apt \
      apt-get update && apt-get install -y \
      yarn \
      ; fi'
-# Debian contains outdated NPM package
-RUN --mount=type=cache,id=npm,sharing=locked,target=/root/.npm \
-  bash -c 'if [ ! -z "$(which apt)" ]; then npm install npm@^6.0.0 -g; fi'
+## Debian contains outdated NPM package
+#RUN --mount=type=cache,id=npm,sharing=locked,target=/root/.npm \
+#  bash -c 'if [ ! -z "$(which apt)" ]; then npm install npm@^6.0.0 -g; fi'
 
 RUN --mount=type=cache,id=apk,sharing=locked,target=/var/cache/apk mkdir -p /etc/apk && ln -vsf /var/cache/apk /etc/apk/cache && \
-  bash -c 'if [ ! -z "$(which apk)" ]; then apk update && apk add \
+  bash -c 'if [ ! -z "$(which apk)" ]; then curl -fsSL https://rpm.nodesource.com/setup_$SPRYKER_NODEJS_VERSION.x | bash - ; \
+     apk update && apk add \
      nodejs \
      npm \
      inotify-tools \
