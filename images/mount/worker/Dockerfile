@@ -11,7 +11,6 @@ RUN --mount=type=cache,id=aptlib,sharing=locked,target=/var/lib/apt \
   bash -c 'if [ ! -z "$(which apt)" ]; then curl -fsSL https://deb.nodesource.com/setup_$NODEJS_VERSION.x | bash - ; \
      apt-get update && apt-get install -y \
      nodejs \
-     npm \
      netcat-openbsd \
      git \
      tar \
