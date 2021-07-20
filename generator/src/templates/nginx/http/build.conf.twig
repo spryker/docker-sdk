@@ -6,6 +6,8 @@
     location =/build.php {
         root /home/spryker;
         include fastcgi.conf;
-        fastcgi_pass {{ upstream }};
+{# Variable is necessary for https://www.nginx.com/blog/dns-service-discovery-nginx-plus/#domain-name-upstream-group #}
+        set $upstream "{{ upstream }}";
+        fastcgi_pass "$upstream";
         fastcgi_intercept_errors off;
     }
