@@ -14,3 +14,27 @@
         retries: 5
     volumes:
       - {{ serviceName }}-{{ serviceData['engine'] }}-data:/data
+
+{% if serviceData['replica-services'] is defined %}
+{% for replica in serviceData['replica-services'] %}
+  {{ serviceName }}_{{ replica }}:
+      image: redis:5.0-alpine
+      command: "redis-server --slaveof {{ serviceName }} 6379"
+      depends_on:
+        - {{ serviceName }}
+      networks:
+          - private
+      labels:
+          'spryker.app.name': storage
+          'spryker.app.type': services
+          'spryker.project': ${SPRYKER_DOCKER_PREFIX}:${SPRYKER_DOCKER_TAG}
+      healthcheck:
+          test: [ "CMD", "redis-cli", "ping" ]
+          interval: 10s
+          timeout: 5s
+          retries: 5
+      volumes:
+          - {{ serviceName }}-{{ serviceData['engine'] }}-data:/data
+
+{% endfor %}
+{% endif %}

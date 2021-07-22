@@ -1,13 +1,22 @@
 {% include "terraform/environment.common.tf.twig" with _context %}
+{% include "terraform/pm/php-fpm.tf.twig" with {
+    applicationData: applicationData,
+    project: project
+} %}
 {% include "terraform/key_value_store/#{project['services']['key_value_store']['engine']}.tf.twig" with {
     serviceData: project['services']['key_value_store'],
     serviceName: 'key_value_store'
 } %}
 {% include "terraform/search/#{project['services']['search']['engine']}.tf.twig" with {
     serviceData: project['services']['search'],
-    serviceName: 'search'
+    serviceName: 'search',
+    searchIndexPrefix: project['namespace']
 } %}
 {% include "terraform/session-fe/#{project['services']['session']['engine']}.tf.twig" with {
     serviceData: project['services']['session'],
     serviceName: 'session'
 } %}
+{% include "terraform/mail/mail.tf.twig" with {
+    serviceData: regionData['services']['mail']
+} %}
+

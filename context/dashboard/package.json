@@ -4,13 +4,14 @@
   "main": "src/index.js",
   "license": "MIT",
   "dependencies": {
-    "chokidar": "^3.4.1",
+    "bl": ">=2.2.1",
+    "chokidar": "^3.4.2",
     "docker-loghose": "^1.6.5",
     "dockerode": "^3.2.1",
     "eol": "^0.9.1",
     "express": "^4.17.1",
     "http-proxy-middleware": "^1.0.5",
-    "pug": "^3.0.0",
+    "pug": "^3.0.1",
     "serve-favicon": "^2.5.0",
     "through2": "^4.0.2"
   }

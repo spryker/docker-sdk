@@ -1,5 +1,6 @@
 <?php
 
+use Spatie\Url\Url;
 use Symfony\Component\Yaml\Parser;
 use Twig\Environment;
 use Twig\Loader\ChainLoader;
@@ -20,13 +21,25 @@ $loaders = new ChainLoader([
     new FilesystemLoader($deploymentDir),
 ]);
 $twig = new Environment($loaders);
+$nginxVarEncoder = new class() {
+    public function encode($value)
+    {
+        return str_replace([' ', '"', '{', '}'], ['\ ', '\"', '\{', '\}'], (string)$value);
+    }
+};
+$tfVarEncoder = new class() {
+    public function encode($value)
+    {
+        return json_encode((string)$value, JSON_UNESCAPED_SLASHES);
+    }
+};
 $envVarEncoder = new class() {
     private $isActive = false;
 
     public function encode($value)
     {
         if ($this->isActive) {
-            return json_encode((string)$value);
+            return json_encode((string)$value, JSON_UNESCAPED_SLASHES);
         }
 
         return $value;
@@ -40,7 +53,9 @@ $envVarEncoder = new class() {
         $this->isActive = $isActive;
     }
 };
+$twig->addFilter(new TwigFilter('tf_var', [$tfVarEncoder, 'encode'], ['is_safe' => ['all']]));
 $twig->addFilter(new TwigFilter('env_var', [$envVarEncoder, 'encode'], ['is_safe' => ['all']]));
+$twig->addFilter(new TwigFilter('nginx_var', [$nginxVarEncoder, 'encode'], ['is_safe' => ['all']]));
 $twig->addFilter(new TwigFilter('normalize_endpoint', static function ($string) {
     return str_replace(['.', ':'], ['dot', '_'], $string);
 }, ['is_safe' => ['all']]));
@@ -56,6 +71,8 @@ $projectData['_defaultDeploymentDir'] = $defaultDeploymentDir;
 $projectData['tag'] = $projectData['tag'] ?? uniqid();
 $projectData['_platform'] = $platform;
 $mountMode = $projectData['_mountMode'] = retrieveMountMode($projectData, $platform);
+$projectData['_syncIgnore'] = buildSyncIgnore($deploymentDir);
+$projectData['_syncSessionName'] = preg_replace('/[^-a-zA-Z0-9]/', '-', $projectData['namespace'] . '-' . $projectData['tag'] . '-codebase');
 $projectData['_isDevelopment'] = $mountMode !== 'baked';
 $projectData['_fileMode'] = $mountMode === 'baked' ? 'baked' : 'mount';
 $projectData['_ports'] = retrieveUniquePorts($projectData);
@@ -71,8 +88,16 @@ $projectData['storageData'] = retrieveStorageData($projectData);
 $projectData['composer']['autoload'] = buildComposerAutoloadConfig($projectData);
 $isAutoloadCacheEnabled = $projectData['_isAutoloadCacheEnabled'] = isAutoloadCacheEnabled($projectData);
 $projectData['_requirementAnalyzerData'] = buildDataForRequirementAnalyzer($projectData);
+$projectData['secrets'] = buildSecrets($deploymentDir);
 
-// Making dashboard a required service
+// TODO Make it optional in next major
+// Making webdriver as required service for BC reasons
+if (empty($projectData['services']['webdriver'])) {
+    $projectData['services']['webdriver'] = [
+        'engine' => 'phantomjs',
+    ];
+}
+
 $projectData['_dashboardEndpoint'] = '';
 if (!empty($projectData['services']['dashboard'])) {
     $projectData['services']['dashboard']['endpoints'] = $projectData['services']['dashboard']['endpoints'] ?? [
@@ -81,7 +106,7 @@ if (!empty($projectData['services']['dashboard'])) {
     reset($projectData['services']['dashboard']['endpoints']);
     $projectData['_dashboardEndpoint'] = sprintf(
         '%s://%s',
-        ($projectData['docker']['ssl']['enabled'] ?? false) ? 'https' : 'http',
+        getCurrentScheme($projectData),
         key($projectData['services']['dashboard']['endpoints'])
     );
 }
@@ -101,10 +126,29 @@ $projectData['_endpointDebugMap'] = [];
 
 verbose('Generating ENV files... [DONE]');
 
+const YVES_APP = 'yves';
+const ZED_APP = 'zed';
+const GLUE_APP = 'glue';
+const BACKOFFICE_APP = 'backoffice';
+const BACKEND_GATEWAY_APP = 'backend-gateway';
+const MERCHANT_PORTAL = 'merchant-portal';
+
+const ENTRY_POINTS = [
+    BACKOFFICE_APP => 'Backoffice',
+    BACKEND_GATEWAY_APP => 'BackendGateway',
+    ZED_APP => 'Zed',
+    YVES_APP => 'Yves',
+    GLUE_APP => 'Glue',
+    MERCHANT_PORTAL => 'MerchantPortal',
+];
+
 foreach ($projectData['groups'] ?? [] as $groupName => $groupData) {
     foreach ($groupData['applications'] ?? [] as $applicationName => $applicationData) {
         foreach ($applicationData['endpoints'] ?? [] as $endpoint => $endpointData) {
-            $entryPoint = $endpointData['entry-point'] ?? ucfirst(strtolower($applicationData['application']));
+            if ($endpointData === null) {
+                $endpointData = [];
+            }
+            $entryPoint = $endpointData['entry-point'] ?? ENTRY_POINTS[$applicationData['application']] ?? str_replace('-', '', ucwords(strtolower($applicationName), '-'));
             $projectData['_entryPoints'][$entryPoint] = $entryPoint;
             $projectData['groups'][$groupName]['applications'][$applicationName]['endpoints'][$endpoint]['entry-point'] = $entryPoint;
 
@@ -132,6 +176,25 @@ foreach ($projectData['groups'] ?? [] as $groupName => $groupData) {
                     };
                 }
             }
+
+            if (array_key_exists('redirect', $endpointData)) {
+                if ($application !== 'static') {
+                    warn('`redirect` attribute is allowed for `static` application only');
+                }
+
+                $redirect = $endpointData['redirect'];
+
+                if (!is_array($redirect)) {
+                    $projectData['groups'][$groupName]['applications'][$applicationName]['endpoints'][$endpoint]['redirect']
+                        = $redirect
+                        = [
+                            'url' => $redirect,
+                        ];
+                }
+
+                $projectData['groups'][$groupName]['applications'][$applicationName]['endpoints'][$endpoint]['redirect']['url']
+                    = ensureUrlScheme($redirect['url'], $projectData);
+            }
         }
     }
 }
@@ -142,12 +205,38 @@ foreach ($primal as $callbacks) {
     }
 }
 
-$endpointMap = $projectData['_endpointMap'];
+$endpointMap = $projectData['_endpointMap'] = mapBackendEndpointsWithFallbackZed($projectData['_endpointMap']);
+
 $projectData['_applications'] = [];
 $frontend = [];
 $environment = [
     'project' => $projectData['namespace'],
 ];
+
+/**
+ * @param array $endpointMap
+ *
+ * @return array
+ */
+function mapBackendEndpointsWithFallbackZed(array $endpointMap): array
+{
+    $zedApplicationsToCheck = [
+        BACKOFFICE_APP,
+        BACKEND_GATEWAY_APP,
+    ];
+
+    foreach ($zedApplicationsToCheck as $zedApplicationToCheck) {
+        foreach ($endpointMap as $store => $storeEndpointMap) {
+            if (array_key_exists($zedApplicationToCheck, $storeEndpointMap)) {
+                continue;
+            }
+            $endpointMap[$store][$zedApplicationToCheck] = $storeEndpointMap[ZED_APP];
+        }
+    }
+
+    return $endpointMap;
+}
+
 foreach ($projectData['groups'] ?? [] as $groupName => $groupData) {
     foreach ($groupData['applications'] ?? [] as $applicationName => $applicationData) {
         if ($applicationData['application'] !== 'static') {
@@ -178,8 +267,7 @@ foreach ($projectData['groups'] ?? [] as $groupName => $groupData) {
                 'name' => $applicationName,
                 'endpoints' => array_map(
                     static function ($endpoint) use ($projectData) {
-                        return sprintf('%s://%s', $projectData['docker']['ssl']['enabled'] ?? false ? 'https' : 'http',
-                            $endpoint);
+                        return sprintf('%s://%s', getCurrentScheme($projectData), $endpoint);
                     },
                     array_keys($httpEndpoints)
                 )
@@ -211,12 +299,19 @@ foreach ($projectData['groups'] ?? [] as $groupName => $groupData) {
                 );
             }
 
-            if ($applicationData['application'] === 'zed') {
+            if ($applicationData['application'] === ZED_APP
+                || $applicationData['application'] === BACKEND_GATEWAY_APP
+                || $applicationData['application'] === BACKOFFICE_APP
+                || $applicationData['application'] === MERCHANT_PORTAL
+            ) {
+                $services = [];
 
-                $services = array_replace_recursive(
-                    $projectData['regions'][$groupData['region']]['stores'][$endpointData['store']]['services'],
-                    $endpointData['services'] ?? []
-                );
+                if (array_key_exists('store', $endpointData)) {
+                    $services = array_replace_recursive(
+                        $projectData['regions'][$groupData['region']]['stores'][$endpointData['store']]['services'],
+                        $endpointData['services'] ?? []
+                    );
+                }
 
                 $envVarEncoder->setIsActive(true);
                 file_put_contents(
@@ -251,14 +346,18 @@ foreach ($projectData['groups'] ?? [] as $groupName => $groupData) {
                 $envVarEncoder->setIsActive(false);
             }
 
-            if ($applicationData['application'] === 'yves') {
+            if ($applicationData['application'] === YVES_APP) {
+                $services = [];
 
-                $services = array_replace_recursive(
-                    $projectData['regions'][$groupData['region']]['stores'][$endpointData['store']]['services'],
-                    $endpointData['services'] ?? []
-                );
+                $isEndpointDataHasStore = array_key_exists('store', $endpointData);
+                if ($isEndpointDataHasStore) {
+                    $services = array_replace_recursive(
+                        $projectData['regions'][$groupData['region']]['stores'][$endpointData['store']]['services'],
+                        $endpointData['services'] ?? []
+                    );
+                }
 
-                if ($endpointData['store'] === ($projectData['docker']['testing']['store'] ?? '')) {
+                if ($isEndpointDataHasStore && $endpointData['store'] === ($projectData['docker']['testing']['store'] ?? '')) {
                     $envVarEncoder->setIsActive(true);
                     file_put_contents(
                         $deploymentDir . DS . 'env' . DS . 'cli' . DS . 'testing.env',
@@ -283,6 +382,25 @@ foreach ($projectData['groups'] ?? [] as $groupName => $groupData) {
     }
 }
 
+if (!empty($projectData['services']['key_value_store']['replicas'])) {
+    $replicas = $projectData['services']['key_value_store']['replicas']['number'] ?? 1;
+    $projectData['services']['key_value_store']['replica-services'] = array_map(function ($index) {
+        return 'replica' . $index;
+    }, range(1, (int)$replicas));
+    $projectData['services']['key_value_store']['options'] = json_encode([
+        'replication' => 'predis',
+    ], JSON_UNESCAPED_SLASHES);
+
+    $sources = [
+        'tcp://key_value_store?role=master', 'tcp://key_value_store'
+    ];
+    foreach ($projectData['services']['key_value_store']['replica-services'] as $replica) {
+        $sources[] = 'tcp://key_value_store_' . $replica;
+    }
+
+    $projectData['services']['key_value_store']['sources'] = json_encode($sources, JSON_UNESCAPED_SLASHES);
+}
+
 foreach ($projectData['services'] ?? [] as $serviceName => $serviceData) {
     $httpEndpoints = array_filter(
         $serviceData['endpoints'] ?? [],
@@ -296,8 +414,7 @@ foreach ($projectData['services'] ?? [] as $serviceName => $serviceData) {
             'name' => $serviceName,
             'endpoints' => array_map(
                 static function ($endpoint) use ($projectData) {
-                    return sprintf('%s://%s', $projectData['docker']['ssl']['enabled'] ?? false ? 'https' : 'http',
-                        $endpoint);
+                    return sprintf('%s://%s', getCurrentScheme($projectData), $endpoint);
                 },
                 array_keys($httpEndpoints)
             )
@@ -331,15 +448,6 @@ file_put_contents(
     $twig->render('php/conf.d/99-from-deploy-yaml-php.ini.twig', $projectData)
 );
 
-
-file_put_contents(
-    $deploymentDir . DS . 'env' . DS . 'swagger.env',
-    $twig->render('env/swagger/swagger-ui.env.twig', [
-        'project' => $projectData,
-        'endpointMap' => $endpointMap,
-    ])
-);
-
 $envVarEncoder->setIsActive(true);
 file_put_contents(
     $deploymentDir . DS . 'terraform/environment.tf',
@@ -349,6 +457,12 @@ file_put_contents(
     ])
 );
 $envVarEncoder->setIsActive(false);
+file_put_contents(
+    $deploymentDir . DS . 'terraform/secrets.sdk.auto.tfvars',
+    $twig->render('terraform/secrets.sdk.auto.tfvars.twig', [
+        'project' => $projectData,
+    ])
+);
 file_put_contents(
     $deploymentDir . DS . 'terraform/frontend.json',
     json_encode($frontend, JSON_PRETTY_PRINT)
@@ -367,10 +481,6 @@ unlink($deploymentDir . DS . 'images' . DS . 'common' . DS . 'application' . DS 
 file_put_contents(
     $deploymentDir . DS . 'docker-compose.yml',
     $twig->render('docker-compose.yml.twig', $projectData)
-);
-file_put_contents(
-    $deploymentDir . DS . 'docker-compose.test.yml',
-    $twig->render('docker-compose.test.yml.twig', $projectData)
 );
 
 verbose('Generating scripts... [DONE]');
@@ -632,6 +742,29 @@ function getStoreSpecific(array $projectData): array
 /**
  * @param string $deploymentDir
  *
+ * @return string[]
+ */
+function buildSyncIgnore(string $deploymentDir): array
+{
+    $sourceFilePath = $deploymentDir . DS . '.dockersyncignore';
+
+    if (!file_exists($sourceFilePath)) {
+        return [];
+    }
+
+    $sourceContent = (string) file_get_contents($sourceFilePath);
+
+    $rules = array();
+    preg_match_all('/([^\n#]+)?.*$/im', $sourceContent, $rules);
+
+    return array_map(static function ($element) {
+        return addslashes(trim($element));
+    }, array_filter($rules[1]));
+}
+
+/**
+ * @param string $deploymentDir
+ *
  * @return string
  */
 function buildKnownHosts(string $deploymentDir): string
@@ -824,6 +957,11 @@ function verbose($output)
     }
 }
 
+function warn($output)
+{
+    echo $output . PHP_EOL;
+}
+
 /**
  * @param array $services
  * @param string $engine
@@ -992,4 +1130,123 @@ function generatePasswords(array $users): string
 function getFrontendZoneByDomainLevel(string $host, int $level = 2): string
 {
     return implode('.', array_slice(explode('.', $host), -$level, $level, true));
+}
+
+/**
+ * @param $projectData
+ *
+ * @return string
+ */
+function getCurrentScheme($projectData): string
+{
+    return ($projectData['docker']['ssl']['enabled'] ?? false) ? 'https' : 'http';
+}
+
+/**
+ * @param string $urlString
+ * @param array $projectData
+ *
+ * @return string
+ */
+function ensureUrlScheme(string $urlString, array $projectData): string
+{
+    $url = Url::fromString($urlString);
+
+    if ($url->getScheme() === '') {
+        return (string)$url->withScheme(getCurrentScheme($projectData));
+    }
+
+    return $urlString;
+}
+
+/**
+ * @param string $deploymentDir
+ *
+ * @return string[]
+ */
+function buildSecrets(string $deploymentDir): array
+{
+    $data = [];
+    $openSshKeys = generateOpenSshKeys($deploymentDir);
+
+    $data['SPRYKER_OAUTH_KEY_PRIVATE'] = str_replace(PHP_EOL, '__LINE__', $openSshKeys['privateKey']);
+    $data['SPRYKER_OAUTH_KEY_PUBLIC'] = str_replace(PHP_EOL, '__LINE__', $openSshKeys['publicKey']);
+    $data['SPRYKER_OAUTH_ENCRYPTION_KEY'] = generateToken(48);
+    $data['SPRYKER_OAUTH_CLIENT_IDENTIFIER'] = 'frontend';
+    $data['SPRYKER_OAUTH_CLIENT_SECRET'] = generateToken(48);
+    $data['SPRYKER_ZED_REQUEST_TOKEN'] = generateToken(80);
+
+    return $data;
+}
+
+/**
+ * @param string $deploymentDir
+ *
+ * @return string[]
+ */
+function generateOpenSshKeys(string $deploymentDir): array
+{
+    $sshDir = $deploymentDir . DS . 'context' . DS . 'ssh';
+    if (!file_exists($sshDir)) {
+        mkdir($sshDir);
+    }
+
+    $generatePrivateKeyCommandTemplate = 'openssl genrsa -out %s 2048 2>&1';
+    $generatePublicKeyCommandTemplate = 'openssl rsa -in %s -pubout -out %s 2>&1';
+
+    $privateKeyPath = $sshDir . DS .'private.key';
+    $publicKeyPath = $sshDir . DS . 'public.key';
+
+    exec(
+        sprintf($generatePrivateKeyCommandTemplate, $privateKeyPath),
+        $output,
+        $returnCode
+    );
+
+
+    if ($returnCode > 0) {
+        echo implode(PHP_EOL, $output);
+        exit($returnCode);
+    }
+
+    exec(
+        sprintf($generatePublicKeyCommandTemplate, $privateKeyPath, $publicKeyPath),
+        $output,
+        $returnCode
+    );
+
+    if ($returnCode > 0) {
+        echo implode(PHP_EOL, $output);
+        exit($returnCode);
+    }
+
+    verbose(implode(PHP_EOL, $output));
+
+    $sshKeys =  [
+        'privateKey' => file_get_contents($privateKeyPath),
+        'publicKey' => file_get_contents($publicKeyPath),
+    ];
+
+    exec('rm -rf ' . $sshDir);
+
+    return $sshKeys;
+}
+
+/**
+ * @param int $tokenLength
+ *
+ * @return string
+ */
+function generateToken($tokenLength = 80): string
+{
+    $availableChars = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    $availableCharsLength = strlen($availableChars);
+    $token = '';
+
+    for($i = 0; $i < $tokenLength; $i++) {
+        $randomChar = $availableChars[mt_rand(0, $availableCharsLength - 1)];
+        $token .= $randomChar;
+    }
+
+    return $token;
 }

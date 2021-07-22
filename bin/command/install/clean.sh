@@ -6,7 +6,7 @@ Registry::Help::command -c "clean" "Stops all Spryker containers and remove imag
 
 function Command::clean() {
     Compose::cleanEverything
-    sync clean
+    sync clean # TODO deprecated, use Registry::Flow::addAfterDown in mounts
     Images::destroy
 
     return "${TRUE}"

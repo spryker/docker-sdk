@@ -1,7 +1,7 @@
 #!/bin/bash
 
 function Service::Scheduler::isInstalled() {
-    [ "${SPRYKER_TESTING_ENABLE}" -eq 1 ] && return "${TRUE}"
+    [ -n "${SPRYKER_TESTING_ENABLE}" ] && return "${TRUE}"
 
     Runtime::waitFor scheduler
     Console::start -n "Checking jobs are installed..."
@@ -12,7 +12,7 @@ function Service::Scheduler::isInstalled() {
 }
 
 Service::Scheduler::pause() {
-    [ "${SPRYKER_TESTING_ENABLE}" -eq 1 ] && return "${TRUE}"
+    [ -n "${SPRYKER_TESTING_ENABLE}" ] && return "${TRUE}"
 
     Runtime::waitFor scheduler
     Console::start -n "Suspending scheduler..."
@@ -37,13 +37,15 @@ Service::Scheduler::pause() {
 }
 
 Service::Scheduler::unpause() {
-    [ "${SPRYKER_TESTING_ENABLE}" -eq 1 ] && return "${TRUE}"
+    [ -n "${SPRYKER_TESTING_ENABLE}" ] && return "${TRUE}"
 
     Runtime::waitFor scheduler
     Console::start -n "Resuming scheduler..."
 
     # shellcheck disable=SC2016
     Compose::exec 'curl -sLI -X POST ${SPRYKER_SCHEDULER_HOST}:${SPRYKER_SCHEDULER_PORT}/cancelQuietDown' >/dev/null || true
+
+    Console::end "[DONE]"
 }
 
 function Service::Scheduler::start() {
@@ -70,7 +72,7 @@ function Service::Scheduler::clean() {
 }
 
 function Service::Scheduler::_run() {
-    [ "${SPRYKER_TESTING_ENABLE}" -eq 1 ] && return "${TRUE}"
+    [ -n "${SPRYKER_TESTING_ENABLE}" ] && return "${TRUE}"
 
     Runtime::waitFor scheduler
 

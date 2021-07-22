@@ -18,11 +18,30 @@ function Images::destroy() {
     docker rmi -f "${SPRYKER_PLATFORM_IMAGE}" || true
 }
 
+# Using temporary file for secrets as `docker secret` is only available for swarm mode.
+function Images::_prepareSecrets() {
+    env - "${SECRETS_ENVIRONMENT[@]}" env > "${SECRETS_FILE_PATH}"
+}
+
 function Images::_buildApp() {
+
+    local -a sshArgument=()
     local folder=${1}
     local baseAppImage="${SPRYKER_DOCKER_PREFIX}_base_app:${SPRYKER_DOCKER_TAG}"
     local appImage="${SPRYKER_DOCKER_PREFIX}_app:${SPRYKER_DOCKER_TAG}"
+    local localAppImage="${SPRYKER_DOCKER_PREFIX}_local_app:${SPRYKER_DOCKER_TAG}"
     local runtimeImage="${SPRYKER_DOCKER_PREFIX}_run_app:${SPRYKER_DOCKER_TAG}"
+    local baseCliImage="${SPRYKER_DOCKER_PREFIX}_base_cli:${SPRYKER_DOCKER_TAG}"
+    local cliImage="${SPRYKER_DOCKER_PREFIX}_cli:${SPRYKER_DOCKER_TAG}"
+    local pipelineImage="${SPRYKER_DOCKER_PREFIX}_pipeline:${SPRYKER_DOCKER_TAG}"
+    local runtimeCliImage="${SPRYKER_DOCKER_PREFIX}_run_cli:${SPRYKER_DOCKER_TAG}"
+
+    if [ -n "${SSH_AUTH_SOCK_IN_CLI}" ]; then
+        sshArgument=('--ssh' 'default')
+    fi
+
+    Images::_prepareSecrets
+    Registry::Trap::addExitHook 'removeBuildSecrets' "rm -f ${SECRETS_FILE_PATH}"
 
     Console::verbose "${INFO}Building Application images${NC}"
 
@@ -42,14 +61,14 @@ function Images::_buildApp() {
 
     docker build \
         -t "${appImage}" \
-        -t "${runtimeImage}" \
         -f "${DEPLOYMENT_PATH}/images/${folder}/application/Dockerfile" \
+        "${sshArgument[@]}" \
+        --secret "id=secrets-env,src=$SECRETS_FILE_PATH" \
         --progress="${PROGRESS_TYPE}" \
         --build-arg "SPRYKER_PARENT_IMAGE=${baseAppImage}" \
         --build-arg "SPRYKER_DOCKER_PREFIX=${SPRYKER_DOCKER_PREFIX}" \
         --build-arg "SPRYKER_DOCKER_TAG=${SPRYKER_DOCKER_TAG}" \
         --build-arg "USER_UID=${USER_FULL_ID%%:*}" \
-        --build-arg "COMPOSER_AUTH=${COMPOSER_AUTH}" \
         --build-arg "DEPLOYMENT_PATH=${DEPLOYMENT_PATH}" \
         --build-arg "SPRYKER_PIPELINE=${SPRYKER_PIPELINE}" \
         --build-arg "APPLICATION_ENV=${APPLICATION_ENV}" \
@@ -61,56 +80,62 @@ function Images::_buildApp() {
         . 1>&2
 
     docker build \
+        -t "${localAppImage}" \
         -t "${runtimeImage}" \
-        -f "${DEPLOYMENT_PATH}/images/debug/application/Dockerfile" \
+        -f "${DEPLOYMENT_PATH}/images/common/application-local/Dockerfile" \
         --progress="${PROGRESS_TYPE}" \
         --build-arg "SPRYKER_PARENT_IMAGE=${appImage}" \
         "${DEPLOYMENT_PATH}/context" 1>&2
-}
 
-function Images::_buildCli() {
-    local folder=${1}
-    local appImage="${SPRYKER_DOCKER_PREFIX}_app:${SPRYKER_DOCKER_TAG}"
-    local appImage="${SPRYKER_DOCKER_PREFIX}_app:${SPRYKER_DOCKER_TAG}"
-    local baseCliImage="${SPRYKER_DOCKER_PREFIX}_base_cli:${SPRYKER_DOCKER_TAG}"
-    local cliImage="${SPRYKER_DOCKER_PREFIX}_cli:${SPRYKER_DOCKER_TAG}"
-    local runtimeCliImage="${SPRYKER_DOCKER_PREFIX}_run_cli:${SPRYKER_DOCKER_TAG}"
+    if [ -n "${SPRYKER_XDEBUG_MODE_ENABLE}" ]; then
+        docker build \
+            -t "${runtimeImage}" \
+            -f "${DEPLOYMENT_PATH}/images/debug/application/Dockerfile" \
+            --progress="${PROGRESS_TYPE}" \
+            --build-arg "SPRYKER_PARENT_IMAGE=${localAppImage}" \
+            "${DEPLOYMENT_PATH}/context" 1>&2
+    fi
 
     Console::verbose "${INFO}Building CLI images${NC}"
 
     docker build \
         -t "${baseCliImage}" \
+        -t "${pipelineImage}" \
         -f "${DEPLOYMENT_PATH}/images/common/cli/Dockerfile" \
         --progress="${PROGRESS_TYPE}" \
-        --build-arg "SPRYKER_PARENT_IMAGE=${appImage}" \
+        --build-arg "SPRYKER_PARENT_IMAGE=${localAppImage}" \
         "${DEPLOYMENT_PATH}/context" 1>&2
 
     docker build \
         -t "${cliImage}" \
         -t "${runtimeCliImage}" \
         -f "${DEPLOYMENT_PATH}/images/${folder}/cli/Dockerfile" \
+        "${sshArgument[@]}" \
+        --secret "id=secrets-env,src=$SECRETS_FILE_PATH" \
         --progress="${PROGRESS_TYPE}" \
         --build-arg "SPRYKER_PARENT_IMAGE=${baseCliImage}" \
-        --build-arg "SPRYKER_APPLICATION_IMAGE=${appImage}" \
         --build-arg "DEPLOYMENT_PATH=${DEPLOYMENT_PATH}" \
-        --build-arg "COMPOSER_AUTH=${COMPOSER_AUTH}" \
         --build-arg "SPRYKER_PIPELINE=${SPRYKER_PIPELINE}" \
         --build-arg "SPRYKER_BUILD_HASH=${SPRYKER_BUILD_HASH:-"current"}" \
         --build-arg "SPRYKER_BUILD_STAMP=${SPRYKER_BUILD_STAMP:-""}" \
         .  1>&2
 
-    docker build \
-        -t "${runtimeCliImage}" \
-        -f "${DEPLOYMENT_PATH}/images/debug/cli/Dockerfile" \
-        --progress="${PROGRESS_TYPE}" \
-        --build-arg "SPRYKER_PARENT_IMAGE=${cliImage}" \
-        "${DEPLOYMENT_PATH}/context" 1>&2
+    if [ -n "${SPRYKER_XDEBUG_MODE_ENABLE}" ]; then
+        docker build \
+            -t "${runtimeCliImage}" \
+            -f "${DEPLOYMENT_PATH}/images/debug/cli/Dockerfile" \
+            --progress="${PROGRESS_TYPE}" \
+            --build-arg "SPRYKER_PARENT_IMAGE=${cliImage}" \
+            "${DEPLOYMENT_PATH}/context" 1>&2
+    fi
+
+    Registry::Trap::releaseExitHook 'removeBuildSecrets'
 }
 
 function Images::_buildFrontend() {
     local folder=${1}
     local cliImage="${SPRYKER_DOCKER_PREFIX}_cli:${SPRYKER_DOCKER_TAG}"
-    local builderAssetsImage=$(Assets::getImageTag)
+    local builderAssetsImage="$(Assets::getImageTag)"
     local baseFrontendImage="${SPRYKER_DOCKER_PREFIX}_base_frontend:${SPRYKER_DOCKER_TAG}"
     local frontendImage="${SPRYKER_DOCKER_PREFIX}_frontend:${SPRYKER_DOCKER_TAG}"
     local runtimeFrontendImage="${SPRYKER_DOCKER_PREFIX}_run_frontend:${SPRYKER_DOCKER_TAG}"
@@ -135,12 +160,14 @@ function Images::_buildFrontend() {
         --build-arg "SPRYKER_ASSETS_BUILDER_IMAGE=${builderAssetsImage}" \
         "${DEPLOYMENT_PATH}/context" 1>&2
 
-    docker build \
-        -t "${runtimeFrontendImage}" \
-        -f "${DEPLOYMENT_PATH}/images/debug/frontend/Dockerfile" \
-        --progress="${PROGRESS_TYPE}" \
-        --build-arg "SPRYKER_PARENT_IMAGE=${frontendImage}" \
-        "${DEPLOYMENT_PATH}/context" 1>&2
+    if [ -n "${SPRYKER_XDEBUG_MODE_ENABLE}" ]; then
+        docker build \
+            -t "${runtimeFrontendImage}" \
+            -f "${DEPLOYMENT_PATH}/images/debug/frontend/Dockerfile" \
+            --progress="${PROGRESS_TYPE}" \
+            --build-arg "SPRYKER_PARENT_IMAGE=${frontendImage}" \
+            "${DEPLOYMENT_PATH}/context" 1>&2
+    fi
 }
 
 function Images::_buildGateway() {
@@ -159,7 +186,7 @@ function Images::_tagByApp() {
     local applicationName=$1
     local imageName=$2
     local baseImageName=${3:-${imageName}}
-    local applicationPrefix=$(echo "$applicationName" | tr '[:upper:]' '[:lower:]')
+    local applicationPrefix="$(echo "$applicationName" | tr '[:upper:]' '[:lower:]')"
     local tag="${imageName}-${applicationPrefix}"
 
     docker tag "${baseImageName}" "${tag}"
@@ -172,6 +199,8 @@ function Images::tagApplications() {
         Images::_tagByApp "${application}" "${SPRYKER_DOCKER_PREFIX}_app:${tag}" "${SPRYKER_DOCKER_PREFIX}_app:${SPRYKER_DOCKER_TAG}"
         Images::_tagByApp "${application}" "${SPRYKER_DOCKER_PREFIX}_run_app:${tag}" "${SPRYKER_DOCKER_PREFIX}_run_app:${SPRYKER_DOCKER_TAG}"
     done
+
+    Images::_tagByApp pipeline "${SPRYKER_DOCKER_PREFIX}_pipeline:${tag}" "${SPRYKER_DOCKER_PREFIX}_pipeline:${SPRYKER_DOCKER_TAG}"
 }
 
 function Images::tagFrontend() {
@@ -189,4 +218,5 @@ function Images::printAll() {
     done
 
     printf "%s %s_frontend:%s\n" "frontend" "${SPRYKER_DOCKER_PREFIX}" "${tag}-frontend"
+    printf "%s %s_pipeline:%s\n" "pipeline" "${SPRYKER_DOCKER_PREFIX}" "${tag}-pipeline"
 }
