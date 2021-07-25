@@ -92,7 +92,6 @@ function Compose::command() {
 
 # ---------------
 function Compose::up() {
-
     local noCache=""
     local doBuild=""
     local doAssets=""

@@ -1,5 +1,6 @@
   {{ serviceName }}:
     image: spryker/kibana:5.6.16
+    {{ project._platformCompose }}
     networks:
         - private
     labels:

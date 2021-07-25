@@ -80,7 +80,7 @@ function Assets::build() {
     fi
 
     Console::start "Cleaning old assets..."
-
+    local platformArg=$(Environment::getPlatformCliOption)
     # ${XARGS_NO_RUN_IF_EMPTY} must be without quotes
     # shellcheck disable=SC2086
     docker images --filter "reference=${SPRYKER_DOCKER_PREFIX}_builder_assets:${SPRYKER_DOCKER_TAG}*" --format "{{.ID}}" | xargs ${XARGS_NO_RUN_IF_EMPTY} docker rmi -f
@@ -94,7 +94,7 @@ function Assets::build() {
 
     docker build \
         -t "${builderAssetsImage}" \
-        -f "${DEPLOYMENT_PATH}/images/baked/assets/Dockerfile" \
+        -f "${DEPLOYMENT_PATH}/images/baked/assets/Dockerfile" $platformArg \
         --progress="${PROGRESS_TYPE}" \
         --build-arg "SPRYKER_PARENT_IMAGE=${cliImage}" \
         --build-arg "SPRYKER_ASSETS_MODE=${mode}" \

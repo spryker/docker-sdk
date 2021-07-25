@@ -2,6 +2,7 @@
 {% set firstGlueEndpointMap = project['_endpointMap'] | first %}
   {{ serviceName }}:
     image: swaggerapi/swagger-ui:v3.24.3
+    {{ project._platformCompose }}
     networks:
         - private
     labels:

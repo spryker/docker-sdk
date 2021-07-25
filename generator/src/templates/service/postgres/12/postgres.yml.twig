@@ -1,5 +1,6 @@
   {{ serviceName }}:
     image: postgres:12-alpine
+    {{ project._platformCompose }}
     networks:
       - private
     labels:

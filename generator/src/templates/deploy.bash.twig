@@ -115,7 +115,7 @@ readonly SPRYKER_DOCKER_PREFIX=${COMPOSE_PROJECT_NAME}
 readonly SPRYKER_DOCKER_TAG="{{ tag | default('1.0') }}"
 readonly SPRYKER_FRONTEND_IMAGE="{{ assets['image'] | default('nginx:alpine') }}"
 readonly SPRYKER_COMPOSER_MODE="{{ composer.mode | default('') }}"
-readonly SPRYKER_COMPOSER_AUTOLOAD="{{ composer.autoload | default('') }}"
+readonly SPRYKER_COMPOSER_AUTOLOAD="{{ composer.autoload | default('--optimize') }}"
 readonly SPRYKER_LOG_DIRECTORY="{{ docker['logs']['path'] | default('/var/log/spryker') }}"
 readonly SPRYKER_ASSETS_MODE="{{ assets['mode'] | default('development') }}"
 readonly SPRYKER_DB_ENGINE="{{ services['database']['engine'] == 'mysql' ? 'mysql' : 'pgsql' }}"

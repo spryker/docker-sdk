@@ -1,5 +1,10 @@
   {{ serviceName }}:
+{% if project._isArm  %}
+    image: volhovm/elasticsearch:5.6.16-arm
+{% else %}
     image: elasticsearch:5.6-alpine
+{% endif %}
+    {{ project._platformCompose }}
     networks:
       - private
     labels:

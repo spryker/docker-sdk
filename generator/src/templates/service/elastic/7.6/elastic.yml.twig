@@ -1,5 +1,10 @@
   {{ serviceName }}:
-    image: docker.elastic.co/elasticsearch/elasticsearch:7.6.2
+{% if project._isArm  %}
+    image: volhovm/elasticsearch:7.6.2-arm
+{% else %}
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.6
+{% endif %}
+    {{ project._platformCompose }}
     networks:
         - private
     labels:

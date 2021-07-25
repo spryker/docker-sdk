@@ -45,6 +45,9 @@ function Command::bootstrap() {
     local tmpDeploymentDir="${SOURCE_DIR}/deployment/_tmp"
     local defaultProjectYaml=$([ -f "./deploy.local.yml" ] && echo -n "./deploy.local.yml" || echo -n "./deploy.yml")
     local projectYaml=${1:-${defaultProjectYaml}}
+    local platformArg=$(Environment::getPlatformCliOption)
+    local platformComposeArg=$(Environment::getPlatformComposeOption)
+    local isArm=$(Environment::IsArchitectureArm64)
 
     if [ -n "${SKIP_BOOTSTRAP_IF_DONE}" ] && [ -f "${DESTINATION_DIR}/project.yml" ]; then
         if cmp -s "${DESTINATION_DIR}/project.yml" "${projectYaml}"; then
@@ -77,7 +80,7 @@ function Command::bootstrap() {
 
     Console::verbose::start "Building generator..."
     docker build -t spryker_docker_sdk \
-        -f "${SOURCE_DIR}/generator/Dockerfile" \
+        -f "${SOURCE_DIR}/generator/Dockerfile" $platformArg \
         --progress="${PROGRESS_TYPE:-auto}" \
         --build-arg="USER_UID=${USER_FULL_ID%%:*}" \
         -q \
@@ -103,8 +106,10 @@ function Command::bootstrap() {
     if [ "${USER_FULL_ID%%:*}" != '0' ]; then
         userToRun=()
     fi
-    docker run -i --rm "${userToRun[@]}" \
+    docker run -i $platformArg --rm "${userToRun[@]}" \
         -e SPRYKER_DOCKER_SDK_PLATFORM="${_PLATFORM}" \
+        -e SPRYKER_DOCKER_SDK_PLATFORM_COMPOSE_ARG="${platformComposeArg}" \
+        -e SPRYKER_DOCKER_SDK_PLATFORM_IS_ARM="${isArm}" \
         -e SPRYKER_DOCKER_SDK_DEPLOYMENT_DIR="${DESTINATION_DIR}" \
         -e VERBOSE="${VERBOSE}" \
         -v "${tmpDeploymentDir}":/data/deployment:rw \

@@ -15,12 +15,17 @@ $deploymentDir = '/data/deployment';
 $projectYaml = $deploymentDir . '/project.yml';
 $defaultDeploymentDir = getenv('SPRYKER_DOCKER_SDK_DEPLOYMENT_DIR') ?: './';
 $platform = getenv('SPRYKER_DOCKER_SDK_PLATFORM') ?: 'linux'; // Possible values: linux windows macos
+$platformComposeArg = getenv('SPRYKER_DOCKER_SDK_PLATFORM_COMPOSE_ARG') ?: ''; // Possible values: "platform: linux/arm64/v8" | empty
+$platformIsArm = getenv('SPRYKER_DOCKER_SDK_PLATFORM_IS_ARM') ?: 0;
 
 $loaders = new ChainLoader([
     new FilesystemLoader(APPLICATION_SOURCE_DIR . DS . 'templates'),
     new FilesystemLoader($deploymentDir),
 ]);
-$twig = new Environment($loaders);
+
+$twig = new Environment($loaders, ['debug' => true]);
+$twig->addExtension(new \Twig\Extension\DebugExtension());
+
 $nginxVarEncoder = new class() {
     public function encode($value)
     {
@@ -70,6 +75,9 @@ $projectData['_knownHosts'] = buildKnownHosts($deploymentDir);
 $projectData['_defaultDeploymentDir'] = $defaultDeploymentDir;
 $projectData['tag'] = $projectData['tag'] ?? uniqid();
 $projectData['_platform'] = $platform;
+$projectData['_platformCompose'] = $platformComposeArg;
+$projectData['_isArm'] = $platformIsArm;
+$projectData['_testVar'] = "platformIsArm";
 $mountMode = $projectData['_mountMode'] = retrieveMountMode($projectData, $platform);
 $projectData['_syncIgnore'] = buildSyncIgnore($deploymentDir);
 $projectData['_syncSessionName'] = preg_replace('/[^-a-zA-Z0-9]/', '-', $projectData['namespace'] . '-' . $projectData['tag'] . '-codebase');
@@ -528,12 +536,22 @@ verbose(implode(PHP_EOL, $output));
 function retrieveMountMode(array $projectData, string $platform): string
 {
     $mountMode = 'baked';
-    foreach ($projectData['docker']['mount'] ?? [] as $engine => $configuration) {
-        if (in_array($platform, $configuration['platforms'] ?? [$platform], true)) {
-            $mountMode = $engine;
+    foreach ($projectData['docker']['mount'] ?? [] as $configurationPlatform => $engine) {
+        if ($platform == $configurationPlatform) {
+            $mountMode = array_shift($engine);
             break;
         }
         $mountMode = '';
+    }
+
+    if ($mountMode === '') {
+        foreach ($projectData['docker']['mount'] ?? [] as $engine => $configuration) {
+        if (in_array($platform, $configuration['platforms'] ?? [$platform], true)) {
+                $mountMode = $engine;
+                break;
+            }
+            $mountMode = '';
+        }
     }
 
     if ($mountMode === '') {

@@ -23,6 +23,7 @@ services:
 
   cli:
     image: ${SPRYKER_DOCKER_PREFIX}_run_cli:${SPRYKER_DOCKER_TAG}
+    {{ project._platformCompose }}
     networks:
       - public
       - private
@@ -46,6 +47,7 @@ services:
       BLACKFIRE_CLIENT_TOKEN: ${BLACKFIRE_CLIENT_TOKEN}
       TIDEWAYS_APIKEY: ${TIDEWAYS_APIKEY}
       TIDEWAYS_CLI_ENABLED: ${TIDEWAYS_CLI_ENABLED}
+      COMPOSER_MEMORY_LIMIT: -1
       TIDEWAYS_ENVIRONMENT_NAME: ${TIDEWAYS_ENVIRONMENT_NAME}
     command:
       - "node"
@@ -53,6 +55,7 @@ services:
 
   frontend:
     image: ${SPRYKER_DOCKER_PREFIX}_run_frontend:${SPRYKER_DOCKER_TAG}
+    {{ project._platformCompose }}
     networks:
         - private
     labels:
@@ -85,6 +88,8 @@ services:
     volumes:
 {% if _mountMode == 'native' %}
       - ./public:/data/public:ro
+{% elseif _mountMode == 'delegated' %}
+      - ./:/data:delegated
 {% else %}
       - ${SPRYKER_DOCKER_PREFIX}_${SPRYKER_DOCKER_TAG}_data_sync:/data
 {% endif %}
@@ -92,6 +97,7 @@ services:
 
   gateway:
     image: ${SPRYKER_DOCKER_PREFIX}_gateway:${SPRYKER_DOCKER_TAG}
+    {{ project._platformCompose }}
     ports:
 {% for port in _ports %}
       - "{{ port }}:{{ port }}"
@@ -160,7 +166,7 @@ volumes:
     external: false
   cli_history:
     external: false
-{% if  _mountMode != 'baked' and _mountMode != 'native' %}
+{% if  _mountMode != 'baked' and _mountMode != 'native' and _mountMode != 'delegated' %}
   {{ namespace }}_{{ tag }}_data_sync:
     external: true
 {% endif %}

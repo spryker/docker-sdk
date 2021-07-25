@@ -1,5 +1,6 @@
   {{ serviceName }}:
     image: rediscommander/redis-commander:latest
+    {{ project._platformCompose }}
     networks:
       - private
     labels:

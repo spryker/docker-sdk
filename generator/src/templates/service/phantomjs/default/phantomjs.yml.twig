@@ -1,5 +1,6 @@
   {{ serviceName }}:
     image: wernight/phantomjs:latest
+    {{ project._platformCompose }}
     networks:
       - public
     labels:

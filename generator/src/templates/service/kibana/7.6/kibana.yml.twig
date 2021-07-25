@@ -1,5 +1,6 @@
   {{ serviceName }}:
     image: docker.elastic.co/kibana/kibana:7.6.2
+    {{ project._platformCompose }}
     networks:
         - private
     labels:

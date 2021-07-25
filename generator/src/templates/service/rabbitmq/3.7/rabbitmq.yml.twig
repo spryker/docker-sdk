@@ -1,5 +1,10 @@
   {{ serviceName }}:
+{% if project._isArm  %}
+    image: volhovm/rabbitmq:3.7.14-arm
+{% else %}
     image: spryker/rabbitmq:3.7.14
+{% endif %}
+    {{ project._platformCompose }}
     hostname: {{ serviceName }} # RabbitMQ determines the cluster by its hostname
     networks:
       - private

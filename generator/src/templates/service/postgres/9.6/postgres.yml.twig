@@ -1,5 +1,6 @@
   {{ serviceName }}:
     image: postgres:9.6-alpine
+    {{ project._platformCompose }}
     networks:
       - private
     labels:

@@ -1,5 +1,10 @@
   {{ serviceName }}:
+{% if project._isArm  %}
+    image: volhovm/mailhog:v1.0.1-arm
+{% else %}
     image: mailhog/mailhog:v1.0.0
+{% endif %}
+    {{ project._platformCompose }}
     networks:
       - private
     labels:

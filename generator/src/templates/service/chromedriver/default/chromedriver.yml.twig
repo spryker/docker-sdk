@@ -1,5 +1,6 @@
   {{ serviceName }}:
     image: spryker/chromedriver
+    {{ project._platformCompose }}
     networks:
       - public
     init: true

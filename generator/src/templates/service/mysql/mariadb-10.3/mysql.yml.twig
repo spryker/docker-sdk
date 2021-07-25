@@ -1,5 +1,6 @@
   {{ serviceName }}:
     image: mariadb:10.3
+    {{ project._platformCompose }}
     networks:
       - private
     labels:

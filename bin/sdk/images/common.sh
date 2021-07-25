@@ -35,7 +35,7 @@ function Images::_buildApp() {
     local cliImage="${SPRYKER_DOCKER_PREFIX}_cli:${SPRYKER_DOCKER_TAG}"
     local pipelineImage="${SPRYKER_DOCKER_PREFIX}_pipeline:${SPRYKER_DOCKER_TAG}"
     local runtimeCliImage="${SPRYKER_DOCKER_PREFIX}_run_cli:${SPRYKER_DOCKER_TAG}"
-
+    local platformArg=$(Environment::getPlatformCliOption)
     if [ -n "${SSH_AUTH_SOCK_IN_CLI}" ]; then
         sshArgument=('--ssh' 'default')
     fi
@@ -47,7 +47,7 @@ function Images::_buildApp() {
 
     docker build \
         -t "${baseAppImage}" \
-        -f "${DEPLOYMENT_PATH}/images/common/application/Dockerfile" \
+        -f "${DEPLOYMENT_PATH}/images/common/application/Dockerfile" $platformArg \
         --progress="${PROGRESS_TYPE}" \
         --build-arg "SPRYKER_PLATFORM_IMAGE=${SPRYKER_PLATFORM_IMAGE}" \
         --build-arg "SPRYKER_LOG_DIRECTORY=${SPRYKER_LOG_DIRECTORY}" \
@@ -61,7 +61,7 @@ function Images::_buildApp() {
 
     docker build \
         -t "${appImage}" \
-        -f "${DEPLOYMENT_PATH}/images/${folder}/application/Dockerfile" \
+        -f "${DEPLOYMENT_PATH}/images/${folder}/application/Dockerfile" $platformArg \
         "${sshArgument[@]}" \
         --secret "id=secrets-env,src=$SECRETS_FILE_PATH" \
         --progress="${PROGRESS_TYPE}" \
@@ -82,7 +82,7 @@ function Images::_buildApp() {
     docker build \
         -t "${localAppImage}" \
         -t "${runtimeImage}" \
-        -f "${DEPLOYMENT_PATH}/images/common/application-local/Dockerfile" \
+        -f "${DEPLOYMENT_PATH}/images/common/application-local/Dockerfile" $platformArg \
         --progress="${PROGRESS_TYPE}" \
         --build-arg "SPRYKER_PARENT_IMAGE=${appImage}" \
         "${DEPLOYMENT_PATH}/context" 1>&2
@@ -90,7 +90,7 @@ function Images::_buildApp() {
     if [ -n "${SPRYKER_XDEBUG_MODE_ENABLE}" ]; then
         docker build \
             -t "${runtimeImage}" \
-            -f "${DEPLOYMENT_PATH}/images/debug/application/Dockerfile" \
+            -f "${DEPLOYMENT_PATH}/images/debug/application/Dockerfile" $platformArg \
             --progress="${PROGRESS_TYPE}" \
             --build-arg "SPRYKER_PARENT_IMAGE=${localAppImage}" \
             "${DEPLOYMENT_PATH}/context" 1>&2
@@ -101,7 +101,7 @@ function Images::_buildApp() {
     docker build \
         -t "${baseCliImage}" \
         -t "${pipelineImage}" \
-        -f "${DEPLOYMENT_PATH}/images/common/cli/Dockerfile" \
+        -f "${DEPLOYMENT_PATH}/images/common/cli/Dockerfile" $platformArg \
         --progress="${PROGRESS_TYPE}" \
         --build-arg "SPRYKER_PARENT_IMAGE=${localAppImage}" \
         "${DEPLOYMENT_PATH}/context" 1>&2
@@ -109,7 +109,7 @@ function Images::_buildApp() {
     docker build \
         -t "${cliImage}" \
         -t "${runtimeCliImage}" \
-        -f "${DEPLOYMENT_PATH}/images/${folder}/cli/Dockerfile" \
+        -f "${DEPLOYMENT_PATH}/images/${folder}/cli/Dockerfile" $platformArg \
         "${sshArgument[@]}" \
         --secret "id=secrets-env,src=$SECRETS_FILE_PATH" \
         --progress="${PROGRESS_TYPE}" \
@@ -123,7 +123,7 @@ function Images::_buildApp() {
     if [ -n "${SPRYKER_XDEBUG_MODE_ENABLE}" ]; then
         docker build \
             -t "${runtimeCliImage}" \
-            -f "${DEPLOYMENT_PATH}/images/debug/cli/Dockerfile" \
+            -f "${DEPLOYMENT_PATH}/images/debug/cli/Dockerfile" $platformArg \
             --progress="${PROGRESS_TYPE}" \
             --build-arg "SPRYKER_PARENT_IMAGE=${cliImage}" \
             "${DEPLOYMENT_PATH}/context" 1>&2
@@ -139,12 +139,13 @@ function Images::_buildFrontend() {
     local baseFrontendImage="${SPRYKER_DOCKER_PREFIX}_base_frontend:${SPRYKER_DOCKER_TAG}"
     local frontendImage="${SPRYKER_DOCKER_PREFIX}_frontend:${SPRYKER_DOCKER_TAG}"
     local runtimeFrontendImage="${SPRYKER_DOCKER_PREFIX}_run_frontend:${SPRYKER_DOCKER_TAG}"
+    local platformArg=$(Environment::getPlatformCliOption)
 
     Console::verbose "${INFO}Building Frontend images${NC}"
 
     docker build \
         -t "${baseFrontendImage}" \
-        -f "${DEPLOYMENT_PATH}/images/common/frontend/Dockerfile" \
+        -f "${DEPLOYMENT_PATH}/images/common/frontend/Dockerfile"  $platformArg \
         --progress="${PROGRESS_TYPE}" \
         --build-arg "SPRYKER_FRONTEND_IMAGE=${SPRYKER_FRONTEND_IMAGE}" \
         --build-arg "SPRYKER_BUILD_HASH=${SPRYKER_BUILD_HASH:-"current"}" \
@@ -154,7 +155,7 @@ function Images::_buildFrontend() {
     docker build \
         -t "${frontendImage}" \
         -t "${runtimeFrontendImage}" \
-        -f "${DEPLOYMENT_PATH}/images/${folder}/frontend/Dockerfile" \
+        -f "${DEPLOYMENT_PATH}/images/${folder}/frontend/Dockerfile"  $platformArg \
         --progress="${PROGRESS_TYPE}" \
         --build-arg "SPRYKER_PARENT_IMAGE=${baseFrontendImage}" \
         --build-arg "SPRYKER_ASSETS_BUILDER_IMAGE=${builderAssetsImage}" \
@@ -163,7 +164,7 @@ function Images::_buildFrontend() {
     if [ -n "${SPRYKER_XDEBUG_MODE_ENABLE}" ]; then
         docker build \
             -t "${runtimeFrontendImage}" \
-            -f "${DEPLOYMENT_PATH}/images/debug/frontend/Dockerfile" \
+            -f "${DEPLOYMENT_PATH}/images/debug/frontend/Dockerfile"  $platformArg \
             --progress="${PROGRESS_TYPE}" \
             --build-arg "SPRYKER_PARENT_IMAGE=${frontendImage}" \
             "${DEPLOYMENT_PATH}/context" 1>&2
@@ -174,10 +175,9 @@ function Images::_buildGateway() {
     local gatewayImage="${SPRYKER_DOCKER_PREFIX}_gateway:${SPRYKER_DOCKER_TAG}"
 
     Console::verbose "${INFO}Building Gateway image${NC}"
-
     docker build \
         -t "${gatewayImage}" \
-        -f "${DEPLOYMENT_PATH}/images/common/gateway/Dockerfile" \
+        -f "${DEPLOYMENT_PATH}/images/common/gateway/Dockerfile" $(Environment::getPlatformCliOption) \
         --progress="${PROGRESS_TYPE}" \
         "${DEPLOYMENT_PATH}/context" 1>&2
 }

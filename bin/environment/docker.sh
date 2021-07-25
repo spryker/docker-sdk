@@ -90,4 +90,39 @@ function Environment::getFullUserId() {
     return "${TRUE}"
 }
 
+# ------------------
+function Environment::IsArchitectureArm64() {
+    local arch="`uname -m`"
+    if [[ "${arch}" == "arm64" ]]
+    then
+        echo "1"
+        return "${TRUE}"
+    fi
+    return "${FALSE}"
+}
+
+# ------------------
+function Environment::getPlatformCliOption() {
+    local isArm=$(Environment::IsArchitectureArm64)
+    if [[ ! -z $isArm ]]
+    then
+        echo "--platform linux/arm64/v8 "
+        return "${TRUE}"
+    fi
+    echo ""
+    return "${TRUE}"
+}
+
+# ------------------
+function Environment::getPlatformComposeOption() {
+    local isArm=$(Environment::IsArchitectureArm64)
+    if [[ ! -z $isArm ]]
+    then
+        echo "platform: linux/arm64/v8"
+        return "${TRUE}"
+    fi
+    echo ""
+    return "${TRUE}"
+}
+
 Registry::addChecker 'Environment::checkDockerVersion'
