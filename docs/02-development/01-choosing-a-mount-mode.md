@@ -29,6 +29,23 @@ This mount mode is default for the Demo mode. It is not suitable for the applica
 Mounts source files directly from host machine into containers.
 Works perfectly with Linux and Windows (WSL2).
 
+* delegated
+Mounts source files directly from host machine into containers using docker mount mode.
+The delegated configuration provides the weakest set of guarantees.
+For directories mounted with delegated the container’s view of the file system is authoritative,
+and writes performed by containers may not be immediately reflected on the host file system.
+In situations such as NFS asynchronous mode, if a running container with a delegated bind mount crashes,
+then writes may be lost.
+Works perfectly with MacOS, Linux and Windows (WSL2).
+
+* cached
+Mounts source files directly from host machine into containers using docker mount mode
+The cached configuration provides all the guarantees of the delegated configuration,
+and some additional guarantees around the visibility of writes performed by containers.
+As such, cached typically improves the performance of read-heavy workloads, at the cost
+of some temporary inconsistency between the host and the container.
+Works perfectly with MacOS, Linux and Windows (WSL2).
+
 * mutagen
 Synchronizes source files between your host machine and a container in an effective real-time way that combines the performance of the rsync algorithm with bidirectionality and low-latency filesystem watching.
 This mount mode is stable with MacOS.
