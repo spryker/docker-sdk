@@ -168,7 +168,7 @@ volumes:
     external: false
   cli_history:
     external: false
-{% if  _mountMode != 'baked' and _mountMode != 'native' and _mountMode != 'delegated' %}
+{% if  _mountMode != 'baked' and _mountMode != 'native' and _mountMode != 'delegated' and _mountMode != 'cached' %}
   {{ namespace }}_{{ tag }}_data_sync:
     external: true
 {% endif %}

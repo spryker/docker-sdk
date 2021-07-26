@@ -6,7 +6,7 @@
       - ./:/data:delegated
 {% elseif _mountMode == 'cached' %}
       - ./:/data:cached
-{% else  %}
+{% else %}
       - ${SPRYKER_DOCKER_PREFIX}_${SPRYKER_DOCKER_TAG}_data_sync:/data:nocopy
 {% endif %}
 {% endif %}

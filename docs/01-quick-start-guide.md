@@ -30,7 +30,7 @@ git clone git@github.com:spryker/docker-sdk.git docker
 ```
 
 
-## Setting up a developer environemnt
+## Setting up a developer environment
 
 To set up a developer environment:
 
