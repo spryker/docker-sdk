@@ -17,9 +17,7 @@
 
     location ~ \.php$ {
         include fastcgi.conf;
-{# Variable is necessary for https://www.nginx.com/blog/dns-service-discovery-nginx-plus/#domain-name-upstream-group #}
-        set $upstream "{{ upstream }}";
-        fastcgi_pass "$upstream";
+        fastcgi_pass {{ upstream }};
         fastcgi_intercept_errors off;
         try_files $fastcgi_script_name @proxy;
     }
@@ -27,9 +25,7 @@
     location @proxy {
 {% block location %}
         include fastcgi.conf;
-{# Variable is necessary for https://www.nginx.com/blog/dns-service-discovery-nginx-plus/#domain-name-upstream-group #}
-        set $upstream "{{ upstream }}";
-        fastcgi_pass "$upstream";
+        fastcgi_pass "{{ upstream }}";
 
 {% include "nginx/http/default.location.conf.twig" with _context %}
 
