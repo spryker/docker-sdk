@@ -16,7 +16,7 @@ Review the minimum system requirements in the table:
 
 ## Installing and configuring required software
 Follow the steps to install and configure the required software:
-1. Download and install [Docker Desktop (Mac)](https://download.docker.com/mac/stable/Docker.dmg).
+1. Download and install [Docker Desktop (Mac)](https://desktop.docker.com/mac/stable/amd64/Docker.dmg).
 2. Accept the privilege escalation request "Docker Desktop needs privileged access.".
 @(Info)()(Signup for Docker Hub is not required.)
 
