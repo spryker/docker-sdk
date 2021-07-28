@@ -1,5 +1,10 @@
 # syntax = docker/dockerfile:experimental
-ARG SPRYKER_PLATFORM_IMAGE=spryker/php:7.3
+{% if project._isArm  %}
+    ARG SPRYKER_PLATFORM_IMAGE={{ image is iterable ? image['tag'] : image | default('spryker/php:7.4') }}
+{% else %}
+    ARG SPRYKER_PLATFORM_IMAGE=spryker/php:7.4
+{% endif %}
+
 FROM ${SPRYKER_PLATFORM_IMAGE} AS application-basic
 
 ENV SPRYKER_IN_DOCKER=1

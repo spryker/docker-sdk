@@ -71,12 +71,13 @@ $yamlParser = new Parser();
 
 $projectData = $yamlParser->parseFile($projectYaml);
 
+$projectData['_platformCompose'] = $platformComposeArg;
+$projectData['_isArm'] = $platformIsArm;
+updateImageDependOnPlatform($projectData);
 $projectData['_knownHosts'] = buildKnownHosts($deploymentDir);
 $projectData['_defaultDeploymentDir'] = $defaultDeploymentDir;
 $projectData['tag'] = $projectData['tag'] ?? uniqid();
 $projectData['_platform'] = $platform;
-$projectData['_platformCompose'] = $platformComposeArg;
-$projectData['_isArm'] = $platformIsArm;
 $mountMode = $projectData['_mountMode'] = retrieveMountMode($projectData, $platform);
 $projectData['_syncIgnore'] = buildSyncIgnore($deploymentDir);
 $projectData['_syncSessionName'] = preg_replace('/[^-a-zA-Z0-9]/', '-', $projectData['namespace'] . '-' . $projectData['tag'] . '-codebase');
@@ -219,6 +220,19 @@ $frontend = [];
 $environment = [
     'project' => $projectData['namespace'],
 ];
+
+function updateImageDependOnPlatform(&$projectData)
+{
+    if (empty($projectData['_isArm'])) {
+        return;
+    }
+
+    if (is_array($projectData['image'])) {
+        $projectData['image']['tag'] = str_replace('spryker', 'volhovm', $projectData['image']['tag']);
+        return;
+    }
+    $projectData['image'] = str_replace('spryker', 'volhovm', $projectData['image']);
+}
 
 /**
  * @param array $endpointMap
