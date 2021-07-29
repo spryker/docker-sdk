@@ -1,7 +1,7 @@
 #!/bin/bash
 
 function Service::Broker::install() {
-    Runtime::waitFor broker
+#    Runtime::waitFor broker
 
     Console::start "${INFO}Configuring broker...${NC}"
 

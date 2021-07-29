@@ -3,21 +3,8 @@
     serviceData: project['services']['key_value_store'],
     serviceName: 'key_value_store'
 } %}
-{% include "terraform/search/#{project['services']['search']['engine']}.tf.twig" with {
-    serviceData: project['services']['search'],
-    serviceName: 'search',
-    searchIndexPrefix: project['namespace']
-} %}
 {% include "terraform/database/#{project['services']['database']['engine']}.tf.twig" with {
     serviceData: project['services']['database'],
     regionData: regionData['services']['database'],
     serviceName: 'database'
-} %}
-{% include "terraform/broker/#{project['services']['broker']['engine']}.tf.twig" with {
-    serviceData: project['services']['broker'],
-    serviceName: 'broker',
-    brokerConnections: brokerConnections
-} %}
-{% include "terraform/mail/mail.tf.twig" with {
-    serviceData: regionData['services']['mail']
 } %}

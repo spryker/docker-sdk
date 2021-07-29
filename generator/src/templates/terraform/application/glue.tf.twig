@@ -7,12 +7,3 @@
     serviceData: project['services']['key_value_store'],
     serviceName: 'key_value_store'
 } %}
-{% include "terraform/search/#{project['services']['search']['engine']}.tf.twig" with {
-    serviceData: project['services']['search'],
-    serviceName: 'search',
-    searchIndexPrefix: project['namespace']
-} %}
-{% include "terraform/mail/mail.tf.twig" with {
-    serviceData: regionData['services']['mail']
-} %}
-

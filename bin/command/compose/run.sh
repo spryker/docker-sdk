@@ -10,7 +10,7 @@ function Command::run() {
     Compose::command restart frontend gateway
 
     Runtime::waitFor database
-    Runtime::waitFor search
+#    Runtime::waitFor search
     Runtime::waitFor key_value_store
 
     return "${TRUE}"

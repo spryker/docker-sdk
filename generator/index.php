@@ -670,6 +670,8 @@ function getSSLRedirectPort(array $projectData): int
  */
 function getBrokerConnections(array $projectData): string
 {
+    return json_encode([]);
+
     $brokerServiceData = $projectData['services']['broker'];
 
     $connections = [];
@@ -698,6 +700,8 @@ function getBrokerConnections(array $projectData): string
  */
 function getCloudBrokerConnections(array $projectData): string
 {
+    return json_encode([]);
+
     $brokerServiceData = $projectData['services']['broker'];
 
     $connections = [];
