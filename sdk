@@ -78,4 +78,4 @@ esac
 
 END_TIME=`date +%s`
 TOTAL_TIME_SEC=`expr $END_TIME - $START_TIME`
-echo "Total Execution Time: $(( ${TOTAL_TIME_SEC} / 3600 ))h $(( (${TOTAL_TIME_SEC} / 60) % 60 ))m $(( ${TOTAL_TIME_SEC} % 60 ))s"
+echo -e "\nTotal Execution Time: $(( ${TOTAL_TIME_SEC} / 3600 ))h $(( (${TOTAL_TIME_SEC} / 60) % 60 ))m $(( ${TOTAL_TIME_SEC} % 60 ))s"

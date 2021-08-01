@@ -73,6 +73,7 @@ $projectData = $yamlParser->parseFile($projectYaml);
 
 $projectData['_platformCompose'] = $platformComposeArg;
 $projectData['_isArm'] = $platformIsArm;
+$projectData['_timeOut'] = isDevelopmentMode($projectData) ? '5m' : '1m';
 updateImageDependOnPlatform($projectData);
 $projectData['_knownHosts'] = buildKnownHosts($deploymentDir);
 $projectData['_defaultDeploymentDir'] = $defaultDeploymentDir;
@@ -221,7 +222,46 @@ $environment = [
     'project' => $projectData['namespace'],
 ];
 
-function updateImageDependOnPlatform(&$projectData)
+/**
+ * @param array $projectData
+ * @return bool
+ */
+function isDevelopmentMode(array $projectData): bool
+{
+    return ($projectData['assets']['mode'] ?? 'production') == 'development';
+}
+
+/**
+ * Update script execution time in case of development mode
+ * @param bool   $isDevelopmentMode
+ * @param string $deploymentDir
+ */
+function updateExecutionTime(bool $isDevelopmentMode, string $deploymentDir)
+{
+    if (!$isDevelopmentMode) {
+        return;
+    }
+
+    $config = [
+        $deploymentDir . DS . 'context' . DS . 'php' . DS . 'php.ini' => ['max_execution_time' => 180],
+        $deploymentDir . DS . 'context' . DS . 'php' . DS . 'php-fpm.d' . DS . 'worker.conf' => ['request_terminate_timeout' => '5m'],
+    ];
+
+    foreach ($config as $file => $correction) {
+        $content = file_get_contents($file);
+        foreach ($correction as $property => $replacement) {
+            $content = preg_replace("(${property}.*)", "${property} = ${replacement}", $content);
+        }
+        file_put_contents($file, $content);
+    }
+}
+
+/**
+ * Replace base image depends on platform
+ *
+ * @param array $projectData
+ */
+function updateImageDependOnPlatform(array &$projectData)
 {
     if (empty($projectData['_isArm'])) {
         return;
@@ -468,6 +508,8 @@ file_put_contents(
     $deploymentDir . DS . 'context' . DS . 'php' . DS . 'conf.d' . DS . '99-from-deploy-yaml-php.ini',
     $twig->render('php/conf.d/99-from-deploy-yaml-php.ini.twig', $projectData)
 );
+
+updateExecutionTime(isDevelopmentMode($projectData), $deploymentDir);
 
 $envVarEncoder->setIsActive(true);
 file_put_contents(
