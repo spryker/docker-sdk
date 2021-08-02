@@ -38,11 +38,11 @@ function Data::load() {
 #            brokerInstalled=1
 #        fi
 
-        if [ -z "${schedulerSuspended}" ]; then
-            schedulerSuspended=1
-            Service::Scheduler::pause
-            Registry::Trap::addExitHook 'resumeScheduler' 'Service::Scheduler::unpause'
-        fi
+#        if [ -z "${schedulerSuspended}" ]; then
+#            schedulerSuspended=1
+##            Service::Scheduler::pause
+#            Registry::Trap::addExitHook 'resumeScheduler' 'Service::Scheduler::unpause'
+#        fi
 
         for store in "${STORES[@]}"; do
             SPRYKER_CURRENT_STORE="${store}"
