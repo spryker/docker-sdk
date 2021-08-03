@@ -346,7 +346,7 @@ foreach ($projectData['groups'] ?? [] as $groupName => $groupData) {
                 $envVarEncoder->setIsActive(false);
             }
 
-            if ($applicationData['application'] === YVES_APP) {
+            if ($applicationData['application'] === YVES_APP || $applicationData['application'] === GLUE_APP) {
                 $services = [];
 
                 $isEndpointDataHasStore = array_key_exists('store', $endpointData);
