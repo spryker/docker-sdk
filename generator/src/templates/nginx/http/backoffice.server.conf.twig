@@ -39,4 +39,9 @@
         fastcgi_param SPRYKER_API_HOST "{{ project['_endpointMap'][endpointData['store']]['glue'] }}";
         fastcgi_param SPRYKER_API_PORT "{{ (project['_endpointMap'][endpointData['store']]['glue'] | split(':'))[1] | default(project['_defaultPort']) }}";
 {% endif %}
+
+{% if project['_endpointMap'][endpointData['store']]['merchant-portal'] is not empty %}
+        fastcgi_param SPRYKER_MP_HOST "{{ project['_endpointMap'][endpointData['store']]['merchant-portal'] }}";
+        fastcgi_param SPRYKER_MP_PORT "{{ (project['_endpointMap'][endpointData['store']]['merchant-portal'] | split(':'))[1] | default(project['_defaultPort']) }}";
+{% endif %}
 {% endblock location %}
