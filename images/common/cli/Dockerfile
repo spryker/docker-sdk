@@ -5,7 +5,7 @@ FROM ${SPRYKER_PARENT_IMAGE} as cli-basic
 
 # Blackfire client
 RUN mkdir -p /tmp/blackfire \
-    && curl -A "Docker" -L https://blackfire.io/api/v1/releases/client/linux_static/amd64 | tar zxp -C /tmp/blackfire \
+    && curl -A "Docker" -L https://packages.blackfire.io/binaries/blackfire/2.4.3/blackfire-linux_amd64.tar.gz| tar zxp -C /tmp/blackfire \
     && mv /tmp/blackfire/blackfire /usr/bin/blackfire \
     && rm -Rf /tmp/blackfire
 
