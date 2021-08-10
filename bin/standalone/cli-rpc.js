@@ -42,6 +42,9 @@ class Dispatcher {
         child.stdout.on('data', (chunk) => {
             responseBuffer += chunk.toString();
         });
+        child.stderr.on('data', (chunk) => {
+            responseBuffer += chunk.toString();
+        });
         child.on('close', (code) => {
             response.statusCode = code === 0 ? 200 : 400;
             response.write(responseBuffer);
