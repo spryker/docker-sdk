@@ -454,7 +454,7 @@ The format of the key  is `domain[:port]`. The key must be project-wide unique.
   * `*` – allows all domains
   :::(Info) (Allowing all domains)
   For security reasons, we recommend allowing all domains only as a temporary workaround. As a permanent solution:
-  * Define the desired domains as separate endpoints with separate CORS headers. 
+  * Define the desired domains as separate endpoints with separate CORS headers.
   * Define the desired domains on the application level
   :::
 
@@ -629,6 +629,8 @@ The following services are supported:
 An application profiler *Service* used for testing and debugging.
 * Project-wide
     - `blackfire: engine:` - possible value is `blackfire`.
+    - `blackfire: agent-image:` - default value is `blackfire/blackfire:1`.
+    - `blackfire: agent-port:` - default value is `8707`.
     - `blackfire: server-id:` - defines the server id used to authenticate with Blackfire. Use it only if you have a shared agent between multiple environments.
     - `blackfire: server-token:` - defines the server token used to authenticate with Blackfire. Use it only if you have a shared agent between multiple environments.
     - `blackfire: client-id:` - defines the client ID from the Client ID/Client Token credentials pair.
