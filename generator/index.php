@@ -313,6 +313,7 @@ foreach ($projectData['groups'] ?? [] as $groupName => $groupData) {
             }
             if ($isEndpointDataHasStore && $endpointData['store'] === ($projectData['docker']['testing']['store'] ?? '')) {
                 $projectData['_testing']['storeName'] = $endpointData['store'];
+                $projectData['_testing']['endpointMap'] = $endpointMap;
                 $projectData['_testing']['applications'][$applicationData['application']] = [
                     'applicationName' => $applicationName,
                     'services' => $services,
