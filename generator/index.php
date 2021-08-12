@@ -123,6 +123,10 @@ $projectData['_endpointMap'] = [];
 $projectData['_storeSpecific'] = getStoreSpecific($projectData);
 $debugPortIndex = 10000;
 $projectData['_endpointDebugMap'] = [];
+$projectData['_testing'] = [
+    'defaultPort' => $defaultPort,
+    'projectServices' => $projectData['services']
+];
 
 verbose('Generating ENV files... [DONE]');
 
@@ -299,20 +303,28 @@ foreach ($projectData['groups'] ?? [] as $groupName => $groupData) {
                 );
             }
 
+            $services = [];
+            $isEndpointDataHasStore = array_key_exists('store', $endpointData);
+            if ($isEndpointDataHasStore) {
+                $services = array_replace_recursive(
+                    $projectData['regions'][$groupData['region']]['stores'][$endpointData['store']]['services'],
+                    $endpointData['services'] ?? []
+                );
+            }
+            if ($isEndpointDataHasStore && $endpointData['store'] === ($projectData['docker']['testing']['store'] ?? '')) {
+                $projectData['_testing']['storeName'] = $endpointData['store'];
+                $projectData['_testing']['applications'][$applicationData['application']] = [
+                    'applicationName' => $applicationName,
+                    'services' => $services,
+                    'endpoint' => $endpoint,
+                ];
+            }
+
             if ($applicationData['application'] === ZED_APP
                 || $applicationData['application'] === BACKEND_GATEWAY_APP
                 || $applicationData['application'] === BACKOFFICE_APP
                 || $applicationData['application'] === MERCHANT_PORTAL
             ) {
-                $services = [];
-
-                if (array_key_exists('store', $endpointData)) {
-                    $services = array_replace_recursive(
-                        $projectData['regions'][$groupData['region']]['stores'][$endpointData['store']]['services'],
-                        $endpointData['services'] ?? []
-                    );
-                }
-
                 $envVarEncoder->setIsActive(true);
                 file_put_contents(
                     $deploymentDir . DS . 'env' . DS . 'cli' . DS . strtolower($endpointData['store']) . '.env',
@@ -345,41 +357,17 @@ foreach ($projectData['groups'] ?? [] as $groupName => $groupData) {
                 );
                 $envVarEncoder->setIsActive(false);
             }
-
-            if ($applicationData['application'] === YVES_APP) {
-                $services = [];
-
-                $isEndpointDataHasStore = array_key_exists('store', $endpointData);
-                if ($isEndpointDataHasStore) {
-                    $services = array_replace_recursive(
-                        $projectData['regions'][$groupData['region']]['stores'][$endpointData['store']]['services'],
-                        $endpointData['services'] ?? []
-                    );
-                }
-
-                if ($isEndpointDataHasStore && $endpointData['store'] === ($projectData['docker']['testing']['store'] ?? '')) {
-                    $envVarEncoder->setIsActive(true);
-                    file_put_contents(
-                        $deploymentDir . DS . 'env' . DS . 'cli' . DS . 'testing.env',
-                        $twig->render('env/cli/testing.env.twig', [
-                            'applicationName' => $applicationName,
-                            'applicationData' => $applicationData,
-                            'project' => $projectData,
-                            'host' => strtok($endpoint, ':'),
-                            'port' => strtok($endpoint) ?: $defaultPort,
-                            'regionName' => $groupData['region'],
-                            'regionData' => $projectData['regions'][$groupData['region']],
-                            'brokerConnections' => getBrokerConnections($projectData),
-                            'storeName' => $endpointData['store'],
-                            'services' => $services,
-                            'endpointMap' => $endpointMap,
-                        ])
-                    );
-                    $envVarEncoder->setIsActive(false);
-                }
-            }
         }
     }
+}
+
+if ($projectData['_testing']) {
+    $envVarEncoder->setIsActive(true);
+    file_put_contents(
+        $deploymentDir . DS . 'env' . DS . 'cli' . DS . 'testing.env',
+        $twig->render('env/cli/testing.env.twig', $projectData['_testing'])
+    );
+    $envVarEncoder->setIsActive(false);
 }
 
 if (!empty($projectData['services']['key_value_store']['replicas'])) {
