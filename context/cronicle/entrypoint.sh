@@ -1,6 +1,6 @@
 #!/bin/bash
 
-export ROOT_DIR=${SPRYKER_CRONICLE_BASE_PATH}/cronicle
+export ROOT_DIR=/home/spryker/cronicle
 export CONF_DIR=$ROOT_DIR/conf
 export BIN_DIR=$ROOT_DIR/bin
 # DATA_DIR needs to be the same as the exposed Docker volume in Dockerfile
@@ -16,10 +16,9 @@ export NODE_EXTRA_CA_CERTS=/etc/ssl/certs/ca-certificates.crt
 export CRONICLE_echo=1
 export CRONICLE_foreground=1
 
-bash "$ROOT_DIR/setup.sh"
-
 # Only run setup when setup needs to be done
 if [ ! -f "$DATA_DIR/.setup_done" ]; then
+    node "$BIN_DIR/build.js" dist
     bash "$BIN_DIR/control.sh" setup
 
     # Create plugins directory

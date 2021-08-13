@@ -4,6 +4,8 @@ ARG SPRYKER_PARENT_IMAGE
 FROM ${SPRYKER_PARENT_IMAGE} AS scheduler
 
 ENV NODEJS_VERSION='12'
+ENV CRONICLE_REPO='https://github.com/spryker-sdk/Cronicle.git'
+ENV CRONICLE_BRANCH='feature/sc-5888/master-light-weight-scheduler'
 USER root
 
 RUN --mount=type=cache,id=aptlib,sharing=locked,target=/var/lib/apt \
@@ -37,11 +39,13 @@ USER spryker
 ENV PATH=/home/spryker/bin:$PATH
 
 RUN --mount=type=cache,id=npm,sharing=locked,target=/root/.npm \
-  /usr/bin/install -d -m 777 /home/spryker/cronicle \
-  && cd /home/spryker/cronicle \
+  /usr/bin/install -d -m 777 /home/spryker/ \
+  && cd /home/spryker \
+  && git clone -b $CRONICLE_BRANCH $CRONICLE_REPO cronicle\
+  && cd cronicle \
+  && npm i \
   && mkdir -p data logs plugins
 
-ADD cronicle/setup.sh /home/spryker/cronicle/setup.sh
 ADD cronicle/entrypoint.sh /home/spryker/cronicle/entrypoint.sh
 
 EXPOSE 3012 3014
