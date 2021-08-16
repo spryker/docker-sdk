@@ -5,7 +5,7 @@ FROM ${SPRYKER_PARENT_IMAGE} AS scheduler
 
 ENV NODEJS_VERSION='12'
 ENV CRONICLE_REPO='https://github.com/spryker-sdk/Cronicle.git'
-ENV CRONICLE_BRANCH='feature/sc-5888/master-light-weight-scheduler'
+ENV CRONICLE_BRANCH='master'
 USER root
 
 RUN --mount=type=cache,id=aptlib,sharing=locked,target=/var/lib/apt \
