@@ -509,6 +509,11 @@ file_put_contents(
     $twig->render('php/conf.d/99-from-deploy-yaml-php.ini.twig', $projectData)
 );
 
+file_put_contents(
+    $deploymentDir . DS . 'context' . DS . 'php' . DS . 'debug' . DS . 'etc' . DS . 'php' . DS . 'debug.conf.d' . DS . '99-from-deploy-yaml-php.ini',
+    $twig->render('php/conf.d/99-from-deploy-yaml-php.ini.twig', $projectData)
+);
+
 updateExecutionTime(isDevelopmentMode($projectData), $deploymentDir);
 
 $envVarEncoder->setIsActive(true);
