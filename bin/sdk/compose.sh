@@ -135,7 +135,7 @@ function Compose::up() {
     Registry::Flow::runAfterUp
 
     Data::load ${noCache} ${doData}
-#    Service::Scheduler::start ${noCache} ${doJobs}
+    Service::Scheduler::start ${noCache} ${doJobs}
 }
 
 function Compose::run() {
