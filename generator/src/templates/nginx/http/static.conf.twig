@@ -8,6 +8,19 @@
     }
 
     location / {
+
+        {% if auth['engine'] is not empty and auth['engine'] == 'basic' %}
+        if ($request_method = OPTIONS) {
+            add_header Content-Length 0;
+            add_header Content-Type text/plain;
+            add_header Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS";
+            add_header Access-Control-Allow-Origin $http_origin;
+            add_header Access-Control-Allow-Headers "Authorization, Content-Type";
+            add_header Access-Control-Allow-Credentials true;
+            return 200;
+        }
+        {% endif %}
+
         access_log  off;
         expires     7d;
         add_header  Pragma public;
