@@ -13,7 +13,7 @@ ENV PATH=/data/vendor/bin:$PATH
 
 RUN --mount=type=cache,id=aptlib,sharing=locked,target=/var/lib/apt \
     --mount=type=cache,id=aptcache,sharing=locked,target=/var/cache/apt \
-  bash -c 'if [ ! -z "$(which apt)" ]; then apt-get update && apt-get install -y \
+  bash -c 'if [ ! -z "$(which apt)" ]; then apt update -y && apt install -y \
      nodejs \
      npm \
      inotify-tools \
@@ -27,7 +27,7 @@ RUN --mount=type=cache,id=aptlib,sharing=locked,target=/var/lib/apt \
   bash -c 'if [ ! -z "$(which apt)" ]; then \
      curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add - && \
      echo "deb https://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources.list.d/yarn.list && \
-     apt-get update && apt-get install -y \
+     apt update -y && apt install -y \
      yarn \
      ; fi'
 # Debian contains outdated NPM package
