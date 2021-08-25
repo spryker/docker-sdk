@@ -454,7 +454,7 @@ The format of the key  is `domain[:port]`. The key must be project-wide unique.
   * `*` – allows all domains
   :::(Info) (Allowing all domains)
   For security reasons, we recommend allowing all domains only as a temporary workaround. As a permanent solution:
-  * Define the desired domains as separate endpoints with separate CORS headers. 
+  * Define the desired domains as separate endpoints with separate CORS headers.
   * Define the desired domains on the application level
   :::
 
