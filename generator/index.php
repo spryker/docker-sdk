@@ -451,7 +451,7 @@ file_put_contents(
 file_put_contents(
     $deploymentDir . DS . 'context' . DS . 'php' . DS . 'debug' . DS . 'etc' . DS . 'php' . DS . 'debug.conf.d' . DS . '99-from-deploy-yaml-php.ini',
     $twig->render('php/conf.d/99-from-deploy-yaml-php.ini.twig', $projectData)
-);    
+);
 
 $envVarEncoder->setIsActive(true);
 file_put_contents(
@@ -871,8 +871,32 @@ function buildNewrelicEnvVariables(array $projectData): array
         return $newrelicEnvVariables;
     }
 
-    foreach ($projectData['docker']['newrelic'] as $key => $value) {
-        $newrelicEnvVariables['NEWRELIC_' . strtoupper($key)] = $value;
+    return mapNewrelicEnVariables($projectData['docker']['newrelic'], $newrelicEnvVariables);
+}
+
+/**
+ * @param array $newrelicData
+ * @param array $newrelicEnvVariables
+ * @param string|null $newrelicKeyPrefix
+ *
+ * @return array
+ */
+function mapNewrelicEnVariables(array $newrelicData, array $newrelicEnvVariables, string $newrelicKeyPrefix = null): array
+{
+    $envVariablePrefix = $newrelicKeyPrefix == null
+        ? 'NEWRELIC_'
+        : $newrelicKeyPrefix . '_';
+
+    foreach ($newrelicData as $key => $value) {
+        $newrelicKey = $envVariablePrefix . strtoupper(str_replace('-', '_', $key));
+
+        if (is_array($value)) {
+            $newrelicEnvVariables = mapNewrelicEnVariables($value, $newrelicEnvVariables, $newrelicKey);
+
+            continue;
+        }
+
+        $newrelicEnvVariables[$newrelicKey] = $value;
     }
 
     return $newrelicEnvVariables;
