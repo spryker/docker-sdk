@@ -96,9 +96,9 @@ matrix:
           - docker-sdk/sdk testing codecept run -c codeception.ci.functional.yml
       before_script: skip
       after_script: skip
-    - name: Docker / B2B Demoshop / PHP-7.2 Alpine / PostgreSQL / Functional
+    - name: Docker / B2B Demoshop / PHP-8.0 Alpine / PostgreSQL / Functional
       env:
-          - SPRYKER_PLATFORM_IMAGE=spryker/php:7.2-alpine3.12
+          - SPRYKER_PLATFORM_IMAGE=spryker/php:8.0-alpine3.13
           - TRAVIS=1
           - APPLICATION_ENV=ci.pgsql
           - SPRYKER_TESTING_ENABLED=1
