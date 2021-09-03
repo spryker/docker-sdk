@@ -495,9 +495,9 @@ Defines the [New Relic](https://documentation.spryker.com/docs/services#new-reli
 * `docker: newrelic: license:` - defines a New Relic license. Aquire it from [New Relic](https://www.newrelic.com/).
 * `docker: newrelic: appname:` - defines a New Relic application name. This variable is optional and does not have a default value.
 * `docker: newrelic: enabled:` - defines if Newrelic is enabled. Possible values are `true` and `false`. This variable is optional with the default value of `true`.
-* `docker: newrelic: distributed-tracing: enabled` - defines if Newrelic Distributed Tracing is enabled. Possible values are `true` and `false`. [New Relic Distributed Tracing](https://docs.newrelic.com/docs/agents/php-agent/features/distributed-tracing-php-agent/)
-* `docker: newrelic: distributed-tracing: exclude-newrelic-header` - defines if New Relic Distributed Tracing headers is enabled. Possible values are `true` and `false`. [New Relic Distributed Tracing](https://docs.newrelic.com/docs/agents/php-agent/features/distributed-tracing-php-agent/)
-* `docker: newrelic: transaction-tracer: threshold` - defines Newrelic Transaction tracer threshold. Possible values are `0` or greatest. [New Relic Distributed Tracing](https://docs.newrelic.com/docs/agents/php-agent/features/distributed-tracing-php-agent/)
+* `docker: newrelic: distributed-tracing: enabled` - defines if [New Relic distributed tracing](https://docs.newrelic.com/docs/agents/php-agent/features/distributed-tracing-php-agent/) is enabled. Possible values are `true` and `false`.
+* `docker: newrelic: distributed-tracing: exclude-newrelic-header` - defines if New Relic distributed tracing headers are enabled. Possible values are `true` and `false`. For information about the headers, see [How trace context is passed between applications](https://docs.newrelic.com/docs/distributed-tracing/concepts/how-new-relic-distributed-tracing-works/#headers).
+* `docker: newrelic: transaction-tracer: threshold` - defines the New Relic transaction tracer threshold. Accepts numeric values starting from `0`. For information about the thresholds, see [Configure transaction traces](https://docs.newrelic.com/docs/apm/transactions/transaction-traces/configure-transaction-traces/).
 
 ```yaml
 docker:
