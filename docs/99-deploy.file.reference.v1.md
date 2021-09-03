@@ -496,7 +496,7 @@ Defines the [New Relic](https://documentation.spryker.com/docs/services#new-reli
 * `docker: newrelic: appname:` - defines a New Relic application name. This variable is optional and does not have a default value.
 * `docker: newrelic: enabled:` - defines if Newrelic is enabled. Possible values are `true` and `false`. This variable is optional with the default value of `true`.
 * `docker: newrelic: distributed-tracing: enabled` - defines if Newrelic Distributed Tracing is enabled. Possible values are `true` and `false`. [New Relic Distributed Tracing](https://docs.newrelic.com/docs/agents/php-agent/features/distributed-tracing-php-agent/)
-* `docker: newrelic: distributed-tracing: exclude-newrelic-header` - defines if New Relic Distributed Tracing headers is enabled. Possible values are `1` and `0`. [New Relic Distributed Tracing](https://docs.newrelic.com/docs/agents/php-agent/features/distributed-tracing-php-agent/)
+* `docker: newrelic: distributed-tracing: exclude-newrelic-header` - defines if New Relic Distributed Tracing headers is enabled. Possible values are `true` and `false`. [New Relic Distributed Tracing](https://docs.newrelic.com/docs/agents/php-agent/features/distributed-tracing-php-agent/)
 * `docker: newrelic: transaction-tracer: threshold` - defines Newrelic Transaction tracer threshold. Possible values are `0` or greatest. [New Relic Distributed Tracing](https://docs.newrelic.com/docs/agents/php-agent/features/distributed-tracing-php-agent/)
 
 ```yaml
