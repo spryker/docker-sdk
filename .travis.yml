@@ -98,7 +98,7 @@ matrix:
       after_script: skip
     - name: Docker / B2B Demoshop / PHP-7.3 Alpine / PostgreSQL / Functional
       env:
-          - SPRYKER_PLATFORM_IMAGE=spryker/php:7.3-alpine3.13
+          - SPRYKER_PLATFORM_IMAGE=spryker/php:7.3-alpine3.12
           - TRAVIS=1
           - APPLICATION_ENV=ci.pgsql
           - SPRYKER_TESTING_ENABLED=1
