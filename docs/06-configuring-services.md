@@ -245,7 +245,7 @@ Follow the steps to configure an endpoint for Redis Commander:
 
 ```yaml
 services:
-...    
+...
     redis-gui:
         engine: redis-commander
         endpoints:
@@ -374,7 +374,7 @@ Follow the steps to enable New Relic:
 ```yaml
 docker:
     newrelic:
-        license: {new_relic_license)
+        license: {new_relic_license}
 ```
 
 2. Adjust `deploy.*.yml` in the `image:` section:
@@ -427,7 +427,7 @@ ChromeDriver is provided as a webdriver service by default, but you can switch t
 
 ### ChromeDriver
 
-[ChromeDriver](https://chromedriver.chromium.org/) is a thin wrapper on WebDriver and [Chromium](https://chromedriver.chromium.org/) headless browser. It is used for automating web page interaction, JavaScript execution, and other testing-related activities. It provides full-control API to make end-to-end testing flexible and comfortable.  
+[ChromeDriver](https://chromedriver.chromium.org/) is a thin wrapper on WebDriver and [Chromium](https://chromedriver.chromium.org/) headless browser. It is used for automating web page interaction, JavaScript execution, and other testing-related activities. It provides full-control API to make end-to-end testing flexible and comfortable.
 
 
 :::(Warning) (Default service)

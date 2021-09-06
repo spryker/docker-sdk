@@ -101,8 +101,8 @@ if (empty($projectData['services']['webdriver'])) {
 $projectData['_dashboardEndpoint'] = '';
 if (!empty($projectData['services']['dashboard'])) {
     $projectData['services']['dashboard']['endpoints'] = $projectData['services']['dashboard']['endpoints'] ?? [
-        'localhost' => []
-    ];
+            'localhost' => []
+        ];
     reset($projectData['services']['dashboard']['endpoints']);
     $projectData['_dashboardEndpoint'] = sprintf(
         '%s://%s',
@@ -188,8 +188,8 @@ foreach ($projectData['groups'] ?? [] as $groupName => $groupData) {
                     $projectData['groups'][$groupName]['applications'][$applicationName]['endpoints'][$endpoint]['redirect']
                         = $redirect
                         = [
-                            'url' => $redirect,
-                        ];
+                        'url' => $redirect,
+                    ];
                 }
 
                 $projectData['groups'][$groupName]['applications'][$applicationName]['endpoints'][$endpoint]['redirect']['url']
@@ -857,10 +857,33 @@ function buildNewrelicEnvVariables(array $projectData): array
     }
 
     foreach ($projectData['docker']['newrelic'] as $key => $value) {
+        if ($key == 'distributed-tracing') {
+            $newrelicEnvVariables = array_merge($newrelicEnvVariables, buildNewrelicDistributedTracing($projectData));
+
+            continue;
+        }
+
         $newrelicEnvVariables['NEWRELIC_' . strtoupper($key)] = $value;
     }
+     return $newrelicEnvVariables;
+}
 
-    return $newrelicEnvVariables;
+/**
+ * @param array $projectData
+ *
+ * @return string[]
+ */
+function buildNewrelicDistributedTracing(array $projectData): array
+{
+    $distributedTracingData = $projectData['docker']['newrelic']['distributed-tracing'] ?? [];
+
+    return [
+        'NEWRELIC_TRANSACTION_TRACER_ENABLED' => (int) $distributedTracingData['enabled'] ?? 0,
+        'NEWRELIC_DISTRIBUTED_TRACING_ENABLED' => (int) $distributedTracingData['enabled'] ?? 0,
+        'NEWRELIC_SPAN_EVENTS_ENABLED' => (int) $distributedTracingData['enabled'] ?? 0,
+        'NEWRELIC_TRANSACTION_TRACER_THRESHOLD' => (int) $distributedTracingData['transaction-tracer-threshold'] ?? 0,
+        'NEWRELIC_DISTRIBUTED_TRACING_EXCLUDE_NEWRELIC_HEADER' => (int) $distributedTracingData['exclude-newrelic-header'] ?? 0,
+    ];
 }
 
 /**
