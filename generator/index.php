@@ -271,7 +271,7 @@ foreach ($projectData['groups'] ?? [] as $groupName => $groupData) {
             $schedulerEnabledStores = array_keys($projectData['regions'][$groupData['region']]['stores']) ?? [];
             if ($applicationData['application'] === 'worker') {
                 $projectData['_schedulers']['enabledStores'][$groupName] = $schedulerEnabledStores;
-                $data['applicationData']['cronicleApiKey'] = $projectData['_schedulers'][$groupName][$applicationData['worker-id']]['api_key'];
+                $applicationData['cronicleApiKey'] = $projectData['_schedulers'][$groupName][$applicationData['worker-id']]['api_key'];
             }
 
             $data = [
