@@ -197,8 +197,8 @@ foreach ($projectData['groups'] ?? [] as $groupName => $groupData) {
                     $projectData['groups'][$groupName]['applications'][$applicationName]['endpoints'][$endpoint]['redirect']
                         = $redirect
                         = [
-                            'url' => $redirect,
-                        ];
+                        'url' => $redirect,
+                    ];
                 }
 
                 $projectData['groups'][$groupName]['applications'][$applicationName]['endpoints'][$endpoint]['redirect']['url']
@@ -215,6 +215,12 @@ foreach ($primal as $callbacks) {
 }
 
 $endpointMap = $projectData['_endpointMap'] = mapBackendEndpointsWithFallbackZed($projectData['_endpointMap']);
+
+$projectData['_testing'] = [
+    'defaultPort' => $defaultPort,
+    'projectServices' => $projectData['services'],
+    'endpointMap' => $endpointMap,
+];
 
 $projectData['_applications'] = [];
 $frontend = [];
@@ -360,19 +366,25 @@ foreach ($projectData['groups'] ?? [] as $groupName => $groupData) {
                 );
             }
 
+            $services = [];
+            $isEndpointDataHasStore = array_key_exists('store', $endpointData);
+            if ($isEndpointDataHasStore) {
+                $services = array_replace_recursive(
+                    $projectData['regions'][$groupData['region']]['stores'][$endpointData['store']]['services'],
+                    $endpointData['services'] ?? []
+                );
+            }
+            if ($isEndpointDataHasStore && $endpointData['store'] === ($projectData['docker']['testing']['store'] ?? '')) {
+                $projectData['_testing']['storeName'] = $endpointData['store'];
+                $projectData['_testing']['regionServices'] = array_merge($projectData['_testing']['services'] ?? [], $services);
+                $projectData['_testing']['services'][$endpointData['store']][$applicationData['application']] = $services;
+            }
+
             if ($applicationData['application'] === ZED_APP
                 || $applicationData['application'] === BACKEND_GATEWAY_APP
                 || $applicationData['application'] === BACKOFFICE_APP
                 || $applicationData['application'] === MERCHANT_PORTAL
             ) {
-                $services = [];
-
-                if (array_key_exists('store', $endpointData)) {
-                    $services = array_replace_recursive(
-                        $projectData['regions'][$groupData['region']]['stores'][$endpointData['store']]['services'],
-                        $endpointData['services'] ?? []
-                    );
-                }
 
                 $envVarEncoder->setIsActive(true);
                 file_put_contents(
@@ -405,39 +417,6 @@ foreach ($projectData['groups'] ?? [] as $groupName => $groupData) {
                     ])
                 );
                 $envVarEncoder->setIsActive(false);
-            }
-
-            if ($applicationData['application'] === YVES_APP) {
-                $services = [];
-
-                $isEndpointDataHasStore = array_key_exists('store', $endpointData);
-                if ($isEndpointDataHasStore) {
-                    $services = array_replace_recursive(
-                        $projectData['regions'][$groupData['region']]['stores'][$endpointData['store']]['services'],
-                        $endpointData['services'] ?? []
-                    );
-                }
-
-                if ($isEndpointDataHasStore && $endpointData['store'] === ($projectData['docker']['testing']['store'] ?? '')) {
-                    $envVarEncoder->setIsActive(true);
-                    file_put_contents(
-                        $deploymentDir . DS . 'env' . DS . 'cli' . DS . 'testing.env',
-                        $twig->render('env/cli/testing.env.twig', [
-                            'applicationName' => $applicationName,
-                            'applicationData' => $applicationData,
-                            'project' => $projectData,
-                            'host' => strtok($endpoint, ':'),
-                            'port' => strtok($endpoint) ?: $defaultPort,
-                            'regionName' => $groupData['region'],
-                            'regionData' => $projectData['regions'][$groupData['region']],
-                            'brokerConnections' => getBrokerConnections($projectData),
-                            'storeName' => $endpointData['store'],
-                            'services' => $services,
-                            'endpointMap' => $endpointMap,
-                        ])
-                    );
-                    $envVarEncoder->setIsActive(false);
-                }
             }
         }
     }
@@ -549,6 +528,12 @@ unlink($deploymentDir . DS . 'images' . DS . 'common' . DS . 'application' . DS 
 file_put_contents(
     $deploymentDir . DS . 'docker-compose.yml',
     $twig->render('docker-compose.yml.twig', $projectData)
+);
+
+$envVarEncoder->setIsActive(true);
+file_put_contents(
+    $deploymentDir . DS . 'env' . DS . 'cli' . DS . 'testing.env',
+    $twig->render('env/cli/testing.env.twig', $projectData['_testing'])
 );
 
 verbose('Generating scripts... [DONE]');
@@ -935,10 +920,33 @@ function buildNewrelicEnvVariables(array $projectData): array
     }
 
     foreach ($projectData['docker']['newrelic'] as $key => $value) {
+        if ($key == 'distributed-tracing') {
+            $newrelicEnvVariables = array_merge($newrelicEnvVariables, buildNewrelicDistributedTracing($projectData));
+
+            continue;
+        }
+
         $newrelicEnvVariables['NEWRELIC_' . strtoupper($key)] = $value;
     }
+     return $newrelicEnvVariables;
+}
 
-    return $newrelicEnvVariables;
+/**
+ * @param array $projectData
+ *
+ * @return string[]
+ */
+function buildNewrelicDistributedTracing(array $projectData): array
+{
+    $distributedTracingData = $projectData['docker']['newrelic']['distributed-tracing'] ?? [];
+
+    return [
+        'NEWRELIC_TRANSACTION_TRACER_ENABLED' => (int) $distributedTracingData['enabled'] ?? 0,
+        'NEWRELIC_DISTRIBUTED_TRACING_ENABLED' => (int) $distributedTracingData['enabled'] ?? 0,
+        'NEWRELIC_SPAN_EVENTS_ENABLED' => (int) $distributedTracingData['enabled'] ?? 0,
+        'NEWRELIC_TRANSACTION_TRACER_THRESHOLD' => (int) $distributedTracingData['transaction-tracer-threshold'] ?? 0,
+        'NEWRELIC_DISTRIBUTED_TRACING_EXCLUDE_NEWRELIC_HEADER' => (int) $distributedTracingData['exclude-newrelic-header'] ?? 0,
+    ];
 }
 
 /**

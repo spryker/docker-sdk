@@ -38,6 +38,7 @@ before_install:
   - sudo apt-get install --only-upgrade docker-ce -y
   - sudo curl -L "https://github.com/docker/compose/releases/download/1.24.0/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
   - sudo chmod +x /usr/local/bin/docker-compose
+  - sudo systemctl start docker
 
 matrix:
   fast_finish: true
@@ -95,9 +96,9 @@ matrix:
           - docker-sdk/sdk testing codecept run -c codeception.ci.functional.yml
       before_script: skip
       after_script: skip
-    - name: Docker / B2B Demoshop / PHP-7.2 Alpine / PostgreSQL / Functional
+    - name: Docker / B2B Demoshop / PHP-7.3 Alpine / PostgreSQL / Functional
       env:
-          - SPRYKER_PLATFORM_IMAGE=spryker/php:7.2-alpine3.12
+          - SPRYKER_PLATFORM_IMAGE=spryker/php:7.3-alpine3.12
           - TRAVIS=1
           - APPLICATION_ENV=ci.pgsql
           - SPRYKER_TESTING_ENABLED=1
