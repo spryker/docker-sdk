@@ -72,10 +72,6 @@ For contribution guidelines, see [Code contribution guide](https://documentation
 |   |   | 6.8  |
 |   |   | 7.6  |
 |   |   | 7.10 |
-|   |   | 7.11 |
-|   |   | 7.12 |
-|   |   | 7.13 |
-|   |   | 7.14 |
 | scheduler  | jenkins  | 2.176  |
 | webdriver  | phantomjs  | latest* |
 |   | chromedriver  | latest |
@@ -85,8 +81,4 @@ For contribution guidelines, see [Code contribution guide](https://documentation
 |   |   | 6.8 |
 |   |   | 7.6 |
 |   |   | 7.10 |
-|   |   | 7.11 |
-|   |   | 7.12 |
-|   |   | 7.13 |
-|   |   | 7.14 |
 | blackfire  | blackfire  | latest |
