@@ -75,6 +75,14 @@ namespace: spryker-demo
 
 ***
 
+### pipeline:
+
+Defines the installation recipe for the Spryker applications to the specific configuration file from the `config/install/` directory. 
+
+This variable is optional. If not specified, the default value applies: `pipeline: 'docker'`. Installation recipe configuration file: `config/install/docker.yml`.
+
+***
+
 ### tag:
 
 Defines a tag to separate different boots for a single deployment.
