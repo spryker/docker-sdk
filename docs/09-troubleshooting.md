@@ -281,6 +281,6 @@ Try the following:
 It's not possible to establish the dtabase connection from the host machine.
 
 **then**
-1. Check that the deploy yml file is using and make sure port is exposed.
+1. Check that the deploy yml file is used and make sure the port is exposed.
 2. Check that port is not occupied by the local process by running `sudo lsof -nP -i4TCP:3306 | grep LISTEN` (with port declared in deploy.yml file).
 3. Check if the proper credentials and database name are used. All required information you can find in deploy yml.
