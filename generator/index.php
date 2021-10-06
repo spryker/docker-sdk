@@ -80,6 +80,7 @@ $defaultPort = $projectData['_defaultPort'] = getDefaultPort($projectData);
 $hosts = $projectData['_hosts'] = retrieveHostNames($projectData);
 $projectData['_phpExtensions'] = buildPhpExtensionList($projectData);
 $projectData['_phpIni'] = buildPhpIniAdditionalConfig($projectData);
+$projectData['_phpFpmWorker'] = buildPhpFpmWorkerAdditionalConfig($projectData);
 $projectData['_envs'] = array_merge(
     getAdditionalEnvVariables($projectData),
     buildNewrelicEnvVariables($projectData)
@@ -430,6 +431,11 @@ file_put_contents(
 file_put_contents(
     $deploymentDir . DS . 'context' . DS . 'php' . DS . 'debug' . DS . 'etc' . DS . 'php' . DS . 'debug.conf.d' . DS . '99-from-deploy-yaml-php.ini',
     $twig->render('php/conf.d/99-from-deploy-yaml-php.ini.twig', $projectData)
+);
+
+file_put_contents(
+    $deploymentDir . DS . 'context' . DS . 'php' . DS . 'php-fpm.d' . DS . 'worker.conf',
+    $twig->render('php/php-fpm.d/worker.conf.twig', $projectData)
 );
 
 $envVarEncoder->setIsActive(true);
@@ -884,6 +890,32 @@ function buildNewrelicDistributedTracing(array $projectData): array
         'NEWRELIC_TRANSACTION_TRACER_THRESHOLD' => (int) $distributedTracingData['transaction-tracer-threshold'] ?? 0,
         'NEWRELIC_DISTRIBUTED_TRACING_EXCLUDE_NEWRELIC_HEADER' => (int) $distributedTracingData['exclude-newrelic-header'] ?? 0,
     ];
+}
+
+/**
+ * @param array $projectData
+ *
+ * @return array
+ */
+function buildPhpFpmWorkerAdditionalConfig(array $projectData): array
+{
+    $additionalPhpFpmWorkerConfiguration = $projectData['image']['php']['fpm'] ?? [];
+
+    if (!$additionalPhpFpmWorkerConfiguration) {
+        $additionalPhpFpmWorkerConfiguration['global'] = [];
+        $additionalPhpFpmWorkerConfiguration['worker'] = [];
+        return $additionalPhpFpmWorkerConfiguration;
+    }
+
+   $formattedAdditionalPhpFpmWorkerConfiguration = [];
+
+    foreach ($additionalPhpFpmWorkerConfiguration as $group => $groupData) {
+        foreach ($groupData as $key => $value) {
+            $formattedAdditionalPhpFpmWorkerConfiguration[$group][$key] = $value;
+        }
+    }
+
+    return $formattedAdditionalPhpFpmWorkerConfiguration;
 }
 
 /**

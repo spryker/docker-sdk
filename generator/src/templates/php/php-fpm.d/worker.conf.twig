@@ -1,0 +1,79 @@
+{% for group, data in _phpFpmWorker %}
+[{{ group }}]
+{% if group == "global" %}
+; no global defaults defined
+{% endif %}
+{% if group == "worker" %}
+; worker defaults
+{% if "clear_env" not in data|keys %}
+clear_env = no
+{% endif %}
+{% if "catch_workers_output" not in data|keys %}
+catch_workers_output = yes
+{% endif %}
+{% if "decorate_workers_output" not in data|keys %}
+decorate_workers_output = no
+{% endif %}
+{% if "listen" not in data|keys %}
+listen = 9000
+{% endif %}
+{% if "listen.backlog" not in data|keys %}
+listen.backlog = 128
+{% endif %}
+{% if "user" not in data|keys %}
+user = spryker
+{% endif %}
+{% if "group" not in data|keys %}
+group = www-data
+{% endif %}
+{% if "pm" not in data|keys %}
+pm = ${PHP_FPM_PM}
+{% endif %}
+{% if "pm.max_children" not in data|keys %}
+pm.max_children = ${PHP_FPM_PM_MAX_CHILDREN}
+{% endif %}
+{% if "pm.start_servers" not in data|keys %}
+pm.start_servers = ${PHP_FPM_PM_START_SERVERS}
+{% endif %}
+{% if "pm.min_spare_servers" not in data|keys %}
+pm.min_spare_servers = ${PHP_FPM_PM_MIN_SPARE_SERVERS}
+{% endif %}
+{% if "pm.max_spare_servers" not in data|keys %}
+pm.max_spare_servers = ${PHP_FPM_PM_MAX_SPARE_SERVERS}
+{% endif %}
+{% if "pm.max_requests" not in data|keys %}
+pm.max_requests = ${PHP_FPM_PM_MAX_REQUESTS}
+{% endif %}
+{% if "pm.status_path" not in data|keys %}
+pm.status_path = /php-fpm-status-worker
+{% endif %}
+{% if "ping.path" not in data|keys %}
+ping.path = /fpm-ping.php
+{% endif %}
+{% if "ping.response" not in data|keys %}
+ping.response = OK
+{% endif %}
+{% if "request_terminate_timeout" not in data|keys %}
+request_terminate_timeout = 1m{% endif %}
+{% if "chdir" not in data|keys %}
+chdir = /
+{% endif %}
+{% if "php_admin_value[memory_limit]" not in data|keys %}
+php_admin_value[memory_limit] = 1024M
+{% endif %}
+{% if "php_admin_value[expose_php]" not in data|keys %}
+php_admin_value[expose_php] = off
+{% endif %}
+{% if "php_admin_value[error_log]" not in data|keys %}
+php_admin_value[error_log] = /dev/stderr
+{% endif %}
+{% endif %}
+
+{% if data %}
+; user defined settings
+{% for key, value in data %}
+{{ key }} = {{ value }}
+{% endfor %}
+{% endif %}
+
+{% endfor %}

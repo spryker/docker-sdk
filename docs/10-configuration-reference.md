@@ -74,3 +74,33 @@ image:
             memory_limit: {memroy_limit_value}
             ...
 ```
+
+## Use custom PHP FPM worker settings
+
+The PHP FPM worker conf has a bunch of default settings.
+If you want to change these or if you want to add additional settings you can do that like the following in `deploy.*.yml`:
+
+```yaml
+image:
+    ...
+    php:
+        fpm:
+            global:
+                YOUR_KEY: YOUR_VALUE
+                ...
+            worker:
+                YOUR_KEY: YOUR_VALUE
+                ...
+```
+
+The result will be
+
+```
+[global]:
+YOUR_KEY: YOUR_VALUE
+
+[worker]
+; here are all default settings
+YOUR_KEY: YOUR_VALUE
+```
+
