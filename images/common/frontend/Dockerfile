@@ -12,10 +12,8 @@ COPY --chown=root:root nginx/auth /etc/nginx/auth
 COPY --chown=root:root nginx/entrypoint.sh /
 RUN chmod +x /entrypoint.sh
 
-ARG SPRYKER_DNS_RESOLVER_FLAGS="valid=10s ipv6=off"
-ENV SPRYKER_DNS_RESOLVER_FLAGS=${SPRYKER_DNS_RESOLVER_FLAGS}
-ARG SPRYKER_DNS_RESOLVER_IP='127.0.0.11'
-ENV SPRYKER_DNS_RESOLVER_IP=${SPRYKER_DNS_RESOLVER_IP}
+ENV SPRYKER_DNS_RESOLVER_FLAGS="valid=10s ipv6=off"
+ENV SPRYKER_DNS_RESOLVER_IP="127.0.0.11"
 
 # Build info
 ARG SPRYKER_BUILD_HASH='current'

@@ -149,8 +149,6 @@ function Images::_buildFrontend() {
         --build-arg "SPRYKER_FRONTEND_IMAGE=${SPRYKER_FRONTEND_IMAGE}" \
         --build-arg "SPRYKER_BUILD_HASH=${SPRYKER_BUILD_HASH:-"current"}" \
         --build-arg "SPRYKER_BUILD_STAMP=${SPRYKER_BUILD_STAMP:-""}" \
-        --build-arg "SPRYKER_DNS_RESOLVER_FLAGS=${SPRYKER_DNS_RESOLVER_FLAGS:-"valid=10s ipv6=off"}" \
-        --build-arg "SPRYKER_DNS_RESOLVER_IP=${SPRYKER_DNS_RESOLVER_IP:-"127.0.0.11"}" \
         "${DEPLOYMENT_PATH}/context" 1>&2
 
     docker build \
