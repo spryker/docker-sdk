@@ -71,6 +71,7 @@ For contribution guidelines, see [Code contribution guide](https://documentation
 | search  | elastic  | 5.6*  |
 |   |   | 6.8  |
 |   |   | 7.6  |
+|   |   | 7.8  |
 | scheduler  | jenkins  | 2.176  |
 | webdriver  | phantomjs  | latest* |
 |   | chromedriver  | latest |
@@ -79,4 +80,5 @@ For contribution guidelines, see [Code contribution guide](https://documentation
 | kibana  | kibana  | 5.6* |
 |   |   | 6.8 |
 |   |   | 7.6 |
+|   |   | 7.8 |
 | blackfire  | blackfire  | latest |
