@@ -1,0 +1,9 @@
+imports:
+    - environment/dev/image.deploy.template.yml
+    - environment/dev/composer.deploy.template.yml
+    - environment/dev/assets.deploy.template.yml
+    - common/regions.deploy.template.yml
+    - common/groups.deploy.template.yml
+    - environment/dev/services.deploy.template.yml
+    - environment/dev/docker.deploy.template.yml
+
