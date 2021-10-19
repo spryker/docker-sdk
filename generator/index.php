@@ -1,8 +1,6 @@
 <?php
 
-use DeployFileGenerator\DeployFileBuilder;
 use DeployFileGenerator\DeployFileFactory;
-use DeployFileGenerator\YamlFileLoader;
 use Spatie\Url\Url;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\Yaml\Parser;
@@ -17,8 +15,7 @@ define('APPLICATION_SOURCE_DIR', __DIR__ . DS . 'src');
 include_once __DIR__ . DS . 'vendor' . DS . 'autoload.php';
 
 $deploymentDir = '/data/deployment';
-$mainProjectYaml = $deploymentDir . '/project.yml';
-$projectYaml = buildProjectYaml($mainProjectYaml);
+$projectYaml = buildProjectYaml($deploymentDir . '/project.yml');
 $defaultDeploymentDir = getenv('SPRYKER_DOCKER_SDK_DEPLOYMENT_DIR') ?: './';
 $platform = getenv('SPRYKER_DOCKER_SDK_PLATFORM') ?: 'linux'; // Possible values: linux windows macos
 
@@ -1278,9 +1275,7 @@ function generateToken($tokenLength = 80): string
 function buildProjectYaml(string $mainProjectYaml): string
 {
     $deployFileFactory = new DeployFileFactory();
-    /*todo: inline should be dynamic*/
-    $yaml = Yaml::dump($deployFileFactory->createDeployFileBuilder()->buildDeployFile($mainProjectYaml), 50);
-    file_put_contents($mainProjectYaml, $yaml);
+    $deployFileProcessor = $deployFileFactory->createDeployFileProcessor();
 
-    return $mainProjectYaml;
+    return $deployFileProcessor->buildDeployFile($mainProjectYaml, $mainProjectYaml);
 }

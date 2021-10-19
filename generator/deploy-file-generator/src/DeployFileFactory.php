@@ -2,34 +2,92 @@
 
 namespace DeployFileGenerator;
 
-use DeployFileGenerator\Yaml\YamlFileLoader;
-use Symfony\Component\Config\FileLocator;
-use Symfony\Component\Config\FileLocatorInterface;
-use Symfony\Component\Config\Loader\LoaderInterface;
+use DeployFileGenerator\Builder\DeployFileBuilderInterface;
+use DeployFileGenerator\Builder\YamlDeployFileBuilder;
+use DeployFileGenerator\Loader\DeployFileLoaderInterface;
+use DeployFileGenerator\Loader\YamlDeployFileLoader;
+use DeployFileGenerator\ParameterResolver\ParametersResolver;
+use DeployFileGenerator\ParameterResolver\ParametersResolverInterface;
+use DeployFileGenerator\ParameterResolver\Resolvers\PercentAnnotationParameterResolver;
+use DeployFileGenerator\Processor\DeployFileProcessor;
+use DeployFileGenerator\Processor\DeployFileProcessorInterface;
+use Symfony\Component\Yaml\Dumper;
+use Symfony\Component\Yaml\Parser;
 
 class DeployFileFactory
 {
     /**
-     * @return LoaderInterface
+     * @return DeployFileLoaderInterface
      */
-    public function createYamlFileLoader(): LoaderInterface
+    public function createYamlFileLoader(): DeployFileLoaderInterface
     {
-        return new YamlFileLoader($this->createSymfonyFileLocator());
+        return new YamlDeployFileLoader(
+            $this->createSymfonyYamlParser(),
+            $this->createParametersResolver(),
+            $this->createDeployFileConfig()
+        );
     }
 
     /**
-     * @return FileLocatorInterface
+     * @return DeployFileProcessorInterface
      */
-    public function createSymfonyFileLocator(): FileLocatorInterface
+    public function createDeployFileProcessor(): DeployFileProcessorInterface
     {
-        return new FileLocator();
+        return new DeployFileProcessor(
+            $this->createYamlFileLoader(),
+            $this->createYamlBuilder()
+        );
     }
 
     /**
-     * @return DeployFileBuilder
+     * @return DeployFileConfig
      */
-    public function createDeployFileBuilder(): DeployFileBuilder
+    public function createDeployFileConfig(): DeployFileConfig
     {
-        return new DeployFileBuilder($this->createYamlFileLoader());
+        return new DeployFileConfig();
+    }
+
+    /**
+     * @return ParametersResolverInterface
+     */
+    public function createParametersResolver(): ParametersResolverInterface
+    {
+        return new ParametersResolver(
+            $this->getParameterResolverCollection()
+        );
+    }
+
+    /**
+     * @return PercentAnnotationParameterResolver[]
+     */
+    public function getParameterResolverCollection(): array
+    {
+        return [
+            new PercentAnnotationParameterResolver(),
+        ];
+    }
+
+    public function createYamlBuilder(): DeployFileBuilderInterface
+    {
+        return new YamlDeployFileBuilder(
+            $this->createSymfonyYamlDumper(),
+            $this->createDeployFileConfig()->getYamlInline()
+        );
+    }
+
+    /**
+     * @return Parser
+     */
+    public function createSymfonyYamlParser(): Parser
+    {
+        return new Parser();
+    }
+
+    /**
+     * @return Dumper
+     */
+    public function createSymfonyYamlDumper(): Dumper
+    {
+        return new Dumper();
     }
 }
