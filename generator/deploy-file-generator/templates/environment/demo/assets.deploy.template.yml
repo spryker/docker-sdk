@@ -1,6 +1,6 @@
 assets:
-  mode: production
-  compression:
-    gzip:
-      static: true
-      level: 5
+    mode: production
+    compression:
+        gzip:
+            static: true
+            level: 5
