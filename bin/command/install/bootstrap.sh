@@ -96,7 +96,7 @@ function Command::bootstrap() {
         cp ".known_hosts" "${tmpDeploymentDir}/"
     fi
     if [ -f "${projectDeployTemplatesDirectory}" ]; then
-        cp -rf "${projectDeployTemplatesDirectory}" "${tmpDeploymentDir}/deploy-templates"
+        cp -rf "${projectDeployTemplatesDirectory}" "${tmpDeploymentDir}/project-deploy-templates"
     fi
     Console::end "[DONE]"
 

@@ -9,7 +9,7 @@
   },
   "autoload": {
     "psr-4": {
-      "DeployFileGenerator\\": "deploy-file-generator/src/"
+      "DeployFileGenerator\\": "src/"
     }
   },
   "minimum-stability": "dev",
@@ -18,5 +18,10 @@
     "platform": {
       "php": "7.3"
     }
+  },
+  "require-dev": {
+    "squizlabs/php_codesniffer": "^3.6",
+    "phpunit/phpunit": "^9.5",
+    "spryker/code-sniffer": "^0.16.5"
   }
 }

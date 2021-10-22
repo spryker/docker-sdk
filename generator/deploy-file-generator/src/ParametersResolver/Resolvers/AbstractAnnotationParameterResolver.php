@@ -1,6 +1,11 @@
 <?php
 
-namespace DeployFileGenerator\ParameterResolver\Resolvers;
+/**
+ * This file is part of the Spryker Suite.
+ * For full license information, please view the LICENSE file that was distributed with this source code.
+ */
+
+namespace DeployFileGenerator\ParametersResolver\Resolvers;
 
 abstract class AbstractAnnotationParameterResolver implements ParameterResolverInterface, AnnotationParameterResolverInterface
 {
@@ -24,7 +29,7 @@ abstract class AbstractAnnotationParameterResolver implements ParameterResolverI
 
         $param = $match[1];
 
-        /*todo: skip error if empty match*/
+        /* skip error if empty match*/
         if (!isset($params[$param])) {
             return $value;
         }

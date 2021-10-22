@@ -1,0 +1,40 @@
+services:
+    database:
+        engine: mysql
+        version: mariadb-10.4
+        root:
+            username: 'root'
+            password: 'secret'
+        endpoints:
+            localhost:3306:
+                protocol: tcp
+    broker:
+        engine: rabbitmq
+        api:
+            username: 'spryker'
+            password: 'secret'
+        endpoints:
+            queue.night-test.cloud.spryker.toys:
+            localhost:5672:
+                protocol: tcp
+    session:
+        engine: redis
+    key_value_store:
+        engine: redis
+        endpoints:
+            localhost:16379:
+                protocol: tcp
+    search:
+        engine: elastic
+        version: 7.6
+        endpoints:
+            localhost:9200:
+                protocol: tcp
+    scheduler:
+        engine: jenkins
+        endpoints:
+            scheduler.night-test.cloud.spryker.toys:
+    mail_catcher:
+        engine: mailhog
+        endpoints:
+            mail.night-test.cloud.spryker.toys:

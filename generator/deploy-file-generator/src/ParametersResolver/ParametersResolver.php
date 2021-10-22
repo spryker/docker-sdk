@@ -1,19 +1,21 @@
 <?php
 
-namespace DeployFileGenerator\ParameterResolver;
+/**
+ * This file is part of the Spryker Suite.
+ * For full license information, please view the LICENSE file that was distributed with this source code.
+ */
 
-
-use DeployFileGenerator\ParameterResolver\Resolvers\ParameterResolverInterface;
+namespace DeployFileGenerator\ParametersResolver;
 
 class ParametersResolver implements ParametersResolverInterface
 {
     /**
-     * @var ParameterResolverInterface[]
+     * @var \DeployFileGenerator\ParametersResolver\Resolvers\ParameterResolverInterface[]
      */
-    private $resolvers;
+    protected $resolvers;
 
     /**
-     * @param ParameterResolverInterface[] $resolvers
+     * @param \DeployFileGenerator\ParametersResolver\Resolvers\ParameterResolverInterface[] $resolvers
      */
     public function __construct(array $resolvers)
     {
@@ -23,6 +25,7 @@ class ParametersResolver implements ParametersResolverInterface
     /**
      * @param array $content
      * @param array $params
+     *
      * @return array
      */
     public function resolveParams(array $content, array $params = []): array
@@ -47,7 +50,7 @@ class ParametersResolver implements ParametersResolverInterface
      *
      * @return mixed
      */
-    private function resolve($value, array $params = [])
+    protected function resolve($value, array $params = [])
     {
         if (is_array($value)) {
             return $this->resolveParams($value, $params);

@@ -1,44 +1,38 @@
 <?php
 
+
+/**
+ * This file is part of the Spryker Suite.
+ * For full license information, please view the LICENSE file that was distributed with this source code.
+ */
+
 namespace DeployFileGenerator\Processor;
 
-
-use DeployFileGenerator\Builder\DeployFileBuilderInterface;
-use DeployFileGenerator\Loader\DeployFileLoaderInterface;
+use DeployFileGenerator\Strategy\DeployFileBuildStrategyInterface;
+use DeployFileGenerator\Transfer\DeployFileTransfer;
 
 class DeployFileProcessor implements DeployFileProcessorInterface
 {
     /**
-     * @var DeployFileLoaderInterface
+     * @var \DeployFileGenerator\Strategy\DeployFileBuildStrategyInterface
      */
-    private $loader;
-    /**
-     * @var DeployFileBuilderInterface
-     */
-    private $builder;
+    protected $strategy;
 
     /**
-     * @param DeployFileLoaderInterface $loader
-     * @param DeployFileBuilderInterface $builder
+     * @param \DeployFileGenerator\Strategy\DeployFileBuildStrategyInterface $strategy
      */
-    public function __construct(DeployFileLoaderInterface $loader, DeployFileBuilderInterface $builder)
+    public function __construct(DeployFileBuildStrategyInterface $strategy)
     {
-        $this->loader = $loader;
-        $this->builder = $builder;
+        $this->strategy = $strategy;
     }
 
     /**
-     * @param string $currentDeployFilePath
-     * @param string $outputDeployFilePath
+     * @param \DeployFileGenerator\Transfer\DeployFileTransfer $deployFileTransfer
      *
-     * @return string
+     * @return \DeployFileGenerator\Transfer\DeployFileTransfer
      */
-    public function buildDeployFile(string $currentDeployFilePath, string $outputDeployFilePath): string
+    public function process(DeployFileTransfer $deployFileTransfer): DeployFileTransfer
     {
-        return $this->builder
-            ->build(
-                $this->loader->load($currentDeployFilePath),
-                $outputDeployFilePath
-            );
+        return $this->strategy->execute($deployFileTransfer);
     }
 }

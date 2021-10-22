@@ -1,46 +1,113 @@
 <?php
 
+
+/**
+ * This file is part of the Spryker Suite.
+ * For full license information, please view the LICENSE file that was distributed with this source code.
+ */
+
 namespace DeployFileGenerator;
 
+use DeployFileGenerator\Builder\DeployFileBuilder;
 use DeployFileGenerator\Builder\DeployFileBuilderInterface;
-use DeployFileGenerator\Builder\YamlDeployFileBuilder;
-use DeployFileGenerator\Loader\DeployFileLoaderInterface;
-use DeployFileGenerator\Loader\YamlDeployFileLoader;
-use DeployFileGenerator\ParameterResolver\ParametersResolver;
-use DeployFileGenerator\ParameterResolver\ParametersResolverInterface;
-use DeployFileGenerator\ParameterResolver\Resolvers\PercentAnnotationParameterResolver;
+use DeployFileGenerator\Executor\ExecutorFactory;
+use DeployFileGenerator\FileFinder\FileFinder;
+use DeployFileGenerator\FileFinder\FileFinderInterface;
+use DeployFileGenerator\Importer\DeployFileImporterInterface;
+use DeployFileGenerator\Importer\YamlDataImporter;
+use DeployFileGenerator\MergeResolver\MergeResolverInterface;
+use DeployFileGenerator\MergeResolver\Resolvers\ServiceMergeResolver;
+use DeployFileGenerator\MergeResolver\YamlDeployFileMergeResolver;
+use DeployFileGenerator\ParametersResolver\ParametersResolver;
+use DeployFileGenerator\ParametersResolver\ParametersResolverInterface;
+use DeployFileGenerator\ParametersResolver\Resolvers\PercentAnnotationParameterResolver;
 use DeployFileGenerator\Processor\DeployFileProcessor;
 use DeployFileGenerator\Processor\DeployFileProcessorInterface;
+use DeployFileGenerator\Strategy\DeployFileBuildStrategyInterface;
+use DeployFileGenerator\Strategy\YamlDeployFileBuildStrategy;
 use Symfony\Component\Yaml\Dumper;
 use Symfony\Component\Yaml\Parser;
 
 class DeployFileFactory
 {
     /**
-     * @return DeployFileLoaderInterface
+     * @return \DeployFileGenerator\Builder\DeployFileBuilderInterface
      */
-    public function createYamlFileLoader(): DeployFileLoaderInterface
+    public function createDeployFileBuilder(): DeployFileBuilderInterface
     {
-        return new YamlDeployFileLoader(
-            $this->createSymfonyYamlParser(),
-            $this->createParametersResolver(),
-            $this->createDeployFileConfig()
+        return new DeployFileBuilder(
+            $this->createYamlDeployFileProcessor()
         );
     }
 
     /**
-     * @return DeployFileProcessorInterface
+     * @return \DeployFileGenerator\Processor\DeployFileProcessorInterface
      */
-    public function createDeployFileProcessor(): DeployFileProcessorInterface
+    public function createYamlDeployFileProcessor(): DeployFileProcessorInterface
     {
         return new DeployFileProcessor(
-            $this->createYamlFileLoader(),
-            $this->createYamlBuilder()
+            $this->createYamlDeployFileBuildStrategy()
         );
     }
 
     /**
-     * @return DeployFileConfig
+     * @return \DeployFileGenerator\Strategy\DeployFileBuildStrategyInterface
+     */
+    public function createYamlDeployFileBuildStrategy(): DeployFileBuildStrategyInterface
+    {
+        return new YamlDeployFileBuildStrategy(
+            $this->createExecutorFactory()->createYamlDeployFileBuildExecutorCollection()
+        );
+    }
+
+    /**
+     * @return \DeployFileGenerator\Importer\DeployFileImporterInterface
+     */
+    public function createYamlProjectDataImporter(): DeployFileImporterInterface
+    {
+        return new YamlDataImporter(
+            $this->createDeployFileConfig()->getProjectDirectoryPath(),
+            $this->createSymfonyYamlParser(),
+            $this->createParametersResolver(),
+            $this->createYamlDeployFileMergeResolver()
+        );
+    }
+
+    /**
+     * @return \DeployFileGenerator\Importer\DeployFileImporterInterface
+     */
+    public function createYamlBaseDataImporter(): DeployFileImporterInterface
+    {
+        return new YamlDataImporter(
+            $this->createDeployFileConfig()->getBaseDirectoryPath(),
+            $this->createSymfonyYamlParser(),
+            $this->createParametersResolver(),
+            $this->createYamlDeployFileMergeResolver()
+        );
+    }
+
+    /**
+     * @return \DeployFileGenerator\MergeResolver\MergeResolverInterface
+     */
+    public function createYamlDeployFileMergeResolver(): MergeResolverInterface
+    {
+        return new YamlDeployFileMergeResolver(
+            $this->getMergeResolverCollection()
+        );
+    }
+
+    /**
+     * @return array
+     */
+    public function getMergeResolverCollection(): array
+    {
+        return [
+            new ServiceMergeResolver(),
+        ];
+    }
+
+    /**
+     * @return \DeployFileGenerator\DeployFileConfig
      */
     public function createDeployFileConfig(): DeployFileConfig
     {
@@ -48,7 +115,7 @@ class DeployFileFactory
     }
 
     /**
-     * @return ParametersResolverInterface
+     * @return \DeployFileGenerator\ParametersResolver\ParametersResolverInterface
      */
     public function createParametersResolver(): ParametersResolverInterface
     {
@@ -58,7 +125,7 @@ class DeployFileFactory
     }
 
     /**
-     * @return PercentAnnotationParameterResolver[]
+     * @return \DeployFileGenerator\ParametersResolver\Resolvers\PercentAnnotationParameterResolver[]
      */
     public function getParameterResolverCollection(): array
     {
@@ -67,16 +134,16 @@ class DeployFileFactory
         ];
     }
 
-    public function createYamlBuilder(): DeployFileBuilderInterface
+    /**
+     * @return \DeployFileGenerator\FileFinder\FileFinderInterface
+     */
+    public function createFileFinder(): FileFinderInterface
     {
-        return new YamlDeployFileBuilder(
-            $this->createSymfonyYamlDumper(),
-            $this->createDeployFileConfig()->getYamlInline()
-        );
+        return new FileFinder($this->createDeployFileConfig());
     }
 
     /**
-     * @return Parser
+     * @return \Symfony\Component\Yaml\Parser
      */
     public function createSymfonyYamlParser(): Parser
     {
@@ -84,10 +151,18 @@ class DeployFileFactory
     }
 
     /**
-     * @return Dumper
+     * @return \Symfony\Component\Yaml\Dumper
      */
     public function createSymfonyYamlDumper(): Dumper
     {
         return new Dumper();
+    }
+
+    /**
+     * @return \DeployFileGenerator\Executor\ExecutorFactory
+     */
+    public function createExecutorFactory(): ExecutorFactory
+    {
+        return new ExecutorFactory($this);
     }
 }

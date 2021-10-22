@@ -1,0 +1,43 @@
+regions:
+    DE:
+        services:
+            mail:
+                sender:
+                    name: Spryker No-Reply
+                    email: no-reply@night-test.cloud.spryker.toys
+            database:
+                database: spryker_staging
+                username: spryker
+                password: secret
+
+        stores:
+            DE:
+                services:
+                    broker:
+                        namespace: de_queue
+                    key_value_store:
+                        namespace: 1
+                    search:
+                        namespace: de_search
+                    session:
+                        namespace: 2
+            AT:
+                services:
+                    broker:
+                        namespace: at_queue
+                    key_value_store:
+                        namespace: 1
+                    search:
+                        namespace: at_search
+                    session:
+                        namespace: 2
+            US:
+                services:
+                    broker:
+                        namespace: us_queue
+                    key_value_store:
+                        namespace: 1
+                    search:
+                        namespace: us_search
+                    session:
+                        namespace: 2

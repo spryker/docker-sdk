@@ -1275,7 +1275,7 @@ function generateToken($tokenLength = 80): string
 function buildProjectYaml(string $mainProjectYaml): string
 {
     $deployFileFactory = new DeployFileFactory();
-    $deployFileProcessor = $deployFileFactory->createDeployFileProcessor();
+    $deployFileProcessor = $deployFileFactory->createDeployFileBuilder();
 
-    return $deployFileProcessor->buildDeployFile($mainProjectYaml, $mainProjectYaml);
+    return $deployFileProcessor->build($mainProjectYaml, $mainProjectYaml);
 }
