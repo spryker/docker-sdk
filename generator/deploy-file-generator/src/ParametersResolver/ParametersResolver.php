@@ -57,7 +57,9 @@ class ParametersResolver implements ParametersResolverInterface
         }
 
         foreach ($this->resolvers as $resolver) {
-            return $resolver->resolveValue($value, $params);
+            $value = $resolver->resolveValue($value, $params);
         }
+
+        return $value;
     }
 }
