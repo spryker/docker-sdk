@@ -1,13 +1,14 @@
 docker:
-    blackfire:
-        enabled: true
     ssl:
-        enabled: true
+        enabled: false
+
     debug:
         enabled: false
         xdebug:
             enabled: false
+
     testing:
         store: DE
+
     mount:
         baked:

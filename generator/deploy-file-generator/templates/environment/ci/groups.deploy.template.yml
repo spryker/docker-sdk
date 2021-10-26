@@ -1,84 +1,58 @@
-x-real-ip: &real-ip
-    real-ip:
-        from:
-            - 10.0.0.0/8 # AWS VPC network
-            - 103.21.244.0/22 # Cloudflare
-            - 103.22.200.0/22 # Cloudflare
-            - 103.31.4.0/22 # Cloudflare
-            - 104.16.0.0/12 # Cloudflare
-            - 108.162.192.0/18 # Cloudflare
-            - 131.0.72.0/22 # Cloudflare
-            - 141.101.64.0/18 # Cloudflare
-            - 162.158.0.0/15 # Cloudflare
-            - 172.64.0.0/13 # Cloudflare
-            - 173.245.48.0/20 # Cloudflare
-            - 188.114.96.0/20 # Cloudflare
-            - 190.93.240.0/20 # Cloudflare
-            - 197.234.240.0/22 # Cloudflare
-            - 198.41.128.0/17 # Cloudflare
-            - 2400:cb00::/32 # Cloudflare
-            - 2606:4700::/32 # Cloudflare
-            - 2803:f800::/32 # Cloudflare
-            - 2405:b500::/32 # Cloudflare
-            - 2405:8100::/32 # Cloudflare
-            - 2c0f:f248::/32 # Cloudflare
-            - 2a06:98c0::/29 # Cloudflare
-
-x-frontend-auth: &frontend-auth
-    <<: *real-ip
-    auth:
-        engine: basic
-        users:
-            - username: cloud
-              password: cloud
-        exclude:
-            - '${ALLOWED_IP}' # AWS gateway
-            - 185.60.20.0/24 # PayOne
-            - 77.122.97.254/32 # Olena Krivtsova
-
 groups:
-    DE-1:
-        region: DE
+    EU:
+        region: EU
         applications:
-            Yves:
+            yves_eu:
                 application: yves
                 endpoints:
-                    demo-date-time-configurator.night-test.cloud.spryker.toys:
+                    date-time-configurator-example.spryker.local:
                         entry-point: Configurator
-                    www.de.night-test.cloud.spryker.toys:
+                    yves.de.spryker.local:
                         store: DE
-                        <<: *frontend-auth
-                    de.night-test.cloud.spryker.toys:
-                        store: DE
-                        <<: *frontend-auth
-                    www.at.night-test.cloud.spryker.toys:
+                        services:
+                            session:
+                                namespace: 1
+                    yves.at.spryker.local:
                         store: AT
-                        <<: *frontend-auth
-                    at.night-test.cloud.spryker.toys:
-                        store: AT
-                        <<: *frontend-auth
-                    www.us.night-test.cloud.spryker.toys:
-                        store: US
-                        <<: *frontend-auth
-                    us.night-test.cloud.spryker.toys:
-                        store: US
-                        <<: *frontend-auth
-            Zed:
-                application: zed
-                endpoints:
-                    backoffice.de.night-test.cloud.spryker.toys:
-                        store: DE
-                        primal: true
-                    backoffice.at.night-test.cloud.spryker.toys:
-                        store: AT
-                    backoffice.us.night-test.cloud.spryker.toys:
-                        store: US
-            Glue:
+                        services:
+                            session:
+                                namespace: 2
+            glue_eu:
                 application: glue
                 endpoints:
-                    glue.de.night-test.cloud.spryker.toys:
+                    glue.de.spryker.local:
                         store: DE
-                    glue.at.night-test.cloud.spryker.toys:
+                    glue.at.spryker.local:
                         store: AT
-                    glue.us.night-test.cloud.spryker.toys:
-                        store: US
+            backoffice_eu:
+                application: backoffice
+                endpoints:
+                    backoffice.de.spryker.local:
+                        store: DE
+                        primal: true
+                        services:
+                            session:
+                                namespace: 3
+                    backoffice.at.spryker.local:
+                        store: AT
+                        services:
+                            session:
+                                namespace: 4
+            backend_gateway_eu:
+                application: backend-gateway
+                endpoints:
+                    backend-gateway.de.spryker.local:
+                        store: DE
+                        primal: true
+                    backend-gateway.at.spryker.local:
+                        store: AT
+                        primal: true
+            backend_api_eu:
+                application: zed
+                endpoints:
+                    backend-api.de.spryker.local:
+                        store: DE
+                        entry-point: BackendApi
+                    backend-api.at.spryker.local:
+                        store: AT
+                        entry-point: BackendApi

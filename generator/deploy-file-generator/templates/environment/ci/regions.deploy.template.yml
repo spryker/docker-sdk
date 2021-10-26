@@ -1,12 +1,12 @@
 regions:
-    DE:
+    EU:
         services:
             mail:
                 sender:
                     name: Spryker No-Reply
-                    email: no-reply@night-test.cloud.spryker.toys
+                    email: no-reply@spryker.local
             database:
-                database: spryker_staging
+                database: eu-docker
                 username: spryker
                 password: secret
 
@@ -14,30 +14,20 @@ regions:
             DE:
                 services:
                     broker:
-                        namespace: de_queue
+                        namespace: de-docker
                     key_value_store:
                         namespace: 1
                     search:
                         namespace: de_search
                     session:
-                        namespace: 2
+                        namespace: 1
             AT:
                 services:
                     broker:
-                        namespace: at_queue
+                        namespace: at-docker
                     key_value_store:
-                        namespace: 1
+                        namespace: 2
                     search:
                         namespace: at_search
                     session:
-                        namespace: 2
-            US:
-                services:
-                    broker:
-                        namespace: us_queue
-                    key_value_store:
                         namespace: 1
-                    search:
-                        namespace: us_search
-                    session:
-                        namespace: 2
