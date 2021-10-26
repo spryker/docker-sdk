@@ -9,7 +9,7 @@
   },
   "autoload": {
     "psr-4": {
-      "DeployFileGenerator\\": "src/"
+      "DeployFileGenerator\\": "deploy-file-generator/src/"
     }
   },
   "minimum-stability": "dev",
