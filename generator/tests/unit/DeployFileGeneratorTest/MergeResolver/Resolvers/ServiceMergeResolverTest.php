@@ -5,7 +5,7 @@
  * For full license information, please view the LICENSE file that was distributed with this source code.
  */
 
-namespace DeployFileGeneratorTest\MergeResolver\Resolvers;
+namespace Unit\DeployFileGeneratorTest\MergeResolver\Resolvers;
 
 use Codeception\Test\Unit;
 use DeployFileGenerator\MergeResolver\Resolvers\ServiceMergeResolver;

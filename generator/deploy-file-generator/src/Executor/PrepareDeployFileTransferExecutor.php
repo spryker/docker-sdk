@@ -44,7 +44,6 @@ class PrepareDeployFileTransferExecutor implements ExecutorInterface
         $rawData = $this->yamlParser->parseFile($deployFileTransfer->getInputFilePath());
         $imports = $this->getImportsByKeys($rawData);
         $projectImport = $this->getProjectImport($imports);
-
         $baseImport = $this->getBaseImport($imports);
         $resultData = $this->cleanUpData($rawData);
 

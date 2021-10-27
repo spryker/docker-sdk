@@ -5,10 +5,11 @@
  * For full license information, please view the LICENSE file that was distributed with this source code.
  */
 
-namespace DeployFileGeneratorTest\Strategy;
+namespace Unit\DeployFileGeneratorTest\Strategy;
 
 use Codeception\Test\Unit;
 use DeployFileGenerator\Executor\ExecutorInterface;
+use DeployFileGenerator\Strategy\DeployFileBuildStrategyInterface;
 use DeployFileGenerator\Strategy\YamlDeployFileBuildStrategy;
 use DeployFileGenerator\Transfer\DeployFileTransfer;
 
@@ -41,17 +42,13 @@ class YamlDeployFileBuildStrategyTest extends Unit
      */
     public function testExecute(): void
     {
-        $strategy = new YamlDeployFileBuildStrategy(
-            $this->getExecutorsCollection()
-        );
-
         $deployFileTransfer = new DeployFileTransfer();
         $deployFileTransfer = $deployFileTransfer->setInputFilePath(static::INPUT_YAML_PATH);
 
         $this->tester->assertEquals(static::INPUT_YAML_PATH, $deployFileTransfer->getInputFilePath());
         $this->tester->assertIsEmpty($deployFileTransfer->getRawData());
 
-        $deployFileTransfer = $strategy->execute($deployFileTransfer);
+        $deployFileTransfer = $this->createYamlDeployFileBuildStrategy()->execute($deployFileTransfer);
 
         $this->tester->assertEquals(static::NEW_INPUT_YAML_PATH, $deployFileTransfer->getInputFilePath());
         $this->tester->assertNotEquals(static::INPUT_YAML_PATH, $deployFileTransfer->getInputFilePath());
@@ -81,5 +78,15 @@ class YamlDeployFileBuildStrategyTest extends Unit
                 },
             ]),
         ];
+    }
+
+    /**
+     * @return \DeployFileGenerator\Strategy\DeployFileBuildStrategyInterface
+     */
+    protected function createYamlDeployFileBuildStrategy(): DeployFileBuildStrategyInterface
+    {
+        return new YamlDeployFileBuildStrategy(
+            $this->getExecutorsCollection()
+        );
     }
 }

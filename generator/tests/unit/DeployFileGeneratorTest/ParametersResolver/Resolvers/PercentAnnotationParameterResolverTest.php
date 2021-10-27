@@ -5,7 +5,7 @@
  * For full license information, please view the LICENSE file that was distributed with this source code.
  */
 
-namespace DeployFileGeneratorTest\ParametersResolver\Resolvers;
+namespace Unit\DeployFileGeneratorTest\ParametersResolver\Resolvers;
 
 use Codeception\Test\Unit;
 use DeployFileGenerator\ParametersResolver\Resolvers\PercentAnnotationParameterResolver;

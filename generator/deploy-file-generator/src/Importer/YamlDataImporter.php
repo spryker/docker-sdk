@@ -10,7 +10,6 @@ namespace DeployFileGenerator\Importer;
 
 use DeployFileGenerator\DeployFileConstants;
 use DeployFileGenerator\MergeResolver\MergeResolverInterface;
-use DeployFileGenerator\ParametersResolver\ParametersResolver;
 use DeployFileGenerator\ParametersResolver\ParametersResolverInterface;
 use Symfony\Component\Yaml\Parser;
 
@@ -77,10 +76,6 @@ class YamlDataImporter implements DeployFileImporterInterface
     public function importFromFile(string $filePath, array $parameters = []): array
     {
         $data = $this->parser->parseFile($filePath);
-
-        if ($data == null) {
-            var_dump($filePath, $parameters);
-        }
 
         return $this->importFromData($data, $parameters);
     }

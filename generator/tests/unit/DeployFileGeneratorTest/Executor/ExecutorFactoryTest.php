@@ -5,7 +5,7 @@
  * For full license information, please view the LICENSE file that was distributed with this source code.
  */
 
-namespace DeployFileGeneratorTest\Executor;
+namespace Unit\DeployFileGeneratorTest\Executor;
 
 use Codeception\Test\Unit;
 use DeployFileGenerator\DeployFileFactory;
@@ -14,6 +14,16 @@ use ReflectionMethod;
 
 class ExecutorFactoryTest extends Unit
 {
+    /**
+     * @var string
+     */
+    protected const FUNCTION_KEY = 'function';
+
+    /**
+     * @var string
+     */
+    protected const TEST_PREFIX = 'test';
+
     /**
      * @var \UnitTester
      */
@@ -64,9 +74,9 @@ class ExecutorFactoryTest extends Unit
      */
     protected function getFactoryMethod(): string
     {
-        $testMethodName = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 4)[2]['function'];
+        $testMethodName = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 4)[2][static::FUNCTION_KEY];
 
-        return lcfirst(ltrim($testMethodName, 'test'));
+        return lcfirst(ltrim($testMethodName, static::TEST_PREFIX));
     }
 
     /**

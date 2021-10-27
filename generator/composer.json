@@ -14,7 +14,7 @@
     },
     "autoload-dev": {
         "psr-4": {
-            "DeployFileGeneratorTest\\": "tests/unit/DeployFileGeneratorTest"
+            "Unit\\": "tests/unit"
         }
     },
     "minimum-stability": "dev",

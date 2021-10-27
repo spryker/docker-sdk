@@ -5,7 +5,7 @@
  * For full license information, please view the LICENSE file that was distributed with this source code.
  */
 
-namespace DeployFileGeneratorTest\Executor;
+namespace Unit\DeployFileGeneratorTest\Executor;
 
 use Codeception\Test\Unit;
 use DeployFileGenerator\Executor\ExportDeployFileTransferToYamlExecutor;
@@ -38,11 +38,14 @@ class ExportDeployFileTransferToYamlExecutorTest extends Unit
      */
     public function testExecute(): void
     {
-        $executor = new ExportDeployFileTransferToYamlExecutor(new Dumper());
-        $deployFileTransfer = $executor->execute($this->createDeployFileTransfer());
+        $deployFileTransfer = $this->createExportDeployFileTransferToYamlExecutor()
+            ->execute($this->createDeployFileTransfer());
 
         $this->tester->assertFileExists(static::EXPORT_FILE_PATH);
-        $this->tester->assertEquals($this->getResultData(), (new Parser())->parseFile($deployFileTransfer->getOutputFilePath()));
+        $this->tester->assertEquals(
+            $this->getResultData(),
+            $this->createParser()->parseFile($deployFileTransfer->getOutputFilePath())
+        );
     }
 
     /**
@@ -64,5 +67,21 @@ class ExportDeployFileTransferToYamlExecutorTest extends Unit
         return [
             'some-data' => 'some-value',
         ];
+    }
+
+    /**
+     * @return \DeployFileGenerator\Executor\ExportDeployFileTransferToYamlExecutor
+     */
+    protected function createExportDeployFileTransferToYamlExecutor(): ExportDeployFileTransferToYamlExecutor
+    {
+        return new ExportDeployFileTransferToYamlExecutor(new Dumper());
+    }
+
+    /**
+     * @return \Symfony\Component\Yaml\Parser
+     */
+    protected function createParser(): Parser
+    {
+        return new Parser();
     }
 }

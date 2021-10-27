@@ -5,10 +5,11 @@
  * For full license information, please view the LICENSE file that was distributed with this source code.
  */
 
-namespace DeployFileGeneratorTest\Processor;
+namespace Unit\DeployFileGeneratorTest\Processor;
 
 use Codeception\Test\Unit;
 use DeployFileGenerator\Processor\DeployFileProcessor;
+use DeployFileGenerator\Processor\DeployFileProcessorInterface;
 use DeployFileGenerator\Strategy\DeployFileBuildStrategyInterface;
 use DeployFileGenerator\Transfer\DeployFileTransfer;
 
@@ -33,14 +34,11 @@ class DeployFileProcessorTest extends Unit
      */
     public function testProcess(): void
     {
-        $processor = new DeployFileProcessor(
-            $this->createStrategyMock()
-        );
         $deployFileTransfer = new DeployFileTransfer();
 
         $this->tester->assertIsEmpty($deployFileTransfer->getRawData());
 
-        $deployFileTransfer = $processor->process($deployFileTransfer);
+        $deployFileTransfer = $this->createDeployFileProcessor()->process($deployFileTransfer);
 
         $this->tester->assertEquals([
             static::NEW_KEY => static::NEW_DATA,
@@ -60,5 +58,15 @@ class DeployFileProcessorTest extends Unit
                 return $deployFileTransfer->setRawData($newRawData);
             },
         ]);
+    }
+
+    /**
+     * @return \DeployFileGenerator\Processor\DeployFileProcessorInterface
+     */
+    protected function createDeployFileProcessor(): DeployFileProcessorInterface
+    {
+        return new DeployFileProcessor(
+            $this->createStrategyMock()
+        );
     }
 }

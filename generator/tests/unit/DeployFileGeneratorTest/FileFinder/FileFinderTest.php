@@ -5,7 +5,7 @@
  * For full license information, please view the LICENSE file that was distributed with this source code.
  */
 
-namespace DeployFileGeneratorTest\FileFinder;
+namespace Unit\DeployFileGeneratorTest\FileFinder;
 
 use Codeception\Test\Unit;
 use DeployFileGenerator\DeployFileConfig;
@@ -37,8 +37,7 @@ class FileFinderTest extends Unit
      */
     public function testGetFilePathOnProjectLayer(): void
     {
-        $fileFinder = $this->createFileFinder();
-        $filePath = $fileFinder->getFilePathOnProjectLayer(static::FILE_NAME);
+        $filePath = $this->createFileFinder()->getFilePathOnProjectLayer(static::FILE_NAME);
 
         $this->tester->assertFileExists($filePath);
     }
@@ -48,8 +47,7 @@ class FileFinderTest extends Unit
      */
     public function testGetFilePathOnBaseLayer(): void
     {
-        $fileFinder = $this->createFileFinder();
-        $filePath = $fileFinder->getFilePathOnBaseLayer(static::FILE_NAME);
+        $filePath = $this->createFileFinder()->getFilePathOnBaseLayer(static::FILE_NAME);
 
         $this->tester->assertFileExists($filePath);
     }

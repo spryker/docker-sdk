@@ -7,7 +7,6 @@
 
 namespace DeployFileGenerator\Builder;
 
-use DeployFileGenerator\Processor\DeployFileProcessor;
 use DeployFileGenerator\Processor\DeployFileProcessorInterface;
 use DeployFileGenerator\Transfer\DeployFileTransfer;
 

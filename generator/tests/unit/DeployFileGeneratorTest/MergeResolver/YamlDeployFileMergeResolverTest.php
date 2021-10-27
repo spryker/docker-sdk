@@ -5,7 +5,7 @@
  * For full license information, please view the LICENSE file that was distributed with this source code.
  */
 
-namespace DeployFileGeneratorTest\MergeResolver;
+namespace Unit\DeployFileGeneratorTest\MergeResolver;
 
 use Codeception\Test\Unit;
 use DeployFileGenerator\MergeResolver\MergeResolverInterface;
@@ -21,7 +21,7 @@ class YamlDeployFileMergeResolverTest extends Unit
     /**
      * @return void
      */
-    public function testResolve()
+    public function testResolve(): void
     {
         $yamlDeployFileMergeResolver = new YamlDeployFileMergeResolver(
             $this->createMergeResolverCollection()
@@ -55,7 +55,7 @@ class YamlDeployFileMergeResolverTest extends Unit
     }
 
     /**
-     * @return \DeployFileGenerator\MergeResolver\MergeResolverInterface[]
+     * @return array
      */
     protected function createMergeResolverCollection(): array
     {

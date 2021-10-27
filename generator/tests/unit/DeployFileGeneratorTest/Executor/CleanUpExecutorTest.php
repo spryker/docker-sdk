@@ -5,11 +5,12 @@
  * For full license information, please view the LICENSE file that was distributed with this source code.
  */
 
-namespace DeployFileGeneratorTest\Executor;
+namespace Unit\DeployFileGeneratorTest\Executor;
 
 use Codeception\Test\Unit;
 use DeployFileGenerator\DeployFileConstants;
 use DeployFileGenerator\Executor\CleanUpExecutor;
+use DeployFileGenerator\Executor\ExecutorInterface;
 use DeployFileGenerator\Transfer\DeployFileTransfer;
 
 class CleanUpExecutorTest extends Unit
@@ -33,8 +34,7 @@ class CleanUpExecutorTest extends Unit
             ],
         ];
 
-        $cleanUpExecutor = new CleanUpExecutor();
-        $deployFileTransfer = $cleanUpExecutor->execute(
+        $deployFileTransfer = $this->getCleanUpExecutor()->execute(
             $this->createDeployFileTransferWithResultData($resultData)
         );
 
@@ -53,8 +53,7 @@ class CleanUpExecutorTest extends Unit
             'some-key' => 'some-data',
         ];
 
-        $cleanUpExecutor = new CleanUpExecutor();
-        $deployFileTransfer = $cleanUpExecutor->execute(
+        $deployFileTransfer = $this->getCleanUpExecutor()->execute(
             $this->createDeployFileTransferWithResultData($resultData)
         );
 
@@ -74,5 +73,13 @@ class CleanUpExecutorTest extends Unit
         $deployFileTransfer = new DeployFileTransfer();
 
         return $deployFileTransfer->setResultData($resultData);
+    }
+
+    /**
+     * @return \DeployFileGenerator\Executor\ExecutorInterface
+     */
+    protected function getCleanUpExecutor(): ExecutorInterface
+    {
+        return new CleanUpExecutor();
     }
 }

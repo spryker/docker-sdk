@@ -5,7 +5,7 @@
  * For full license information, please view the LICENSE file that was distributed with this source code.
  */
 
-namespace DeployFileGeneratorTest;
+namespace Unit\DeployFileGeneratorTest;
 
 use Codeception\Test\Unit;
 use DeployFileGenerator\DeployFileFactory;
@@ -13,6 +13,16 @@ use ReflectionMethod;
 
 class DeployFileFactoryTest extends Unit
 {
+    /**
+     * @var string
+     */
+    protected const FUNCTION_KEY = 'function';
+
+    /**
+     * @var string
+     */
+    protected const TEST_PREFIX = 'test';
+
     /**
      * @var \UnitTester
      */
@@ -143,15 +153,15 @@ class DeployFileFactoryTest extends Unit
      */
     private function getFactoryMethod(): string
     {
-        $testMethodName = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 4)[2]['function'];
+        $testMethodName = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 4)[2][static::FUNCTION_KEY];
 
-        return lcfirst(ltrim($testMethodName, 'test'));
+        return lcfirst(ltrim($testMethodName, static::TEST_PREFIX));
     }
 
     /**
      * @return void
      */
-    private function assertInstanceOfForThisFactoryMethod(): void
+    protected function assertInstanceOfForThisFactoryMethod(): void
     {
         $factoryMethod = $this->getFactoryMethod();
         $factoryReflection = new ReflectionMethod(DeployFileFactory::class, $factoryMethod);

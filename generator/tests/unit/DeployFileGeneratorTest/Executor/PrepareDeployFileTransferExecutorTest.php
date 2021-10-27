@@ -5,10 +5,11 @@
  * For full license information, please view the LICENSE file that was distributed with this source code.
  */
 
-namespace DeployFileGeneratorTest\Executor;
+namespace Unit\DeployFileGeneratorTest\Executor;
 
 use Codeception\Test\Unit;
 use DeployFileGenerator\DeployFileConstants;
+use DeployFileGenerator\Executor\ExecutorInterface;
 use DeployFileGenerator\Executor\PrepareDeployFileTransferExecutor;
 use DeployFileGenerator\FileFinder\FileFinder;
 use DeployFileGenerator\FileFinder\FileFinderInterface;
@@ -43,12 +44,8 @@ class PrepareDeployFileTransferExecutorTest extends Unit
             ],
         ];
 
-        $executor = new PrepareDeployFileTransferExecutor(
-            $this->createYamlParserMock($yamlData),
-            $this->createFileFinderMock(),
-        );
-
-        $deployFileTransfer = $executor->execute($this->createDeployFileTransfer());
+        $deployFileTransfer = $this->createPrepareDeployFileTransferExecutor($yamlData)
+            ->execute($this->createDeployFileTransfer());
 
         $this->tester->assertArrayHasKey(static::PROJECT_YML_FILE_NAME, $deployFileTransfer->getProjectImports());
         $this->tester->assertArrayHasKey(static::BASE_YML_FILE_NAME, $deployFileTransfer->getBaseImports());
@@ -66,12 +63,8 @@ class PrepareDeployFileTransferExecutorTest extends Unit
             ],
         ];
 
-        $executor = new PrepareDeployFileTransferExecutor(
-            $this->createYamlParserMock($yamlData),
-            $this->createNullableFileFinderMock(),
-        );
-
-        $deployFileTransfer = $executor->execute($this->createDeployFileTransfer());
+        $deployFileTransfer = $this->createPrepareDeployFileTransferExecutorWithNullableFileFinder($yamlData)
+            ->execute($this->createDeployFileTransfer());
 
         $this->tester->assertArrayNotHasKey(static::PROJECT_YML_FILE_NAME, $deployFileTransfer->getProjectImports());
         $this->tester->assertArrayNotHasKey(static::BASE_YML_FILE_NAME, $deployFileTransfer->getBaseImports());
@@ -84,10 +77,7 @@ class PrepareDeployFileTransferExecutorTest extends Unit
     {
         $yamlData = [];
 
-        $executor = new PrepareDeployFileTransferExecutor(
-            $this->createYamlParserMock($yamlData),
-            $this->createFileFinderMock(),
-        );
+        $executor = $this->createPrepareDeployFileTransferExecutor($yamlData);
 
         $deployFileTransfer = $executor->execute($this->createDeployFileTransfer());
 
@@ -139,5 +129,31 @@ class PrepareDeployFileTransferExecutorTest extends Unit
             'getFilePathOnBaseLayer' => null,
             'getFilePathOnProjectLayer' => null,
         ]);
+    }
+
+    /**
+     * @param array $yamlData
+     *
+     * @return \DeployFileGenerator\Executor\ExecutorInterface
+     */
+    protected function createPrepareDeployFileTransferExecutor(array $yamlData): ExecutorInterface
+    {
+        return new PrepareDeployFileTransferExecutor(
+            $this->createYamlParserMock($yamlData),
+            $this->createFileFinderMock(),
+        );
+    }
+
+    /**
+     * @param array $yamlData
+     *
+     * @return \DeployFileGenerator\Executor\ExecutorInterface
+     */
+    protected function createPrepareDeployFileTransferExecutorWithNullableFileFinder(array $yamlData): ExecutorInterface
+    {
+        return new PrepareDeployFileTransferExecutor(
+            $this->createYamlParserMock($yamlData),
+            $this->createNullableFileFinderMock(),
+        );
     }
 }

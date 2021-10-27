@@ -32,7 +32,7 @@ class DeployFileTransfer
     /**
      * @var string[]
      */
-    protected $projectImports= [];
+    protected $projectImports = [];
 
     /**
      * @var string[]
