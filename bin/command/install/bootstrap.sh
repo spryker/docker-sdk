@@ -95,9 +95,7 @@ function Command::bootstrap() {
     if [ -f ".known_hosts" ]; then
         cp ".known_hosts" "${tmpDeploymentDir}/"
     fi
-    if [ -f "${projectDeployTemplatesDirectory}" ]; then
-        cp -rf "${projectDeployTemplatesDirectory}" "${tmpDeploymentDir}/project-deploy-templates"
-    fi
+    cp -rf "${projectDeployTemplatesDirectory}" "${tmpDeploymentDir}/project-deploy-templates"
     Console::end "[DONE]"
 
     Console::info "${INFO}Running generator${NC}"
