@@ -41,13 +41,13 @@ Find B2B and B2C deploy file examples for [development](06-installation/installa
 
 Deploy file has inheritance and parameter functionality. Builder grabs all included files, merges and resolves parameters.
 Deploy file Builder are using two layers for file storing:
-- `Project layer` exists on spryker project layer and has path`. / Config / deploy-templates`.
-- `Base layer` exists on docker-sdk layer and has path` ./** {docker-sdk-directory} ** / generator / deploy-file-generator / templates`.
+- `Project layer` exists on spryker project layer and has path`./config/deploy-templates`.
+- `Base layer` exists on docker-sdk layer and has path`./**{docker-sdk-directory}**/generator/deploy-file-generator/templates`.
 
 Merge and parameter resolving has a priority order:
-1) `project layer` - all files and parameters from`. / Config / deploy-templates`;
-2) `main deploy file` - deploy file on project layer (` deploy.yml`, `deploy. *. Yml`);
-3) `base layer` - all files and parameters from` ./** {docker-sdk-directory} ** / generator / deploy-file-generator / templates`;
+1) `project layer` - all files and parameters from`./Config/deploy-templates`;
+2) `main deploy file` - deploy file on project layer (`deploy.yml`, `deploy.*.yml`);
+3) `base layer` - all files and parameters from`./**{docker-sdk-directory}**/generator/deploy-file-generator/templates`;
 
 Generated file you can find by path (./** {docker-sdk-directory} ** / deployment / default / project.yml)
 ***
