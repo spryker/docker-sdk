@@ -39,6 +39,17 @@ Find B2B and B2C deploy file examples for [development](06-installation/installa
 | [B2C Demo Shop deploy file](https://github.com/spryker-shop/b2c-demo-shop/blob/master/deploy.dev.yml) | [B2C Demo Shop deploy file](https://github.com/spryker-shop/b2c-demo-shop/blob/master/deploy.yml) |
 | [B2B Demo Shop deploy file](https://github.com/spryker-shop/b2b-demo-shop/blob/master/deploy.dev.yml) | [B2B Demo Shop deploy file](https://github.com/spryker-shop/b2b-demo-shop/blob/master/deploy.yml) |
 
+Deploy file has inheritance and parameter functionality. Builder grabs all included files, merges and resolves parameters.
+Deploy file Builder are using two layers for file storing:
+- `Project layer` exists on spryker project layer and has path`. / Config / deploy-templates`.
+- `Base layer` exists on docker-sdk layer and has path` ./** {docker-sdk-directory} ** / generator / deploy-file-generator / templates`.
+
+Merge and parameter resolving has a priority order:
+1) `project layer` - all files and parameters from`. / Config / deploy-templates`;
+2) `main deploy file` - deploy file on project layer (` deploy.yml`, `deploy. *. Yml`);
+3) `base layer` - all files and parameters from` ./** {docker-sdk-directory} ** / generator / deploy-file-generator / templates`;
+
+Generated file you can find by path (./** {docker-sdk-directory} ** / deployment / default / project.yml)
 ***
 ### version:
 
@@ -77,7 +88,7 @@ namespace: spryker-demo
 
 ### pipeline:
 
-Defines the installation recipe for the Spryker applications to the specific configuration file from the `config/install/` directory. 
+Defines the installation recipe for the Spryker applications to the specific configuration file from the `config/install/` directory.
 
 This variable is optional. If not specified, the default value applies: `pipeline: 'docker'`. Installation recipe configuration file: `config/install/docker.yml`.
 
@@ -125,6 +136,47 @@ environment: 'docker'
 ```
 
 
+***
+
+### imports:
+
+Defines the deploy files which should be included into full generated `deploy.yml`.
+For importing file should be existed on `project` or `base` layers.
+```yaml
+version: 1.0
+
+imports:
+    deploy.base.template.yml:
+```
+***
+For using dynamic configuration, import file have a parameters.
+For resolving parameters using annotation formats:
+ - '%' - percent annotation;
+
+`deploy.dev.yml`
+```yaml
+version: 1.0
+
+imports:
+    deploy.base.template.yml:
+      parameters:
+        env_name: 'dev'
+```
+***
+
+`deploy.base.template.yml`
+```yaml
+version: 1.0
+
+imports:
+    environment/%env_name%/image.deploy.template.yml:
+    environment/%env_name%/composer.deploy.template.yml:
+    environment/%env_name%/assets.deploy.template.yml:
+    environment/%env_name%/regions.deploy.template.yml:
+    environment/%env_name%/groups.deploy.template.yml:
+    environment/%env_name%/services.deploy.template.yml:
+    environment/%env_name%/docker.deploy.template.yml:
+```
 ***
 
 ### image:
