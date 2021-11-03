@@ -41,7 +41,7 @@ function terminateMutagenSessionsWithObsoleteDockerId() {
     dockerId=$(docker info --format '{{.ID}}' 2>/dev/null | awk '{ gsub(":","_",$1); print $1 }' || echo '')
 
     if [ -z "$dockerId" ]; then
-        Console::warn "Docker ID is empty, mutagen session check does not work, please repair the script."
+        Console::error "${WARN}Docker ID is empty, please check the script and try again."
         return
     fi
 
@@ -51,20 +51,20 @@ function terminateMutagenSessionsWithObsoleteDockerId() {
 
     for sessionId in ${sessionIds}; do
         if [ -z "$dockerId" ]; then
-            Console::warn "Session ID is empty, session check skipped, please repair the script."
+            Console::warn "Session ID is empty, please check the script and try again."
             continue
         fi
 
         sessionDockerId=$(mutagen sync list "${sessionId}" 2>/dev/null | grep 'io.mutagen.compose.daemon.identifier:' | awk '{print $2}' || echo '')
 
         if [ -z "$sessionDockerId" ]; then
-            Console::warn "Docker ID for session with ID ${sessionId} is empty, session check skipped, please repair the script."
+           Console::warn "Docker ID for session ${sessionId} is empty, please check the script and try again."
             continue
         fi
 
         if [ "$sessionDockerId" != "$dockerId" ]; then
             mutagen sync terminate "${sessionId}"
-            Console::log "${INFO}Mutagen session with ID ${sessionId} is obsolete and deleted."
+            Console::log "Mutagen session ${sessionId} has been terminated."
         fi
     done
 }
