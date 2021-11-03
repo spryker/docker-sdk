@@ -50,7 +50,7 @@ function terminateMutagenSessionsWithObsoleteDockerId() {
     sessionIds=$(mutagen sync list "${SPRYKER_SYNC_SESSION_NAME}" 2>/dev/null | grep 'Identifier:' | awk '{print $2}' || echo '')
 
     for sessionId in ${sessionIds}; do
-        if [ -z "$dockerId" ]; then
+        if [ -z "$sessionId" ]; then
             Console::warn "Session ID is empty, please check the script and try again."
             continue
         fi
