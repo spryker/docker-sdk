@@ -25,7 +25,7 @@ function Mount::Mutagen::beforeUp() {
     # The volume will not be deleted if any app container is running.
     docker volume rm "${SPRYKER_SYNC_VOLUME}" >/dev/null 2>&1 || true
 
-    deleteMutagenSessionsWithObsoleteDockerId
+    terminateMutagenSessionsWithObsoleteDockerId
 
     # Clean content of the sync volume if the sync session is terminated or halted.
     sessionStatus=$(mutagen sync list "${SPRYKER_SYNC_SESSION_NAME}" 2>/dev/null | grep 'Status:' | awk '{print $2}' || echo '')
@@ -37,7 +37,7 @@ function Mount::Mutagen::beforeUp() {
     fi
 }
 
-function deleteMutagenSessionsWithObsoleteDockerId() {
+function terminateMutagenSessionsWithObsoleteDockerId() {
     dockerId=$(docker info --format '{{.ID}}' 2>/dev/null | awk '{ gsub(":","_",$1); print $1 }' || echo '')
 
     if [ -z "$dockerId" ]; then
