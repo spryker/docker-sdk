@@ -92,6 +92,7 @@ $projectData['composer']['autoload'] = buildComposerAutoloadConfig($projectData)
 $isAutoloadCacheEnabled = $projectData['_isAutoloadCacheEnabled'] = isAutoloadCacheEnabled($projectData);
 $projectData['_requirementAnalyzerData'] = buildDataForRequirementAnalyzer($projectData);
 $projectData['secrets'] = buildSecrets($deploymentDir);
+$projectData = buildDefaultCredentials($projectData);
 
 // TODO Make it optional in next major
 // Making webdriver as required service for BC reasons
@@ -1278,4 +1279,113 @@ function buildProjectYaml(string $mainProjectYaml): string
     $deployFileProcessor = $deployFileFactory->createDeployFileBuilder();
 
     return $deployFileProcessor->build($mainProjectYaml, $mainProjectYaml);
+}
+
+/**
+ * @param array $projectData
+ *
+ * @return array
+ */
+function buildDefaultCredentials(array $projectData): array
+{
+    $projectData = buildDefaultCredentialsForDatabase($projectData);
+    $projectData = buildDefaultCredentialsForBroker($projectData);
+
+    return $projectData;
+}
+
+/**
+ * @param array $projectData
+ *
+ * @return array
+ */
+function buildDefaultCredentialsForDatabase(array $projectData): array
+{
+    $projectData = buildDefaultRootCredentialsForDatabase($projectData);
+    $projectData = buildDefaultRegionCredentialsForDatabase($projectData);
+
+    return $projectData;
+}
+
+/**
+ * @param array $projectData
+ *
+ * @return array
+ */
+function buildDefaultRootCredentialsForDatabase(array $projectData): array
+{
+    if (!isset($projectData['services']['database'])) {
+        return $projectData;
+    }
+
+    $defaultDbServiceRootConfig = [
+        'username' => 'root',
+        'password' => 'secret',
+    ];
+
+    $dbServiceRootConfig = $projectData['services']['database']['root'] ?? [];
+
+    $projectData['services']['database']['root'] = array_merge(
+        $defaultDbServiceRootConfig,
+        $dbServiceRootConfig
+    );
+
+    return $projectData;
+}
+
+/**
+ * @param array $projectData
+ *
+ * @return array
+ */
+function buildDefaultRegionCredentialsForDatabase(array $projectData): array
+{
+    if (!isset($projectData['regions'])) {
+        return $projectData;
+    }
+
+    $defaultDbRegionCredentials = [
+        'username' => 'spryker',
+        'password' => 'secret',
+    ];
+
+    foreach ($projectData['regions'] as $regionName => $regionConfig) {
+        if (!isset($regionConfig['services']['database'])) {
+            continue;
+        }
+
+        $regionDbConfig = $regionConfig['services']['database'];
+        $regionDbConfig = array_merge($defaultDbRegionCredentials, $regionDbConfig);
+
+        $projectData['regions'][$regionName]['services']['database'] = $regionDbConfig;
+    }
+
+    return $projectData;
+}
+
+
+/**
+ * @param array $projectData
+ *
+ * @return array
+ */
+function buildDefaultCredentialsForBroker(array $projectData): array
+{
+    if (!isset($projectData['services']['broker'])) {
+        return $projectData;
+    }
+
+    $defaultBrokerServiceCredentials = [
+        'username' => 'spryker',
+        'password' => 'secret',
+    ];
+
+    $brokerServiceCredentials = $projectData['services']['broker']['api'] ?? [];
+
+    $projectData['services']['broker']['api'] = array_merge(
+        $defaultBrokerServiceCredentials,
+        $brokerServiceCredentials
+    );
+
+    return $projectData;
 }

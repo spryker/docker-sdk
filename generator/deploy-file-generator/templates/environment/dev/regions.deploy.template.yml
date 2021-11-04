@@ -7,9 +7,6 @@ regions:
                     email: no-reply@spryker.local
             database:
                 database: eu-docker
-                username: spryker
-                password: secret
-
         stores:
             DE:
                 services:
@@ -35,8 +32,6 @@ regions:
                     email: no-reply@spryker.local
             database:
                 database: us-docker
-                username: spryker
-                password: secret
         stores:
             US:
                 services:
