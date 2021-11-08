@@ -36,7 +36,7 @@ class DeployFileFactory
     public function createDeployFileBuilder(): DeployFileBuilderInterface
     {
         return new DeployFileBuilder(
-            $this->createYamlDeployFileProcessor()
+            $this->createYamlDeployFileProcessor(),
         );
     }
 
@@ -46,7 +46,7 @@ class DeployFileFactory
     public function createYamlDeployFileProcessor(): DeployFileProcessorInterface
     {
         return new DeployFileProcessor(
-            $this->createYamlDeployFileBuildStrategy()
+            $this->createYamlDeployFileBuildStrategy(),
         );
     }
 
@@ -56,7 +56,7 @@ class DeployFileFactory
     public function createYamlDeployFileBuildStrategy(): DeployFileBuildStrategyInterface
     {
         return new YamlDeployFileBuildStrategy(
-            $this->createExecutorFactory()->createYamlDeployFileBuildExecutorCollection()
+            $this->createExecutorFactory()->createYamlDeployFileBuildExecutorCollection(),
         );
     }
 
@@ -69,7 +69,7 @@ class DeployFileFactory
             $this->createDeployFileConfig()->getProjectDirectoryPath(),
             $this->createSymfonyYamlParser(),
             $this->createParametersResolver(),
-            $this->createYamlDeployFileMergeResolver()
+            $this->createYamlDeployFileMergeResolver(),
         );
     }
 
@@ -82,7 +82,7 @@ class DeployFileFactory
             $this->createDeployFileConfig()->getBaseDirectoryPath(),
             $this->createSymfonyYamlParser(),
             $this->createParametersResolver(),
-            $this->createYamlDeployFileMergeResolver()
+            $this->createYamlDeployFileMergeResolver(),
         );
     }
 
@@ -92,7 +92,7 @@ class DeployFileFactory
     public function createYamlDeployFileMergeResolver(): MergeResolverInterface
     {
         return new YamlDeployFileMergeResolver(
-            $this->getMergeResolverCollection()
+            $this->getMergeResolverCollection(),
         );
     }
 
@@ -120,12 +120,12 @@ class DeployFileFactory
     public function createParametersResolver(): ParametersResolverInterface
     {
         return new ParametersResolver(
-            $this->getParameterResolverCollection()
+            $this->getParameterResolverCollection(),
         );
     }
 
     /**
-     * @return \DeployFileGenerator\ParametersResolver\Resolvers\PercentAnnotationParameterResolver[]
+     * @return array<\DeployFileGenerator\ParametersResolver\Resolvers\PercentAnnotationParameterResolver>
      */
     public function getParameterResolverCollection(): array
     {

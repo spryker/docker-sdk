@@ -2,9 +2,7 @@
 
 use DeployFileGenerator\DeployFileFactory;
 use Spatie\Url\Url;
-use Symfony\Component\Config\FileLocator;
 use Symfony\Component\Yaml\Parser;
-use Symfony\Component\Yaml\Yaml;
 use Twig\Environment;
 use Twig\Loader\ChainLoader;
 use Twig\Loader\FilesystemLoader;

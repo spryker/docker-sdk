@@ -32,19 +32,19 @@ class FileFinder implements FileFinderInterface
     public function getFilePathOnBaseLayer(string $fileName): ?string
     {
         return $this->getFilePath(
-            $this->buildPath($this->config->getBaseDirectoryPath()) . $fileName
+            $this->buildPath($this->config->getBaseDirectoryPath()) . $fileName,
         );
     }
 
     /**
      * @param string $fileName
      *
-     * @return string
+     * @return string|null
      */
     public function getFilePathOnProjectLayer(string $fileName): ?string
     {
         return $this->getFilePath(
-            $this->buildPath($this->config->getProjectDirectoryPath()) . $fileName
+            $this->buildPath($this->config->getProjectDirectoryPath()) . $fileName,
         );
     }
 

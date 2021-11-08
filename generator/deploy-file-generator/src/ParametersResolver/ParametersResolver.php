@@ -10,12 +10,12 @@ namespace DeployFileGenerator\ParametersResolver;
 class ParametersResolver implements ParametersResolverInterface
 {
     /**
-     * @var \DeployFileGenerator\ParametersResolver\Resolvers\ParameterResolverInterface[]
+     * @var array<\DeployFileGenerator\ParametersResolver\Resolvers\ParameterResolverInterface>
      */
     protected $resolvers;
 
     /**
-     * @param \DeployFileGenerator\ParametersResolver\Resolvers\ParameterResolverInterface[] $resolvers
+     * @param array<\DeployFileGenerator\ParametersResolver\Resolvers\ParameterResolverInterface> $resolvers
      */
     public function __construct(array $resolvers)
     {
