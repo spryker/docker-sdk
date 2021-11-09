@@ -66,7 +66,7 @@ matrix:
       before_install: skip
       before_script: skip
       after_script: skip
-    - name Deploy file builder tests
+    - name: Deploy file builder tests
       language: php
       php: 7.4
       script:
