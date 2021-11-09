@@ -1276,7 +1276,7 @@ function buildProjectYaml(string $mainProjectYaml): string
     $deployFileFactory = new DeployFileFactory();
     $deployFileProcessor = $deployFileFactory->createDeployFileBuilder();
 
-    return $deployFileProcessor->build($mainProjectYaml, $mainProjectYaml);
+    return $deployFileProcessor->build($mainProjectYaml, $mainProjectYaml)->getOutputFilePath();
 }
 
 /**

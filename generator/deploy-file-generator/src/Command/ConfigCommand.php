@@ -59,13 +59,12 @@ class ConfigCommand extends Command
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $deployFileFactory = $this->createDeployFileFactory();
-        $generatedFilePath = $deployFileFactory->createDeployFileBuilder()->build(
+        $deployFileTransfer = $deployFileFactory->createDeployFileBuilder()->build(
             $input->getArgument(static::DEPLOY_FILE_PATH),
             $input->getArgument(static::DEPLOY_FILE_PATH),
         );
 
-        $data = $deployFileFactory->createSymfonyYamlParser()->parseFile($generatedFilePath);
-
+        $data = $deployFileTransfer->getResultData();
         $tables = $this->buildTables($data, $output);
 
         foreach ($tables as $table) {

@@ -37,10 +37,9 @@ class DeployFileBuilderTest extends Unit
         $inputFilePath = static::INPUT_FILE_PATH;
         $outputFilePath = static::OUTPUT_FILE_PATH;
 
-        $resultPath = $this->createDeployFileBuilder()
-            ->build($inputFilePath, $outputFilePath);
+        $deployFileTransfer = $this->createDeployFileBuilder()->build($inputFilePath, $outputFilePath);
 
-        $this->tester->assertEquals($outputFilePath, $resultPath);
+        $this->tester->assertEquals($outputFilePath, $deployFileTransfer->getOutputFilePath());
     }
 
     /**

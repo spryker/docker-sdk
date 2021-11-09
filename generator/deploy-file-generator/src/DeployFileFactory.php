@@ -97,7 +97,7 @@ class DeployFileFactory
     }
 
     /**
-     * @return array
+     * @return array<\DeployFileGenerator\MergeResolver\MergeResolverInterface>
      */
     public function getMergeResolverCollection(): array
     {
@@ -125,7 +125,7 @@ class DeployFileFactory
     }
 
     /**
-     * @return array<\DeployFileGenerator\ParametersResolver\Resolvers\PercentAnnotationParameterResolver>
+     * @return array<\DeployFileGenerator\ParametersResolver\Resolvers\ParameterResolverInterface>
      */
     public function getParameterResolverCollection(): array
     {

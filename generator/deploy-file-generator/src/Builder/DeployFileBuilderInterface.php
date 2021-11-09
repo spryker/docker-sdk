@@ -7,13 +7,15 @@
 
 namespace DeployFileGenerator\Builder;
 
+use DeployFileGenerator\Transfer\DeployFileTransfer;
+
 interface DeployFileBuilderInterface
 {
     /**
      * @param string $inputFilePath
      * @param string $outputFilePath
      *
-     * @return string
+     * @return \DeployFileGenerator\Transfer\DeployFileTransfer
      */
-    public function build(string $inputFilePath, string $outputFilePath): string;
+    public function build(string $inputFilePath, string $outputFilePath): DeployFileTransfer;
 }
