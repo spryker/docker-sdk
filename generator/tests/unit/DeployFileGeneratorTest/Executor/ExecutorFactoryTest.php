@@ -86,7 +86,7 @@ class ExecutorFactoryTest extends Unit
     {
         $factoryMethod = $this->getFactoryMethod();
         $factoryReflection = new ReflectionMethod(ExecutorFactory::class, $factoryMethod);
-        $factoryMethodReturnType = $factoryReflection->getReturnType()->getName();
+        $factoryMethodReturnType = $factoryReflection->getReturnType();
 
         $resultObject = $this->createExecutorFactory()->$factoryMethod();
 

@@ -1,0 +1,103 @@
+# Main section
+version:
+    not-empty:
+    string-type:
+namespace:
+    not-empty:
+    string-type:
+tag:
+    not-empty:
+    string-type:
+environment:
+    not-empty:
+    string-type:
+pipeline:
+    not-empty:
+    string-type:
+
+# Region section
+regions:
+    require:
+    not-empty:
+regions.*.services:
+    only-key:
+        - mail
+        - database
+regions.*.stores.*.services:
+    only-key:
+        - broker
+        - key_value_store
+        - search
+
+# Image:
+image.tag:
+    string-type:
+image.environment:
+    array-type:
+image.php:
+    only-key:
+        - ini
+        - enabled-extensions
+image.php.enabled-extensions:
+    only-value:
+        - blackfire
+        - newrelic
+        - tideways
+
+# Assets
+assets.image:
+    string-type:
+assets.compression:
+    only-key:
+        - gzip
+        - brotli
+assets.mode:
+    string-type:
+    only-value:
+        - production
+        - development
+assets.compression.*.static:
+    only-value:
+        - only
+        - true
+        - false
+assets.compression.*.level:
+    range-value:
+        - 1
+        - 5
+
+# Groups
+groups.*.region:
+    group-region:
+groups.*.applications.*.application:
+    only-value:
+        - backoffice
+        - backend-gateway
+        - zed
+        - yves
+        - glue
+        - merchant-portal
+
+# Services
+services.database.engine:
+    only-value:
+        - postgres
+        - mysql
+services.broker.engine:
+    only-value:
+        - rabbitmq
+services.session.engine:
+    only-value:
+        - redis
+services.key_value_store.engine:
+    only-value:
+        - redis
+services.search.engine:
+    only-value:
+        - elastic
+services.scheduler.engine:
+    only-value:
+        - jenkins
+services.mail_catcher.engine:
+    only-value:
+        - mailhog

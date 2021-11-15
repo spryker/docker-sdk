@@ -1,0 +1,24 @@
+includes:
+    - vendor/spryker-sdk/phpstan-spryker/extension.neon
+    - vendor/phpstan/phpstan/conf/bleedingEdge.neon
+
+parameters:
+    level: 6
+    tmpDir: .phpstan-cache
+    scanFiles:
+        - tests/_support/UnitTester.php
+        - tests/_support/_generated/UnitTesterActions.php
+    paths:
+        - src/
+        - tests/
+    excludePaths:
+        - tests/_support/*
+        - tests/_output/*
+        - tests/_data/*
+
+    reportUnmatchedIgnoredErrors: false
+    checkMissingIterableValueType: false
+    checkGenericClassInNonGenericObjectType: false
+
+    parallel:
+    	maximumNumberOfProcesses: 1

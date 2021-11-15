@@ -10,7 +10,7 @@ namespace Unit\DeployFileGeneratorTest\Processor;
 use Codeception\Test\Unit;
 use DeployFileGenerator\Processor\DeployFileProcessor;
 use DeployFileGenerator\Processor\DeployFileProcessorInterface;
-use DeployFileGenerator\Strategy\DeployFileBuildStrategyInterface;
+use DeployFileGenerator\Strategy\DeployFileStrategyInterface;
 use DeployFileGenerator\Transfer\DeployFileTransfer;
 
 class DeployFileProcessorTest extends Unit
@@ -46,11 +46,11 @@ class DeployFileProcessorTest extends Unit
     }
 
     /**
-     * @return \DeployFileGenerator\Strategy\DeployFileBuildStrategyInterface
+     * @return \DeployFileGenerator\Strategy\DeployFileStrategyInterface
      */
-    protected function createStrategyMock(): DeployFileBuildStrategyInterface
+    protected function createStrategyMock(): DeployFileStrategyInterface
     {
-        return $this->makeEmpty(DeployFileBuildStrategyInterface::class, [
+        return $this->makeEmpty(DeployFileStrategyInterface::class, [
             'execute' => function (DeployFileTransfer $deployFileTransfer) {
                 $newRawData = $deployFileTransfer->getRawData();
                 $newRawData[static::NEW_KEY] = static::NEW_DATA;

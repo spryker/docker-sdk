@@ -27,13 +27,14 @@ class DeployFileBuilder implements DeployFileBuilderInterface
 
     /**
      * @param string $inputFilePath
-     * @param string $outputFilePath
+     * @param string|null $outputFilePath
      *
      * @return \DeployFileGenerator\Transfer\DeployFileTransfer
      */
-    public function build(string $inputFilePath, string $outputFilePath): DeployFileTransfer
+    public function build(string $inputFilePath, ?string $outputFilePath = null): DeployFileTransfer
     {
         $deployFileTransfer = new DeployFileTransfer();
+        $outputFilePath = $outputFilePath ?? $inputFilePath;
 
         $deployFileTransfer = $deployFileTransfer->setInputFilePath($inputFilePath);
         $deployFileTransfer = $deployFileTransfer->setOutputFilePath($outputFilePath);

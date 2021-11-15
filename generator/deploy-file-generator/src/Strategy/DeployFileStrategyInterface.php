@@ -5,17 +5,16 @@
  * For full license information, please view the LICENSE file that was distributed with this source code.
  */
 
-namespace DeployFileGenerator\Builder;
+namespace DeployFileGenerator\Strategy;
 
 use DeployFileGenerator\Transfer\DeployFileTransfer;
 
-interface DeployFileBuilderInterface
+interface DeployFileStrategyInterface
 {
     /**
-     * @param string $inputFilePath
-     * @param string|null $outputFilePath
+     * @param \DeployFileGenerator\Transfer\DeployFileTransfer $deployFileTransfer
      *
      * @return \DeployFileGenerator\Transfer\DeployFileTransfer
      */
-    public function build(string $inputFilePath, ?string $outputFilePath = null): DeployFileTransfer;
+    public function execute(DeployFileTransfer $deployFileTransfer): DeployFileTransfer;
 }

@@ -9,7 +9,7 @@ namespace DeployFileGenerator\Strategy;
 
 use DeployFileGenerator\Transfer\DeployFileTransfer;
 
-class YamlDeployFileBuildStrategy implements DeployFileBuildStrategyInterface
+class DeployFileStrategy implements DeployFileStrategyInterface
 {
     /**
      * @var array<\DeployFileGenerator\Executor\ExecutorInterface>

@@ -21,6 +21,11 @@ class DeployFileConfig
     protected const BASE_DEPLOY_FILE_DIRECTORY_PATH = './deploy-file-generator/templates/';
 
     /**
+     * @var string
+     */
+    protected const VALIDATION_RULES_FILE_PATH = './deploy-file-generator/config/validation.yml';
+
+    /**
      * @return string
      */
     public function getProjectDirectoryPath(): string
@@ -42,5 +47,13 @@ class DeployFileConfig
     public function getYamlInline(): int
     {
         return 50;
+    }
+
+    /**
+     * @return string
+     */
+    public function getValidationRulesFilePath(): string
+    {
+        return static::VALIDATION_RULES_FILE_PATH;
     }
 }

@@ -165,7 +165,7 @@ class DeployFileFactoryTest extends Unit
     {
         $factoryMethod = $this->getFactoryMethod();
         $factoryReflection = new ReflectionMethod(DeployFileFactory::class, $factoryMethod);
-        $factoryMethodReturnType = $factoryReflection->getReturnType()->getName();
+        $factoryMethodReturnType = $factoryReflection->getReturnType();
 
         $resultObject = $this->createDeployFileFactory()->$factoryMethod();
 

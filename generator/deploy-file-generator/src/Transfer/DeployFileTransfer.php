@@ -7,6 +7,8 @@
 
 namespace DeployFileGenerator\Transfer;
 
+use DeployFileGenerator\Transfer\Validation\Message\ValidationMessageBagTransfer;
+
 class DeployFileTransfer
 {
     /**
@@ -30,14 +32,19 @@ class DeployFileTransfer
     protected $outputFilePath = '';
 
     /**
-     * @var array<string>
+     * @var array<string, array|null>
      */
     protected $projectImports = [];
 
     /**
-     * @var array<string>
+     * @var array<string, array|null>
      */
     protected $baseImports = [];
+
+    /**
+     * @var \DeployFileGenerator\Transfer\Validation\Message\ValidationMessageBagTransfer
+     */
+    protected $validationMessageBagTransfer;
 
     /**
      * @return array
@@ -120,7 +127,7 @@ class DeployFileTransfer
     }
 
     /**
-     * @return array<string>
+     * @return array<string, array|null>
      */
     public function getProjectImports(): array
     {
@@ -128,7 +135,7 @@ class DeployFileTransfer
     }
 
     /**
-     * @param array<string> $projectImports
+     * @param array<string, array|null> $projectImports
      *
      * @return $this
      */
@@ -140,7 +147,7 @@ class DeployFileTransfer
     }
 
     /**
-     * @return array<string>
+     * @return array<string, array|null>
      */
     public function getBaseImports(): array
     {
@@ -148,13 +155,33 @@ class DeployFileTransfer
     }
 
     /**
-     * @param array<string> $baseImports
+     * @param array<string, array|null> $baseImports
      *
      * @return $this
      */
     public function setBaseImports(array $baseImports)
     {
         $this->baseImports = $baseImports;
+
+        return $this;
+    }
+
+    /**
+     * @return \DeployFileGenerator\Transfer\Validation\Message\ValidationMessageBagTransfer
+     */
+    public function getValidationMessageBagTransfer(): ValidationMessageBagTransfer
+    {
+        return $this->validationMessageBagTransfer;
+    }
+
+    /**
+     * @param \DeployFileGenerator\Transfer\Validation\Message\ValidationMessageBagTransfer $validationMessageBagTransfer
+     *
+     * @return $this
+     */
+    public function setValidationMessageBagTransfer(ValidationMessageBagTransfer $validationMessageBagTransfer)
+    {
+        $this->validationMessageBagTransfer = $validationMessageBagTransfer;
 
         return $this;
     }

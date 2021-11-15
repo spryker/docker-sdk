@@ -10,6 +10,8 @@ namespace DeployFileGenerator;
 
 use DeployFileGenerator\Builder\DeployFileBuilder;
 use DeployFileGenerator\Builder\DeployFileBuilderInterface;
+use DeployFileGenerator\Configurator\DeployFileConfigurator;
+use DeployFileGenerator\Configurator\DeployFileConfiguratorInterface;
 use DeployFileGenerator\Executor\ExecutorFactory;
 use DeployFileGenerator\FileFinder\FileFinder;
 use DeployFileGenerator\FileFinder\FileFinderInterface;
@@ -18,13 +20,15 @@ use DeployFileGenerator\Importer\YamlDataImporter;
 use DeployFileGenerator\MergeResolver\MergeResolverInterface;
 use DeployFileGenerator\MergeResolver\Resolvers\ServiceMergeResolver;
 use DeployFileGenerator\MergeResolver\YamlDeployFileMergeResolver;
+use DeployFileGenerator\Output\Output;
 use DeployFileGenerator\ParametersResolver\ParametersResolver;
 use DeployFileGenerator\ParametersResolver\ParametersResolverInterface;
 use DeployFileGenerator\ParametersResolver\Resolvers\PercentAnnotationParameterResolver;
 use DeployFileGenerator\Processor\DeployFileProcessor;
 use DeployFileGenerator\Processor\DeployFileProcessorInterface;
-use DeployFileGenerator\Strategy\DeployFileBuildStrategyInterface;
-use DeployFileGenerator\Strategy\YamlDeployFileBuildStrategy;
+use DeployFileGenerator\Strategy\DeployFileStrategy;
+use DeployFileGenerator\Strategy\DeployFileStrategyInterface;
+use DeployFileGenerator\Validator\ValidatorFactory;
 use Symfony\Component\Yaml\Dumper;
 use Symfony\Component\Yaml\Parser;
 
@@ -36,14 +40,14 @@ class DeployFileFactory
     public function createDeployFileBuilder(): DeployFileBuilderInterface
     {
         return new DeployFileBuilder(
-            $this->createYamlDeployFileProcessor(),
+            $this->createYamlDeployFileBuildProcessor(),
         );
     }
 
     /**
      * @return \DeployFileGenerator\Processor\DeployFileProcessorInterface
      */
-    public function createYamlDeployFileProcessor(): DeployFileProcessorInterface
+    public function createYamlDeployFileBuildProcessor(): DeployFileProcessorInterface
     {
         return new DeployFileProcessor(
             $this->createYamlDeployFileBuildStrategy(),
@@ -51,13 +55,37 @@ class DeployFileFactory
     }
 
     /**
-     * @return \DeployFileGenerator\Strategy\DeployFileBuildStrategyInterface
+     * @return \DeployFileGenerator\Configurator\DeployFileConfiguratorInterface
      */
-    public function createYamlDeployFileBuildStrategy(): DeployFileBuildStrategyInterface
+    public function createDeployFileConfigurator(): DeployFileConfiguratorInterface
     {
-        return new YamlDeployFileBuildStrategy(
-            $this->createExecutorFactory()->createYamlDeployFileBuildExecutorCollection(),
+        return new DeployFileConfigurator($this->createYamlDeployFileConfigProcessor());
+    }
+
+    /**
+     * @return \DeployFileGenerator\Processor\DeployFileProcessorInterface
+     */
+    public function createYamlDeployFileConfigProcessor(): DeployFileProcessorInterface
+    {
+        return new DeployFileProcessor(
+            $this->createYamlDeployFileConfigStrategy(),
         );
+    }
+
+    /**
+     * @return \DeployFileGenerator\Strategy\DeployFileStrategyInterface
+     */
+    public function createYamlDeployFileBuildStrategy(): DeployFileStrategyInterface
+    {
+        return new DeployFileStrategy($this->createExecutorFactory()->createYamlDeployFileBuildExecutorCollection());
+    }
+
+    /**
+     * @return \DeployFileGenerator\Strategy\DeployFileStrategyInterface
+     */
+    public function createYamlDeployFileConfigStrategy(): DeployFileStrategyInterface
+    {
+        return new DeployFileStrategy($this->createExecutorFactory()->createYamlDeployFileConfigExecutorCollection());
     }
 
     /**
@@ -164,5 +192,21 @@ class DeployFileFactory
     public function createExecutorFactory(): ExecutorFactory
     {
         return new ExecutorFactory($this);
+    }
+
+    /**
+     * @return \DeployFileGenerator\Validator\ValidatorFactory
+     */
+    public function createValidatorFactory(): ValidatorFactory
+    {
+        return new ValidatorFactory();
+    }
+
+    /**
+     * @return \DeployFileGenerator\Output\Output
+     */
+    public function createOutput(): Output
+    {
+        return new Output();
     }
 }

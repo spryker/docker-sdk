@@ -35,13 +35,28 @@ class ExecutorFactory
             $this->createBaseImportDataExecutor(),
             $this->createCleanUpExecutor(),
             $this->createExportDeployFileTransferToYamlExecutor(),
+            $this->createValidateDeployFileExecutor(),
+        ];
+    }
+
+    /**
+     * @return array<\DeployFileGenerator\Executor\ExecutorInterface>
+     */
+    public function createYamlDeployFileConfigExecutorCollection(): array
+    {
+        return [
+            $this->createPrepareDeployFileTransferExecutor(),
+            $this->createProjectImportDataExecutor(),
+            $this->createBaseImportDataExecutor(),
+            $this->createCleanUpExecutor(),
+            $this->createValidateDeployFileExecutor(),
         ];
     }
 
     /**
      * @return \DeployFileGenerator\Executor\ExecutorInterface
      */
-    public function createPrepareDeployFileTransferExecutor(): ExecutorInterface
+    protected function createPrepareDeployFileTransferExecutor(): ExecutorInterface
     {
         return new PrepareDeployFileTransferExecutor(
             $this->deployFileFactory->createSymfonyYamlParser(),
@@ -52,7 +67,7 @@ class ExecutorFactory
     /**
      * @return \DeployFileGenerator\Executor\ExecutorInterface
      */
-    public function createExportDeployFileTransferToYamlExecutor(): ExecutorInterface
+    protected function createExportDeployFileTransferToYamlExecutor(): ExecutorInterface
     {
         return new ExportDeployFileTransferToYamlExecutor(
             $this->deployFileFactory->createSymfonyYamlDumper(),
@@ -63,7 +78,7 @@ class ExecutorFactory
     /**
      * @return \DeployFileGenerator\Executor\ExecutorInterface
      */
-    public function createProjectImportDataExecutor(): ExecutorInterface
+    protected function createProjectImportDataExecutor(): ExecutorInterface
     {
         return new ImportProjectDataExecutor(
             $this->deployFileFactory->createYamlProjectDataImporter(),
@@ -74,11 +89,23 @@ class ExecutorFactory
     /**
      * @return \DeployFileGenerator\Executor\ExecutorInterface
      */
-    public function createBaseImportDataExecutor(): ExecutorInterface
+    protected function createBaseImportDataExecutor(): ExecutorInterface
     {
         return new ImportBaseDataExecutor(
             $this->deployFileFactory->createYamlBaseDataImporter(),
             $this->deployFileFactory->createYamlDeployFileMergeResolver(),
+        );
+    }
+
+    /**
+     * @return \DeployFileGenerator\Executor\ExecutorInterface
+     */
+    protected function createValidateDeployFileExecutor(): ExecutorInterface
+    {
+        return new ValidateDeployFileExecutor(
+            $this->deployFileFactory->createValidatorFactory()->createValidator(),
+            $this->deployFileFactory->createDeployFileConfig()->getValidationRulesFilePath(),
+            $this->deployFileFactory->createSymfonyYamlParser(),
         );
     }
 

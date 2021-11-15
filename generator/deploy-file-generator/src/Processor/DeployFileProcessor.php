@@ -8,20 +8,20 @@
 
 namespace DeployFileGenerator\Processor;
 
-use DeployFileGenerator\Strategy\DeployFileBuildStrategyInterface;
+use DeployFileGenerator\Strategy\DeployFileStrategyInterface;
 use DeployFileGenerator\Transfer\DeployFileTransfer;
 
 class DeployFileProcessor implements DeployFileProcessorInterface
 {
     /**
-     * @var \DeployFileGenerator\Strategy\DeployFileBuildStrategyInterface
+     * @var \DeployFileGenerator\Strategy\DeployFileStrategyInterface
      */
     protected $strategy;
 
     /**
-     * @param \DeployFileGenerator\Strategy\DeployFileBuildStrategyInterface $strategy
+     * @param \DeployFileGenerator\Strategy\DeployFileStrategyInterface $strategy
      */
-    public function __construct(DeployFileBuildStrategyInterface $strategy)
+    public function __construct(DeployFileStrategyInterface $strategy)
     {
         $this->strategy = $strategy;
     }

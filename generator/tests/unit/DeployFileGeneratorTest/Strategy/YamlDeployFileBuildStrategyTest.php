@@ -9,8 +9,8 @@ namespace Unit\DeployFileGeneratorTest\Strategy;
 
 use Codeception\Test\Unit;
 use DeployFileGenerator\Executor\ExecutorInterface;
-use DeployFileGenerator\Strategy\DeployFileBuildStrategyInterface;
-use DeployFileGenerator\Strategy\YamlDeployFileBuildStrategy;
+use DeployFileGenerator\Strategy\DeployFileStrategyInterface;
+use DeployFileGenerator\Strategy\DeployFileStrategy;
 use DeployFileGenerator\Transfer\DeployFileTransfer;
 
 class YamlDeployFileBuildStrategyTest extends Unit
@@ -81,11 +81,11 @@ class YamlDeployFileBuildStrategyTest extends Unit
     }
 
     /**
-     * @return \DeployFileGenerator\Strategy\DeployFileBuildStrategyInterface
+     * @return \DeployFileGenerator\Strategy\DeployFileStrategyInterface
      */
-    protected function createYamlDeployFileBuildStrategy(): DeployFileBuildStrategyInterface
+    protected function createYamlDeployFileBuildStrategy(): DeployFileStrategyInterface
     {
-        return new YamlDeployFileBuildStrategy(
+        return new DeployFileStrategy(
             $this->getExecutorsCollection()
         );
     }

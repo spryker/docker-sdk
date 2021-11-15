@@ -2,6 +2,7 @@
 
 use DeployFileGenerator\DeployFileFactory;
 use Spatie\Url\Url;
+use Symfony\Component\Console\Output\ConsoleOutput;
 use Symfony\Component\Yaml\Parser;
 use Twig\Environment;
 use Twig\Loader\ChainLoader;
@@ -1276,7 +1277,11 @@ function buildProjectYaml(string $mainProjectYaml): string
     $deployFileFactory = new DeployFileFactory();
     $deployFileProcessor = $deployFileFactory->createDeployFileBuilder();
 
-    return $deployFileProcessor->build($mainProjectYaml, $mainProjectYaml)->getOutputFilePath();
+    $deployFileTransfer = $deployFileProcessor->build($mainProjectYaml);
+    $deployFileFactory->createOutput()
+        ->buildValidationResult($deployFileTransfer->getValidationMessageBagTransfer(), new ConsoleOutput());
+
+    return $deployFileTransfer->getOutputFilePath();
 }
 
 /**

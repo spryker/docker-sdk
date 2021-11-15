@@ -1,20 +1,19 @@
 <?php
-
 /**
  * This file is part of the Spryker Suite.
  * For full license information, please view the LICENSE file that was distributed with this source code.
  */
 
-namespace DeployFileGenerator\Strategy;
+namespace DeployFileGenerator\Configurator;
 
 use DeployFileGenerator\Transfer\DeployFileTransfer;
 
-interface DeployFileBuildStrategyInterface
+interface DeployFileConfiguratorInterface
 {
     /**
-     * @param \DeployFileGenerator\Transfer\DeployFileTransfer $deployFileTransfer
+     * @param string $inputFilePath
      *
      * @return \DeployFileGenerator\Transfer\DeployFileTransfer
      */
-    public function execute(DeployFileTransfer $deployFileTransfer): DeployFileTransfer;
+    public function config(string $inputFilePath): DeployFileTransfer;
 }
