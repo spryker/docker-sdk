@@ -481,11 +481,27 @@ dashboard:
 
 
 ### Configuration
-To configure Tideways, adjust your `deploy.*.yml` as follows:
+
+Follow the steps to enable Tideways:
+
+1. Adjust `deploy.*.yml` in the `image:` section to enable and configure the Tideways PHP extension:
 
 ```yaml
-tideways:
-    apikey: {tideways_api_key}
-    environment-name: {tideways_environment_name}
-    cli-enabled: {true|false}
+image:
+    tag: spryker/php:7.3 # Use the same tag you had in `image:`
+    php:
+        ...
+        ini:
+            "tideways.connection": "tcp://tideways:9135"
+        enabled-extensions:
+            - tideways
+```
+
+2. Adjust `deploy.*.yml` in the `services:` section to configure Tideways:
+```yaml
+services:
+    tideways:
+        apikey: {tideways_api_key}
+        environment: {tideways_environment}
+        cli-enabled: {true|false}
 ```
