@@ -3,7 +3,7 @@
       context: ./${DEPLOYMENT_PATH}/images/common/services/tideways/
       dockerfile: Dockerfile
       args:
-        TIDEWAYS_ENVIRONMENT_DEFAULT: "{{ serviceData.environment | default('production') }}"
+        TIDEWAYS_ENVIRONMENT_DEFAULT: "{{ serviceData.environment | default('development') }}"
     networks:
       - private
     labels:

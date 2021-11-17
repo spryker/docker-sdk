@@ -796,7 +796,7 @@ The swagger-ui *Service* used to run Swagger UI to develop API endpoints.
 An application profiler *Service* for testing and debugging.
 * Project-wide
   - `tideways: apikey:` - defines the api-key to authenticate with Tideways.
-  - `tideways: environment-name:` - defines the environment name of your environment on Tideways. This variable is optional with the default value of `production`.
+  - `tideways: environment:` - defines the environment name of your environment on Tideways. This variable is optional with the default value of `development`.
   - `tideways: cli-enabled:` - defines if profilling of CLI script is enabled. This variable is optional with the default value of `false`.
 
 

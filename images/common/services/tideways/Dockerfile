@@ -1,6 +1,6 @@
 FROM debian:stable-slim AS tideways-deamon
 
-ARG TIDEWAYS_ENVIRONMENT_DEFAULT=production
+ARG TIDEWAYS_ENVIRONMENT_DEFAULT=development
 ENV TIDEWAYS_ENVIRONMENT=$TIDEWAYS_ENVIRONMENT_DEFAULT
 
 RUN apt update -y && apt install -yq --no-install-recommends gnupg2 curl sudo ca-certificates
