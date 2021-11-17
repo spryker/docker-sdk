@@ -77,7 +77,7 @@ namespace: spryker-demo
 
 ### pipeline:
 
-Defines the installation recipe for the Spryker applications to the specific configuration file from the `config/install/` directory. 
+Defines the installation recipe for the Spryker applications to the specific configuration file from the `config/install/` directory.
 
 This variable is optional. If not specified, the default value applies: `pipeline: 'docker'`. Installation recipe configuration file: `config/install/docker.yml`.
 
@@ -203,8 +203,8 @@ Defines the list of *Regions*.
 
 <a name="regions-services"></a>
 * `regions: services:` - defines settings for *Region*-specific `services:`. Only `database:` and `mail: sender:` are allowed here.
-	* `regions: services: database:` - see [database:](#database-).
-	* `regions: services: mail: sender:` - defines the mail sender configuration. Possible values are `name:` and `email:`.
+    * `regions: services: database:` - see [database:](#database-).
+    * `regions: services: mail: sender:` - defines the mail sender configuration. Possible values are `name:` and `email:`.
 * `regions: stores:` - defines the list of *Stores*.
 <a name="regions-stores-services"></a>
 * `regions: stores: services:` - defines application-wide, *Store*-specific settings for *Services*. Only `broker:`, `key_value_store:` and `search:` are currently allowed here. See [services:](#services-) to learn more.
@@ -335,18 +335,18 @@ Optional parameters for `application:`:
 * `groups: applications: application: endpoints: auth: engine:` - defines an engine for the basic auth. Only one of the following is allowed per an endpoint: `basic` or `whitelist`.
   * Basic auth variables:
     * `groups: applications: application: endpoints: auth: users:` - defines user credentials for basic auth.
-    	* `groups: applications: application: endpoints: auth: users: username:` - defines a username for basic auth.
-	    * `groups: applications: application: endpoints: auth: users: password:` - defines a password for basic auth.
+        * `groups: applications: application: endpoints: auth: users: username:` - defines a username for basic auth.
+        * `groups: applications: application: endpoints: auth: users: password:` - defines a password for basic auth.
     * `groups: applications: application: endpoints: auth: exclude:` - defines the IPs from which clients can access the endpoint bypassing the basic auth.
   * Whitelist auth variables:
     * `groups: applications: application: endpoints: auth: include:` - defines the IPs to allow access from.
 
 * `groups: applications: application: endpoints: primal:` - defines if a ZED endpoint is primal for a store. Yves and Glue applications send Zed RPC calls to the primal endpoint. This variable is optional with the default value of `false`. If no endpoint is defined as primal for a store, the first endpoint in descending order is considered primal.
 * `groups: applications: application: http: max-request-body-size:` - defines the maximum allowed size of the request body that can be sent to the application, in MB. If not specified, the default values apply:
-	* `backoffice` - `10m`
+    * `backoffice` - `10m`
     * `merchant-portal` - `10m`
-	* `glue` - `2m`
-	* `yves` - `1m`
+    * `glue` - `2m`
+    * `yves` - `1m`
 
 ```yaml
 ...
@@ -605,11 +605,11 @@ docker:
 Defines the composer settings to be used during deployment.
 
 1. `mode:` - defines whether packages should be installed from the  `require` or `require-dev` section of `composer.json`. Possible values are `--no-dev` and `-dev`. This variable is optional. If not specified, the default values apply:
-	* [Development mode]: `mode: --dev`
-	* [Demo mode]: `mode: --no-dev`
+    * [Development mode]: `mode: --dev`
+    * [Demo mode]: `mode: --no-dev`
 2. `autoload:` - defines composer autoload options. Possible values are `--optimize` and `--classmap-authoritative`. This variable is optional. If not specified, the default values apply:
-	* Development mode: `autoload: --optimize`
-	* Demo mode: `autoload: --classmap-authoritative`
+    * Development mode: `autoload: --optimize`
+    * Demo mode: `autoload: --classmap-authoritative`
 ***
 
 ## Services
