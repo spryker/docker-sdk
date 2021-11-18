@@ -64,12 +64,12 @@ class ConfigCommand extends Command
         $validationResult = $deployFileTransfer->getValidationMessageBagTransfer();
 
         $this->createDeployFileFactory()
-            ->createOutput()
+            ->createTableOutput()
             ->buildConfig($data, $output);
 
         if ($validationResult->getValidationResult() !== []) {
             $this->createDeployFileFactory()
-                ->createOutput()
+                ->createTableOutput()
                 ->buildValidationResult($validationResult, $output);
 
             return Command::FAILURE;

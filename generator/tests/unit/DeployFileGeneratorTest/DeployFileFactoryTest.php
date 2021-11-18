@@ -31,14 +31,6 @@ class DeployFileFactoryTest extends Unit
     /**
      * @return void
      */
-    public function testCreateYamlDeployFileProcessor(): void
-    {
-        $this->assertInstanceOfForThisFactoryMethod();
-    }
-
-    /**
-     * @return void
-     */
     public function testCreateYamlProjectDataImporter(): void
     {
         $this->assertInstanceOfForThisFactoryMethod();
@@ -136,6 +128,38 @@ class DeployFileFactoryTest extends Unit
      * @return void
      */
     public function testCreateDeployFileConfig(): void
+    {
+        $this->assertInstanceOfForThisFactoryMethod();
+    }
+
+    /**
+     * @return void
+     */
+    public function testCreateYamlDeployFileConfigStrategy(): void
+    {
+        $this->assertInstanceOfForThisFactoryMethod();
+    }
+
+    /**
+     * @return void
+     */
+    public function testCreateDeployFileConfigurator(): void
+    {
+        $this->assertInstanceOfForThisFactoryMethod();
+    }
+
+    /**
+     * @return void
+     */
+    public function testCreateYamlDeployFileConfigProcessor(): void
+    {
+        $this->assertInstanceOfForThisFactoryMethod();
+    }
+
+    /**
+     * @return void
+     */
+    public function testCreateTableOutput(): void
     {
         $this->assertInstanceOfForThisFactoryMethod();
     }

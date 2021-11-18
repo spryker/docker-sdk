@@ -1278,7 +1278,7 @@ function buildProjectYaml(string $mainProjectYaml): string
     $deployFileProcessor = $deployFileFactory->createDeployFileBuilder();
 
     $deployFileTransfer = $deployFileProcessor->build($mainProjectYaml);
-    $deployFileFactory->createOutput()
+    $deployFileFactory->createTableOutput()
         ->buildValidationResult($deployFileTransfer->getValidationMessageBagTransfer(), new ConsoleOutput());
 
     return $deployFileTransfer->getOutputFilePath();

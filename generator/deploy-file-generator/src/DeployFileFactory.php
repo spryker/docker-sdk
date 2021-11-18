@@ -20,7 +20,8 @@ use DeployFileGenerator\Importer\YamlDataImporter;
 use DeployFileGenerator\MergeResolver\MergeResolverInterface;
 use DeployFileGenerator\MergeResolver\Resolvers\ServiceMergeResolver;
 use DeployFileGenerator\MergeResolver\YamlDeployFileMergeResolver;
-use DeployFileGenerator\Output\Output;
+use DeployFileGenerator\Output\TableOutput;
+use DeployFileGenerator\Output\TableOutputInterface;
 use DeployFileGenerator\ParametersResolver\ParametersResolver;
 use DeployFileGenerator\ParametersResolver\ParametersResolverInterface;
 use DeployFileGenerator\ParametersResolver\Resolvers\PercentAnnotationParameterResolver;
@@ -203,10 +204,10 @@ class DeployFileFactory
     }
 
     /**
-     * @return \DeployFileGenerator\Output\Output
+     * @return \DeployFileGenerator\Output\TableOutputInterface
      */
-    public function createOutput(): Output
+    public function createTableOutput(): TableOutputInterface
     {
-        return new Output();
+        return new TableOutput();
     }
 }

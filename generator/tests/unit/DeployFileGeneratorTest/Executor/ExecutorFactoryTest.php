@@ -32,41 +32,9 @@ class ExecutorFactoryTest extends Unit
     /**
      * @return void
      */
-    public function testCreateExportDeployFileTransferToYamlExecutor(): void
-    {
-        $this->assertInstanceOfForThisFactoryMethod();
-    }
-
-    /**
-     * @return void
-     */
     public function testCreateYamlDeployFileBuildExecutorCollection(): void
     {
         $this->tester->assertIsArray($this->createExecutorFactory()->createYamlDeployFileBuildExecutorCollection());
-    }
-
-    /**
-     * @return void
-     */
-    public function testCreateProjectImportDataExecutor(): void
-    {
-        $this->assertInstanceOfForThisFactoryMethod();
-    }
-
-    /**
-     * @return void
-     */
-    public function testCreateBaseImportDataExecutor(): void
-    {
-        $this->assertInstanceOfForThisFactoryMethod();
-    }
-
-    /**
-     * @return void
-     */
-    public function testCreatePrepareDeployFileTransferExecutor(): void
-    {
-        $this->assertInstanceOfForThisFactoryMethod();
     }
 
     /**

@@ -9,7 +9,7 @@ namespace DeployFileGenerator\Output;
 use DeployFileGenerator\Transfer\Validation\Message\ValidationMessageBagTransfer;
 use Symfony\Component\Console\Output\OutputInterface as SymfonyOutputInterface;
 
-interface OutputInterface
+interface TableOutputInterface
 {
     /**
      * @param \DeployFileGenerator\Transfer\Validation\Message\ValidationMessageBagTransfer $validationMessageBagTransfer
