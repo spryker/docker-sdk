@@ -7,12 +7,11 @@
 namespace DeployFileGenerator\Output;
 
 use DeployFileGenerator\Transfer\Validation\Message\ValidationMessageBagTransfer;
-use DeployFileGenerator\Transfer\Validation\Message\ValidationRuleMessageTransfer;
 use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Helper\TableSeparator;
-use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Console\Output\OutputInterface as SymfonyOutputInterface;
 
-class Output
+class Output implements OutputInterface
 {
     /**
      * @param \DeployFileGenerator\Transfer\Validation\Message\ValidationMessageBagTransfer $validationMessageBagTransfer
@@ -20,7 +19,7 @@ class Output
      *
      * @return void
      */
-    public function buildValidationResult(ValidationMessageBagTransfer $validationMessageBagTransfer, OutputInterface $output): void
+    public function buildValidationResult(ValidationMessageBagTransfer $validationMessageBagTransfer, SymfonyOutputInterface $output): void
     {
         $validationResult = $validationMessageBagTransfer->getValidationResult();
         $rows = [];
@@ -45,7 +44,7 @@ class Output
      *
      * @return void
      */
-    public function buildConfig(array $data, OutputInterface $output): void
+    public function buildConfig(array $data, SymfonyOutputInterface $output): void
     {
         $tables = [];
         $mainTableRows = [];
@@ -86,7 +85,7 @@ class Output
      *
      * @return \Symfony\Component\Console\Helper\Table
      */
-    protected function createTable(string $title, array $rows, OutputInterface $output): Table
+    protected function createTable(string $title, array $rows, SymfonyOutputInterface $output): Table
     {
         $table = new Table($output->section());
 
