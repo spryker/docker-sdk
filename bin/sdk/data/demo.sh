@@ -47,7 +47,7 @@ function Data::load() {
         for store in "${STORES[@]}"; do
             SPRYKER_CURRENT_STORE="${store}"
             Console::info "Init storages for ${SPRYKER_CURRENT_STORE} store."
-            Compose::exec "vendor/bin/install${verboseOption} -r ${SPRYKER_PIPELINE} -s init-storages-per-store"
+            Compose::exec "SPRYKER_CURRENT_STORE=${SPRYKER_CURRENT_STORE} vendor/bin/install${verboseOption} -r ${SPRYKER_PIPELINE} -s init-storages-per-store"
         done
 
         SPRYKER_CURRENT_STORE="${STORES[0]}"
