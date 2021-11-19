@@ -4,47 +4,32 @@ This document describes how to run tests in different ways.
 
 ## What is a testing mode?
 
-Docker SDK allows you to run an application in an environment configured for testing.
+Docker SDK allows you to switch the application into the special mdoe, optimised for running your tests.
 
-In the testing mode, docker/sdk set of containers configured for testing. For example:
-1. background jobs are disabled;
-2. the webdriver container is present.
+The aim of the testing mode - is to allow you running tests in isolation, having a full control on the system under test and have all needed tooling in place. Once activating testing mode, the following happens:
+1. CLI, applicatoin and webserver contaienrs are switched to the "testing mode";
+2. Background jobs are disabled;
+3. The webdriver container for the end-to-end tests is created (if not yet) and launched.
 
 
+## Activating testing mode and running your tests
 
-## Running tests in the testing mode
+Your Codeception tests will be executed in the CLI container with the testing mode activated. You can acieve that by either switching your running environment (w.o. rebuilding containers) into the testing mode, or run/restart your environment with testing mode activated (with rebuilding contaienrs).
 
-To run tests, you need to run Codeception in a CLI container.
+### Activating testing mode on your running environment
 
-There are several similar ways to do that. Use the most suitable way for you.
-
-### Running tests in a dedicated testing container
-
-To run tests in a dedicated testing container:
-
-1. Start a new container in testing mode:
+To activate the testing mode on your running environment and enter CLI container:
 ```bash
 docker/sdk testing
 ```
 
-2. Run Codeception:
+Now, in the CLI container, you can run Codeception:
 ```bash
 codecept run
 ```
+Same as with other CLI commands, you can run the above in a single command, e.g. `docker/sdk testing codecept run`.
 
-### Running tests in a dedicated testing container with a single command
-
-To run tests in a dedicated testing container with a single command, run `docker/sdk testing codecept run`.
-
-The command runs tests as follows:
-
-1. Start a new container in testing mode.
-2. Run Codeception.
-3. Stop the container.
-
-### Running tests with all containers in the testing mode
-
-To run tests with all containers in testing mode:
+### Run / resrart your environment in a testing mode
 
 1. Restart all containers in testing mode:
 
@@ -53,7 +38,7 @@ docker/sdk up -t
 ```
 2. Switch to the CLI container:
 ```bash
-docker/sdk testing
+docker/sdk cli -t
 ```
 3. Run Codeception:
 ```bash
@@ -139,3 +124,13 @@ params:
     - tests/default.yml
     - env
 ```
+
+## Stopping the testing mode
+
+Once you're done with running your tests, you can get back to the development mode by simply runing
+
+```bash
+docker/sdk start
+```
+
+This will stop/remove the webdriver, run the scheduler and deactivate testing mode.
