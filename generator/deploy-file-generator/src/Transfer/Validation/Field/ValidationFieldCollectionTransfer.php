@@ -9,12 +9,12 @@ namespace DeployFileGenerator\Transfer\Validation\Field;
 class ValidationFieldCollectionTransfer
 {
     /**
-     * @var array<ValidationFieldTransfer>
+     * @var array<\DeployFileGenerator\Transfer\Validation\Field\ValidationFieldTransfer>
      */
     protected $fields = [];
 
     /**
-     * @return array<ValidationFieldTransfer>
+     * @return array<\DeployFileGenerator\Transfer\Validation\Field\ValidationFieldTransfer>
      */
     public function getFields(): array
     {
@@ -22,7 +22,7 @@ class ValidationFieldCollectionTransfer
     }
 
     /**
-     * @param array<ValidationFieldTransfer> $fields
+     * @param array<\DeployFileGenerator\Transfer\Validation\Field\ValidationFieldTransfer> $fields
      *
      * @return $this
      */

@@ -31,7 +31,7 @@ class DeployFileFactoryTest extends Unit
     /**
      * @return void
      */
-    public function testCreateYamlProjectDataImporter(): void
+    public function testCreateProjectDataImporter(): void
     {
         $this->assertInstanceOfForThisFactoryMethod();
     }
@@ -39,23 +39,7 @@ class DeployFileFactoryTest extends Unit
     /**
      * @return void
      */
-    public function testCreateYamlDeployFileBuildStrategy(): void
-    {
-        $this->assertInstanceOfForThisFactoryMethod();
-    }
-
-    /**
-     * @return void
-     */
-    public function testCreateYamlDeployFileMergeResolver(): void
-    {
-        $this->assertInstanceOfForThisFactoryMethod();
-    }
-
-    /**
-     * @return void
-     */
-    public function testCreateExecutorFactory(): void
+    public function testCreateDeployFileMergeResolver(): void
     {
         $this->assertInstanceOfForThisFactoryMethod();
     }
@@ -79,14 +63,6 @@ class DeployFileFactoryTest extends Unit
     /**
      * @return void
      */
-    public function testCreateDeployFileBuilder(): void
-    {
-        $this->assertInstanceOfForThisFactoryMethod();
-    }
-
-    /**
-     * @return void
-     */
     public function testGetMergeResolverCollection(): void
     {
         $this->tester->assertIsArray($this->createDeployFileFactory()->getMergeResolverCollection());
@@ -103,7 +79,7 @@ class DeployFileFactoryTest extends Unit
     /**
      * @return void
      */
-    public function testCreateYamlBaseDataImporter(): void
+    public function testCreateBaseDataImporter(): void
     {
         $this->assertInstanceOfForThisFactoryMethod();
     }
@@ -135,23 +111,7 @@ class DeployFileFactoryTest extends Unit
     /**
      * @return void
      */
-    public function testCreateYamlDeployFileConfigStrategy(): void
-    {
-        $this->assertInstanceOfForThisFactoryMethod();
-    }
-
-    /**
-     * @return void
-     */
-    public function testCreateDeployFileConfigurator(): void
-    {
-        $this->assertInstanceOfForThisFactoryMethod();
-    }
-
-    /**
-     * @return void
-     */
-    public function testCreateYamlDeployFileConfigProcessor(): void
+    public function testCreateDeployFileConfigProcessor(): void
     {
         $this->assertInstanceOfForThisFactoryMethod();
     }

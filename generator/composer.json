@@ -29,7 +29,7 @@
     "require-dev": {
         "squizlabs/php_codesniffer": "^3.6",
         "phpunit/phpunit": "^9.5",
-        "spryker/code-sniffer": "^0.16.5",
+        "spryker/code-sniffer": "^0.17.1",
         "codeception/codeception": "^4.1",
         "codeception/module-phpbrowser": "^1.0.0",
         "codeception/module-asserts": "^1.0.0",

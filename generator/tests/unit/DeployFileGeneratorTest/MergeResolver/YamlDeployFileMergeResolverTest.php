@@ -9,7 +9,7 @@ namespace Unit\DeployFileGeneratorTest\MergeResolver;
 
 use Codeception\Test\Unit;
 use DeployFileGenerator\MergeResolver\MergeResolverInterface;
-use DeployFileGenerator\MergeResolver\YamlDeployFileMergeResolver;
+use DeployFileGenerator\MergeResolver\DeployFileMergeResolver;
 
 class YamlDeployFileMergeResolverTest extends Unit
 {
@@ -23,7 +23,7 @@ class YamlDeployFileMergeResolverTest extends Unit
      */
     public function testResolve(): void
     {
-        $yamlDeployFileMergeResolver = new YamlDeployFileMergeResolver(
+        $yamlDeployFileMergeResolver = new DeployFileMergeResolver(
             $this->createMergeResolverCollection()
         );
 

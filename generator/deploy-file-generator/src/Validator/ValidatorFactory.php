@@ -7,9 +7,7 @@
 
 namespace DeployFileGenerator\Validator;
 
-use DeployFileGenerator\ArrayAccessor\ArrayAccessor;
-use DeployFileGenerator\ArrayAccessor\ArrayAccessorInterface;
-use DeployFileGenerator\DeployFileFactory;
+use DeployFileGenerator\DeployFileConfig;
 use DeployFileGenerator\Validator\Builder\ValidationFieldCollectionBuilder;
 use DeployFileGenerator\Validator\Builder\ValidationFieldCollectionBuilderInterface;
 use DeployFileGenerator\Validator\Rule\GroupRegionRule;
@@ -20,6 +18,7 @@ use DeployFileGenerator\Validator\Rule\RangeValue;
 use DeployFileGenerator\Validator\Rule\RequireRule;
 use DeployFileGenerator\Validator\Rule\Type\ArrayType;
 use DeployFileGenerator\Validator\Rule\Type\StringTypeRule;
+use Symfony\Component\Yaml\Parser;
 
 class ValidatorFactory
 {
@@ -34,31 +33,15 @@ class ValidatorFactory
     }
 
     /**
-     * @return \DeployFileGenerator\ArrayAccessor\ArrayAccessorInterface
-     */
-    protected function createArrayAccessor(): ArrayAccessorInterface
-    {
-        return new ArrayAccessor();
-    }
-
-    /**
      * @return \DeployFileGenerator\Validator\Builder\ValidationFieldCollectionBuilderInterface
      */
     protected function createValidationFieldCollectionBuilder(): ValidationFieldCollectionBuilderInterface
     {
         return new ValidationFieldCollectionBuilder(
-            $this->createDeployFileFactory()->createDeployFileConfig()->getValidationRulesFilePath(),
-            $this->createDeployFileFactory()->createSymfonyYamlParser(),
+            $this->createDeployFileConfig()->getValidationRulesFilePath(),
+            $this->createSymfonyYamlParser(),
             $this->getValidatorRuleMap(),
         );
-    }
-
-    /**
-     * @return \DeployFileGenerator\DeployFileFactory
-     */
-    protected function createDeployFileFactory(): DeployFileFactory
-    {
-        return new DeployFileFactory();
     }
 
     /**
@@ -76,5 +59,21 @@ class ValidatorFactory
             GroupRegionRule::RULE_NAME => GroupRegionRule::class,
             RangeValue::RULE_NAME => RangeValue::class,
         ];
+    }
+
+    /**
+     * @return \DeployFileGenerator\DeployFileConfig
+     */
+    protected function createDeployFileConfig(): DeployFileConfig
+    {
+        return new DeployFileConfig();
+    }
+
+    /**
+     * @return \Symfony\Component\Yaml\Parser
+     */
+    public function createSymfonyYamlParser(): Parser
+    {
+        return new Parser();
     }
 }

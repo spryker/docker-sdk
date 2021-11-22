@@ -8,6 +8,7 @@
 namespace DeployFileGenerator\Command;
 
 use DeployFileGenerator\DeployFileFactory;
+use DeployFileGenerator\Transfer\DeployFileTransfer;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -56,21 +57,23 @@ class ConfigCommand extends Command
      */
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $deployFileTransfer = $this->createDeployFileFactory()
-            ->createDeployFileConfigurator()
-            ->config($input->getArgument(static::DEPLOY_FILE_PATH));
+        $deployFileTransfer = new DeployFileTransfer();
+        $deployFileTransfer = $deployFileTransfer->setInputFilePath($input->getArgument(static::DEPLOY_FILE_PATH));
 
-        $data = $deployFileTransfer->getResultData();
-        $validationResult = $deployFileTransfer->getValidationMessageBagTransfer();
+        $deployFileTransfer = $this->createDeployFileFactory()
+            ->createDeployFileConfigProcessor()
+            ->process($deployFileTransfer);
+
+        $validationMessageBagTransfer = $deployFileTransfer->getValidationMessageBagTransfer();
 
         $this->createDeployFileFactory()
-            ->createTableOutput()
-            ->buildConfig($data, $output);
+            ->createDeployFileYamlOutput()
+            ->render($deployFileTransfer, $output);
 
-        if ($validationResult->getValidationResult() !== []) {
+        if ($validationMessageBagTransfer->getValidationResult() !== []) {
             $this->createDeployFileFactory()
-                ->createTableOutput()
-                ->buildValidationResult($validationResult, $output);
+                ->createValidationTableOutput()
+                ->render($deployFileTransfer, $output);
 
             return Command::FAILURE;
         }

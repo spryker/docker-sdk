@@ -11,12 +11,12 @@ use DeployFileGenerator\Validator\Rule\RuleInterface;
 class ValidationRuleCollectionTransfer
 {
     /**
-     * @var array<RuleInterface>
+     * @var array<\DeployFileGenerator\Validator\Rule\RuleInterface>
      */
     protected $validationRules = [];
 
     /**
-     * @return array<RuleInterface>
+     * @return array<\DeployFileGenerator\Validator\Rule\RuleInterface>
      */
     public function getValidationRules(): array
     {
@@ -24,7 +24,7 @@ class ValidationRuleCollectionTransfer
     }
 
     /**
-     * @param array<RuleInterface> $validationRules
+     * @param array<\DeployFileGenerator\Validator\Rule\RuleInterface> $validationRules
      *
      * @return $this
      */

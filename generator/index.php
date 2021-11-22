@@ -1,6 +1,7 @@
 <?php
 
 use DeployFileGenerator\DeployFileFactory;
+use DeployFileGenerator\Transfer\DeployFileTransfer;
 use Spatie\Url\Url;
 use Symfony\Component\Console\Output\ConsoleOutput;
 use Symfony\Component\Yaml\Parser;
@@ -1274,14 +1275,19 @@ function generateToken($tokenLength = 80): string
  */
 function buildProjectYaml(string $mainProjectYaml): string
 {
+    $deployFileTransfer = new DeployFileTransfer();
+    $deployFileTransfer = $deployFileTransfer->setInputFilePath($mainProjectYaml);
+    $deployFileTransfer = $deployFileTransfer->setOutputFilePath($mainProjectYaml);
+
     $deployFileFactory = new DeployFileFactory();
-    $deployFileProcessor = $deployFileFactory->createDeployFileBuilder();
+    $deployFileTransfer = $deployFileFactory->createDeployFileBuildProcessor()->process($deployFileTransfer);
 
-    $deployFileTransfer = $deployFileProcessor->build($mainProjectYaml);
-    $deployFileFactory->createTableOutput()
-        ->buildValidationResult($deployFileTransfer->getValidationMessageBagTransfer(), new ConsoleOutput());
+    if ($deployFileTransfer->getValidationMessageBagTransfer()->getValidationResult() == []) {
+        return $deployFileTransfer->getOutputFilePath();
+    }
 
-    return $deployFileTransfer->getOutputFilePath();
+    $deployFileFactory->createValidationTableOutput()->render($deployFileTransfer, new ConsoleOutput());
+    exit(1);
 }
 
 /**

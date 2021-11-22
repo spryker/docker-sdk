@@ -8,27 +8,31 @@
 
 namespace DeployFileGenerator;
 
-use DeployFileGenerator\Builder\DeployFileBuilder;
-use DeployFileGenerator\Builder\DeployFileBuilderInterface;
-use DeployFileGenerator\Configurator\DeployFileConfigurator;
-use DeployFileGenerator\Configurator\DeployFileConfiguratorInterface;
-use DeployFileGenerator\Executor\ExecutorFactory;
+use DeployFileGenerator\Executor\CleanUpExecutor;
+use DeployFileGenerator\Executor\ExecutorInterface;
+use DeployFileGenerator\Executor\ExportDeployFileTransferToYamlExecutor;
+use DeployFileGenerator\Executor\ImportBaseDataExecutor;
+use DeployFileGenerator\Executor\ImportProjectDataExecutor;
+use DeployFileGenerator\Executor\PrepareDeployFileTransferExecutor;
+use DeployFileGenerator\Executor\SortResultDataExecutor;
+use DeployFileGenerator\Executor\ValidateDeployFileExecutor;
 use DeployFileGenerator\FileFinder\FileFinder;
 use DeployFileGenerator\FileFinder\FileFinderInterface;
+use DeployFileGenerator\Importer\DataImporter;
 use DeployFileGenerator\Importer\DeployFileImporterInterface;
-use DeployFileGenerator\Importer\YamlDataImporter;
+use DeployFileGenerator\MergeResolver\DeployFileMergeResolver;
 use DeployFileGenerator\MergeResolver\MergeResolverInterface;
 use DeployFileGenerator\MergeResolver\Resolvers\ServiceMergeResolver;
-use DeployFileGenerator\MergeResolver\YamlDeployFileMergeResolver;
-use DeployFileGenerator\Output\TableOutput;
-use DeployFileGenerator\Output\TableOutputInterface;
+use DeployFileGenerator\Output\DeployFileYamlOutput;
+use DeployFileGenerator\Output\OutputInterface;
+use DeployFileGenerator\Output\Table\TableBuilder;
+use DeployFileGenerator\Output\Table\TableBuilderInterface;
+use DeployFileGenerator\Output\ValidationTableOutput;
 use DeployFileGenerator\ParametersResolver\ParametersResolver;
 use DeployFileGenerator\ParametersResolver\ParametersResolverInterface;
 use DeployFileGenerator\ParametersResolver\Resolvers\PercentAnnotationParameterResolver;
 use DeployFileGenerator\Processor\DeployFileProcessor;
 use DeployFileGenerator\Processor\DeployFileProcessorInterface;
-use DeployFileGenerator\Strategy\DeployFileStrategy;
-use DeployFileGenerator\Strategy\DeployFileStrategyInterface;
 use DeployFileGenerator\Validator\ValidatorFactory;
 use Symfony\Component\Yaml\Dumper;
 use Symfony\Component\Yaml\Parser;
@@ -36,91 +40,84 @@ use Symfony\Component\Yaml\Parser;
 class DeployFileFactory
 {
     /**
-     * @return \DeployFileGenerator\Builder\DeployFileBuilderInterface
+     * @return \DeployFileGenerator\Processor\DeployFileProcessorInterface
      */
-    public function createDeployFileBuilder(): DeployFileBuilderInterface
+    public function createDeployFileBuildProcessor(): DeployFileProcessorInterface
     {
-        return new DeployFileBuilder(
-            $this->createYamlDeployFileBuildProcessor(),
-        );
+        return new DeployFileProcessor($this->createDeployFileBuildExecutorCollection());
     }
 
     /**
      * @return \DeployFileGenerator\Processor\DeployFileProcessorInterface
      */
-    public function createYamlDeployFileBuildProcessor(): DeployFileProcessorInterface
+    public function createDeployFileConfigProcessor(): DeployFileProcessorInterface
     {
-        return new DeployFileProcessor(
-            $this->createYamlDeployFileBuildStrategy(),
-        );
+        return new DeployFileProcessor($this->createDeployFileConfigExecutorCollection());
     }
 
     /**
-     * @return \DeployFileGenerator\Configurator\DeployFileConfiguratorInterface
+     * @return array<\DeployFileGenerator\Executor\ExecutorInterface>
      */
-    public function createDeployFileConfigurator(): DeployFileConfiguratorInterface
+    public function createDeployFileBuildExecutorCollection(): array
     {
-        return new DeployFileConfigurator($this->createYamlDeployFileConfigProcessor());
+        return [
+            $this->createPrepareDeployFileTransferExecutor(),
+            $this->createProjectImportDataExecutor(),
+            $this->createBaseImportDataExecutor(),
+            $this->createCleanUpExecutor(),
+            $this->createSortResultDataExecutor(),
+            $this->createValidateDeployFileExecutor(),
+            $this->createExportDeployFileTransferToYamlExecutor(),
+        ];
     }
 
     /**
-     * @return \DeployFileGenerator\Processor\DeployFileProcessorInterface
+     * @return array<\DeployFileGenerator\Executor\ExecutorInterface>
      */
-    public function createYamlDeployFileConfigProcessor(): DeployFileProcessorInterface
+    public function createDeployFileConfigExecutorCollection(): array
     {
-        return new DeployFileProcessor(
-            $this->createYamlDeployFileConfigStrategy(),
-        );
-    }
-
-    /**
-     * @return \DeployFileGenerator\Strategy\DeployFileStrategyInterface
-     */
-    public function createYamlDeployFileBuildStrategy(): DeployFileStrategyInterface
-    {
-        return new DeployFileStrategy($this->createExecutorFactory()->createYamlDeployFileBuildExecutorCollection());
-    }
-
-    /**
-     * @return \DeployFileGenerator\Strategy\DeployFileStrategyInterface
-     */
-    public function createYamlDeployFileConfigStrategy(): DeployFileStrategyInterface
-    {
-        return new DeployFileStrategy($this->createExecutorFactory()->createYamlDeployFileConfigExecutorCollection());
+        return [
+            $this->createPrepareDeployFileTransferExecutor(),
+            $this->createProjectImportDataExecutor(),
+            $this->createBaseImportDataExecutor(),
+            $this->createCleanUpExecutor(),
+            $this->createSortResultDataExecutor(),
+            $this->createValidateDeployFileExecutor(),
+        ];
     }
 
     /**
      * @return \DeployFileGenerator\Importer\DeployFileImporterInterface
      */
-    public function createYamlProjectDataImporter(): DeployFileImporterInterface
+    public function createProjectDataImporter(): DeployFileImporterInterface
     {
-        return new YamlDataImporter(
+        return new DataImporter(
             $this->createDeployFileConfig()->getProjectDirectoryPath(),
             $this->createSymfonyYamlParser(),
             $this->createParametersResolver(),
-            $this->createYamlDeployFileMergeResolver(),
+            $this->createDeployFileMergeResolver(),
         );
     }
 
     /**
      * @return \DeployFileGenerator\Importer\DeployFileImporterInterface
      */
-    public function createYamlBaseDataImporter(): DeployFileImporterInterface
+    public function createBaseDataImporter(): DeployFileImporterInterface
     {
-        return new YamlDataImporter(
+        return new DataImporter(
             $this->createDeployFileConfig()->getBaseDirectoryPath(),
             $this->createSymfonyYamlParser(),
             $this->createParametersResolver(),
-            $this->createYamlDeployFileMergeResolver(),
+            $this->createDeployFileMergeResolver(),
         );
     }
 
     /**
      * @return \DeployFileGenerator\MergeResolver\MergeResolverInterface
      */
-    public function createYamlDeployFileMergeResolver(): MergeResolverInterface
+    public function createDeployFileMergeResolver(): MergeResolverInterface
     {
-        return new YamlDeployFileMergeResolver(
+        return new DeployFileMergeResolver(
             $this->getMergeResolverCollection(),
         );
     }
@@ -188,26 +185,109 @@ class DeployFileFactory
     }
 
     /**
-     * @return \DeployFileGenerator\Executor\ExecutorFactory
+     * @return \DeployFileGenerator\Output\OutputInterface
      */
-    public function createExecutorFactory(): ExecutorFactory
+    public function createDeployFileYamlOutput(): OutputInterface
     {
-        return new ExecutorFactory($this);
+        return new DeployFileYamlOutput(
+            $this->createSymfonyYamlDumper(),
+            $this->createDeployFileConfig()->getYamlInline(),
+        );
+    }
+
+    /**
+     * @return \DeployFileGenerator\Output\OutputInterface
+     */
+    public function createValidationTableOutput(): OutputInterface
+    {
+        return new ValidationTableOutput($this->createTableBuilder());
+    }
+
+    /**
+     * @return \DeployFileGenerator\Executor\ExecutorInterface
+     */
+    public function createPrepareDeployFileTransferExecutor(): ExecutorInterface
+    {
+        return new PrepareDeployFileTransferExecutor(
+            $this->createSymfonyYamlParser(),
+            $this->createFileFinder(),
+        );
+    }
+
+    /**
+     * @return \DeployFileGenerator\Executor\ExecutorInterface
+     */
+    public function createExportDeployFileTransferToYamlExecutor(): ExecutorInterface
+    {
+        return new ExportDeployFileTransferToYamlExecutor(
+            $this->createSymfonyYamlDumper(),
+            $this->createDeployFileConfig()->getYamlInline(),
+        );
+    }
+
+    /**
+     * @return \DeployFileGenerator\Executor\ExecutorInterface
+     */
+    public function createProjectImportDataExecutor(): ExecutorInterface
+    {
+        return new ImportProjectDataExecutor(
+            $this->createProjectDataImporter(),
+            $this->createDeployFileMergeResolver(),
+        );
+    }
+
+    /**
+     * @return \DeployFileGenerator\Executor\ExecutorInterface
+     */
+    public function createBaseImportDataExecutor(): ExecutorInterface
+    {
+        return new ImportBaseDataExecutor(
+            $this->createBaseDataImporter(),
+            $this->createDeployFileMergeResolver(),
+        );
+    }
+
+    /**
+     * @return \DeployFileGenerator\Executor\ExecutorInterface
+     */
+    public function createValidateDeployFileExecutor(): ExecutorInterface
+    {
+        return new ValidateDeployFileExecutor(
+            $this->createValidatorFactory()->createValidator(),
+        );
+    }
+
+    /**
+     * @return \DeployFileGenerator\Executor\ExecutorInterface
+     */
+    public function createCleanUpExecutor(): ExecutorInterface
+    {
+        return new CleanUpExecutor();
+    }
+
+    /**
+     * @return \DeployFileGenerator\Executor\ExecutorInterface
+     */
+    public function createSortResultDataExecutor(): ExecutorInterface
+    {
+        return new SortResultDataExecutor(
+            $this->createDeployFileConfig()->getDeployFileOutputOrderKeys(),
+        );
+    }
+
+    /**
+     * @return \DeployFileGenerator\Output\Table\TableBuilderInterface
+     */
+    public function createTableBuilder(): TableBuilderInterface
+    {
+        return new TableBuilder();
     }
 
     /**
      * @return \DeployFileGenerator\Validator\ValidatorFactory
      */
-    public function createValidatorFactory(): ValidatorFactory
+    protected function createValidatorFactory(): ValidatorFactory
     {
         return new ValidatorFactory();
-    }
-
-    /**
-     * @return \DeployFileGenerator\Output\TableOutputInterface
-     */
-    public function createTableOutput(): TableOutputInterface
-    {
-        return new TableOutput();
     }
 }
