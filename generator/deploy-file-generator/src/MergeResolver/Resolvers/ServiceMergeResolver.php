@@ -7,6 +7,7 @@
 
 namespace DeployFileGenerator\MergeResolver\Resolvers;
 
+use DeployFileGenerator\DeployFileConstants;
 use DeployFileGenerator\MergeResolver\MergeResolverInterface;
 
 class ServiceMergeResolver implements MergeResolverInterface
@@ -21,19 +22,19 @@ class ServiceMergeResolver implements MergeResolverInterface
     {
         $resultData = array_replace_recursive($importData, $projectData);
 
-        if (!array_key_exists('services', $resultData)) {
+        if (!array_key_exists(DeployFileConstants::YAML_SERVICES_KEY, $resultData)) {
             return $resultData;
         }
 
-        $services = $resultData['services'];
+        $services = $resultData[DeployFileConstants::YAML_SERVICES_KEY];
 
         foreach ($services as $serviceName => $serviceParams) {
             if ($serviceParams == null) {
-                unset($services[$serviceName]);
+                $services[$serviceName] = DeployFileConstants::YAML_SERVICE_NULL_VALUE;
             }
         }
 
-        $resultData['services'] = $services;
+        $resultData[DeployFileConstants::YAML_SERVICES_KEY] = $services;
 
         return $resultData;
     }

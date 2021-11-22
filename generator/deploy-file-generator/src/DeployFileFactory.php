@@ -8,6 +8,10 @@
 
 namespace DeployFileGenerator;
 
+use DeployFileGenerator\Cleaner\Cleaner;
+use DeployFileGenerator\Cleaner\CleanerInterface;
+use DeployFileGenerator\Cleaner\Cleaners\ImportsCleaner;
+use DeployFileGenerator\Cleaner\Cleaners\ServicesCleaner;
 use DeployFileGenerator\Executor\CleanUpExecutor;
 use DeployFileGenerator\Executor\ExecutorInterface;
 use DeployFileGenerator\Executor\ExportDeployFileTransferToYamlExecutor;
@@ -262,7 +266,7 @@ class DeployFileFactory
      */
     public function createCleanUpExecutor(): ExecutorInterface
     {
-        return new CleanUpExecutor();
+        return new CleanUpExecutor($this->createCleaner());
     }
 
     /**
@@ -284,10 +288,29 @@ class DeployFileFactory
     }
 
     /**
+     * @return \DeployFileGenerator\Cleaner\CleanerInterface
+     */
+    public function createCleaner(): CleanerInterface
+    {
+        return new Cleaner($this->createDeployFileCleanerCollection());
+    }
+
+    /**
      * @return \DeployFileGenerator\Validator\ValidatorFactory
      */
     protected function createValidatorFactory(): ValidatorFactory
     {
         return new ValidatorFactory();
+    }
+
+    /**
+     * @return array<\DeployFileGenerator\Cleaner\CleanerInterface>
+     */
+    protected function createDeployFileCleanerCollection(): array
+    {
+        return [
+            new ImportsCleaner(),
+            new ServicesCleaner(),
+        ];
     }
 }

@@ -8,6 +8,7 @@
 namespace Unit\DeployFileGeneratorTest\Executor;
 
 use Codeception\Test\Unit;
+use DeployFileGenerator\Cleaner\CleanerInterface;
 use DeployFileGenerator\DeployFileConstants;
 use DeployFileGenerator\Executor\CleanUpExecutor;
 use DeployFileGenerator\Executor\ExecutorInterface;
@@ -80,6 +81,21 @@ class CleanUpExecutorTest extends Unit
      */
     protected function getCleanUpExecutor(): ExecutorInterface
     {
-        return new CleanUpExecutor();
+        return new CleanUpExecutor($this->makeEmpty(
+            CleanerInterface::class,
+            ['clean' => function(DeployFileTransfer $deployFileTransfer) {
+                $resultData = $deployFileTransfer->getResultData();
+
+                if (!array_key_exists(DeployFileConstants::YAML_IMPORTS_KEY, $resultData)) {
+                    return $deployFileTransfer;
+                }
+
+                unset($resultData[DeployFileConstants::YAML_IMPORTS_KEY]);
+
+                $deployFileTransfer = $deployFileTransfer->setResultData($resultData);
+
+                return $deployFileTransfer;
+            }]
+        ));
     }
 }

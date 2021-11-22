@@ -18,4 +18,14 @@ interface DeployFileConstants
      * @var string
      */
     public const YAML_PARAMETERS_KEY = 'parameters';
+
+    /**
+     * @var string
+     */
+    public const YAML_SERVICES_KEY = 'services';
+
+    /**
+     * @var string
+     */
+    public const YAML_SERVICE_NULL_VALUE = 'NULL';
 }
