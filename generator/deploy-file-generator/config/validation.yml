@@ -19,15 +19,10 @@ pipeline:
 regions:
     require:
     not-empty:
+regions.*:
+    array-type:
 regions.*.services:
-    only-key:
-        - mail
-        - database
-regions.*.stores.*.services:
-    only-key:
-        - broker
-        - key_value_store
-        - search
+    not-empty:
 
 # Image:
 image.tag:
@@ -35,69 +30,53 @@ image.tag:
 image.environment:
     array-type:
 image.php:
-    only-key:
-        - ini
-        - enabled-extensions
+    array-type:
 image.php.enabled-extensions:
-    only-value:
-        - blackfire
-        - newrelic
-        - tideways
+    array-type:
 
 # Assets
 assets.image:
     string-type:
-assets.compression:
-    only-key:
-        - gzip
-        - brotli
 assets.mode:
     string-type:
-    only-value:
-        - production
-        - development
 assets.compression.*.static:
-    only-value:
-        - only
-        - true
-        - false
+    string-type:
 assets.compression.*.level:
-    range-value:
-        - 1
-        - 5
+    integer-type:
 
 # Groups
 groups.*.region:
     group-region:
 groups.*.applications.*.application:
-    only-value:
-        - backoffice
-        - backend-gateway
-        - zed
-        - yves
-        - glue
-        - merchant-portal
+    string-type:
+groups.*.applications.*.endpoints:
+    array-type:
 
 # Services
-services.database.engine:
+services.*.engine:
+    string-type:
+services.*.endpoints:
+    array-type:
+
+# Docker
+docker.ssl.enabled:
     only-value:
-        - postgres
-        - mysql
-services.broker.engine:
+        - true
+        - false
+docker.ssl.redirect:
     only-value:
-        - rabbitmq
-services.session.engine:
+        - true
+        - false
+docker.testing.store:
+    string-type:
+docker.debug.enabled:
     only-value:
-        - redis
-services.key_value_store.engine:
+        - true
+        - false
+docker.debug.xdebug.enabled:
     only-value:
-        - redis
-services.search.engine:
-    only-value:
-        - elastic
-services.scheduler.engine:
-    only-value:
-        - jenkins
-services.mail_catcher.engine:
-    only-value:
-        - mailhog
+        - true
+        - false
+
+docker.mount.*:
+    array-type:

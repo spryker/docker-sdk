@@ -9,17 +9,17 @@ namespace DeployFileGenerator\Validator\Rule\Type;
 use DeployFileGenerator\Validator\Rule\AbstractRule;
 use Illuminate\Support\Arr;
 
-class ArrayType extends AbstractRule
+class IntegerType extends AbstractRule
 {
     /**
      * @var string
      */
-    public const RULE_NAME = 'array-type';
+    public const RULE_NAME = 'integer-type';
 
     /**
      * @var string
      */
-    protected const VALIDATION_MESSAGE_TEMPLATE = '`%s` should be Array.';
+    protected const VALIDATION_MESSAGE_TEMPLATE = '`%s` should be Integer.';
 
     /**
      * @param string $validateField
@@ -39,16 +39,12 @@ class ArrayType extends AbstractRule
             return true;
         }
 
-        if (!$this->isWildCardFieldName($validateField)) {
-            return is_array($data);
+        if (!$this->isWildCardFieldName($validateField) || !is_array($data)) {
+            return is_int($data);
         }
 
         foreach ($data as $item) {
-            if ($item == null) {
-                continue;
-            }
-
-            if (!is_array($item)) {
+            if (!is_int($item)) {
                 return false;
             }
         }

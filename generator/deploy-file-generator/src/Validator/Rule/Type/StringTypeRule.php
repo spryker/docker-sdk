@@ -30,10 +30,26 @@ class StringTypeRule extends AbstractRule
      */
     public function isValid(string $validateField, array $data): bool
     {
-        if (!Arr::has($data, $validateField)) {
+        if (!$this->isWildCardFieldName($validateField) && !Arr::has($data, $validateField)) {
             return true;
         }
 
-        return is_string(data_get($data, $validateField));
+        $data = data_get($data, $validateField);
+
+        if ($data == null) {
+            return true;
+        }
+
+        if (!$this->isWildCardFieldName($validateField) || !is_array($data)) {
+            return is_string($data);
+        }
+
+        foreach ($data as $item) {
+            if (!is_string($item)) {
+                return false;
+            }
+        }
+
+        return true;
     }
 }
