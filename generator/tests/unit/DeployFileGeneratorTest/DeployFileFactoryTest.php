@@ -117,14 +117,6 @@ class DeployFileFactoryTest extends Unit
     }
 
     /**
-     * @return void
-     */
-    public function testCreateTableOutput(): void
-    {
-        $this->assertInstanceOfForThisFactoryMethod();
-    }
-
-    /**
      * @return \DeployFileGenerator\DeployFileFactory
      */
     private function createDeployFileFactory(): DeployFileFactory
