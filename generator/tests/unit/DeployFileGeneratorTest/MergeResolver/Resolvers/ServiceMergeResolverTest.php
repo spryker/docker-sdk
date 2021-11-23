@@ -10,7 +10,6 @@ namespace Unit\DeployFileGeneratorTest\MergeResolver\Resolvers;
 use Codeception\Test\Unit;
 use DeployFileGenerator\DeployFileConstants;
 use DeployFileGenerator\MergeResolver\Resolvers\ServiceMergeResolver;
-use DeployFileGenerator\Transfer\DeployFileTransfer;
 
 class ServiceMergeResolverTest extends Unit
 {

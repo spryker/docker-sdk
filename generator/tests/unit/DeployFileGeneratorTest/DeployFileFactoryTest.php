@@ -117,6 +117,38 @@ class DeployFileFactoryTest extends Unit
     }
 
     /**
+     * @return void
+     */
+    public function testCreateDeployFileBuildProcessor(): void
+    {
+        $this->assertInstanceOfForThisFactoryMethod();
+    }
+
+    /**
+     * @return void
+     */
+    public function testCreateTableBuilder(): void
+    {
+        $this->assertInstanceOfForThisFactoryMethod();
+    }
+
+    /**
+     * @return void
+     */
+    public function testCreateValidationTableOutput(): void
+    {
+        $this->assertInstanceOfForThisFactoryMethod();
+    }
+
+    /**
+     * @return void
+     */
+    public function testCreateDeployFileYamlOutput(): void
+    {
+        $this->assertInstanceOfForThisFactoryMethod();
+    }
+
+    /**
      * @return \DeployFileGenerator\DeployFileFactory
      */
     private function createDeployFileFactory(): DeployFileFactory

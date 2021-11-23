@@ -27,35 +27,35 @@ class PercentAnnotationParameterResolverTest extends Unit
             'demo',
             $percentAnnotationParameterResolver->resolveValue('%env%', [
                 'env' => 'demo',
-            ])
+            ]),
         );
 
         $this->assertEquals(
             'some-demo-environment',
             $percentAnnotationParameterResolver->resolveValue('some-%env%-environment', [
                 'env' => 'demo',
-            ])
+            ]),
         );
 
         $this->assertEquals(
             123,
             $percentAnnotationParameterResolver->resolveValue(123, [
                 'env' => 'demo',
-            ])
+            ]),
         );
 
         $this->assertEquals(
             'some-string-without-annotation',
             $percentAnnotationParameterResolver->resolveValue('some-string-without-annotation', [
                 'env' => 'demo',
-            ])
+            ]),
         );
 
         $this->assertEquals(
             'some-%env%-environment',
             $percentAnnotationParameterResolver->resolveValue('some-%env%-environment', [
                 'other-param' => 'demo',
-            ])
+            ]),
         );
     }
 

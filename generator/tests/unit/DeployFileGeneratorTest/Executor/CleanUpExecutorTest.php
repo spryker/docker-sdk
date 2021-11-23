@@ -36,12 +36,12 @@ class CleanUpExecutorTest extends Unit
         ];
 
         $deployFileTransfer = $this->getCleanUpExecutor()->execute(
-            $this->createDeployFileTransferWithResultData($resultData)
+            $this->createDeployFileTransferWithResultData($resultData),
         );
 
         $this->tester->assertArrayNotHasKey(
             DeployFileConstants::YAML_IMPORTS_KEY,
-            $deployFileTransfer->getResultData()
+            $deployFileTransfer->getResultData(),
         );
     }
 
@@ -55,12 +55,12 @@ class CleanUpExecutorTest extends Unit
         ];
 
         $deployFileTransfer = $this->getCleanUpExecutor()->execute(
-            $this->createDeployFileTransferWithResultData($resultData)
+            $this->createDeployFileTransferWithResultData($resultData),
         );
 
         $this->tester->assertArrayNotHasKey(
             DeployFileConstants::YAML_IMPORTS_KEY,
-            $deployFileTransfer->getResultData()
+            $deployFileTransfer->getResultData(),
         );
     }
 
@@ -83,7 +83,8 @@ class CleanUpExecutorTest extends Unit
     {
         return new CleanUpExecutor($this->makeEmpty(
             CleanerInterface::class,
-            ['clean' => function(DeployFileTransfer $deployFileTransfer) {
+            [
+            'clean' => function (DeployFileTransfer $deployFileTransfer) {
                 $resultData = $deployFileTransfer->getResultData();
 
                 if (!array_key_exists(DeployFileConstants::YAML_IMPORTS_KEY, $resultData)) {
@@ -95,7 +96,7 @@ class CleanUpExecutorTest extends Unit
                 $deployFileTransfer = $deployFileTransfer->setResultData($resultData);
 
                 return $deployFileTransfer;
-            }]
+            }],
         ));
     }
 }

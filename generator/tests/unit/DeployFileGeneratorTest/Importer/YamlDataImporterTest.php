@@ -8,8 +8,8 @@
 namespace Unit\DeployFileGeneratorTest\Importer;
 
 use Codeception\Test\Unit;
-use DeployFileGenerator\Importer\DeployFileImporterInterface;
 use DeployFileGenerator\Importer\DataImporter;
+use DeployFileGenerator\Importer\DeployFileImporterInterface;
 use DeployFileGenerator\MergeResolver\MergeResolverInterface;
 use DeployFileGenerator\ParametersResolver\ParametersResolverInterface;
 use Symfony\Component\Yaml\Parser;
@@ -58,7 +58,7 @@ class YamlDataImporterTest extends Unit
                 'resolve' => function (array $projectData, array $importData) {
                     return array_merge_recursive($importData, $projectData);
                 },
-            ])
+            ]),
         );
     }
 }

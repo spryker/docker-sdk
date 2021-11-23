@@ -16,8 +16,8 @@ use DeployFileGenerator\Validator\Rule\OnlyKeyRule;
 use DeployFileGenerator\Validator\Rule\OnlyValueRule;
 use DeployFileGenerator\Validator\Rule\RangeValue;
 use DeployFileGenerator\Validator\Rule\RequireRule;
-use DeployFileGenerator\Validator\Rule\Type\ArrayType;
-use DeployFileGenerator\Validator\Rule\Type\IntegerType;
+use DeployFileGenerator\Validator\Rule\Type\ArrayTypeRule;
+use DeployFileGenerator\Validator\Rule\Type\IntegerTypeRule;
 use DeployFileGenerator\Validator\Rule\Type\StringTypeRule;
 use Symfony\Component\Yaml\Parser;
 
@@ -56,10 +56,10 @@ class ValidatorFactory
             StringTypeRule::RULE_NAME => StringTypeRule::class,
             OnlyKeyRule::RULE_NAME => OnlyKeyRule::class,
             OnlyValueRule::RULE_NAME => OnlyValueRule::class,
-            ArrayType::RULE_NAME => ArrayType::class,
+            ArrayTypeRule::RULE_NAME => ArrayTypeRule::class,
             GroupRegionRule::RULE_NAME => GroupRegionRule::class,
             RangeValue::RULE_NAME => RangeValue::class,
-            IntegerType::RULE_NAME => IntegerType::class,
+            IntegerTypeRule::RULE_NAME => IntegerTypeRule::class,
         ];
     }
 

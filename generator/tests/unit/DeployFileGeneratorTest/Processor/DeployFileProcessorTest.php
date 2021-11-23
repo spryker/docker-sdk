@@ -19,6 +19,7 @@ class DeployFileProcessorTest extends Unit
      * @var string
      */
     protected const NEW_KEY = 'some_key';
+
     /**
      * @var string
      */
@@ -52,15 +53,16 @@ class DeployFileProcessorTest extends Unit
     {
         return new DeployFileProcessor([
             $this->makeEmpty(
-                ExecutorInterface::class, [
-                    'execute' => function(DeployFileTransfer $deployFileTransfer) {
+                ExecutorInterface::class,
+                [
+                    'execute' => function (DeployFileTransfer $deployFileTransfer) {
                         $newRawData = $deployFileTransfer->getRawData();
                         $newRawData[static::NEW_KEY] = static::NEW_DATA;
 
                         return $deployFileTransfer->setRawData($newRawData);
                     },
-                ]
-            )
+                ],
+            ),
         ]);
     }
 }

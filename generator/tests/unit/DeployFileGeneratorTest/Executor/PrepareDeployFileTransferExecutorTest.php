@@ -22,6 +22,7 @@ class PrepareDeployFileTransferExecutorTest extends Unit
      * @var string
      */
     protected const PROJECT_YML_FILE_NAME = 'project.yml';
+
     /**
      * @var string
      */
