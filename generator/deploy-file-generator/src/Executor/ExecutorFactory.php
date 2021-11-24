@@ -25,7 +25,7 @@ class ExecutorFactory
     }
 
     /**
-     * @return \DeployFileGenerator\Executor\ExecutorInterface[]
+     * @return array<\DeployFileGenerator\Executor\ExecutorInterface>
      */
     public function createYamlDeployFileBuildExecutorCollection(): array
     {
@@ -45,7 +45,7 @@ class ExecutorFactory
     {
         return new PrepareDeployFileTransferExecutor(
             $this->deployFileFactory->createSymfonyYamlParser(),
-            $this->deployFileFactory->createFileFinder()
+            $this->deployFileFactory->createFileFinder(),
         );
     }
 
@@ -56,7 +56,7 @@ class ExecutorFactory
     {
         return new ExportDeployFileTransferToYamlExecutor(
             $this->deployFileFactory->createSymfonyYamlDumper(),
-            $this->deployFileFactory->createDeployFileConfig()->getYamlInline()
+            $this->deployFileFactory->createDeployFileConfig()->getYamlInline(),
         );
     }
 
@@ -67,7 +67,7 @@ class ExecutorFactory
     {
         return new ImportProjectDataExecutor(
             $this->deployFileFactory->createYamlProjectDataImporter(),
-            $this->deployFileFactory->createYamlDeployFileMergeResolver()
+            $this->deployFileFactory->createYamlDeployFileMergeResolver(),
         );
     }
 
@@ -78,7 +78,7 @@ class ExecutorFactory
     {
         return new ImportBaseDataExecutor(
             $this->deployFileFactory->createYamlBaseDataImporter(),
-            $this->deployFileFactory->createYamlDeployFileMergeResolver()
+            $this->deployFileFactory->createYamlDeployFileMergeResolver(),
         );
     }
 

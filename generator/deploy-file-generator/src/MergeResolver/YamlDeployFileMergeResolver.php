@@ -10,12 +10,12 @@ namespace DeployFileGenerator\MergeResolver;
 class YamlDeployFileMergeResolver implements MergeResolverInterface
 {
     /**
-     * @var \DeployFileGenerator\MergeResolver\MergeResolverInterface[]
+     * @var array<\DeployFileGenerator\MergeResolver\MergeResolverInterface>
      */
     protected $resolvers;
 
     /**
-     * @param \DeployFileGenerator\MergeResolver\MergeResolverInterface[] $resolvers
+     * @param array<\DeployFileGenerator\MergeResolver\MergeResolverInterface> $resolvers
      */
     public function __construct(array $resolvers)
     {

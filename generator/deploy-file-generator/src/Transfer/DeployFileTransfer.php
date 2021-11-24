@@ -30,12 +30,12 @@ class DeployFileTransfer
     protected $outputFilePath = '';
 
     /**
-     * @var string[]
+     * @var array<string>
      */
     protected $projectImports = [];
 
     /**
-     * @var string[]
+     * @var array<string>
      */
     protected $baseImports = [];
 
@@ -120,7 +120,7 @@ class DeployFileTransfer
     }
 
     /**
-     * @return string[]
+     * @return array<string>
      */
     public function getProjectImports(): array
     {
@@ -128,7 +128,7 @@ class DeployFileTransfer
     }
 
     /**
-     * @param string[] $projectImports
+     * @param array<string> $projectImports
      *
      * @return $this
      */
@@ -140,7 +140,7 @@ class DeployFileTransfer
     }
 
     /**
-     * @return string[]
+     * @return array<string>
      */
     public function getBaseImports(): array
     {
@@ -148,7 +148,7 @@ class DeployFileTransfer
     }
 
     /**
-     * @param string[] $baseImports
+     * @param array<string> $baseImports
      *
      * @return $this
      */

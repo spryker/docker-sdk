@@ -35,12 +35,12 @@ class CleanUpExecutorTest extends Unit
         ];
 
         $deployFileTransfer = $this->getCleanUpExecutor()->execute(
-            $this->createDeployFileTransferWithResultData($resultData)
+            $this->createDeployFileTransferWithResultData($resultData),
         );
 
         $this->tester->assertArrayNotHasKey(
             DeployFileConstants::YAML_IMPORTS_KEY,
-            $deployFileTransfer->getResultData()
+            $deployFileTransfer->getResultData(),
         );
     }
 
@@ -54,12 +54,12 @@ class CleanUpExecutorTest extends Unit
         ];
 
         $deployFileTransfer = $this->getCleanUpExecutor()->execute(
-            $this->createDeployFileTransferWithResultData($resultData)
+            $this->createDeployFileTransferWithResultData($resultData),
         );
 
         $this->tester->assertArrayNotHasKey(
             DeployFileConstants::YAML_IMPORTS_KEY,
-            $deployFileTransfer->getResultData()
+            $deployFileTransfer->getResultData(),
         );
     }
 

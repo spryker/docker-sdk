@@ -19,6 +19,7 @@ class DeployFileBuilderTest extends Unit
      * @var string
      */
     protected const INPUT_FILE_PATH = 'input-file-path';
+
     /**
      * @var string
      */
@@ -53,7 +54,7 @@ class DeployFileBuilderTest extends Unit
                 'process' => function (DeployFileTransfer $deployFileTransfer) {
                     return $deployFileTransfer;
                 },
-            ])
+            ]),
         );
     }
 }

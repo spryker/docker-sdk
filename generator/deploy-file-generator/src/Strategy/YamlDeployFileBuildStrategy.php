@@ -12,12 +12,12 @@ use DeployFileGenerator\Transfer\DeployFileTransfer;
 class YamlDeployFileBuildStrategy implements DeployFileBuildStrategyInterface
 {
     /**
-     * @var \DeployFileGenerator\Executor\ExecutorInterface[]
+     * @var array<\DeployFileGenerator\Executor\ExecutorInterface>
      */
     protected $executors;
 
     /**
-     * @param \DeployFileGenerator\Executor\ExecutorInterface[] $executors
+     * @param array<\DeployFileGenerator\Executor\ExecutorInterface> $executors
      */
     public function __construct(array $executors)
     {

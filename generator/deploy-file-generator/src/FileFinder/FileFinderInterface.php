@@ -19,7 +19,7 @@ interface FileFinderInterface
     /**
      * @param string $fileName
      *
-     * @return string
+     * @return string|null
      */
     public function getFilePathOnProjectLayer(string $fileName): ?string;
 }

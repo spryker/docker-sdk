@@ -18,10 +18,12 @@ class FileFinderTest extends Unit
      * @var string
      */
     protected const BASE_PATH = './tests/_output/base/';
+
     /**
      * @var string
      */
     protected const PROJECT_PATH = './tests/_output/project/';
+
     /**
      * @var string
      */

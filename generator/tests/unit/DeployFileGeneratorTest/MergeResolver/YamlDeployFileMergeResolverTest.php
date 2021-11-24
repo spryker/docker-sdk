@@ -24,7 +24,7 @@ class YamlDeployFileMergeResolverTest extends Unit
     public function testResolve(): void
     {
         $yamlDeployFileMergeResolver = new YamlDeployFileMergeResolver(
-            $this->createMergeResolverCollection()
+            $this->createMergeResolverCollection(),
         );
 
         $projectData = [

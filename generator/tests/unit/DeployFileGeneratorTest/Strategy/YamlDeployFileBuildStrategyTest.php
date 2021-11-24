@@ -19,14 +19,17 @@ class YamlDeployFileBuildStrategyTest extends Unit
      * @var string
      */
     protected const NEW_INPUT_YAML_PATH = 'new-input-path.yml';
+
     /**
      * @var string
      */
     protected const INPUT_YAML_PATH = 'input-path.yml';
+
     /**
      * @var string
      */
     protected const NEW_KEY = 'some_key';
+
     /**
      * @var string
      */
@@ -86,7 +89,7 @@ class YamlDeployFileBuildStrategyTest extends Unit
     protected function createYamlDeployFileBuildStrategy(): DeployFileBuildStrategyInterface
     {
         return new YamlDeployFileBuildStrategy(
-            $this->getExecutorsCollection()
+            $this->getExecutorsCollection(),
         );
     }
 }

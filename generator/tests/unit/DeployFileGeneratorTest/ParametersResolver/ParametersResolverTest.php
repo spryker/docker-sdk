@@ -24,7 +24,7 @@ class ParametersResolverTest extends Unit
     public function testResolveParams(): void
     {
         $parametersResolver = new ParametersResolver(
-            $this->createResolverCollection()
+            $this->createResolverCollection(),
         );
 
         $data = [

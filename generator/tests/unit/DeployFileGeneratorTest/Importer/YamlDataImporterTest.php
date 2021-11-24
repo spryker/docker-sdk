@@ -58,7 +58,7 @@ class YamlDataImporterTest extends Unit
                 'resolve' => function (array $projectData, array $importData) {
                     return array_merge_recursive($importData, $projectData);
                 },
-            ])
+            ]),
         );
     }
 }

@@ -44,7 +44,7 @@ class ExportDeployFileTransferToYamlExecutorTest extends Unit
         $this->tester->assertFileExists(static::EXPORT_FILE_PATH);
         $this->tester->assertEquals(
             $this->getResultData(),
-            $this->createParser()->parseFile($deployFileTransfer->getOutputFilePath())
+            $this->createParser()->parseFile($deployFileTransfer->getOutputFilePath()),
         );
     }
 
@@ -60,7 +60,7 @@ class ExportDeployFileTransferToYamlExecutorTest extends Unit
     }
 
     /**
-     * @return string[]
+     * @return array<string>
      */
     protected function getResultData(): array
     {

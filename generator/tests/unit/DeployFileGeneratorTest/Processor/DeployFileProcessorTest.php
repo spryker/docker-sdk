@@ -19,6 +19,7 @@ class DeployFileProcessorTest extends Unit
      * @var string
      */
     protected const NEW_KEY = 'some_key';
+
     /**
      * @var string
      */
@@ -66,7 +67,7 @@ class DeployFileProcessorTest extends Unit
     protected function createDeployFileProcessor(): DeployFileProcessorInterface
     {
         return new DeployFileProcessor(
-            $this->createStrategyMock()
+            $this->createStrategyMock(),
         );
     }
 }
