@@ -1,4 +1,7 @@
 # Deploy file reference — version 1
+
+
+
 This reference page describes version 1 of the Deploy file format. This is the newest version.
 <div class="bg-section">
 <h2> Glossary</h2>
@@ -39,17 +42,7 @@ Find B2B and B2C deploy file examples for [development](06-installation/installa
 | [B2C Demo Shop deploy file](https://github.com/spryker-shop/b2c-demo-shop/blob/master/deploy.dev.yml) | [B2C Demo Shop deploy file](https://github.com/spryker-shop/b2c-demo-shop/blob/master/deploy.yml) |
 | [B2B Demo Shop deploy file](https://github.com/spryker-shop/b2b-demo-shop/blob/master/deploy.dev.yml) | [B2B Demo Shop deploy file](https://github.com/spryker-shop/b2b-demo-shop/blob/master/deploy.yml) |
 
-Deploy file has inheritance and parameter functionality. Builder grabs all included files, merges and resolves parameters.
-Deploy file Builder are using two layers for file storing:
-- `Project layer` exists on spryker project layer and has path`./config/deploy-templates`.
-- `Base layer` exists on docker-sdk layer and has path`./**{docker-sdk-directory}**/generator/deploy-file-generator/templates`.
 
-Merge and parameter resolving has a priority order:
-1) `project layer` - all files and parameters from`./Config/deploy-templates`;
-2) `main deploy file` - deploy file on project layer (`deploy.yml`, `deploy.*.yml`);
-3) `base layer` - all files and parameters from`./**{docker-sdk-directory}**/generator/deploy-file-generator/templates`;
-
-Generated file you can find by path (./** {docker-sdk-directory} ** / deployment / default / project.yml)
 ***
 ### version:
 
@@ -140,20 +133,39 @@ environment: 'docker'
 
 ### imports:
 
-Defines the deploy files which should be included into full generated `deploy.yml`.
-For importing file should be existed on `project` or `base` layers.
+Defines additional deploy files to be included into a build. The files must exist on a [project or base layer](/docs/scos/dev/the-docker-sdk/deploy-file.html).
+
 ```yaml
 version: 1.0
 
 imports:
     deploy.base.template.yml:
 ```
-***
-For using dynamic configuration, import file have a parameters.
-For resolving parameters using annotation formats:
- - '%' - percent annotation;
 
-`deploy.dev.yml`
+{% info_block infoBox "Merged deploy files" %}
+
+If you include a deploy file, the included deploy file is merged with the original one. The final deploy file is used to build the application. You can find it at `/{DOCKER_SDK_DIRECTORY}/deployment/default/project.yml`.
+
+{% endinfo_block %}
+
+
+***
+
+### imports: {deploy_file_name}:
+
+Defines the configuration to be used when parsing the included deploy file.
+* `{deploy_file_name}: parameters:` - defines the [dynamic parameters](/01-deploy-file.md#dynamic-parameters) to be used when parsing the included deploy file. In the included deploy file, the parameter name should be wrapped in `%`.
+
+```yaml
+version: 1.0
+
+imports:
+    {deploy_file_name}:
+      parameters:
+        {dynamic_parameter_name}: '{dynamic_parameter_value}'
+```
+Example:
+
 ```yaml
 version: 1.0
 
@@ -162,21 +174,7 @@ imports:
       parameters:
         env_name: 'dev'
 ```
-***
 
-`deploy.base.template.yml`
-```yaml
-version: 1.0
-
-imports:
-    environment/%env_name%/image.deploy.template.yml:
-    environment/%env_name%/composer.deploy.template.yml:
-    environment/%env_name%/assets.deploy.template.yml:
-    environment/%env_name%/regions.deploy.template.yml:
-    environment/%env_name%/groups.deploy.template.yml:
-    environment/%env_name%/services.deploy.template.yml:
-    environment/%env_name%/docker.deploy.template.yml:
-```
 ***
 
 ### image:
@@ -283,7 +281,7 @@ regions:
 
 ### groups:
 
-Defines the list of *Groups**.
+Defines the list of *Groups*.
 
 * `groups: region:` - defines the relation to a *Region* by key.
 * `groups: applications:` - defines the list of *Applications*. See [groups: applications:](#groups-applications-) to learn more.
