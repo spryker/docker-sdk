@@ -44,7 +44,7 @@ class IntegerTypeRule extends AbstractRule
         }
 
         foreach ($data as $item) {
-            if (!is_int($item)) {
+            if (!is_int($item) && !is_null($item)) {
                 return false;
             }
         }

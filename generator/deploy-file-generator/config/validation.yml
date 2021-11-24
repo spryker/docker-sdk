@@ -39,8 +39,6 @@ assets.image:
     string-type:
 assets.mode:
     string-type:
-assets.compression.*.static:
-    string-type:
 assets.compression.*.level:
     integer-type:
 
