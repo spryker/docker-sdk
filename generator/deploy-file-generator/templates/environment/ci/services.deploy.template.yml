@@ -1,14 +1,8 @@
 services:
     database:
         engine: postgres
-        root:
-            username: 'root'
-            password: 'secret'
     broker:
         engine: rabbitmq
-        api:
-            username: 'spryker'
-            password: 'secret'
     session:
         engine: redis
     key_value_store:

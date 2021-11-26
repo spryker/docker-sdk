@@ -7,7 +7,7 @@
 
 namespace DeployFileGenerator\MergeResolver;
 
-class YamlDeployFileMergeResolver implements MergeResolverInterface
+class DeployFileMergeResolver implements MergeResolverInterface
 {
     /**
      * @var array<\DeployFileGenerator\MergeResolver\MergeResolverInterface>

@@ -8,8 +8,8 @@
 namespace Unit\DeployFileGeneratorTest\Importer;
 
 use Codeception\Test\Unit;
+use DeployFileGenerator\Importer\DataImporter;
 use DeployFileGenerator\Importer\DeployFileImporterInterface;
-use DeployFileGenerator\Importer\YamlDataImporter;
 use DeployFileGenerator\MergeResolver\MergeResolverInterface;
 use DeployFileGenerator\ParametersResolver\ParametersResolverInterface;
 use Symfony\Component\Yaml\Parser;
@@ -46,7 +46,7 @@ class YamlDataImporterTest extends Unit
      */
     protected function createYamlDataImporter(): DeployFileImporterInterface
     {
-        return new YamlDataImporter(
+        return new DataImporter(
             static::PATH_PREFIX,
             $this->make(Parser::class),
             $this->makeEmpty(ParametersResolverInterface::class, [

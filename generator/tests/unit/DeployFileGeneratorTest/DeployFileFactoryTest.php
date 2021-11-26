@@ -31,7 +31,7 @@ class DeployFileFactoryTest extends Unit
     /**
      * @return void
      */
-    public function testCreateYamlDeployFileProcessor(): void
+    public function testCreateProjectDataImporter(): void
     {
         $this->assertInstanceOfForThisFactoryMethod();
     }
@@ -39,31 +39,7 @@ class DeployFileFactoryTest extends Unit
     /**
      * @return void
      */
-    public function testCreateYamlProjectDataImporter(): void
-    {
-        $this->assertInstanceOfForThisFactoryMethod();
-    }
-
-    /**
-     * @return void
-     */
-    public function testCreateYamlDeployFileBuildStrategy(): void
-    {
-        $this->assertInstanceOfForThisFactoryMethod();
-    }
-
-    /**
-     * @return void
-     */
-    public function testCreateYamlDeployFileMergeResolver(): void
-    {
-        $this->assertInstanceOfForThisFactoryMethod();
-    }
-
-    /**
-     * @return void
-     */
-    public function testCreateExecutorFactory(): void
+    public function testCreateDeployFileMergeResolver(): void
     {
         $this->assertInstanceOfForThisFactoryMethod();
     }
@@ -87,14 +63,6 @@ class DeployFileFactoryTest extends Unit
     /**
      * @return void
      */
-    public function testCreateDeployFileBuilder(): void
-    {
-        $this->assertInstanceOfForThisFactoryMethod();
-    }
-
-    /**
-     * @return void
-     */
     public function testGetMergeResolverCollection(): void
     {
         $this->tester->assertIsArray($this->createDeployFileFactory()->getMergeResolverCollection());
@@ -111,7 +79,7 @@ class DeployFileFactoryTest extends Unit
     /**
      * @return void
      */
-    public function testCreateYamlBaseDataImporter(): void
+    public function testCreateBaseDataImporter(): void
     {
         $this->assertInstanceOfForThisFactoryMethod();
     }
@@ -141,6 +109,46 @@ class DeployFileFactoryTest extends Unit
     }
 
     /**
+     * @return void
+     */
+    public function testCreateDeployFileConfigProcessor(): void
+    {
+        $this->assertInstanceOfForThisFactoryMethod();
+    }
+
+    /**
+     * @return void
+     */
+    public function testCreateDeployFileBuildProcessor(): void
+    {
+        $this->assertInstanceOfForThisFactoryMethod();
+    }
+
+    /**
+     * @return void
+     */
+    public function testCreateTableBuilder(): void
+    {
+        $this->assertInstanceOfForThisFactoryMethod();
+    }
+
+    /**
+     * @return void
+     */
+    public function testCreateValidationTableOutput(): void
+    {
+        $this->assertInstanceOfForThisFactoryMethod();
+    }
+
+    /**
+     * @return void
+     */
+    public function testCreateDeployFileYamlOutput(): void
+    {
+        $this->assertInstanceOfForThisFactoryMethod();
+    }
+
+    /**
      * @return \DeployFileGenerator\DeployFileFactory
      */
     private function createDeployFileFactory(): DeployFileFactory
@@ -165,7 +173,7 @@ class DeployFileFactoryTest extends Unit
     {
         $factoryMethod = $this->getFactoryMethod();
         $factoryReflection = new ReflectionMethod(DeployFileFactory::class, $factoryMethod);
-        $factoryMethodReturnType = $factoryReflection->getReturnType()->getName();
+        $factoryMethodReturnType = $factoryReflection->getReturnType();
 
         $resultObject = $this->createDeployFileFactory()->$factoryMethod();
 

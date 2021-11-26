@@ -8,22 +8,21 @@
 
 namespace DeployFileGenerator\Processor;
 
-use DeployFileGenerator\Strategy\DeployFileBuildStrategyInterface;
 use DeployFileGenerator\Transfer\DeployFileTransfer;
 
 class DeployFileProcessor implements DeployFileProcessorInterface
 {
     /**
-     * @var \DeployFileGenerator\Strategy\DeployFileBuildStrategyInterface
+     * @var array<\DeployFileGenerator\Executor\ExecutorInterface>
      */
-    protected $strategy;
+    protected $executors;
 
     /**
-     * @param \DeployFileGenerator\Strategy\DeployFileBuildStrategyInterface $strategy
+     * @param array<\DeployFileGenerator\Executor\ExecutorInterface> $executors
      */
-    public function __construct(DeployFileBuildStrategyInterface $strategy)
+    public function __construct(array $executors)
     {
-        $this->strategy = $strategy;
+        $this->executors = $executors;
     }
 
     /**
@@ -33,6 +32,10 @@ class DeployFileProcessor implements DeployFileProcessorInterface
      */
     public function process(DeployFileTransfer $deployFileTransfer): DeployFileTransfer
     {
-        return $this->strategy->execute($deployFileTransfer);
+        foreach ($this->executors as $executor) {
+            $deployFileTransfer = $executor->execute($deployFileTransfer);
+        }
+
+        return $deployFileTransfer;
     }
 }

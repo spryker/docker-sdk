@@ -13,7 +13,7 @@ use DeployFileGenerator\MergeResolver\MergeResolverInterface;
 use DeployFileGenerator\ParametersResolver\ParametersResolverInterface;
 use Symfony\Component\Yaml\Parser;
 
-class YamlDataImporter implements DeployFileImporterInterface
+class DataImporter implements DeployFileImporterInterface
 {
     /**
      * @var \Symfony\Component\Yaml\Parser
