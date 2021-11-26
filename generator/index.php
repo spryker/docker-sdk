@@ -1182,8 +1182,8 @@ function buildSecrets(string $deploymentDir): array
     $data = [];
     $openSshKeys = generateOpenSshKeys($deploymentDir);
 
-    $data['SPRYKER_OAUTH_KEY_PRIVATE'] = str_replace(PHP_EOL, '__LINE__', $openSshKeys['privateKey']);
-    $data['SPRYKER_OAUTH_KEY_PUBLIC'] = str_replace(PHP_EOL, '__LINE__', $openSshKeys['publicKey']);
+//    $data['SPRYKER_OAUTH_KEY_PRIVATE'] = str_replace(PHP_EOL, '__LINE__', $openSshKeys['privateKey']);
+//    $data['SPRYKER_OAUTH_KEY_PUBLIC'] = str_replace(PHP_EOL, '__LINE__', $openSshKeys['publicKey']);
     $data['SPRYKER_OAUTH_ENCRYPTION_KEY'] = generateToken(48);
     $data['SPRYKER_OAUTH_CLIENT_IDENTIFIER'] = 'frontend';
     $data['SPRYKER_OAUTH_CLIENT_SECRET'] = generateToken(48);
