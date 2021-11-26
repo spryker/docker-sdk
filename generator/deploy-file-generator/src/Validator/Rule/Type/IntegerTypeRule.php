@@ -19,7 +19,7 @@ class IntegerTypeRule extends AbstractRule
     /**
      * @var string
      */
-    protected const VALIDATION_MESSAGE_TEMPLATE = '`%s` should be Integer.';
+    public const VALIDATION_MESSAGE_TEMPLATE = '`%s` should be Integer.';
 
     /**
      * @param string $validateField

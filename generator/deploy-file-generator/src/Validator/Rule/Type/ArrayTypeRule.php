@@ -19,7 +19,7 @@ class ArrayTypeRule extends AbstractRule
     /**
      * @var string
      */
-    protected const VALIDATION_MESSAGE_TEMPLATE = '`%s` should be Array.';
+    public const VALIDATION_MESSAGE_TEMPLATE = '`%s` should be Array.';
 
     /**
      * @param string $validateField

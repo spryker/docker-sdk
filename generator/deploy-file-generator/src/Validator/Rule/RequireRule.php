@@ -19,7 +19,7 @@ class RequireRule extends AbstractRule
     /**
      * @var string
      */
-    protected const VALIDATION_MESSAGE_TEMPLATE = '`%s` is required.';
+    public const VALIDATION_MESSAGE_TEMPLATE = '`%s` is required.';
 
     /**
      * @param string $validateField

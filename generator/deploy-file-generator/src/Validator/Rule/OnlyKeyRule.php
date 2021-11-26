@@ -19,7 +19,7 @@ class OnlyKeyRule extends AbstractRule
     /**
      * @var string
      */
-    protected const VALIDATION_MESSAGE_TEMPLATE = '`%s` should contain %s only.';
+    public const VALIDATION_MESSAGE_TEMPLATE = '`%s` should contain %s only.';
 
     /**
      * @param string $validateField

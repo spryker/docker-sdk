@@ -20,7 +20,7 @@ class StringTypeRule extends AbstractRule
     /**
      * @var string
      */
-    protected const VALIDATION_MESSAGE_TEMPLATE = '`%s` should be String.';
+    public const VALIDATION_MESSAGE_TEMPLATE = '`%s` should be String.';
 
     /**
      * @param string $validateField
@@ -45,7 +45,7 @@ class StringTypeRule extends AbstractRule
         }
 
         foreach ($data as $item) {
-            if (!is_string($item)) {
+            if (!is_string($item) && !is_null($item)) {
                 return false;
             }
         }

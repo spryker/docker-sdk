@@ -18,7 +18,7 @@ class GroupRegionRule extends AbstractRule
     /**
      * @var string
      */
-    protected const VALIDATION_MESSAGE_TEMPLATE = '%s should be inited into Region section.';
+    public const VALIDATION_MESSAGE_TEMPLATE = '%s should be inited into Region section.';
 
     /**
      * @param string $validateField
@@ -33,6 +33,14 @@ class GroupRegionRule extends AbstractRule
         }
 
         $regionNames = data_get($data, $validateField);
+
+        if ($regionNames == null) {
+            return true;
+        }
+
+        if (!$this->isWildCardFieldName($validateField) || !is_array($regionNames)) {
+            return Arr::has($data, 'regions.' . $regionNames);
+        }
 
         foreach ($regionNames as $regionName) {
             if (!Arr::has($data, 'regions.' . $regionName)) {

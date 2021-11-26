@@ -19,7 +19,7 @@ class NotEmptyRule extends AbstractRule
     /**
      * @var string
      */
-    protected const VALIDATION_MESSAGE_TEMPLATE = '`%s` should not be empty.';
+    public const VALIDATION_MESSAGE_TEMPLATE = '`%s` should not be empty.';
 
     /**
      * @param string $validateField

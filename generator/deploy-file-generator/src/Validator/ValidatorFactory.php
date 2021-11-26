@@ -14,7 +14,7 @@ use DeployFileGenerator\Validator\Rule\GroupRegionRule;
 use DeployFileGenerator\Validator\Rule\NotEmptyRule;
 use DeployFileGenerator\Validator\Rule\OnlyKeyRule;
 use DeployFileGenerator\Validator\Rule\OnlyValueRule;
-use DeployFileGenerator\Validator\Rule\RangeValue;
+use DeployFileGenerator\Validator\Rule\RangeValueRule;
 use DeployFileGenerator\Validator\Rule\RequireRule;
 use DeployFileGenerator\Validator\Rule\Type\ArrayTypeRule;
 use DeployFileGenerator\Validator\Rule\Type\IntegerTypeRule;
@@ -58,7 +58,7 @@ class ValidatorFactory
             OnlyValueRule::RULE_NAME => OnlyValueRule::class,
             ArrayTypeRule::RULE_NAME => ArrayTypeRule::class,
             GroupRegionRule::RULE_NAME => GroupRegionRule::class,
-            RangeValue::RULE_NAME => RangeValue::class,
+            RangeValueRule::RULE_NAME => RangeValueRule::class,
             IntegerTypeRule::RULE_NAME => IntegerTypeRule::class,
         ];
     }

@@ -8,7 +8,7 @@ namespace DeployFileGenerator\Validator\Rule;
 
 use Illuminate\Support\Arr;
 
-class RangeValue extends AbstractRule
+class RangeValueRule extends AbstractRule
 {
     /**
      * @var string
@@ -18,7 +18,7 @@ class RangeValue extends AbstractRule
     /**
      * @var string
      */
-    protected const VALIDATION_MESSAGE_TEMPLATE = '%s should be in range %s';
+    public const VALIDATION_MESSAGE_TEMPLATE = '%s should be in range %s';
 
     /**
      * @param string $validateField
@@ -40,8 +40,20 @@ class RangeValue extends AbstractRule
             return true;
         }
 
+        if (!$this->isWildCardFieldName($validateField) || !is_array($data)) {
+            if (!is_int($data)) {
+                return true;
+            }
+
+            return !($data < $this->ruleConfig[0] || $data > $this->ruleConfig[1]);
+        }
+
         foreach ($data as $range) {
-            if ($range < $this->ruleConfig[0] || $range > $this->ruleConfig[1]) {
+            if (!is_int($range)) {
+                continue;
+            }
+
+            if ($range > $this->ruleConfig[0] || $range < $this->ruleConfig[1]) {
                 return false;
             }
         }

@@ -19,7 +19,7 @@ abstract class AbstractRule implements RuleInterface
     /**
      * @var string
      */
-    protected const VALIDATION_MESSAGE_TEMPLATE = '';
+    public const VALIDATION_MESSAGE_TEMPLATE = '';
 
     /**
      * @var array

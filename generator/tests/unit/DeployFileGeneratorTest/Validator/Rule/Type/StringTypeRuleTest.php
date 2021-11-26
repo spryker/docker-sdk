@@ -7,29 +7,40 @@
 namespace Unit\DeployFileGeneratorTest\Validator\Rule\Type;
 
 use DeployFileGenerator\Validator\Rule\RuleInterface;
-use DeployFileGenerator\Validator\Rule\Type\IntegerTypeRule;
+use DeployFileGenerator\Validator\Rule\Type\StringTypeRule;
 use Unit\DeployFileGeneratorTest\Validator\Rule\AbstractRuleTest;
 
-class IntegerTypeRuleTest extends AbstractRuleTest
+class StringTypeRuleTest extends AbstractRuleTest
 {
+    /**
+     * @var \UnitTester
+     */
+    protected $tester;
+
+    /**
+     * @return array[]
+     */
     public function dataProvider(): array
     {
         return [
-            ['key', ['key' => 1], true],
-            ['key', ['key' => 'str'], false],
+            ['key', ['key' => 1], false],
+            ['key', ['key' => 'str'], true],
             ['key', ['key' => ['first-key' => 123]], false],
             ['key', ['key' => true], false],
             ['key', [], true],
 
-            ['key.*.inner-key', ['key' => ['first' =>  ['inner-key' => 1], 'second' =>  ['inner-key' => 1]]], true],
+            ['key.*.inner-key', ['key' => ['first' =>  ['inner-key' => 'str'], 'second' =>  ['inner-key' => 'str']]], true],
             ['key.*.inner-key', ['key' => ['first' =>  ['inner-key' => 1], 'second' =>  ['inner-key' => 'str']]], false],
-            ['key.*.inner-key', ['key' => ['first' =>  ['inner-key' => 1], 'second' =>  []]], true],
+            ['key.*.inner-key', ['key' => ['first' =>  ['inner-key' => 'str'], 'second' =>  []]], true],
             ['key.*.inner-key', [], true],
         ];
     }
 
+    /**
+     * @return RuleInterface
+     */
     protected function createRule(): RuleInterface
     {
-        return new IntegerTypeRule();
+        return new StringTypeRule();
     }
 }
