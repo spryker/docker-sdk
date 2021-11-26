@@ -4,7 +4,9 @@ Deploy file is a [Docker Compose](https://docs.docker.com/compose/) YAML file us
 
 ## Deploy file inheritance
 
-You can use multiple deploy files to define an application's infrastructure. The [`imports:`](02-deploy.file.reference.v1.md#imports) deploy file parameter is used to add additional deploy files to a build.
+Usual deploy file have duplicate section or section has a small different.
+For avoiding this behavior you can use multiple deploy files to define an application's infrastructure.
+The [`imports:`](02-deploy.file.reference.v1.md#imports) deploy file parameter is used to add additional deploy files to a build.
 
 ```yaml
 import:
