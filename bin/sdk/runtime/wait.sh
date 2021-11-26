@@ -4,7 +4,7 @@ function Runtime::waitFor() {
     local target=${1}
     local -i retriesFor=${2:-180} # seconds
     local -i interval=${3:-2}     # seconds
-    local containers=$(docker ps --filter "name=${SPRYKER_DOCKER_PREFIX}-${target}_*" --format "{{.Names}}")
+    local containers=$(docker ps --filter "name=${SPRYKER_DOCKER_PREFIX}_${target}_*" --format "{{.Names}}")
 
     [ -z "${containers}" ] && Console::error "${WARN}Service ${INFO}\`${1}\`${WARN} is not running. Please check the name.${NC}" && exit 1
 

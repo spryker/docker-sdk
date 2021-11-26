@@ -144,7 +144,7 @@ function Compose::run() {
 
     Console::verbose "${INFO}Running Spryker containers${NC}"
     sync start
-    Compose::command up -d --remove-orphans "${@}"
+    Compose::command --compatibility up -d --remove-orphans "${@}"
 #      --scale "webdriver=$([ -n "${SPRYKER_TESTING_ENABLE}" ] && echo 1 || echo 0)" \
 #      --scale "scheduler=$([ -n "${SPRYKER_TESTING_ENABLE}" ] && echo 0 || echo 1)" \
 #      "${@}"
