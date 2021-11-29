@@ -5,7 +5,3 @@ node_modules
 deployment/*
 !deployment/.gitkeep
 
-/generator/.phpstan-cache/
-/generator/tests/_support/_generated/
-/generator/tests/_output/
-!/generator/tests/_output/.gitkeep
