@@ -11,6 +11,9 @@ use DeployFileGenerator\Validator\Rule\RuleInterface;
 
 class RequireRuleTest extends AbstractRuleTest
 {
+    /**
+     * @return array<array>
+     */
     public function dataProvider(): array
     {
         return [
@@ -19,6 +22,9 @@ class RequireRuleTest extends AbstractRuleTest
         ];
     }
 
+    /**
+     * @return \DeployFileGenerator\Validator\Rule\RuleInterface
+     */
     protected function createRule(): RuleInterface
     {
         return new RequireRule();

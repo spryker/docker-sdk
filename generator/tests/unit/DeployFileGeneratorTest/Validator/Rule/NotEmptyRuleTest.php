@@ -8,10 +8,12 @@ namespace Unit\DeployFileGeneratorTest\Validator\Rule;
 
 use DeployFileGenerator\Validator\Rule\NotEmptyRule;
 use DeployFileGenerator\Validator\Rule\RuleInterface;
-use PHPUnit\Framework\TestCase;
 
 class NotEmptyRuleTest extends AbstractRuleTest
 {
+    /**
+     * @return array<array>
+     */
     public function dataProvider(): array
     {
         return [
@@ -23,6 +25,9 @@ class NotEmptyRuleTest extends AbstractRuleTest
         ];
     }
 
+    /**
+     * @return \DeployFileGenerator\Validator\Rule\RuleInterface
+     */
     protected function createRule(): RuleInterface
     {
         return new NotEmptyRule();

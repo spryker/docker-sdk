@@ -21,6 +21,10 @@ abstract class AbstractRuleTest extends Unit
     /**
      * @dataProvider dataProvider
      *
+     * @param string $key
+     * @param array $data
+     * @param bool $exceptedResult
+     *
      * @return void
      */
     public function testIsValid(string $key, array $data, bool $exceptedResult): void
@@ -33,20 +37,20 @@ abstract class AbstractRuleTest extends Unit
      */
     public function testGetRuleName(): void
     {
-        /** @var AbstractRule $ruleInstance */
+        /** @var \DeployFileGenerator\Validator\Rule\AbstractRule $ruleInstance */
         $ruleInstance = $this->createRule();
 
         $this->tester->assertSame(
             $ruleInstance::RULE_NAME,
-            $ruleInstance->getRuleName()
+            $ruleInstance->getRuleName(),
         );
 
         $ruleInstance = $this->make(AbstractRule::class);
         $this->tester->expectThrowable(
             RuntimeException::class,
-            function() use ($ruleInstance) {
+            function () use ($ruleInstance) {
                 $ruleInstance->getRuleName();
-            }
+            },
         );
     }
 
@@ -55,22 +59,22 @@ abstract class AbstractRuleTest extends Unit
      */
     public function testGetValidationMessage(): void
     {
-        /** @var AbstractRule $ruleInstance */
+        /** @var \DeployFileGenerator\Validator\Rule\AbstractRule $ruleInstance */
         $ruleInstance = $this->createRule();
         $testFieldName = 'test-field';
         $validationMessage = sprintf($ruleInstance::VALIDATION_MESSAGE_TEMPLATE, $testFieldName);
 
         $this->tester->assertSame(
             $validationMessage,
-            $ruleInstance->getValidationMessage($testFieldName)
+            $ruleInstance->getValidationMessage($testFieldName),
         );
 
         $ruleInstance = $this->make(AbstractRule::class);
         $this->tester->expectThrowable(
             RuntimeException::class,
-            function() use ($ruleInstance, $testFieldName) {
+            function () use ($ruleInstance, $testFieldName) {
                 $ruleInstance->getValidationMessage($testFieldName);
-            }
+            },
         );
     }
 
@@ -80,7 +84,7 @@ abstract class AbstractRuleTest extends Unit
     abstract public function dataProvider(): array;
 
     /**
-     * @return RuleInterface
+     * @return \DeployFileGenerator\Validator\Rule\RuleInterface
      */
     abstract protected function createRule(): RuleInterface;
 }

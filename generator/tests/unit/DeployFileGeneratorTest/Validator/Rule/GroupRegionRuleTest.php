@@ -8,12 +8,11 @@ namespace Unit\DeployFileGeneratorTest\Validator\Rule;
 
 use DeployFileGenerator\Validator\Rule\GroupRegionRule;
 use DeployFileGenerator\Validator\Rule\RuleInterface;
-use PHPUnit\Framework\TestCase;
 
 class GroupRegionRuleTest extends AbstractRuleTest
 {
     /**
-     * @return array[]
+     * @return array<array>
      */
     public function dataProvider(): array
     {
@@ -27,7 +26,7 @@ class GroupRegionRuleTest extends AbstractRuleTest
     }
 
     /**
-     * @return RuleInterface
+     * @return \DeployFileGenerator\Validator\Rule\RuleInterface
      */
     protected function createRule(): RuleInterface
     {

@@ -12,6 +12,9 @@ use Unit\DeployFileGeneratorTest\Validator\Rule\AbstractRuleTest;
 
 class IntegerTypeRuleTest extends AbstractRuleTest
 {
+    /**
+     * @return array<array>
+     */
     public function dataProvider(): array
     {
         return [
@@ -21,13 +24,16 @@ class IntegerTypeRuleTest extends AbstractRuleTest
             ['key', ['key' => true], false],
             ['key', [], true],
 
-            ['key.*.inner-key', ['key' => ['first' =>  ['inner-key' => 1], 'second' =>  ['inner-key' => 1]]], true],
-            ['key.*.inner-key', ['key' => ['first' =>  ['inner-key' => 1], 'second' =>  ['inner-key' => 'str']]], false],
-            ['key.*.inner-key', ['key' => ['first' =>  ['inner-key' => 1], 'second' =>  []]], true],
+            ['key.*.inner-key', ['key' => ['first' => ['inner-key' => 1], 'second' => ['inner-key' => 1]]], true],
+            ['key.*.inner-key', ['key' => ['first' => ['inner-key' => 1], 'second' => ['inner-key' => 'str']]], false],
+            ['key.*.inner-key', ['key' => ['first' => ['inner-key' => 1], 'second' => []]], true],
             ['key.*.inner-key', [], true],
         ];
     }
 
+    /**
+     * @return \DeployFileGenerator\Validator\Rule\RuleInterface
+     */
     protected function createRule(): RuleInterface
     {
         return new IntegerTypeRule();

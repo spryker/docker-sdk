@@ -18,7 +18,7 @@ class StringTypeRuleTest extends AbstractRuleTest
     protected $tester;
 
     /**
-     * @return array[]
+     * @return array<array>
      */
     public function dataProvider(): array
     {
@@ -29,15 +29,15 @@ class StringTypeRuleTest extends AbstractRuleTest
             ['key', ['key' => true], false],
             ['key', [], true],
 
-            ['key.*.inner-key', ['key' => ['first' =>  ['inner-key' => 'str'], 'second' =>  ['inner-key' => 'str']]], true],
-            ['key.*.inner-key', ['key' => ['first' =>  ['inner-key' => 1], 'second' =>  ['inner-key' => 'str']]], false],
-            ['key.*.inner-key', ['key' => ['first' =>  ['inner-key' => 'str'], 'second' =>  []]], true],
+            ['key.*.inner-key', ['key' => ['first' => ['inner-key' => 'str'], 'second' => ['inner-key' => 'str']]], true],
+            ['key.*.inner-key', ['key' => ['first' => ['inner-key' => 1], 'second' => ['inner-key' => 'str']]], false],
+            ['key.*.inner-key', ['key' => ['first' => ['inner-key' => 'str'], 'second' => []]], true],
             ['key.*.inner-key', [], true],
         ];
     }
 
     /**
-     * @return RuleInterface
+     * @return \DeployFileGenerator\Validator\Rule\RuleInterface
      */
     protected function createRule(): RuleInterface
     {

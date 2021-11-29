@@ -13,9 +13,19 @@ use RuntimeException;
 
 class RangeValueRuleTest extends AbstractRuleTest
 {
+    /**
+     * @var int
+     */
     protected const MIN_VALUE = 1;
+
+    /**
+     * @var int
+     */
     protected const MAX_VALUE = 6;
 
+    /**
+     * @return array<array>
+     */
     public function dataProvider(): array
     {
         return [
@@ -29,31 +39,37 @@ class RangeValueRuleTest extends AbstractRuleTest
         ];
     }
 
+    /**
+     * @return void
+     */
     public function testGetValidationMessage(): void
     {
-        /** @var AbstractRule $ruleInstance */
+        /** @var \DeployFileGenerator\Validator\Rule\AbstractRule $ruleInstance */
         $ruleInstance = $this->createRule();
         $testFieldName = 'test-field';
         $validationMessage = sprintf(
             $ruleInstance::VALIDATION_MESSAGE_TEMPLATE,
             $testFieldName,
-            static::MIN_VALUE . '...' . static::MAX_VALUE
+            static::MIN_VALUE . '...' . static::MAX_VALUE,
         );
 
         $this->tester->assertSame(
             $validationMessage,
-            $ruleInstance->getValidationMessage($testFieldName)
+            $ruleInstance->getValidationMessage($testFieldName),
         );
 
         $ruleInstance = $this->make(AbstractRule::class);
         $this->tester->expectThrowable(
             RuntimeException::class,
-            function() use ($ruleInstance, $testFieldName) {
+            function () use ($ruleInstance, $testFieldName) {
                 $ruleInstance->getValidationMessage($testFieldName);
-            }
+            },
         );
     }
 
+    /**
+     * @return \DeployFileGenerator\Validator\Rule\RuleInterface
+     */
     protected function createRule(): RuleInterface
     {
         return new RangeValueRule([static::MIN_VALUE, static::MAX_VALUE]);
