@@ -45,14 +45,4 @@ class ValidationMessageBagTransfer
 
         return $this;
     }
-
-    /**
-     * @param string $fieldName
-     *
-     * @return \DeployFileGenerator\Transfer\Validation\Message\ValidationRuleMessageTransfer[]
-     */
-    public function getValidationResultByFieldName(string $fieldName): array
-    {
-        return $this->validationResult[$fieldName] ?? [];
-    }
 }
