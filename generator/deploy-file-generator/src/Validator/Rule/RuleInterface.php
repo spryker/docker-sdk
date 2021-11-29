@@ -11,7 +11,7 @@ interface RuleInterface
 {
     /**
      * @param string $validateField
-     * @param mixed $data
+     * @param array $data
      *
      * @return bool
      */

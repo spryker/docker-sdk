@@ -49,10 +49,10 @@ class ValidationMessageBagTransfer
     /**
      * @param string $fieldName
      *
-     * @return \DeployFileGenerator\Transfer\Validation\Message\ValidationRuleMessageTransfer|null
+     * @return \DeployFileGenerator\Transfer\Validation\Message\ValidationRuleMessageTransfer[]
      */
-    public function getValidationResultByFieldName(string $fieldName): ?ValidationRuleMessageTransfer
+    public function getValidationResultByFieldName(string $fieldName): array
     {
-        return $this->validationResult[$fieldName] ?? null;
+        return $this->validationResult[$fieldName] ?? [];
     }
 }
