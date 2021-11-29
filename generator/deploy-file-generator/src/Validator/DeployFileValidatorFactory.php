@@ -21,14 +21,14 @@ use DeployFileGenerator\Validator\Rule\Type\IntegerTypeRule;
 use DeployFileGenerator\Validator\Rule\Type\StringTypeRule;
 use Symfony\Component\Yaml\Parser;
 
-class ValidatorFactory
+class DeployFileValidatorFactory
 {
     /**
-     * @return \DeployFileGenerator\Validator\ValidatorInterface
+     * @return \DeployFileGenerator\Validator\DeployFileValidatorInterface
      */
-    public function createValidator(): ValidatorInterface
+    public function createDeployFileValidator(): DeployFileValidatorInterface
     {
-        return new Validator(
+        return new DeployFileValidator(
             $this->createValidationFieldCollectionBuilder(),
         );
     }

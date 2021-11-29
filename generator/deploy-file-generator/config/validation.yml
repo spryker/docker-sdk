@@ -22,6 +22,7 @@ regions:
 regions.*:
     array-type:
 regions.*.services:
+    not-empty:
 regions.*.services.database:
     require:
 
@@ -54,6 +55,7 @@ groups.*.applications.*.endpoints:
 
 # Services
 services.*.engine:
+    require:
     string-type:
 services.*.endpoints:
     array-type:

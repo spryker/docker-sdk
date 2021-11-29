@@ -34,7 +34,7 @@ use DeployFileGenerator\ParametersResolver\ParametersResolverInterface;
 use DeployFileGenerator\ParametersResolver\Resolvers\PercentAnnotationParameterResolver;
 use DeployFileGenerator\Processor\DeployFileProcessor;
 use DeployFileGenerator\Processor\DeployFileProcessorInterface;
-use DeployFileGenerator\Validator\ValidatorFactory;
+use DeployFileGenerator\Validator\DeployFileValidatorFactory;
 use Symfony\Component\Console\Output\ConsoleOutput;
 use Symfony\Component\Console\Output\OutputInterface as SymfonyOutputInterface;
 use Symfony\Component\Yaml\Dumper;
@@ -249,7 +249,7 @@ class DeployFileGeneratorFactory
     public function createValidateDeployFileExecutor(): ExecutorInterface
     {
         return new ValidateDeployFileExecutor(
-            $this->createValidatorFactory()->createValidator(),
+            $this->createDeployFileValidatorFactory()->createDeployFileValidator(),
         );
     }
 
@@ -280,11 +280,11 @@ class DeployFileGeneratorFactory
     }
 
     /**
-     * @return \DeployFileGenerator\Validator\ValidatorFactory
+     * @return \DeployFileGenerator\Validator\DeployFileValidatorFactory
      */
-    protected function createValidatorFactory(): ValidatorFactory
+    protected function createDeployFileValidatorFactory(): DeployFileValidatorFactory
     {
-        return new ValidatorFactory();
+        return new DeployFileValidatorFactory();
     }
 
     /**

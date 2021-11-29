@@ -9,7 +9,7 @@ namespace DeployFileGenerator\Validator;
 
 use DeployFileGenerator\Transfer\DeployFileTransfer;
 
-interface ValidatorInterface
+interface DeployFileValidatorInterface
 {
     /**
      * @param \DeployFileGenerator\Transfer\DeployFileTransfer $deployFileTransfer

@@ -8,19 +8,19 @@
 namespace DeployFileGenerator\Executor;
 
 use DeployFileGenerator\Transfer\DeployFileTransfer;
-use DeployFileGenerator\Validator\ValidatorInterface;
+use DeployFileGenerator\Validator\DeployFileValidatorInterface;
 
 class ValidateDeployFileExecutor implements ExecutorInterface
 {
     /**
-     * @var \DeployFileGenerator\Validator\ValidatorInterface
+     * @var \DeployFileGenerator\Validator\DeployFileValidatorInterface
      */
     protected $validator;
 
     /**
-     * @param \DeployFileGenerator\Validator\ValidatorInterface $validator
+     * @param \DeployFileGenerator\Validator\DeployFileValidatorInterface $validator
      */
-    public function __construct(ValidatorInterface $validator)
+    public function __construct(DeployFileValidatorInterface $validator)
     {
         $this->validator = $validator;
     }

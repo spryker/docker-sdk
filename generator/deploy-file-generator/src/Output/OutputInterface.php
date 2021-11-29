@@ -16,4 +16,18 @@ interface OutputInterface
      * @return void
      */
     public function render(DeployFileTransfer $deployFileTransfer): void;
+
+    /**
+     * @param \DeployFileGenerator\Transfer\DeployFileTransfer $deployFileTransfer
+     *
+     * @return void
+     */
+    public function renderDeployFileTransferYaml(DeployFileTransfer $deployFileTransfer): void;
+
+    /**
+     * @param \DeployFileGenerator\Transfer\DeployFileTransfer $deployFileTransfer
+     *
+     * @return void
+     */
+    public function renderValidationResult(DeployFileTransfer $deployFileTransfer): void;
 }

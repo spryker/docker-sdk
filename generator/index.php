@@ -16,6 +16,11 @@ include_once __DIR__ . DS . 'vendor' . DS . 'autoload.php';
 
 $deploymentDir = '/data/deployment';
 $projectYaml = buildProjectYaml($deploymentDir . '/project.yml');
+
+if ($projectYaml == '') {
+    return;
+}
+
 $defaultDeploymentDir = getenv('SPRYKER_DOCKER_SDK_DEPLOYMENT_DIR') ?: './';
 $platform = getenv('SPRYKER_DOCKER_SDK_PLATFORM') ?: 'linux'; // Possible values: linux windows macos
 
@@ -1286,8 +1291,9 @@ function buildProjectYaml(string $mainProjectYaml): string
         return $deployFileTransfer->getOutputFilePath();
     }
 
-    $deployFileFactory->createValidationTableOutput()->render($deployFileTransfer, new ConsoleOutput());
-    exit(1);
+    $deployFileFactory->createDeployFileOutput()->renderValidationResult($deployFileTransfer);
+
+    return '';
 }
 
 /**

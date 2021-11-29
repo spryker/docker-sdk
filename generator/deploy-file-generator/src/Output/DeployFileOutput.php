@@ -75,7 +75,7 @@ class DeployFileOutput implements OutputInterface
      *
      * @return void
      */
-    protected function renderDeployFileTransferYaml(DeployFileTransfer $deployFileTransfer): void
+    public function renderDeployFileTransferYaml(DeployFileTransfer $deployFileTransfer): void
     {
         $this->output->writeln(
             $this->dumper->dump(
@@ -90,7 +90,7 @@ class DeployFileOutput implements OutputInterface
      *
      * @return void
      */
-    protected function renderValidationResult(DeployFileTransfer $deployFileTransfer): void
+    public function renderValidationResult(DeployFileTransfer $deployFileTransfer): void
     {
         $validationResult = $deployFileTransfer->getValidationMessageBagTransfer()->getValidationResult();
 

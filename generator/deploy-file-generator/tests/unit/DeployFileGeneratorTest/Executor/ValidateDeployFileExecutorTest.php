@@ -10,7 +10,7 @@ use Codeception\Test\Unit;
 use DeployFileGenerator\Executor\ExecutorInterface;
 use DeployFileGenerator\Executor\ValidateDeployFileExecutor;
 use DeployFileGenerator\Transfer\DeployFileTransfer;
-use DeployFileGenerator\Validator\ValidatorInterface;
+use DeployFileGenerator\Validator\DeployFileValidatorInterface;
 
 class ValidateDeployFileExecutorTest extends Unit
 {
@@ -44,7 +44,7 @@ class ValidateDeployFileExecutorTest extends Unit
      */
     protected function createValidateDeployFileExecutor(): ExecutorInterface
     {
-        return new ValidateDeployFileExecutor($this->makeEmpty(ValidatorInterface::class, [
+        return new ValidateDeployFileExecutor($this->makeEmpty(DeployFileValidatorInterface::class, [
             'validate' => function (DeployFileTransfer $deployFileTransfer) {
                 return $deployFileTransfer->setResultData([
                     'key' => 'after validation data',

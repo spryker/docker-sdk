@@ -13,7 +13,7 @@ use DeployFileGenerator\Transfer\Validation\Message\ValidationMessageBagTransfer
 use DeployFileGenerator\Transfer\Validation\Message\ValidationRuleMessageTransfer;
 use DeployFileGenerator\Validator\Builder\ValidationFieldCollectionBuilderInterface;
 
-class Validator implements ValidatorInterface
+class DeployFileValidator implements DeployFileValidatorInterface
 {
     /**
      * @var \DeployFileGenerator\Validator\Builder\ValidationFieldCollectionBuilderInterface
