@@ -19,7 +19,7 @@ class YamlDataImporterTest extends Unit
     /**
      * @var string
      */
-    protected const PATH_PREFIX = './tests/_data/templates/yml-data-importer-test/';
+    protected const PATH_PREFIX = './deploy-file-generator/tests/_data/templates/yml-data-importer-test/';
 
     /**
      * @var \UnitTester

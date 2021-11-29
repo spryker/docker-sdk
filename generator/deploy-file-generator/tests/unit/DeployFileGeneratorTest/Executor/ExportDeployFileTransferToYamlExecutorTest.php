@@ -18,7 +18,7 @@ class ExportDeployFileTransferToYamlExecutorTest extends Unit
     /**
      * @var string
      */
-    protected const EXPORT_FILE_PATH = './tests/_output/ExportDeployFileTransferToYamlExecutorTest.yml';
+    protected const EXPORT_FILE_PATH = './deploy-file-generator/tests/_output/ExportDeployFileTransferToYamlExecutorTest.yml';
 
     /**
      * @var \UnitTester

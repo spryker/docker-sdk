@@ -1,9 +1,9 @@
 paths:
-    tests: tests
-    output: tests/_output
-    data: tests/_data
-    support: tests/_support
-    envs: tests/_envs
+    tests: deploy-file-generator/tests
+    output: deploy-file-generator/tests/_output
+    data: deploy-file-generator/tests/_data
+    support: deploy-file-generator/tests/_support
+    envs: deploy-file-generator/tests/_envs
 
 actor_suffix: Tester
 
