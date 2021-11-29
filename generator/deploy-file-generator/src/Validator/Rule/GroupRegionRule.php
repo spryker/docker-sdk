@@ -18,7 +18,7 @@ class GroupRegionRule extends AbstractRule
     /**
      * @var string
      */
-    public const VALIDATION_MESSAGE_TEMPLATE = '%s should be inited into Region section.';
+    public const VALIDATION_MESSAGE_TEMPLATE = '`%s` should be inited into Region section.';
 
     /**
      * @param string $validateField

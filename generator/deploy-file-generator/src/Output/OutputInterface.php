@@ -7,15 +7,13 @@
 namespace DeployFileGenerator\Output;
 
 use DeployFileGenerator\Transfer\DeployFileTransfer;
-use Symfony\Component\Console\Output\OutputInterface as SymfonyOutputInterface;
 
 interface OutputInterface
 {
     /**
      * @param \DeployFileGenerator\Transfer\DeployFileTransfer $deployFileTransfer
-     * @param \Symfony\Component\Console\Output\OutputInterface $output
      *
      * @return void
      */
-    public function render(DeployFileTransfer $deployFileTransfer, SymfonyOutputInterface $output): void;
+    public function render(DeployFileTransfer $deployFileTransfer): void;
 }

@@ -64,21 +64,11 @@ class ConfigCommand extends Command
             ->createDeployFileConfigProcessor()
             ->process($deployFileTransfer);
 
-        $validationMessageBagTransfer = $deployFileTransfer->getValidationMessageBagTransfer();
-
         $this->createDeployFileFactory()
-            ->createDeployFileYamlOutput()
-            ->render($deployFileTransfer, $output);
+            ->createDeployFileOutput()
+            ->render($deployFileTransfer);
 
-        if ($validationMessageBagTransfer->getValidationResult() !== []) {
-            $this->createDeployFileFactory()
-                ->createValidationTableOutput()
-                ->render($deployFileTransfer, $output);
-
-            return Command::FAILURE;
-        }
-
-        return Command::SUCCESS;
+        return $this->getCommandResult($deployFileTransfer);
     }
 
     /**
@@ -87,5 +77,19 @@ class ConfigCommand extends Command
     protected function createDeployFileFactory(): DeployFileFactory
     {
         return new DeployFileFactory();
+    }
+
+    /**
+     * @param \DeployFileGenerator\Transfer\DeployFileTransfer $deployFileTransfer
+     *
+     * @return int
+     */
+    protected function getCommandResult(DeployFileTransfer $deployFileTransfer): int
+    {
+        if ($deployFileTransfer->getValidationMessageBagTransfer()->getValidationResult() !== []) {
+            return Command::FAILURE;
+        }
+
+        return Command::SUCCESS;
     }
 }

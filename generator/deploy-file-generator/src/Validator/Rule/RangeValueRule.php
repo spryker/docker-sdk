@@ -18,7 +18,7 @@ class RangeValueRule extends AbstractRule
     /**
      * @var string
      */
-    public const VALIDATION_MESSAGE_TEMPLATE = '%s should be in range %s';
+    public const VALIDATION_MESSAGE_TEMPLATE = '`%s` should be in range %s';
 
     /**
      * @param string $validateField

@@ -27,17 +27,16 @@ use DeployFileGenerator\Importer\DeployFileImporterInterface;
 use DeployFileGenerator\MergeResolver\DeployFileMergeResolver;
 use DeployFileGenerator\MergeResolver\MergeResolverInterface;
 use DeployFileGenerator\MergeResolver\Resolvers\ServiceMergeResolver;
-use DeployFileGenerator\Output\DeployFileYamlOutput;
+use DeployFileGenerator\Output\DeployFileOutput;
 use DeployFileGenerator\Output\OutputInterface;
-use DeployFileGenerator\Output\Table\TableBuilder;
-use DeployFileGenerator\Output\Table\TableBuilderInterface;
-use DeployFileGenerator\Output\ValidationTableOutput;
 use DeployFileGenerator\ParametersResolver\ParametersResolver;
 use DeployFileGenerator\ParametersResolver\ParametersResolverInterface;
 use DeployFileGenerator\ParametersResolver\Resolvers\PercentAnnotationParameterResolver;
 use DeployFileGenerator\Processor\DeployFileProcessor;
 use DeployFileGenerator\Processor\DeployFileProcessorInterface;
 use DeployFileGenerator\Validator\ValidatorFactory;
+use Symfony\Component\Console\Output\ConsoleOutput;
+use Symfony\Component\Console\Output\OutputInterface as SymfonyOutputInterface;
 use Symfony\Component\Yaml\Dumper;
 use Symfony\Component\Yaml\Parser;
 
@@ -191,20 +190,13 @@ class DeployFileFactory
     /**
      * @return \DeployFileGenerator\Output\OutputInterface
      */
-    public function createDeployFileYamlOutput(): OutputInterface
+    public function createDeployFileOutput(): OutputInterface
     {
-        return new DeployFileYamlOutput(
+        return new DeployFileOutput(
+            $this->createSymfonyConsoleOutput(),
             $this->createSymfonyYamlDumper(),
             $this->createDeployFileConfig()->getYamlInline(),
         );
-    }
-
-    /**
-     * @return \DeployFileGenerator\Output\OutputInterface
-     */
-    public function createValidationTableOutput(): OutputInterface
-    {
-        return new ValidationTableOutput($this->createTableBuilder());
     }
 
     /**
@@ -280,14 +272,6 @@ class DeployFileFactory
     }
 
     /**
-     * @return \DeployFileGenerator\Output\Table\TableBuilderInterface
-     */
-    public function createTableBuilder(): TableBuilderInterface
-    {
-        return new TableBuilder();
-    }
-
-    /**
      * @return \DeployFileGenerator\Cleaner\CleanerInterface
      */
     public function createCleaner(): CleanerInterface
@@ -312,5 +296,13 @@ class DeployFileFactory
             new ImportsCleaner(),
             new ServicesCleaner(),
         ];
+    }
+
+    /**
+     * @return \Symfony\Component\Console\Output\OutputInterface
+     */
+    protected function createSymfonyConsoleOutput(): SymfonyOutputInterface
+    {
+        return new ConsoleOutput();
     }
 }
