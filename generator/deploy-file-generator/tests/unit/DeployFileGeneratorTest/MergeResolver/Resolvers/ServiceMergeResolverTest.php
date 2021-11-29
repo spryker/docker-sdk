@@ -8,7 +8,7 @@
 namespace Unit\DeployFileGeneratorTest\MergeResolver\Resolvers;
 
 use Codeception\Test\Unit;
-use DeployFileGenerator\DeployFileConstants;
+use DeployFileGenerator\DeployFileGeneratorConstants;
 use DeployFileGenerator\MergeResolver\Resolvers\ServiceMergeResolver;
 
 class ServiceMergeResolverTest extends Unit
@@ -45,7 +45,7 @@ class ServiceMergeResolverTest extends Unit
                 'db' => [
                     'engine' => 'mysql',
                 ],
-                'redis' => DeployFileConstants::YAML_SERVICE_NULL_VALUE,
+                'redis' => DeployFileGeneratorConstants::YAML_SERVICE_NULL_VALUE,
             ],
         ];
 

@@ -7,7 +7,7 @@
 
 namespace DeployFileGenerator\Validator;
 
-use DeployFileGenerator\DeployFileConfig;
+use DeployFileGenerator\DeployFileGeneratorConfig;
 use DeployFileGenerator\Validator\Builder\ValidationFieldCollectionBuilder;
 use DeployFileGenerator\Validator\Builder\ValidationFieldCollectionBuilderInterface;
 use DeployFileGenerator\Validator\Rule\GroupRegionRule;
@@ -64,11 +64,11 @@ class ValidatorFactory
     }
 
     /**
-     * @return \DeployFileGenerator\DeployFileConfig
+     * @return \DeployFileGenerator\DeployFileGeneratorConfig
      */
-    protected function createDeployFileConfig(): DeployFileConfig
+    protected function createDeployFileConfig(): DeployFileGeneratorConfig
     {
-        return new DeployFileConfig();
+        return new DeployFileGeneratorConfig();
     }
 
     /**

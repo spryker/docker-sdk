@@ -1,6 +1,6 @@
 <?php
 
-use DeployFileGenerator\DeployFileFactory;
+use DeployFileGenerator\DeployFileGeneratorFactory;
 use DeployFileGenerator\Transfer\DeployFileTransfer;
 use Spatie\Url\Url;
 use Symfony\Component\Console\Output\ConsoleOutput;
@@ -1279,7 +1279,7 @@ function buildProjectYaml(string $mainProjectYaml): string
     $deployFileTransfer = $deployFileTransfer->setInputFilePath($mainProjectYaml);
     $deployFileTransfer = $deployFileTransfer->setOutputFilePath($mainProjectYaml);
 
-    $deployFileFactory = new DeployFileFactory();
+    $deployFileFactory = new DeployFileGeneratorFactory();
     $deployFileTransfer = $deployFileFactory->createDeployFileBuildProcessor()->process($deployFileTransfer);
 
     if ($deployFileTransfer->getValidationMessageBagTransfer()->getValidationResult() == []) {

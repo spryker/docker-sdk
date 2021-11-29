@@ -8,7 +8,7 @@
 namespace Unit\DeployFileGeneratorTest\FileFinder;
 
 use Codeception\Test\Unit;
-use DeployFileGenerator\DeployFileConfig;
+use DeployFileGenerator\DeployFileGeneratorConfig;
 use DeployFileGenerator\FileFinder\FileFinder;
 use DeployFileGenerator\FileFinder\FileFinderInterface;
 
@@ -83,7 +83,7 @@ class FileFinderTest extends Unit
      */
     protected function createFileFinder(): FileFinderInterface
     {
-        $configMock = $this->make(DeployFileConfig::class, [
+        $configMock = $this->make(DeployFileGeneratorConfig::class, [
             'getProjectDirectoryPath' => self::PROJECT_PATH,
             'getBaseDirectoryPath' => self::BASE_PATH,
         ]);

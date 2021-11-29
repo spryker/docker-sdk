@@ -9,7 +9,7 @@ namespace Unit\DeployFileGeneratorTest\Cleaner\Cleaners;
 use Codeception\Test\Unit;
 use DeployFileGenerator\Cleaner\CleanerInterface;
 use DeployFileGenerator\Cleaner\Cleaners\ImportsCleaner;
-use DeployFileGenerator\DeployFileConstants;
+use DeployFileGenerator\DeployFileGeneratorConstants;
 use DeployFileGenerator\Transfer\DeployFileTransfer;
 
 class ImportsCleanerTest extends Unit
@@ -26,7 +26,7 @@ class ImportsCleanerTest extends Unit
     {
         $resultData = [
             'some-key' => 'some-data',
-            DeployFileConstants::YAML_IMPORTS_KEY => [
+            DeployFileGeneratorConstants::YAML_IMPORTS_KEY => [
                 1,
                 2,
                 3,

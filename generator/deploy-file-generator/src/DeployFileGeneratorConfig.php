@@ -8,7 +8,7 @@
 
 namespace DeployFileGenerator;
 
-class DeployFileConfig
+class DeployFileGeneratorConfig
 {
     /**
      * @var string

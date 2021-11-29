@@ -8,7 +8,7 @@
 namespace Unit\DeployFileGeneratorTest\Executor;
 
 use Codeception\Test\Unit;
-use DeployFileGenerator\DeployFileConstants;
+use DeployFileGenerator\DeployFileGeneratorConstants;
 use DeployFileGenerator\Executor\ExecutorInterface;
 use DeployFileGenerator\Executor\ImportBaseDataExecutor;
 use DeployFileGenerator\Importer\DeployFileImporterInterface;
@@ -42,7 +42,7 @@ class ImportBaseDataExecutorTest extends Unit
         $deployFileTransfer = $this->createImportBaseDataExecutor()->execute($deployFileTransfer);
         $this->tester->assertEquals([
             'some-key' => 'some data',
-            DeployFileConstants::YAML_IMPORTS_KEY => [
+            DeployFileGeneratorConstants::YAML_IMPORTS_KEY => [
                 static::IMPORT_DATA_YML_PATH => null,
             ],
             static::IMPORTED_FILES_KEY => [
@@ -59,10 +59,10 @@ class ImportBaseDataExecutorTest extends Unit
         return new ImportBaseDataExecutor(
             $this->makeEmpty(DeployFileImporterInterface::class, [
                 'importFromData' => function (array $data, array $parameters = []) {
-                    if (!array_key_exists(DeployFileConstants::YAML_IMPORTS_KEY, $data)) {
+                    if (!array_key_exists(DeployFileGeneratorConstants::YAML_IMPORTS_KEY, $data)) {
                         return $data;
                     }
-                    $data[static::IMPORTED_FILES_KEY] = array_keys($data[DeployFileConstants::YAML_IMPORTS_KEY]);
+                    $data[static::IMPORTED_FILES_KEY] = array_keys($data[DeployFileGeneratorConstants::YAML_IMPORTS_KEY]);
 
                     return $data;
                 },

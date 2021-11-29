@@ -9,7 +9,7 @@ namespace Unit\DeployFileGeneratorTest\Cleaner\Cleaners;
 use Codeception\Test\Unit;
 use DeployFileGenerator\Cleaner\CleanerInterface;
 use DeployFileGenerator\Cleaner\Cleaners\ServicesCleaner;
-use DeployFileGenerator\DeployFileConstants;
+use DeployFileGenerator\DeployFileGeneratorConstants;
 use DeployFileGenerator\Transfer\DeployFileTransfer;
 
 class ServicesCleanerTest extends Unit
@@ -26,16 +26,16 @@ class ServicesCleanerTest extends Unit
     {
         $resultData = [
             'some-key' => 'some-data',
-            DeployFileConstants::YAML_SERVICES_KEY => [
+            DeployFileGeneratorConstants::YAML_SERVICES_KEY => [
                 'search' => [
                     'endpoints' => [],
                 ],
-                'broker' => DeployFileConstants::YAML_SERVICE_NULL_VALUE,
+                'broker' => DeployFileGeneratorConstants::YAML_SERVICE_NULL_VALUE,
             ],
         ];
         $expectedData = [
             'some-key' => 'some-data',
-            DeployFileConstants::YAML_SERVICES_KEY => [
+            DeployFileGeneratorConstants::YAML_SERVICES_KEY => [
                 'search' => [
                     'endpoints' => [],
                 ],
@@ -55,7 +55,7 @@ class ServicesCleanerTest extends Unit
     {
         $resultData = [
             'some-key' => 'some-data',
-            DeployFileConstants::YAML_SERVICES_KEY => [
+            DeployFileGeneratorConstants::YAML_SERVICES_KEY => [
                 'search' => [
                     'endpoints' => [],
                 ],
@@ -63,7 +63,7 @@ class ServicesCleanerTest extends Unit
         ];
         $expectedData = [
             'some-key' => 'some-data',
-            DeployFileConstants::YAML_SERVICES_KEY => [
+            DeployFileGeneratorConstants::YAML_SERVICES_KEY => [
                 'search' => [
                     'endpoints' => [],
                 ],

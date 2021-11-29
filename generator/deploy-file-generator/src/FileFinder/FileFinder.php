@@ -7,19 +7,19 @@
 
 namespace DeployFileGenerator\FileFinder;
 
-use DeployFileGenerator\DeployFileConfig;
+use DeployFileGenerator\DeployFileGeneratorConfig;
 
 class FileFinder implements FileFinderInterface
 {
     /**
-     * @var \DeployFileGenerator\DeployFileConfig
+     * @var \DeployFileGenerator\DeployFileGeneratorConfig
      */
     protected $config;
 
     /**
-     * @param \DeployFileGenerator\DeployFileConfig $config
+     * @param \DeployFileGenerator\DeployFileGeneratorConfig $config
      */
-    public function __construct(DeployFileConfig $config)
+    public function __construct(DeployFileGeneratorConfig $config)
     {
         $this->config = $config;
     }

@@ -8,7 +8,7 @@
 
 namespace DeployFileGenerator\Importer;
 
-use DeployFileGenerator\DeployFileConstants;
+use DeployFileGenerator\DeployFileGeneratorConstants;
 use DeployFileGenerator\MergeResolver\MergeResolverInterface;
 use DeployFileGenerator\ParametersResolver\ParametersResolverInterface;
 use Symfony\Component\Yaml\Parser;
@@ -88,18 +88,18 @@ class DataImporter implements DeployFileImporterInterface
      */
     protected function parseImports(array $content, array $parentParameters = []): array
     {
-        if (!array_key_exists(DeployFileConstants::YAML_IMPORTS_KEY, $content)) {
+        if (!array_key_exists(DeployFileGeneratorConstants::YAML_IMPORTS_KEY, $content)) {
             return $content;
         }
 
-        foreach ($content[DeployFileConstants::YAML_IMPORTS_KEY] as $importPath => $importParams) {
-            $importParams = $importParams[DeployFileConstants::YAML_PARAMETERS_KEY] ?? [];
+        foreach ($content[DeployFileGeneratorConstants::YAML_IMPORTS_KEY] as $importPath => $importParams) {
+            $importParams = $importParams[DeployFileGeneratorConstants::YAML_PARAMETERS_KEY] ?? [];
             $importParams = array_merge($parentParameters, $importParams);
 
             $importedData = $this->importFromFile($this->pathPrefix . $importPath, $importParams);
             $content = $this->mergeResolver->resolve($content, $importedData);
 
-            unset($content[DeployFileConstants::YAML_IMPORTS_KEY][$importPath]);
+            unset($content[DeployFileGeneratorConstants::YAML_IMPORTS_KEY][$importPath]);
         }
 
         return $content;

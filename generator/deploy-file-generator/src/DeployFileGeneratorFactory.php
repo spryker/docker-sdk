@@ -40,7 +40,7 @@ use Symfony\Component\Console\Output\OutputInterface as SymfonyOutputInterface;
 use Symfony\Component\Yaml\Dumper;
 use Symfony\Component\Yaml\Parser;
 
-class DeployFileFactory
+class DeployFileGeneratorFactory
 {
     /**
      * @return \DeployFileGenerator\Processor\DeployFileProcessorInterface
@@ -136,11 +136,11 @@ class DeployFileFactory
     }
 
     /**
-     * @return \DeployFileGenerator\DeployFileConfig
+     * @return \DeployFileGenerator\DeployFileGeneratorConfig
      */
-    public function createDeployFileConfig(): DeployFileConfig
+    public function createDeployFileConfig(): DeployFileGeneratorConfig
     {
-        return new DeployFileConfig();
+        return new DeployFileGeneratorConfig();
     }
 
     /**

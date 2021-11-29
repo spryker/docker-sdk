@@ -8,10 +8,10 @@
 namespace Unit\DeployFileGeneratorTest;
 
 use Codeception\Test\Unit;
-use DeployFileGenerator\DeployFileFactory;
+use DeployFileGenerator\DeployFileGeneratorFactory;
 use ReflectionMethod;
 
-class DeployFileFactoryTest extends Unit
+class DeployFileGeneratorFactoryTest extends Unit
 {
     /**
      * @var string
@@ -133,11 +133,11 @@ class DeployFileFactoryTest extends Unit
     }
 
     /**
-     * @return \DeployFileGenerator\DeployFileFactory
+     * @return \DeployFileGenerator\DeployFileGeneratorFactory
      */
-    private function createDeployFileFactory(): DeployFileFactory
+    private function createDeployFileFactory(): DeployFileGeneratorFactory
     {
-        return new DeployFileFactory();
+        return new DeployFileGeneratorFactory();
     }
 
     /**
@@ -156,7 +156,7 @@ class DeployFileFactoryTest extends Unit
     protected function assertInstanceOfForThisFactoryMethod(): void
     {
         $factoryMethod = $this->getFactoryMethod();
-        $factoryReflection = new ReflectionMethod(DeployFileFactory::class, $factoryMethod);
+        $factoryReflection = new ReflectionMethod(DeployFileGeneratorFactory::class, $factoryMethod);
         $factoryMethodReturnType = $factoryReflection->getReturnType();
 
         $resultObject = $this->createDeployFileFactory()->$factoryMethod();

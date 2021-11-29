@@ -22,7 +22,8 @@ regions:
 regions.*:
     array-type:
 regions.*.services:
-    not-empty:
+regions.*.services.database:
+    require:
 
 # Image:
 image.tag:
@@ -46,6 +47,7 @@ assets.compression.*.level:
 groups.*.region:
     group-region:
 groups.*.applications.*.application:
+    require:
     string-type:
 groups.*.applications.*.endpoints:
     array-type:

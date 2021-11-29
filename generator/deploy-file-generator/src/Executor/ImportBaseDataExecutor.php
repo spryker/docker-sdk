@@ -7,7 +7,7 @@
 
 namespace DeployFileGenerator\Executor;
 
-use DeployFileGenerator\DeployFileConstants;
+use DeployFileGenerator\DeployFileGeneratorConstants;
 use DeployFileGenerator\Transfer\DeployFileTransfer;
 
 class ImportBaseDataExecutor extends AbstractImportDataExecutor
@@ -20,7 +20,7 @@ class ImportBaseDataExecutor extends AbstractImportDataExecutor
     protected function prepareDataToImport(DeployFileTransfer $deployFileTransfer): array
     {
         $data = $deployFileTransfer->getResultData();
-        $data[DeployFileConstants::YAML_IMPORTS_KEY] = $deployFileTransfer->getBaseImports();
+        $data[DeployFileGeneratorConstants::YAML_IMPORTS_KEY] = $deployFileTransfer->getBaseImports();
 
         return $data;
     }

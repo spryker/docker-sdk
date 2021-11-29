@@ -9,7 +9,7 @@ namespace Unit\DeployFileGeneratorTest\Executor;
 
 use Codeception\Test\Unit;
 use DeployFileGenerator\Cleaner\CleanerInterface;
-use DeployFileGenerator\DeployFileConstants;
+use DeployFileGenerator\DeployFileGeneratorConstants;
 use DeployFileGenerator\Executor\CleanUpExecutor;
 use DeployFileGenerator\Executor\ExecutorInterface;
 use DeployFileGenerator\Transfer\DeployFileTransfer;
@@ -28,7 +28,7 @@ class CleanUpExecutorTest extends Unit
     {
         $resultData = [
             'some-key' => 'some-data',
-            DeployFileConstants::YAML_IMPORTS_KEY => [
+            DeployFileGeneratorConstants::YAML_IMPORTS_KEY => [
                 1,
                 2,
                 3,
@@ -40,7 +40,7 @@ class CleanUpExecutorTest extends Unit
         );
 
         $this->tester->assertArrayNotHasKey(
-            DeployFileConstants::YAML_IMPORTS_KEY,
+            DeployFileGeneratorConstants::YAML_IMPORTS_KEY,
             $deployFileTransfer->getResultData(),
         );
     }
@@ -59,7 +59,7 @@ class CleanUpExecutorTest extends Unit
         );
 
         $this->tester->assertArrayNotHasKey(
-            DeployFileConstants::YAML_IMPORTS_KEY,
+            DeployFileGeneratorConstants::YAML_IMPORTS_KEY,
             $deployFileTransfer->getResultData(),
         );
     }
@@ -87,11 +87,11 @@ class CleanUpExecutorTest extends Unit
             'clean' => function (DeployFileTransfer $deployFileTransfer) {
                 $resultData = $deployFileTransfer->getResultData();
 
-                if (!array_key_exists(DeployFileConstants::YAML_IMPORTS_KEY, $resultData)) {
+                if (!array_key_exists(DeployFileGeneratorConstants::YAML_IMPORTS_KEY, $resultData)) {
                     return $deployFileTransfer;
                 }
 
-                unset($resultData[DeployFileConstants::YAML_IMPORTS_KEY]);
+                unset($resultData[DeployFileGeneratorConstants::YAML_IMPORTS_KEY]);
 
                 $deployFileTransfer = $deployFileTransfer->setResultData($resultData);
 

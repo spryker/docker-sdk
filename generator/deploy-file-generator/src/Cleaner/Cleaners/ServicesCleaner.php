@@ -7,7 +7,7 @@
 namespace DeployFileGenerator\Cleaner\Cleaners;
 
 use DeployFileGenerator\Cleaner\CleanerInterface;
-use DeployFileGenerator\DeployFileConstants;
+use DeployFileGenerator\DeployFileGeneratorConstants;
 use DeployFileGenerator\Transfer\DeployFileTransfer;
 
 class ServicesCleaner implements CleanerInterface
@@ -21,13 +21,13 @@ class ServicesCleaner implements CleanerInterface
     {
         $resultData = $deployFileTransfer->getResultData();
 
-        if (!array_key_exists(DeployFileConstants::YAML_SERVICES_KEY, $resultData)) {
+        if (!array_key_exists(DeployFileGeneratorConstants::YAML_SERVICES_KEY, $resultData)) {
             return $deployFileTransfer;
         }
 
-        foreach ($resultData[DeployFileConstants::YAML_SERVICES_KEY] as $serviceName => $serviceConfig) {
-            if ($serviceConfig == DeployFileConstants::YAML_SERVICE_NULL_VALUE) {
-                unset($resultData[DeployFileConstants::YAML_SERVICES_KEY][$serviceName]);
+        foreach ($resultData[DeployFileGeneratorConstants::YAML_SERVICES_KEY] as $serviceName => $serviceConfig) {
+            if ($serviceConfig == DeployFileGeneratorConstants::YAML_SERVICE_NULL_VALUE) {
+                unset($resultData[DeployFileGeneratorConstants::YAML_SERVICES_KEY][$serviceName]);
             }
         }
 

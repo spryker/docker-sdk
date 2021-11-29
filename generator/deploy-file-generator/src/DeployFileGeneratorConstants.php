@@ -7,7 +7,7 @@
 
 namespace DeployFileGenerator;
 
-interface DeployFileConstants
+interface DeployFileGeneratorConstants
 {
     /**
      * @var string

@@ -29,6 +29,18 @@ class RequireRule extends AbstractRule
      */
     public function isValid(string $validateField, array $data): bool
     {
-        return Arr::has($data, $validateField);
+        if (!$this->isWildCardFieldName($validateField)) {
+            return Arr::has($data, $validateField);
+        }
+
+        $data = data_get($data, $validateField);
+
+        foreach ($data as $item) {
+            if ($item == null) {
+                return false;
+            }
+        }
+
+        return true;
     }
 }

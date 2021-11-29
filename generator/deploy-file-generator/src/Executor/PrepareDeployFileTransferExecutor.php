@@ -7,7 +7,7 @@
 
 namespace DeployFileGenerator\Executor;
 
-use DeployFileGenerator\DeployFileConstants;
+use DeployFileGenerator\DeployFileGeneratorConstants;
 use DeployFileGenerator\FileFinder\FileFinderInterface;
 use DeployFileGenerator\Transfer\DeployFileTransfer;
 use Symfony\Component\Yaml\Parser;
@@ -62,11 +62,11 @@ class PrepareDeployFileTransferExecutor implements ExecutorInterface
      */
     protected function getImportsByKeys(array $rawData): array
     {
-        if (!array_key_exists(DeployFileConstants::YAML_IMPORTS_KEY, $rawData)) {
+        if (!array_key_exists(DeployFileGeneratorConstants::YAML_IMPORTS_KEY, $rawData)) {
             return [];
         }
 
-        return $rawData[DeployFileConstants::YAML_IMPORTS_KEY];
+        return $rawData[DeployFileGeneratorConstants::YAML_IMPORTS_KEY];
     }
 
     /**
@@ -119,11 +119,11 @@ class PrepareDeployFileTransferExecutor implements ExecutorInterface
      */
     protected function cleanUpData(array $rawData): array
     {
-        if (!array_key_exists(DeployFileConstants::YAML_IMPORTS_KEY, $rawData)) {
+        if (!array_key_exists(DeployFileGeneratorConstants::YAML_IMPORTS_KEY, $rawData)) {
             return $rawData;
         }
 
-        unset($rawData[DeployFileConstants::YAML_IMPORTS_KEY]);
+        unset($rawData[DeployFileGeneratorConstants::YAML_IMPORTS_KEY]);
 
         return $rawData;
     }

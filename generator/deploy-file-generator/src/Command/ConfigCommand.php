@@ -7,7 +7,7 @@
 
 namespace DeployFileGenerator\Command;
 
-use DeployFileGenerator\DeployFileFactory;
+use DeployFileGenerator\DeployFileGeneratorFactory;
 use DeployFileGenerator\Transfer\DeployFileTransfer;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
@@ -72,11 +72,11 @@ class ConfigCommand extends Command
     }
 
     /**
-     * @return \DeployFileGenerator\DeployFileFactory
+     * @return \DeployFileGenerator\DeployFileGeneratorFactory
      */
-    protected function createDeployFileFactory(): DeployFileFactory
+    protected function createDeployFileFactory(): DeployFileGeneratorFactory
     {
-        return new DeployFileFactory();
+        return new DeployFileGeneratorFactory();
     }
 
     /**

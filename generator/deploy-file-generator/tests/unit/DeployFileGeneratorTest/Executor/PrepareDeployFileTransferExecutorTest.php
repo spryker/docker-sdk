@@ -8,7 +8,7 @@
 namespace Unit\DeployFileGeneratorTest\Executor;
 
 use Codeception\Test\Unit;
-use DeployFileGenerator\DeployFileConstants;
+use DeployFileGenerator\DeployFileGeneratorConstants;
 use DeployFileGenerator\Executor\ExecutorInterface;
 use DeployFileGenerator\Executor\PrepareDeployFileTransferExecutor;
 use DeployFileGenerator\FileFinder\FileFinder;
@@ -39,7 +39,7 @@ class PrepareDeployFileTransferExecutorTest extends Unit
     public function testExecuteWithImportInData(): void
     {
         $yamlData = [
-            DeployFileConstants::YAML_IMPORTS_KEY => [
+            DeployFileGeneratorConstants::YAML_IMPORTS_KEY => [
                 static::PROJECT_YML_FILE_NAME => null,
                 static::BASE_YML_FILE_NAME => null,
             ],
@@ -58,7 +58,7 @@ class PrepareDeployFileTransferExecutorTest extends Unit
     public function testExecuteIfFileNotExist(): void
     {
         $yamlData = [
-            DeployFileConstants::YAML_IMPORTS_KEY => [
+            DeployFileGeneratorConstants::YAML_IMPORTS_KEY => [
                 static::PROJECT_YML_FILE_NAME => null,
                 static::BASE_YML_FILE_NAME => null,
             ],
