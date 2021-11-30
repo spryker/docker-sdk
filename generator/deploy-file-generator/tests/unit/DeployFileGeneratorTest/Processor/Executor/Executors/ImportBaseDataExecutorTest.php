@@ -37,9 +37,13 @@ class ImportBaseDataExecutorTest extends Unit
      */
     public function testExecute(): void
     {
+        // Arrange
         $deployFileTransfer = $this->createDeployFileTransfer();
 
+        // Act
         $deployFileTransfer = $this->createImportBaseDataExecutor()->execute($deployFileTransfer);
+
+        // Assert
         $this->tester->assertEquals([
             'some-key' => 'some data',
             DeployFileGeneratorConstants::YAML_IMPORTS_KEY => [

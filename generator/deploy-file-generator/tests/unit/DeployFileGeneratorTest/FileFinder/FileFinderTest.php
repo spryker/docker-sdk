@@ -39,8 +39,10 @@ class FileFinderTest extends Unit
      */
     public function testGetFilePathOnProjectLayer(): void
     {
+        // Arrange, Act
         $filePath = $this->createFileFinder()->getFilePathOnProjectLayer(static::FILE_NAME);
 
+        // Assert
         $this->tester->assertFileExists($filePath);
     }
 
@@ -49,8 +51,10 @@ class FileFinderTest extends Unit
      */
     public function testGetFilePathOnBaseLayer(): void
     {
+        // Arrange, Act
         $filePath = $this->createFileFinder()->getFilePathOnBaseLayer(static::FILE_NAME);
 
+        // Assert
         $this->tester->assertFileExists($filePath);
     }
 

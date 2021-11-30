@@ -29,6 +29,7 @@ abstract class AbstractRuleTest extends Unit
      */
     public function testIsValid(string $key, array $data, bool $exceptedResult): void
     {
+        // Act, Assert
         $this->tester->assertSame($exceptedResult, $this->createRule()->isValid($key, $data));
     }
 
@@ -37,15 +38,20 @@ abstract class AbstractRuleTest extends Unit
      */
     public function testGetRuleName(): void
     {
+        // Arrange
         /** @var \DeployFileGenerator\Validator\Rule\AbstractRule $ruleInstance */
         $ruleInstance = $this->createRule();
 
+        // Act, Assert
         $this->tester->assertSame(
             $ruleInstance::RULE_NAME,
             $ruleInstance->getRuleName(),
         );
 
+        // Arrange
         $ruleInstance = $this->make(AbstractRule::class);
+
+        // Act, Assert
         $this->tester->expectThrowable(
             RuntimeException::class,
             function () use ($ruleInstance) {
@@ -59,17 +65,22 @@ abstract class AbstractRuleTest extends Unit
      */
     public function testGetValidationMessage(): void
     {
+        // Arrange
         /** @var \DeployFileGenerator\Validator\Rule\AbstractRule $ruleInstance */
         $ruleInstance = $this->createRule();
         $testFieldName = 'test-field';
         $validationMessage = sprintf($ruleInstance::VALIDATION_MESSAGE_TEMPLATE, $testFieldName);
 
+        // Act, Assert
         $this->tester->assertSame(
             $validationMessage,
             $ruleInstance->getValidationMessage($testFieldName),
         );
 
+        // Arrange
         $ruleInstance = $this->make(AbstractRule::class);
+
+        // Act, Assert
         $this->tester->expectThrowable(
             RuntimeException::class,
             function () use ($ruleInstance, $testFieldName) {

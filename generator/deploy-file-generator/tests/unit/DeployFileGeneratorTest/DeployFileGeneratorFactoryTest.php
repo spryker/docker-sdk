@@ -33,6 +33,7 @@ class DeployFileGeneratorFactoryTest extends Unit
      */
     public function testCreateProjectDataImporter(): void
     {
+        // Arrange, Act, Assert
         $this->assertInstanceOfForThisFactoryMethod();
     }
 
@@ -41,6 +42,7 @@ class DeployFileGeneratorFactoryTest extends Unit
      */
     public function testCreateDeployFileMergeResolver(): void
     {
+        // Arrange, Act, Assert
         $this->assertInstanceOfForThisFactoryMethod();
     }
 
@@ -49,6 +51,7 @@ class DeployFileGeneratorFactoryTest extends Unit
      */
     public function testCreateFileFinder(): void
     {
+        // Arrange, Act, Assert
         $this->assertInstanceOfForThisFactoryMethod();
     }
 
@@ -57,6 +60,7 @@ class DeployFileGeneratorFactoryTest extends Unit
      */
     public function testCreateSymfonyYamlDumper(): void
     {
+        // Arrange, Act, Assert
         $this->assertInstanceOfForThisFactoryMethod();
     }
 
@@ -65,6 +69,7 @@ class DeployFileGeneratorFactoryTest extends Unit
      */
     public function testGetMergeResolverCollection(): void
     {
+        // Arrange, Act, Assert
         $this->tester->assertIsArray($this->createDeployFileFactory()->getMergeResolverCollection());
     }
 
@@ -73,6 +78,7 @@ class DeployFileGeneratorFactoryTest extends Unit
      */
     public function testCreateSymfonyYamlParser(): void
     {
+        // Arrange, Act, Assert
         $this->assertInstanceOfForThisFactoryMethod();
     }
 
@@ -81,6 +87,7 @@ class DeployFileGeneratorFactoryTest extends Unit
      */
     public function testCreateBaseDataImporter(): void
     {
+        // Arrange, Act, Assert
         $this->assertInstanceOfForThisFactoryMethod();
     }
 
@@ -89,6 +96,7 @@ class DeployFileGeneratorFactoryTest extends Unit
      */
     public function testGetParameterResolverCollection(): void
     {
+        // Arrange, Act, Assert
         $this->tester->assertIsArray($this->createDeployFileFactory()->getParameterResolverCollection());
     }
 
@@ -97,6 +105,7 @@ class DeployFileGeneratorFactoryTest extends Unit
      */
     public function testCreateParametersResolver(): void
     {
+        // Arrange, Act, Assert
         $this->assertInstanceOfForThisFactoryMethod();
     }
 
@@ -105,6 +114,7 @@ class DeployFileGeneratorFactoryTest extends Unit
      */
     public function testCreateDeployFileConfig(): void
     {
+        // Arrange, Act, Assert
         $this->assertInstanceOfForThisFactoryMethod();
     }
 
@@ -113,6 +123,7 @@ class DeployFileGeneratorFactoryTest extends Unit
      */
     public function testCreateDeployFileOutput(): void
     {
+        // Arrange, Act, Assert
         $this->assertInstanceOfForThisFactoryMethod();
     }
 
@@ -139,12 +150,15 @@ class DeployFileGeneratorFactoryTest extends Unit
      */
     protected function assertInstanceOfForThisFactoryMethod(): void
     {
+        // Arrange
         $factoryMethod = $this->getFactoryMethod();
         $factoryReflection = new ReflectionMethod(DeployFileGeneratorFactory::class, $factoryMethod);
         $factoryMethodReturnType = $factoryReflection->getReturnType();
 
+        // Act
         $resultObject = $this->createDeployFileFactory()->$factoryMethod();
 
+        // Assert
         $this->tester->assertInstanceOf($factoryMethodReturnType, $resultObject);
     }
 }

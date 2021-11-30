@@ -39,9 +39,11 @@ class ExportDeployFileTransferToYamlExecutorTest extends Unit
      */
     public function testExecute(): void
     {
+        // Arrange, Act
         $deployFileTransfer = $this->createExportDeployFileTransferToYamlExecutor()
             ->execute($this->createDeployFileTransfer());
 
+        // Assert
         $this->tester->assertFileExists(static::EXPORT_FILE_PATH);
         $this->tester->assertEquals(
             $this->getResultData(),

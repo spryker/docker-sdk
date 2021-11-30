@@ -31,13 +31,17 @@ class YamlDataImporterTest extends Unit
      */
     public function testImportFromFile(): void
     {
+        // Arrange
         $expectedResult = [
             'imported-key' => 'imported data',
             'some-key' => 'some data',
             'imports' => [],
         ];
 
+        // Act
         $data = $this->createYamlDataImporter()->importFromFile(static::PATH_PREFIX . 'data.yml');
+
+        // Assert
         $this->tester->assertEquals($expectedResult, $data);
     }
 

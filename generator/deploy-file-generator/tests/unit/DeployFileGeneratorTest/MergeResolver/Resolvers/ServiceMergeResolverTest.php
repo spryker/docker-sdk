@@ -23,6 +23,7 @@ class ServiceMergeResolverTest extends Unit
      */
     public function testResolve(): void
     {
+        // Arrange
         $projectData = [
             'services' => [
                 'redis' => null,
@@ -49,11 +50,14 @@ class ServiceMergeResolverTest extends Unit
             ],
         ];
 
+        // Act
         $serviceMergeResolver = new ServiceMergeResolver();
         $resultData = $serviceMergeResolver->resolve($projectData, $importData);
 
+        // Assert
         $this->tester->assertEquals($expectedData, $resultData);
 
+        // Arrange
         $projectData = [
             'region' => [
                 'EU' => 'data',
@@ -72,8 +76,11 @@ class ServiceMergeResolverTest extends Unit
                 'US' => 'data',
             ],
         ];
+
+        // Act
         $resultData = $serviceMergeResolver->resolve($projectData, $importData);
 
+        // Assert
         $this->tester->assertEquals($expectedData, $resultData);
     }
 }

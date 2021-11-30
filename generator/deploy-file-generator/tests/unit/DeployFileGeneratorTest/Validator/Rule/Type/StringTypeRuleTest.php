@@ -22,6 +22,7 @@ class StringTypeRuleTest extends AbstractRuleTest
      */
     public function dataProvider(): array
     {
+        // Arrange
         return [
             ['key', ['key' => 1], false],
             ['key', ['key' => 'str'], true],

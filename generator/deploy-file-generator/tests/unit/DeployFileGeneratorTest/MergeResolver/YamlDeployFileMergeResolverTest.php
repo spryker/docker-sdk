@@ -23,6 +23,7 @@ class YamlDeployFileMergeResolverTest extends Unit
      */
     public function testResolve(): void
     {
+        // Arrange
         $yamlDeployFileMergeResolver = new DeployFileMergeResolver(
             $this->createMergeResolverCollection(),
         );
@@ -47,7 +48,10 @@ class YamlDeployFileMergeResolverTest extends Unit
             ],
         ];
 
+        // Act
         $result = $yamlDeployFileMergeResolver->resolve($projectData, $importData);
+
+        // Assert
         $this->tester->assertEquals([
             'env' => 'data from merge resolver',
             'services' => null,

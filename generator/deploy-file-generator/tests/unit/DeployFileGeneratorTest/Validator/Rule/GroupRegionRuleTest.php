@@ -16,6 +16,7 @@ class GroupRegionRuleTest extends AbstractRuleTest
      */
     public function dataProvider(): array
     {
+        // Arrange
         return [
             ['groups.*.region', ['regions' => ['EU' => []], 'groups' => ['some-group' => ['region' => 'EU']]], true],
             ['groups.*.region', ['regions' => ['EU' => []], 'groups' => []], true],

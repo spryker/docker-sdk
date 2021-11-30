@@ -35,12 +35,16 @@ class DeployFileProcessorTest extends Unit
      */
     public function testProcess(): void
     {
+        // Arrange
         $deployFileTransfer = new DeployFileTransfer();
 
+        // Assert
         $this->tester->assertIsEmpty($deployFileTransfer->getRawData());
 
+        // Act
         $deployFileTransfer = $this->createDeployFileProcessor()->process($deployFileTransfer);
 
+        // Assert
         $this->tester->assertEquals([
             static::NEW_KEY => static::NEW_DATA,
         ], $deployFileTransfer->getRawData());

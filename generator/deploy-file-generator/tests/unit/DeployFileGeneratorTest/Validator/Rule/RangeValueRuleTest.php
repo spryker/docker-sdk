@@ -28,6 +28,7 @@ class RangeValueRuleTest extends AbstractRuleTest
      */
     public function dataProvider(): array
     {
+        // Arrange
         return [
             ['key', ['key' => rand(static::MIN_VALUE, static::MAX_VALUE) - 1], true],
             ['key', ['key' => 'str'], true],

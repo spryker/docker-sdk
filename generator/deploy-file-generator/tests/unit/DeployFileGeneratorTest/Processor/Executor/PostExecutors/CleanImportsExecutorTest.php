@@ -24,6 +24,7 @@ class CleanImportsExecutorTest extends Unit
      */
     public function testCleanWithImportsKeyInResultData(): void
     {
+        // Arrange
         $resultData = [
             'some-key' => 'some-data',
             DeployFileGeneratorConstants::YAML_IMPORTS_KEY => [
@@ -38,8 +39,10 @@ class CleanImportsExecutorTest extends Unit
         $deployFileTransfer = new DeployFileTransfer();
         $deployFileTransfer = $deployFileTransfer->setResultData($resultData);
 
+        // Act
         $deployFileTransfer = $this->createCleanImportsExecutor()->execute($deployFileTransfer);
 
+        // Assert
         $this->tester->assertEquals($expectedResult, $deployFileTransfer->getResultData());
     }
 
@@ -48,6 +51,7 @@ class CleanImportsExecutorTest extends Unit
      */
     public function testCleanWithoutImportsKeyInResultData(): void
     {
+        // Arrange
         $resultData = [
             'first-key' => 'some-data',
             'second-key' => 'some-data',
@@ -56,8 +60,10 @@ class CleanImportsExecutorTest extends Unit
         $deployFileTransfer = new DeployFileTransfer();
         $deployFileTransfer = $deployFileTransfer->setResultData($resultData);
 
+        // Act
         $deployFileTransfer = $this->createCleanImportsExecutor()->execute($deployFileTransfer);
 
+        // Assert
         $this->tester->assertEquals($resultData, $deployFileTransfer->getResultData());
     }
 

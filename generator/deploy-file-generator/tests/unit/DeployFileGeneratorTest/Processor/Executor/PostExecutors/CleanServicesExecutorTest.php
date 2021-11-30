@@ -24,6 +24,7 @@ class CleanServicesExecutorTest extends Unit
      */
     public function testCleanWithNullableService(): void
     {
+        // Arrange
         $resultData = [
             'some-key' => 'some-data',
             DeployFileGeneratorConstants::YAML_SERVICES_KEY => [
@@ -43,8 +44,11 @@ class CleanServicesExecutorTest extends Unit
         ];
         $transfer = new DeployFileTransfer();
         $transfer = $transfer->setResultData($resultData);
+
+        // Act
         $transfer = $this->createCleanServicesExecutor()->execute($transfer);
 
+        // Assert
         $this->tester->assertEquals($expectedData, $transfer->getResultData());
     }
 
@@ -53,6 +57,7 @@ class CleanServicesExecutorTest extends Unit
      */
     public function testCleanWithoutNullableService(): void
     {
+        // Arrange
         $resultData = [
             'some-key' => 'some-data',
             DeployFileGeneratorConstants::YAML_SERVICES_KEY => [
@@ -71,8 +76,11 @@ class CleanServicesExecutorTest extends Unit
         ];
         $transfer = new DeployFileTransfer();
         $transfer = $transfer->setResultData($resultData);
+
+        // Act
         $transfer = $this->createCleanServicesExecutor()->execute($transfer);
 
+        // Assert
         $this->tester->assertEquals($expectedData, $transfer->getResultData());
     }
 
@@ -81,6 +89,7 @@ class CleanServicesExecutorTest extends Unit
      */
     public function testCleanWithoutServices(): void
     {
+        // Arrange
         $resultData = [
             'some-key' => 'some-data',
         ];
@@ -89,8 +98,11 @@ class CleanServicesExecutorTest extends Unit
         ];
         $transfer = new DeployFileTransfer();
         $transfer = $transfer->setResultData($resultData);
+
+        // Act
         $transfer = $this->createCleanServicesExecutor()->execute($transfer);
 
+        // Assert
         $this->tester->assertEquals($expectedData, $transfer->getResultData());
     }
 

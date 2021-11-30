@@ -25,6 +25,7 @@ class ArrayTypeRuleTest extends AbstractRuleTest
      */
     public function dataProvider(): array
     {
+        // Arrange
         return [
             ['test-key', ['test-key' => [2]], true],
             ['test-key', ['other-key' => [2]], true],

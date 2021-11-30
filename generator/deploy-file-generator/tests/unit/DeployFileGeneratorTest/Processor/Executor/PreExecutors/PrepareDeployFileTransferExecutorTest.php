@@ -38,6 +38,7 @@ class PrepareDeployFileTransferExecutorTest extends Unit
      */
     public function testExecuteWithImportInData(): void
     {
+        // Arrange
         $yamlData = [
             DeployFileGeneratorConstants::YAML_IMPORTS_KEY => [
                 static::PROJECT_YML_FILE_NAME => null,
@@ -45,9 +46,11 @@ class PrepareDeployFileTransferExecutorTest extends Unit
             ],
         ];
 
+        // Act
         $deployFileTransfer = $this->createPrepareDeployFileTransferExecutor($yamlData)
             ->execute($this->createDeployFileTransfer());
 
+        // Assert
         $this->tester->assertArrayHasKey(static::PROJECT_YML_FILE_NAME, $deployFileTransfer->getProjectImports());
         $this->tester->assertArrayHasKey(static::BASE_YML_FILE_NAME, $deployFileTransfer->getBaseImports());
     }

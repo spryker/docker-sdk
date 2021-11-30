@@ -22,7 +22,10 @@ class PercentAnnotationParameterResolverTest extends Unit
      */
     public function testResolveValue(): void
     {
+        // Arrange
         $percentAnnotationParameterResolver = new PercentAnnotationParameterResolver();
+
+        // Act, Assert
         $this->assertEquals(
             'demo',
             $percentAnnotationParameterResolver->resolveValue('%env%', [
@@ -30,13 +33,14 @@ class PercentAnnotationParameterResolverTest extends Unit
             ]),
         );
 
+        // Act, Assert
         $this->assertEquals(
             'some-demo-environment',
             $percentAnnotationParameterResolver->resolveValue('some-%env%-environment', [
                 'env' => 'demo',
             ]),
         );
-
+        // Act, Assert
         $this->assertEquals(
             123,
             $percentAnnotationParameterResolver->resolveValue(123, [
@@ -44,6 +48,7 @@ class PercentAnnotationParameterResolverTest extends Unit
             ]),
         );
 
+        // Act, Assert
         $this->assertEquals(
             'some-string-without-annotation',
             $percentAnnotationParameterResolver->resolveValue('some-string-without-annotation', [
@@ -51,6 +56,7 @@ class PercentAnnotationParameterResolverTest extends Unit
             ]),
         );
 
+        // Act, Assert
         $this->assertEquals(
             'some-%env%-environment',
             $percentAnnotationParameterResolver->resolveValue('some-%env%-environment', [
@@ -64,8 +70,10 @@ class PercentAnnotationParameterResolverTest extends Unit
      */
     public function testGetAnnotationTemplate(): void
     {
+        // Arrange
         $percentAnnotationParameterResolver = new PercentAnnotationParameterResolver();
 
+        // Act, Assert
         $this->tester->assertIsString($percentAnnotationParameterResolver->getAnnotationTemplate());
     }
 }

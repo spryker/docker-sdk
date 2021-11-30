@@ -23,6 +23,7 @@ class SortResultDataExecutorTest extends Unit
      */
     public function testExecute(): void
     {
+        // Arrange
         $data = [
             'third-key' => 'some data',
             'first-key' => 'some data',
@@ -38,8 +39,11 @@ class SortResultDataExecutorTest extends Unit
 
         $transfer = new DeployFileTransfer();
         $transfer = $transfer->setResultData($data);
+
+        // Act
         $transfer = $this->createSortResultDataExecutor()->execute($transfer);
 
+        // Assert
         $this->tester->assertEquals(array_keys($exceptedResult), array_keys($transfer->getResultData()));
         $this->tester->assertNotEquals(array_keys($data), array_keys($transfer->getResultData()));
     }

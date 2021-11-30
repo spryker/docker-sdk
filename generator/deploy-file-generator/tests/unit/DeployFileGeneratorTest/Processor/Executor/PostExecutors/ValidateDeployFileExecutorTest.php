@@ -24,6 +24,7 @@ class ValidateDeployFileExecutorTest extends Unit
      */
     public function testExecute()
     {
+        // Arrange
         $data = [
             'third-key' => 'some data',
             'first-key' => 'some data',
@@ -34,8 +35,10 @@ class ValidateDeployFileExecutorTest extends Unit
         $transfer = new DeployFileTransfer();
         $transfer = $transfer->setResultData($data);
 
+        // Act
         $transfer = $this->createValidateDeployFileExecutor()->execute($transfer);
 
+        // Assert
         $this->tester->assertEquals(['key' => 'after validation data'], $transfer->getResultData());
     }
 

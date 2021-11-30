@@ -23,6 +23,7 @@ class ParametersResolverTest extends Unit
      */
     public function testResolveParams(): void
     {
+        // Arrange
         $parametersResolver = new ParametersResolver(
             $this->createResolverCollection(),
         );
@@ -50,8 +51,10 @@ class ParametersResolverTest extends Unit
             ],
         ];
 
+        // Act
         $result = $parametersResolver->resolveParams($data, $params);
 
+        // Assert
         $this->tester->assertEquals($expected, $result);
     }
 
