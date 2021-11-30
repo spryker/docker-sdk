@@ -8,9 +8,9 @@
 namespace Unit\DeployFileGeneratorTest\Processor;
 
 use Codeception\Test\Unit;
-use DeployFileGenerator\Executor\ExecutorInterface;
 use DeployFileGenerator\Processor\DeployFileProcessor;
 use DeployFileGenerator\Processor\DeployFileProcessorInterface;
+use DeployFileGenerator\Processor\Executor\ExecutorInterface;
 use DeployFileGenerator\Transfer\DeployFileTransfer;
 
 class DeployFileProcessorTest extends Unit
@@ -51,7 +51,7 @@ class DeployFileProcessorTest extends Unit
      */
     protected function createDeployFileProcessor(): DeployFileProcessorInterface
     {
-        return new DeployFileProcessor([
+        return (new DeployFileProcessor())->addExecutor(
             $this->makeEmpty(
                 ExecutorInterface::class,
                 [
@@ -63,6 +63,6 @@ class DeployFileProcessorTest extends Unit
                     },
                 ],
             ),
-        ]);
+        );
     }
 }

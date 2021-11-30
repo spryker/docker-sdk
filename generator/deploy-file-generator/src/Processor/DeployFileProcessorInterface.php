@@ -8,6 +8,7 @@
 
 namespace DeployFileGenerator\Processor;
 
+use DeployFileGenerator\Processor\Executor\ExecutorInterface;
 use DeployFileGenerator\Transfer\DeployFileTransfer;
 
 interface DeployFileProcessorInterface
@@ -18,4 +19,25 @@ interface DeployFileProcessorInterface
      * @return \DeployFileGenerator\Transfer\DeployFileTransfer
      */
     public function process(DeployFileTransfer $deployFileTransfer): DeployFileTransfer;
+
+    /**
+     * @param \DeployFileGenerator\Processor\Executor\ExecutorInterface $executor
+     *
+     * @return $this
+     */
+    public function addPreExecutor(ExecutorInterface $executor);
+
+    /**
+     * @param \DeployFileGenerator\Processor\Executor\ExecutorInterface $executor
+     *
+     * @return $this
+     */
+    public function addExecutor(ExecutorInterface $executor);
+
+    /**
+     * @param \DeployFileGenerator\Processor\Executor\ExecutorInterface $executor
+     *
+     * @return $this
+     */
+    public function addPostExecutor(ExecutorInterface $executor);
 }

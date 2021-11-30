@@ -111,22 +111,6 @@ class DeployFileGeneratorFactoryTest extends Unit
     /**
      * @return void
      */
-    public function testCreateDeployFileConfigProcessor(): void
-    {
-        $this->assertInstanceOfForThisFactoryMethod();
-    }
-
-    /**
-     * @return void
-     */
-    public function testCreateDeployFileBuildProcessor(): void
-    {
-        $this->assertInstanceOfForThisFactoryMethod();
-    }
-
-    /**
-     * @return void
-     */
     public function testCreateDeployFileOutput(): void
     {
         $this->assertInstanceOfForThisFactoryMethod();

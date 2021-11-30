@@ -5,14 +5,14 @@
  * For full license information, please view the LICENSE file that was distributed with this source code.
  */
 
-namespace Unit\DeployFileGeneratorTest\Executor;
+namespace Unit\DeployFileGeneratorTest\Processor\Executor\Executors;
 
 use Codeception\Test\Unit;
 use DeployFileGenerator\DeployFileGeneratorConstants;
-use DeployFileGenerator\Executor\ExecutorInterface;
-use DeployFileGenerator\Executor\ImportProjectDataExecutor;
 use DeployFileGenerator\Importer\DeployFileImporterInterface;
 use DeployFileGenerator\MergeResolver\MergeResolverInterface;
+use DeployFileGenerator\Processor\Executor\ExecutorInterface;
+use DeployFileGenerator\Processor\Executor\Executors\ImportProjectDataExecutor;
 use DeployFileGenerator\Transfer\DeployFileTransfer;
 
 class ImportProjectDataExecutorTest extends Unit
@@ -54,7 +54,7 @@ class ImportProjectDataExecutorTest extends Unit
     }
 
     /**
-     * @return \DeployFileGenerator\Executor\ExecutorInterface
+     * @return \DeployFileGenerator\Processor\Executor\ExecutorInterface
      */
     protected function createImportProjectDataExecutor(): ExecutorInterface
     {

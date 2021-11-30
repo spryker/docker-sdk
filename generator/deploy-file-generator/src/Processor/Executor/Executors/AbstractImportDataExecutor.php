@@ -5,10 +5,11 @@
  * For full license information, please view the LICENSE file that was distributed with this source code.
  */
 
-namespace DeployFileGenerator\Executor;
+namespace DeployFileGenerator\Processor\Executor\Executors;
 
 use DeployFileGenerator\Importer\DeployFileImporterInterface;
 use DeployFileGenerator\MergeResolver\MergeResolverInterface;
+use DeployFileGenerator\Processor\Executor\ExecutorInterface;
 use DeployFileGenerator\Transfer\DeployFileTransfer;
 
 abstract class AbstractImportDataExecutor implements ExecutorInterface

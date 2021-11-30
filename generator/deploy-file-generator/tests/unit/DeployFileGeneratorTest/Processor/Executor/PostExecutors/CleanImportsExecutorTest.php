@@ -4,15 +4,15 @@
  * For full license information, please view the LICENSE file that was distributed with this source code.
  */
 
-namespace Unit\DeployFileGeneratorTest\Cleaner\Cleaners;
+namespace Unit\DeployFileGeneratorTest\Processor\Executor\PostExecutors;
 
 use Codeception\Test\Unit;
-use DeployFileGenerator\Cleaner\CleanerInterface;
-use DeployFileGenerator\Cleaner\Cleaners\ImportsCleaner;
 use DeployFileGenerator\DeployFileGeneratorConstants;
+use DeployFileGenerator\Processor\Executor\ExecutorInterface;
+use DeployFileGenerator\Processor\Executor\PostExecutors\CleanImportsExecutor;
 use DeployFileGenerator\Transfer\DeployFileTransfer;
 
-class ImportsCleanerTest extends Unit
+class CleanImportsExecutorTest extends Unit
 {
     /**
      * @var \UnitTester
@@ -38,7 +38,7 @@ class ImportsCleanerTest extends Unit
         $deployFileTransfer = new DeployFileTransfer();
         $deployFileTransfer = $deployFileTransfer->setResultData($resultData);
 
-        $deployFileTransfer = $this->createImportsCleaner()->clean($deployFileTransfer);
+        $deployFileTransfer = $this->createCleanImportsExecutor()->execute($deployFileTransfer);
 
         $this->tester->assertEquals($expectedResult, $deployFileTransfer->getResultData());
     }
@@ -56,16 +56,16 @@ class ImportsCleanerTest extends Unit
         $deployFileTransfer = new DeployFileTransfer();
         $deployFileTransfer = $deployFileTransfer->setResultData($resultData);
 
-        $deployFileTransfer = $this->createImportsCleaner()->clean($deployFileTransfer);
+        $deployFileTransfer = $this->createCleanImportsExecutor()->execute($deployFileTransfer);
 
         $this->tester->assertEquals($resultData, $deployFileTransfer->getResultData());
     }
 
     /**
-     * @return \DeployFileGenerator\Cleaner\CleanerInterface
+     * @return \DeployFileGenerator\Processor\Executor\ExecutorInterface
      */
-    protected function createImportsCleaner(): CleanerInterface
+    protected function createCleanImportsExecutor(): ExecutorInterface
     {
-        return new ImportsCleaner();
+        return new CleanImportsExecutor();
     }
 }

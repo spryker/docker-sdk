@@ -5,10 +5,11 @@
  * For full license information, please view the LICENSE file that was distributed with this source code.
  */
 
-namespace Unit\DeployFileGeneratorTest\Executor;
+namespace Unit\DeployFileGeneratorTest\Processor\Executor\PostExecutors;
 
 use Codeception\Test\Unit;
-use DeployFileGenerator\Executor\ExportDeployFileTransferToYamlExecutor;
+use DeployFileGenerator\Processor\Executor\ExecutorInterface;
+use DeployFileGenerator\Processor\Executor\PostExecutors\ExportDeployFileTransferToYamlExecutor;
 use DeployFileGenerator\Transfer\DeployFileTransfer;
 use Symfony\Component\Yaml\Dumper;
 use Symfony\Component\Yaml\Parser;
@@ -70,9 +71,9 @@ class ExportDeployFileTransferToYamlExecutorTest extends Unit
     }
 
     /**
-     * @return \DeployFileGenerator\Executor\ExportDeployFileTransferToYamlExecutor
+     * @return \DeployFileGenerator\Processor\Executor\ExecutorInterface
      */
-    protected function createExportDeployFileTransferToYamlExecutor(): ExportDeployFileTransferToYamlExecutor
+    protected function createExportDeployFileTransferToYamlExecutor(): ExecutorInterface
     {
         return new ExportDeployFileTransferToYamlExecutor(new Dumper());
     }

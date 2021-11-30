@@ -4,15 +4,15 @@
  * For full license information, please view the LICENSE file that was distributed with this source code.
  */
 
-namespace Unit\DeployFileGeneratorTest\Cleaner\Cleaners;
+namespace Unit\DeployFileGeneratorTest\Processor\Executor\PostExecutors;
 
 use Codeception\Test\Unit;
-use DeployFileGenerator\Cleaner\CleanerInterface;
-use DeployFileGenerator\Cleaner\Cleaners\ServicesCleaner;
 use DeployFileGenerator\DeployFileGeneratorConstants;
+use DeployFileGenerator\Processor\Executor\ExecutorInterface;
+use DeployFileGenerator\Processor\Executor\PostExecutors\CleanServicesExecutor;
 use DeployFileGenerator\Transfer\DeployFileTransfer;
 
-class ServicesCleanerTest extends Unit
+class CleanServicesExecutorTest extends Unit
 {
     /**
      * @var \UnitTester
@@ -43,7 +43,7 @@ class ServicesCleanerTest extends Unit
         ];
         $transfer = new DeployFileTransfer();
         $transfer = $transfer->setResultData($resultData);
-        $transfer = $this->createServicesCleaner()->clean($transfer);
+        $transfer = $this->createCleanServicesExecutor()->execute($transfer);
 
         $this->tester->assertEquals($expectedData, $transfer->getResultData());
     }
@@ -71,7 +71,7 @@ class ServicesCleanerTest extends Unit
         ];
         $transfer = new DeployFileTransfer();
         $transfer = $transfer->setResultData($resultData);
-        $transfer = $this->createServicesCleaner()->clean($transfer);
+        $transfer = $this->createCleanServicesExecutor()->execute($transfer);
 
         $this->tester->assertEquals($expectedData, $transfer->getResultData());
     }
@@ -89,16 +89,16 @@ class ServicesCleanerTest extends Unit
         ];
         $transfer = new DeployFileTransfer();
         $transfer = $transfer->setResultData($resultData);
-        $transfer = $this->createServicesCleaner()->clean($transfer);
+        $transfer = $this->createCleanServicesExecutor()->execute($transfer);
 
         $this->tester->assertEquals($expectedData, $transfer->getResultData());
     }
 
     /**
-     * @return \DeployFileGenerator\Cleaner\CleanerInterface
+     * @return \DeployFileGenerator\Processor\Executor\ExecutorInterface
      */
-    protected function createServicesCleaner(): CleanerInterface
+    protected function createCleanServicesExecutor(): ExecutorInterface
     {
-        return new ServicesCleaner();
+        return new CleanServicesExecutor();
     }
 }

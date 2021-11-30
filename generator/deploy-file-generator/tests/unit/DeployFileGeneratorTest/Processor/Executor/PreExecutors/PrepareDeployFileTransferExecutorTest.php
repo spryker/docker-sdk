@@ -5,14 +5,14 @@
  * For full license information, please view the LICENSE file that was distributed with this source code.
  */
 
-namespace Unit\DeployFileGeneratorTest\Executor;
+namespace Unit\DeployFileGeneratorTest\Processor\Executor\PreExecutors;
 
 use Codeception\Test\Unit;
 use DeployFileGenerator\DeployFileGeneratorConstants;
-use DeployFileGenerator\Executor\ExecutorInterface;
-use DeployFileGenerator\Executor\PrepareDeployFileTransferExecutor;
 use DeployFileGenerator\FileFinder\FileFinder;
 use DeployFileGenerator\FileFinder\FileFinderInterface;
+use DeployFileGenerator\Processor\Executor\ExecutorInterface;
+use DeployFileGenerator\Processor\Executor\PreExecutors\PrepareDeployFileTransferExecutor;
 use DeployFileGenerator\Transfer\DeployFileTransfer;
 use Symfony\Component\Yaml\Parser;
 
@@ -135,7 +135,7 @@ class PrepareDeployFileTransferExecutorTest extends Unit
     /**
      * @param array $yamlData
      *
-     * @return \DeployFileGenerator\Executor\ExecutorInterface
+     * @return \DeployFileGenerator\Processor\Executor\ExecutorInterface
      */
     protected function createPrepareDeployFileTransferExecutor(array $yamlData): ExecutorInterface
     {
@@ -148,7 +148,7 @@ class PrepareDeployFileTransferExecutorTest extends Unit
     /**
      * @param array $yamlData
      *
-     * @return \DeployFileGenerator\Executor\ExecutorInterface
+     * @return \DeployFileGenerator\Processor\Executor\ExecutorInterface
      */
     protected function createPrepareDeployFileTransferExecutorWithNullableFileFinder(array $yamlData): ExecutorInterface
     {

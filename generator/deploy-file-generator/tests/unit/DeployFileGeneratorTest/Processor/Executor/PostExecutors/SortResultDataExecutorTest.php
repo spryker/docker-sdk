@@ -4,11 +4,11 @@
  * For full license information, please view the LICENSE file that was distributed with this source code.
  */
 
-namespace Unit\DeployFileGeneratorTest\Executor;
+namespace Unit\DeployFileGeneratorTest\Processor\Executor\PostExecutors;
 
 use Codeception\Test\Unit;
-use DeployFileGenerator\Executor\ExecutorInterface;
-use DeployFileGenerator\Executor\SortResultDataExecutor;
+use DeployFileGenerator\Processor\Executor\ExecutorInterface;
+use DeployFileGenerator\Processor\Executor\PostExecutors\SortResultDataExecutor;
 use DeployFileGenerator\Transfer\DeployFileTransfer;
 
 class SortResultDataExecutorTest extends Unit
@@ -45,7 +45,7 @@ class SortResultDataExecutorTest extends Unit
     }
 
     /**
-     * @return \DeployFileGenerator\Executor\ExecutorInterface
+     * @return \DeployFileGenerator\Processor\Executor\ExecutorInterface
      */
     protected function createSortResultDataExecutor(): ExecutorInterface
     {

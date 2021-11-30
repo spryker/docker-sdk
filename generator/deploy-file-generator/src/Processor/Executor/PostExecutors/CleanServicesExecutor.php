@@ -4,20 +4,20 @@
  * For full license information, please view the LICENSE file that was distributed with this source code.
  */
 
-namespace DeployFileGenerator\Cleaner\Cleaners;
+namespace DeployFileGenerator\Processor\Executor\PostExecutors;
 
-use DeployFileGenerator\Cleaner\CleanerInterface;
 use DeployFileGenerator\DeployFileGeneratorConstants;
+use DeployFileGenerator\Processor\Executor\ExecutorInterface;
 use DeployFileGenerator\Transfer\DeployFileTransfer;
 
-class ServicesCleaner implements CleanerInterface
+class CleanServicesExecutor implements ExecutorInterface
 {
     /**
      * @param \DeployFileGenerator\Transfer\DeployFileTransfer $deployFileTransfer
      *
      * @return \DeployFileGenerator\Transfer\DeployFileTransfer
      */
-    public function clean(DeployFileTransfer $deployFileTransfer): DeployFileTransfer
+    public function execute(DeployFileTransfer $deployFileTransfer): DeployFileTransfer
     {
         $resultData = $deployFileTransfer->getResultData();
 

@@ -8,22 +8,25 @@
 
 namespace DeployFileGenerator\Processor;
 
+use DeployFileGenerator\Processor\Executor\ExecutorInterface;
 use DeployFileGenerator\Transfer\DeployFileTransfer;
 
 class DeployFileProcessor implements DeployFileProcessorInterface
 {
     /**
-     * @var array<\DeployFileGenerator\Executor\ExecutorInterface>
+     * @var array<\DeployFileGenerator\Processor\Executor\ExecutorInterface>
      */
-    protected $executors;
+    protected $executors = [];
 
     /**
-     * @param array<\DeployFileGenerator\Executor\ExecutorInterface> $executors
+     * @var array<\DeployFileGenerator\Processor\Executor\ExecutorInterface>
      */
-    public function __construct(array $executors)
-    {
-        $this->executors = $executors;
-    }
+    protected $preExecutors = [];
+
+    /**
+     * @var array<\DeployFileGenerator\Processor\Executor\ExecutorInterface>
+     */
+    protected $postExecutors = [];
 
     /**
      * @param \DeployFileGenerator\Transfer\DeployFileTransfer $deployFileTransfer
@@ -32,7 +35,58 @@ class DeployFileProcessor implements DeployFileProcessorInterface
      */
     public function process(DeployFileTransfer $deployFileTransfer): DeployFileTransfer
     {
-        foreach ($this->executors as $executor) {
+        $deployFileTransfer = $this->execute($this->preExecutors, $deployFileTransfer);
+        $deployFileTransfer = $this->execute($this->executors, $deployFileTransfer);
+        $deployFileTransfer = $this->execute($this->postExecutors, $deployFileTransfer);
+
+        return $deployFileTransfer;
+    }
+
+    /**
+     * @param \DeployFileGenerator\Processor\Executor\ExecutorInterface $executor
+     *
+     * @return $this
+     */
+    public function addPreExecutor(ExecutorInterface $executor)
+    {
+        $this->preExecutors[] = $executor;
+
+        return $this;
+    }
+
+    /**
+     * @param \DeployFileGenerator\Processor\Executor\ExecutorInterface $executor
+     *
+     * @return $this
+     */
+    public function addExecutor(ExecutorInterface $executor)
+    {
+        $this->executors[] = $executor;
+
+        return $this;
+    }
+
+    /**
+     * @param \DeployFileGenerator\Processor\Executor\ExecutorInterface $executor
+     *
+     * @return $this
+     */
+    public function addPostExecutor(ExecutorInterface $executor)
+    {
+        $this->postExecutors[] = $executor;
+
+        return $this;
+    }
+
+    /**
+     * @param array<\DeployFileGenerator\Processor\Executor\ExecutorInterface> $executors
+     * @param \DeployFileGenerator\Transfer\DeployFileTransfer $deployFileTransfer
+     *
+     * @return \DeployFileGenerator\Transfer\DeployFileTransfer
+     */
+    protected function execute(array $executors, DeployFileTransfer $deployFileTransfer)
+    {
+        foreach ($executors as $executor) {
             $deployFileTransfer = $executor->execute($deployFileTransfer);
         }
 

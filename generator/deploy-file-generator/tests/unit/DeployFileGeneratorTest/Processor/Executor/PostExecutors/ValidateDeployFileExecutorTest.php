@@ -4,11 +4,11 @@
  * For full license information, please view the LICENSE file that was distributed with this source code.
  */
 
-namespace Unit\DeployFileGeneratorTest\Executor;
+namespace Unit\DeployFileGeneratorTest\Processor\Executor\PostExecutors;
 
 use Codeception\Test\Unit;
-use DeployFileGenerator\Executor\ExecutorInterface;
-use DeployFileGenerator\Executor\ValidateDeployFileExecutor;
+use DeployFileGenerator\Processor\Executor\ExecutorInterface;
+use DeployFileGenerator\Processor\Executor\PostExecutors\ValidateDeployFileExecutor;
 use DeployFileGenerator\Transfer\DeployFileTransfer;
 use DeployFileGenerator\Validator\DeployFileValidatorInterface;
 
@@ -40,7 +40,7 @@ class ValidateDeployFileExecutorTest extends Unit
     }
 
     /**
-     * @return \DeployFileGenerator\Executor\ExecutorInterface
+     * @return \DeployFileGenerator\Processor\Executor\ExecutorInterface
      */
     protected function createValidateDeployFileExecutor(): ExecutorInterface
     {

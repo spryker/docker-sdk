@@ -8,18 +8,6 @@
 
 namespace DeployFileGenerator;
 
-use DeployFileGenerator\Cleaner\Cleaner;
-use DeployFileGenerator\Cleaner\CleanerInterface;
-use DeployFileGenerator\Cleaner\Cleaners\ImportsCleaner;
-use DeployFileGenerator\Cleaner\Cleaners\ServicesCleaner;
-use DeployFileGenerator\Executor\CleanUpExecutor;
-use DeployFileGenerator\Executor\ExecutorInterface;
-use DeployFileGenerator\Executor\ExportDeployFileTransferToYamlExecutor;
-use DeployFileGenerator\Executor\ImportBaseDataExecutor;
-use DeployFileGenerator\Executor\ImportProjectDataExecutor;
-use DeployFileGenerator\Executor\PrepareDeployFileTransferExecutor;
-use DeployFileGenerator\Executor\SortResultDataExecutor;
-use DeployFileGenerator\Executor\ValidateDeployFileExecutor;
 use DeployFileGenerator\FileFinder\FileFinder;
 use DeployFileGenerator\FileFinder\FileFinderInterface;
 use DeployFileGenerator\Importer\DataImporter;
@@ -34,6 +22,15 @@ use DeployFileGenerator\ParametersResolver\ParametersResolverInterface;
 use DeployFileGenerator\ParametersResolver\Resolvers\PercentAnnotationParameterResolver;
 use DeployFileGenerator\Processor\DeployFileProcessor;
 use DeployFileGenerator\Processor\DeployFileProcessorInterface;
+use DeployFileGenerator\Processor\Executor\ExecutorInterface;
+use DeployFileGenerator\Processor\Executor\Executors\ImportBaseDataExecutor;
+use DeployFileGenerator\Processor\Executor\Executors\ImportProjectDataExecutor;
+use DeployFileGenerator\Processor\Executor\PostExecutors\CleanImportsExecutor;
+use DeployFileGenerator\Processor\Executor\PostExecutors\CleanServicesExecutor;
+use DeployFileGenerator\Processor\Executor\PostExecutors\ExportDeployFileTransferToYamlExecutor;
+use DeployFileGenerator\Processor\Executor\PostExecutors\SortResultDataExecutor;
+use DeployFileGenerator\Processor\Executor\PostExecutors\ValidateDeployFileExecutor;
+use DeployFileGenerator\Processor\Executor\PreExecutors\PrepareDeployFileTransferExecutor;
 use DeployFileGenerator\Validator\DeployFileValidatorFactory;
 use Symfony\Component\Console\Output\ConsoleOutput;
 use Symfony\Component\Console\Output\OutputInterface as SymfonyOutputInterface;
@@ -47,7 +44,15 @@ class DeployFileGeneratorFactory
      */
     public function createDeployFileBuildProcessor(): DeployFileProcessorInterface
     {
-        return new DeployFileProcessor($this->createDeployFileBuildExecutorCollection());
+        return (new DeployFileProcessor())
+            ->addPreExecutor($this->createPrepareDeployFileTransferExecutor())
+            ->addExecutor($this->createProjectImportDataExecutor())
+            ->addExecutor($this->createBaseImportDataExecutor())
+            ->addPostExecutor($this->createCleanImportsExecutor())
+            ->addPostExecutor($this->createCleanServicesExecutor())
+            ->addPostExecutor($this->createSortResultDataExecutor())
+            ->addPostExecutor($this->createValidateDeployFileExecutor())
+            ->addPostExecutor($this->createExportDeployFileTransferToYamlExecutor());
     }
 
     /**
@@ -55,38 +60,14 @@ class DeployFileGeneratorFactory
      */
     public function createDeployFileConfigProcessor(): DeployFileProcessorInterface
     {
-        return new DeployFileProcessor($this->createDeployFileConfigExecutorCollection());
-    }
-
-    /**
-     * @return array<\DeployFileGenerator\Executor\ExecutorInterface>
-     */
-    public function createDeployFileBuildExecutorCollection(): array
-    {
-        return [
-            $this->createPrepareDeployFileTransferExecutor(),
-            $this->createProjectImportDataExecutor(),
-            $this->createBaseImportDataExecutor(),
-            $this->createCleanUpExecutor(),
-            $this->createSortResultDataExecutor(),
-            $this->createValidateDeployFileExecutor(),
-            $this->createExportDeployFileTransferToYamlExecutor(),
-        ];
-    }
-
-    /**
-     * @return array<\DeployFileGenerator\Executor\ExecutorInterface>
-     */
-    public function createDeployFileConfigExecutorCollection(): array
-    {
-        return [
-            $this->createPrepareDeployFileTransferExecutor(),
-            $this->createProjectImportDataExecutor(),
-            $this->createBaseImportDataExecutor(),
-            $this->createCleanUpExecutor(),
-            $this->createSortResultDataExecutor(),
-            $this->createValidateDeployFileExecutor(),
-        ];
+        return (new DeployFileProcessor())
+            ->addPreExecutor($this->createPrepareDeployFileTransferExecutor())
+            ->addExecutor($this->createProjectImportDataExecutor())
+            ->addExecutor($this->createBaseImportDataExecutor())
+            ->addPostExecutor($this->createCleanImportsExecutor())
+            ->addPostExecutor($this->createCleanServicesExecutor())
+            ->addPostExecutor($this->createSortResultDataExecutor())
+            ->addPostExecutor($this->createValidateDeployFileExecutor());
     }
 
     /**
@@ -200,7 +181,7 @@ class DeployFileGeneratorFactory
     }
 
     /**
-     * @return \DeployFileGenerator\Executor\ExecutorInterface
+     * @return \DeployFileGenerator\Processor\Executor\ExecutorInterface
      */
     public function createPrepareDeployFileTransferExecutor(): ExecutorInterface
     {
@@ -211,7 +192,7 @@ class DeployFileGeneratorFactory
     }
 
     /**
-     * @return \DeployFileGenerator\Executor\ExecutorInterface
+     * @return \DeployFileGenerator\Processor\Executor\ExecutorInterface
      */
     public function createExportDeployFileTransferToYamlExecutor(): ExecutorInterface
     {
@@ -222,7 +203,7 @@ class DeployFileGeneratorFactory
     }
 
     /**
-     * @return \DeployFileGenerator\Executor\ExecutorInterface
+     * @return \DeployFileGenerator\Processor\Executor\ExecutorInterface
      */
     public function createProjectImportDataExecutor(): ExecutorInterface
     {
@@ -233,7 +214,7 @@ class DeployFileGeneratorFactory
     }
 
     /**
-     * @return \DeployFileGenerator\Executor\ExecutorInterface
+     * @return \DeployFileGenerator\Processor\Executor\ExecutorInterface
      */
     public function createBaseImportDataExecutor(): ExecutorInterface
     {
@@ -244,7 +225,7 @@ class DeployFileGeneratorFactory
     }
 
     /**
-     * @return \DeployFileGenerator\Executor\ExecutorInterface
+     * @return \DeployFileGenerator\Processor\Executor\ExecutorInterface
      */
     public function createValidateDeployFileExecutor(): ExecutorInterface
     {
@@ -254,15 +235,7 @@ class DeployFileGeneratorFactory
     }
 
     /**
-     * @return \DeployFileGenerator\Executor\ExecutorInterface
-     */
-    public function createCleanUpExecutor(): ExecutorInterface
-    {
-        return new CleanUpExecutor($this->createCleaner());
-    }
-
-    /**
-     * @return \DeployFileGenerator\Executor\ExecutorInterface
+     * @return \DeployFileGenerator\Processor\Executor\ExecutorInterface
      */
     public function createSortResultDataExecutor(): ExecutorInterface
     {
@@ -272,11 +245,19 @@ class DeployFileGeneratorFactory
     }
 
     /**
-     * @return \DeployFileGenerator\Cleaner\CleanerInterface
+     * @return \DeployFileGenerator\Processor\Executor\ExecutorInterface
      */
-    public function createCleaner(): CleanerInterface
+    public function createCleanImportsExecutor(): ExecutorInterface
     {
-        return new Cleaner($this->createDeployFileCleanerCollection());
+        return new CleanImportsExecutor();
+    }
+
+    /**
+     * @return \DeployFileGenerator\Processor\Executor\ExecutorInterface
+     */
+    public function createCleanServicesExecutor(): ExecutorInterface
+    {
+        return new CleanServicesExecutor();
     }
 
     /**
@@ -285,17 +266,6 @@ class DeployFileGeneratorFactory
     protected function createDeployFileValidatorFactory(): DeployFileValidatorFactory
     {
         return new DeployFileValidatorFactory();
-    }
-
-    /**
-     * @return array<\DeployFileGenerator\Cleaner\CleanerInterface>
-     */
-    protected function createDeployFileCleanerCollection(): array
-    {
-        return [
-            new ImportsCleaner(),
-            new ServicesCleaner(),
-        ];
     }
 
     /**
