@@ -6,6 +6,7 @@
 
 namespace DeployFileGenerator\Output;
 
+use DeployFileGenerator\DeployFileGeneratorConfig;
 use DeployFileGenerator\Transfer\DeployFileTransfer;
 use Symfony\Component\Console\Output\OutputInterface as SymfonyOutputInterface;
 use Symfony\Component\Yaml\Dumper;
@@ -38,9 +39,9 @@ class DeployFileOutput implements OutputInterface
     protected $dumper;
 
     /**
-     * @var int
+     * @var \DeployFileGenerator\DeployFileGeneratorConfig
      */
-    protected $yamlInline;
+    protected $config;
 
     /**
      * @var \Symfony\Component\Console\Output\OutputInterface
@@ -50,12 +51,12 @@ class DeployFileOutput implements OutputInterface
     /**
      * @param \Symfony\Component\Console\Output\OutputInterface $output
      * @param \Symfony\Component\Yaml\Dumper $dumper
-     * @param int $yamlInline
+     * @param \DeployFileGenerator\DeployFileGeneratorConfig $config
      */
-    public function __construct(SymfonyOutputInterface $output, Dumper $dumper, int $yamlInline = 0)
+    public function __construct(SymfonyOutputInterface $output, Dumper $dumper, DeployFileGeneratorConfig $config)
     {
         $this->dumper = $dumper;
-        $this->yamlInline = $yamlInline;
+        $this->config = $config;
         $this->output = $output;
     }
 
@@ -80,7 +81,7 @@ class DeployFileOutput implements OutputInterface
         $this->output->writeln(
             $this->dumper->dump(
                 $deployFileTransfer->getResultData(),
-                $this->yamlInline,
+                $this->config->getYamlInline(),
             ),
         );
     }

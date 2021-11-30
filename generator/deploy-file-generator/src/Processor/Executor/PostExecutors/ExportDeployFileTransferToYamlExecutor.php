@@ -7,6 +7,7 @@
 
 namespace DeployFileGenerator\Processor\Executor\PostExecutors;
 
+use DeployFileGenerator\DeployFileGeneratorConfig;
 use DeployFileGenerator\Processor\Executor\ExecutorInterface;
 use DeployFileGenerator\Transfer\DeployFileTransfer;
 use Symfony\Component\Yaml\Dumper;
@@ -19,18 +20,18 @@ class ExportDeployFileTransferToYamlExecutor implements ExecutorInterface
     protected $dumper;
 
     /**
-     * @var int
+     * @var \DeployFileGenerator\DeployFileGeneratorConfig
      */
-    protected $inline;
+    protected $config;
 
     /**
      * @param \Symfony\Component\Yaml\Dumper $dumper
-     * @param int $inline
+     * @param \DeployFileGenerator\DeployFileGeneratorConfig $config
      */
-    public function __construct(Dumper $dumper, int $inline = 0)
+    public function __construct(Dumper $dumper, DeployFileGeneratorConfig $config)
     {
         $this->dumper = $dumper;
-        $this->inline = $inline;
+        $this->config = $config;
     }
 
     /**
@@ -40,7 +41,7 @@ class ExportDeployFileTransferToYamlExecutor implements ExecutorInterface
      */
     public function execute(DeployFileTransfer $deployFileTransfer): DeployFileTransfer
     {
-        $yamlContent = $this->dumper->dump($deployFileTransfer->getResultData(), $this->inline);
+        $yamlContent = $this->dumper->dump($deployFileTransfer->getResultData(), $this->config->getYamlInline());
         file_put_contents($deployFileTransfer->getOutputFilePath(), $yamlContent);
 
         return $deployFileTransfer;

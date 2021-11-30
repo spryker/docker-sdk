@@ -18,7 +18,7 @@ $deploymentDir = '/data/deployment';
 $projectYaml = buildProjectYaml($deploymentDir . '/project.yml');
 
 if ($projectYaml == '') {
-    return;
+    exit(1);
 }
 
 $defaultDeploymentDir = getenv('SPRYKER_DOCKER_SDK_DEPLOYMENT_DIR') ?: './';

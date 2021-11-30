@@ -6,22 +6,23 @@
 
 namespace DeployFileGenerator\Processor\Executor\PostExecutors;
 
+use DeployFileGenerator\DeployFileGeneratorConfig;
 use DeployFileGenerator\Processor\Executor\ExecutorInterface;
 use DeployFileGenerator\Transfer\DeployFileTransfer;
 
 class SortResultDataExecutor implements ExecutorInterface
 {
     /**
-     * @var array<string>
+     * @var \DeployFileGenerator\DeployFileGeneratorConfig
      */
-    protected $deployFileOutputOrderKeys;
+    protected $config;
 
     /**
-     * @param array<string> $deployFileOutputOrderKeys
+     * @param \DeployFileGenerator\DeployFileGeneratorConfig
      */
-    public function __construct(array $deployFileOutputOrderKeys)
+    public function __construct(DeployFileGeneratorConfig $config)
     {
-        $this->deployFileOutputOrderKeys = $deployFileOutputOrderKeys;
+        $this->config = $config;
     }
 
     /**
@@ -34,7 +35,7 @@ class SortResultDataExecutor implements ExecutorInterface
         $sortedResult = [];
         $resultData = $deployFileTransfer->getResultData();
 
-        foreach ($this->deployFileOutputOrderKeys as $deployFileOutputOrderKey) {
+        foreach ($this->config->getDeployFileOutputOrderKeys() as $deployFileOutputOrderKey) {
             if (!array_key_exists($deployFileOutputOrderKey, $resultData)) {
                 continue;
             }

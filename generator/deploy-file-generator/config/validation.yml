@@ -51,11 +51,18 @@ groups.*.applications.*.application:
     require:
     string-type:
 groups.*.applications.*.endpoints:
+    require:
+    array-type:
+groups.*.applications.*.endpoints.*.store:
+    string-type:
+groups.*.applications.*.endpoints.*.services:
     array-type:
 
 # Services
 services.*.engine:
     require:
+    string-type:
+services.*.version:
     string-type:
 services.*.endpoints:
     array-type:
@@ -81,4 +88,7 @@ docker.debug.xdebug.enabled:
         - false
 
 docker.mount.*:
+    array-type:
+
+docker.mount.*.platforms:
     array-type:

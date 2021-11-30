@@ -176,7 +176,7 @@ class DeployFileGeneratorFactory
         return new DeployFileOutput(
             $this->createSymfonyConsoleOutput(),
             $this->createSymfonyYamlDumper(),
-            $this->createDeployFileConfig()->getYamlInline(),
+            $this->createDeployFileConfig(),
         );
     }
 
@@ -198,7 +198,7 @@ class DeployFileGeneratorFactory
     {
         return new ExportDeployFileTransferToYamlExecutor(
             $this->createSymfonyYamlDumper(),
-            $this->createDeployFileConfig()->getYamlInline(),
+            $this->createDeployFileConfig(),
         );
     }
 
@@ -240,7 +240,7 @@ class DeployFileGeneratorFactory
     public function createSortResultDataExecutor(): ExecutorInterface
     {
         return new SortResultDataExecutor(
-            $this->createDeployFileConfig()->getDeployFileOutputOrderKeys(),
+            $this->createDeployFileConfig(),
         );
     }
 
