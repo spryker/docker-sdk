@@ -7,6 +7,7 @@
 namespace Unit\DeployFileGeneratorTest\Processor\Executor\PostExecutors;
 
 use Codeception\Test\Unit;
+use DeployFileGenerator\DeployFileGeneratorConfig;
 use DeployFileGenerator\Processor\Executor\ExecutorInterface;
 use DeployFileGenerator\Processor\Executor\PostExecutors\SortResultDataExecutor;
 use DeployFileGenerator\Transfer\DeployFileTransfer;
@@ -53,10 +54,14 @@ class SortResultDataExecutorTest extends Unit
      */
     protected function createSortResultDataExecutor(): ExecutorInterface
     {
-        return new SortResultDataExecutor([
-            'first-key',
-            'second-key',
-            'specific-key',
-        ]);
+        return new SortResultDataExecutor(
+            $this->makeEmpty(DeployFileGeneratorConfig::class, [
+                'getDeployFileOutputOrderKeys' => [
+                    'first-key',
+                    'second-key',
+                    'specific-key',
+                ]
+            ])
+        );
     }
 }

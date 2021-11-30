@@ -8,6 +8,7 @@
 namespace Unit\DeployFileGeneratorTest\Processor\Executor\PostExecutors;
 
 use Codeception\Test\Unit;
+use DeployFileGenerator\DeployFileGeneratorConfig;
 use DeployFileGenerator\Processor\Executor\ExecutorInterface;
 use DeployFileGenerator\Processor\Executor\PostExecutors\ExportDeployFileTransferToYamlExecutor;
 use DeployFileGenerator\Transfer\DeployFileTransfer;
@@ -77,7 +78,12 @@ class ExportDeployFileTransferToYamlExecutorTest extends Unit
      */
     protected function createExportDeployFileTransferToYamlExecutor(): ExecutorInterface
     {
-        return new ExportDeployFileTransferToYamlExecutor(new Dumper());
+        return new ExportDeployFileTransferToYamlExecutor(
+            new Dumper(),
+            $this->makeEmpty(DeployFileGeneratorConfig::class, [
+                'getYamlInline' => 50,
+            ])
+        );
     }
 
     /**
