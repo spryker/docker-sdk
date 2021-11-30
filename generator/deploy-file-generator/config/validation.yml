@@ -62,8 +62,6 @@ groups.*.applications.*.endpoints.*.services:
 services.*.engine:
     require:
     string-type:
-services.*.version:
-    string-type:
 services.*.endpoints:
     array-type:
 
