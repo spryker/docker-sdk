@@ -31,7 +31,7 @@ class ImportProjectDataExecutor extends AbstractImportDataExecutor
      *
      * @return \DeployFileGenerator\Transfer\DeployFileTransfer
      */
-    protected function setDataIntoDeployFileTransfer(DeployFileTransfer $deployFileTransfer, array $data): DeployFileTransfer
+    protected function mapDataToResultData(DeployFileTransfer $deployFileTransfer, array $data): DeployFileTransfer
     {
         return $deployFileTransfer->setResultData($data);
     }

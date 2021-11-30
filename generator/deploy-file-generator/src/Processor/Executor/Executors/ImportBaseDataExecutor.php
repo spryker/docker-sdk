@@ -31,7 +31,7 @@ class ImportBaseDataExecutor extends AbstractImportDataExecutor
      *
      * @return \DeployFileGenerator\Transfer\DeployFileTransfer
      */
-    protected function setDataIntoDeployFileTransfer(DeployFileTransfer $deployFileTransfer, array $data): DeployFileTransfer
+    protected function mapDataToResultData(DeployFileTransfer $deployFileTransfer, array $data): DeployFileTransfer
     {
         $projectData = $deployFileTransfer->getResultData();
         $result = $this->mergeResolver->resolve($data, $projectData);

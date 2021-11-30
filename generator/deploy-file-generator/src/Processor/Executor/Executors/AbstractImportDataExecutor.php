@@ -43,7 +43,7 @@ abstract class AbstractImportDataExecutor implements ExecutorInterface
     {
         $data = $this->prepareDataToImport($deployFileTransfer);
         $data = $this->importer->importFromData($data);
-        $deployFileTransfer = $this->setDataIntoDeployFileTransfer($deployFileTransfer, $data);
+        $deployFileTransfer = $this->mapDataToResultData($deployFileTransfer, $data);
 
         return $deployFileTransfer;
     }
@@ -61,5 +61,5 @@ abstract class AbstractImportDataExecutor implements ExecutorInterface
      *
      * @return \DeployFileGenerator\Transfer\DeployFileTransfer
      */
-    abstract protected function setDataIntoDeployFileTransfer(DeployFileTransfer $deployFileTransfer, array $data): DeployFileTransfer;
+    abstract protected function mapDataToResultData(DeployFileTransfer $deployFileTransfer, array $data): DeployFileTransfer;
 }
