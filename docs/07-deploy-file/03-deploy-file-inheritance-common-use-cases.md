@@ -1,14 +1,17 @@
-This document contains examples of using deploy file inheritance to avoid defining duplicate parameters in deploy files. Instead of creating a full deploy file with just one or two different parameter for an environment, you can create a deploy file with just the parameters unique to the environment.
+This document contains examples of using deploy file inheritance. The examples show how to do the following:
+* Avoid defining duplicate parameters in deploy files.
+* Re-use configuration from a deploy file in multiple deploy files.
+* Use dynamic parameters when the a configuration is re-used in multiple environments.
 
-For case, we provide examples
+For comparison, we provide examples of achieving the same result with and without deploy file inheritance.
 
-## Defining different domain names
+## Defining domain names
 
-Two environments have have the same infrastructure, except domain names.
+The following examples show how you can define different domain names for two environments.
 
-### Defining different domain names via two full deploy files
+### Defining domain names via main deploy files
 
-Defined in two full deploy files, the configuration for two different domain names looks as follows:
+Defined in main deploy files, the configuration of different domain names looks as follows:
 
 **deploy.prod.yml**
 ```yaml
@@ -34,19 +37,19 @@ groups:
             Yves:
                 application: yves
                 endpoints:
-                    test.spryker.com:
+                    dev.spryker.com:
                         store: DE
 ...
 ```
 
-### Defining different domains via deploy file inheritance
+### Defining domain names via a dedicated deploy file
 
 
-To define a different domain name for an environment using deploy file inheritance, do the following:
+To define domain names by including a dedicated deploy file with a dynamic parameter, do the following:
 
 1. Create `config/deploy-templates/{DEPLOY_FILE_NAME}`. For example, `config/deploy-templates/groups.yml`.
 
-2. As a domain name, add a dynamic parameter name. For example, add the `domain` parameter name.
+2. Define the domain name as a dynamic parameter. For example, define it as a `domain` parameter name.
 
 **config/deploy-templates/groups.yml**
 ```yaml
@@ -60,7 +63,8 @@ groups:
                     de.%domain%:
                         store: DE
 ```
-3. In `deploy.prod.yml` and `deploy.dev.yml`, include `config/deploy-templates/groups.yml` with the `domain` parameter defined for each environment.
+
+3. In `deploy.prod.yml` and `deploy.dev.yml`, include `config/deploy-templates/groups.yml` with the `domain` dynamic parameter defined for each environment.
 
 **deploy.prod.yml**
 ```yaml
@@ -84,28 +88,31 @@ imports:
 
 ## Enabling New Relic
 
-By default, all the deploy files include `deploy.base.template.yml` from the base layer with parameters for each environment.
+By default, NewRelic is disabled. The following examples show how you can enable New Relic with different license keys in two environments.
 
-**deploy.dev.yml**
+### Enabling New Relic via main deploy files
+
+The configuration of enabled New Relic looks as follows in main deploy files:
+
+**deploy.prod.yml**
 ```yaml
 version: '0.1'
 
 namespace: spryker
 tag: 'dev'
 
-environment: docker.dev
+environment: docker.prod
+
+docker:
+    newrelic:
+        license: sker759fsdu01xkdotunc85334e85c10cd0jh67f
 
 imports:
     deploy.base.template.yml:
         parameters:
-            env_name: 'dev'
+            env_name: 'prod'
 ```
 
-By default, NewRelic is disabled. To enable it, you need to extend a deploy file or import a deploy file with enabled NewRelic.
-
-### Enabling New Relic via the main deploy file
-
-The configuration of enabled New Relic looks as follows:
 
 **deploy.dev.yml**
 ```yaml
@@ -130,14 +137,36 @@ imports:
 
 To enable New Relic with a dedicated deploy file, do the following:
 
-1. Create new file **config/deploy-templates/newrelic.yml**
+1. Create `config/deploy-templates/{DEPLOY_FILE_NAME}`. For example, `config/deploy-templates/enabled-newrelic.yml`.
+
+2. Define New Relic as enabled with the license key defined dynamically:
 ```yaml
 docker:
     newrelic:
-        license: eu01xxaa7460e1ea3abdfbbbd34e85c10cd0NRAL
+        license: %license_key%
 ```
 
-2. In `deploy.dev.yml`, include
+2. In `deploy.prod.yml` and `deploy.dev.yml`, include `config/deploy-templates/enabled-newrelic.yml` with the `license_key` dynamic parameter  defined for each environment.
+
+**deploy.prod.yml**
+```yaml
+version: '0.1'
+
+namespace: spryker
+tag: 'produ'
+
+environment: docker.prod
+
+imports:
+    enabled-newrelic.yml:
+      parameters:
+          license_key: 'sker759fsdu01xkdotunc85334e85c10cd0jh67f'
+    deploy.base.template.yml:
+        parameters:
+            env_name: 'prod'
+```
+
+**deploy.dev.yml**
 ```yaml
 version: '0.1'
 
@@ -147,20 +176,55 @@ tag: 'dev'
 environment: docker.dev
 
 imports:
-    newrelic.yml:
+    enabled-newrelic.yml:
+      parameters:
+          license_key: 'eu01xxaa7460e1ea3abdfbbbd34e85c10cd0NRAL'
     deploy.base.template.yml:
         parameters:
             env_name: 'dev'
 ```
 ***
 
-## Adding a new application
 
-You can add a new application by extending the main deploy file or by including a dedicated deploy file with the application's configuration.
+## Adding an application
 
-### Adding a new application via the main deploy file
+The following examples shows how to add two applications with different endpoints.
 
-The configuration of a new application in the main deploy file looks as follows:
+### Adding an application via main deploy files
+
+The configuration of a new application in main deploy files looks as follows:
+
+**deploy.prod.yml**
+```yaml
+version: '0.1'
+
+namespace: spryker
+tag: 'prod'
+
+environment: docker.prod
+
+groups:
+    EU:
+        region: DE
+        applications:
+            Mportal:
+                application: merchant-portal
+                endpoints:
+                    mp.de.spryker.com:
+                        entry-point: MerchantPortal
+                        store: DE
+                        primal: true
+                        services:
+                            session:
+                                namespace: 7
+
+imports:
+    deploy.base.template.yml:
+        parameters:
+            env_name: 'prod'
+```
+
+
 
 **deploy.dev.yml**
 ```yaml
@@ -192,11 +256,14 @@ imports:
             env_name: 'dev'
 ```
 
-### Adding a new application via a dedicated deploy file
+### Adding an application via a dedicated deploy file
 
 To add an application via an included deploy file, do the following:
 
-1. Create `config/deploy-templates/merchant-application.yml`:
+
+1. Create `config/deploy-templates/{DEPLOY_FILE_NAME}`. For example, `config/deploy-templates/merchant-application.yml`.
+
+2. Define the application with the endpoint defined dynamically:
 ```yaml
 groups:
     EU:
@@ -205,7 +272,7 @@ groups:
             Mportal:
                 application: merchant-portal
                 endpoints:
-                    mp.de.dev.spryker.com:
+                    %hostname%:
                         entry-point: MerchantPortal
                         store: DE
                         primal: true
@@ -214,8 +281,28 @@ groups:
                                 namespace: 7
 ```
 
-2. In `deploy.dev.yml`, include `merchant-application.yml`:
+2. In `deploy.prod.yml` and `deploy.dev.yml`, include `merchant-application.yml` with the `hostname` dynamic parameter defined:
 
+**deploy.prod.yml**
+```yaml
+version: '0.1'
+
+namespace: spryker
+tag: 'prod'
+
+environment: docker.prod
+
+imports:
+    merchant-application.yml:
+      parameters:
+          hostname: 'mp.de.spryker.com'      
+    deploy.base.template.yml:
+        parameters:
+            env_name: 'prod'
+```
+
+
+**deploy.dev.yml**
 ```yaml
 version: '0.1'
 
@@ -226,69 +313,130 @@ environment: docker.dev
 
 imports:
     merchant-application.yml:
+      parameters:
+          hostname: 'mp.de.dev.spryker.com'      
     deploy.base.template.yml:
         parameters:
             env_name: 'dev'
 ```
 ***
 
-## Adding services
-docker/sdk has the `dashboard` service only for the `dev` environment. To enable it in any other environment, you need to extend the deploy file of the environment or include the deploy file with the configuration.
+## Enabling services
+
+The Docker SDK has the `dashboard` service enabled by default only for the `dev` environment. The following examples show how you can enable it for demo and production environments with different endpoints.
 
 
-### Extend basic deploy file
-**deploy.dev.yml**
+### Enabling services via main deploy files
+
+The configuration of enabled dashboard looks as follows in main deploy files:
+
+**deploy.prod.yml**
 ```yaml
 version: '0.1'
 
 namespace: spryker
-tag: 'dev'
+tag: 'prod'
 
-environment: docker.dev
+environment: docker.prod
 
 services:
     dashboard:
         engine: dashboard
         endpoints:
-            spryker.local:
+            dashboard.spryker.com:
 
 imports:
     deploy.base.template.yml:
         parameters:
-            env_name: 'dev'
+            env_name: 'prod'
 ```
 
-### Import file with new services
+**deploy.demo.yml**
+```yaml
+version: '0.1'
 
-1. create new file **config/deploy-templates/services.yml**
+namespace: spryker
+tag: 'demo'
+
+environment: docker.demo
+
+services:
+    dashboard:
+        engine: dashboard
+        endpoints:
+            dashboard.demo-spryker.local:
+
+imports:
+    deploy.base.template.yml:
+        parameters:
+            env_name: 'demo'
+```
+
+
+
+
+### Enable services via a dedicated deploy file
+
+To enable dashboard via a dedicated deploy file with endpoing defined dynamically, do the following:
+
+1. Create `config/deploy-templates/{DEPLOY_FILE_NAME}`. For example, `config/deploy-templates/services.yml`.
+
+2. Add the configuration of an enabled dashboard with the endpoint defined dynamically.
 ```yaml
 services:
     dashboard:
         engine: dashboard
         endpoints:
-            spryker.local:
+            %dashboard_hostname%:
 ```
 
-2. extend basic deploy file **deploy.dev.yml**
+2. In `deploy.prod.yml` and `deploy.prod.yml`, include `services.yml` with the `dashboard_hostname` dynamic parameter defined:
+
+**deploy.prod.yml**
 ```yaml
 version: '0.1'
 
 namespace: spryker
-tag: 'dev'
+tag: 'prod'
 
-environment: docker.dev
+environment: docker.prod
 
 imports:
     services.yml:
+      parameters:
+          dashboard_hostname: 'dashboard.spryker.com'
     deploy.base.template.yml:
         parameters:
             env_name: 'dev'
 ```
+
+**deploy.demo.yml**
+```yaml
+version: '0.1'
+
+namespace: spryker
+tag: 'demo'
+
+environment: docker.demo
+
+imports:
+    services.yml:
+      parameters:
+          dashboard_hostname: 'dashboard.demo-spryker.local'
+    deploy.base.template.yml:
+        parameters:
+            env_name: 'demo'
+```
 ***
 
-## Change namespace:
-If you need to change `namespace`, you need to change `namespace` in your deploy file or import new file with changed `namespace`:
-### Extend basic deploy file
+## Changing namespaces
+
+The following examples show how to set different namespaces for two environments.
+
+### Changing namespaces via main deploy files
+
+The namespaces defined via main deploy files look as follows:
+
 **deploy.dev.yml**
 ```yaml
 version: '0.1'
@@ -303,13 +451,35 @@ imports:
         parameters:
             env_name: 'dev'
 ```
-
-### Import file with new namespace
-1. create new file **config/deploy-templates/namespace.yml**
+**deploy.prod.yml**
 ```yaml
-namespace: spryker-dev
+version: '0.1'
+
+namespace: spryker-prod
+tag: 'prod'
+
+environment: docker.prod
+
+imports:
+    deploy.base.template.yml:
+        parameters:
+            env_name: 'prod'
 ```
-2. extend basic deploy file **deploy.dev.yml**
+
+### Changing namespaces via a dedicated deploy file
+
+To create a deploy file with a dynamic configuration and re-use it in multiple environments, do the following:
+
+1. Create `config/deploy-templates/{DEPLOY_FILE_NAME}`. For example, `config/deploy-templates/namespace.yml`.
+
+2. In `namespace.yml`, define the namespace name with the environment name defined dynamically:
+```yaml
+namespace: spryker-%env_name%
+```
+
+2. In `deploy.prod.yml` and `deploy.prod.yml`, include `namespace.yml` with the `env_name` dynamic parameter defined:
+
+**deploy.dev.yml**
 ```yaml
 version: '0.1'
 
@@ -320,17 +490,38 @@ environment: docker.dev
 
 imports:
     namespace.yml:
+      parameters:
+          env_name: 'dev'      
     deploy.base.template.yml:
         parameters:
             env_name: 'dev'
+```
+
+**deploy.prod.yml**
+```yaml
+version: '0.1'
+
+namespace: spryker
+tag: 'prod'
+
+environment: docker.prod
+
+imports:
+    namespace.yml:
+      parameters:
+          env_name: 'prod'      
+    deploy.base.template.yml:
+        parameters:
+            env_name: 'prod'
 ```
 ***
 
-## Add/extend region:
-If you need to add new region or extend existed region,
-you need to add region data in your deploy file or import new file with region data:
-### Extend basic deploy file
-#### Add new region **deploy.dev.yml**
+
+## Adding regions
+To add a new region, you can extend the deploy files of the desired environments or create a dedicated deploy file and re-use it in the deploy files of the desired environments.
+
+### Adding regions via the main deploy files
+
 ```yaml
 version: '0.1'
 
@@ -364,7 +555,61 @@ imports:
         parameters:
             env_name: 'dev'
 ```
-#### Extend US region **deploy.dev.yml**
+
+### Adding regions via a dedicated deploy file
+
+1. Create `config/deploy-templates/{DEPLOY_FILE_NAME}`. For example, `config/deploy-templates/regions.yml`.
+
+2. In `regions.yml`, define the configuration you want to extend the existing configuration with:
+
+```yaml
+regions:
+    UK:
+        services:
+            mail:
+                sender:
+                    name: 'Spryker No-Reply'
+                    email: no-reply@spryker.local
+            database:
+                database: uk-docker
+        stores:
+            UK:
+                services:
+                    broker:
+                        namespace: uk-docker
+                    key_value_store:
+                        namespace: 1
+                    search:
+                        namespace: uk_search
+```                        
+
+3. Include `regions.yml` into the build of the desired environments by extending their respective deploy files as follows:
+
+```yaml
+version: '0.1'
+
+namespace: spryker
+tag: 'dev'
+
+environment: docker.dev
+
+imports:
+    regions.yml:
+    deploy.base.template.yml:
+        parameters:
+            env_name: 'dev'
+```
+
+***
+
+## Extending regions
+
+Since the region's configuration is already defined in `deploy.base.template.yml`, you don't need to duplicate it in the deploy files. You just need to define the new configuration.
+
+### Extending regions via the main deploy files
+
+In this example, we extend the US region which is defined in `deploy.base.template.yml`.
+
 ```yaml
 version: '0.1'
 
@@ -391,30 +636,12 @@ imports:
         parameters:
             env_name: 'dev'
 ```
-### Import file with regions
-1. create new file **config/deploy-templates/regions.yml**
-#### Add new region
-```yaml
-regions:
-    UK:
-        services:
-            mail:
-                sender:
-                    name: 'Spryker No-Reply'
-                    email: no-reply@spryker.local
-            database:
-                database: uk-docker
-        stores:
-            UK:
-                services:
-                    broker:
-                        namespace: uk-docker
-                    key_value_store:
-                        namespace: 1
-                    search:
-                        namespace: uk_search
-```
-#### Extend US region
+
+### Extending regions via a dedicated deploy file
+
+1. Create `config/deploy-templates/{DEPLOY_FILE_NAME}`. For example, `config/deploy-templates/regions.yml`.
+
+2. In `regions.yml`, define the configuration you want to extend the existing configuration with:
 ```yaml
 regions:
     US:
@@ -428,7 +655,9 @@ regions:
                     search:
                         namespace: ca_search
 ```
-2. extend basic deploy file **deploy.dev.yml**
+
+3. Include `regions.yml` into the build of the desired environments by extending their respective deploy files as follows:
+
 ```yaml
 version: '0.1'
 
@@ -445,8 +674,8 @@ imports:
 ```
 ***
 
-## Deleting regions
-If you need to remove one or more regions, instead of using the default `deploy.base.template.yml` template, you need to init a custom one with specific regions.
+## Removing regions
+To remove one or more regions, instead of using the default `deploy.base.template.yml` template, you need to init a custom one with specific regions.
 ***
 
 ## Disabling services
@@ -477,15 +706,15 @@ imports:
 
 To disable a service by including a dedicated deploy file, do the following:
 
-1. Create a deploy file with the services disabled:
 
-**config/deploy-templates/disabled-dashboard.yml**
+1. Create `config/deploy-templates/{DEPLOY_FILE_NAME}`. For example, `config/deploy-templates/disabled-dashboard.yml`.
+
 ```yaml
 services:
     dashboard: null
 ```
 
-2. In the main deploy file, include the deploy file you've created:
+2. In `deploy.prod.yml` and `deploy.prod.yml`, include `disabled-dashboard.yml`:
 
 **deploy.dev.yml**
 ```yaml
@@ -502,4 +731,3 @@ imports:
         parameters:
             env_name: 'dev'
 ```
-***

@@ -2,60 +2,30 @@
 
 Deploy file is a [Docker Compose](https://docs.docker.com/compose/) YAML file used by the Docker SDK to build infrastructure for applications. The deploy file's structure is based on [YAML version 1.2 syntax](https://yaml.org/spec/1.2/spec.html).
 
-## Deploy file inheritance
+## Deploy file templates
 
-Usual deploy file have duplicate section or section has a small different.
-For avoiding this behavior you can use multiple deploy files to define an application's infrastructure.
-The [`imports:`](02-deploy.file.reference.v1.md#imports) deploy file parameter is used to add additional deploy files to a build.
+An application usually has a deploy file for each environment. Even though the environments are different, most of the basic parameters are usually the same. To avoid defining duplicate parameters, you can use a deploy file template with dynamic parameters.
+
+Deploy file template is a deploy file that contains the most basic configuration of an application or the configuration that's the same for multiple environments. By including a deploy file template into your application's configuration, you avoid defining all the basic and duplicate configuration in the main deploy files.
+
+Docker SDK is shipped with the basic deploy file template: `deploy.base.template.yml`. By default, it works with `dev` and `demo` environments, as well as CI. You can also adjust it to work with the production environment or create a custom template.
+
+### Including deploy file templates
+
+To include a deploy file template into an application's configuration, use the [`imports:`](02-deploy.file.reference.v1.md#imports) parameter in the main deploy file of the desired environment.
 
 ```yaml
 import:
   custom_deploy_file.yml
 ```
 
-When an application with multiple deploy files is being built, a deploy file builder parses and merges the deploy files into a single one at `/{DOCKER_SDK_DIRECTORY}/deployment/default/project.yml`.
+### Dynamic parameters
 
-The deploy file builder parses deploy files from the following layers:
-* `Project layer`: located on a project layer at`./config/deploy-templates`.
-* `Base layer`: located on the Docker SDK layer at`./{DOCKER_SDK_DIRECTORY}/generator/deploy-file-generator/templates`.
-
-## Parameter inheritance
-
-When merging deploy files, the deploy file builder merges duplicate parameters. Deploy files are merged in the following order:
-
-1. `main deploy file`: deploy file on the project layer: `deploy.*.yml`.
-2. `project layer`: all the deploy files in `./config/deploy-templates`, except the main one.
-3. `base layer` - all the deploy files in `./**{docker-sdk-directory}**/generator/deploy-file-generator/templates`.
-
-During a merge, each new value of a parameter overwrites the value of the parameter from the previous deploy file. For example, in `./**{docker-sdk-directory}**/generator/deploy-file-generator/templates/services.deploy.template.yml`, memory limit is defined as follows:
-
-```yaml
-image:
-    ...
-    php:
-        ini:
-            memory_limit: 512M
-```
-And, in `deploy.yml`, the same parameter is defined as follows:
-
-```yaml
-image:
-    ...
-    php:
-        ini:
-            memory_limit: 2048M
-```
-
-As a result, because `deploy.yml` is merged after `services.deploy.template.yml`, the memory limit value in `project.yml` is `2048M`.
-
-
-## Dynamic parameters
-
-A dynamic parameter is a YAML parameter that defines the value of a placeholder for an included deploy file. The deploy file builder replaces the placeholders with the dynamic parameter's value when merging deploy files.
+A dynamic parameter is a YAML parameter that defines the value of a placeholder for an included deploy file. It enables environment-specific parameters to be used in deploy file templates.
 
 For example, a deploy file includes another deploy file:
 
-**deploy.yml**
+**deploy.*.yml**
 ```yaml
 version: 1.0
 
@@ -96,3 +66,45 @@ imports:
     environment/dev/services.deploy.template.yml:
     environment/dev/docker.deploy.template.yml:
 ```
+
+
+
+
+
+
+## Deploy file inheritance
+
+When an application with multiple deploy files is being built, a deploy file builder parses and merges the deploy files into a single one at `/{DOCKER_SDK_DIRECTORY}/deployment/default/project.yml`.
+
+The deploy file builder parses deploy files from the following layers:
+* `Project layer`: located on a project layer at`./config/deploy-templates`.
+* `Base layer`: located on the Docker SDK layer at`./{DOCKER_SDK_DIRECTORY}/generator/deploy-file-generator/templates`.
+
+## Parameter inheritance
+
+When merging deploy files, the deploy file builder merges duplicate parameters. Deploy files are merged in the following order:
+
+1. `main deploy file`: deploy file on the project layer: `deploy.*.yml`.
+2. `project layer`: all the deploy files in `./config/deploy-templates`, except the main one.
+3. `base layer` - all the deploy files in `./**{docker-sdk-directory}**/generator/deploy-file-generator/templates`.
+
+During a merge, each new value of a parameter overwrites the value of the parameter from the previous deploy file. For example, in `./**{docker-sdk-directory}**/generator/deploy-file-generator/templates/services.deploy.template.yml`, memory limit is defined as follows:
+
+```yaml
+image:
+    ...
+    php:
+        ini:
+            memory_limit: 512M
+```
+And, in `deploy.yml`, the same parameter is defined as follows:
+
+```yaml
+image:
+    ...
+    php:
+        ini:
+            memory_limit: 2048M
+```
+
+As a result, because `deploy.yml` is merged after `services.deploy.template.yml`, the memory limit value in `project.yml` is `2048M`.
