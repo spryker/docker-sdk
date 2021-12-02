@@ -23,7 +23,7 @@ import:
 
 A dynamic parameter is a YAML parameter that defines the value of a placeholder for an included deploy file. It enables environment-specific parameters to be used in deploy file templates.
 
-For example, a deploy file includes another deploy file:
+For example, `deploy.dev.yaml` includes `deploy.base.template.yml`:
 
 **deploy.*.yml**
 ```yaml
