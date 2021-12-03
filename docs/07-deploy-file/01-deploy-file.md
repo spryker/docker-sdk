@@ -76,6 +76,12 @@ imports:
 
 When an application with multiple deploy files is being built, a deploy file builder parses and merges the deploy files into a single one at `/{DOCKER_SDK_DIRECTORY}/deployment/default/project.yml`.
 
+{% info_block infoBox "Previewing merged deploy files" %}
+
+To check how the final deploy file looks without stopping containers, run `docker config {DEPLOY_FILE_NAME}`. For example, if your main deploy file is `deploy.dev.yml`, run `docker config deploy.dev.yml`. The command parses the included deploy files and returns the merged file and validation errors, if any.
+
+{% endinfo_block %}
+
 The deploy file builder parses deploy files from the following layers:
 * `Project layer`: located on a project layer at`./config/deploy-templates`.
 * `Base layer`: located on the Docker SDK layer at`./{DOCKER_SDK_DIRECTORY}/generator/deploy-file-generator/templates`.
