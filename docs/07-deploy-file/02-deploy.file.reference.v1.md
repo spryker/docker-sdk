@@ -144,7 +144,7 @@ imports:
 
 {% info_block infoBox "Merged deploy files" %}
 
-If you include a deploy file, the included deploy file is merged with the original one. The final deploy file is used to build the application. You can find it at `/{DOCKER_SDK_DIRECTORY}/deployment/default/project.yml`.
+If you include a deploy file, the included deploy file is merged with the original one. The final deploy file is used to build the application. To check how the final deploy file looks without stopping containers, run `docker config {DEPLOY_FILE_NAME}`. For example, if your main deploy file is `deploy.dev.yml`, run `docker config deploy.dev.yml`. The command parses the included deploy files and returns the merged file and validation errors, if any.
 
 {% endinfo_block %}
 
