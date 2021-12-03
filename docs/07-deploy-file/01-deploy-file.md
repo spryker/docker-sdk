@@ -1,6 +1,6 @@
 # Deploy file
 
-Deploy file is a [Docker Compose](https://docs.docker.com/compose/) YAML file used by the Docker SDK to build infrastructure for applications. The deploy file's structure is based on [YAML version 1.2 syntax](https://yaml.org/spec/1.2/spec.html).
+Deploy file is a YAML file used by the Docker SDK to build infrastructure for applications. The deploy file's structure is based on [YAML version 1.2 syntax](https://yaml.org/spec/1.2/spec.html).
 
 ## Deploy file templates
 
@@ -25,7 +25,7 @@ A dynamic parameter is a YAML parameter that defines the value of a placeholder 
 
 For example, `deploy.dev.yaml` includes `deploy.base.template.yml`:
 
-**deploy.*.yml**
+**deploy.dev.yml**
 ```yaml
 version: 1.0
 
@@ -51,7 +51,7 @@ imports:
     environment/%env_name%/docker.deploy.template.yml:
 ```
 
-When merging `deploy.base.template.yml` with `deploy.yml`, `%env_name%` is replaced with `dev`:
+When `deploy.base.template.yml` is included into the build of `deploy.dev.yml`, `%env_name%` is replaced with `dev`:
 
 **deploy.base.template.yml**
 ```yaml

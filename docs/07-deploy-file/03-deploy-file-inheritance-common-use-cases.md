@@ -211,7 +211,7 @@ groups:
                 application: merchant-portal
                 endpoints:
                     mp.de.spryker.com:
-                        entry-point: MerchantPortal
+                        entry-point: `MerchantPortal`
                         store: DE
                         primal: true
                         services:
