@@ -272,7 +272,7 @@ groups:
             Mportal:
                 application: merchant-portal
                 endpoints:
-                    %hostname%:
+                    '%hostname%':
                         entry-point: MerchantPortal
                         store: DE
                         primal: true
@@ -387,7 +387,7 @@ services:
     dashboard:
         engine: dashboard
         endpoints:
-            %dashboard_hostname%:
+            '%dashboard_hostname%':
 ```
 
 2. In `deploy.prod.yml` and `deploy.prod.yml`, include `services.yml` with the `dashboard_hostname` dynamic parameter defined:
