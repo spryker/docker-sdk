@@ -78,7 +78,7 @@ When an application with multiple deploy files is being built, a deploy file bui
 
 {% info_block infoBox "Previewing merged deploy files" %}
 
-To check how the final deploy file looks without stopping containers, run `docker config {DEPLOY_FILE_NAME}`. For example, if your main deploy file is `deploy.dev.yml`, run `docker config deploy.dev.yml`. The command parses the included deploy files and returns the merged file and validation errors, if any.
+To check how the final deploy file looks without stopping containers, run `docker/sdk config {DEPLOY_FILE_NAME}`. For example, if your main deploy file is `deploy.dev.yml`, run `docker/sdk config deploy.dev.yml`. The command parses the included deploy files and returns the merged file and validation errors, if any.
 
 {% endinfo_block %}
 
