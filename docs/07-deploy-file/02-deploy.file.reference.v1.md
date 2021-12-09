@@ -133,7 +133,7 @@ environment: 'docker'
 
 ### imports:
 
-Defines additional deploy files to be included into a build. The files must exist on a [project or base layer](/docs/scos/dev/the-docker-sdk/deploy-file.html).
+Defines additional deploy files to be included into a build. The files must exist on a [project or base layer](/01-deploy-file.md).
 
 ```yaml
 version: 1.0
