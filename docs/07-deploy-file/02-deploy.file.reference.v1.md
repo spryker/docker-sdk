@@ -154,7 +154,7 @@ If you include a deploy file, the included deploy file is merged with the origin
 ### imports: {deploy_file_name}:
 
 Defines the configuration to be used when parsing the included deploy file.
-* `{deploy_file_name}: parameters:` - defines the [dynamic parameters](/01-deploy-file.md#dynamic-parameters) to be used when parsing the included deploy file. In the included deploy file, the parameter name should be wrapped in `%`.
+* `{deploy_file_name}: parameters:` - defines the [dynamic parameters](01-deploy-file.md#dynamic-parameters) to be used when parsing the included deploy file. In the included deploy file, the parameter name should be wrapped in `%`.
 
 ```yaml
 version: 1.0
