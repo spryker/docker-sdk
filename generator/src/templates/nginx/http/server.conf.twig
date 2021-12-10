@@ -1,6 +1,10 @@
 {% set port = (endpoint | split(':'))[1] | default(80) %} {# 80 port due to HTTP internal request from gateway #}
 {% set externalPort = (endpoint | split(':'))[1] | default(project['_defaultPort']) %}
 {% set host = endpoint | split(':') | first %}
+
+{% block map %}
+{% endblock %}
+
 server {
 {% block server %}
 {% block host %}
