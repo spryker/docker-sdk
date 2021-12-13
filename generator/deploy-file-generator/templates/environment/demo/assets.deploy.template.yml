@@ -1,0 +1,6 @@
+assets:
+    mode: production
+    compression:
+        gzip:
+            static: true
+            level: 5
