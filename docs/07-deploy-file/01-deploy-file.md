@@ -86,24 +86,15 @@ The deploy file builder parses deploy files from the following layers:
 * `Project layer`: located on a project layer at`./config/deploy-templates`.
 * `Base layer`: located on the Docker SDK layer at`./{DOCKER_SDK_DIRECTORY}/generator/deploy-file-generator/templates`.
 
-## Parameter inheritance
-
-When merging deploy files, the deploy file builder merges duplicate parameters. Deploy files are merged in the following order:
+Deploy files are merged in the following order:
 
 1. `main deploy file`: deploy file on the project layer: `deploy.*.yml`.
 2. `project layer`: all the deploy files in `./config/deploy-templates`, except the main one.
-3. `base layer` - all the deploy files in `./**{docker-sdk-directory}**/generator/deploy-file-generator/templates`.
+3. `base layer` - all the deploy files in `./{DOCKER_SDK_DIRECTORY}/generator/deploy-file-generator/templates`.
 
-During a merge, each new value of a parameter overwrites the value of the parameter from the previous deploy file. For example, in `./**{docker-sdk-directory}**/generator/deploy-file-generator/templates/services.deploy.template.yml`, memory limit is defined as follows:
+## Parameter inheritance
 
-```yaml
-image:
-    ...
-    php:
-        ini:
-            memory_limit: 512M
-```
-And, in `deploy.yml`, the same parameter is defined as follows:
+When merging deploy files, the deploy file builder skips each duplicate parameter that was present in the previous parsed deploy files. For example, in `deploy.dev.yml`, memory limit is defined as follows:
 
 ```yaml
 image:
@@ -112,5 +103,14 @@ image:
         ini:
             memory_limit: 2048M
 ```
+And, in `./spryker/generator/deploy-file-generator/templates/services.deploy.template.yml`, the memory limit is defined as follows:
 
-As a result, because `deploy.yml` is merged after `services.deploy.template.yml`, the memory limit value in `project.yml` is `2048M`.
+```yaml
+image:
+    ...
+    php:
+        ini:
+            memory_limit: 512M
+```
+
+As a result, because `deploy.dev.yml` is parsed before `services.deploy.template.yml`, the memory limit value in `project.yml` is `2048M`.
