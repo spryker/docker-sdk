@@ -30,7 +30,7 @@ function Command::build() {
             Images::buildFrontend --force
             ;;
         *)
-            Console::error "Unknown build target '${subCommand}' is occurred. No action." > /dev/stderr
+            Console::error "Unknown build target '${subCommand}' is occurred. No action." >&2
             exit 1
             ;;
     esac

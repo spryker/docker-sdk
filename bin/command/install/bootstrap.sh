@@ -45,12 +45,13 @@ function Command::bootstrap() {
     local tmpDeploymentDir="${SOURCE_DIR}/deployment/_tmp"
     local defaultProjectYaml=$([ -f "./deploy.local.yml" ] && echo -n "./deploy.local.yml" || echo -n "./deploy.yml")
     local projectYaml=${1:-${defaultProjectYaml}}
+    local projectDeployTemplatesDirectory="./config/deploy-templates/"
 
     if [ -n "${SKIP_BOOTSTRAP_IF_DONE}" ] && [ -f "${DESTINATION_DIR}/project.yml" ]; then
         if cmp -s "${DESTINATION_DIR}/project.yml" "${projectYaml}"; then
             if [ "$(cat "${DESTINATION_DIR}/_git" 2>/dev/null || true)" == "${gitHash}" ]; then
-                Console::log "${CYAN}Bootstrap is skipped as the branch is still the same.${NC}" >/dev/stderr
-                Console::log "${DGRAY}Do not use ${LGRAY}-s${DGRAY} option to bootstrap anyway.${NC}" >/dev/stderr
+                Console::log "${CYAN}Bootstrap is skipped as the branch is still the same.${NC}" >&2
+                Console::log "${DGRAY}Do not use ${LGRAY}-s${DGRAY} option to bootstrap anyway.${NC}" >&2
                 exit 0
             fi
         fi
@@ -93,6 +94,9 @@ function Command::bootstrap() {
     cp "$([ -f "./.dockersyncignore" ] && echo './.dockersyncignore' || echo "${SOURCE_DIR}/.dockersyncignore.default")" "${tmpDeploymentDir}/.dockersyncignore"
     if [ -f ".known_hosts" ]; then
         cp ".known_hosts" "${tmpDeploymentDir}/"
+    fi
+    if [ -d "${projectDeployTemplatesDirectory}" ]; then
+        cp -rf "${projectDeployTemplatesDirectory}" "${tmpDeploymentDir}/project-deploy-templates"
     fi
     Console::end "[DONE]"
 

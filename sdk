@@ -17,6 +17,8 @@ import environment/cross-platform.sh
 import environment/check-directories.sh
 import command/install/bootstrap.sh
 
+import command/install/config.sh
+
 SPRYKER_PROJECT_NAME=${SPRYKER_PROJECT_NAME:-default}
 
 while getopts ":p:" opt; do
@@ -56,12 +58,16 @@ command=$1
 shift || true
 
 case "${command}" in
+    config)
+        bash "${FRAMEWORK_CWD}/standalone/logo/spryker-sdk.sh" >&2
+        Command::config "${@}"
+        ;;
     boot | bootstrap)
-        bash "${FRAMEWORK_CWD}/standalone/logo/spryker-sdk.sh" > /dev/stderr
+        bash "${FRAMEWORK_CWD}/standalone/logo/spryker-sdk.sh" >&2
         Command::bootstrap "${@}"
         ;;
     help | '')
-        bash "${FRAMEWORK_CWD}/standalone/logo/spryker-sdk.sh" > /dev/stderr
+        bash "${FRAMEWORK_CWD}/standalone/logo/spryker-sdk.sh" >&2
         Registry::printHelp
         [ -f "${DEPLOY_SCRIPT}" ] && ${DEPLOY_SCRIPT} help "${@}"
         ;;
