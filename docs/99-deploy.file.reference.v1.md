@@ -16,7 +16,7 @@ This reference page describes version 1 of the Deploy file format. This is the n
  <dd>A store related context a request is processed in.</dd>
 
  <dt>Application</dt>
- <dd>A Spryker application, like Backoffice(Zed), Backend-Gateway, Yves, Glue or MerchantPortal.</dd>
+ <dd>A Spryker application, like Backoffice(Zed), Backend-Gateway, Yves, GlueStorefront(Glue), GlueBackend or MerchantPortal.</dd>
 
  <dt>Service</dt>
  <dd>An external storage or utility service. Represents service type and configuration. The configuration can be defined on different levels: project-wide, region-wide, store-specific or endpoint-specific with limitations based on the service type.</dd>
@@ -77,7 +77,7 @@ namespace: spryker-demo
 
 ### pipeline:
 
-Defines the installation recipe for the Spryker applications to the specific configuration file from the `config/install/` directory. 
+Defines the installation recipe for the Spryker applications to the specific configuration file from the `config/install/` directory.
 
 This variable is optional. If not specified, the default value applies: `pipeline: 'docker'`. Installation recipe configuration file: `config/install/docker.yml`.
 
@@ -320,7 +320,7 @@ The key must be project-wide unique.
 
 Obligatory parameters for `application:`:
 
-* `groups: applications: application:` - defines the type of *Application*. Possible values are `backoffice`, `backend-gateway`, `zed`, `yves`, `glue` and `merchant-portal`.
+* `groups: applications: application:` - defines the type of *Application*. Possible values are `backoffice`, `backend-gateway`, `zed`, `yves`, `glue-storefront`, `glue-backend`,`glue` and `merchant-portal`.
 * `groups: applications: endpoints:` - defines the list of *Endpoints* to access the *Application*. See [groups: applications: endpoints:](#groups-applications-endpoints-) to learn more.
 
 Optional parameters for `application:`:
@@ -345,6 +345,8 @@ Optional parameters for `application:`:
 * `groups: applications: application: http: max-request-body-size:` - defines the maximum allowed size of the request body that can be sent to the application, in MB. If not specified, the default values apply:
 	* `backoffice` - `10m`
     * `merchant-portal` - `10m`
+	* `glue-storefront` - `10m`
+	* `glue-backend` - `10m`
 	* `glue` - `2m`
 	* `yves` - `1m`
 
