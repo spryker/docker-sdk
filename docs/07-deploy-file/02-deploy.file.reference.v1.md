@@ -1,4 +1,7 @@
 # Deploy file reference — version 1
+
+
+
 This reference page describes version 1 of the Deploy file format. This is the newest version.
 <div class="bg-section">
 <h2> Glossary</h2>
@@ -38,6 +41,7 @@ Find B2B and B2C deploy file examples for [development](06-installation/installa
 | --- | --- |
 | [B2C Demo Shop deploy file](https://github.com/spryker-shop/b2c-demo-shop/blob/master/deploy.dev.yml) | [B2C Demo Shop deploy file](https://github.com/spryker-shop/b2c-demo-shop/blob/master/deploy.yml) |
 | [B2B Demo Shop deploy file](https://github.com/spryker-shop/b2b-demo-shop/blob/master/deploy.dev.yml) | [B2B Demo Shop deploy file](https://github.com/spryker-shop/b2b-demo-shop/blob/master/deploy.yml) |
+
 
 ***
 ### version:
@@ -124,6 +128,52 @@ version: 1.0
 environment: 'docker'
 ```
 
+
+***
+
+### imports:
+
+Defines additional deploy files to be included into a build. The files must exist on a [project or base layer](/01-deploy-file.md).
+
+```yaml
+version: 1.0
+
+imports:
+    deploy.base.template.yml:
+```
+
+{% info_block infoBox "Merged deploy files" %}
+
+If you include a deploy file, the included deploy file is merged with the original one. The final deploy file is used to build the application. To check how the final deploy file looks without stopping containers, run `docker config {DEPLOY_FILE_NAME}`. For example, if your main deploy file is `deploy.dev.yml`, run `docker config deploy.dev.yml`. The command parses the included deploy files and returns the merged file and validation errors, if any.
+
+{% endinfo_block %}
+
+
+***
+
+### imports: {deploy_file_name}:
+
+Defines the configuration to be used when parsing the included deploy file.
+* `{deploy_file_name}: parameters:` - defines the [dynamic parameters](01-deploy-file.md#dynamic-parameters) to be used when parsing the included deploy file. In the included deploy file, the parameter name should be wrapped in `%`.
+
+```yaml
+version: 1.0
+
+imports:
+    {deploy_file_name}:
+      parameters:
+        {dynamic_parameter_name}: '{dynamic_parameter_value}'
+```
+Example:
+
+```yaml
+version: 1.0
+
+imports:
+    deploy.base.template.yml:
+      parameters:
+        env_name: 'dev'
+```
 
 ***
 
@@ -231,7 +281,7 @@ regions:
 
 ### groups:
 
-Defines the list of *Groups**.
+Defines the list of *Groups*.
 
 * `groups: region:` - defines the relation to a *Region* by key.
 * `groups: applications:` - defines the list of *Applications*. See [groups: applications:](#groups-applications-) to learn more.
