@@ -390,7 +390,7 @@ services:
             '%dashboard_hostname%':
 ```
 
-2. In `deploy.prod.yml` and `deploy.prod.yml`, include `services.yml` with the `dashboard_hostname` dynamic parameter defined:
+2. In `deploy.prod.yml` and `deploy.dev.yml`, include `services.yml` with the `dashboard_hostname` dynamic parameter defined:
 
 **deploy.prod.yml**
 ```yaml
