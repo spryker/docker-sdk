@@ -66,6 +66,13 @@ matrix:
       before_install: skip
       before_script: skip
       after_script: skip
+    - name: Deploy file builder tests
+      language: php
+      php: 7.4
+      script:
+        - cd generator
+        - composer install
+        - vendor/bin/codecept run
     - name: Docker / B2C Demoshop / PHP-7.3 Alpine / MariaDB / Functional
       env:
         - SPRYKER_PLATFORM_IMAGE=spryker/php:7.3-alpine3.12

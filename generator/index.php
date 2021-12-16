@@ -1,6 +1,9 @@
 <?php
 
+use DeployFileGenerator\DeployFileGeneratorFactory;
+use DeployFileGenerator\Transfer\DeployFileTransfer;
 use Spatie\Url\Url;
+use Symfony\Component\Console\Output\ConsoleOutput;
 use Symfony\Component\Yaml\Parser;
 use Twig\Environment;
 use Twig\Loader\ChainLoader;
@@ -12,7 +15,12 @@ define('APPLICATION_SOURCE_DIR', __DIR__ . DS . 'src');
 include_once __DIR__ . DS . 'vendor' . DS . 'autoload.php';
 
 $deploymentDir = '/data/deployment';
-$projectYaml = $deploymentDir . '/project.yml';
+$projectYaml = buildProjectYaml($deploymentDir . '/project.yml');
+
+if ($projectYaml == '') {
+    exit(1);
+}
+
 $defaultDeploymentDir = getenv('SPRYKER_DOCKER_SDK_DEPLOYMENT_DIR') ?: './';
 $platform = getenv('SPRYKER_DOCKER_SDK_PLATFORM') ?: 'linux'; // Possible values: linux windows macos
 
@@ -89,6 +97,7 @@ $projectData['composer']['autoload'] = buildComposerAutoloadConfig($projectData)
 $isAutoloadCacheEnabled = $projectData['_isAutoloadCacheEnabled'] = isAutoloadCacheEnabled($projectData);
 $projectData['_requirementAnalyzerData'] = buildDataForRequirementAnalyzer($projectData);
 $projectData['secrets'] = buildSecrets($deploymentDir);
+$projectData = buildDefaultCredentials($projectData);
 
 // TODO Make it optional in next major
 // Making webdriver as required service for BC reasons
@@ -132,6 +141,8 @@ const GLUE_APP = 'glue';
 const BACKOFFICE_APP = 'backoffice';
 const BACKEND_GATEWAY_APP = 'backend-gateway';
 const MERCHANT_PORTAL = 'merchant-portal';
+const GLUE_STOREFRONT = 'glue-storefront';
+const GLUE_BACKEND = 'glue-backend';
 
 const ENTRY_POINTS = [
     BACKOFFICE_APP => 'Backoffice',
@@ -140,6 +151,8 @@ const ENTRY_POINTS = [
     YVES_APP => 'Yves',
     GLUE_APP => 'Glue',
     MERCHANT_PORTAL => 'MerchantPortal',
+    GLUE_STOREFRONT => 'GlueStorefront',
+    GLUE_BACKEND => 'GlueBackend',
 ];
 
 foreach ($projectData['groups'] ?? [] as $groupName => $groupData) {
@@ -1262,4 +1275,136 @@ function generateToken($tokenLength = 80): string
     }
 
     return $token;
+}
+
+/**
+ * @param string $mainProjectYaml
+ *
+ * @return string
+ */
+function buildProjectYaml(string $mainProjectYaml): string
+{
+    $deployFileTransfer = new DeployFileTransfer();
+    $deployFileTransfer = $deployFileTransfer->setInputFilePath($mainProjectYaml);
+    $deployFileTransfer = $deployFileTransfer->setOutputFilePath($mainProjectYaml);
+
+    $deployFileFactory = new DeployFileGeneratorFactory();
+    $deployFileTransfer = $deployFileFactory->createDeployFileBuildProcessor()->process($deployFileTransfer);
+
+    if ($deployFileTransfer->getValidationMessageBagTransfer()->getValidationResult() == []) {
+        return $deployFileTransfer->getOutputFilePath();
+    }
+
+    $deployFileFactory->createDeployFileOutput()->renderValidationResult($deployFileTransfer);
+
+    return '';
+}
+
+/**
+ * @param array $projectData
+ *
+ * @return array
+ */
+function buildDefaultCredentials(array $projectData): array
+{
+    $projectData = buildDefaultCredentialsForDatabase($projectData);
+    $projectData = buildDefaultCredentialsForBroker($projectData);
+
+    return $projectData;
+}
+
+/**
+ * @param array $projectData
+ *
+ * @return array
+ */
+function buildDefaultCredentialsForDatabase(array $projectData): array
+{
+    $projectData = buildDefaultRootCredentialsForDatabase($projectData);
+    $projectData = buildDefaultRegionCredentialsForDatabase($projectData);
+
+    return $projectData;
+}
+
+/**
+ * @param array $projectData
+ *
+ * @return array
+ */
+function buildDefaultRootCredentialsForDatabase(array $projectData): array
+{
+    if (!isset($projectData['services']['database'])) {
+        return $projectData;
+    }
+
+    $defaultDbServiceRootConfig = [
+        'username' => 'root',
+        'password' => 'secret',
+    ];
+
+    $dbServiceRootConfig = $projectData['services']['database']['root'] ?? [];
+
+    $projectData['services']['database']['root'] = array_merge(
+        $defaultDbServiceRootConfig,
+        $dbServiceRootConfig
+    );
+
+    return $projectData;
+}
+
+/**
+ * @param array $projectData
+ *
+ * @return array
+ */
+function buildDefaultRegionCredentialsForDatabase(array $projectData): array
+{
+    if (!isset($projectData['regions'])) {
+        return $projectData;
+    }
+
+    $defaultDbRegionCredentials = [
+        'username' => 'spryker',
+        'password' => 'secret',
+    ];
+
+    foreach ($projectData['regions'] as $regionName => $regionConfig) {
+        if (!isset($regionConfig['services']['database'])) {
+            continue;
+        }
+
+        $regionDbConfig = $regionConfig['services']['database'];
+        $regionDbConfig = array_merge($defaultDbRegionCredentials, $regionDbConfig);
+
+        $projectData['regions'][$regionName]['services']['database'] = $regionDbConfig;
+    }
+
+    return $projectData;
+}
+
+
+/**
+ * @param array $projectData
+ *
+ * @return array
+ */
+function buildDefaultCredentialsForBroker(array $projectData): array
+{
+    if (!isset($projectData['services']['broker'])) {
+        return $projectData;
+    }
+
+    $defaultBrokerServiceCredentials = [
+        'username' => 'spryker',
+        'password' => 'secret',
+    ];
+
+    $brokerServiceCredentials = $projectData['services']['broker']['api'] ?? [];
+
+    $projectData['services']['broker']['api'] = array_merge(
+        $defaultBrokerServiceCredentials,
+        $brokerServiceCredentials
+    );
+
+    return $projectData;
 }
