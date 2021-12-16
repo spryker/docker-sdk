@@ -11,7 +11,7 @@ function Environment::checkDockerComposeVersion() {
     local requiredMinimalVersion=${1:-'1.22.0'}
     local installedVersion=$(
         command -v docker-compose >/dev/null
-        test $? -eq 0 && docker-compose version --short || echo 0
+        test $? -eq 0 && docker-compose version --short | tr -d 'v' || echo 0
     )
 
     if [ "${installedVersion}" == 0 ]; then
