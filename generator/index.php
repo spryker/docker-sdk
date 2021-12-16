@@ -141,6 +141,8 @@ const GLUE_APP = 'glue';
 const BACKOFFICE_APP = 'backoffice';
 const BACKEND_GATEWAY_APP = 'backend-gateway';
 const MERCHANT_PORTAL = 'merchant-portal';
+const GLUE_STOREFRONT = 'glue-storefront';
+const GLUE_BACKEND = 'glue-backend';
 
 const ENTRY_POINTS = [
     BACKOFFICE_APP => 'Backoffice',
@@ -149,6 +151,8 @@ const ENTRY_POINTS = [
     YVES_APP => 'Yves',
     GLUE_APP => 'Glue',
     MERCHANT_PORTAL => 'MerchantPortal',
+    GLUE_STOREFRONT => 'GlueStorefront',
+    GLUE_BACKEND => 'GlueBackend',
 ];
 
 foreach ($projectData['groups'] ?? [] as $groupName => $groupData) {
