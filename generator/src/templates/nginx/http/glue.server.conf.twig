@@ -1,10 +1,14 @@
 {% extends "nginx/http/application.server.conf.twig" %}
 
 {% block map %}
+
+{% if endpointData['cors-allow-origin'] is not empty %}
 # is allowed origin
-map $http_origin $allow_origin {
+map $http_origin $allow_origin_glue {
     ~^{{ endpointData['cors-allow-origin'] | default('') | nginx_var }}$ $http_origin;
 }
+{% endif %}
+
 {% endblock %}
 
 {% block server %}
@@ -29,8 +33,9 @@ map $http_origin $allow_origin {
         fastcgi_param SPRYKER_MAIL_SENDER_NAME "{{ storeServices['mail']['sender']['name'] }}";
 {% endif %}
 
+{% if endpointData['cors-allow-origin'] is not empty %}
         if ($request_method = 'OPTIONS') {
-            add_header 'Access-Control-Allow-Origin' '$allow_origin' always;
+            add_header 'Access-Control-Allow-Origin' '$allow_origin_glue' always;
             add_header 'Access-Control-Allow-Methods' 'GET, POST, PUT, DELETE, PATCH, HEAD, OPTIONS' always;
             add_header 'Access-Control-Allow-Headers' '{{ endpointData['cors-allow-headers'] | default('') | nginx_var }}' always;
             add_header 'Access-Control-Allow-Credentials' 'true' always;
@@ -41,5 +46,6 @@ map $http_origin $allow_origin {
 
             return 204;
         }
+{% endif %}
 
 {% endblock location %}

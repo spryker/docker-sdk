@@ -1,4 +1,16 @@
 {% extends "nginx/http/application.server.conf.twig" %}
+
+{% block map %}
+
+{% if endpointData['cors-allow-origin'] is not empty %}
+# is allowed origin
+map $http_origin $allow_origin_zed {
+    ~^{{ endpointData['cors-allow-origin'] | default('') | nginx_var }}$ $http_origin;
+}
+{% endif %}
+
+{% endblock %}
+
 {% block server %}
 {{ parent() }}
 
@@ -34,4 +46,20 @@
         fastcgi_param SPRYKER_API_HOST "{{ project['_endpointMap'][endpointData['store']]['glue'] }}";
         fastcgi_param SPRYKER_API_PORT "{{ (project['_endpointMap'][endpointData['store']]['glue'] | split(':'))[1] | default(project['_defaultPort']) }}";
 {% endif %}
+
+{% if endpointData['cors-allow-origin'] is not empty %}
+        if ($request_method = 'OPTIONS') {
+            add_header 'Access-Control-Allow-Origin' '$allow_origin_zed' always;
+            add_header 'Access-Control-Allow-Methods' 'GET, POST, PUT, DELETE, PATCH, HEAD, OPTIONS' always;
+            add_header 'Access-Control-Allow-Headers' '{{ endpointData['cors-allow-headers'] | default('') | nginx_var }}' always;
+            add_header 'Access-Control-Allow-Credentials' 'true' always;
+            add_header 'Access-Control-Expose-Headers' 'ETag' always;
+            add_header 'Access-Control-Max-Age' 1728000 always;
+            add_header 'Content-Type' 'text/plain; charset=utf-8' always;
+            add_header 'Content-Length' 0 always;
+
+            return 204;
+        }
+{% endif %}
+
 {% endblock location %}
