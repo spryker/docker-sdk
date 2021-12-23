@@ -14,36 +14,43 @@ In the testing mode, you can run tests in isolation, with full control of the sy
 
 ## Activating the testing mode and running tests
 
-To activate the testing mode, do one of the following:
+You can activate the testing mode in one of the following ways:
 
 * Switch the running environment into the testing mode without rebuilding containers.
 * Rebuild containers and run an environment with the testing mode activated.
 * Rebuild containers and restart your environment with the testing mode activated.
 
-### Activating testing mode on your running environment
+### Activating the testing mode in a running environment
 
-To activate the testing mode on your running environment and enter CLI container:
+1. Activate the testing mode in a running environment and enter the CLI container:
 ```bash
 docker/sdk testing
 ```
 
-Now, in the CLI container, you can run Codeception:
+2. In the CLI container, run Codeception:
 ```bash
 codecept run
 ```
-Same as with other CLI commands, you can run the above in a single command, e.g. `docker/sdk testing codecept run`.
+{% info_block infoBox "" %}
 
-### Run / resrart your environment in a testing mode
+Same as other CLI commands, you can run the preceding commands as a single command: `docker/sdk testing codecept run`.
 
-1. Restart all containers in testing mode:
+{% endinfo_block %}
+
+
+### Running or restarting an environment in the testing mode
+
+1. Restart all containers in the testing mode:
 
 ```bash
 docker/sdk up -t
 ```
+
 2. Switch to the CLI container:
 ```bash
 docker/sdk cli -t
 ```
+
 3. Run Codeception:
 ```bash
 codecept run
@@ -131,10 +138,10 @@ params:
 
 ## Stopping the testing mode
 
-Once you're done with running your tests, you can get back to the development mode by simply runing
+Once you've finished running tests, you can switch back to the development mode:
 
 ```bash
 docker/sdk start
 ```
 
-This will stop/remove the webdriver, run the scheduler and deactivate testing mode.
+This stops or removes the webdriver, runs the scheduler, and deactivates the testing mode.
