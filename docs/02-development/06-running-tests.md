@@ -7,9 +7,8 @@ This document describes how to run tests in different ways.
 The Docker SDK lets you run applications in an environment configured for running tests.
 
 In the testing mode, you can run tests in isolation, with full control of the system tested and all needed tooling in place. Once you activate the testing mode, the following happens:
-1. The scheduler is enabled. 
+1. The scheduler is enabled. Background jobs are stopped for preserving data consistency and full isolation.
 2. The webdriver is enabled.
-3. Background jobs are disabled for preserving data consistency and full isolation.
 
 
 ## Activating the testing mode and running tests
