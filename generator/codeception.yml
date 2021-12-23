@@ -1,0 +1,19 @@
+paths:
+    tests: deploy-file-generator/tests
+    output: deploy-file-generator/tests/_output
+    data: deploy-file-generator/tests/_data
+    support: deploy-file-generator/tests/_support
+    envs: deploy-file-generator/tests/_envs
+
+actor_suffix: Tester
+
+coverage:
+    enabled: true
+    include:
+        - deploy-file-generator/src/*
+    exclude:
+        - vendor/*
+
+extensions:
+    enabled:
+        - Codeception\Extension\RunFailed

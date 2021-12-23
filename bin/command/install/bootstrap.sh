@@ -45,6 +45,7 @@ function Command::bootstrap() {
     local tmpDeploymentDir="${SOURCE_DIR}/deployment/_tmp"
     local defaultProjectYaml=$([ -f "./deploy.local.yml" ] && echo -n "./deploy.local.yml" || echo -n "./deploy.yml")
     local projectYaml=${1:-${defaultProjectYaml}}
+    local projectDeployTemplatesDirectory="./config/deploy-templates/"
     local platformArg=$(Environment::getPlatformCliOption)
     local platformComposeArg=$(Environment::getPlatformComposeOption)
     local isArm=$(Environment::IsArchitectureArm64)
@@ -96,6 +97,9 @@ function Command::bootstrap() {
     cp "$([ -f "./.dockersyncignore" ] && echo './.dockersyncignore' || echo "${SOURCE_DIR}/.dockersyncignore.default")" "${tmpDeploymentDir}/.dockersyncignore"
     if [ -f ".known_hosts" ]; then
         cp ".known_hosts" "${tmpDeploymentDir}/"
+    fi
+    if [ -d "${projectDeployTemplatesDirectory}" ]; then
+        cp -rf "${projectDeployTemplatesDirectory}" "${tmpDeploymentDir}/project-deploy-templates"
     fi
     Console::end "[DONE]"
 

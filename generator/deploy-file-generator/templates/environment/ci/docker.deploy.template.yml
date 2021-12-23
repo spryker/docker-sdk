@@ -1,0 +1,14 @@
+docker:
+    ssl:
+        enabled: false
+
+    debug:
+        enabled: false
+        xdebug:
+            enabled: false
+
+    testing:
+        store: DE
+
+    mount:
+        baked:
