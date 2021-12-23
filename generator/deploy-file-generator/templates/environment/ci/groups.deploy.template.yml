@@ -1,0 +1,58 @@
+groups:
+    EU:
+        region: EU
+        applications:
+            yves_eu:
+                application: yves
+                endpoints:
+                    date-time-configurator-example.spryker.local:
+                        entry-point: Configurator
+                    yves.de.spryker.local:
+                        store: DE
+                        services:
+                            session:
+                                namespace: 1
+                    yves.at.spryker.local:
+                        store: AT
+                        services:
+                            session:
+                                namespace: 2
+            glue_eu:
+                application: glue
+                endpoints:
+                    glue.de.spryker.local:
+                        store: DE
+                    glue.at.spryker.local:
+                        store: AT
+            backoffice_eu:
+                application: backoffice
+                endpoints:
+                    backoffice.de.spryker.local:
+                        store: DE
+                        primal: true
+                        services:
+                            session:
+                                namespace: 3
+                    backoffice.at.spryker.local:
+                        store: AT
+                        services:
+                            session:
+                                namespace: 4
+            backend_gateway_eu:
+                application: backend-gateway
+                endpoints:
+                    backend-gateway.de.spryker.local:
+                        store: DE
+                        primal: true
+                    backend-gateway.at.spryker.local:
+                        store: AT
+                        primal: true
+            backend_api_eu:
+                application: zed
+                endpoints:
+                    backend-api.de.spryker.local:
+                        store: DE
+                        entry-point: BackendApi
+                    backend-api.at.spryker.local:
+                        store: AT
+                        entry-point: BackendApi
