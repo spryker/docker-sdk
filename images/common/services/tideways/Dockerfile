@@ -1,12 +1,12 @@
-FROM debian:stable-slim AS tideways-deamon
+FROM debian:stable-slim AS tideways-daemon
 
 ARG TIDEWAYS_ENVIRONMENT_DEFAULT=production
 ENV TIDEWAYS_ENVIRONMENT=$TIDEWAYS_ENVIRONMENT_DEFAULT
 
-RUN apt update -y && apt install -yq --no-install-recommends gnupg2 curl sudo ca-certificates
+RUN apt update -y && apt install -yq --no-install-recommends gnupg2 curl sudo ca-certificates wget
 
-RUN echo 'deb http://s3-eu-west-1.amazonaws.com/tideways/packages debian main' > /etc/apt/sources.list.d/tideways.list && \
-    curl -sS 'https://s3-eu-west-1.amazonaws.com/tideways/packages/EEB5E8F4.gpg' | apt-key add -
+RUN echo 'deb https://packages.tideways.com/apt-packages-main any-version main' > /etc/apt/sources.list.d/tideways.list && \
+    wget -qO - 'https://packages.tideways.com/key.gpg' | apt-key add -
 RUN DEBIAN_FRONTEND=noninteractive apt update -y && apt install -yq tideways-daemon && \
     apt autoremove --assume-yes && \
     apt clean && \

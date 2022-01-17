@@ -506,6 +506,13 @@ if ($returnCode > 0) {
 
 verbose(implode(PHP_EOL, $output));
 
+$errorMessages = validateServiceVersions($projectData);
+
+if (count($errorMessages) > 0) {
+    warn(implode(PHP_EOL, $errorMessages));
+    exit(1);
+}
+
 // -------------------------
 /**
  * @param array $projectData
@@ -1262,4 +1269,87 @@ function generateToken($tokenLength = 80): string
     }
 
     return $token;
+}
+
+/**
+ * @param array $projectData
+ * @return string[]
+ */
+function validateServiceVersions(array $projectData): array
+{
+    $validationMessageTemplate = '`%s` service with `%s` engine and %s version are unsupported on ARM architecture. Please check documentation.';
+    $validationMessages = [];
+
+    if (!isArmArchitecture()) {
+        return $validationMessages;
+    }
+
+    $services = $projectData['services'];
+    $unsupportedServiceVersions = getUnsupportedArmServiceMap();
+
+    foreach ($unsupportedServiceVersions as $serviceName => $serviceEngines) {
+        if (!array_key_exists($serviceName, $services)) {
+            continue;
+        }
+
+        $service = $services[$serviceName];
+        $serviceEngine = $service['engine'] ?? null;
+        $serviceVersion = $service['version'] ?? 'default';
+
+        if($serviceEngine == null || !array_key_exists($serviceEngine, $serviceEngines)) {
+            continue;
+        }
+
+        if (!in_array($serviceVersion, $serviceEngines[$serviceEngine])) {
+            continue;
+        }
+
+        $validationMessages[] = sprintf($validationMessageTemplate, $serviceName, $serviceEngine, $serviceVersion);
+    }
+
+    return $validationMessages;
+}
+
+/**
+ * @return string[][][]
+ */
+function getUnsupportedArmServiceMap(): array
+{
+    return [
+        'database' => [
+            'mysql' => ['default', '5.7'],
+        ],
+        'broker' => [
+            'rabbitmq' => ['default', '3.7'],
+        ],
+        'webdriver' => [
+            'phantomjs' => ['*'],
+        ],
+        'search' => [
+            'elastic' => ['5.6', '6.8', 'default'],
+        ],
+        'kibana' => [
+            'kibana' => ['5.6', '6.8', 'default'],
+        ],
+        'scheduler' => [
+            'jenkins' => ['2.176', 'default'],
+        ],
+    ];
+}
+
+/**
+ * @return bool
+ */
+function isArmArchitecture(): bool
+{
+    $possibleValue = [
+        'arm',
+        'aarch64_be',
+        'aarch64',
+        'armv8l',
+    ];
+
+    $currentArchitecture = php_uname('m');
+
+    return in_array($currentArchitecture, $possibleValue);
 }
