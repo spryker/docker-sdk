@@ -144,10 +144,16 @@ function Compose::run() {
 
     Console::verbose "${INFO}Running Spryker containers${NC}"
     sync start
-    Compose::command --compatibility up -d --remove-orphans \
-      --scale "webdriver=$([ -n "${SPRYKER_TESTING_ENABLE}" ] && echo 1 || echo 0)" \
-      --scale "scheduler=$([ -n "${SPRYKER_TESTING_ENABLE}" ] && echo 0 || echo 1)" \
-      "${@}"
+
+    Compose::command --compatibility up -d --remove-orphans "${@}"
+
+    if [ -n "${SPRYKER_TESTING_ENABLE}" ]; then
+        Compose::command --compatibility stop scheduler
+    fi
+
+    if [ -z "${SPRYKER_TESTING_ENABLE}" ]; then
+        Compose::command --compatibility stop webdriver
+    fi
 
     # Note: Compose::run can be used for running only one container, e.g. CLI.
     Registry::Flow::runAfterRun
