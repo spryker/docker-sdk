@@ -83,7 +83,7 @@ function Compose::command() {
     local -a composeFiles=()
     IFS=' ' read -r -a composeFiles <<< "$(Compose::getComposeFiles)"
 
-    ${DOCKER_COMPOSE_SUBSTITUTE:-'docker-compose'} \
+    ${DOCKER_COMPOSE_SUBSTITUTE:-'docker compose'} \
         --project-directory "${PROJECT_DIR}" \
         --project-name "${SPRYKER_DOCKER_PREFIX}" \
         "${composeFiles[@]}" \
@@ -144,10 +144,10 @@ function Compose::run() {
 
     Console::verbose "${INFO}Running Spryker containers${NC}"
     sync start
-    Compose::command --compatibility up -d --remove-orphans "${@}"
-#      --scale "webdriver=$([ -n "${SPRYKER_TESTING_ENABLE}" ] && echo 1 || echo 0)" \
-#      --scale "scheduler=$([ -n "${SPRYKER_TESTING_ENABLE}" ] && echo 0 || echo 1)" \
-#      "${@}"
+    Compose::command --compatibility up -d --remove-orphans \
+      --scale "webdriver=$([ -n "${SPRYKER_TESTING_ENABLE}" ] && echo 1 || echo 0)" \
+      --scale "scheduler=$([ -n "${SPRYKER_TESTING_ENABLE}" ] && echo 0 || echo 1)" \
+      "${@}"
 
     # Note: Compose::run can be used for running only one container, e.g. CLI.
     Registry::Flow::runAfterRun

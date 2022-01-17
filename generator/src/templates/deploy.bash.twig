@@ -6,7 +6,7 @@ set -e
 SELF_SCRIPT=${SELF_SCRIPT:-$0}
 
 # Overridable
-DOCKER_COMPOSE_SUBSTITUTE='docker-compose'
+DOCKER_COMPOSE_SUBSTITUTE='docker compose'
 
 pushd "${BASH_SOURCE%/*}" >/dev/null
 . ./bin/framework.sh
