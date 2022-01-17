@@ -83,7 +83,7 @@ function Compose::command() {
     local -a composeFiles=()
     IFS=' ' read -r -a composeFiles <<< "$(Compose::getComposeFiles)"
 
-    ${DOCKER_COMPOSE_SUBSTITUTE:-'docker compose'} \
+    ${DOCKER_COMPOSE_SUBSTITUTE:-'docker-compose'} \
         --project-directory "${PROJECT_DIR}" \
         --project-name "${SPRYKER_DOCKER_PREFIX}" \
         "${composeFiles[@]}" \
