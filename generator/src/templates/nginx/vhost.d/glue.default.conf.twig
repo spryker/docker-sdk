@@ -1,2 +1,2 @@
     client_max_body_size {{ applicationData['http']['max-request-body-size'] | default('2m') }};
-    large_client_header_buffers {{ applicationData['http']['client-request-header-size'] | default('4 32k') }};
+    large_client_header_buffers {{ applicationData['http']['max-client-header-buffers-size'] | default('4 16k') }};
