@@ -93,6 +93,9 @@ class DataImporter implements DeployFileImporterInterface
         }
 
         foreach ($content[DeployFileGeneratorConstants::YAML_IMPORTS_KEY] as $importPath => $importParams) {
+            if (strpos($importPath, '?') !== false) {
+                $importPath = explode('?', $importPath)[1];
+            }
             $importParams = $importParams[DeployFileGeneratorConstants::YAML_PARAMETERS_KEY] ?? [];
             $importParams = array_merge($parentParameters, $importParams);
 

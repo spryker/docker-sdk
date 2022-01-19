@@ -16,6 +16,11 @@ use Symfony\Component\Yaml\Parser;
 class PrepareDeployFileTransferExecutor implements ExecutorInterface
 {
     /**
+     * @var string
+     */
+    protected const FILE_PATH_KEY = 'filePath';
+
+    /**
      * @var \Symfony\Component\Yaml\Parser
      */
     protected $yamlParser;
@@ -54,6 +59,7 @@ class PrepareDeployFileTransferExecutor implements ExecutorInterface
         $deployFileTransfer = $deployFileTransfer->setBaseImports($baseImport);
 
         return $deployFileTransfer;
+
     }
 
     /**
@@ -80,13 +86,17 @@ class PrepareDeployFileTransferExecutor implements ExecutorInterface
         $result = [];
 
         foreach ($imports as $importFileName => $importData) {
-            $filePathOnProjectLayer = $this->fileFinder->getFilePathOnProjectLayer($importFileName);
+            $key = $importFileName;
+            if (array_key_exists(static::FILE_PATH_KEY, $importData)) {
+                $importFileName = $importData[static::FILE_PATH_KEY];
+            }
 
+            $filePathOnProjectLayer = $this->fileFinder->getFilePathOnProjectLayer($importFileName);
             if ($filePathOnProjectLayer == null) {
                 continue;
             }
 
-            $result[$importFileName] = $importData;
+            $result[$key . '?' . $importFileName] = $importData;
         }
 
         return $result;
