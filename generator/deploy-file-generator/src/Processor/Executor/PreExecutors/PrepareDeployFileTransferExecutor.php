@@ -16,11 +16,6 @@ use Symfony\Component\Yaml\Parser;
 class PrepareDeployFileTransferExecutor implements ExecutorInterface
 {
     /**
-     * @var string
-     */
-    protected const FILE_PATH_KEY = 'filePath';
-
-    /**
      * @var \Symfony\Component\Yaml\Parser
      */
     protected $yamlParser;
@@ -85,18 +80,17 @@ class PrepareDeployFileTransferExecutor implements ExecutorInterface
     {
         $result = [];
 
-        foreach ($imports as $importFileName => $importData) {
-            $key = $importFileName;
-            if (array_key_exists(static::FILE_PATH_KEY, $importData)) {
-                $importFileName = $importData[static::FILE_PATH_KEY];
+        foreach ($imports as $importName => $importData) {
+            if (!array_key_exists(DeployFileGeneratorConstants::YAML_TEMPLATE_KEY, $importData)) {
+                $importData[DeployFileGeneratorConstants::YAML_TEMPLATE_KEY] = $importName;
             }
 
-            $filePathOnProjectLayer = $this->fileFinder->getFilePathOnProjectLayer($importFileName);
+            $filePathOnProjectLayer = $this->fileFinder->getFilePathOnProjectLayer($importData[DeployFileGeneratorConstants::YAML_TEMPLATE_KEY]);
             if ($filePathOnProjectLayer == null) {
                 continue;
             }
 
-            $result[$key . '?' . $importFileName] = $importData;
+            $result[$importName . DeployFileGeneratorConstants::YAML_IMPORTS_TEMPLATE_KEY_SEPARATOR . $importData[DeployFileGeneratorConstants::YAML_TEMPLATE_KEY]] = $importData;
         }
 
         return $result;
@@ -111,13 +105,17 @@ class PrepareDeployFileTransferExecutor implements ExecutorInterface
     {
         $result = [];
 
-        foreach ($imports as $importFileName => $importData) {
-            $filePathOnBaseLayer = $this->fileFinder->getFilePathOnBaseLayer($importFileName);
+        foreach ($imports as $importName => $importData) {
+            if (!array_key_exists(DeployFileGeneratorConstants::YAML_TEMPLATE_KEY, $importData)) {
+                $importData[DeployFileGeneratorConstants::YAML_TEMPLATE_KEY] = $importName;
+            }
+
+            $filePathOnBaseLayer = $this->fileFinder->getFilePathOnBaseLayer($importData[DeployFileGeneratorConstants::YAML_TEMPLATE_KEY]);
             if ($filePathOnBaseLayer == null) {
                 continue;
             }
 
-            $result[$importFileName] = $importData;
+            $result[$importName . DeployFileGeneratorConstants::YAML_IMPORTS_TEMPLATE_KEY_SEPARATOR . $importData[DeployFileGeneratorConstants::YAML_TEMPLATE_KEY]] = $importData;
         }
 
         return $result;
