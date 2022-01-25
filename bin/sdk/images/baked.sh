@@ -38,5 +38,6 @@ function Images::buildFrontend() {
 
     Images::_buildFrontend baked
     Images::_buildGateway
+    Images::_buildRedisReader
     Images::tagFrontend "${SPRYKER_DOCKER_TAG}"
 }

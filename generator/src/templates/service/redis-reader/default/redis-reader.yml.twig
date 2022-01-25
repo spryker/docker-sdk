@@ -1,0 +1,15 @@
+  {{ serviceName }}:
+    build:
+      context: ./${DEPLOYMENT_PATH}/images/common/services/redis-reader/
+      dockerfile: Dockerfile
+    networks:
+      - private
+    environment:
+        REDIS_HOST: "{{ serviceData['redis_host'] }}"
+        REDIS_PORT: "{{ serviceData['redis_port'] }}"
+        REDIS_DB: "{{ serviceData['redis_db'] }}"
+        PORT: "{{ serviceData['port'] }}"
+    labels:
+      'spryker.app.name': redis-reader
+      'spryker.app.type': agents
+      'spryker.project': ${SPRYKER_DOCKER_PREFIX}:${SPRYKER_DOCKER_TAG}

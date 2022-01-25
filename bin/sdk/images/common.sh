@@ -182,6 +182,18 @@ function Images::_buildGateway() {
         "${DEPLOYMENT_PATH}/context" 1>&2
 }
 
+function Images::_buildRedisReader() {
+    local redisReaderImage="${SPRYKER_DOCKER_PREFIX}_redis_reader:${SPRYKER_DOCKER_TAG}"
+
+    Console::verbose "${INFO}Building redis-reader image${NC}"
+
+    docker build \
+        -t "${redisReaderImage}" \
+        -f "${DEPLOYMENT_PATH}/images/common/services/redis-reader/Dockerfile" \
+        --progress="${PROGRESS_TYPE}" \
+        "${DEPLOYMENT_PATH}/context" 1>&2
+}
+
 function Images::_tagByApp() {
     local applicationName=$1
     local imageName=$2
