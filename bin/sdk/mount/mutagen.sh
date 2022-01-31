@@ -6,7 +6,7 @@ import lib/version.sh
 import lib/string.sh
 
 # shellcheck disable=SC2034
-DOCKER_COMPOSE_SUBSTITUTE='mutagen compose'
+DOCKER_COMPOSE_SUBSTITUTE='mutagen-compose'
 
 function Mount::logs() {
     mutagen sync monitor "${SPRYKER_SYNC_SESSION_NAME}"
