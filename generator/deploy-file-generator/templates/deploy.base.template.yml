@@ -1,0 +1,8 @@
+imports:
+    environment/%env_name%/image.deploy.template.yml:
+    environment/%env_name%/composer.deploy.template.yml:
+    environment/%env_name%/assets.deploy.template.yml:
+    environment/%env_name%/regions.deploy.template.yml:
+    environment/%env_name%/groups.deploy.template.yml:
+    environment/%env_name%/services.deploy.template.yml:
+    environment/%env_name%/docker.deploy.template.yml:

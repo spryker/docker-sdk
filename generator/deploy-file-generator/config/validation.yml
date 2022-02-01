@@ -1,0 +1,92 @@
+# Main section
+version:
+    not-empty:
+    string-type:
+namespace:
+    not-empty:
+    string-type:
+tag:
+    not-empty:
+    string-type:
+environment:
+    not-empty:
+    string-type:
+pipeline:
+    not-empty:
+    string-type:
+
+# Region section
+regions:
+    require:
+    not-empty:
+regions.*:
+    array-type:
+regions.*.services:
+    not-empty:
+regions.*.services.database:
+    require:
+
+# Image:
+image.tag:
+    string-type:
+image.environment:
+    array-type:
+image.php:
+    array-type:
+image.php.enabled-extensions:
+    array-type:
+
+# Assets
+assets.image:
+    string-type:
+assets.mode:
+    string-type:
+assets.compression.*.level:
+    integer-type:
+
+# Groups
+groups.*.region:
+    group-region:
+groups.*.applications.*.application:
+    require:
+    string-type:
+groups.*.applications.*.endpoints:
+    require:
+    array-type:
+groups.*.applications.*.endpoints.*.store:
+    string-type:
+groups.*.applications.*.endpoints.*.services:
+    array-type:
+
+# Services
+services.*.engine:
+    require:
+    string-type:
+services.*.endpoints:
+    array-type:
+
+# Docker
+docker.ssl.enabled:
+    only-value:
+        - true
+        - false
+docker.ssl.redirect:
+    only-value:
+        - true
+        - false
+docker.testing.store:
+    string-type:
+docker.debug.enabled:
+    only-value:
+        - true
+        - false
+docker.debug.xdebug.enabled:
+    only-value:
+        - true
+        - false
+
+docker.mount.*:
+    array-type:
+
+docker.mount.*.platforms:
+    array-type:

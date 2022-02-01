@@ -68,9 +68,10 @@ For contribution guidelines, see [Code contribution guide](https://documentation
 | broker  | rabbitmq  | 3.7  |
 | session  | redis  | 5.0  |
 | key_value_store  | redis  | 5.0  |
-| search  | elastic  | 5.6*  |
+| search  | elastic  | 5.6* |
 |   |   | 6.8  |
 |   |   | 7.6  |
+|   |   | 7.10 |
 | scheduler  | jenkins  | 2.176  |
 | webdriver  | phantomjs  | latest* |
 |   | chromedriver  | latest |
@@ -79,4 +80,5 @@ For contribution guidelines, see [Code contribution guide](https://documentation
 | kibana  | kibana  | 5.6* |
 |   |   | 6.8 |
 |   |   | 7.6 |
+|   |   | 7.10 |
 | blackfire  | blackfire  | latest |

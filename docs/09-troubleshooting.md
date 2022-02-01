@@ -147,7 +147,7 @@ sudo lsof -nPi:80 | grep LISTEN
 You get the `413 Request Entity Too Large` error.
 
 **then**
-1. Increase the maximum request body size for the related application. See [Deploy File Reference - 1.0](https://documentation.spryker.com/docs/deploy-file-reference-10#groups-applications) to learn how to do that.
+1. Increase the maximum request body size for the related application. See [Deploy File Reference - 1.0](07-deploy-file/02-deploy-file-reference.v1.md#groups-applications) to learn how to do that.
 2. Fetch the update:
 ```bash
 docker/sdk bootstrap
@@ -178,7 +178,7 @@ docker/sdk up
 ### An application is not reachable via http
 
 **when**
-An application like Yves, BackOffice(Zed), Glue, or MerchantPortal is not reachable after installation.
+An application like Yves, BackOffice(Zed), GlueStorefront(Glue), GlueBackend or MerchantPortal is not reachable after installation.
 
 **then**
 In `deploy.*.yml`, ensure that SSL encryption is disabled:
@@ -276,3 +276,18 @@ Try the following:
     ```bash
     docker/sdk run -x
     ```
+
+**when**
+It's not possible to establish the database connection from the host machine.
+
+**then**
+1. Check that the deploy yml file is used and make sure the port is exposed.
+2. Check that port is not occupied by the local process by running `sudo lsof -nP -i4TCP:3306 | grep LISTEN` (with port declared in the deploy.yml file).
+3. Check if the proper credentials and database name are used. You can find all the required information in the deploy yml file.
+
+
+**when**
+You get an error after running `docker/sdk cli {ARGUMENT_1}`.
+
+**then**
+Wrap the command arguments into single quotes. For example, `docker/sdk cli 'composer require spryker/*'`
