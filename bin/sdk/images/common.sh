@@ -169,6 +169,7 @@ function Images::_buildFrontend() {
             -f "${DEPLOYMENT_PATH}/images/debug/frontend/Dockerfile"  $platformArg \
             --progress="${PROGRESS_TYPE}" \
             --build-arg "SPRYKER_PARENT_IMAGE=${frontendImage}" \
+            --build-arg "SPRYKER_XDEBUG_MODE_ENABLE=${SPRYKER_XDEBUG_MODE_ENABLE}" \
             "${DEPLOYMENT_PATH}/context" 1>&2
     fi
 }
