@@ -45,6 +45,16 @@ function Compose::exec() {
     local tty
     [ -t -0 ] && tty='' || tty='-T'
 
+	# For avoid https://github.com/docker/compose/issues/9104
+	local ttyDisabledKey='docker_compose_tty_disabled'
+	if [ "${DOCKER_COMPOSE_TTY_DISABLED}" == "${@: -1}" ]; then
+		if  [ "${DOCKER_COMPOSE_TTY_DISABLED}" == "${ttyDisabledKey}" ]; then
+			tty='-T'
+		fi
+
+		set -- "${@:1:$(($#-1))}"
+	fi
+
     Compose::command exec ${tty} \
         -e COMMAND="${*}" \
         -e APPLICATION_STORE="${SPRYKER_CURRENT_STORE}" \
