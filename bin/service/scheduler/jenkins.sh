@@ -8,7 +8,7 @@ function Service::Scheduler::isInstalled() {
 
     # shellcheck disable=SC2016
     local jobsCount=$(Compose::exec 'curl -sL ${SPRYKER_SCHEDULER_HOST}:${SPRYKER_SCHEDULER_PORT}/scriptText -d "script=println Jenkins.instance.projects.collect{ it.name }.size" | tail -n 1' | tr -d " \n\r")
-    [ "${jobsCount}" -gt 0 ] && Console::end "[INSTALLED]" && return "${TRUE}" || return "${FALSE}"
+    [[ "${jobsCount}" -gt 0 ]] && Console::end "[INSTALLED]" && return "${TRUE}" || return "${FALSE}"
 }
 
 Service::Scheduler::pause() {
@@ -27,8 +27,8 @@ Service::Scheduler::pause() {
     while :; do
         # shellcheck disable=SC2016
         local runningJobsCount=$(Compose::exec 'curl -sL ${SPRYKER_SCHEDULER_HOST}:${SPRYKER_SCHEDULER_PORT}/computer/api/xml?xpath=*/busyExecutors/text\(\) | tail -n 1' | tr -d " \n\r")
-        [ "${runningJobsCount}" -eq 0 ] && break
-        [ "${counter}" -ge "${waitFor}" ] && break
+        [[ "${runningJobsCount}" -eq 0 ]] && break
+        [[ "${counter}" -ge "${waitFor}" ]] && break
         counter=$((counter + interval))
         sleep "${interval}"
     done
