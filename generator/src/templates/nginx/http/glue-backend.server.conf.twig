@@ -1,0 +1,39 @@
+{% extends "nginx/http/application.server.conf.twig" %}
+{% block server %}
+    {{ parent() }}
+
+    {% include "nginx/vhost.d/glue-backend.default.conf.twig" with _context %}
+    {% include "nginx/vhost.d/timeouts.conf.twig" with { timeout: timeout | default('1m') } %}
+{% endblock server %}
+{% block location %}
+    {{ parent() }}
+
+    fastcgi_param SPRYKER_ZED_HOST "{{ zedHost | split(':') | first }}";
+    fastcgi_param SPRYKER_ZED_PORT "{{ project['_defaultPort'] }}";
+
+    fastcgi_param SPRYKER_SESSION_BE_NAMESPACE "{{ storeServices['session']['namespace'] | default(endpointData['services']['session']['namespace']) }}";
+    fastcgi_param SPRYKER_GLUE_BACKEND_HOST "{{ host }}";
+    fastcgi_param SPRYKER_GLUE_BACKEND_PORT "{{ externalPort }}";
+
+{% if storeServices['mail']['sender']['email'] is not empty %}
+    fastcgi_param SPRYKER_MAIL_SENDER_EMAIL "{{ storeServices['mail']['sender']['email'] }}";
+{% endif %}
+{% if storeServices['mail']['sender']['name'] is not empty %}
+    fastcgi_param SPRYKER_MAIL_SENDER_NAME "{{ storeServices['mail']['sender']['name'] }}";
+{% endif %}
+
+{% if project['_endpointMap'][endpointData['store']]['yves'] is not empty %}
+    fastcgi_param SPRYKER_FE_HOST "{{ project['_endpointMap'][endpointData['store']]['yves'] }}";
+    fastcgi_param SPRYKER_FE_PORT "{{ (project['_endpointMap'][endpointData['store']]['yves'] | split(':'))[1] | default(project['_defaultPort']) }}";
+{% endif %}
+
+{% if project['_endpointMap'][endpointData['store']]['glue'] is not empty %}
+    fastcgi_param SPRYKER_API_HOST "{{ project['_endpointMap'][endpointData['store']]['glue'] }}";
+    fastcgi_param SPRYKER_API_PORT "{{ (project['_endpointMap'][endpointData['store']]['glue'] | split(':'))[1] | default(project['_defaultPort']) }}";
+{% endif %}
+
+{% if project['_endpointMap'][endpointData['store']]['glue-storefront'] is not empty %}
+    fastcgi_param SPRYKER_API_HOST "{{ project['_endpointMap'][endpointData['store']]['glue-storefront'] }}";
+    fastcgi_param SPRYKER_API_PORT "{{ (project['_endpointMap'][endpointData['store']]['glue-storefront'] | split(':'))[1] | default(project['_defaultPort']) }}";
+{% endif %}
+{% endblock location %}

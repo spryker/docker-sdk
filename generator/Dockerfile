@@ -15,6 +15,7 @@ RUN --mount=type=cache,id=composer,sharing=locked,target=/home/spryker/.composer
 COPY --chown=spryker:spryker src ${srcRoot}/src
 COPY --chown=spryker:spryker openssl ${srcRoot}/openssl
 COPY --chown=spryker:spryker index.php ${srcRoot}
+COPY --chown=spryker:spryker deploy-file-generator ${srcRoot}/deploy-file-generator
 
 RUN chmod 755 ${srcRoot}/openssl/generate.sh
 

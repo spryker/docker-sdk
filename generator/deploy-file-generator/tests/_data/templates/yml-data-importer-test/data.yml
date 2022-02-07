@@ -1,0 +1,4 @@
+some-key: 'some data'
+
+imports:
+    import-data.yml:
