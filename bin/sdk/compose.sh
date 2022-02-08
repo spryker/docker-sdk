@@ -47,8 +47,9 @@ function Compose::exec() {
 
 	# For avoid https://github.com/docker/compose/issues/9104
 	local ttyDisabledKey='docker_compose_tty_disabled'
-	if [ "${DOCKER_COMPOSE_TTY_DISABLED}" == "${@: -1}" ]; then
-		if  [ "${DOCKER_COMPOSE_TTY_DISABLED}" == "${ttyDisabledKey}" ]; then
+	local lastArg="${@: -1}"
+	if [ "${DOCKER_COMPOSE_TTY_DISABLED}" = "${lastArg}" ]; then
+		if  [ "${DOCKER_COMPOSE_TTY_DISABLED}" = "${ttyDisabledKey}" ]; then
 			tty='-T'
 		fi
 
@@ -155,7 +156,7 @@ function Compose::run() {
     Console::verbose "${INFO}Running Spryker containers${NC}"
     sync start
 
-    Compose::command --compatibility up -d --remove-orphans "${@}"
+    Compose::command --compatibility up -d --remove-orphans --quiet-pull "${@}"
 
     if [ -n "${SPRYKER_TESTING_ENABLE}" ]; then
         Compose::command --compatibility stop scheduler

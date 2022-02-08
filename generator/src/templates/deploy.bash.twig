@@ -211,7 +211,7 @@ export TIDEWAYS_CLI_ENABLED=${TIDEWAYS_CLI_ENABLED}
 export TIDEWAYS_ENVIRONMENT_NAME=${TIDEWAYS_ENVIRONMENT_NAME}
 
 {# For avoid https://github.com/docker/compose/issues/9104 #}
-export DOCKER_COMPOSE_TTY_DISABLED=$(Environment::getDockerComposeTTY)
+export DOCKER_COMPOSE_TTY_DISABLED="$(Environment::getDockerComposeTTY)"
 
 Registry::Flow::runBoot
 

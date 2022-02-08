@@ -57,9 +57,9 @@ function Environment::getDockerComposeTTY() {
 	local dockerComposeVersion="2.2.3"
 
     if [ "$(Version::parse "${installedVersion}")" -eq "$(Version::parse "${dockerComposeVersion}")" ]; then
-		echo ${ttyDisabledKey}
+		echo "${ttyDisabledKey}"
 	else
-		echo ${ttyEnabledKey}
+		echo "${ttyEnabledKey}"
     fi
 }
 
