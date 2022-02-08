@@ -81,6 +81,8 @@ class PrepareDeployFileTransferExecutor implements ExecutorInterface
         $result = [];
 
         foreach ($imports as $importName => $importData) {
+            $importData = $importData ?? [];
+
             if (!array_key_exists(DeployFileGeneratorConstants::YAML_TEMPLATE_KEY, $importData)) {
                 $importData[DeployFileGeneratorConstants::YAML_TEMPLATE_KEY] = $importName;
             }
@@ -106,6 +108,8 @@ class PrepareDeployFileTransferExecutor implements ExecutorInterface
         $result = [];
 
         foreach ($imports as $importName => $importData) {
+            $importData = $importData ?? [];
+
             if (!array_key_exists(DeployFileGeneratorConstants::YAML_TEMPLATE_KEY, $importData)) {
                 $importData[DeployFileGeneratorConstants::YAML_TEMPLATE_KEY] = $importName;
             }
