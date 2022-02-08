@@ -1,7 +1,7 @@
 This document contains examples of using deploy file inheritance. The examples show how to do the following:
 * Avoid defining duplicate parameters in deploy files.
 * Re-use configuration from a deploy file in multiple deploy files.
-* Use dynamic parameters when the a configuration is re-used in multiple environments.
+* Use dynamic parameters when the a configuration is reused in multiple environments.
 
 For comparison, we provide examples of achieving the same result with and without deploy file inheritance.
 
