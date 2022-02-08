@@ -19,7 +19,7 @@ This reference page describes version 1 of the Deploy file format. This is the n
  <dd>A store related context a request is processed in.</dd>
 
  <dt>Application</dt>
- <dd>A Spryker application, like Backoffice(Zed), Backend-Gateway, Yves, Glue or MerchantPortal.</dd>
+ <dd>A Spryker application, like Backoffice(Zed), Backend-Gateway, Yves, GlueStorefront(Glue), GlueBackend or MerchantPortal.</dd>
 
  <dt>Service</dt>
  <dd>An external storage or utility service. Represents service type and configuration. The configuration can be defined on different levels: project-wide, region-wide, store-specific or endpoint-specific with limitations based on the service type.</dd>
@@ -133,14 +133,33 @@ environment: 'docker'
 
 ### imports:
 
-Defines additional deploy files to be included into a build. The files must exist on a [project or base layer](/01-deploy-file.md).
+Defines any of the following:
 
+* Imports of additional deploy files to be included into a build. Supports imports of the same deploy file multiple times. To define a deploy file and dynamic parameters for this type of import, see [imports: {import_name}:](#imports-importname).
+```yaml
+imports:
+    {import_name}:
+    {import_name}:       
+```     
+
+* Additional deploy files to be included into a build. To define dynamic parameters for this type of import, see [imports: {deploy_file_name}:](#imports-deployfilename).
 ```yaml
 version: 1.0
-
 imports:
-    deploy.base.template.yml:
+    {deploy_file_name}:
+    {deploy_file_name}:
 ```
+
+* An array of additional deploy files to be included into a build. Supports imports of the same deploy file multiple times. To define dynamic parameters for this type of import, see [imports: parameters:](#imports-parameters)
+```yaml
+imports:
+    - template: {deploy_file_name}
+    - template: {deploy_file_name}
+```
+
+The files must exist on a [project or base layer](/docs/scos/dev/the-docker-sdk/{{page.version}}/deploy-file/deploy-file.html).
+
+
 
 {% info_block infoBox "Merged deploy files" %}
 
@@ -151,28 +170,87 @@ If you include a deploy file, the included deploy file is merged with the origin
 
 ***
 
+### imports: parameters:
+
+Defines the [dynamic parameters](/docs/scos/dev/the-docker-sdk/{{page.version}}/deploy-file/deploy-file.html#dynamic-parameters) to be used when parsing the included deploy file. In the included deploy file, the parameter name should be wrapped in `%`.
+
+```yaml
+imports:
+  - template: {deploy_file_name}
+    parameters:
+      {dynamic_parameter_name}: '{dynamic_parameter_value}'
+      {dynamic_parameter_name}: '{dynamic_parameter_value}'
+```            
+
+Example:
+```yaml
+imports:
+  - template: deploy.porject.yml
+    parameters:
+      env-name: 'dev'
+      locale: 'en'
+```
+
+{% info_block warningBox "" %}
+
+Affects the included deploy file that it follows in an array of included deploy files. To learn how you can add dynamic parameters for other types of imports, see [imports: {import_name}:](#imports-importname) and [imports: {deploy_file_name}:](#imports-deployfilename).
+
+{% endinfo_block %}
+
+***
+
+
+### imports: {import_name}:
+
+Defines the configuration of the import:
+* `{import_name}: template:` — defines the deploy file to be included into a build  as part of this import.
+* `{import_name}: parameters:` - defines the [dynamic parameters](/docs/scos/dev/the-docker-sdk/{{page.version}}/deploy-file/deploy-file.html#dynamic-parameters) to be used when parsing the included deploy file. In the included deploy file, the parameter name should be wrapped in `%`.
+
+```yaml
+imports:
+    {import_name}:
+        template: {deploy_file_name}
+        parameters:
+          {dynamic_parameter_name}: '{dynamic_parameter_value}'
+          {dynamic_parameter_name}: '{dynamic_parameter_value}'
+```
+Example:
+```yaml
+imports:
+    base:
+        template: deploy.base.template.yml
+        parameters:
+          env_name: 'dev'
+          locale: 'en'
+```
+
+***
+
+
+
 ### imports: {deploy_file_name}:
 
 Defines the configuration to be used when parsing the included deploy file.
-* `{deploy_file_name}: parameters:` - defines the [dynamic parameters](01-deploy-file.md#dynamic-parameters) to be used when parsing the included deploy file. In the included deploy file, the parameter name should be wrapped in `%`.
+* `{deploy_file_name}: parameters:` - defines the [dynamic parameters](/docs/scos/dev/the-docker-sdk/{{page.version}}/deploy-file/deploy-file.html#dynamic-parameters) to be used when parsing the included deploy file. In the included deploy file, the parameter name should be wrapped in `%`.
+
 
 ```yaml
 version: 1.0
-
 imports:
     {deploy_file_name}:
       parameters:
         {dynamic_parameter_name}: '{dynamic_parameter_value}'
+        {dynamic_parameter_name}: '{dynamic_parameter_value}'  
 ```
 Example:
 
 ```yaml
 version: 1.0
-
 imports:
     deploy.base.template.yml:
       parameters:
         env_name: 'dev'
+        locale: 'en'
 ```
 
 ***
@@ -370,7 +448,7 @@ The key must be project-wide unique.
 
 Obligatory parameters for `application:`:
 
-* `groups: applications: application:` - defines the type of *Application*. Possible values are `backoffice`, `backend-gateway`, `zed`, `yves`, `glue` and `merchant-portal`.
+* `groups: applications: application:` - defines the type of *Application*. Possible values are `backoffice`, `backend-gateway`, `zed`, `yves`, `glue-storefront`, `glue-backend`,`glue` and `merchant-portal`.
 * `groups: applications: endpoints:` - defines the list of *Endpoints* to access the *Application*. See [groups: applications: endpoints:](#groups-applications-endpoints-) to learn more.
 
 Optional parameters for `application:`:
@@ -395,6 +473,8 @@ Optional parameters for `application:`:
 * `groups: applications: application: http: max-request-body-size:` - defines the maximum allowed size of the request body that can be sent to the application, in MB. If not specified, the default values apply:
 	* `backoffice` - `10m`
     * `merchant-portal` - `10m`
+	* `glue-storefront` - `10m`
+	* `glue-backend` - `10m`
 	* `glue` - `2m`
 	* `yves` - `1m`
 

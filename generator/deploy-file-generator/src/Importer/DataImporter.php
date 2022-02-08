@@ -92,16 +92,39 @@ class DataImporter implements DeployFileImporterInterface
             return $content;
         }
 
-        foreach ($content[DeployFileGeneratorConstants::YAML_IMPORTS_KEY] as $importPath => $importParams) {
+        foreach ($content[DeployFileGeneratorConstants::YAML_IMPORTS_KEY] as $importName => $importParams) {
+            if (strpos($importName, DeployFileGeneratorConstants::YAML_IMPORTS_TEMPLATE_KEY_SEPARATOR) !== false) {
+                $importName = explode(DeployFileGeneratorConstants::YAML_IMPORTS_TEMPLATE_KEY_SEPARATOR, $importName)[1];
+            }
+
+            $importName = $importParams[DeployFileGeneratorConstants::YAML_TEMPLATE_KEY] ?? $importName;
             $importParams = $importParams[DeployFileGeneratorConstants::YAML_PARAMETERS_KEY] ?? [];
             $importParams = array_merge($parentParameters, $importParams);
 
-            $importedData = $this->importFromFile($this->pathPrefix . $importPath, $importParams);
+            $importedData = $this->importFromFile($this->getImportFilePath((string)$importName, $importParams), $importParams);
+
             $content = $this->mergeResolver->resolve($content, $importedData);
 
-            unset($content[DeployFileGeneratorConstants::YAML_IMPORTS_KEY][$importPath]);
+            unset($content[DeployFileGeneratorConstants::YAML_IMPORTS_KEY][$importName]);
         }
 
         return $content;
+    }
+
+    /**
+     * @param string $importName
+     * @param array $importParams
+     *
+     * @return string
+     */
+    protected function getImportFilePath(string $importName, array $importParams): string
+    {
+        $importPath = $importParams[DeployFileGeneratorConstants::YAML_TEMPLATE_KEY] ?? $importName;
+
+        if (strpos($importName, DeployFileGeneratorConstants::YAML_IMPORTS_TEMPLATE_KEY_SEPARATOR) !== false) {
+            $importPath = explode(DeployFileGeneratorConstants::YAML_IMPORTS_TEMPLATE_KEY_SEPARATOR, $importName)[1];
+        }
+
+        return $this->pathPrefix . $importPath;
     }
 }

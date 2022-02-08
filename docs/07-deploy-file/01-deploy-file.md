@@ -67,9 +67,58 @@ imports:
     environment/dev/docker.deploy.template.yml:
 ```
 
+### Import types
 
+You can include a deploy file into an application's configuration using one of the following import types.
 
+* File path:
+```yaml
+imports:
+    deploy.base.template.yml:
+    deploy.project.template.yml:
+```      
 
+* Named array:
+```yaml
+imports:
+    base-deploy-file:
+        template: deploy.base.template.yml
+    project-deploy-file:
+        template: deploy.project.template.yml
+```
+
+* Unnamed array:
+```yaml
+imports:
+    - template: deploy.base.template.yml
+    - template: deploy.project.template.yml
+```
+
+Unlike file path import, named and unnamed array imports support including the same deploy file multiple types. This can be useful when you want to add the same configuration multiple times with different parameters.
+
+Example of including the same deploy file with different parameters via a named array import:
+
+```yaml
+imports:
+    project-deploy-file:
+        template: deploy.project.template.yml
+        parameters: 'stage'
+    extended-project-deploy-file:
+        template: deploy.project.template.yml
+        parameters:
+            env_name: 'dev'
+```
+
+Example of including the same deploy file with different parameters via an unnamed array import:
+
+```yaml
+- template: deploy.porject.template.yml
+  parameters:
+      env-name: 'stage'
+- template: deploy.porject.template.yml
+  parameters:
+      env-name: 'dev'
+```
 
 
 ## Deploy file inheritance

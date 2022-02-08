@@ -21,19 +21,21 @@ abstract class AbstractAnnotationParameterResolver implements ParameterResolverI
             return $value;
         }
 
-        preg_match($this->getAnnotationTemplate(), $value, $match);
+        preg_match_all($this->getAnnotationTemplate(), $value, $match);
 
-        if (!$match) {
+        if (!$match[0]) {
             return $value;
         }
 
-        $param = $match[1];
+        foreach ($match[1] as $key => $param) {
+            /* skip error if empty match*/
+            if (!isset($params[$param])) {
+                continue;
+            }
 
-        /* skip error if empty match*/
-        if (!isset($params[$param])) {
-            return $value;
+            $value = str_replace($match[0][$key], $params[$param], $value);
         }
 
-        return str_replace($match[0], $params[$param], $value);
+        return $value;
     }
 }
