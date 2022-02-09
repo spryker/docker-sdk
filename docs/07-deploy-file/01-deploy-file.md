@@ -17,6 +17,7 @@ To include a deploy file template into an application's configuration, use the [
 ```yaml
 import:
   custom_deploy_file.yml:
+      template: custom_deploy_file.yml
 ```
 
 ### Dynamic parameters
@@ -31,8 +32,9 @@ version: 1.0
 
 imports:
     deploy.base.template.yml:
-      parameters:
-        env_name: 'dev'
+        template: deploy.base.template.yml
+        parameters:
+            env_name: 'dev'
 ```
 
 The included deploy file includes more deploy files:
@@ -70,13 +72,6 @@ imports:
 ### Import types
 
 You can include a deploy file into an application's configuration using one of the following import types.
-
-* File path:
-```yaml
-imports:
-    deploy.base.template.yml:
-    deploy.project.template.yml:
-```      
 
 * Named array:
 ```yaml

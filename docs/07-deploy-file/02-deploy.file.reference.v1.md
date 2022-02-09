@@ -139,15 +139,9 @@ Defines any of the following:
 ```yaml
 imports:
     {import_name}:
-    {import_name}:       
-```     
-
-* Additional deploy files to be included into a build. To define dynamic parameters for this type of import, see [imports: {deploy_file_name}:](#imports-deployfilename).
-```yaml
-version: 1.0
-imports:
-    {deploy_file_name}:
-    {deploy_file_name}:
+        template: {deploy_file_name}
+    {import_name}:
+        template: {deploy_file_name}
 ```
 
 * An array of additional deploy files to be included into a build. Supports imports of the same deploy file multiple times. To define dynamic parameters for this type of import, see [imports: parameters:](#imports-parameters)
@@ -226,32 +220,6 @@ imports:
 
 ***
 
-
-
-### imports: {deploy_file_name}:
-
-Defines the configuration to be used when parsing the included deploy file.
-* `{deploy_file_name}: parameters:` - defines the [dynamic parameters](/docs/scos/dev/the-docker-sdk/{{page.version}}/deploy-file/deploy-file.html#dynamic-parameters) to be used when parsing the included deploy file. In the included deploy file, the parameter name should be wrapped in `%`.
-
-
-```yaml
-version: 1.0
-imports:
-    {deploy_file_name}:
-      parameters:
-        {dynamic_parameter_name}: '{dynamic_parameter_value}'
-        {dynamic_parameter_name}: '{dynamic_parameter_value}'  
-```
-Example:
-
-```yaml
-version: 1.0
-imports:
-    deploy.base.template.yml:
-      parameters:
-        env_name: 'dev'
-        locale: 'en'
-```
 
 ***
 
