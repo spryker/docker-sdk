@@ -89,7 +89,7 @@ imports:
     - template: deploy.project.template.yml
 ```
 
-Unlike file path import, named and unnamed array imports support including the same deploy file multiple types. This can be useful when you want to add the same configuration multiple times with different parameters.
+Named and unnamed array imports support including the same deploy file multiple types. This can be useful when you want to add the same configuration multiple times with different parameters.
 
 Example of including the same deploy file with different parameters via a named array import:
 
