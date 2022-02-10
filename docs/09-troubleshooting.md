@@ -215,6 +215,52 @@ mutagen sync terminate <all sessions in the list>
 docker/sdk up
 ```
 
+**when**
+Revert on specific version(e.g. 0.13.0-beta4)
+
+**then**
+
+* Get commit hash from https://github.com/mutagen-io/homebrew-mutagen/commits/master
+* Remove prev mutagen version:
+```
+brew uninstall --ignore-dependencies {{ mutagen || mutagen-beta }}
+```
+
+* Run the commands:
+```
+cd "$(brew --repo mutagen-io/homebrew-mutagen)" && \
+git checkout {{ HASH COMMIT FROM mutagen-io/homebrew-mutagen }} && \
+HOMEBREW_NO_AUTO_UPDATE=1 brew install mutagen-io/mutagen/{{ mutagen || mutagen-beta }} && \
+mutagen daemon stop  && \
+mutagen daemon start && \
+cd -
+```
+
+**when**
+Error:
+```
+unable to bring up Mutagen Compose sidecar service: unable to reconcile Mutagen sessions: unable to connect to Mutagen daemon: client/daemon version mismatch (daemon restart recommended)
+```
+
+**then**
+
+* Run the commands:
+```
+mutagen daemon stop
+docker/sdk prune
+```
+
+**when**
+To enable Docker-compose v1
+
+**then**
+
+* Run the commands:
+```
+export COMPOSE_VERSION=1 
+docker/sdk up
+```
+
 
 ## Troubleshooting debugging
 
