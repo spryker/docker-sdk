@@ -51,8 +51,8 @@ class PrepareDeployFileTransferExecutorTest extends Unit
             ->execute($this->createDeployFileTransfer());
 
         // Assert
-        $this->tester->assertArrayHasKey(static::PROJECT_YML_FILE_NAME, $deployFileTransfer->getProjectImports());
-        $this->tester->assertArrayHasKey(static::BASE_YML_FILE_NAME, $deployFileTransfer->getBaseImports());
+        $this->tester->assertArrayHasKey(static::PROJECT_YML_FILE_NAME . '?' . static::PROJECT_YML_FILE_NAME, $deployFileTransfer->getProjectImports());
+        $this->tester->assertArrayHasKey(static::BASE_YML_FILE_NAME . '?' . static::BASE_YML_FILE_NAME, $deployFileTransfer->getBaseImports());
     }
 
     /**
