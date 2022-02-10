@@ -13,7 +13,7 @@ function Environment::checkDockerComposeVersion() {
     local installedVersion=$(Environment::getDockerComposeVersion)
 
     if [ "${installedVersion}" == 0 ]; then
-        Console::error "Docker Compose is not found. Please, make sure Docker Compose is installed."
+        Console::error "Docker Compose V${COMPOSE_VERSION} is not found. Please, make sure Docker Compose V${COMPOSE_VERSION} is installed."
         exit 1
     fi
 
