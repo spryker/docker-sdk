@@ -4,7 +4,7 @@ FROM ${SPRYKER_PARENT_IMAGE} AS application-debug
 
 RUN --mount=type=cache,id=aptlib,sharing=locked,target=/var/lib/apt \
     --mount=type=cache,id=aptcache,sharing=locked,target=/var/cache/apt \
-  bash -c 'if [ ! -z "$(which apt)" ]; then apt-get update && apt-get install -y \
+  bash -c 'if [ ! -z "$(which apt)" ]; then apt update -y && apt install -y \
      supervisor \
      ; fi'
 

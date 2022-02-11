@@ -26,29 +26,35 @@ class Dispatcher {
         response.setHeader('Content-Type', 'text/plain');
 
         let child;
+        let responseBuffer = '';
+
         try {
             child = spawn('bash', ['-c', requestBody]);
         } catch (error) {
             console.error(error);
-            response.write(error.message);
             response.statusCode = 400;
+            response.write(error.message);
             response.end();
             return;
         }
 
         console.info(requestBody);
         child.stdout.on('data', (chunk) => {
-            response.write(chunk.toString());
+            responseBuffer += chunk.toString();
+        });
+        child.stderr.on('data', (chunk) => {
+            responseBuffer += chunk.toString();
         });
         child.on('close', (code) => {
             response.statusCode = code === 0 ? 200 : 400;
+            response.write(responseBuffer);
             response.end();
         });
 
         child.on('error', (error) => {
             console.error(error);
-            response.write(error.message);
             response.statusCode = 400;
+            response.write(error.message);
             response.end();
         });
     }
@@ -71,8 +77,8 @@ class Dispatcher {
 
             if (error) {
                 response.setHeader('Content-Type', 'text/plain');
-                response.write(error.toString());
                 response.statusCode = 500;
+                response.write(error.toString());
                 response.end();
                 return;
             }
@@ -82,8 +88,8 @@ class Dispatcher {
             }
 
             response.setHeader('Content-Type', 'text/yaml');
-            response.write(schemaContent);
             response.statusCode = 200;
+            response.write(schemaContent);
             response.end();
         });
     }

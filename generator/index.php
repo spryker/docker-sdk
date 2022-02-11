@@ -1,6 +1,9 @@
 <?php
 
+use DeployFileGenerator\DeployFileGeneratorFactory;
+use DeployFileGenerator\Transfer\DeployFileTransfer;
 use Spatie\Url\Url;
+use Symfony\Component\Console\Output\ConsoleOutput;
 use Symfony\Component\Yaml\Parser;
 use Twig\Environment;
 use Twig\Loader\ChainLoader;
@@ -12,7 +15,12 @@ define('APPLICATION_SOURCE_DIR', __DIR__ . DS . 'src');
 include_once __DIR__ . DS . 'vendor' . DS . 'autoload.php';
 
 $deploymentDir = '/data/deployment';
-$projectYaml = $deploymentDir . '/project.yml';
+$projectYaml = buildProjectYaml($deploymentDir . '/project.yml');
+
+if ($projectYaml == '') {
+    exit(1);
+}
+
 $defaultDeploymentDir = getenv('SPRYKER_DOCKER_SDK_DEPLOYMENT_DIR') ?: './';
 $platform = getenv('SPRYKER_DOCKER_SDK_PLATFORM') ?: 'linux'; // Possible values: linux windows macos
 
@@ -89,6 +97,7 @@ $projectData['composer']['autoload'] = buildComposerAutoloadConfig($projectData)
 $isAutoloadCacheEnabled = $projectData['_isAutoloadCacheEnabled'] = isAutoloadCacheEnabled($projectData);
 $projectData['_requirementAnalyzerData'] = buildDataForRequirementAnalyzer($projectData);
 $projectData['secrets'] = buildSecrets($deploymentDir);
+$projectData = buildDefaultCredentials($projectData);
 
 // TODO Make it optional in next major
 // Making webdriver as required service for BC reasons
@@ -101,8 +110,8 @@ if (empty($projectData['services']['webdriver'])) {
 $projectData['_dashboardEndpoint'] = '';
 if (!empty($projectData['services']['dashboard'])) {
     $projectData['services']['dashboard']['endpoints'] = $projectData['services']['dashboard']['endpoints'] ?? [
-        'localhost' => []
-    ];
+            'localhost' => []
+        ];
     reset($projectData['services']['dashboard']['endpoints']);
     $projectData['_dashboardEndpoint'] = sprintf(
         '%s://%s',
@@ -132,6 +141,8 @@ const GLUE_APP = 'glue';
 const BACKOFFICE_APP = 'backoffice';
 const BACKEND_GATEWAY_APP = 'backend-gateway';
 const MERCHANT_PORTAL = 'merchant-portal';
+const GLUE_STOREFRONT = 'glue-storefront';
+const GLUE_BACKEND = 'glue-backend';
 
 const ENTRY_POINTS = [
     BACKOFFICE_APP => 'Backoffice',
@@ -140,6 +151,8 @@ const ENTRY_POINTS = [
     YVES_APP => 'Yves',
     GLUE_APP => 'Glue',
     MERCHANT_PORTAL => 'MerchantPortal',
+    GLUE_STOREFRONT => 'GlueStorefront',
+    GLUE_BACKEND => 'GlueBackend',
 ];
 
 foreach ($projectData['groups'] ?? [] as $groupName => $groupData) {
@@ -188,8 +201,8 @@ foreach ($projectData['groups'] ?? [] as $groupName => $groupData) {
                     $projectData['groups'][$groupName]['applications'][$applicationName]['endpoints'][$endpoint]['redirect']
                         = $redirect
                         = [
-                            'url' => $redirect,
-                        ];
+                        'url' => $redirect,
+                    ];
                 }
 
                 $projectData['groups'][$groupName]['applications'][$applicationName]['endpoints'][$endpoint]['redirect']['url']
@@ -206,6 +219,12 @@ foreach ($primal as $callbacks) {
 }
 
 $endpointMap = $projectData['_endpointMap'] = mapBackendEndpointsWithFallbackZed($projectData['_endpointMap']);
+
+$projectData['_testing'] = [
+    'defaultPort' => $defaultPort,
+    'projectServices' => $projectData['services'],
+    'endpointMap' => $endpointMap,
+];
 
 $projectData['_applications'] = [];
 $frontend = [];
@@ -230,7 +249,7 @@ function mapBackendEndpointsWithFallbackZed(array $endpointMap): array
             if (array_key_exists($zedApplicationToCheck, $storeEndpointMap)) {
                 continue;
             }
-            $endpointMap[$store][$zedApplicationToCheck] = $storeEndpointMap[ZED_APP];
+            $endpointMap[$store][$zedApplicationToCheck] = $storeEndpointMap[ZED_APP] ?? null;
         }
     }
 
@@ -299,19 +318,25 @@ foreach ($projectData['groups'] ?? [] as $groupName => $groupData) {
                 );
             }
 
+            $services = [];
+            $isEndpointDataHasStore = array_key_exists('store', $endpointData);
+            if ($isEndpointDataHasStore) {
+                $services = array_replace_recursive(
+                    $projectData['regions'][$groupData['region']]['stores'][$endpointData['store']]['services'],
+                    $endpointData['services'] ?? []
+                );
+            }
+            if ($isEndpointDataHasStore && $endpointData['store'] === ($projectData['docker']['testing']['store'] ?? '')) {
+                $projectData['_testing']['storeName'] = $endpointData['store'];
+                $projectData['_testing']['regionServices'] = array_merge($projectData['_testing']['services'] ?? [], $services);
+                $projectData['_testing']['services'][$endpointData['store']][$applicationData['application']] = $services;
+            }
+
             if ($applicationData['application'] === ZED_APP
                 || $applicationData['application'] === BACKEND_GATEWAY_APP
                 || $applicationData['application'] === BACKOFFICE_APP
                 || $applicationData['application'] === MERCHANT_PORTAL
             ) {
-                $services = [];
-
-                if (array_key_exists('store', $endpointData)) {
-                    $services = array_replace_recursive(
-                        $projectData['regions'][$groupData['region']]['stores'][$endpointData['store']]['services'],
-                        $endpointData['services'] ?? []
-                    );
-                }
 
                 $envVarEncoder->setIsActive(true);
                 file_put_contents(
@@ -344,39 +369,6 @@ foreach ($projectData['groups'] ?? [] as $groupName => $groupData) {
                     ])
                 );
                 $envVarEncoder->setIsActive(false);
-            }
-
-            if ($applicationData['application'] === YVES_APP || $applicationData['application'] === GLUE_APP) {
-                $services = [];
-
-                $isEndpointDataHasStore = array_key_exists('store', $endpointData);
-                if ($isEndpointDataHasStore) {
-                    $services = array_replace_recursive(
-                        $projectData['regions'][$groupData['region']]['stores'][$endpointData['store']]['services'],
-                        $endpointData['services'] ?? []
-                    );
-                }
-
-                if ($isEndpointDataHasStore && $endpointData['store'] === ($projectData['docker']['testing']['store'] ?? '')) {
-                    $envVarEncoder->setIsActive(true);
-                    file_put_contents(
-                        $deploymentDir . DS . 'env' . DS . 'cli' . DS . 'testing.env',
-                        $twig->render('env/cli/testing.env.twig', [
-                            'applicationName' => $applicationName,
-                            'applicationData' => $applicationData,
-                            'project' => $projectData,
-                            'host' => strtok($endpoint, ':'),
-                            'port' => strtok($endpoint) ?: $defaultPort,
-                            'regionName' => $groupData['region'],
-                            'regionData' => $projectData['regions'][$groupData['region']],
-                            'brokerConnections' => getBrokerConnections($projectData),
-                            'storeName' => $endpointData['store'],
-                            'services' => $services,
-                            'endpointMap' => $endpointMap,
-                        ])
-                    );
-                    $envVarEncoder->setIsActive(false);
-                }
             }
         }
     }
@@ -448,6 +440,11 @@ file_put_contents(
     $twig->render('php/conf.d/99-from-deploy-yaml-php.ini.twig', $projectData)
 );
 
+file_put_contents(
+    $deploymentDir . DS . 'context' . DS . 'php' . DS . 'debug' . DS . 'etc' . DS . 'php' . DS . 'debug.conf.d' . DS . '99-from-deploy-yaml-php.ini',
+    $twig->render('php/conf.d/99-from-deploy-yaml-php.ini.twig', $projectData)
+);
+
 $envVarEncoder->setIsActive(true);
 file_put_contents(
     $deploymentDir . DS . 'terraform/environment.tf',
@@ -481,6 +478,12 @@ unlink($deploymentDir . DS . 'images' . DS . 'common' . DS . 'application' . DS 
 file_put_contents(
     $deploymentDir . DS . 'docker-compose.yml',
     $twig->render('docker-compose.yml.twig', $projectData)
+);
+
+$envVarEncoder->setIsActive(true);
+file_put_contents(
+    $deploymentDir . DS . 'env' . DS . 'cli' . DS . 'testing.env',
+    $twig->render('env/cli/testing.env.twig', $projectData['_testing'])
 );
 
 verbose('Generating scripts... [DONE]');
@@ -671,8 +674,7 @@ function getSSLRedirectPort(array $projectData): int
 function getBrokerConnections(array $projectData): string
 {
     return json_encode([]);
-
-    $brokerServiceData = $projectData['services']['broker'];
+    $brokerServiceData = $projectData['services']['broker'] ?? [];
 
     $connections = [];
     foreach ($projectData['regions'] as $regionName => $regionData) {
@@ -871,10 +873,33 @@ function buildNewrelicEnvVariables(array $projectData): array
     }
 
     foreach ($projectData['docker']['newrelic'] as $key => $value) {
+        if ($key == 'distributed-tracing') {
+            $newrelicEnvVariables = array_merge($newrelicEnvVariables, buildNewrelicDistributedTracing($projectData));
+
+            continue;
+        }
+
         $newrelicEnvVariables['NEWRELIC_' . strtoupper($key)] = $value;
     }
+     return $newrelicEnvVariables;
+}
 
-    return $newrelicEnvVariables;
+/**
+ * @param array $projectData
+ *
+ * @return string[]
+ */
+function buildNewrelicDistributedTracing(array $projectData): array
+{
+    $distributedTracingData = $projectData['docker']['newrelic']['distributed-tracing'] ?? [];
+
+    return [
+        'NEWRELIC_TRANSACTION_TRACER_ENABLED' => (int) $distributedTracingData['enabled'] ?? 0,
+        'NEWRELIC_DISTRIBUTED_TRACING_ENABLED' => (int) $distributedTracingData['enabled'] ?? 0,
+        'NEWRELIC_SPAN_EVENTS_ENABLED' => (int) $distributedTracingData['enabled'] ?? 0,
+        'NEWRELIC_TRANSACTION_TRACER_THRESHOLD' => (int) $distributedTracingData['transaction-tracer-threshold'] ?? 0,
+        'NEWRELIC_DISTRIBUTED_TRACING_EXCLUDE_NEWRELIC_HEADER' => (int) $distributedTracingData['exclude-newrelic-header'] ?? 0,
+    ];
 }
 
 /**
@@ -1253,4 +1278,136 @@ function generateToken($tokenLength = 80): string
     }
 
     return $token;
+}
+
+/**
+ * @param string $mainProjectYaml
+ *
+ * @return string
+ */
+function buildProjectYaml(string $mainProjectYaml): string
+{
+    $deployFileTransfer = new DeployFileTransfer();
+    $deployFileTransfer = $deployFileTransfer->setInputFilePath($mainProjectYaml);
+    $deployFileTransfer = $deployFileTransfer->setOutputFilePath($mainProjectYaml);
+
+    $deployFileFactory = new DeployFileGeneratorFactory();
+    $deployFileTransfer = $deployFileFactory->createDeployFileBuildProcessor()->process($deployFileTransfer);
+
+    if ($deployFileTransfer->getValidationMessageBagTransfer()->getValidationResult() == []) {
+        return $deployFileTransfer->getOutputFilePath();
+    }
+
+    $deployFileFactory->createDeployFileOutput()->renderValidationResult($deployFileTransfer);
+
+    return '';
+}
+
+/**
+ * @param array $projectData
+ *
+ * @return array
+ */
+function buildDefaultCredentials(array $projectData): array
+{
+    $projectData = buildDefaultCredentialsForDatabase($projectData);
+    $projectData = buildDefaultCredentialsForBroker($projectData);
+
+    return $projectData;
+}
+
+/**
+ * @param array $projectData
+ *
+ * @return array
+ */
+function buildDefaultCredentialsForDatabase(array $projectData): array
+{
+    $projectData = buildDefaultRootCredentialsForDatabase($projectData);
+    $projectData = buildDefaultRegionCredentialsForDatabase($projectData);
+
+    return $projectData;
+}
+
+/**
+ * @param array $projectData
+ *
+ * @return array
+ */
+function buildDefaultRootCredentialsForDatabase(array $projectData): array
+{
+    if (!isset($projectData['services']['database'])) {
+        return $projectData;
+    }
+
+    $defaultDbServiceRootConfig = [
+        'username' => 'root',
+        'password' => 'secret',
+    ];
+
+    $dbServiceRootConfig = $projectData['services']['database']['root'] ?? [];
+
+    $projectData['services']['database']['root'] = array_merge(
+        $defaultDbServiceRootConfig,
+        $dbServiceRootConfig
+    );
+
+    return $projectData;
+}
+
+/**
+ * @param array $projectData
+ *
+ * @return array
+ */
+function buildDefaultRegionCredentialsForDatabase(array $projectData): array
+{
+    if (!isset($projectData['regions'])) {
+        return $projectData;
+    }
+
+    $defaultDbRegionCredentials = [
+        'username' => 'spryker',
+        'password' => 'secret',
+    ];
+
+    foreach ($projectData['regions'] as $regionName => $regionConfig) {
+        if (!isset($regionConfig['services']['database'])) {
+            continue;
+        }
+
+        $regionDbConfig = $regionConfig['services']['database'];
+        $regionDbConfig = array_merge($defaultDbRegionCredentials, $regionDbConfig);
+
+        $projectData['regions'][$regionName]['services']['database'] = $regionDbConfig;
+    }
+
+    return $projectData;
+}
+
+
+/**
+ * @param array $projectData
+ *
+ * @return array
+ */
+function buildDefaultCredentialsForBroker(array $projectData): array
+{
+    if (!isset($projectData['services']['broker'])) {
+        return $projectData;
+    }
+
+    $defaultBrokerServiceCredentials = [
+        'username' => 'spryker',
+        'password' => 'secret',
+    ];
+
+    $brokerServiceCredentials = $projectData['services']['broker']['api'] ?? [];
+
+    $projectData['services']['broker']['api'] = array_merge(
+        $defaultBrokerServiceCredentials,
+        $brokerServiceCredentials
+    );
+
+    return $projectData;
 }

@@ -1,0 +1,23 @@
+{% extends "nginx/http/application.server.conf.twig" %}
+{% block server %}
+    {{ parent() }}
+
+    {% include "nginx/vhost.d/glue-storefront.conf.twig" with _context %}
+    {% include "nginx/vhost.d/timeouts.conf.twig" with { timeout: timeout | default('1m') } %}
+{% endblock server %}
+{% block location %}
+    {{ parent() }}
+    fastcgi_param SPRYKER_ZED_HOST "{{ zedHost | split(':') | first }}";
+    fastcgi_param SPRYKER_ZED_PORT "{{ (zedHost | split(':'))[1] | default(project['_defaultPort']) }}";
+
+    fastcgi_param SPRYKER_GLUE_STOREFRONT_HOST "{{ host }}";
+    fastcgi_param SPRYKER_GLUE_STOREFRONT_PORT "{{ externalPort }}";
+    fastcgi_param SPRYKER_GLUE_APPLICATION_CORS_ALLOW_ORIGIN "{{ endpointData['cors-allow-origin'] | default('') | nginx_var }}";
+
+{% if storeServices['mail']['sender']['email'] is not empty %}
+    fastcgi_param SPRYKER_MAIL_SENDER_EMAIL "{{ storeServices['mail']['sender']['email'] }}";
+{% endif %}
+{% if storeServices['mail']['sender']['name'] is not empty %}
+    fastcgi_param SPRYKER_MAIL_SENDER_NAME "{{ storeServices['mail']['sender']['name'] }}";
+{% endif %}
+{% endblock location %}

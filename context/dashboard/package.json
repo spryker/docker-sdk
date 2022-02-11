@@ -11,6 +11,7 @@
     "eol": "^0.9.1",
     "express": "^4.17.1",
     "http-proxy-middleware": "^1.0.5",
+    "path-parse": ">=1.0.7",
     "pug": "^3.0.1",
     "serve-favicon": "^2.5.0",
     "through2": "^4.0.2"

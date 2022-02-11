@@ -13,7 +13,7 @@ COPY --chown=root:root nginx/entrypoint.sh /
 RUN chmod +x /entrypoint.sh
 
 ENV SPRYKER_DNS_RESOLVER_FLAGS="valid=10s ipv6=off"
-ENV SPRYKER_DNS_RESOLVER_IP="127.0.0.11"
+ENV SPRYKER_DNS_RESOLVER_IP=""
 
 # Build info
 ARG SPRYKER_BUILD_HASH='current'
@@ -26,4 +26,5 @@ RUN mkdir -p /usr/share/nginx/ \
   && rm -f /tmp/build.json
 
 ENTRYPOINT [ "/entrypoint.sh" ]
+
 CMD ["nginx", "-g", "daemon off;"]
