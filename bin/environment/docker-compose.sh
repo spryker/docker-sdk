@@ -26,18 +26,18 @@ function Environment::checkDockerComposeVersion() {
 
 function Environment::getDockerComposeVersion() {
     local composeVersion="$(
-           command -v docker >/dev/null
-           test $? -eq 0 && docker compose version --short | tr -d 'v' || echo 0
-        )"
+       command -v docker >/dev/null
+       test $? -eq 0 && docker compose version --short | tr -d 'v' || echo 0
+    )"
 
-	if [ "${composeVersion}" == 0 ]; then
+	if [ -z "${composeVersion}" ]; then
          composeVersion="$(
              command -v docker-compose >/dev/null
              test $? -eq 0 && docker-compose version --short | tr -d 'v' || echo 0
          )"
 	fi
 
-     echo ${composeVersion};
+	echo ${composeVersion};
 }
 
 function Environment::getDockerComposeSubstitute() {
