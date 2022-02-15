@@ -28,4 +28,14 @@ interface DeployFileGeneratorConstants
      * @var string
      */
     public const YAML_SERVICE_NULL_VALUE = 'NULL';
+
+    /**
+     * @var string
+     */
+    public const YAML_TEMPLATE_KEY = 'template';
+
+    /**
+     * @var string
+     */
+    public const YAML_IMPORTS_TEMPLATE_KEY_SEPARATOR = '?';
 }
