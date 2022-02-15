@@ -2,7 +2,6 @@
 
 export COMPOSE_HTTP_TIMEOUT=400
 export COMPOSE_CONVERT_WINDOWS_PATHS=1
-export COMPOSE_VERSION=${COMPOSE_VERSION:-2}
 
 require docker-compose tr
 
@@ -13,7 +12,7 @@ function Environment::checkDockerComposeVersion() {
     local installedVersion=$(Environment::getDockerComposeVersion)
 
     if [ "${installedVersion}" == 0 ]; then
-        Console::error "Docker Compose V${COMPOSE_VERSION} is not found. Please, make sure Docker Compose V${COMPOSE_VERSION} is installed."
+        Console::error "Docker Compose V2 is not found. Please, make sure Docker Compose V2 is installed."
         exit 1
     fi
 
@@ -26,17 +25,19 @@ function Environment::checkDockerComposeVersion() {
 }
 
 function Environment::getDockerComposeVersion() {
-    if [ ${COMPOSE_VERSION} == 2 ]; then
-        echo "$(
+    local composeVersion="$(
            command -v docker >/dev/null
            test $? -eq 0 && docker compose version --short | tr -d 'v' || echo 0
         )"
-    else
-        echo "$(
+
+	if [ "${composeVersion}" == 0 ]; then
+         composeVersion="$(
              command -v docker-compose >/dev/null
              test $? -eq 0 && docker-compose version --short | tr -d 'v' || echo 0
          )"
-    fi
+	fi
+
+     echo ${composeVersion};
 }
 
 function Environment::getDockerComposeSubstitute() {

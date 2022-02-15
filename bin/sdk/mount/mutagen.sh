@@ -91,29 +91,18 @@ function Mount::Mutagen::afterDown() {
 }
 
 function Mount::Mutagen::install() {
-	local dockerComposeInstalledVersion=$(Environment::getDockerComposeVersion)
+	local isMutagenInstalled=$(Mount::Mutagen::isMutagenInstalled)
 
-	local installLink=$(Mount::Mutagen::getInstallLink "${dockerComposeInstalledVersion}")
-    local installedVersion=$(Mount::Mutagen::getInstalledVersion "${dockerComposeInstalledVersion}")
-    local requiredMinimalVersion=$(Mount::Mutagen::getMutagenMinimalVersion "${dockerComposeInstalledVersion}")
+	if [ -n "${isMutagenInstalled}" ]; then
+		Console::error "${isMutagenInstalled}"
 
-    if [ -z "${installedVersion}" ]; then
-        Console::error "Mutagen.io binary is not available. Please, install Mutagen.io. Minimum required version is: ${requiredMinimalVersion}."
+		return "${FALSE}"
+	fi
 
-        if [ "${_PLATFORM}" == 'macos' ]; then
-            echo -n "$(Mount::Mutagen::getInstallMessage "${dockerComposeInstalledVersion}" "${installLink}")"
-        fi
+	local validateMutagenVersion=$(Mount::Mutagen::validateMutagenVersion)
+	if [ -n "${validateMutagenVersion}" ]; then
+        Console::error "${validateMutagenVersion}"
 
-        return "${FALSE}"
-    fi
-
-    if [ "$(Version::parse "${installedVersion}")" -lt "$(Version::parse "${requiredMinimalVersion}")" ]; then
-        Console::error "Mutagen.io version ${installedVersion} is not supported. Please, update Mutagen.io to at least ${requiredMinimalVersion}."
-
-        if [ "${_PLATFORM}" == 'macos' ]; then
-            echo -n "brew list | grep mutagen | xargs ${XARGS_NO_RUN_IF_EMPTY} brew remove && $(Mount::Mutagen::getInstallMessage ${dockerComposeInstalledVersion} ${installLink})"
-
-        fi
         return "${FALSE}"
     fi
 
@@ -162,6 +151,7 @@ function Mount::Mutagen::getMutagenMinimalVersion() {
 	local dockerComposeInstalledVersion=${1}
     local requiredMinimalVersionForDockerComposeV1='0.12.0'
     local requiredMinimalVersionForDockerComposeV2='0.13.0'
+
 	local requiredMinimalVersion
 
     if [ "${dockerComposeInstalledVersion:0:1}" -lt 2 ]; then
@@ -187,6 +177,76 @@ function Mount::Mutagen::getInstallMessage() {
     echo ${message}
 }
 
+function Mount::Mutagen::isMutagenInstalled() {
+	local dockerComposeInstalledVersion=$(Environment::getDockerComposeVersion)
+
+	local installLink=$(Mount::Mutagen::getInstallLink "${dockerComposeInstalledVersion}")
+    local installedVersion=$(Mount::Mutagen::getInstalledVersion)
+    local requiredMinimalVersion=$(Mount::Mutagen::getMutagenMinimalVersion "${dockerComposeInstalledVersion}")
+
+    if [ -z "${installedVersion}" ]; then
+        errorMessage+="\nMutagen.io binary is not available. Please, install Mutagen.io. Minimum required version is: ${requiredMinimalVersion}.\n"
+
+        if [ "${_PLATFORM}" == 'macos' ]; then
+            errorMessage+="$(Mount::Mutagen::getInstallMessage "${dockerComposeInstalledVersion}" "${installLink}")"
+        fi
+
+        echo "${errorMessage}"
+    fi
+}
+
+function Mount::Mutagen::validateMutagenVersion() {
+	local dockerComposeInstalledVersion=$(Environment::getDockerComposeVersion)
+
+	local installLink=$(Mount::Mutagen::getInstallLink "${dockerComposeInstalledVersion}")
+    local installedVersion=$(Mount::Mutagen::getInstalledVersion)
+    local requiredMinimalVersion=$(Mount::Mutagen::getMutagenMinimalVersion "${dockerComposeInstalledVersion}")
+
+    local errorMessage="\n"
+
+    if [ "$(Version::parse "${installedVersion}")" -lt "$(Version::parse "${requiredMinimalVersion}")" ]; then
+        errorMessage+="Mutagen.io version ${installedVersion} is not supported. Please, update Mutagen.io to at least ${requiredMinimalVersion}."
+
+        if [ "${_PLATFORM}" == 'macos' ]; then
+            errorMessage+="\nbrew list | grep mutagen | xargs ${XARGS_NO_RUN_IF_EMPTY} brew remove && $(Mount::Mutagen::getInstallMessage ${dockerComposeInstalledVersion} ${installLink})"
+        fi
+
+        echo ${errorMessage}
+
+		Console::error "${errorMessage}"
+
+        return "${FALSE}"
+    else
+        local parsedInstallVersion=$(Version::parse "${installedVersion}")
+        if [ -n "$( echo ${installedVersion} | sed -n '/beta/p')" ] && [ "${parsedInstallVersion:0:2}" -eq 13 ]; then
+			errorMessage+="Mutagen.io version ${installedVersion} is not supported. Please, update Mutagen.io to at least ${requiredMinimalVersion}."
+
+            if [ "${_PLATFORM}" == 'macos' ]; then
+                errorMessage+="\nbrew list | grep mutagen | xargs ${XARGS_NO_RUN_IF_EMPTY} brew remove && $(Mount::Mutagen::getInstallMessage ${dockerComposeInstalledVersion} ${installLink})"
+            fi
+
+            echo "${errorMessage}"
+        fi
+    fi
+}
+
+function Mount::Mutagen::checkMutagenVersion() {
+	local isMutagenInstalled=$(Mount::Mutagen::isMutagenInstalled)
+
+	if [ -n "${isMutagenInstalled}" ]; then
+		Console::error "${isMutagenInstalled}"
+
+		exit 1
+	fi
+
+	local validateMutagenVersion=$(Mount::Mutagen::validateMutagenVersion)
+	if [ -n "${validateMutagenVersion}" ]; then
+        Console::error "${validateMutagenVersion}"
+
+        exit 1
+    fi
+}
+
 DOCKER_COMPOSE_SUBSTITUTE="$(Mount::Mutagen::getDockerComposeSubstitute)"
 
 Registry::Flow::addBeforeUp 'Mount::Mutagen::beforeUp'
@@ -194,3 +254,4 @@ Registry::Flow::addBeforeRun 'Mount::Mutagen::beforeRun'
 Registry::Flow::addAfterCliReady 'Mount::Mutagen::afterCliReady'
 Registry::Flow::addAfterDown 'Mount::Mutagen::afterDown'
 Registry::addInstaller 'Mount::Mutagen::install'
+Registry::addChecker 'Mount::Mutagen::checkMutagenVersion'
