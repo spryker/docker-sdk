@@ -216,7 +216,8 @@ docker/sdk up
 ```
 
 **when**
-Revert on specific version(e.g. 0.13.0-beta4)
+Revert on specific Mutagen version.
+E.G you are using Docker Compose V1 and you don't have the possibility to update to the docker compose v2 (mandatory requirement).
 
 **then**
 
