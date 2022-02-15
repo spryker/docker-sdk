@@ -250,17 +250,6 @@ mutagen daemon stop
 docker/sdk prune
 ```
 
-**when**
-To enable Docker-compose v1
-
-**then**
-
-* Run the commands:
-```
-export COMPOSE_VERSION=1 
-docker/sdk up
-```
-
 
 ## Troubleshooting debugging
 
