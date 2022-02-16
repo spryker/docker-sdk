@@ -44,7 +44,7 @@ Make sure to adjust the configuration for each separate store. See [config_defau
 
 ## Set up a Deploy file
 
-Set up a [Deploy file](https://documentation.spryker.com/docs/deploy-file-reference-10) per your infruscturcure requirements using the examples in the table:
+Set up a [Deploy file](07-deploy-file/02-deploy-file-reference.v1.md) per your infruscturcure requirements using the examples in the table:
 
 | Development mode | Demo mode |
 | --- | --- |
@@ -95,7 +95,7 @@ Ensure that, in the `hosts` file in the local environment, all the domains from 
 
 ## Endpoints
 
-To ensure that the installation is successful, make sure you can access the configured endpoints from the Deploy file. See [Deploy file reference - 1.0](https://documentation.spryker.com/docs/deploy-file-reference-10) to learn about the Deploy file.
+To ensure that the installation is successful, make sure you can access the configured endpoints from the Deploy file. See [Deploy file reference - 1.0](07-deploy-file/02-deploy-file-reference.v1.md) to learn about the Deploy file.
 
 :::(Info) (RabbitMQ UI credentials)
 To access RabbitMQ UI, use `spryker` as a username and `secret` as a password. You can adjust the credentials in `deploy.yml`.
