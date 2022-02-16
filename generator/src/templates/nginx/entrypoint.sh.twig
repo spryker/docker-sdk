@@ -1,5 +1,5 @@
 #!/bin/sh
-{% set envVariables = ["\$ALLOWED_IP"] %}
+{% set envVariables = ["\$ALLOWED_IP", "\$SPRYKER_BUILD_HASH"] %}
 {% for groupData in groups %}
 {% for applicationName, applicationData in groupData['applications'] %}
 {% if applicationData['application'] != 'static' %}
@@ -16,5 +16,9 @@ if [ -z "${SPRYKER_DNS_RESOLVER_IP}" ]; then
 fi
 
 envsubst '$SPRYKER_DNS_RESOLVER_IP ${SPRYKER_DNS_RESOLVER_FLAGS} {{ envVariables | join(' ') }}' < /etc/nginx/template/resolver.conf.tmpl > /etc/nginx/conf.d/00-resolver.conf
+
+if [ -n "${SPRYKER_XDEBUG_MODE_ENABLE}" ]; then
+envsubst '{{ envVariables | join(' ') }}' < /etc/nginx/template/debug.default.conf > /etc/nginx/conf.d/debug.default.conf
+fi
 
 exec "$@"

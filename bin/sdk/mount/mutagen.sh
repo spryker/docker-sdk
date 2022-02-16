@@ -25,6 +25,8 @@ function Mount::Mutagen::beforeUp() {
     # The volume will not be deleted if any app container is running.
     docker volume rm "${SPRYKER_SYNC_VOLUME}" >/dev/null 2>&1 || true
 
+    terminateMutagenSessionsWithObsoleteDockerId
+
     # Clean content of the sync volume if the sync session is terminated or halted.
     sessionStatus=$(mutagen sync list "${SPRYKER_SYNC_SESSION_NAME}" 2>/dev/null | grep 'Status:' | awk '{print $2}' || echo '')
     if [ -z "${sessionStatus}" ] || [ "${sessionStatus}" == 'Halted' ]; then
@@ -33,6 +35,38 @@ function Mount::Mutagen::beforeUp() {
         docker run -i --rm -v "${SPRYKER_SYNC_VOLUME}:/data" busybox find /data/ ! -path /data/ -delete >/dev/null 2>&1 || true
         Console::end "[OK]"
     fi
+}
+
+function terminateMutagenSessionsWithObsoleteDockerId() {
+    dockerId=$(docker info --format '{{.ID}}' 2>/dev/null | awk '{ gsub(":","_",$1); print $1 }' || echo '')
+
+    if [ -z "$dockerId" ]; then
+        Console::error "${WARN}Docker ID is empty, please check the script and try again."
+        return
+    fi
+
+    Console::log "Checking mutagen sessions for docker ID: ${dockerId}"
+
+    sessionIds=$(mutagen sync list "${SPRYKER_SYNC_SESSION_NAME}" 2>/dev/null | grep 'Identifier:' | awk '{print $2}' || echo '')
+
+    for sessionId in ${sessionIds}; do
+        if [ -z "$sessionId" ]; then
+            Console::warn "Session ID is empty, please check the script and try again."
+            continue
+        fi
+
+        sessionDockerId=$(mutagen sync list "${sessionId}" 2>/dev/null | grep 'io.mutagen.compose.daemon.identifier:' | awk '{print $2}' || echo '')
+
+        if [ -z "$sessionDockerId" ]; then
+           Console::warn "Docker ID for session ${sessionId} is empty, please check the script and try again."
+            continue
+        fi
+
+        if [ "$sessionDockerId" != "$dockerId" ]; then
+            mutagen sync terminate "${sessionId}"
+            Console::log "Mutagen session ${sessionId} has been terminated."
+        fi
+    done
 }
 
 # This is necessary due to https://github.com/mutagen-io/mutagen/issues/224

@@ -1,0 +1,23 @@
+  {{ applicationName | lower }}:
+    image: ${SPRYKER_DOCKER_PREFIX}_run_app:${SPRYKER_DOCKER_TAG}-{{ applicationName | lower }}
+    depends_on:
+      - database
+      - broker
+      - key_value_store
+      - session
+      - search
+    networks:
+      - private
+    labels:
+      'spryker.app.name': {{ applicationName }}
+      'spryker.app.type': glue-backend
+      'spryker.project': ${SPRYKER_DOCKER_PREFIX}:${SPRYKER_DOCKER_TAG}
+    env_file:
+      - ${DEPLOYMENT_PATH}/env/{{ applicationName }}.env
+    environment:
+      SPRYKER_TESTING_ENABLED: ${SPRYKER_TESTING_ENABLE}
+      SPRYKER_XDEBUG_HOST_IP: ${SPRYKER_XDEBUG_HOST_IP}
+      TIDEWAYS_APIKEY: ${TIDEWAYS_APIKEY}
+      TIDEWAYS_CLI_ENABLED: ${TIDEWAYS_CLI_ENABLED}
+      TIDEWAYS_ENVIRONMENT_NAME: ${TIDEWAYS_ENVIRONMENT_NAME}
+    <<: *app-volumes
