@@ -1,4 +1,5 @@
 server_names_hash_bucket_size 128;
+server_tokens off;
 
 {% if assets['compression'] is not empty %}
 {% for compressionEngine, compressionData in assets['compression'] %}
@@ -21,6 +22,7 @@ server {
 {% for groupData in groups %}
 {% for applicationName, applicationData in groupData['applications'] %}
 {% for endpoint, endpointData in applicationData['endpoints'] %}
+{% set zedHost = _endpointMap[endpointData['store']]['backend-gateway'] | default('') %}
 {% include "nginx/http/#{applicationData['application']}.server.conf.twig" with {
     endpoint: endpoint,
     endpointData: endpointData,
@@ -28,7 +30,7 @@ server {
     auth: endpointData['auth'] | default([]),
     storeServices: regions[groupData['region']]['stores'][endpointData['store']]['services'] | default([]),
     upstream: "${SPRYKER_NGINX_CGI_" ~ (applicationName | upper) ~ "}",
-    zedHost: _endpointMap[endpointData['store']]['zed'] | default(''),
+    zedHost: zedHost,
     timeout: '1m',
     project: _context
 } %}

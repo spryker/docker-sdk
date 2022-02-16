@@ -1,34 +1,35 @@
-# Spryker Commerce OS - Docker SDK
+# Spryker Commerce OS — Docker SDK
 [![Build Status](https://travis-ci.com/spryker/docker-sdk.svg?branch=master)](https://travis-ci.com/spryker/docker-sdk)
 
 ## Description
 
-Spryker Docker SDK helps to setup docker environment for your Spryker project.
+Spryker Docker SDK helps to set up a Docker environment for your Spryker project.
 
-This repository does not contain the specific Dockerfile or docker-compose files.
-It contains a tool which prepares those files automatically in order to match the infrastructure specific to your Spryker project.
+This repository does not contain a specific Dockerfile or Docker Compose files. It contains a tool that prepares those files to match the infrastructure of your Spryker project.
 
-Spryker Docker SDK requires the [Deploy file](https://documentation.spryker.com/docs/deploy-file-reference-10).
-The tool reads the specified Deploy file and builds a production-like Docker infrastructure for Spryker accordingly.
 
-The purposes of the tool:
+Spryker Docker SDK reads a [Deploy file](docs/99-deploy-file-reference.v1.md) and builds a production-like Docker infrastructure for Spryker accordingly.
+
+The tool is used for:
 
 1. Building production-like Docker images.
 1. Serving as a part of development environment based on Docker.
 1. Simplifying the process of setting up a local demo of Spryker project.
 
-## Installation
-> Note: All the commands below should be run from the root directory of Spryker project.
+## Installing Spryker Docker SDK
+> Note: Run all the commands below from the root directory of your Spryker project.
+
+To install the Docker SDK:
 
 1. Fetch Docker SDK tools:
 ```bash
 git clone https://github.com/spryker/docker-sdk.git ./docker
 ```
 
-> Note: Make sure `docker 18.09.1+` and `docker-compose 1.23+` are installed in the local environment.
+> Verification: Make sure `docker 18.09.1+` and `docker-compose 1.23+` have been installed.
 
 
-2. Initialize docker setup:
+2. Initialize Docker setup:
 
 ```bash
 docker/sdk bootstrap
@@ -39,9 +40,17 @@ docker/sdk bootstrap
 docker/sdk up
 ```
 
+## Troubleshooting installation
+
+For installation troubleshooting, see [Troubleshooting installation](docs/09-troubleshooting.md#troubleshooting-installation)
+
 ## Documentation
 
-To start working with Spryker in Docker, see [Docker SDK](https://documentation.spryker.com/docs/docker-sdk).
+To start working with Spryker in Docker, see [Quick start guide](docs/01-quick-start-guide.md).
+
+## Contributing to Spryker Docker SDK
+
+For contribution guidelines, see [Code contribution guide](https://documentation.spryker.com/docs/code-contribution-guide#code-contribution-guide)
 
 ## Supported services
 
@@ -55,12 +64,14 @@ To start working with Spryker in Docker, see [Docker SDK](https://documentation.
 |   |   | mariadb-10.2  |
 |   |   | mariadb-10.3  |
 |   |   | mariadb-10.4  |
+|   |   | mariadb-10.5  |
 | broker  | rabbitmq  | 3.7  |
 | session  | redis  | 5.0  |
 | key_value_store  | redis  | 5.0  |
-| search  | elastic  | 5.6*  |
+| search  | elastic  | 5.6* |
 |   |   | 6.8  |
 |   |   | 7.6  |
+|   |   | 7.10 |
 | scheduler  | jenkins  | 2.176  |
 | webdriver  | phantomjs  | latest* |
 |   | chromedriver  | latest |
@@ -68,4 +79,6 @@ To start working with Spryker in Docker, see [Docker SDK](https://documentation.
 | swagger  | swagger-ui  | v3.24  |
 | kibana  | kibana  | 5.6* |
 |   |   | 6.8 |
+|   |   | 7.6 |
+|   |   | 7.10 |
 | blackfire  | blackfire  | latest |
