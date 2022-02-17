@@ -6,7 +6,7 @@
 server {
     listen {{ portToListen | default(port) }} {{ ssl ? 'ssl http2' }};
     listen [::]:{{ portToListen | default(port) }} {{ ssl ? 'ssl http2' }};
-    server_name {{ host }};
+    server_name {{ host }} www.{{ host }};
     resolver 127.0.0.11 valid=10s;
 {% if ssl %}
     include /etc/nginx/vhost.d/ssl.default.conf;

@@ -4,7 +4,7 @@
 server {
 {% block server %}
 {% block host %}
-    server_name {{ host }};
+    server_name {{ host }} www.{{ host }};
     listen {{ portToListen | default(port) }};
 {% endblock host %}
 {% block auth %}
