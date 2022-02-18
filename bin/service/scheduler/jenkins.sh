@@ -7,7 +7,7 @@ function Service::Scheduler::isInstalled() {
     Console::start -n "Checking jobs are installed..."
 
     # shellcheck disable=SC2016
-    local jobsCount=$(Compose::exec 'curl -sL ${SPRYKER_SCHEDULER_HOST}:${SPRYKER_SCHEDULER_PORT}/scriptText -d "script=println Jenkins.instance.projects.collect{ it.name }.size" | tail -n 1' | tr -d " \n\r")
+    local jobsCount=$(Jenkins::callJenkins 'scriptText -d "script=println Jenkins.instance.projects.collect{ it.name }.size"| tail -n 1')
     [ "${jobsCount}" -gt 0 ] && Console::end "[INSTALLED]" && return "${TRUE}" || return "${FALSE}"
 }
 
@@ -26,7 +26,7 @@ Service::Scheduler::pause() {
     local waitFor=60
     while :; do
         # shellcheck disable=SC2016
-        local runningJobsCount=$(Compose::exec 'curl -sL ${SPRYKER_SCHEDULER_HOST}:${SPRYKER_SCHEDULER_PORT}/computer/api/xml?xpath=*/busyExecutors/text\(\) | tail -n 1' | tr -d " \n\r")
+        local runningJobsCount=$(Jenkins::callJenkins 'computer/api/xml?xpath=*/busyExecutors/text\(\) | tail -n 1')
         [ "${runningJobsCount}" -eq 0 ] && break
         [ "${counter}" -ge "${waitFor}" ] && break
         counter=$((counter + interval))
@@ -84,4 +84,28 @@ function Service::Scheduler::_run() {
             Compose::exec "vendor/bin/install -r ${SPRYKER_PIPELINE} -s scheduler-${1}"
         done
     done
+}
+
+function Jenkins::callJenkins() {
+    local uri=${1}
+
+    local cookieJar="/data/jenkins_cookie_jar"
+    local statusCode=$(Compose::exec 'curl -o /dev/null -s -w "%{http_code}\n" ${SPRYKER_SCHEDULER_HOST}:${SPRYKER_SCHEDULER_PORT}/crumbIssuer/api/json | tail -n 1' | tr -d " \n\r")
+    local curlOptions='-sL'
+
+    local crumbToken=''
+    local crumbHeader=''
+    local composeCommand=''
+
+    if [ "${statusCode}" -ne '200' ]; then
+        composeCommand=$(printf 'curl %s ${SPRYKER_SCHEDULER_HOST}:${SPRYKER_SCHEDULER_PORT}/%s' "${curlOptions}" "${uri}")
+    else
+        Compose::exec 'rm -f '${cookieJar}' && touch '${cookieJar}
+        crumbToken=$(Compose::exec 'curl -sL --cookie-jar '"${cookieJar}"' ${SPRYKER_SCHEDULER_HOST}:${SPRYKER_SCHEDULER_PORT}/crumbIssuer/api/json | jq -r ".crumbRequestField + \":\" + .crumb"' | tr -d " \n\r")
+        crumbHeader="-H \"${crumbToken}\" --cookie \"${cookieJar}\""
+        curlOptions+=' '${crumbHeader}
+        composeCommand=$(printf 'curl %s ${SPRYKER_SCHEDULER_HOST}:${SPRYKER_SCHEDULER_PORT}/%s' "${curlOptions}" "${uri}")
+    fi
+
+    echo $(Compose::exec ${composeCommand} | tr -d " \n\r")
 }
