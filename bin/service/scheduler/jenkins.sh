@@ -107,5 +107,8 @@ function Jenkins::callJenkins() {
         composeCommand=$(printf 'curl %s ${SPRYKER_SCHEDULER_HOST}:${SPRYKER_SCHEDULER_PORT}/%s' "${curlOptions}" "${uri}")
     fi
 
-    echo $(Compose::exec ${composeCommand} | tr -d " \n\r")
+    local result=$(Compose::exec ${composeCommand} | tr -d " \n\r")
+    Compose::exec 'rm -f '${cookieJar}
+
+    echo ${result}
 }
