@@ -5,10 +5,10 @@ FROM ${SPRYKER_PARENT_IMAGE} AS assets-builder
 
 USER spryker
 
-COPY package.json package-lock.json ${srcRoot}/
-COPY frontend ${srcRoot}/frontend
-COPY tsconfig.json ${srcRoot}/
-COPY config/Yves ${srcRoot}/config/Yves
+COPY --chown=spryker:spryker package.json package-lock.json ${srcRoot}/
+COPY --chown=spryker:spryker frontend* ${srcRoot}/frontend
+COPY --chown=spryker:spryker tsconfig*.json ${srcRoot}/
+COPY --chown=spryker:spryker config/Yves ${srcRoot}/config/Yves
 
 ARG SPRYKER_ASSETS_MODE='development'
 ENV SPRYKER_ASSETS_MODE=${SPRYKER_ASSETS_MODE}

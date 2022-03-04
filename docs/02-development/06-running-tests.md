@@ -1,86 +1,54 @@
-This document is a draft. See [Docker SDK](https://documentation.spryker.com/docs/docker-sdk) for official documentation.
+# Running tests
 
-## Description
-Read the description below and, in the *Structure* section, fill out the document by answering the questions directly.
-We may have added some existing content and encourage you to update, remove or restructure it if needed.
-
-
-> Audience:
->
-> - Developers who run tests using docker/sdk.
-> - Devops who set CI up using docker/sdk.
->
-> Outcome:
-> - You know how to run functional, API, E2E tests locally or on CI using docker/sdk.
-
-## Outline
-
-1. How to turn on testing mode: argument, `testing` commands.
-2. How to run tests.
-3. How to choose webdriver.
-4. What codeception configuration should be in place.
-5. Testing mode. What is the difference in comparing with usual mode.
-
-## Structure
-
-:::(Info)(Structure)
-The structure below is just a reference. We encourage you to add subsections, change or swap the provided sections if needed.
-:::
-
+This document describes how to run tests in different ways.
 
 ## What is a testing mode?
 
-Docker SDK allows you to run application in an environment configured for testing.
+The Docker SDK lets you run applications in an environment configured for running tests.
 
-In the testing mode, docker/sdk set of containers configured for testing. For example:
-1. background jobs are disabled;
-2. the webdriver container is present. 
+In the testing mode, you can run tests in isolation, with full control of the system tested and all needed tooling in place. Once you activate the testing mode, the following happens:
+1. The scheduler is enabled. Background jobs are stopped for preserving data consistency and full isolation.
+2. The webdriver is enabled.
 
 
+## Activating the testing mode and running tests
 
-## Running tests in the testing mode
+You can activate the testing mode in one of the following ways:
 
-To run tests, you need to run Codeception in a CLI container.
+* Switch a running environment into the testing mode without rebuilding containers.
+* Rebuild containers and run or restart an environment with the testing mode activated.
 
-There are several similar ways to do that. Use the most suitable way for you.
+### Activating the testing mode in a running environment
 
-### Running tests in a dedicated testing container
-
-To run tests in a dedicated testing container:
-
-1. Start a new container in testing mode:
+1. Activate the testing mode in a running environment and enter the CLI container:
 ```bash
 docker/sdk testing
 ```
 
-2. Run Codeception:
+2. In the CLI container, run Codeception:
 ```bash
 codecept run
 ```
+{% info_block infoBox "" %}
 
-### Running tests in a dedicated testing container with a single command
+Same as other CLI commands, you can run the preceding commands as a single command: `docker/sdk testing codecept run`.
 
-To run tests in a dedicated testing container with a single command, run `docker/sdk testing codecept run`.
+{% endinfo_block %}
 
-The command runs tests as follows:
 
-1. Start a new container in testing mode.
-2. Run Codeception.
-3. Stop the container.
+### Running or restarting an environment in the testing mode
 
-### Running tests with all containers in the testing mode
-
-To run tests with all containers in testing mode:
-
-1. Restart all containers in testing mode:
+1. Restart all containers in the testing mode:
 
 ```bash
 docker/sdk up -t
 ```
+
 2. Switch to the CLI container:
 ```bash
-docker/sdk testing
+docker/sdk cli -t
 ```
+
 3. Run Codeception:
 ```bash
 codecept run
@@ -112,7 +80,7 @@ To exclude one or more groups of tests, run `codecept run -x {Tax} -x {Customer}
 
 To choose a webdriver, update `deploy.*.yml`.
 
-Chromedriver is the default webdriver shipped with Docker SDK. 
+Chromedriver is the default webdriver shipped with Docker SDK.
 
 The Chromedriver configuration looks as follows in the deploy file:
 ```yaml
@@ -121,7 +89,7 @@ services:
         engine: chromedriver
 ```        
 
-See [webdriver:](99-deploy.file.reference.v1.md#webdriver-) to learn more about webdriver configuration in the deploy file. 
+See [webdriver:](99-deploy.file.reference.v1.md#webdriver-) to learn more about webdriver configuration in the deploy file.
 
 ## Configure Codeception
 
@@ -166,3 +134,12 @@ params:
     - env
 ```
 
+## Stopping the testing mode
+
+Once you've finished running tests, you can switch back to the development mode:
+
+```bash
+docker/sdk start
+```
+
+This stops or removes the webdriver, runs the scheduler, and deactivates the testing mode.

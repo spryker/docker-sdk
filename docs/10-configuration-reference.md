@@ -1,10 +1,4 @@
-> Audience:
->
-> - Everyone who wants to know how to configure the Docker SDK.
->
-> Outcome:
-> - You have a handbook with configuration instructions for common cases.
-
+# Configuration reference
 
 This document is a quick reference for the most common configuration options of the Docker SDK.
 
@@ -63,8 +57,8 @@ To increase maximum upload size, update `deploy.*.yml` as follows:
 ```yaml
 ...
     applications:
-      zed:
-        application: zed
+      backoffice:
+        application: backoffice
         http:
           max-request-body-size: {request_body_size_value}
         ...

@@ -1,0 +1,25 @@
+docker:
+    ssl:
+        enabled: false
+        redirect: true
+
+    testing:
+        store: DE
+
+    debug:
+        enabled: true
+        xdebug:
+            enabled: true
+
+    mount:
+        native:
+            platforms:
+                - linux
+
+        docker-sync:
+            platforms:
+                - windows
+
+        mutagen:
+            platforms:
+                - macos

@@ -17,17 +17,19 @@ The tool is used for:
 1. Simplifying the process of setting up a local demo of Spryker project.
 
 ## Installing Spryker Docker SDK
-> Note: All the commands below should be run from the root directory of Spryker project.
+> Note: Run all the commands below from the root directory of your Spryker project.
+
+To install the Docker SDK:
 
 1. Fetch Docker SDK tools:
 ```bash
 git clone https://github.com/spryker/docker-sdk.git ./docker
 ```
 
-> Note: Make sure `docker 18.09.1+` and `docker-compose 1.23+` are installed in the local environment.
+> Verification: Make sure `docker 18.09.1+` and `docker-compose 1.23+` have been installed.
 
 
-2. Initialize docker setup:
+2. Initialize Docker setup:
 
 ```bash
 docker/sdk bootstrap
@@ -66,9 +68,10 @@ For contribution guidelines, see [Code contribution guide](https://documentation
 | broker  | rabbitmq  | 3.7  |
 | session  | redis  | 5.0  |
 | key_value_store  | redis  | 5.0  |
-| search  | elastic  | 5.6*  |
+| search  | elastic  | 5.6* |
 |   |   | 6.8  |
 |   |   | 7.6  |
+|   |   | 7.10 |
 | scheduler  | jenkins  | 2.176  |
 | webdriver  | phantomjs  | latest* |
 |   | chromedriver  | latest |
@@ -77,4 +80,5 @@ For contribution guidelines, see [Code contribution guide](https://documentation
 | kibana  | kibana  | 5.6* |
 |   |   | 6.8 |
 |   |   | 7.6 |
+|   |   | 7.10 |
 | blackfire  | blackfire  | latest |

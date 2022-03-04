@@ -22,8 +22,17 @@ RUN mkdir -p /home/spryker/.ssh && chmod 0700 /home/spryker/.ssh
 RUN bash -c '[ ! -z "${KNOWN_HOSTS}" ] && ssh-keyscan -t rsa ${KNOWN_HOSTS} >> /home/spryker/.ssh/known_hosts || true'
 RUN chown spryker:spryker -R /home/spryker/.ssh
 
+# PHP-FPM environment variables
+ENV PHP_FPM_PM=dynamic
+ENV PHP_FPM_PM_MAX_CHILDREN=4
+ENV PHP_FPM_PM_START_SERVERS=2
+ENV PHP_FPM_PM_MIN_SPARE_SERVERS=1
+ENV PHP_FPM_PM_MAX_SPARE_SERVERS=2
+ENV PHP_FPM_PM_MAX_REQUESTS=500
+
 # PHP configuration
 COPY php/php-fpm.d/worker.conf /usr/local/etc/php-fpm.d/worker.conf
+RUN bash -c "php -r 'exit(PHP_VERSION_ID > 70400 ? 1 : 0);' && sed -i '' -e 's/decorate_workers_output/;decorate_workers_output/g' /usr/local/etc/php-fpm.d/worker.conf || true"
 COPY php/php.ini /usr/local/etc/php/
 COPY php/conf.d/90-opcache.ini /usr/local/etc/php/conf.d
 # removing default opcache.ini

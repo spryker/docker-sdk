@@ -1,3 +1,6 @@
+# Installing in Development mode on Windows
+
+
 This document describes how to install Spryker in [Development Mode](01-choosing-an-installation-mode.md#development-mode) on Windows.
 
 ## Installing Docker prerequisites on Windows
@@ -18,13 +21,13 @@ Follow the steps to install Spryker in Development mode:
     a. Clone the B2C repository:
 
     ```bash
-    git clone https://github.com/spryker-shop/b2c-demo-shop.git -b 202009.0-p1 --single-branch ./
+    git clone https://github.com/spryker-shop/b2c-demo-shop.git -b 202009.0-p1 --single-branch ./b2c-demo-shop
     ```
 
     b. Clone the B2B repository:
 
     ```bash
-    git clone https://github.com/spryker-shop/b2b-demo-shop.git -b 202009.0-p1 --single-branch ./
+    git clone https://github.com/spryker-shop/b2b-demo-shop.git -b 202009.0-p1 --single-branch ./b2b-demo-shop
     ```
 
 5. Depending on the repository you've cloned, navigate into the cloned folder:
@@ -60,10 +63,13 @@ $ docker-compose --version
 ```
 :::
 
-8. Change line 7 of `{shop_name}/docker/context/php/debug/etc/php/debug.conf.d/69-xdebug.ini` to the following:
+8. In `{shop_name}/docker/context/php/debug/etc/php/debug.conf.d/69-xdebug.ini`, set `xdebug.remote_host` and `xdebug.client_host` to `host.docker.internal`:
 
 ```text
+...
 xdebug.remote_host=host.docker.internal
+...
+xdebug.client_host=host.docker.internal
 ```
 
 9. Add your user to the `docker` group:
@@ -80,12 +86,7 @@ docker/sdk bootstrap deploy.dev.yml
 Once you finish the setup, you don't need to run `bootstrap` to start the instance. You only need to run it after you update the Docker SDK or the deploy file.
 :::
 
-11. Once the job finishes, build and start the instance:
-```bash
-docker/sdk up
-```
-
-12. Update the `hosts` file:
+11. Update the `hosts` file:
     1. Open the Start menu.
     2. In the search field, enter `Notepad`.
     3. Right-click *Notepad* and select **Run as administrator**.
@@ -94,32 +95,29 @@ docker/sdk up
     6. Put the following path into the address line: `C:\Windows\System32\drivers\etc`.
     7. In the **File name** line, enter `hosts` and select **Open**.
     The hosts file opens in the drop-down.
-    8. Add the following line into the file:
-    ```text
-    127.0.0.1   zed.de.spryker.local glue.de.spryker.local yves.de.spryker.local scheduler.spryker.local mail.spryker.local queue.spryker.local
-    ```
-    @(Info)()(If needed, add corresponding entries for other stores. For example, if you are going to have a US store, add the following entries: `zed.us.spryker.local glue.us.spryker.local yves.us.spryker.local`)
+    8. Follow the installation instructions in the white box from the `docker/sdk bootstrap` command execution results to prepare the environment.
+    :::(Info) ()
+    You can run `docker/sdk install` after `bootstrap` to get the list of the instructions.
+    :::
     9. Select **File** > **Save**.
     10. Close the file.
 
+12. Once the job finishes, build and start the instance:
 
-@(Warning)()(Depending on the hardware performance, the first project launch can take up to 20 minutes.)
+```bash
+docker/sdk up
+```
+
+:::(Warning) ()
+Depending on the hardware performance, the first project launch can take up to 20 minutes.
+:::
 
 ## Endpoints
 
-To ensure that the installation is successful, make sure you can access the following endpoints.
-
-| Application | Endpoints |
-| --- | --- |
-| The Storefront |  yves.de.spryker.local, yves.at.spryker.local, yves.us.spryker.local |
-| the Back Office | zed.de.spryker.local, zed.at.spryker.local, zed.us.spryker.local |
-| Glue API | glue.de.spryker.local, glue.at.spryker.local, glue.us.spryker.local |
-| Jenkins (scheduler) | scheduler.spryker.local |
-| RabbitMQ UI (queue manager) | queue.spryker.local |
-| Mailhog UI (email catcher) | mail.spryker.local |
+To ensure that the installation is successful, make sure you can access the configured endpoints from the Deploy file. See [Deploy file reference - 1.0](../../99-deploy.file.reference.v1.md) to learn about the Deploy file.
 
 :::(Info) (RabbitMQ UI credentials)
-To access RabbitMQ UI, use `spryker` as a username and `secret` as a password. You can adjust the credentials in `deploy.yml`. See [Deploy file reference - 1.0](../../99-deploy.file.reference.v1.md) to learn about the Deploy file.
+To access RabbitMQ UI, use `spryker` as a username and `secret` as a password. You can adjust the credentials in `deploy.yml`.
 :::
 
 ## Getting the list of useful commands

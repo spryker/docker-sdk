@@ -1,12 +1,4 @@
-
-> Audience:
->
-> - Everybody who uses the Docker SDK.
->
-> Outcome:
-> - You understand the difference between modes and can choose one.
-
-
+# Choosing an installation mode
 
 In this section, you can find installation guides for Spryker in Docker. Currently, you can install Spryker in the following ways:
 * Install Spryker in Development mode.
@@ -74,7 +66,7 @@ Learn how to convert a project into a Docker based instance in [Integrating the 
 
 ## Running production
 
-Currently, there is no installation guide for deploying Spryker in Docker in a production environment. But you can generate the images suitable for a production environment and the archives with assets for each application - Yves, Zed and Glue.
+Currently, there is no installation guide for deploying Spryker in Docker in a production environment. But you can generate the images suitable for a production environment and the archives with assets for each application - Yves, BackOffice(Zed), Backend-Gateway, GlueStorefront(Glue), GlueBackend and MerchantPortal.
 
 Learn how to generate Docker images and assets for a production environment in [Running production](07-running-production.md).
 

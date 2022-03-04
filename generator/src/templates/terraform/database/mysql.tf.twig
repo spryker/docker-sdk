@@ -1,2 +1,4 @@
       SPRYKER_DB_ENGINE = "mysql"
       SPRYKER_DB_DATABASE = {{ regionData['database'] | default(serviceData['database']) | tf_var }}
+      SPRYKER_DB_CHARACTER_SET = {{ regionData['character-set'] | default('utf8') | tf_var }}
+      SPRYKER_DB_COLLATE = {{ regionData['collate'] | default('utf8_general_ci') | tf_var }}
