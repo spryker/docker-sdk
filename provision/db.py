@@ -128,7 +128,8 @@ def read_database_configuration():
      is_valid_data = True
      for region_name, region_data in deploy_file_data['regions'].items():
         if 'database' in region_data['services']:
-            return None
+            ssm_put_parameter('SPRYKER_PAAS_SERVICES', json.dumps(data), 'String')
+            exit(0)
 
         if 'databases' not in region_data['services'] or bool(region_data['services']['databases']) == False:
            print('Please check `region.services.databases` section for {} region'.format(region_name))
@@ -159,22 +160,21 @@ def read_database_configuration():
                         'collate': 'utf8_general_ci' if region_databases_data[db_name] == None else region_databases_data[db_name].get('collate')
                     }
 
-     db_paas = ssm_get_parameter('SPRYKER_DB_PAAS')
-
      if is_valid_data == False or bool(data['databases']) == False:
-        data['databases'] = {}
+        print('Deploy file has invalid data.')
+        exit(1)
 
+     paas_services = ssm_get_parameter('SPRYKER_PAAS_SERVICES')
+
+     if paas_services is None:
         return data
 
-     if db_paas is None:
-        return data
+     paas_services_data = json.loads(paas_services['Parameter']['Value'])
 
-     db_paas_data = json.loads(db_paas['Parameter']['Value'])
-
-     return merge_two_dicts(db_paas_data, data)
+     return merge_two_dicts(paas_services_data, data)
 
 def provision_logical_dbs():
-    """Creates logic dbs if they don't exist based on ${SPRYKER_DB_PAAS} environment variable."""
+    """Creates logic dbs if they don't exist based on ${SPRYKER_PAAS_SERVICES} environment variable."""
 
     try:
         db_host = ssm_get_parameter('SPRYKER_DB_HOST')
@@ -190,13 +190,9 @@ def provision_logical_dbs():
 
         data = read_database_configuration()
 
-        if data is None:
-            ssm_delete_parameter('SPRYKER_DB_PAAS')
-
-            return
-
-        if bool(data['databases']) == False:
-            return
+        if data is None or bool(data['databases']) == False:
+            print('Please check your databases configuration.')
+            exit(1)
 
         databases = []
         mysql_cursor.execute("SHOW DATABASES")
@@ -233,7 +229,7 @@ def provision_logical_dbs():
             mysql_connection.commit()
             print('Transaction committed for `{}`.'.format(db_database))
 
-        ssm_put_parameter('SPRYKER_DB_PAAS', json.dumps(data), 'String')
+        ssm_put_parameter('SPRYKER_PAAS_SERVICES', json.dumps(data), 'String')
 
     except errors.Error as e:
         mysql_connection.rollback()
@@ -246,6 +242,7 @@ def provision_logical_dbs():
 
 def main():
     provision_logical_dbs()
+    exit(0)
 
 if __name__ == '__main__':
     main()
