@@ -1373,6 +1373,7 @@ function buildDefaultRegionCredentialsForDatabase(array $projectData): array
         'databases' => [],
     ];
 
+    $databaseServiceData = $projectData['services']['database'];
     foreach ($projectData['regions'] as $regionName => $regionConfig) {
         if (!isset($regionConfig['services']['database']) && !isset($regionConfig['services']['databases'])) {
             continue;
@@ -1395,7 +1396,7 @@ function buildDefaultRegionCredentialsForDatabase(array $projectData): array
                         if (isset($storeDbConfig['name']) && $storeDbConfig['name'] === $dbName) {
                             $databases['databases'][$storeName] = [
                                 'host' => 'database',
-                                'port' => '3306',
+                                'port' => $databaseServiceData['port'] ?? $databaseServiceData['engine'] === 'mysql' ? 3306 : 5432,
                                 'database' => $dbName,
                                 'username' => sprintf('spryker-%s', $dbName),
                                 'password' => 'secret',
