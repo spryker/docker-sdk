@@ -103,7 +103,7 @@ imports:
             domain: spryker.com
 ```
 
-As the result groups section has `StoreName` parameter in uppercase:
+As the result groups section has `storeName` parameter in uppercase:
 
 ```yaml
 groups:
