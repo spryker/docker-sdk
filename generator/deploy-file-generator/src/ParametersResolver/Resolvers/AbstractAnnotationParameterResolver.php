@@ -44,7 +44,7 @@ abstract class AbstractAnnotationParameterResolver implements ParameterResolverI
 
         foreach ($match[1] as $key => $param) {
             $filter = null;
-            if (str_contains($param, '|')) {
+            if (strpos($param, '|') !== false) {
                 $data = explode('|', $param);
                 $param = trim($data[0]);
                 $filter = trim($data[1]);
