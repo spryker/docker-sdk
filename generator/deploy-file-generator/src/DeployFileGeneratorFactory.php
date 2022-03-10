@@ -145,7 +145,7 @@ class DeployFileGeneratorFactory
         return [
             new PercentAnnotationParameterResolver([
                 $this->createLowerCaseParameterFilter(),
-                $this->createUpperCaseParameterFilter()
+                $this->createUpperCaseParameterFilter(),
             ]),
         ];
     }
