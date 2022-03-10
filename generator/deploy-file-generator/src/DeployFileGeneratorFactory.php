@@ -17,6 +17,9 @@ use DeployFileGenerator\MergeResolver\MergeResolverInterface;
 use DeployFileGenerator\MergeResolver\Resolvers\ServiceMergeResolver;
 use DeployFileGenerator\Output\DeployFileOutput;
 use DeployFileGenerator\Output\OutputInterface;
+use DeployFileGenerator\ParameterFilter\Filters\LowerCaseParameterFilter;
+use DeployFileGenerator\ParameterFilter\Filters\UpperCaseParameterFilter;
+use DeployFileGenerator\ParameterFilter\ParameterFilterInterface;
 use DeployFileGenerator\ParametersResolver\ParametersResolver;
 use DeployFileGenerator\ParametersResolver\ParametersResolverInterface;
 use DeployFileGenerator\ParametersResolver\Resolvers\PercentAnnotationParameterResolver;
@@ -140,7 +143,10 @@ class DeployFileGeneratorFactory
     public function getParameterResolverCollection(): array
     {
         return [
-            new PercentAnnotationParameterResolver(),
+            new PercentAnnotationParameterResolver([
+                $this->createLowerCaseParameterFilter(),
+                $this->createUpperCaseParameterFilter(),
+            ]),
         ];
     }
 
@@ -274,5 +280,21 @@ class DeployFileGeneratorFactory
     protected function createSymfonyConsoleOutput(): SymfonyOutputInterface
     {
         return new ConsoleOutput();
+    }
+
+    /**
+     * @return \DeployFileGenerator\ParameterFilter\ParameterFilterInterface
+     */
+    public function createLowerCaseParameterFilter(): ParameterFilterInterface
+    {
+        return new LowerCaseParameterFilter();
+    }
+
+    /**
+     * @return \DeployFileGenerator\ParameterFilter\ParameterFilterInterface
+     */
+    public function createUpperCaseParameterFilter(): ParameterFilterInterface
+    {
+        return new UpperCaseParameterFilter();
     }
 }
