@@ -23,11 +23,7 @@ def ssm_get_parameter(parameter_name, with_decryption = True):
     :param with_decryption: return decrypted value for secured string params, ignored for String and StringList
     :return: Return parameter details if exist else None
     """
-    ssm_client = boto3.client('ssm',
-        aws_access_key_id=os.environ['AWS_ACCESS_KEY_ID'],
-        aws_secret_access_key=os.environ['AWS_SECRET_ACCESS_KEY'],
-        region_name=os.environ['AWS_DEFAULT_REGION']
-    )
+    ssm_client = boto3.client('ssm')
 
     try:
         result = ssm_client.get_parameter(
@@ -46,11 +42,7 @@ def ssm_put_parameter(parameter_name, parameter_value, parameter_type):
     :param parameter_type: Type of the parameter to create in AWS SSM ('String'|'StringList'|'SecureString')
     :return: Return version of the parameter if successfully created else None
     """
-    ssm_client = boto3.client('ssm',
-        aws_access_key_id=os.environ['AWS_ACCESS_KEY_ID'],
-        aws_secret_access_key=os.environ['AWS_SECRET_ACCESS_KEY'],
-        region_name=os.environ['AWS_DEFAULT_REGION']
-    )
+    ssm_client = boto3.client('ssm')
 
     try:
         result = ssm_client.put_parameter(
