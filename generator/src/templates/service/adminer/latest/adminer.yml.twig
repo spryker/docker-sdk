@@ -1,0 +1,8 @@
+  {{ serviceName }}:
+    image: adminer
+    networks:
+      - private
+    labels:
+      'spryker.app.name': adminer
+      'spryker.app.type': services
+      'spryker.project': ${SPRYKER_DOCKER_PREFIX}:${SPRYKER_DOCKER_TAG}

@@ -82,3 +82,4 @@ For contribution guidelines, see [Code contribution guide](https://documentation
 |   |   | 7.6 |
 |   |   | 7.10 |
 | blackfire  | blackfire  | latest |
+| adminer  | adminer  | latest |
