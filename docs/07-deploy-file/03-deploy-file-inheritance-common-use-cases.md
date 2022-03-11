@@ -55,7 +55,7 @@ To define domain names by including a dedicated deploy file with a dynamic param
 ```yaml
 groups:
     EU:
-        region: DE
+        region: EU
         applications:
             Yves:
                 application: yves
@@ -71,6 +71,7 @@ groups:
 ...
 imports:
     groups.yml:
+        template: groups.yml
         parameters:
             domain: spryker.com
 ...
@@ -80,6 +81,7 @@ imports:
 ...
 imports:
     groups.yml:
+        template: groups.yml
         parameters:
             domain: dev.spryker.com
 ...
@@ -109,6 +111,7 @@ docker:
 
 imports:
     deploy.base.template.yml:
+        template: deploy.base.template.yml
         parameters:
             env_name: 'prod'
 ```
@@ -129,6 +132,7 @@ docker:
 
 imports:
     deploy.base.template.yml:
+        template: deploy.base.template.yml
         parameters:
             env_name: 'dev'
 ```
@@ -159,9 +163,11 @@ environment: docker.prod
 
 imports:
     enabled-newrelic.yml:
-      parameters:
-          license_key: 'sker759fsdu01xkdotunc85334e85c10cd0jh67f'
+        template: enabled-newrelic.yml
+        parameters:
+            license_key: 'sker759fsdu01xkdotunc85334e85c10cd0jh67f'
     deploy.base.template.yml:
+        template: deploy.base.template.yml
         parameters:
             env_name: 'prod'
 ```
@@ -177,9 +183,11 @@ environment: docker.dev
 
 imports:
     enabled-newrelic.yml:
-      parameters:
-          license_key: 'eu01xxaa7460e1ea3abdfbbbd34e85c10cd0NRAL'
+        template: enabled-newrelic.yml
+        parameters:
+            license_key: 'eu01xxaa7460e1ea3abdfbbbd34e85c10cd0NRAL'
     deploy.base.template.yml:
+        template: deploy.base.template.yml
         parameters:
             env_name: 'dev'
 ```
@@ -220,6 +228,7 @@ groups:
 
 imports:
     deploy.base.template.yml:
+        template: deploy.base.template.yml
         parameters:
             env_name: 'prod'
 ```
@@ -252,6 +261,7 @@ groups:
 
 imports:
     deploy.base.template.yml:
+        template: deploy.base.template.yml
         parameters:
             env_name: 'dev'
 ```
@@ -294,9 +304,11 @@ environment: docker.prod
 
 imports:
     merchant-application.yml:
-      parameters:
-          hostname: 'mp.de.spryker.com'      
+        template: merchant-application.yml
+        parameters:
+            hostname: 'mp.de.spryker.com'
     deploy.base.template.yml:
+        template: deploy.base.template.yml
         parameters:
             env_name: 'prod'
 ```
@@ -313,9 +325,11 @@ environment: docker.dev
 
 imports:
     merchant-application.yml:
-      parameters:
-          hostname: 'mp.de.dev.spryker.com'      
+        template: merchant-application.yml
+        parameters:
+            hostname: 'mp.de.dev.spryker.com'
     deploy.base.template.yml:
+        template: deploy.base.template.yml
         parameters:
             env_name: 'dev'
 ```
@@ -347,6 +361,7 @@ services:
 
 imports:
     deploy.base.template.yml:
+        template: deploy.base.template.yml
         parameters:
             env_name: 'prod'
 ```
@@ -368,6 +383,7 @@ services:
 
 imports:
     deploy.base.template.yml:
+        template: deploy.base.template.yml
         parameters:
             env_name: 'demo'
 ```
@@ -403,9 +419,11 @@ environment: docker.prod
 
 imports:
     services.yml:
-      parameters:
-          dashboard_hostname: 'dashboard.spryker.com'
+        template: services.yml
+        parameters:
+            dashboard_hostname: 'dashboard.spryker.com'
     deploy.base.template.yml:
+        template: deploy.base.template.yml
         parameters:
             env_name: 'dev'
 ```
@@ -421,9 +439,11 @@ environment: docker.demo
 
 imports:
     services.yml:
-      parameters:
-          dashboard_hostname: 'dashboard.demo-spryker.local'
+      template: services.yml
+        parameters:
+            dashboard_hostname: 'dashboard.demo-spryker.local'
     deploy.base.template.yml:
+        template: deploy.base.template.yml
         parameters:
             env_name: 'demo'
 ```
@@ -448,6 +468,7 @@ environment: docker.dev
 
 imports:
     deploy.base.template.yml:
+        template: deploy.base.template.yml
         parameters:
             env_name: 'dev'
 ```
@@ -462,6 +483,7 @@ environment: docker.prod
 
 imports:
     deploy.base.template.yml:
+        template: deploy.base.template.yml
         parameters:
             env_name: 'prod'
 ```
@@ -490,9 +512,11 @@ environment: docker.dev
 
 imports:
     namespace.yml:
-      parameters:
-          env_name: 'dev'      
+        template: namespace.yml
+        parameters:
+            env_name: 'dev'
     deploy.base.template.yml:
+        template: deploy.base.template.yml
         parameters:
             env_name: 'dev'
 ```
@@ -508,9 +532,11 @@ environment: docker.prod
 
 imports:
     namespace.yml:
-      parameters:
-          env_name: 'prod'      
+        template: namespace.yml
+        parameters:
+            env_name: 'prod'
     deploy.base.template.yml:
+        template: deploy.base.template.yml
         parameters:
             env_name: 'prod'
 ```
@@ -552,6 +578,7 @@ regions:
 
 imports:
     deploy.base.template.yml:
+        template: deploy.base.template.yml
         parameters:
             env_name: 'dev'
 ```
@@ -581,7 +608,7 @@ regions:
                         namespace: 1
                     search:
                         namespace: uk_search
-```                        
+```
 
 3. Include `regions.yml` into the build of the desired environments by extending their respective deploy files as follows:
 
@@ -595,7 +622,9 @@ environment: docker.dev
 
 imports:
     regions.yml:
+        template: regions.yml
     deploy.base.template.yml:
+        template: deploy.base.template.yml
         parameters:
             env_name: 'dev'
 ```
@@ -633,6 +662,7 @@ regions:
 
 imports:
     deploy.base.template.yml:
+        template: deploy.base.template.yml
         parameters:
             env_name: 'dev'
 ```
@@ -668,7 +698,9 @@ environment: docker.dev
 
 imports:
     regions.yml:
+        template: regions.yml
     deploy.base.template.yml:
+        template: deploy.base.template.yml
         parameters:
             env_name: 'dev'
 ```
@@ -698,6 +730,7 @@ services:
 
 imports:
     deploy.base.template.yml:
+        template: deploy.base.template.yml
         parameters:
             env_name: 'dev'
 ```
@@ -727,7 +760,9 @@ environment: docker.dev
 
 imports:
     disabled-dashboard.yml:
+        template: disabled-dashboard.yml
     deploy.base.template.yml:
+        template: deploy.base.template.yml
         parameters:
             env_name: 'dev'
 ```
