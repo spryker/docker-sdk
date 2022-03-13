@@ -14,6 +14,7 @@
         retries: 5
     volumes:
       - {{ serviceName }}-{{ serviceData['engine'] }}-data:/data
+      - ./${DEPLOYMENT_PATH}/context/redis/redis.conf:/usr/local/etc/redis/redis.conf:ro
 
 {% if serviceData['replica-services'] is defined %}
 {% for replica in serviceData['replica-services'] %}
