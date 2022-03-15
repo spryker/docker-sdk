@@ -3,5 +3,5 @@
 {% block setup %}{% endblock setup %}
 
 {% block command %}<![CDATA[
-{% if job.store is defined %}APPLICATION_STORE="{{ job.store }}" {%endif%}{% if job.region is defined %}SPRYKER_CURRENT_REGION="{{ job.region }}" {%endif%}COMMAND="{{ job.command }}" bash /usr/bin/spryker.sh
+{% if job.store is not empty %}APPLICATION_STORE="{{ job.store }}" {%endif%}{% if job.region is not empty %}SPRYKER_CURRENT_REGION="{{ job.region }}" {%endif%}COMMAND="{{ job.command }}" bash /usr/bin/spryker.sh
 ]]>{% endblock command %}
