@@ -301,6 +301,7 @@ foreach ($projectData['groups'] ?? [] as $groupName => $groupData) {
                     'regionName' => $groupData['region'],
                     'regionData' => $projectData['regions'][$groupData['region']],
                     'brokerConnections' => getBrokerConnections($projectData),
+                    'keyValueStoreConnections' => getKeyValueStores($projectData),
                 ])
             );
         }
@@ -392,6 +393,7 @@ foreach ($projectData['groups'] ?? [] as $groupName => $groupData) {
                         'regionName' => $groupData['region'],
                         'regionData' => $projectData['regions'][$groupData['region']],
                         'brokerConnections' => getBrokerConnections($projectData),
+                        'keyValueStoreConnections' => getKeyValueStores($projectData),
                         'storeName' => $endpointData['store'],
                         'services' => $services,
                         'endpointMap' => $endpointMap,
@@ -407,6 +409,7 @@ foreach ($projectData['groups'] ?? [] as $groupName => $groupData) {
                         'regionName' => $groupData['region'],
                         'regionData' => $projectData['regions'][$groupData['region']],
                         'brokerConnections' => getBrokerConnections($projectData),
+                        'keyValueStoreConnections' => getKeyValueStores($projectData),
                         'storeName' => $endpointData['store'],
                         'services' => $services,
                         'endpointMap' => $endpointMap,
@@ -430,6 +433,7 @@ foreach ($projectData['groups'] ?? [] as $groupName => $groupData) {
                         'regionName' => $groupData['region'],
                         'regionData' => $projectData['regions'][$groupData['region']],
                         'brokerConnections' => getBrokerConnections($projectData),
+                        'keyValueStoreConnections' => getKeyValueStores($projectData),
                         'services' => $services,
                         'endpointMap' => $endpointMap,
                     ])
@@ -444,6 +448,7 @@ foreach ($projectData['groups'] ?? [] as $groupName => $groupData) {
                         'regionName' => $groupData['region'],
                         'regionData' => $projectData['regions'][$groupData['region']],
                         'brokerConnections' => getBrokerConnections($projectData),
+                        'keyValueStoreConnections' => getKeyValueStores($projectData),
                         'services' => $services,
                         'endpointMap' => $endpointMap,
                     ])
@@ -757,15 +762,16 @@ function getBrokerConnections(array $projectData): string
 
     $connections = [];
     foreach ($projectData['regions'] as $regionName => $regionData) {
+        $regionServiceData = $brokerServiceData;
         if (isset($regionData['services']['broker'])) {
-            $localServiceData = array_replace($brokerServiceData, $regionData['services']['broker']);
+            $regionServiceData = array_replace($regionServiceData, $regionData['services']['broker']);
             $connections[$regionName] = [
                 'RABBITMQ_CONNECTION_NAME' => $regionName . '-connection',
                 'RABBITMQ_HOST' => 'broker',
-                'RABBITMQ_PORT' => $localServiceData['port'] ?? 5672,
-                'RABBITMQ_USERNAME' => $localServiceData['api']['username'],
-                'RABBITMQ_PASSWORD' => $localServiceData['api']['password'],
-                'RABBITMQ_VIRTUAL_HOST' => $localServiceData['namespace'],
+                'RABBITMQ_PORT' => $regionServiceData['port'] ?? 5672,
+                'RABBITMQ_USERNAME' => $regionServiceData['api']['username'],
+                'RABBITMQ_PASSWORD' => $regionServiceData['api']['password'],
+                'RABBITMQ_VIRTUAL_HOST' => $regionServiceData['namespace'],
                 'RABBITMQ_STORE_NAMES' => [],
             ];
         }
@@ -773,7 +779,7 @@ function getBrokerConnections(array $projectData): string
             if (!isset($storeData['services']['broker'])) {
                 continue;
             }
-            $localServiceData = array_replace($brokerServiceData, $storeData['services']['broker']);
+            $localServiceData = array_replace($regionServiceData, $storeData['services']['broker']);
             $connections[$storeName] = [
                 'RABBITMQ_CONNECTION_NAME' => $storeName . '-connection',
                 'RABBITMQ_HOST' => 'broker',
@@ -794,23 +800,50 @@ function getBrokerConnections(array $projectData): string
  *
  * @return string
  */
+function getKeyValueStores(array $projectData): string
+{
+    $keyValueStoreData = $projectData['services']['key_value_store'];
+
+    $connections = [];
+    foreach ($projectData['regions'] as $regionName => $regionData) {
+        $regionKeyValueStoreData = $keyValueStoreData;
+        if (isset($regionData['services']['key_value_store'])) {
+            $connections[$regionName] = $regionKeyValueStoreData = array_replace($regionKeyValueStoreData, $regionData['services']['key_value_store']);
+        }
+        foreach ($regionData['stores'] ?? [] as $storeName => $storeData) {
+            if (!isset($storeData['services']['key_value_store'])) {
+                continue;
+            }
+            $connections[$storeName] = array_replace($regionKeyValueStoreData, $storeData['services']['key_value_store']);
+        }
+    }
+
+    return json_encode($connections);
+}
+
+/**
+ * @param array $projectData
+ *
+ * @return string
+ */
 function getCloudBrokerConnections(array $projectData): string
 {
     $brokerServiceData = $projectData['services']['broker'];
 
     $connections = [];
     foreach ($projectData['regions'] as $regionName => $regionData) {
+        $regionServiceData = $brokerServiceData;
         if (isset($regionData['services']['broker'])) {
-            $localServiceData = array_replace($brokerServiceData, $regionData['services']['broker']);
+            $regionServiceData = array_replace($regionServiceData, $regionData['services']['broker']);
             $connections[$regionName] = [
-                'RABBITMQ_VIRTUAL_HOST' => $localServiceData['namespace'],
+                'RABBITMQ_VIRTUAL_HOST' => $regionServiceData['namespace'],
             ];
         }
         foreach ($regionData['stores'] ?? [] as $storeName => $storeData) {
             if (!isset($storeData['services']['broker'])) {
                 continue;
             }
-            $localServiceData = array_replace($brokerServiceData, $storeData['services']['broker']);
+            $localServiceData = array_replace($regionServiceData, $storeData['services']['broker']);
             $connections[$storeName] = [
                 'RABBITMQ_VIRTUAL_HOST' => $localServiceData['namespace'],
             ];
