@@ -102,6 +102,9 @@ def merge_two_dicts(x, y):
      for key, value in y['databases'].items():
          stores[key] = key
          if key in z['databases']:
+            z['databases'][key]['database'] = y['databases'][key]['database']
+            z['databases'][key]['username'] = y['databases'][key]['username']
+            z['databases'][key]['password'] = y['databases'][key]['password']
             z['databases'][key]['character-set'] = y['databases'][key]['character-set']
             z['databases'][key]['collate'] = y['databases'][key]['collate']
 
@@ -118,6 +121,8 @@ def read_database_configuration():
         "databases": {},
      }
      is_valid_data = True
+#      db_host = ssm_get_parameter('SPRYKER_DB_HOST')
+#      db_port = ssm_get_parameter('SPRYKER_DB_PORT')
      for region_name, region_data in deploy_file_data['regions'].items():
         if 'database' in region_data['services']:
             ssm_put_parameter('SPRYKER_PAAS_SERVICES', json.dumps(data), 'String')
@@ -145,9 +150,13 @@ def read_database_configuration():
                         break
                     region_service_data = region_databases_data[db_name]
                     data['databases'][store_name] = {
+#                         'host': db_host['Parameter']['Value'],
+                        'host': 'database',
+#                         'port': db_port['Parameter']['Value'],
+                        'port': 3306,
                         'database': db_name,
                         'password': generate_pw(),
-                        'username': 'spryker-' + db_name,
+                        'username': 'spryker_' + db_name,
                         'character-set': 'utf8' if region_databases_data[db_name] == None else region_databases_data[db_name].get('character-set'),
                         'collate': 'utf8_general_ci' if region_databases_data[db_name] == None else region_databases_data[db_name].get('collate')
                     }
@@ -174,9 +183,12 @@ def provision_logical_dbs():
         db_root_password = ssm_get_parameter('SPRYKER_DB_ROOT_PASSWORD')
 
         mysql_connection = mysql.connector.connect(
-          host=db_host['Parameter']['Value'],
-          user=db_root_user_name['Parameter']['Value'],
-          password=db_root_password['Parameter']['Value']
+#           host=db_host['Parameter']['Value'],
+          host='localhost',
+#           user=db_root_user_name['Parameter']['Value'],
+          user='root',
+#           password=db_root_password['Parameter']['Value']
+          password='secret'
         )
         mysql_cursor = mysql_connection.cursor()
 
@@ -186,17 +198,17 @@ def provision_logical_dbs():
             print('Please check your databases configuration.')
             exit(1)
 
-        databases = []
-        mysql_cursor.execute("SHOW DATABASES")
-        for database in mysql_cursor:
-            databases.append(database[0])
+#         databases = []
+#         mysql_cursor.execute("SHOW DATABASES")
+#         for database in mysql_cursor:
+#             databases.append(database[0])
 
         for key, db in data['databases'].items():
             db_database = db['database']
 
-            if db_database in databases:
-                print('Database `{}` already exist.'.format(db_database))
-                continue
+#             if db_database in databases:
+#                 print('Database `{}` already exist.'.format(db_database))
+#                 continue
 
             db_character_set = db['character-set']
             db_collate = db['collate']
@@ -221,7 +233,7 @@ def provision_logical_dbs():
             mysql_connection.commit()
             print('Transaction committed for `{}`.'.format(db_database))
 
-        ssm_put_parameter('SPRYKER_PAAS_SERVICES', json.dumps(data), 'String')
+        ssm_put_parameter('SPRYKER_PAAS_SERVICES', json.dumps(data), 'SecureString')
 
     except errors.Error as e:
         mysql_connection.rollback()
