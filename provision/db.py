@@ -13,10 +13,13 @@ import secrets
 import mysql.connector
 from mysql.connector import errors
 
-def ssm_get_parameter_path():
-    return "/{}/codebuild/base_task_definition/".format(os.environ['SPRYKER_PROJECT_NAME'])
+PARAM_STORE_CODEBUILD = "codebuild/base_task_definition"
+PARAM_STORE_SECRETS = "custom-secrets"
 
-def ssm_get_parameter(parameter_name, with_decryption = True):
+def ssm_get_parameter_path(parameter_store_path):
+    return "/{}/{}/".format(os.environ['SPRYKER_PROJECT_NAME'], parameter_store_path)
+
+def ssm_get_parameter(parameter_name, parameter_store_path = PARAM_STORE_CODEBUILD, with_decryption = True):
     """Get parameter details in AWS SSM
 
     :param parameter_name: Name of the parameter to fetch details from SSM
@@ -27,14 +30,14 @@ def ssm_get_parameter(parameter_name, with_decryption = True):
 
     try:
         result = ssm_client.get_parameter(
-            Name=ssm_get_parameter_path() + parameter_name,
+            Name=ssm_get_parameter_path(parameter_store_path) + parameter_name,
             WithDecryption=with_decryption
         )
     except ClientError as e:
         return None
     return result
 
-def ssm_put_parameter(parameter_name, parameter_value, parameter_type):
+def ssm_put_parameter(parameter_name, parameter_value, parameter_type, parameter_store_path = PARAM_STORE_CODEBUILD):
     """Creates new parameter in AWS SSM
 
     :param parameter_name: Name of the parameter to create in AWS SSM
@@ -46,7 +49,7 @@ def ssm_put_parameter(parameter_name, parameter_value, parameter_type):
 
     try:
         result = ssm_client.put_parameter(
-            Name=ssm_get_parameter_path() + parameter_name,
+            Name=ssm_get_parameter_path(parameter_store_path) + parameter_name,
             Value=parameter_value,
             Type=parameter_type,
             Overwrite=True
@@ -56,7 +59,7 @@ def ssm_put_parameter(parameter_name, parameter_value, parameter_type):
         return None
     return result['Version']
 
-def ssm_delete_parameter(parameter_name):
+def ssm_delete_parameter(parameter_name, parameter_store_path):
     """Delete parameter in AWS SSM
 
     :param parameter_name: Name of the parameter to delete from AWS SSM
@@ -65,7 +68,7 @@ def ssm_delete_parameter(parameter_name):
 
     try:
         ssm_client.delete_parameter(
-            Name=ssm_get_parameter_path() + parameter_name
+            Name=ssm_get_parameter_path(parameter_store_path) + parameter_name
         )
     except ClientError as e:
         if e.response['Error']['Code'] != 'ParameterNotFound':
@@ -121,11 +124,11 @@ def read_database_configuration():
         "databases": {},
      }
      is_valid_data = True
-#      db_host = ssm_get_parameter('SPRYKER_DB_HOST')
-#      db_port = ssm_get_parameter('SPRYKER_DB_PORT')
+     db_host = ssm_get_parameter('SPRYKER_DB_HOST')
+     db_port = ssm_get_parameter('SPRYKER_DB_PORT')
      for region_name, region_data in deploy_file_data['regions'].items():
         if 'database' in region_data['services']:
-            ssm_put_parameter('SPRYKER_PAAS_SERVICES', json.dumps(data), 'String')
+            ssm_put_parameter('SPRYKER_PAAS_SERVICES', json.dumps(data), 'SecureString', PARAM_STORE_SECRETS)
             exit(0)
 
         if 'databases' not in region_data['services'] or bool(region_data['services']['databases']) == False:
@@ -150,10 +153,8 @@ def read_database_configuration():
                         break
                     region_service_data = region_databases_data[db_name]
                     data['databases'][store_name] = {
-#                         'host': db_host['Parameter']['Value'],
-                        'host': 'database',
-#                         'port': db_port['Parameter']['Value'],
-                        'port': 3306,
+                        'host': db_host['Parameter']['Value'],
+                        'port': db_port['Parameter']['Value'],
                         'database': db_name,
                         'password': generate_pw(),
                         'username': 'spryker_' + db_name,
@@ -165,12 +166,15 @@ def read_database_configuration():
         print('Deploy file has invalid data.')
         exit(1)
 
-     paas_services = ssm_get_parameter('SPRYKER_PAAS_SERVICES')
+     paas_services = ssm_get_parameter('SPRYKER_PAAS_SERVICES', PARAM_STORE_SECRETS)
 
      if paas_services is None:
         return data
 
      paas_services_data = json.loads(paas_services['Parameter']['Value'])
+
+     if bool(paas_services_data['databases']) == False:
+        return data
 
      return merge_two_dicts(paas_services_data, data)
 
@@ -183,12 +187,9 @@ def provision_logical_dbs():
         db_root_password = ssm_get_parameter('SPRYKER_DB_ROOT_PASSWORD')
 
         mysql_connection = mysql.connector.connect(
-#           host=db_host['Parameter']['Value'],
-          host='localhost',
-#           user=db_root_user_name['Parameter']['Value'],
-          user='root',
-#           password=db_root_password['Parameter']['Value']
-          password='secret'
+          host=db_host['Parameter']['Value'],
+          user=db_root_user_name['Parameter']['Value'],
+          password=db_root_password['Parameter']['Value']
         )
         mysql_cursor = mysql_connection.cursor()
 
@@ -198,22 +199,12 @@ def provision_logical_dbs():
             print('Please check your databases configuration.')
             exit(1)
 
-#         databases = []
-#         mysql_cursor.execute("SHOW DATABASES")
-#         for database in mysql_cursor:
-#             databases.append(database[0])
-
         for key, db in data['databases'].items():
             db_database = db['database']
-
-#             if db_database in databases:
-#                 print('Database `{}` already exist.'.format(db_database))
-#                 continue
-
+            db_username = db['username']
+            db_password = db['password']
             db_character_set = db['character-set']
             db_collate = db['collate']
-            db_username = 'spryker-' + db_database
-            db_password = db['password']
 
             print('Transaction started for `{}`.'.format(db_database))
 
@@ -233,12 +224,13 @@ def provision_logical_dbs():
             mysql_connection.commit()
             print('Transaction committed for `{}`.'.format(db_database))
 
-        ssm_put_parameter('SPRYKER_PAAS_SERVICES', json.dumps(data), 'SecureString')
+        ssm_put_parameter('SPRYKER_PAAS_SERVICES', json.dumps(data), 'SecureString', PARAM_STORE_SECRETS)
 
     except errors.Error as e:
         mysql_connection.rollback()
         print("Rolling back ...")
         print(e)
+        exit(1)
 
     finally:
         mysql_cursor.close()
