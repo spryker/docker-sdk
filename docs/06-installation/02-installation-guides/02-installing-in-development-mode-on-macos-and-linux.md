@@ -74,7 +74,7 @@ Once you finish the setup, you don't need to run `bootstrap` to start the instan
 :::
 
 8. Update the `hosts` file:
-Follow the installation instructions in the white box from the `docker/sdk bootstrap` command execution results to prepare the environment.
+Follow the installation instructions in the white box from the `docker/sdk bootstrap` command execution results to prepare the environment. All endpoints ending on `*.localhost` are resolving automatically.
 
 :::(Info) ()
  You can run `docker/sdk install` after `bootstrap` to get the list of the instructions.
