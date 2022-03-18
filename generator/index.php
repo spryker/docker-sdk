@@ -1080,10 +1080,23 @@ function buildComposerAutoloadConfig(array $projectData): string
     return trim($projectData['composer']['autoload'] ?? ($projectData['_fileMode'] === 'baked' ? '--classmap-authoritative' : ''));
 }
 
+function endsWith($haystack, $needle) {
+    return substr_compare($haystack, $needle, -strlen($needle)) === 0;
+}
+
 function buildDataForRequirementAnalyzer(array $projectData): array
 {
     $hosts = $projectData['_hosts'];
-    unset($hosts['localhost']);
+
+    // all domain names ending with TLD 'localhost' do not need to be listed in /etc/hosts 
+    // see https://www.ietf.org/rfc/rfc2606.txt
+    foreach ($hosts as $hostNameKey => $hostNameValue)
+     {
+         if (endsWith($hostNameKey, 'localhost')) 
+         {
+            unset($hosts[$hostNameKey]);
+         }
+     }
 
     return [
         'hosts' => implode(' ', $hosts),
