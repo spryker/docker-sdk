@@ -73,14 +73,9 @@ docker/sdk bootstrap deploy.dev.yml
 Once you finish the setup, you don't need to run `bootstrap` to start the instance. You only need to run it after you update the Docker SDK or the deploy file.
 :::
 
-8. Update the `hosts` file:
-Follow the installation instructions in the white box from the `docker/sdk bootstrap` command execution results to prepare the environment. All endpoints ending on `*.localhost` are resolving automatically.
+8. If the `bootstrap` command returned instructions for preparing your environment, execute them.
 
-:::(Info) ()
- You can run `docker/sdk install` after `bootstrap` to get the list of the instructions.
-:::
-
-9. Once the job finishes, build and start the instance:
+9. Build and start the instance:
     
 ```bash
 docker/sdk up
