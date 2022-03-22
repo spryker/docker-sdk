@@ -23,8 +23,8 @@ regions.*:
     array-type:
 regions.*.services:
     not-empty:
-regions.*.services.database:
-    require:
+#regions.*.services.database:
+#    require:
 
 # Image:
 image.tag:

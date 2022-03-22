@@ -44,18 +44,18 @@ function Data::load() {
             Registry::Trap::addExitHook 'resumeScheduler' 'Service::Scheduler::unpause'
         fi
 
+        Console::info "Loading demo data for ${SPRYKER_CURRENT_REGION} region."
+        Compose::exec "vendor/bin/install${verboseOption} -r ${SPRYKER_PIPELINE} -s clean-storage -s init-storage"
+        Database::init
+
         for store in "${STORES[@]}"; do
             SPRYKER_CURRENT_STORE="${store}"
             Console::info "Init storages for ${SPRYKER_CURRENT_STORE} store."
             Compose::exec "vendor/bin/install${verboseOption} -r ${SPRYKER_PIPELINE} -s init-storages-per-store"
         done
 
-        SPRYKER_CURRENT_STORE="${STORES[0]}"
-        Console::info "Loading demo data for ${SPRYKER_CURRENT_REGION} region."
-        Database::init
-
         local demoDataSection=${1:-demodata}
-        Compose::exec "vendor/bin/install${verboseOption} -r ${SPRYKER_PIPELINE} -s clean-storage -s init-storage -s init-storages-per-region -s ${demoDataSection}"
+        Compose::exec "vendor/bin/install${verboseOption} -r ${SPRYKER_PIPELINE} -s init-storages-per-region -s ${demoDataSection}"
     done
 
     Registry::Trap::releaseExitHook 'resumeScheduler'
