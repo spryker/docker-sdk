@@ -1368,13 +1368,12 @@ function buildDefaultRegionCredentialsForDatabase(array $projectData): array
         'password' => 'secret',
     ];
 
-    $databases = [
-        'version' => '1.0',
-        'databases' => [],
-    ];
-
     $databaseServiceData = $projectData['services']['database'];
     foreach ($projectData['regions'] as $regionName => $regionConfig) {
+        $databases = [
+            'version' => '1.0',
+            'databases' => [],
+        ];
         if (!isset($regionConfig['services']['database']) && !isset($regionConfig['services']['databases'])) {
             continue;
         }
@@ -1383,6 +1382,19 @@ function buildDefaultRegionCredentialsForDatabase(array $projectData): array
             $regionDbConfig = $regionConfig['services']['database'];
             $regionDbConfig = array_merge($defaultDbRegionCredentials, $regionDbConfig);
 
+            foreach ($regionConfig['stores'] as $storeName => $storeConfig) {
+                $databases['databases'][$storeName] = [
+                    'host' => 'database',
+                    'port' => $databaseServiceData['port'] ?? $databaseServiceData['engine'] === 'mysql' ? 3306 : 5432,
+                    'database' => $regionDbConfig['database'],
+                    'username' => $regionDbConfig['username'],
+                    'password' => $regionDbConfig['password'],
+                    'characterSet' => $regionDbConfig['character-set'] ?? 'utf8',
+                    'collate' => $regionDbConfig['collate'] ?? 'utf8_general_ci',
+                ];
+            }
+
+            $projectData['regions'][$regionName]['services']['databases'] = json_encode($databases);
             $projectData['regions'][$regionName]['services']['database'] = $regionDbConfig;
         }
 
@@ -1392,23 +1404,24 @@ function buildDefaultRegionCredentialsForDatabase(array $projectData): array
             foreach ($regionConfig['stores'] as $storeName => $storeConfig) {
                 $storeDbConfig = $storeConfig['services']['database'];
 
-                    foreach ($regionDbConfigs as $dbName => $regionDbConfig) {
-                        if (isset($storeDbConfig['name']) && $storeDbConfig['name'] === $dbName) {
-                            $databases['databases'][$storeName] = [
-                                'host' => 'database',
-                                'port' => $databaseServiceData['port'] ?? $databaseServiceData['engine'] === 'mysql' ? 3306 : 5432,
-                                'database' => $dbName,
-                                'username' => sprintf('spryker-%s', $dbName),
-                                'password' => 'secret',
-                                'characterSet' => $regionDbConfig['character-set'] ?? 'utf8',
-                                'collate' => $regionDbConfig['collate'] ?? 'utf8_general_ci',
-                            ];
-                        }
+                foreach ($regionDbConfigs as $dbName => $regionDbConfig) {
+                    if (isset($storeDbConfig['name']) && $storeDbConfig['name'] === $dbName) {
+                        $databases['databases'][$storeName] = [
+                            'host' => 'database',
+                            'port' => $databaseServiceData['port'] ?? $databaseServiceData['engine'] === 'mysql' ? 3306 : 5432,
+                            'database' => $dbName,
+                            'username' => sprintf('spryker-%s', $dbName),
+                            'password' => 'secret',
+                            'characterSet' => $regionDbConfig['character-set'] ?? 'utf8',
+                            'collate' => $regionDbConfig['collate'] ?? 'utf8_general_ci',
+                        ];
                     }
                 }
             }
-            $projectData['regions'][$regionName]['services']['databases'] = json_encode($databases);
         }
+
+        $projectData['regions'][$regionName]['services']['databases'] = json_encode($databases);
+    }
 
     return $projectData;
 }
