@@ -15,6 +15,7 @@ from mysql.connector import errors
 
 PARAM_STORE_CODEBUILD = "codebuild/base_task_definition"
 PARAM_STORE_SECRETS = "custom-secrets"
+DEFAULT_DATABASE_KEY = "_default"
 
 def ssm_get_parameter_path(parameter_store_path):
     return "/{}/{}/".format(os.environ['SPRYKER_PROJECT_NAME'], parameter_store_path)
@@ -107,7 +108,6 @@ def merge_two_dicts(x, y):
          if key in z['databases']:
             z['databases'][key]['database'] = y['databases'][key]['database']
             z['databases'][key]['username'] = y['databases'][key]['username']
-            z['databases'][key]['password'] = y['databases'][key]['password']
             z['databases'][key]['character-set'] = y['databases'][key]['character-set']
             z['databases'][key]['collate'] = y['databases'][key]['collate']
 
@@ -119,13 +119,26 @@ def merge_two_dicts(x, y):
 
 def read_database_configuration():
      deploy_file_data = read_deploy_file()
+
+     db_host = ssm_get_parameter('SPRYKER_DB_HOST')
+     db_port = ssm_get_parameter('SPRYKER_DB_PORT')
+
      data = {
         "version": "1.0",
         "databases": {},
      }
+
+     data['databases']['_default'] = {
+         'host': db_host['Parameter']['Value'],
+         'port': db_port['Parameter']['Value'],
+         'database': os.environ['SPRYKER_PROJECT_NAME'],
+         'username': ssm_get_parameter('SPRYKER_DB_USERNAME')['Parameter']['Value'],
+         'password': ssm_get_parameter('SPRYKER_DB_PASSWORD')['Parameter']['Value'],
+         'character-set': 'utf8',
+         'collate': 'utf8_general_ci'
+     }
+
      is_valid_data = True
-     db_host = ssm_get_parameter('SPRYKER_DB_HOST')
-     db_port = ssm_get_parameter('SPRYKER_DB_PORT')
      for region_name, region_data in deploy_file_data['regions'].items():
         if 'database' in region_data['services']:
             ssm_put_parameter('SPRYKER_PAAS_SERVICES', json.dumps(data), 'SecureString', PARAM_STORE_SECRETS)
@@ -200,6 +213,9 @@ def provision_logical_dbs():
             exit(1)
 
         for key, db in data['databases'].items():
+            if key == DEFAULT_DATABASE_KEY:
+                continue
+
             db_database = db['database']
             db_username = db['username']
             db_password = db['password']
