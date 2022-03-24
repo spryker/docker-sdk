@@ -84,7 +84,7 @@ def generate_pw(length = 20):
     return password
 
 def read_deploy_file():
-    with open("deploy.{}.yml".format(os.environ['SPRYKER_PROJECT_NAME']), "r") as stream:
+    with open("project.yml", "r") as stream:
         try:
             return yaml.safe_load(stream)
         except yaml.YAMLError as e:
