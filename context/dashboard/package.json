@@ -15,5 +15,8 @@
     "pug": "^3.0.1",
     "serve-favicon": "^2.5.0",
     "through2": "^4.0.2"
+  },
+  "devDependencies": {
+    "minimist": ">=1.2.6"
   }
 }
