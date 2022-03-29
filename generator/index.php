@@ -273,7 +273,7 @@ foreach ($projectData['groups'] ?? [] as $groupName => $groupData) {
                     'regionName' => $groupData['region'],
                     'regionData' => $projectData['regions'][$groupData['region']],
                     'brokerConnections' => getBrokerConnections($projectData),
-                    'endpointList' => $projectData['_endpointList'][$groupData['region']]
+                    'endpointList' => $projectData['_endpointList'][$groupData['region']],
                 ])
             );
         }
@@ -355,7 +355,7 @@ foreach ($projectData['groups'] ?? [] as $groupName => $groupData) {
                         'storeName' => $endpointData['store'],
                         'services' => $services,
                         'endpointMap' => $endpointMap,
-                        'endpointList' => $projectData['_endpointList'][$groupData['region']]
+                        'endpointList' => $projectData['_endpointList'][$groupData['region']],
                     ])
                 );
 
