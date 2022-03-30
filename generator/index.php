@@ -190,7 +190,7 @@ foreach ($projectData['groups'] ?? [] as $groupName => $groupData) {
                     };
                 }
 
-                $projectData['_endpointList'][$groupName][$store][$application][] = $endpoint;
+                $projectData['_endpointList'][$groupName][$store][$application] = $endpoint;
             }
 
             if (array_key_exists('redirect', $endpointData)) {
