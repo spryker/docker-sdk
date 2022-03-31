@@ -1,3 +1,4 @@
       APPLICATION_ENV = {{ project['environment'] | tf_var }}
       SPRYKER_ZED_SSL_ENABLED = {{ ((project['docker']['ssl']['enabled'] | default(false)) ? 1 : 0) | tf_var }}
       SPRYKER_DEBUG_ENABLED = {{ (project['docker']['debug']['enabled'] ? 1 : 0) | tf_var }}
+      SPRYKER_ACTIVE_STORES = {{ project['regions'][regionName]['stores'] | keys | join(',') | tf_var }}
