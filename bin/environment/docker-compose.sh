@@ -30,7 +30,7 @@ function Environment::getDockerComposeVersion() {
        test $? -eq 0 && docker compose version --short | tr -d 'v' || echo 0
     )"
 
-	if [ -z "${composeVersion}" ]; then
+	if [ "${composeVersion}" -eq 0 ]; then
          composeVersion="$(
              docker-compose version >/dev/null 2>&1
              test $? -eq 0 && docker-compose version --short | tr -d 'v' || echo 0
