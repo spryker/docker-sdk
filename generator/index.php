@@ -737,7 +737,7 @@ function getStoreSpecific(array $projectData): array
                 # TODO SESSION should not be used in CLI
             ];
         }
-        $storeSpecific[$regionName]['SPRYKER_KEY_VALUE_REGION_NAMESPACES'] = $projectData[$regionName]['key_value_region_namespaces'];
+        $storeSpecific[$regionName]['SPRYKER_KEY_VALUE_REGION_NAMESPACES'] = $projectData['regions'][$regionName]['key_value_region_namespaces'];
     }
 
     return $storeSpecific;
