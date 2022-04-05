@@ -261,7 +261,6 @@ foreach ($projectData['groups'] ?? [] as $groupName => $groupData) {
     foreach ($groupData['applications'] ?? [] as $applicationName => $applicationData) {
         if ($applicationData['application'] !== 'static') {
             $projectData['_applications'][] = $applicationName;
-
             file_put_contents(
                 $deploymentDir . DS . 'env' . DS . $applicationName . '.env',
                 $twig->render(sprintf('env/application/%s.env.twig', $applicationData['application']), [
@@ -1467,7 +1466,7 @@ function extendProjectDataWithKeyValueRegionNamespaces(array $projectData): arra
         foreach ($regionData['stores'] ?? [] as $storeName => $storeData) {
             $keyValueStoreNamespaces[$storeName] = $storeData['services']['key_value_store']['namespace'];
         }
-        $projectData[$regionName]['key_value_region_namespaces'] = json_encode($keyValueStoreNamespaces);
+        $projectData['regions'][$regionName]['key_value_region_namespaces'] = json_encode($keyValueStoreNamespaces);
     }
 
     return $projectData;
