@@ -55,7 +55,7 @@ To define domain names by including a dedicated deploy file with a dynamic param
 ```yaml
 groups:
     EU:
-        region: DE
+        region: EU
         applications:
             Yves:
                 application: yves
@@ -306,7 +306,7 @@ imports:
     merchant-application.yml:
         template: merchant-application.yml
         parameters:
-            hostname: 'mp.de.spryker.com'      
+            hostname: 'mp.de.spryker.com'
     deploy.base.template.yml:
         template: deploy.base.template.yml
         parameters:
@@ -327,7 +327,7 @@ imports:
     merchant-application.yml:
         template: merchant-application.yml
         parameters:
-            hostname: 'mp.de.dev.spryker.com'      
+            hostname: 'mp.de.dev.spryker.com'
     deploy.base.template.yml:
         template: deploy.base.template.yml
         parameters:
@@ -514,7 +514,7 @@ imports:
     namespace.yml:
         template: namespace.yml
         parameters:
-            env_name: 'dev'      
+            env_name: 'dev'
     deploy.base.template.yml:
         template: deploy.base.template.yml
         parameters:
@@ -534,7 +534,7 @@ imports:
     namespace.yml:
         template: namespace.yml
         parameters:
-            env_name: 'prod'      
+            env_name: 'prod'
     deploy.base.template.yml:
         template: deploy.base.template.yml
         parameters:
@@ -608,7 +608,7 @@ regions:
                         namespace: 1
                     search:
                         namespace: uk_search
-```                        
+```
 
 3. Include `regions.yml` into the build of the desired environments by extending their respective deploy files as follows:
 
