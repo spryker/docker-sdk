@@ -1,10 +1,29 @@
     location /assets/ {
+        auth_basic  off;
+        allow       all;
         access_log  off;
         expires     7d;
         add_header  Pragma public;
         add_header  Cache-Control "public, must-revalidate, proxy-revalidate";
         etag on;
-        try_files   $uri =404;
+        try_files   $uri @assets;
+    }
+
+    location @assets {
+        rewrite ^/assets/[^/]+/(.*)$ /__assets__fallback/${SPRYKER_BUILD_HASH}/$1 last;
+    }
+
+    location ~* /__assets__fallback/(.*) {
+        auth_basic        off;
+        allow             all;
+        access_log        off;
+        add_header        Last-Modified 'Thu, 01 Jan 1970 00:00:00 GMT';
+        add_header        Cache-Control 'no-store, no-cache';
+        if_modified_since off;
+        expires           off;
+        etag              off;
+
+        try_files         /assets/$1 =404;
     }
 
     location / {

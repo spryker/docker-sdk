@@ -1,0 +1,16 @@
+services:
+    database:
+        engine: postgres
+    broker:
+        engine: rabbitmq
+    session:
+        engine: redis
+    key_value_store:
+        engine: redis
+    search:
+        engine: elastic
+        version: 7.6
+    scheduler:
+        engine: jenkins
+    mail_catcher:
+        engine: mailhog
