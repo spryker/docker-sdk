@@ -1,4 +1,6 @@
     location /assets/ {
+        auth_basic  off;
+        allow       all;
         access_log  off;
         expires     7d;
         add_header  Pragma public;
@@ -12,6 +14,8 @@
     }
 
     location ~* /__assets__fallback/(.*) {
+        auth_basic        off;
+        allow             all;
         access_log        off;
         add_header        Last-Modified 'Thu, 01 Jan 1970 00:00:00 GMT';
         add_header        Cache-Control 'no-store, no-cache';

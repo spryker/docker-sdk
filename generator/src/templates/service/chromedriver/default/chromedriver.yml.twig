@@ -1,5 +1,5 @@
   {{ serviceName }}:
-    image: spryker/chromedriver:m1-pre-release
+    image: spryker/chromedriver
     networks:
       - public
     init: true
@@ -14,4 +14,4 @@
       interval: 5s
       timeout: 5s
       retries: 5
-    command: [ "--port=4444", "--whitelisted-ips=", "--url-base=/wd/hub", "--allowed-origins=*" ]
+    command: [ "--port=4444", "--whitelisted-ips=", "--allowed-origins=*", "--url-base=/wd/hub" ]
