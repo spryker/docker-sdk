@@ -7,7 +7,8 @@ function Service::Scheduler::isInstalled() {
     Console::start -n "Checking jobs are installed..."
 
     # shellcheck disable=SC2016
-    local jobsCount=$(Compose::exec 'curl -sL ${SPRYKER_SCHEDULER_HOST}:${SPRYKER_SCHEDULER_PORT}/scriptText -d "script=println Jenkins.instance.projects.collect{ it.name }.size" | tail -n 1' | tr -d " \n\r")
+    # For avoid https://github.com/docker/compose/issues/9104
+    local jobsCount=$(Compose::exec 'curl -sL ${SPRYKER_SCHEDULER_HOST}:${SPRYKER_SCHEDULER_PORT}/scriptText -d "script=println Jenkins.instance.projects.collect{ it.name }.size" | tail -n 1' "${DOCKER_COMPOSE_TTY_DISABLED}"| tr -d " \n\r")
     [ "${jobsCount}" -gt 0 ] && Console::end "[INSTALLED]" && return "${TRUE}" || return "${FALSE}"
 }
 
@@ -26,7 +27,8 @@ Service::Scheduler::pause() {
     local waitFor=60
     while :; do
         # shellcheck disable=SC2016
-        local runningJobsCount=$(Compose::exec 'curl -sL ${SPRYKER_SCHEDULER_HOST}:${SPRYKER_SCHEDULER_PORT}/computer/api/xml?xpath=*/busyExecutors/text\(\) | tail -n 1' | tr -d " \n\r")
+        # For avoid https://github.com/docker/compose/issues/9104
+        local runningJobsCount=$(Compose::exec 'curl -sL ${SPRYKER_SCHEDULER_HOST}:${SPRYKER_SCHEDULER_PORT}/computer/api/xml?xpath=*/busyExecutors/text\(\) | tail -n 1' "${DOCKER_COMPOSE_TTY_DISABLED}"| tr -d " \n\r")
         [ "${runningJobsCount}" -eq 0 ] && break
         [ "${counter}" -ge "${waitFor}" ] && break
         counter=$((counter + interval))
