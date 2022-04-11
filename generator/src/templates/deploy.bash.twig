@@ -2,11 +2,7 @@
 
 # shellcheck disable=SC2034
 set -e
-
 SELF_SCRIPT=${SELF_SCRIPT:-$0}
-
-# Overridable
-DOCKER_COMPOSE_SUBSTITUTE='docker-compose'
 
 pushd "${BASH_SOURCE%/*}" >/dev/null
 . ./bin/framework.sh
@@ -16,6 +12,9 @@ import environment/cross-platform.sh
 import environment/docker.sh
 import environment/docker-compose.sh
 import environment/composer.sh
+
+# Overridable
+DOCKER_COMPOSE_SUBSTITUTE=$(Environment::getDockerComposeSubstitute)
 
 # Help intro
 import command/deploy.sh
@@ -208,6 +207,9 @@ export BLACKFIRE_CLIENT_TOKEN=${BLACKFIRE_CLIENT_TOKEN}
 export TIDEWAYS_APIKEY=${TIDEWAYS_APIKEY}
 export TIDEWAYS_CLI_ENABLED=${TIDEWAYS_CLI_ENABLED}
 export TIDEWAYS_ENVIRONMENT_NAME=${TIDEWAYS_ENVIRONMENT_NAME}
+
+{# For avoid https://github.com/docker/compose/issues/9104 #}
+export DOCKER_COMPOSE_TTY_DISABLED="$(Environment::getDockerComposeTTY)"
 
 Registry::Flow::runBoot
 
