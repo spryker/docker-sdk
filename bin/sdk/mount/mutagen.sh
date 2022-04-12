@@ -208,7 +208,7 @@ function Mount::Mutagen::validateMutagenVersion() {
         errorMessage+="Mutagen.io version ${installedVersion} is not supported. Please, update Mutagen.io to at least ${requiredMinimalVersion}."
 
         if [ "${_PLATFORM}" == 'macos' ]; then
-            errorMessage+="\nbrew list | grep mutagen | xargs ${XARGS_NO_RUN_IF_EMPTY} brew remove && $(Mount::Mutagen::getInstallMessage ${dockerComposeInstalledVersion} ${installLink})"
+            errorMessage+="\nbrew list | grep mutagen | xargs ${XARGS_NO_RUN_IF_EMPTY} brew remove && $(Mount::Mutagen::getInstallMessage ${dockerComposeInstalledVersion} ${installLink}) && mutagen daemon stop && mutagen daemon start"
         fi
 
         echo ${errorMessage}
@@ -222,7 +222,7 @@ function Mount::Mutagen::validateMutagenVersion() {
 			errorMessage+="Mutagen.io version ${installedVersion} is not supported. Please, update Mutagen.io to at least ${requiredMinimalVersion}."
 
             if [ "${_PLATFORM}" == 'macos' ]; then
-                errorMessage+="\nbrew list | grep mutagen | xargs ${XARGS_NO_RUN_IF_EMPTY} brew remove && $(Mount::Mutagen::getInstallMessage ${dockerComposeInstalledVersion} ${installLink})"
+                errorMessage+="\nbrew list | grep mutagen | xargs ${XARGS_NO_RUN_IF_EMPTY} brew remove && $(Mount::Mutagen::getInstallMessage ${dockerComposeInstalledVersion} ${installLink}) && mutagen daemon stop && mutagen daemon start"
             fi
 
             echo "${errorMessage}"
