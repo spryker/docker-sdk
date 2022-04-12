@@ -218,7 +218,7 @@ function Mount::Mutagen::validateMutagenVersion() {
         return "${FALSE}"
     else
         local parsedInstallVersion=$(Version::parse "${installedVersion}")
-        if [ -n "$( echo ${installedVersion} | sed -n '/beta/p')" ] && [ "${parsedInstallVersion:0:2}" -eq 13 ]; then
+        if [ -n "$( echo ${installedVersion} | sed -n '/beta/p')" ] && [ "${parsedInstallVersion:0:2}" -eq 13 ] && [ "$(Environment::IsDockerComposeV2Enabled)" == "${TRUE}" ]; then
 			errorMessage+="Mutagen.io version ${installedVersion} is not supported. Please, update Mutagen.io to at least ${requiredMinimalVersion}."
 
             if [ "${_PLATFORM}" == 'macos' ]; then
