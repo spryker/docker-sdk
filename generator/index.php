@@ -129,6 +129,7 @@ verbose('Generating NGINX configuration... [DONE]');
 $primal = [];
 $projectData['_entryPoints'] = [];
 $projectData['_endpointMap'] = [];
+$projectData = extendProjectDataWithKeyValueRegionNamespaces($projectData);
 $projectData['_storeSpecific'] = getStoreSpecific($projectData);
 $debugPortIndex = 10000;
 $projectData['_endpointDebugMap'] = [];
@@ -260,7 +261,6 @@ foreach ($projectData['groups'] ?? [] as $groupName => $groupData) {
     foreach ($groupData['applications'] ?? [] as $applicationName => $applicationData) {
         if ($applicationData['application'] !== 'static') {
             $projectData['_applications'][] = $applicationName;
-
             file_put_contents(
                 $deploymentDir . DS . 'env' . DS . $applicationName . '.env',
                 $twig->render(sprintf('env/application/%s.env.twig', $applicationData['application']), [
@@ -737,6 +737,7 @@ function getStoreSpecific(array $projectData): array
                 # TODO SESSION should not be used in CLI
             ];
         }
+        $storeSpecific[$regionName]['SPRYKER_KEY_VALUE_REGION_NAMESPACES'] = $projectData['regions'][$regionName]['key_value_region_namespaces'];
     }
 
     return $storeSpecific;
@@ -878,7 +879,7 @@ function buildNewrelicEnvVariables(array $projectData): array
 
         $newrelicEnvVariables['NEWRELIC_' . strtoupper($key)] = $value;
     }
-     return $newrelicEnvVariables;
+    return $newrelicEnvVariables;
 }
 
 /**
@@ -1080,33 +1081,10 @@ function buildComposerAutoloadConfig(array $projectData): string
     return trim($projectData['composer']['autoload'] ?? ($projectData['_fileMode'] === 'baked' ? '--classmap-authoritative' : ''));
 }
 
-function endsWith(string $haystack, string $needle): bool
-{
-    if (function_exists('str_ends_with')) {
-        return str_ends_with($haystack, $needle);
-    }
-
-    if ($needle === '') {
-        return true;
-    }
-
-    $needleLength = strlen($needle);
-
-    return substr($haystack, -$needleLength) === $needle;
-}
-
 function buildDataForRequirementAnalyzer(array $projectData): array
 {
     $hosts = $projectData['_hosts'];
-
-    // all domain names ending with TLD 'localhost' do not need to be listed in /etc/hosts
-    // see https://www.ietf.org/rfc/rfc2606.txt
-    foreach ($hosts as $hostNameKey => $hostNameValue)
-     {
-         if (endsWith($hostNameKey, 'localhost')) {
-            unset($hosts[$hostNameKey]);
-         }
-     }
+    unset($hosts['localhost']);
 
     return [
         'hosts' => implode(' ', $hosts),
@@ -1472,6 +1450,24 @@ function buildDefaultCredentialsForBroker(array $projectData): array
         $defaultBrokerServiceCredentials,
         $brokerServiceCredentials
     );
+
+    return $projectData;
+}
+
+/**
+ * @param array $projectData
+ *
+ * @return array
+ */
+function extendProjectDataWithKeyValueRegionNamespaces(array $projectData): array
+{
+    foreach ($projectData['regions'] as $regionName => $regionData) {
+        $keyValueStoreNamespaces = [];
+        foreach ($regionData['stores'] ?? [] as $storeName => $storeData) {
+            $keyValueStoreNamespaces[$storeName] = $storeData['services']['key_value_store']['namespace'];
+        }
+        $projectData['regions'][$regionName]['key_value_region_namespaces'] = json_encode($keyValueStoreNamespaces);
+    }
 
     return $projectData;
 }
