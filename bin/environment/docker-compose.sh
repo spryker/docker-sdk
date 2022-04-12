@@ -40,6 +40,21 @@ function Environment::getDockerComposeVersion() {
 	echo ${composeVersion};
 }
 
+# Check `Use Docker compose v2` enabler into Docker Desktop
+function Environment::IsDockerComposeV2Enabled() {
+	local isDockerComposeV2Enabled="${FALSE}"
+
+	if [ "${_PLATFORM}" != 'linux' ]; then
+		local composeVersion=$(Version::parse "$(docker-compose version --short)")
+
+		if [ "${composeVersion:0:1}" -eq 2 ]; then
+	         isDockerComposeV2Enabled="${TRUE}"
+		fi
+	fi
+
+	echo ${isDockerComposeV2Enabled};
+}
+
 function Environment::getDockerComposeSubstitute() {
 	local dockerComposeVersion=$(Version::parse "$(Environment::getDockerComposeVersion)")
 
