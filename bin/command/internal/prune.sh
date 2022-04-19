@@ -5,7 +5,7 @@ Registry::addCommand "prune" "Command::prune"
 function Command::prune() {
 	local forceArg=${1}
 
-	if [ "${forceArg}" == "--f" ] || ; then
+	if [ "${forceArg}" == "--f" ]; then
 		forceArg='-f'
 	else
 		forceArg=''
