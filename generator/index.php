@@ -1143,10 +1143,33 @@ function buildComposerAutoloadConfig(array $projectData): string
     return trim($projectData['composer']['autoload'] ?? ($projectData['_fileMode'] === 'baked' ? '--classmap-authoritative' : ''));
 }
 
+function endsWith(string $haystack, string $needle): bool
+{
+    if (function_exists('str_ends_with')) {
+        return str_ends_with($haystack, $needle);
+    }
+
+    if ($needle === '') {
+        return true;
+    }
+
+    $needleLength = strlen($needle);
+
+    return substr($haystack, -$needleLength) === $needle;
+}
+
 function buildDataForRequirementAnalyzer(array $projectData): array
 {
     $hosts = $projectData['_hosts'];
-    unset($hosts['localhost']);
+
+    // all domain names ending with TLD 'localhost' do not need to be listed in /etc/hosts
+    // see https://www.ietf.org/rfc/rfc2606.txt
+    foreach ($hosts as $hostNameKey => $hostNameValue)
+     {
+         if (endsWith($hostNameKey, 'localhost')) {
+            unset($hosts[$hostNameKey]);
+         }
+     }
 
     return [
         'hosts' => implode(' ', $hosts),
