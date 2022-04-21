@@ -63,8 +63,6 @@ function Command::export() {
 #            Assets::build --force
 #            Images::buildFrontend --force
 #            Images::tagFrontend "${tag}"
-            Images::_buildJenkins --force
-            Images::_tagJenkins "${tag}"
             Images::printAll "${tag}"
             ;;
         *)

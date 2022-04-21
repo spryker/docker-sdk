@@ -182,23 +182,6 @@ function Images::_buildFrontend() {
     fi
 }
 
-function Images::_buildJenkins() {
-    local jenkinsImage="${SPRYKER_DOCKER_PREFIX}_jenkins:${SPRYKER_DOCKER_TAG}"
-
-    docker build \
-        -t "${jenkinsImage}" \
-        -f "${DEPLOYMENT_PATH}/images/common/services/jenkins/export/Dockerfile" \
-        --progress="${PROGRESS_TYPE}" \
-        --build-arg "SPRYKER_PARENT_IMAGE=${appImage}" \
-        "${DEPLOYMENT_PATH}/" 1>&2
-}
-
-function Images::_tagJenkins() {
-    local tag=${1:-${SPRYKER_DOCKER_TAG}}
-
-    Images::_tagByApp frontend "${SPRYKER_DOCKER_PREFIX}_jenkins:${tag}" "${SPRYKER_DOCKER_PREFIX}_jenkins:${SPRYKER_DOCKER_TAG}"
-}
-
 function Images::_buildGateway() {
     local gatewayImage="${SPRYKER_DOCKER_PREFIX}_gateway:${SPRYKER_DOCKER_TAG}"
 
