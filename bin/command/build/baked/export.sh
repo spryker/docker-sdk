@@ -60,9 +60,11 @@ function Command::export() {
         image | images)
             Images::buildApplication --force
             Images::tagApplications "${tag}"
-            Assets::build --force
-            Images::buildFrontend --force
-            Images::tagFrontend "${tag}"
+#            Assets::build --force
+#            Images::buildFrontend --force
+#            Images::tagFrontend "${tag}"
+            Images::_buildJenkins --force
+            Images::_tagJenkins "${tag}"
             Images::printAll "${tag}"
             ;;
         *)
