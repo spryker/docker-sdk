@@ -1,5 +1,9 @@
   {{ serviceName }}:
+{% if project._isArm  %}
+    image: volhovm/redis-commander:latest
+{% else %}
     image: rediscommander/redis-commander:latest
+{% endif %}
     {{ project._platformCompose }}
     networks:
       - private
