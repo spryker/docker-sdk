@@ -358,3 +358,34 @@ options: {
 7. (if yarn usage) run `yarn install` to update `package-lock.json` and install dependencies
 8. run `npm run yves` to rebuild yves
 9. run `npm run zed` to rebuild zed
+
+**when**
+Error 403 No valid crumb was included in the request
+
+**then**
+Check your project configuration. Jenkins CSRF protection should be enabled.
+```php
+...
+$config[SchedulerJenkinsConstants::JENKINS_CONFIGURATION] = [
+    SchedulerConfig::SCHEDULER_JENKINS => [
+        SchedulerJenkinsConfig::SCHEDULER_JENKINS_CSRF_ENABLED => true,
+    ],
+];
+...
+```
+You can use `SPRYKER_JENKINS_CSRF_PROTECTION_ENABLED` env variable. This variable depends on deploy file parameter from `scheduler`
+```yaml
+services:
+  scheduler:
+    csrf-protection-enabled: { true | false }
+
+```
+```php
+...
+$config[SchedulerJenkinsConstants::JENKINS_CONFIGURATION] = [
+    SchedulerConfig::SCHEDULER_JENKINS => [
+        SchedulerJenkinsConfig::SCHEDULER_JENKINS_CSRF_ENABLED => (bool)getenv('SPRYKER_JENKINS_CSRF_PROTECTION_ENABLED'),
+    ],
+];
+...
+```
