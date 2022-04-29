@@ -1,7 +1,11 @@
 {% set protocol = project['docker']['ssl']['enabled'] ? 'https://' : 'http://' %}
 {% set firstGlueEndpointMap = project['_endpointMap'] | first %}
   {{ serviceName }}:
+{% if project._isArm  %}
+    image: volhovm/swagger-ui:v3.24.3
+{% else %}
     image: swaggerapi/swagger-ui:v3.24.3
+{% endif %}
     {{ project._platformCompose }}
     networks:
         - private
