@@ -2,7 +2,6 @@
 
 export COMPOSE_HTTP_TIMEOUT=400
 export COMPOSE_CONVERT_WINDOWS_PATHS=1
-export COMPOSE_VERSION=${COMPOSE_VERSION:-2}
 
 require docker-compose tr
 
@@ -13,7 +12,7 @@ function Environment::checkDockerComposeVersion() {
     local installedVersion=$(Environment::getDockerComposeVersion)
 
     if [ "${installedVersion}" == 0 ]; then
-        Console::error "Docker Compose V${COMPOSE_VERSION} is not found. Please, make sure Docker Compose V${COMPOSE_VERSION} is installed."
+        Console::error "Docker Compose is not found. Please, make sure Docker Compose is installed."
         exit 1
     fi
 
@@ -26,17 +25,34 @@ function Environment::checkDockerComposeVersion() {
 }
 
 function Environment::getDockerComposeVersion() {
-    if [ ${COMPOSE_VERSION} == 2 ]; then
-        echo "$(
-           command -v docker >/dev/null
-           test $? -eq 0 && docker compose version --short | tr -d 'v' || echo 0
-        )"
-    else
-        echo "$(
-             command -v docker-compose >/dev/null
+    local composeVersion="$(
+       docker compose version >/dev/null 2>&1
+       test $? -eq 0 && docker compose version --short | tr -d 'v' || echo 0
+    )"
+
+	if [ "${composeVersion}" == '0' ]; then
+         composeVersion="$(
+             docker-compose version >/dev/null 2>&1
              test $? -eq 0 && docker-compose version --short | tr -d 'v' || echo 0
          )"
-    fi
+	fi
+
+	echo ${composeVersion};
+}
+
+# Check `Use Docker compose v2` enabler into Docker Desktop
+function Environment::IsDockerComposeV2Enabled() {
+	local isDockerComposeV2Enabled="${FALSE}"
+
+	if [ "${_PLATFORM}" != 'linux' ]; then
+		local composeVersion=$(Version::parse "$(docker-compose version --short)")
+
+		if [ "${composeVersion:0:1}" -eq 2 ]; then
+	         isDockerComposeV2Enabled="${TRUE}"
+		fi
+	fi
+
+	echo ${isDockerComposeV2Enabled};
 }
 
 function Environment::getDockerComposeSubstitute() {
@@ -56,7 +72,7 @@ function Environment::getDockerComposeTTY() {
 	local installedVersion=$(Environment::getDockerComposeVersion)
 	local dockerComposeVersion="2.2.3"
 
-    if [ "$(Version::parse "${installedVersion}")" -eq "$(Version::parse "${dockerComposeVersion}")" ]; then
+    if [ "$(Version::parse "${installedVersion}")" -ge "$(Version::parse "${dockerComposeVersion}")" ]; then
 		echo "${ttyDisabledKey}"
 	else
 		echo "${ttyEnabledKey}"
