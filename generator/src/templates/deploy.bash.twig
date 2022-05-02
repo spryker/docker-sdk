@@ -8,8 +8,6 @@ pushd "${BASH_SOURCE%/*}" >/dev/null
 . ./bin/framework.sh
 popd >/dev/null
 
-export COMPOSE_VERSION="${COMPOSE_VERSION:-2}"
-
 import environment/cross-platform.sh
 import environment/docker.sh
 import environment/docker-compose.sh
