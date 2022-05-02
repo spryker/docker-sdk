@@ -47,6 +47,7 @@ RUN --mount=type=cache,id=apk,sharing=locked,target=/var/cache/apk mkdir -p /etc
      git \
      redis \
      yarn \
+     jq \
      ; fi'
 
 # TODO Not-available feature: autoload-cache. Should be switchable

@@ -522,7 +522,12 @@ verbose(implode(PHP_EOL, $output));
 $errorMessages = validateServiceVersions($projectData);
 
 if (count($errorMessages) > 0) {
-    warn(implode(PHP_EOL, $errorMessages));
+    $redColorCode = "\033[31m";
+
+    warn($redColorCode . 'Service version compatibility errors:' . PHP_EOL);
+    warn($redColorCode . ' * ' . implode(PHP_EOL . $redColorCode . ' * ' , $errorMessages));
+    warn(PHP_EOL . $redColorCode . 'Please check documentation.');
+
     exit(1);
 }
 
@@ -1445,7 +1450,7 @@ function buildDefaultCredentialsForBroker(array $projectData): array
  */
 function validateServiceVersions(array $projectData): array
 {
-    $validationMessageTemplate = '`%s` service with `%s` engine and %s version are unsupported on ARM architecture. Please check documentation.';
+    $validationMessageTemplate = '`%s` service with `%s` engine and %s version are unsupported on ARM architecture.';
     $validationMessages = [];
 
     if (!isArmArchitecture()) {
@@ -1468,11 +1473,11 @@ function validateServiceVersions(array $projectData): array
             continue;
         }
 
-        if (!in_array($serviceVersion, $serviceEngines[$serviceEngine])) {
+        if (!array_key_exists($serviceVersion, $serviceEngines[$serviceEngine])) {
             continue;
         }
 
-        $validationMessages[] = sprintf($validationMessageTemplate, $serviceName, $serviceEngine, $serviceVersion);
+        $validationMessages[] = sprintf($validationMessageTemplate, $serviceName, $serviceEngine, $serviceEngines[$serviceEngine][$serviceVersion]);
     }
 
     return $validationMessages;
@@ -1485,22 +1490,39 @@ function getUnsupportedArmServiceMap(): array
 {
     return [
         'database' => [
-            'mysql' => ['default', '5.7'],
+            'mysql' => [
+                '5.7' => '5.7',
+                'default' => '5.7',
+            ],
         ],
         'broker' => [
-            'rabbitmq' => ['default', '3.7'],
+            'rabbitmq' => [
+                '3.7' => '3.7',
+                'default' => '3.7',
+            ],
         ],
         'webdriver' => [
             'phantomjs' => ['*'],
         ],
         'search' => [
-            'elastic' => ['5.6', '6.8', 'default'],
+            'elastic' => [
+                '5.6' => '5.6',
+                '6.8' => '6.8',
+                'default' => '5.6',
+            ],
         ],
         'kibana' => [
-            'kibana' => ['5.6', '6.8', 'default'],
+            'kibana' => [
+                '5.6' => '5.6',
+                '6.8' => '6.8',
+                'default' => '5.6',
+            ],
         ],
         'scheduler' => [
-            'jenkins' => ['2.176', 'default'],
+            'jenkins' => [
+                '2.176' => '2.176',
+                'default' => '2.176',
+            ],
         ],
     ];
 }
