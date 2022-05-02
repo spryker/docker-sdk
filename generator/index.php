@@ -519,6 +519,18 @@ if ($returnCode > 0) {
 
 verbose(implode(PHP_EOL, $output));
 
+$errorMessages = validateServiceVersions($projectData);
+
+if (count($errorMessages) > 0) {
+    $redColorCode = "\033[31m";
+
+    warn($redColorCode . 'Service version compatibility errors:' . PHP_EOL);
+    warn($redColorCode . ' * ' . implode(PHP_EOL . $redColorCode . ' * ' , $errorMessages));
+    warn(PHP_EOL . $redColorCode . 'Please check documentation.');
+
+    exit(1);
+}
+
 // -------------------------
 /**
  * @param array $projectData
@@ -1430,4 +1442,104 @@ function buildDefaultCredentialsForBroker(array $projectData): array
     );
 
     return $projectData;
+}
+
+/**
+ * @param array $projectData
+ * @return string[]
+ */
+function validateServiceVersions(array $projectData): array
+{
+    $validationMessageTemplate = '`%s` service with `%s` engine and %s version are unsupported on ARM architecture.';
+    $validationMessages = [];
+
+    if (!isArmArchitecture()) {
+        return $validationMessages;
+    }
+
+    $services = $projectData['services'];
+    $unsupportedServiceVersions = getUnsupportedArmServiceMap();
+
+    foreach ($unsupportedServiceVersions as $serviceName => $serviceEngines) {
+        if (!array_key_exists($serviceName, $services)) {
+            continue;
+        }
+
+        $service = $services[$serviceName];
+        $serviceEngine = $service['engine'] ?? null;
+        $serviceVersion = $service['version'] ?? 'default';
+
+        if($serviceEngine == null || !array_key_exists($serviceEngine, $serviceEngines)) {
+            continue;
+        }
+
+        if (!array_key_exists($serviceVersion, $serviceEngines[$serviceEngine])) {
+            continue;
+        }
+
+        $validationMessages[] = sprintf($validationMessageTemplate, $serviceName, $serviceEngine, $serviceEngines[$serviceEngine][$serviceVersion]);
+    }
+
+    return $validationMessages;
+}
+
+/**
+ * @return string[][][]
+ */
+function getUnsupportedArmServiceMap(): array
+{
+    return [
+        'database' => [
+            'mysql' => [
+                '5.7' => '5.7',
+                'default' => '5.7',
+            ],
+        ],
+        'broker' => [
+            'rabbitmq' => [
+                '3.7' => '3.7',
+                'default' => '3.7',
+            ],
+        ],
+        'webdriver' => [
+            'phantomjs' => ['*'],
+        ],
+        'search' => [
+            'elastic' => [
+                '5.6' => '5.6',
+                '6.8' => '6.8',
+                'default' => '5.6',
+            ],
+        ],
+        'kibana' => [
+            'kibana' => [
+                '5.6' => '5.6',
+                '6.8' => '6.8',
+                'default' => '5.6',
+            ],
+        ],
+        'scheduler' => [
+            'jenkins' => [
+                '2.176' => '2.176',
+                'default' => '2.176',
+            ],
+        ],
+    ];
+}
+
+/**
+ * @return bool
+ */
+function isArmArchitecture(): bool
+{
+    $possibleValue = [
+        'arm',
+        'aarch64_be',
+        'aarch64',
+        'armv8l',
+    ];
+
+    $currentArchitecture = php_uname('m');
+
+    return in_array($currentArchitecture, $possibleValue);
 }
