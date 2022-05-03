@@ -1,6 +1,7 @@
 #!/bin/bash
 
 Registry::addCommand "prune" "Command::prune"
+Registry::Help::command -c "prune [--f]" "Remove all docker data(images, volume, system and builder)."
 
 function Command::prune() {
 	local forceArg=${1}
