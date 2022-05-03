@@ -65,7 +65,7 @@ For contribution guidelines, see [Code contribution guide](https://documentation
 |                 |              | mariadb-10.3 | x           |
 |                 |              | mariadb-10.4 | x           |
 |                 |              | mariadb-10.5 | x           |
-| broker          | rabbitmq     | 3.7          |             |
+| broker          | rabbitmq     | 3.7*         |             |
 |                 |              | 3.8          | x           |
 |                 |              | 3.9          | x           |
 | session         | redis        | 5.0          | x           |
@@ -74,7 +74,7 @@ For contribution guidelines, see [Code contribution guide](https://documentation
 |                 |              | 6.8          |             |
 |                 |              | 7.6          | x           |
 |                 |              | 7.10         | x           |
-| scheduler       | jenkins      | 2.176        |             |
+| scheduler       | jenkins      | 2.176*       |             |
 |                 |              | 2.305        | x           |
 |                 |              | 2.324        | x           |
 | webdriver       | phantomjs    | latest*      |             |
