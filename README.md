@@ -56,34 +56,34 @@ For contribution guidelines, see [Code contribution guide](https://documentation
 
 | Service           | Engine          | Version(s)   | ARM support |
 |-------------------|-----------------|--------------|-------------|
-| database          | postgres        | 9.6*         | x           |
-|                   |                 | 10           | x           |
-|                   |                 | 11           | x           |
-|                   |                 | 12           | x           |
+| database          | postgres        | 9.6*         | &check;     |
+|                   |                 | 10           | &check;     |
+|                   |                 | 11           | &check;     |
+|                   |                 | 12           | &check;     |
 |                   | mysql           | 5.7          |             |
-|                   |                 | mariadb-10.2 | x           |
-|                   |                 | mariadb-10.3 | x           |
-|                   |                 | mariadb-10.4 | x           |
-|                   |                 | mariadb-10.5 | x           |
+|                   |                 | mariadb-10.2 | &check;     |
+|                   |                 | mariadb-10.3 | &check;     |
+|                   |                 | mariadb-10.4 | &check;     |
+|                   |                 | mariadb-10.5 | &check;     |
 | broker            | rabbitmq        | 3.7*         |             |
-|                   |                 | 3.8          | x           |
-|                   |                 | 3.9          | x           |
-| session           | redis           | 5.0          | x           |
-| key_value_store   | redis           | 5.0          | x           |
+|                   |                 | 3.8          | &check;     |
+|                   |                 | 3.9          | &check;     |
+| session           | redis           | 5.0          | &check;     |
+| key_value_store   | redis           | 5.0          | &check;     |
 | search            | elastic         | 5.6*         |             |
 |                   |                 | 6.8          |             |
-|                   |                 | 7.6          | x           |
-|                   |                 | 7.10         | x           |
+|                   |                 | 7.6          | &check;     |
+|                   |                 | 7.10         | &check;     |
 | scheduler         | jenkins         | 2.176*       |             |
-|                   |                 | 2.305        | x           |
-|                   |                 | 2.324        | x           |
+|                   |                 | 2.305        | &check;     |
+|                   |                 | 2.324        | &check;     |
 | webdriver         | phantomjs       | latest*      |             |
-|                   | chromedriver    | latest       | x           |
-| mail_catcher      | mailhog         | 1.0          | x           |
-| swagger           | swagger-ui      | v3.24        | x           |
+|                   | chromedriver    | latest       | &check;     |
+| mail_catcher      | mailhog         | 1.0          | &check;     |
+| swagger           | swagger-ui      | v3.24        | &check;     |
 | kibana            | kibana          | 5.6*         |             |
 |                   |                 | 6.8          |             |
-|                   |                 | 7.6          | x           |
-|                   |                 | 7.10         | x           |
-| blackfire         | blackfire       | latest       | x           |
-| redis-commander   | redis-commander | latest       | x           |
+|                   |                 | 7.6          | &check;     |
+|                   |                 | 7.10         | &check;     |
+| blackfire         | blackfire       | latest       | &check;     |
+| redis-commander   | redis-commander | latest       | &check;     |
