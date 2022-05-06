@@ -29,13 +29,6 @@ function Mount::Mutagen::beforeUp() {
     setComposeCovertWindowsPaths
     terminateMutagenSessionsWithObsoleteDockerId
 
-    local mutagenInstalledVersion="$(Mount::Mutagen::getInstalledVersion)"
-	local installedVersion=$(Version::parse ${mutagenInstalledVersion})
-
-    if [ "${installedVersion:0:2}" -ge 14 ]; then
-        export COMPOSE_CONVERT_WINDOWS_PATHS=0
-    fi
-
     # Clean content of the sync volume if the sync session is terminated or halted.
     sessionStatus=$(mutagen sync list "${SPRYKER_SYNC_SESSION_NAME}" 2>/dev/null | grep 'Status:' | awk '{print $2}' || echo '')
     if [ -z "${sessionStatus}" ] || [ "${sessionStatus}" == 'Halted' ]; then
