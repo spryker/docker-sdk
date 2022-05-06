@@ -1467,7 +1467,7 @@ function validateServiceVersions(array $projectData): array
 
         $service = $services[$serviceName];
         $serviceEngine = $service['engine'] ?? null;
-        $serviceVersion = $service['version'] ?? 'default';
+        $serviceVersion = (string)($service['version'] ?? 'default');
 
         if($serviceEngine == null || !array_key_exists($serviceEngine, $serviceEngines)) {
             continue;
