@@ -1504,20 +1504,6 @@ function getUnsupportedArmServiceMap(): array
         'webdriver' => [
             'phantomjs' => ['*'],
         ],
-        'search' => [
-            'elastic' => [
-                '5.6' => '5.6',
-                '6.8' => '6.8',
-                'default' => '5.6',
-            ],
-        ],
-        'kibana' => [
-            'kibana' => [
-                '5.6' => '5.6',
-                '6.8' => '6.8',
-                'default' => '5.6',
-            ],
-        ],
         'scheduler' => [
             'jenkins' => [
                 '2.176' => '2.176',
