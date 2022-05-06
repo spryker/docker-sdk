@@ -26,7 +26,15 @@ function Mount::Mutagen::beforeUp() {
     # The volume will not be deleted if any app container is running.
     docker volume rm "${SPRYKER_SYNC_VOLUME}" >/dev/null 2>&1 || true
 
+    setComposeCovertWindowsPaths
     terminateMutagenSessionsWithObsoleteDockerId
+
+    local mutagenInstalledVersion="$(Mount::Mutagen::getInstalledVersion)"
+	local installedVersion=$(Version::parse ${mutagenInstalledVersion})
+
+    if [ "${installedVersion:0:2}" -ge 14 ]; then
+        export COMPOSE_CONVERT_WINDOWS_PATHS=0
+    fi
 
     # Clean content of the sync volume if the sync session is terminated or halted.
     sessionStatus=$(mutagen sync list "${SPRYKER_SYNC_SESSION_NAME}" 2>/dev/null | grep 'Status:' | awk '{print $2}' || echo '')
@@ -36,6 +44,18 @@ function Mount::Mutagen::beforeUp() {
         docker run -i --rm -v "${SPRYKER_SYNC_VOLUME}:/data" busybox find /data/ ! -path /data/ -delete >/dev/null 2>&1 || true
         Console::end "[OK]"
     fi
+}
+
+# https://github.com/docker/compose/issues/9428
+function setComposeCovertWindowsPaths() {
+    local mutagenInstalledVersion="$(Mount::Mutagen::getInstalledVersion)"
+	local installedVersion=$(Version::parse ${mutagenInstalledVersion})
+
+    if [ "${installedVersion:0:2}" -ge 14 ]; then
+        export COMPOSE_CONVERT_WINDOWS_PATHS=0
+    fi
+
+    echo ${COMPOSE_CONVERT_WINDOWS_PATHS}
 }
 
 function terminateMutagenSessionsWithObsoleteDockerId() {
