@@ -47,8 +47,6 @@ function updateComposeCovertWindowsPaths() {
     if [ "${installedVersion:0:2}" -ge 14 ]; then
         export COMPOSE_CONVERT_WINDOWS_PATHS=0
     fi
-
-    echo ${COMPOSE_CONVERT_WINDOWS_PATHS}
 }
 
 function terminateMutagenSessionsWithObsoleteDockerId() {
