@@ -9,10 +9,7 @@ function Environment::checkDockerComposeVersion() {
     Console::verbose::start "Checking docker-compose version..."
 
     local requiredMinimalVersion=${1:-'1.22.0'}
-    local installedVersion=$(
-        command -v docker-compose >/dev/null
-        test $? -eq 0 && docker-compose version --short || echo 0
-    )
+    local installedVersion=$(Environment::getDockerComposeVersion)
 
     if [ "${installedVersion}" == 0 ]; then
         Console::error "Docker Compose is not found. Please, make sure Docker Compose is installed."
@@ -25,6 +22,61 @@ function Environment::checkDockerComposeVersion() {
     fi
 
     Console::end "[OK]"
+}
+
+function Environment::getDockerComposeVersion() {
+    local composeVersion="$(
+       docker compose version >/dev/null 2>&1
+       test $? -eq 0 && docker compose version --short | tr -d 'v' || echo 0
+    )"
+
+	if [ "${composeVersion}" == '0' ]; then
+         composeVersion="$(
+             docker-compose version >/dev/null 2>&1
+             test $? -eq 0 && docker-compose version --short | tr -d 'v' || echo 0
+         )"
+	fi
+
+	echo ${composeVersion};
+}
+
+# Check `Use Docker compose v2` enabler into Docker Desktop
+function Environment::IsDockerComposeV2Enabled() {
+	local isDockerComposeV2Enabled="${FALSE}"
+
+	if [ "${_PLATFORM}" != 'linux' ]; then
+		local composeVersion=$(Version::parse "$(docker-compose version --short)")
+
+		if [ "${composeVersion:0:1}" -eq 2 ]; then
+	         isDockerComposeV2Enabled="${TRUE}"
+		fi
+	fi
+
+	echo ${isDockerComposeV2Enabled};
+}
+
+function Environment::getDockerComposeSubstitute() {
+	local dockerComposeVersion=$(Version::parse "$(Environment::getDockerComposeVersion)")
+
+    if [ "${dockerComposeVersion:0:1}" -lt 2 ]; then
+        echo 'docker-compose'
+    else
+        echo 'docker compose'
+    fi
+}
+
+# For avoid https://github.com/docker/compose/issues/9104
+function Environment::getDockerComposeTTY() {
+	local ttyDisabledKey='docker_compose_tty_disabled'
+	local ttyEnabledKey='docker_compose_tty_enabled'
+	local installedVersion=$(Environment::getDockerComposeVersion)
+	local dockerComposeVersion="2.2.3"
+
+    if [ "$(Version::parse "${installedVersion}")" -ge "$(Version::parse "${dockerComposeVersion}")" ]; then
+		echo "${ttyDisabledKey}"
+	else
+		echo "${ttyEnabledKey}"
+    fi
 }
 
 Registry::addChecker 'Environment::checkDockerComposeVersion'

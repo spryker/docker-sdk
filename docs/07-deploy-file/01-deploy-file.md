@@ -69,6 +69,58 @@ imports:
     environment/dev/docker.deploy.template.yml:
 ```
 
+### Dynamic parameters - filters
+
+Parameter filters provide the possibility to modify dynamic parameter original value.
+
+For example, using `storeName` for groups configuration:
+
+**config/deploy-templates/groups.yml**
+
+```yaml
+groups:
+    EU:
+        region: EU
+        applications:
+            Yves:
+                application: yves
+                endpoints:
+                    %storeName%.%domain%:
+                        store: %storeName|upper%
+```
+
+Groups template `config/deploy-templates/groups.yml` includes into `deploy.dev.yml` with `storeName` as dynamic parameter.
+
+**deploy.dev.yml**
+```yaml
+version: 1.0
+
+imports:
+    groups.yml:
+        template: groups.yml
+        parameters:
+            storeName: de
+            domain: spryker.com
+```
+
+As the result groups section has `storeName` parameter in uppercase:
+
+```yaml
+groups:
+    EU:
+        region: EU
+        applications:
+            Yves:
+                application: yves
+                endpoints:
+                    de.spryker.com:
+                        store: DE
+```
+
+Available filters list:
+* lower - converts a value to lowercase.
+* upper - converts a value to uppercase.
+
 ### Import types
 
 You can include a deploy file into an application's configuration using one of the following import types.
@@ -107,10 +159,10 @@ imports:
 Example of including the same deploy file with different parameters via an unnamed array import:
 
 ```yaml
-- template: deploy.porject.template.yml
+- template: deploy.project.template.yml
   parameters:
       env-name: 'stage'
-- template: deploy.porject.template.yml
+- template: deploy.project.template.yml
   parameters:
       env-name: 'dev'
 ```
