@@ -26,7 +26,7 @@ function Mount::Mutagen::beforeUp() {
     # The volume will not be deleted if any app container is running.
     docker volume rm "${SPRYKER_SYNC_VOLUME}" >/dev/null 2>&1 || true
 
-    setComposeCovertWindowsPaths
+    updateComposeCovertWindowsPaths
     terminateMutagenSessionsWithObsoleteDockerId
 
     # Clean content of the sync volume if the sync session is terminated or halted.
@@ -40,7 +40,7 @@ function Mount::Mutagen::beforeUp() {
 }
 
 # https://github.com/docker/compose/issues/9428
-function setComposeCovertWindowsPaths() {
+function updateComposeCovertWindowsPaths() {
     local mutagenInstalledVersion="$(Mount::Mutagen::getInstalledVersion)"
 	local installedVersion=$(Version::parse ${mutagenInstalledVersion})
 
