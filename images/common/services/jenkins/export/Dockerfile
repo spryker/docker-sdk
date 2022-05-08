@@ -1,6 +1,7 @@
 # syntax = docker/dockerfile:experimental
 ARG SPRYKER_PARENT_IMAGE
 
+FROM spryker/jenkins-boilerplate:latest
 FROM ${SPRYKER_PARENT_IMAGE}  as spryker_jenkins
 EXPOSE 8080
 

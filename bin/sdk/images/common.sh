@@ -29,6 +29,7 @@ function Images::_buildApp() {
 
     local -a sshArgument=()
     local folder=${1}
+    local withPushImages=${2:-${FALSE}}
     local baseAppImage="${SPRYKER_DOCKER_PREFIX}_base_app:${SPRYKER_DOCKER_TAG}"
     local appImage="${SPRYKER_DOCKER_PREFIX}_app:${SPRYKER_DOCKER_TAG}"
     local localAppImage="${SPRYKER_DOCKER_PREFIX}_local_app:${SPRYKER_DOCKER_TAG}"
@@ -122,15 +123,6 @@ function Images::_buildApp() {
         --build-arg "SPRYKER_BUILD_STAMP=${SPRYKER_BUILD_STAMP:-""}" \
         .  1>&2
 
-    local jenkinsImage="${SPRYKER_DOCKER_PREFIX}_jenkins:${SPRYKER_DOCKER_TAG}"
-
-    docker build \
-        -t "${jenkinsImage}" \
-        -f "${DEPLOYMENT_PATH}/images/common/services/jenkins/export/Dockerfile" \
-        --progress="${PROGRESS_TYPE}" \
-        --build-arg "SPRYKER_PARENT_IMAGE=${appImage}" \
-        "${DEPLOYMENT_PATH}/" 1>&2
-
     if [ -n "${SPRYKER_XDEBUG_MODE_ENABLE}" ]; then
         docker build \
             -t "${runtimeCliImage}" \
@@ -138,6 +130,17 @@ function Images::_buildApp() {
             --progress="${PROGRESS_TYPE}" \
             --build-arg "SPRYKER_PARENT_IMAGE=${cliImage}" \
             "${DEPLOYMENT_PATH}/context" 1>&2
+    fi
+
+    if [ "${withPushImages}" == "${TRUE}" ]; then
+        local jenkinsImage="${SPRYKER_DOCKER_PREFIX}_jenkins:${SPRYKER_DOCKER_TAG}"
+
+        docker build \
+            -t "${jenkinsImage}" \
+            -f "${DEPLOYMENT_PATH}/images/common/services/jenkins/export/Dockerfile" \
+            --progress="${PROGRESS_TYPE}" \
+            --build-arg "SPRYKER_PARENT_IMAGE=${appImage}" \
+            "${DEPLOYMENT_PATH}/" 1>&2
     fi
 
     Registry::Trap::releaseExitHook 'removeBuildSecrets'
@@ -213,7 +216,6 @@ function Images::tagApplications() {
     done
 
     Images::_tagByApp pipeline "${SPRYKER_DOCKER_PREFIX}_pipeline:${tag}" "${SPRYKER_DOCKER_PREFIX}_pipeline:${SPRYKER_DOCKER_TAG}"
-    Images::_tagByApp frontend "${SPRYKER_DOCKER_PREFIX}_jenkins:${tag}" "${SPRYKER_DOCKER_PREFIX}_jenkins:${SPRYKER_DOCKER_TAG}"
 }
 
 function Images::tagFrontend() {
@@ -232,5 +234,4 @@ function Images::printAll() {
 
     printf "%s %s_frontend:%s\n" "frontend" "${SPRYKER_DOCKER_PREFIX}" "${tag}-frontend"
     printf "%s %s_pipeline:%s\n" "pipeline" "${SPRYKER_DOCKER_PREFIX}" "${tag}-pipeline"
-    printf "%s %s_jenkins:%s\n" "jenkins" "${SPRYKER_DOCKER_PREFIX}" "${tag}-jenkins"
 }
