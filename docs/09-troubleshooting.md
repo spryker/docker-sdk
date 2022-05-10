@@ -327,3 +327,65 @@ You get an error after running `docker/sdk cli {ARGUMENT_1}`.
 
 **then**
 Wrap the command arguments into single quotes. For example, `docker/sdk cli 'composer require spryker/*'`
+
+**when**
+`Node Sass does not yet support your current environment: Linux Unsupported architecture (arm64) with Node.js`
+
+**then**
+1. remove `node-sass` dependencies in `package.json`
+2. add `sass` and `sass-loader`
+```
+...
+"sass": "~1.32.13",
+"sass-loader": "~10.2.0",
+...
+```
+3. update `@spryker/oryx-for-zed`
+```
+...
+"@spryker/oryx-for-zed": "~2.11.5",
+...
+```
+4. add option to sass-loader (`frontend/configs/development.js`)
+```
+loader: 'sass-loader',
+options: {
+   implementation: require('sass'),
+}
+```
+5. run `docker/sdk cli`
+6. run `npm install` to update `package-lock.json` and install dependencies
+7. (if yarn usage) run `yarn install` to update `package-lock.json` and install dependencies
+8. run `npm run yves` to rebuild yves
+9. run `npm run zed` to rebuild zed
+
+**when**
+Error 403 No valid crumb was included in the request
+
+**then**
+Check your project configuration. Jenkins CSRF protection should be enabled.
+```php
+...
+$config[SchedulerJenkinsConstants::JENKINS_CONFIGURATION] = [
+    SchedulerConfig::SCHEDULER_JENKINS => [
+        SchedulerJenkinsConfig::SCHEDULER_JENKINS_CSRF_ENABLED => true,
+    ],
+];
+...
+```
+You can use `SPRYKER_JENKINS_CSRF_PROTECTION_ENABLED` env variable. This variable depends on deploy file parameter from `scheduler`
+```yaml
+services:
+  scheduler:
+    csrf-protection-enabled: { true | false }
+
+```
+```php
+...
+$config[SchedulerJenkinsConstants::JENKINS_CONFIGURATION] = [
+    SchedulerConfig::SCHEDULER_JENKINS => [
+        SchedulerJenkinsConfig::SCHEDULER_JENKINS_CSRF_ENABLED => (bool)getenv('SPRYKER_JENKINS_CSRF_PROTECTION_ENABLED'),
+    ],
+];
+...
+```

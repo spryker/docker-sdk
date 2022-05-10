@@ -261,6 +261,7 @@ foreach ($projectData['groups'] ?? [] as $groupName => $groupData) {
     foreach ($groupData['applications'] ?? [] as $applicationName => $applicationData) {
         if ($applicationData['application'] !== 'static') {
             $projectData['_applications'][] = $applicationName;
+
             file_put_contents(
                 $deploymentDir . DS . 'env' . DS . $applicationName . '.env',
                 $twig->render(sprintf('env/application/%s.env.twig', $applicationData['application']), [
@@ -518,6 +519,18 @@ if ($returnCode > 0) {
 }
 
 verbose(implode(PHP_EOL, $output));
+
+$errorMessages = validateServiceVersions($projectData);
+
+if (count($errorMessages) > 0) {
+    $redColorCode = "\033[31m";
+
+    warn($redColorCode . 'Service version compatibility errors:' . PHP_EOL);
+    warn($redColorCode . ' * ' . implode(PHP_EOL . $redColorCode . ' * ' , $errorMessages));
+    warn(PHP_EOL . $redColorCode . 'Please check documentation.');
+
+    exit(1);
+}
 
 // -------------------------
 /**
@@ -879,7 +892,7 @@ function buildNewrelicEnvVariables(array $projectData): array
 
         $newrelicEnvVariables['NEWRELIC_' . strtoupper($key)] = $value;
     }
-    return $newrelicEnvVariables;
+     return $newrelicEnvVariables;
 }
 
 /**
@@ -1081,10 +1094,33 @@ function buildComposerAutoloadConfig(array $projectData): string
     return trim($projectData['composer']['autoload'] ?? ($projectData['_fileMode'] === 'baked' ? '--classmap-authoritative' : ''));
 }
 
+function endsWith(string $haystack, string $needle): bool
+{
+    if (function_exists('str_ends_with')) {
+        return str_ends_with($haystack, $needle);
+    }
+
+    if ($needle === '') {
+        return true;
+    }
+
+    $needleLength = strlen($needle);
+
+    return substr($haystack, -$needleLength) === $needle;
+}
+
 function buildDataForRequirementAnalyzer(array $projectData): array
 {
     $hosts = $projectData['_hosts'];
-    unset($hosts['localhost']);
+
+    // all domain names ending with TLD 'localhost' do not need to be listed in /etc/hosts
+    // see https://www.ietf.org/rfc/rfc2606.txt
+    foreach ($hosts as $hostNameKey => $hostNameValue)
+     {
+         if (endsWith($hostNameKey, 'localhost')) {
+            unset($hosts[$hostNameKey]);
+         }
+     }
 
     return [
         'hosts' => implode(' ', $hosts),
@@ -1365,7 +1401,7 @@ function buildDefaultRegionCredentialsForDatabase(array $projectData): array
     }
 
     $defaultDbRegionCredentials = [
-        'username' => 'spryker-%',
+        'username' => 'spryker',
         'password' => 'secret',
     ];
 
@@ -1407,12 +1443,13 @@ function buildDefaultRegionCredentialsForDatabase(array $projectData): array
 
                 foreach ($regionDbConfigs as $dbName => $regionDbConfig) {
                     if (isset($storeDbConfig['name']) && $storeDbConfig['name'] === $dbName) {
+                        $regionDbConfig = array_merge($defaultDbRegionCredentials, $regionDbConfig ?? []);
                         $databases['databases'][$storeName] = [
                             'host' => 'database',
                             'port' => $databaseServiceData['port'] ?? $databaseServiceData['engine'] === 'mysql' ? 3306 : 5432,
                             'database' => $dbName,
-                            'username' => sprintf('spryker-%s', $dbName),
-                            'password' => 'secret',
+                            'username' => $regionDbConfig['username'],
+                            'password' => $regionDbConfig['password'],
                             'characterSet' => $regionDbConfig['character-set'] ?? 'utf8',
                             'collate' => $regionDbConfig['collate'] ?? 'utf8_general_ci',
                         ];
@@ -1470,4 +1507,104 @@ function extendProjectDataWithKeyValueRegionNamespaces(array $projectData): arra
     }
 
     return $projectData;
+}
+
+/**
+ * @param array $projectData
+ * @return string[]
+ */
+function validateServiceVersions(array $projectData): array
+{
+    $validationMessageTemplate = '`%s` service with `%s` engine and %s version are unsupported on ARM architecture.';
+    $validationMessages = [];
+
+    if (!isArmArchitecture()) {
+        return $validationMessages;
+    }
+
+    $services = $projectData['services'];
+    $unsupportedServiceVersions = getUnsupportedArmServiceMap();
+
+    foreach ($unsupportedServiceVersions as $serviceName => $serviceEngines) {
+        if (!array_key_exists($serviceName, $services)) {
+            continue;
+        }
+
+        $service = $services[$serviceName];
+        $serviceEngine = $service['engine'] ?? null;
+        $serviceVersion = $service['version'] ?? 'default';
+
+        if($serviceEngine == null || !array_key_exists($serviceEngine, $serviceEngines)) {
+            continue;
+        }
+
+        if (!array_key_exists($serviceVersion, $serviceEngines[$serviceEngine])) {
+            continue;
+        }
+
+        $validationMessages[] = sprintf($validationMessageTemplate, $serviceName, $serviceEngine, $serviceEngines[$serviceEngine][$serviceVersion]);
+    }
+
+    return $validationMessages;
+}
+
+/**
+ * @return string[][][]
+ */
+function getUnsupportedArmServiceMap(): array
+{
+    return [
+        'database' => [
+            'mysql' => [
+                '5.7' => '5.7',
+                'default' => '5.7',
+            ],
+        ],
+        'broker' => [
+            'rabbitmq' => [
+                '3.7' => '3.7',
+                'default' => '3.7',
+            ],
+        ],
+        'webdriver' => [
+            'phantomjs' => ['*'],
+        ],
+        'search' => [
+            'elastic' => [
+                '5.6' => '5.6',
+                '6.8' => '6.8',
+                'default' => '5.6',
+            ],
+        ],
+        'kibana' => [
+            'kibana' => [
+                '5.6' => '5.6',
+                '6.8' => '6.8',
+                'default' => '5.6',
+            ],
+        ],
+        'scheduler' => [
+            'jenkins' => [
+                '2.176' => '2.176',
+                'default' => '2.176',
+            ],
+        ],
+    ];
+}
+
+/**
+ * @return bool
+ */
+function isArmArchitecture(): bool
+{
+    $possibleValue = [
+        'arm',
+        'aarch64_be',
+        'aarch64',
+        'armv8l',
+    ];
+
+    $currentArchitecture = php_uname('m');
+
+    return in_array($currentArchitecture, $possibleValue);
 }
