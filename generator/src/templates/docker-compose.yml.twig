@@ -8,7 +8,7 @@ x-volumes:
 services:
 
   cli_ssh_relay:
-    image: bpack/socat
+    image: spryker/socat:latest
     privileged: true
     command: UNIX-LISTEN:/tmp/ssh-relay/ssh-auth.sock,fork,unlink-early,user=1000,group=1000,mode=666 UNIX-CONNECT:/tmp/ssh-relay/input-ssh-auth.sock
     networks:
