@@ -1364,7 +1364,7 @@ function buildDefaultRegionCredentialsForDatabase(array $projectData): array
     }
 
     $defaultDbRegionCredentials = [
-        'username' => 'spryker-%',
+        'username' => 'spryker',
         'password' => 'secret',
     ];
 
@@ -1406,12 +1406,13 @@ function buildDefaultRegionCredentialsForDatabase(array $projectData): array
 
                 foreach ($regionDbConfigs as $dbName => $regionDbConfig) {
                     if (isset($storeDbConfig['name']) && $storeDbConfig['name'] === $dbName) {
+                        $regionDbConfig = array_merge($defaultDbRegionCredentials, $regionDbConfig ?? []);
                         $databases['databases'][$storeName] = [
                             'host' => 'database',
                             'port' => $databaseServiceData['port'] ?? $databaseServiceData['engine'] === 'mysql' ? 3306 : 5432,
                             'database' => $dbName,
-                            'username' => sprintf('spryker-%s', $dbName),
-                            'password' => 'secret',
+                            'username' => $regionDbConfig['username'],
+                            'password' => $regionDbConfig['password'],
                             'characterSet' => $regionDbConfig['character-set'] ?? 'utf8',
                             'collate' => $regionDbConfig['collate'] ?? 'utf8_general_ci',
                         ];
