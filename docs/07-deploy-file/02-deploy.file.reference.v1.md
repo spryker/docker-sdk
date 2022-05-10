@@ -790,8 +790,9 @@ An SQL database management system *Service*.
 * Store-specific
 
   - `databases:` - defines the list of required store-specific databases.
+  - `databases: database-1: username:`,`databases: database-1: password:` - defines database credentials. The default value: `spryker` and `secret`
   - `databases: database-1: collate:` - defines collation for the database. If not specified, the default value applies: `utf8_general_ci`.
-  - `database: database-1: character-set` - defines character set for the database. If not specified, the default value applies: `utf8`.
+  - `databases: database-1: character-set` - defines character set for the database. If not specified, the default value applies: `utf8`.
 
 ```yaml
 version: "1.0"
