@@ -14,8 +14,8 @@ function Command::build() {
     case ${subCommand} in
         images | image)
             Images::buildApplication --force
-            Assets::build
-            Images::buildFrontend --force
+#            Assets::build
+#            Images::buildFrontend --force
             ;;
         assets | asset)
             Assets::build --force

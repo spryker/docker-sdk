@@ -1,23 +1,17 @@
 # syntax = docker/dockerfile:experimental
 ARG SPRYKER_PARENT_IMAGE
 
-FROM spryker/jenkins-boilerplate:latest
 FROM ${SPRYKER_PARENT_IMAGE}  as spryker_jenkins
+FROM spryker/jenkins-boilerplate:latest as spryker-jenkins-boilerplate
+
+COPY --from=spryker-jenkins-boilerplate /usr/share/jenkins/ref/plugins /usr/share/jenkins/ref/plugins
+COPY --from=spryker-jenkins-boilerplate /usr/share/jenkins/jenkins.war /usr/share/jenkins/jenkins.war
+COPY --from=spryker-jenkins-boilerplate /usr/share/jenkins/jenkins-cli.jar /usr/share/jenkins/jenkins-cli.jar
+
 EXPOSE 8080
 
 RUN apk --no-cache add curl bash openjdk8 ttf-dejavu gettext jq && \
     mkdir -p /envs
-
-ENV JENKINS_VERSION 2.289
-ENV NR_PLUGIN_VERSION 1.0.4
-
-ENV JAVA_HOME /usr/lib/jvm/java-1.8-openjdk
-ENV PATH "${JAVA_HOME}/bin:${PATH}"
-
-RUN set -x && \
-    curl -sSL --create-dirs --retry 1 http://repo.jenkins-ci.org/public/org/jenkins-ci/main/jenkins-war/${JENKINS_VERSION}/jenkins-war-${JENKINS_VERSION}.war -o /usr/share/jenkins/jenkins.war
-
-RUN ls -la
 
 COPY terraform/cli /envs/
 COPY context/jenkins/export/entrypoint.sh /entrypoint.sh
