@@ -32,14 +32,16 @@ function waitForJenkinsToStart(){
   done
 }
 
+mkdir -p ~/.jenkins/updates
 test -f ~/.jenkins/jenkins.model.JenkinsLocationConfiguration.xml || envsubst < /opt/jenkins.model.JenkinsLocationConfiguration.xml > ~/.jenkins/jenkins.model.JenkinsLocationConfiguration.xml
 
 trap 'waitForFinishOfActiveJobs; kill ${pid}; exit 0;' SIGTERM
-java ${JAVA_OPTS} -jar /usr/share/jenkins/jenkins.war ${JENKINS_OPTS} & pid=$!
+cp -r /usr/share/jenkins/ref/plugins/* /root/.jenkins/plugins/
+java ${JAVA_OPTS} -Djenkins.install.runSetupWizard=false -jar /usr/share/jenkins/jenkins.war ${JENKINS_OPTS} & pid=$!
 
 waitForJenkinsToStart
 echo "HTTP port ${PORT} on ${HOST} all started up.."
-test ! -f jenkins-cli.jar && wget ${HOST}:${PORT}/jnlpJars/jenkins-cli.jar
+test ! -f /usr/share/jenkins/jenkins-cli.jar && wget ${HOST}:${PORT}/jnlpJars/jenkins-cli.jar
 
 ### uncomment these two lines if datadog agent shall be installed
 # curl -L http://updates.jenkins-ci.org/update-center.json | sed '1d;$d' > /root/.jenkins/updates/default.json
