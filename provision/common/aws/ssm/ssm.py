@@ -8,6 +8,7 @@ from botocore.exceptions import ClientError
 class AwsSsm:
     PARAM_STORE_CODEBUILD = "codebuild/base_task_definition"
     PARAM_STORE_SECRET = "custom-secrets"
+    PARAM_STORE_TYPE = "SecureString"
 
     @staticmethod
     def ssm_get_parameter_path(parameter_store_path):
@@ -57,3 +58,18 @@ class AwsSsm:
             logging.error(e)
             return None
         return result['Version']
+
+    @classmethod
+    def ssm_delete_parameter(self, parameter_name, parameter_store_path):
+        """Delete parameter in AWS SSM
+        :param parameter_name: Name of the parameter to delete from AWS SSM
+        """
+        ssm_client = boto3.client('ssm')
+
+        try:
+            ssm_client.delete_parameter(
+                Name=ssm_get_parameter_path(parameter_store_path) + parameter_name
+            )
+        except ClientError as e:
+            if e.response['Error']['Code'] != 'ParameterNotFound':
+                logging.error(e)
