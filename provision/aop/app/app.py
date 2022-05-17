@@ -45,6 +45,9 @@ class App:
         apps = Auth0.register_app(jwt_token, apps)
         apps = Subscription.aop_register_queue(apps, self.APPS_KEY, self.APP_ID_KEY)
         Atrs.define_atrs_host(configs[Atrs.ATRS_HOST_KEY])
+
+        Auth0.define_credentials(Auth0.AUTH0_AOP_EVENT_PLATFORM)
+        jwt_token = Auth0.get_jwt_token()
         apps = Atrs.infrastructure_registration(jwt_token, apps, self.APPS_KEY)
         Subscription.sqs_sns_subscription(apps[self.APPS_KEY], self.APP_ID_KEY)
         Env.define_app_environment_vars(apps, configs)

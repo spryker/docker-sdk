@@ -10,7 +10,7 @@ logging.basicConfig(level=logging.INFO)
 
 def main():
     try:
-      Auth0.define_credentials()
+      Auth0.define_credentials(Auth0.AUTH0_AOP_EVENT_PLATFORM)
       auth0_jwt_token = Auth0.get_jwt_token()
 
       apps, configs = App.get_apps()

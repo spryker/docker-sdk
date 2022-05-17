@@ -20,6 +20,9 @@ class Auth0():
 
     AUTH0_CONFIG_HOST_KEY = 'auth0_host'
 
+    AUTH0_AOP_EVENT_PLATFORM = 'aop-event-platform'
+    AUTH0_AOP_ATRS = 'aop-atrs'
+
     def __init__(self):
         self.credentials = {}
         self.jwt_token = ''

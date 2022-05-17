@@ -39,6 +39,9 @@ class Tenant:
         jwt_token = Auth0.get_jwt_token()
         tenants = Auth0.aop_register_tenants(jwt_token, tenants)
         tenants = Subscription.aop_register_queue(tenants, self.TENANTS_KEY, self.STORE_REFERENCE_KEY)
+
+        Auth0.define_credentials(Auth0.AUTH0_AOP_ATRS)
+        jwt_token = Auth0.get_jwt_token()
         tenants = Atrs.infrastructure_registration(jwt_token, tenants, self.TENANTS_KEY)
         Subscription.sqs_sns_subscription(tenants[self.TENANTS_KEY], self.STORE_REFERENCE_KEY)
         Env.define_tenant_environment_vars(tenants, configs)
