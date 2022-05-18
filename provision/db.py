@@ -171,8 +171,8 @@ def read_database_configuration():
                         'database': db_name,
                         'password': generate_pw(),
                         'username': 'spryker_' + db_name,
-                        'character-set': 'utf8' if region_databases_data[db_name] == None else region_databases_data[db_name].get('character-set'),
-                        'collate': 'utf8_general_ci' if region_databases_data[db_name] == None else region_databases_data[db_name].get('collate')
+                        'character-set': 'utf8' if region_databases_data[db_name] == None or 'character-set' not in region_databases_data[db_name] else region_databases_data[db_name].get('character-set'),
+                        'collate': 'utf8_general_ci' if region_databases_data[db_name] == None or 'collate' not in region_databases_data[db_name] else region_databases_data[db_name].get('collate')
                     }
 
      if is_valid_data == False or bool(data['databases']) == False:
