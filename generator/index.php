@@ -1418,19 +1418,6 @@ function buildDefaultRegionCredentialsForDatabase(array $projectData): array
         if (array_key_exists('database', $regionConfig['services'])) {
             $regionDbConfig = $regionConfig['services']['database'];
             $regionDbConfig = array_merge($defaultDbRegionCredentials, $regionDbConfig);
-
-//            foreach ($regionConfig['stores'] as $storeName => $storeConfig) {
-//                $databases['databases'][$storeName] = [
-//                    'host' => 'database',
-//                    'port' => $databaseServiceData['port'] ?? $databaseServiceData['engine'] === 'mysql' ? 3306 : 5432,
-//                    'database' => $regionDbConfig['database'],
-//                    'username' => $regionDbConfig['username'],
-//                    'password' => $regionDbConfig['password'],
-//                    'characterSet' => $regionDbConfig['character-set'] ?? 'utf8',
-//                    'collate' => $regionDbConfig['collate'] ?? 'utf8_general_ci',
-//                ];
-//            }
-
             $projectData['regions'][$regionName]['services']['database'] = $regionDbConfig;
         }
 
@@ -1463,7 +1450,6 @@ function buildDefaultRegionCredentialsForDatabase(array $projectData): array
 
     return $projectData;
 }
-
 
 /**
  * @param array $projectData
