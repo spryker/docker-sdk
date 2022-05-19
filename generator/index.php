@@ -129,6 +129,7 @@ verbose('Generating NGINX configuration... [DONE]');
 $primal = [];
 $projectData['_entryPoints'] = [];
 $projectData['_endpointMap'] = [];
+$projectData = extendProjectDataWithKeyValueRegionNamespaces($projectData);
 $projectData['_storeSpecific'] = getStoreSpecific($projectData);
 $debugPortIndex = 10000;
 $projectData['_endpointDebugMap'] = [];
@@ -749,6 +750,7 @@ function getStoreSpecific(array $projectData): array
                 # TODO SESSION should not be used in CLI
             ];
         }
+        $storeSpecific[$regionName]['SPRYKER_KEY_VALUE_REGION_NAMESPACES'] = $projectData['regions'][$regionName]['key_value_region_namespaces'];
     }
 
     return $storeSpecific;
@@ -1403,20 +1405,51 @@ function buildDefaultRegionCredentialsForDatabase(array $projectData): array
         'password' => 'secret',
     ];
 
+    $databaseServiceData = $projectData['services']['database'];
     foreach ($projectData['regions'] as $regionName => $regionConfig) {
-        if (!isset($regionConfig['services']['database'])) {
+        $databases = [
+            'version' => '1.0',
+            'databases' => [],
+        ];
+        if (!isset($regionConfig['services']['database']) && !isset($regionConfig['services']['databases'])) {
             continue;
         }
 
-        $regionDbConfig = $regionConfig['services']['database'];
-        $regionDbConfig = array_merge($defaultDbRegionCredentials, $regionDbConfig);
+        if (array_key_exists('database', $regionConfig['services'])) {
+            $regionDbConfig = $regionConfig['services']['database'];
+            $regionDbConfig = array_merge($defaultDbRegionCredentials, $regionDbConfig);
+            $projectData['regions'][$regionName]['services']['database'] = $regionDbConfig;
+        }
 
-        $projectData['regions'][$regionName]['services']['database'] = $regionDbConfig;
+        if (array_key_exists('databases', $regionConfig['services'])) {
+            $regionDbConfigs = $regionConfig['services']['databases'];
+
+            foreach ($regionConfig['stores'] as $storeName => $storeConfig) {
+                $storeDbConfig = $storeConfig['services']['database'];
+
+                foreach ($regionDbConfigs as $dbName => $regionDbConfig) {
+                    if (isset($storeDbConfig['name']) && $storeDbConfig['name'] === $dbName) {
+                        $regionDbConfig = array_merge($defaultDbRegionCredentials, $regionDbConfig ?? []);
+                        $databases['databases'][$storeName] = [
+                            'host' => 'database',
+                            'port' => $databaseServiceData['port'] ?? $databaseServiceData['engine'] === 'mysql' ? 3306 : 5432,
+                            'database' => $dbName,
+                            'username' => $regionDbConfig['username'],
+                            'password' => $regionDbConfig['password'],
+                            'characterSet' => $regionDbConfig['character-set'] ?? 'utf8',
+                            'collate' => $regionDbConfig['collate'] ?? 'utf8_general_ci',
+                        ];
+                    }
+                }
+            }
+
+            $projectData['regions'][$regionName]['services']['databases'] = json_encode($databases);
+        }
+
     }
 
     return $projectData;
 }
-
 
 /**
  * @param array $projectData
@@ -1440,6 +1473,24 @@ function buildDefaultCredentialsForBroker(array $projectData): array
         $defaultBrokerServiceCredentials,
         $brokerServiceCredentials
     );
+
+    return $projectData;
+}
+
+/**
+ * @param array $projectData
+ *
+ * @return array
+ */
+function extendProjectDataWithKeyValueRegionNamespaces(array $projectData): array
+{
+    foreach ($projectData['regions'] as $regionName => $regionData) {
+        $keyValueStoreNamespaces = [];
+        foreach ($regionData['stores'] ?? [] as $storeName => $storeData) {
+            $keyValueStoreNamespaces[$storeName] = $storeData['services']['key_value_store']['namespace'];
+        }
+        $projectData['regions'][$regionName]['key_value_region_namespaces'] = json_encode($keyValueStoreNamespaces);
+    }
 
     return $projectData;
 }
