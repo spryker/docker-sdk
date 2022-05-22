@@ -12,7 +12,10 @@ class AwsSsm:
 
     @staticmethod
     def ssm_get_parameter_path(parameter_store_path):
-        return "/{}/{}/".format(os.environ['SPRYKER_PROJECT_NAME'], parameter_store_path)
+        if parameter_store_path:
+            return "/{}/{}/".format(os.environ['SPRYKER_PROJECT_NAME'], parameter_store_path)
+
+        return parameter_store_path
 
     @classmethod
     def update_environment_variables(self, env_vars, path):
@@ -20,7 +23,7 @@ class AwsSsm:
             self.ssm_put_parameter(env_var_key, json.dumps(env_var_data), 'SecureString', path)
 
     @classmethod
-    def ssm_get_parameter(self, parameter_name, parameter_store_path = PARAM_STORE_CODEBUILD, with_decryption = True):
+    def ssm_get_parameter(self, parameter_name, parameter_store_path = '', with_decryption = True):
         """Get parameter details in AWS SSM
         :param parameter_name: Name of the parameter to fetch details from SSM
         :param with_decryption: return decrypted value for secured string params, ignored for String and StringList
@@ -38,7 +41,7 @@ class AwsSsm:
         return result
 
     @classmethod
-    def ssm_put_parameter(self, parameter_name, parameter_value, parameter_type, parameter_store_path = PARAM_STORE_CODEBUILD):
+    def ssm_put_parameter(self, parameter_name, parameter_value, parameter_type, parameter_store_path = ''):
         """Creates new parameter in AWS SSM
         :param parameter_name: Name of the parameter to create in AWS SSM
         :param parameter_value: Value of the parameter to create in AWS SSM

@@ -1,8 +1,6 @@
 import yaml
 import logging
-
 import os.path
-from os import path
 
 class YamlParser:
     def __init__(self):
@@ -46,7 +44,7 @@ class YamlParser:
 
                     endpoints = {
                         'type': application_data['application'],
-                        'url': endpoint_key
+                        'url': 'https://' + endpoint_key
                     }
                     applications[endpoint_data['store']].append(endpoints)
 
