@@ -1,29 +1,30 @@
 from atrs.atrs import Atrs
 from tenant.tenant import Tenant
+from config.config import Config
 from app.app import App
-
 import logging
 
 logging.basicConfig(level=logging.INFO)
 
 def main():
     try:
-        apps, configs = App.get_apps()
-        Atrs.define_atrs_host(configs[Atrs.ATRS_HOST_KEY])
+        logging.info('[PRE-DEPLOY] Reading configuration')
+        configs = Config.get_configs(App.APPS_CONFIGURATION_FILE)
+        Atrs.define_atrs_host(configs)
 
-### Apps registration
-
+        apps = App.get_apps()
         if apps:
+            logging.info('[PRE-DEPLOY] Apps registration')
             apps = App.register_apps(apps, configs)
-            logging.info('Apps list: {}'.format(apps))
+            logging.info('[PRE-DEPLOY] Apps list: {}'.format(apps))
 
-### Tenants registration
         if apps == None:
+            logging.info('[PRE-DEPLOY] Tenants registration')
             tenants = Tenant.get_tenants()
 
             if tenants != {}:
                 tenants = Tenant.register_tenants(tenants, configs)
-                logging.info('Tenants list: {}'.format(tenants))
+                logging.info('[PRE-DEPLOY] Tenants list: {}'.format(tenants))
 
     except Exception as e:
         logging.info(e)

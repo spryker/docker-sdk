@@ -2,6 +2,8 @@ import logging
 import boto3
 from botocore.exceptions import ClientError
 
+import json
+
 class AwsSqs:
     def __init__(self):
         logging.info('[AOP] AwsSqs constructor')
@@ -57,7 +59,9 @@ class AwsSqs:
                  to perform queue operations like sending and receiving messages.
         """
         if not attributes:
-            attributes = {}
+            attributes = {
+                'FifoQueue': 'true'
+            }
 
         try:
             queue = self.get_sqs_client().create_queue(
@@ -73,8 +77,32 @@ class AwsSqs:
             return queue
 
     @classmethod
-    def receive_queue_messages(self, queue):
-        return queue.receive_messages(QueueUrl=queue.url, AttributeNames=['All'], MaxNumberOfMessages=10, VisibilityTimeout=10,WaitTimeSeconds=5)
+    def update_queue_attributes(self, queue_url, queue_arn, policy = {}, dl_policy = {}):
+        try:
+            response = self.get_sqs_client().set_queue_attributes(
+                QueueUrl=queue_url,
+                Attributes={
+                    "Policy" : json.dumps(policy),
+                    'RedrivePolicy': json.dumps(dl_policy)
+                }
+            )
+            logging.info("Queue attributes for '%s' has been updated.", queue_arn)
+        except ClientError as error:
+            logging.info("Couldn't create queue named '%s'.", name)
+            logging.exception(error)
+            return None
+        else:
+            return response['ResponseMetadata']['HTTPStatusCode']
+
+    @classmethod
+    def receive_queue_messages(self, queue, AttributeNames=['All'], MaxNumberOfMessages=10, VisibilityTimeout=10, WaitTimeSeconds=10):
+        return queue.receive_messages(
+            QueueUrl=queue.url,
+            AttributeNames=AttributeNames,
+            MaxNumberOfMessages=MaxNumberOfMessages,
+            VisibilityTimeout=VisibilityTimeout,
+            WaitTimeSeconds=WaitTimeSeconds
+        )
 
     @classmethod
     def delete_message(self, message):

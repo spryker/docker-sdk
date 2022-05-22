@@ -4,27 +4,16 @@ import json
 import os
 
 from common.aws.ssm.ssm import AwsSsm
+from config.config import Config
 
 class Auth0():
-    AUTH0_CUSTOM_DOMAIN_KEY = 'AUTH0_CUSTOM_DOMAIN'
-    AUTH0_CLIENT_ID_KEY = 'AUTH0_CLIENT_ID'
-    AUTH0_CLIENT_SECRET_KEY = 'AUTH0_CLIENT_SECRET'
     AUTH0_AUDIENCE_PATTERN = 'https://{}/api/v2/'
-
-    SPRYKER_AOP_AUTHENTICATION_KEY = 'SPRYKER_AOP_AUTHENTICATION'
-
-    PARAM_STORE_AOP_AUTH0_CREDENTIALS_KEY = 'AOP_AUTH0_CREDENTIALS'
-
     AUTH0_APPS_PREFIX = 'apps_'
     AUTH0_TENANTS_PREFIX = 'tenants_'
-
-    AUTH0_CONFIG_HOST_KEY = 'auth0_host'
-
     AUTH0_AOP_EVENT_PLATFORM = 'aop-event-platform'
     AUTH0_AOP_ATRS = 'aop-atrs'
 
     def __init__(self):
-        self.credentials = {}
         self.jwt_token = ''
         self.auth0_domain = ''
         self.auth0_client_id = ''
@@ -32,24 +21,21 @@ class Auth0():
         self.auth0_audience = ''
 
     @classmethod
-    def define_credentials(self, auth0_audience = ''):
+    def define_credentials(self, configs, auth0_audience = ''):
         logging.info('[Auth0] Reading Auth0 credentials from the storage')
 
-        credentials = AwsSsm.ssm_get_parameter(self.PARAM_STORE_AOP_AUTH0_CREDENTIALS_KEY, AwsSsm.PARAM_STORE_SECRET)
+        if not configs.keys() >= {Config.AUTH0_HOST_KEY, Config.AUTH0_CLIENT_ID_KEY, Config.AUTH0_CLIENT_SECRET_KEY}:
+            logging.exception('[Auth0] Keys: %s, %s and %s must be defined', Config.AUTH0_HOST_KEY, Config.AUTH0_CLIENT_ID_KEY, Config.AUTH0_CLIENT_SECRET_KEY)
+            raise
 
-        if credentials is None or self.SPRYKER_AOP_AUTHENTICATION_KEY not in credentials['Parameter']['Value']:
-            raise Exception('AOP_AUTH0_CREDENTIALS must be defined.')
-
-        self.credentials = json.loads(credentials['Parameter']['Value'])[self.SPRYKER_AOP_AUTHENTICATION_KEY]
-        self.auth0_domain = self.credentials[self.AUTH0_CUSTOM_DOMAIN_KEY]
-        self.auth0_client_id = self.credentials[self.AUTH0_CLIENT_ID_KEY]
-        self.auth0_secret_key = self.credentials[self.AUTH0_CLIENT_SECRET_KEY]
-
+        self.auth0_domain = configs[Config.AUTH0_HOST_KEY]
+        self.auth0_client_id = configs[Config.AUTH0_CLIENT_ID_KEY]
+        self.auth0_secret_key = configs[Config.AUTH0_CLIENT_SECRET_KEY]
         self.auth0_audience = auth0_audience if auth0_audience else self.AUTH0_AUDIENCE_PATTERN.format(self.auth0_domain)
 
         logging.info(self.auth0_audience)
 
-        logging.info('[Auth0] Obtained credentials: {}'.format(self.credentials))
+        logging.info('[Auth0] Obtained credentials: {}, {}, {} and {}'.format(self.auth0_domain, self.auth0_client_id, self.auth0_secret_key, self.auth0_audience))
 
         return self
 
@@ -78,11 +64,7 @@ class Auth0():
         logging.info('[Auth0] Get clients')
         conn = http.client.HTTPSConnection(self.auth0_domain)
 
-        headers = {
-           "Content-Type": "application/json",
-           "authorization": "Bearer {}".format(jwt_token)
-        }
-
+        headers = self.get_request_headers(jwt_token)
         conn.request("GET", "/api/v2/clients?fields=name,client_id,client_metadata,client_secret", headers=headers)
 
         res = conn.getresponse()
@@ -104,11 +86,7 @@ class Auth0():
          logging.info('[Auth0] Get client')
          conn = http.client.HTTPSConnection(self.auth0_domain)
 
-         headers = {
-            "Content-Type": "application/json",
-            "authorization": "Bearer {}".format(jwt_token)
-         }
-
+         headers = self.get_request_headers(jwt_token)
          conn.request("GET", "/api/v2/clients/{}".format(client_id), headers=headers)
 
          res = conn.getresponse()
@@ -134,11 +112,7 @@ class Auth0():
 
         logging.info('[Auth0] Create client payload data {}'.format(payload))
 
-        headers = {
-            "Content-Type": "application/json",
-            "authorization": "Bearer {}".format(jwt_token)
-        }
-
+        headers = self.get_request_headers(jwt_token)
         logging.info('Create client payload: {}'.format(payload))
 
         conn.request("POST", "/api/v2/clients", json.dumps(payload), headers)
@@ -178,10 +152,7 @@ class Auth0():
         payload = {'client_metadata': client['client_metadata'] | tenants_client_metadata}
         logging.info('[Auth0] Update client payload: {}'.format(payload))
 
-        headers = {
-            "Content-Type": "application/json",
-            "authorization": "Bearer {}".format(jwt_token)
-        }
+        headers = self.get_request_headers(jwt_token)
         conn.request("PATCH", "/api/v2/clients/{}".format(client['client_id']), json.dumps(payload), headers)
 
         res = conn.getresponse()
@@ -195,15 +166,12 @@ class Auth0():
 
         return tenants
 
-    # AOP - tenant permission registration
     @classmethod
     def tenant_grant_permission(self, tenant_client_id, jwt_token):
+        logging.info('[Auth0] Tenant permission registration')
         conn = http.client.HTTPSConnection(self.auth0_domain)
 
-        headers = {
-            "Content-Type": "application/json",
-            "authorization": "Bearer {}".format(jwt_token)
-        }
+        headers = self.get_request_headers(jwt_token)
 
         payloads = [
             { "client_id": tenant_client_id, "audience": "aop-atrs", "scope": [ "read:app_atrs","configure:app_atrs" ] },
@@ -220,9 +188,9 @@ class Auth0():
 
         return data
 
-    # AOP - tenant registration
     @classmethod
     def aop_register_tenants(self, jwt_token = '', tenants = {}):
+        logging.info('[Auth0] Tenant registration')
         conn = http.client.HTTPSConnection(self.auth0_domain)
 
         tenants_client_metadata = {}
@@ -239,15 +207,12 @@ class Auth0():
 
         return tenants
 
-    # AOP - application registration
     @classmethod
     def register_app(self, jwt_token, apps):
-
         logging.info('[Auth0] App registration')
 
         conn = http.client.HTTPSConnection(self.auth0_domain)
 
-        # ToDo - Temporary added "break" after the first execution. Please remove it after the fix.
         for app_key, app_data in apps['apps'].items():
             client = self.get_env_client(jwt_token, self.AUTH0_APPS_PREFIX)
             if client:
@@ -256,10 +221,7 @@ class Auth0():
                 continue
             payload = {"name": self.AUTH0_APPS_PREFIX + os.environ['SPRYKER_PROJECT_NAME'], 'app_type': 'non_interactive'}
             logging.info('[Auth0] App registration payload {}'.format(payload))
-            headers = {
-                "Content-Type": "application/json",
-                "authorization": "Bearer {}".format(jwt_token)
-            }
+            headers = self.get_request_headers(jwt_token)
             conn.request("POST", "/api/v2/clients", json.dumps(payload), headers)
 
             res = conn.getresponse()
@@ -269,25 +231,20 @@ class Auth0():
 
             grant_data = self.app_grant_permission(data['client_id'], jwt_token)
 
-#             apps['apps'][app_key].update(app_data | {'client_id' : data['client_id'], 'client_secret': data['client_secret']})
             apps.update({'client_id' : data['client_id'], 'client_secret': data['client_secret']})
 
             break
 
         return apps
 
-    # AOP - application permission registration
     @classmethod
     def app_grant_permission(self, app_client_id, jwt_token):
 
-        logging.info('[Auth0] App grant permission')
+        logging.info('[Auth0] App application permission registration')
 
         conn = http.client.HTTPSConnection(self.auth0_domain)
 
-        headers = {
-            "Content-Type": "application/json",
-            "authorization": "Bearer {}".format(jwt_token)
-        }
+        headers = self.get_request_headers(jwt_token)
 
         payloads = [
             {"client_id": app_client_id, "audience": "aop-event-platform", "scope": [ "event:app" ]},
@@ -304,3 +261,9 @@ class Auth0():
 
         return response_data
 
+    @staticmethod
+    def get_request_headers(jwt_token):
+        return {
+            "Content-Type": "application/json",
+            "authorization": "Bearer {}".format(jwt_token)
+        }

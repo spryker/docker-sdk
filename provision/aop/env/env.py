@@ -1,11 +1,14 @@
 from auth0.auth0 import Auth0
 from common.aws.ssm.ssm import AwsSsm
 from atrs.atrs import Atrs
+from config.config import Config
 
 import logging
 import os
 
 class Env:
+    BUFFER_SIZE = 1
+    PAYONE_KEY = 'payone'
 
     @classmethod
     def define_tenant_environment_vars(self, tenants, configs):
@@ -25,13 +28,13 @@ class Env:
         env_vars = {
             "SPRYKER_AOP_INFRASTRUCTURE": {
                 "SPRYKER_MESSAGE_BROKER_HTTP_SENDER_CONFIG": {
-                    "endpoint" : "https://{}/event-tenant".format('NOT_DEFINED' if Atrs.ATRS_HOST_KEY not in configs else configs[Atrs.ATRS_HOST_KEY])
+                    "endpoint" : "https://{}/event-tenant".format('NOT_DEFINED' if Config.ATRS_HOST_KEY not in configs else configs[Config.ATRS_HOST_KEY])
                 },
                 "SPRYKER_MESSAGE_BROKER_SQS_RECEIVER_CONFIG": {
                       "default": {
                         "endpoint": "https://sqs.{}.amazonaws.com".format(aws_region),
                         "auto_setup": "false",
-                        "buffer_size": 1
+                        "buffer_size": self.BUFFER_SIZE
                       } | sqs_receivers
                 },
             },
@@ -40,7 +43,7 @@ class Env:
                 "STORE_NAME_REFERENCE_MAP": store_map
             },
             'SPRYKER_AOP_AUTHENTICATION': {
-                'AUTH0_CUSTOM_DOMAIN': 'NOT_DEFINED' if Auth0.AUTH0_CONFIG_HOST_KEY not in configs else configs[Auth0.AUTH0_CONFIG_HOST_KEY],
+                'AUTH0_CUSTOM_DOMAIN': 'NOT_DEFINED' if Config.AUTH0_HOST_KEY not in configs else configs[Config.AUTH0_HOST_KEY],
                 'AUTH0_CLIENT_ID': tenants['client_id'],
                 'AUTH0_CLIENT_SECRET': tenants['client_secret'],
             },
@@ -67,20 +70,20 @@ class Env:
         env_vars = {
             'SPRYKER_AOP_INFRASTRUCTURE': {
                 'SPRYKER_MESSAGE_BROKER_HTTP_SENDER_CONFIG': {
-                    'endpoint': 'https://{}/event-app'.format('NOT_DEFINED' if Atrs.ATRS_HOST_KEY not in configs else configs[Atrs.ATRS_HOST_KEY])
+                    'endpoint': 'https://{}/event-app'.format('NOT_DEFINED' if Config.ATRS_HOST_KEY not in configs else configs[Config.ATRS_HOST_KEY])
                 },
                 'SPRYKER_MESSAGE_BROKER_SQS_RECEIVER_CONFIG': {
                     'default': {
                         'endpoint': 'https://sqs.{}.amazonaws.com'.format(aws_region),
                         'auto_setup': 'false',
-                        'buffer_size': 1,
-                        'queue_name': '' if 'payone' not in apps['apps'] else apps['apps']['payone']['appId']
+                        'buffer_size': self.BUFFER_SIZE,
+                        'queue_name': '' if self.PAYONE_KEY not in apps['apps'] else apps['apps'][self.PAYONE_KEY]['appId']
                     }
                 },
                 'AWS_SECRETS_MANAGER_ENDPOINT': 'https://secretsmanager.{}.amazonaws.com'.format(aws_region),
             },
             'SPRYKER_AOP_AUTHENTICATION': {
-                'AUTH0_CUSTOM_DOMAIN': 'NOT_DEFINED' if Auth0.AUTH0_CONFIG_HOST_KEY not in configs else configs[Auth0.AUTH0_CONFIG_HOST_KEY],
+                'AUTH0_CUSTOM_DOMAIN': 'NOT_DEFINED' if Config.AUTH0_HOST_KEY not in configs else configs[Config.AUTH0_HOST_KEY],
                 'AUTH0_CLIENT_ID': apps['client_id'],
                 'AUTH0_CLIENT_SECRET': apps['client_secret'],
             },
