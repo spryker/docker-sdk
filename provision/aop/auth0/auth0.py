@@ -2,9 +2,10 @@ import http.client
 import logging
 import json
 import os
-
-from common.aws.ssm.ssm import AwsSsm
+import sys
 from config.config import Config
+sys.path.insert(1, os.getcwd())
+from common.aws.ssm.ssm import AwsSsm
 
 class Auth0():
     AUTH0_AUDIENCE_PATTERN = 'https://{}/api/v2/'

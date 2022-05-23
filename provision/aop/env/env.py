@@ -1,10 +1,11 @@
+import logging
 from auth0.auth0 import Auth0
-from common.aws.ssm.ssm import AwsSsm
 from atrs.atrs import Atrs
 from config.config import Config
-
-import logging
 import os
+import sys
+sys.path.insert(1, os.getcwd())
+from common.aws.ssm.ssm import AwsSsm
 
 class Env:
     BUFFER_SIZE = 1

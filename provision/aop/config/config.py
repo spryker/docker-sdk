@@ -1,8 +1,10 @@
 import logging
 import json
-
+import os
+import sys
+sys.path.insert(1, os.getcwd())
 from common.aws.ssm.ssm import AwsSsm
-from yml.yml import YamlParser
+from common.yml.yml import YamlParser
 
 class Config:
     CONFIGS_KEY = 'configs'

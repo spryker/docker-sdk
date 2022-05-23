@@ -83,7 +83,7 @@ class AwsLambda:
         logging.info("[AwsLambda] Creating of Lambda function %s.", function_name)
 
         try:
-            with open('docker/provision/aop/' + deployment_package, 'rb') as f:
+            with open('aop/' + deployment_package, 'rb') as f:
             	zipped_code = f.read()
 
             function = self.get_function(function_name)

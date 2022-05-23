@@ -1,11 +1,12 @@
-from subscription.subscription import Subscription
-from auth0.auth0 import Auth0
-from yml.yml import YamlParser
-from atrs.atrs import Atrs
-from env.env import Env
-
+import sys
 import os
 import logging
+from subscription.subscription import Subscription
+from auth0.auth0 import Auth0
+from atrs.atrs import Atrs
+from env.env import Env
+sys.path.insert(1, os.getcwd())
+from common.yml.yml import YamlParser
 
 class App:
     APPS_CONFIGURATION_FILE = 'aop.yml'

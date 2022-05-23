@@ -1,11 +1,11 @@
-from yml.yml import YamlParser
 from auth0.auth0 import Auth0
 from atrs.atrs import Atrs
 from tenant.tenant import Tenant
 from app.app import App
 from config.config import Config
-
-import logging
+import logging, sys
+sys.path.append("..")
+from common.yml.yml import YamlParser
 
 logging.basicConfig(level=logging.INFO)
 

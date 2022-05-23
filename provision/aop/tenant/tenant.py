@@ -1,8 +1,12 @@
+import os
+import logging
+import sys
 from subscription.subscription import Subscription
 from auth0.auth0 import Auth0
-from yml.yml import YamlParser
 from atrs.atrs import Atrs
 from env.env import Env
+sys.path.append("..")
+from common.yml.yml import YamlParser
 
 import os
 import logging

@@ -123,7 +123,7 @@ class Atrs:
                     }
                 }
                 tmp_data = {}
-                for filename in glob.iglob('config/app/{}'.format(attribute_data) + '**/**', recursive=True):
+                for filename in glob.iglob('app/{}'.format(attribute_data) + '**/**', recursive=True):
                      if os.path.isfile(filename):
                         file_name= Path(filename).stem
                         file_extension = os.path.splitext(filename)[1]
@@ -137,7 +137,6 @@ class Atrs:
                                 file_name = 'manifest'
 
                             payload_data['data']['attributes'].update({file_name: json.dumps(file_content)})
-
 
             logging.info('[AOP] App registration, payload data {}'.format(payload_data))
             conn.request("POST", "/apps", json.dumps(payload_data), headers)

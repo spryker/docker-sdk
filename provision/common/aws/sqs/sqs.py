@@ -1,8 +1,7 @@
 import logging
 import boto3
-from botocore.exceptions import ClientError
-
 import json
+from botocore.exceptions import ClientError
 
 class AwsSqs:
     def __init__(self):

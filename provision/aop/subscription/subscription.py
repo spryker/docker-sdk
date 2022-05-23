@@ -1,13 +1,14 @@
 import logging
 import json
 import os
-
+import sys
+sys.path.insert(1, os.getcwd())
+from config.config import Config
 from common.aws.sqs.sqs import AwsSqs
 from common.aws.ssm.ssm import AwsSsm
 from common.aws.sns.sns import AwsSns
 from common.aws.iam.iam import AwsIam
 from common.aws.function.function import AwsLambda
-from config.config import Config
 
 class Subscription:
 
