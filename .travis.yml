@@ -145,9 +145,9 @@ matrix:
           - cd ../ && git clone --depth=3 --branch=master https://github.com/spryker-shop/b2b-demo-shop.git demo-shop && mv docker-sdk demo-shop && cd demo-shop
           - docker-sdk/sdk boot deploy.ci.api.yml -v
           - docker-sdk/sdk up -t -v
-          - docker/sdk testing codecept fixtures
-          - docker/sdk testing console queue:worker:start --stop-when-empty
-          - docker/sdk testing codecept run -c codeception.api.yml
+          - docker-sdk/sdk testing codecept fixtures
+          - docker-sdk/sdk testing console queue:worker:start --stop-when-empty
+          - docker-sdk/sdk testing codecept run -c codeception.api.yml
       before_script: skip
       after_script: skip      
 
