@@ -78,7 +78,7 @@ function Command::export() {
             Images::tagFrontend "${tag}"
 
             if [ -n "${pushDestination}" ]; then
-                Images::push
+                Images::push "${tag}"
             fi
 
             if [ -z "${pushDestination}" ]; then
