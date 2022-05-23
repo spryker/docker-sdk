@@ -5,7 +5,7 @@ import sdk/images/baked.sh
 function Images::buildApplication() {
     Console::verbose "${INFO}Building application images for AWS ECR${NC}"
 
-    Images::_buildApp baked ${TRUE}
+    Images::_buildApp baked "${TRUE}"
 }
 
 function Images::buildFrontend() {
