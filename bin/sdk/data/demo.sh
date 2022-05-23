@@ -54,7 +54,7 @@ function Data::load() {
             Compose::exec "vendor/bin/install${verboseOption} -r ${SPRYKER_PIPELINE} -s init-storages-per-store"
         done
 
-        SPRYKER_CURRENT_STORE="${STORES[0]}"
+        SPRYKER_CURRENT_STORE="${SPRYKER_DEFAULT_STORE}"
         local demoDataSection=${1:-demodata}
         Compose::exec "vendor/bin/install${verboseOption} -r ${SPRYKER_PIPELINE} -s init-storages-per-region -s ${demoDataSection}"
     done
