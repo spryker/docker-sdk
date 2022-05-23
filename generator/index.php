@@ -1488,29 +1488,7 @@ function validateServiceVersions(array $projectData): array
  */
 function getUnsupportedArmServiceMap(): array
 {
-    return [
-        'database' => [
-            'mysql' => [
-                '5.7' => '5.7',
-                'default' => '5.7',
-            ],
-        ],
-        'broker' => [
-            'rabbitmq' => [
-                '3.7' => '3.7',
-                'default' => '3.7',
-            ],
-        ],
-        'webdriver' => [
-            'phantomjs' => ['*'],
-        ],
-        'scheduler' => [
-            'jenkins' => [
-                '2.176' => '2.176',
-                'default' => '2.176',
-            ],
-        ],
-    ];
+    return [];
 }
 
 /**

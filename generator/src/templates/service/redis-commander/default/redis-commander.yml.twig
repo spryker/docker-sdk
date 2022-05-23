@@ -1,14 +1,1 @@
-  {{ serviceName }}:
-    image: rediscommander/redis-commander:latest
-    networks:
-      - private
-    labels:
-      'spryker.app.name': redis-commander
-      'spryker.app.type': hidden
-      'spryker.project': ${SPRYKER_DOCKER_PREFIX}:${SPRYKER_DOCKER_TAG}
-    environment:
-      REDIS_HOSTS: "{{ project.storageData.hosts | merge(serviceData.data.hosts | default([])) | default("") | join(',') }}"
-    depends_on:
-{% for service in project.storageData.services | merge(serviceData.data.services | default([])) | default([]) %}
-      - {{ service }}
-{% endfor %}
+{% include "service/#{engine}/0.8.0/#{engine}.yml.twig" with _context only %}
