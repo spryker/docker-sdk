@@ -33,7 +33,7 @@ function Images::tagFrontend() {
 
     local tag=${1:-${SPRYKER_DOCKER_TAG}}
 
-    docker tag "${SPRYKER_DOCKER_PREFIX}_frontend:${tag}" "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${SPRYKER_PROJECT_NAME}-frontend:latest"
+    docker tag "${SPRYKER_DOCKER_PREFIX}_frontend:${tag}" "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${SPRYKER_PROJECT_NAME}-frontend:${DESIRED_IMAGE_TAG}"
 }
 
 function Images::push() {
