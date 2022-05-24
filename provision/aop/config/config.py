@@ -55,5 +55,5 @@ class Config:
     @classmethod
     def update_webhook_url(self, configs):
         if self.WEBHOOK_URL in configs:
-            AwsSsm.ssm_put_parameter('PARAMETER_STORE_SLACK_WH_URL', configs[self.WEBHOOK_URL], 'SecureString')
+            AwsSsm.ssm_put_parameter('PARAMETER_STORE_SLACK_WH_URL', configs[self.WEBHOOK_URL], AwsSsm.PARAM_STORE_STRING_TYPE)
 

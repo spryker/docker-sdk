@@ -67,7 +67,7 @@ class MultiDb:
                 mysql_connection.commit()
                 logging.info('[MultiDB] Transaction committed for `{}`.'.format(db_database))
 
-            aws_ssm.ssm_put_parameter('SPRYKER_PAAS_SERVICES', json.dumps(data), aws_ssm.PARAM_STORE_TYPE, aws_ssm.PARAM_STORE_SECRET)
+            aws_ssm.ssm_put_parameter('SPRYKER_PAAS_SERVICES', json.dumps(data), aws_ssm.PARAM_STORE_SECURE_STRING_TYPE, aws_ssm.PARAM_STORE_SECRET)
 
         except Exception as e:
             logging.info('[MultiDB] Rolling back due to {}'.format(e))
@@ -108,7 +108,7 @@ class MultiDb:
              for region_name, region_data in deploy_file_data['regions'].items():
                 if 'database' in region_data['services']:
                     logging.info('[MultiDB] Databases section is not defined')
-                    aws_ssm.ssm_put_parameter('SPRYKER_PAAS_SERVICES', json.dumps(data), aws_ssm.PARAM_STORE_TYPE, aws_ssm.PARAM_STORE_SECRET)
+                    aws_ssm.ssm_put_parameter('SPRYKER_PAAS_SERVICES', json.dumps(data), aws_ssm.PARAM_STORE_SECURE_STRING_TYPE, aws_ssm.PARAM_STORE_SECRET)
                     exit(0)
 
                 if 'databases' not in region_data['services'] or bool(region_data['services']['databases']) == False:

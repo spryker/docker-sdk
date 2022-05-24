@@ -8,7 +8,8 @@ from botocore.exceptions import ClientError
 class AwsSsm:
     PARAM_STORE_CODEBUILD = "codebuild/base_task_definition"
     PARAM_STORE_SECRET = "custom-secrets"
-    PARAM_STORE_TYPE = "SecureString"
+    PARAM_STORE_SECURE_STRING_TYPE = "SecureString"
+    PARAM_STORE_STRING_TYPE = "String"
 
     @staticmethod
     def ssm_get_parameter_path(parameter_store_path):
