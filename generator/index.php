@@ -190,7 +190,7 @@ foreach ($projectData['groups'] ?? [] as $groupName => $groupData) {
                         $projectData['groups'][$groupName]['applications'][$applicationName]['endpoints'][$endpoint]['primal'] = true;
                     };
                 }
-                $projectData['_endpointList'][$groupName][$store][$application] = $endpoint;
+                $projectData['_endpointList'][$groupName][$store][camel2dashed($applicationName)] = $endpoint;
             }
 
             if (array_key_exists('redirect', $endpointData)) {
@@ -901,8 +901,8 @@ function buildNewrelicDistributedTracing(array $projectData): array
         'NEWRELIC_TRANSACTION_TRACER_ENABLED' => (int) $distributedTracingData['enabled'] ?? 0,
         'NEWRELIC_DISTRIBUTED_TRACING_ENABLED' => (int) $distributedTracingData['enabled'] ?? 0,
         'NEWRELIC_SPAN_EVENTS_ENABLED' => (int) $distributedTracingData['enabled'] ?? 0,
-        'NEWRELIC_TRANSACTION_TRACER_THRESHOLD' => (int) $distributedTracingData['transaction-tracer-threshold'] ?? 0,
-        'NEWRELIC_DISTRIBUTED_TRACING_EXCLUDE_NEWRELIC_HEADER' => (int) $distributedTracingData['exclude-newrelic-header'] ?? 0,
+        'NEWRELIC_TRANSACTION_TRACER_THRESHOLD' => (int) ($distributedTracingData['transaction-tracer-threshold'] ?? 0),
+        'NEWRELIC_DISTRIBUTED_TRACING_EXCLUDE_NEWRELIC_HEADER' => (int) ($distributedTracingData['exclude-newrelic-header'] ?? 0),
     ];
 }
 
@@ -1433,3 +1433,14 @@ function extendProjectDataWithKeyValueRegionNamespaces(array $projectData): arra
 
     return $projectData;
 }
+
+/**
+ * @param string $className
+ *
+ * @return string
+ */
+function camel2dashed(string $className)
+{
+    return strtolower(preg_replace('/([a-zA-Z])(?=[A-Z])/', '$1-', $className));
+}
+
