@@ -129,6 +129,7 @@ verbose('Generating NGINX configuration... [DONE]');
 $primal = [];
 $projectData['_entryPoints'] = [];
 $projectData['_endpointMap'] = [];
+$projectData = extendProjectDataWithKeyValueRegionNamespaces($projectData);
 $projectData['_endpointList'] = [];
 $projectData['_storeSpecific'] = getStoreSpecific($projectData);
 $debugPortIndex = 10000;
@@ -742,6 +743,7 @@ function getStoreSpecific(array $projectData): array
                 # TODO SESSION should not be used in CLI
             ];
         }
+        $storeSpecific[$regionName]['SPRYKER_KEY_VALUE_REGION_NAMESPACES'] = $projectData['regions'][$regionName]['key_value_region_namespaces'];
     }
 
     return $storeSpecific;
@@ -1410,6 +1412,24 @@ function buildDefaultCredentialsForBroker(array $projectData): array
         $defaultBrokerServiceCredentials,
         $brokerServiceCredentials
     );
+
+    return $projectData;
+}
+
+/**
+ * @param array $projectData
+ *
+ * @return array
+ */
+function extendProjectDataWithKeyValueRegionNamespaces(array $projectData): array
+{
+    foreach ($projectData['regions'] as $regionName => $regionData) {
+        $keyValueStoreNamespaces = [];
+        foreach ($regionData['stores'] ?? [] as $storeName => $storeData) {
+            $keyValueStoreNamespaces[$storeName] = $storeData['services']['key_value_store']['namespace'];
+        }
+        $projectData['regions'][$regionName]['key_value_region_namespaces'] = json_encode($keyValueStoreNamespaces);
+    }
 
     return $projectData;
 }
