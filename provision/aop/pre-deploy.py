@@ -11,7 +11,6 @@ def main():
         logging.info('[PRE-DEPLOY] Reading configuration')
         configs = Config.get_configs(App.APPS_CONFIGURATION_FILE)
         Atrs.define_atrs_host(configs)
-
         apps = App.get_apps()
         if apps:
             logging.info('[PRE-DEPLOY] Apps registration')
