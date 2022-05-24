@@ -35,6 +35,7 @@ function Compose::ensureRunning() {
 function Compose::ensureCliRunning() {
     local isCliRunning=$(docker ps --filter 'status=running' --filter "ancestor=${SPRYKER_DOCKER_PREFIX}_run_cli:${SPRYKER_DOCKER_TAG}" --filter "name=${SPRYKER_DOCKER_PREFIX}_cli_*" --format "{{.Names}}")
     if [ -z "${isCliRunning}" ]; then
+        Compose::runCliDependencyServices
         Compose::run --no-deps cli cli_ssh_relay
         Registry::Flow::runAfterCliReady
     fi
@@ -203,4 +204,10 @@ function Compose::cleanEverything() {
     Console::verbose "${INFO}Stopping and removing all Spryker containers and volumes${NC}"
     Compose::command down -v --remove-orphans --rmi all
     Registry::Flow::runAfterDown
+}
+
+function Compose::runCliDependencyServices() {
+    if [ "${TIDEWAYS_EXTENSION_ENABLED}" = "${TRUE}" ]; then
+        Compose::run --no-deps tideways
+    fi
 }
