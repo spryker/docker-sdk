@@ -9,7 +9,7 @@ sys.path.insert(1, os.getcwd())
 from common.yml.yml import YamlParser
 
 class App:
-    APPS_CONFIGURATION_FILE = 'aop.yml'
+    APPS_CONFIGURATION_FILE = 'configs/aop.yml'
     APPS_KEY = 'apps'
     APP_ID_KEY = 'appId'
 

@@ -22,6 +22,8 @@ class Config:
 
     WEBHOOK_URL = 'webhook_url'
 
+    AOP_APPS_HOST = 'aop_apps_host'
+
     def __init__(self):
         logging.info('[AOP Config] Config constructor')
 

@@ -94,7 +94,7 @@ class Atrs:
         return tenants
 
     @classmethod
-    def app_registration(self, jwt_token, apps):
+    def app_registration(self, jwt_token, apps, configs):
         logging.info('[AOP] Infrastructure. Apps registration')
 
         conn = http.client.HTTPSConnection(self._atrs_host)
@@ -104,6 +104,9 @@ class Atrs:
             "Authorization": "Bearer {}".format(jwt_token),
             "Content-Type": "application/json"
         }
+
+        if Config.AOP_APPS_HOST not in configs:
+            raise Exception('[AOP] `Config.AOP_APPS_HOST` configuration key must be defined.')
 
         for app_key, app_data in apps['apps'].items():
             if type(app_data) is not dict:
@@ -118,12 +121,13 @@ class Atrs:
                     "data": {
                         "type": "apps",
                         "attributes": {
-                            "id": app_data['appId']
+                            "id": app_data['appId'],
+                            "baseUrl": configs[Config.AOP_APPS_HOST],
                         }
                     }
                 }
                 tmp_data = {}
-                for filename in glob.iglob('app/{}'.format(attribute_data) + '**/**', recursive=True):
+                for filename in glob.iglob('configs/app/{}'.format(attribute_data) + '**/**', recursive=True):
                      if os.path.isfile(filename):
                         file_name= Path(filename).stem
                         file_extension = os.path.splitext(filename)[1]

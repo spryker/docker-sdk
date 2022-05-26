@@ -8,14 +8,11 @@ class YamlParser:
 
     @classmethod
     def get_deploy_file_data(self):
-        return self.parse("docker/deployment/{}/project.yml".format(os.environ['SPRYKER_PROJECT_NAME']))
+        return self.parse("configs/docker/deployment/{}/project.yml".format(os.environ['SPRYKER_PROJECT_NAME']))
 
     @staticmethod
     def parse(yaml_file_to_read):
         logging.info('[YamlParser] Reading yml file - {}'.format(yaml_file_to_read))
-
-        if os.path.isdir('project'):
-            yaml_file_to_read = 'project/' + yaml_file_to_read
 
         if not os.path.exists(yaml_file_to_read):
             return None

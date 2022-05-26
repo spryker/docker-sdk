@@ -21,7 +21,7 @@ def main():
       apps = App.get_apps()
       if apps:
           logging.info('[POST-DEPLOY] Apps registration')
-          apps = Atrs.app_registration(auth0_jwt_token, apps)
+          apps = Atrs.app_registration(auth0_jwt_token, apps, configs)
           logging.info('[POST-DEPLOY] Apps registration "{}" has been finished successfully'.format(apps))
 
       if apps is None or apps == {}:
