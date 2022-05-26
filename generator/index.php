@@ -1518,7 +1518,7 @@ function validateServiceVersions(array $projectData): array
 
         $service = $services[$serviceName];
         $serviceEngine = $service['engine'] ?? null;
-        $serviceVersion = $service['version'] ?? 'default';
+        $serviceVersion = (string)($service['version'] ?? 'default');
 
         if($serviceEngine == null || !array_key_exists($serviceEngine, $serviceEngines)) {
             continue;
@@ -1554,20 +1554,6 @@ function getUnsupportedArmServiceMap(): array
         ],
         'webdriver' => [
             'phantomjs' => ['*'],
-        ],
-        'search' => [
-            'elastic' => [
-                '5.6' => '5.6',
-                '6.8' => '6.8',
-                'default' => '5.6',
-            ],
-        ],
-        'kibana' => [
-            'kibana' => [
-                '5.6' => '5.6',
-                '6.8' => '6.8',
-                'default' => '5.6',
-            ],
         ],
         'scheduler' => [
             'jenkins' => [
