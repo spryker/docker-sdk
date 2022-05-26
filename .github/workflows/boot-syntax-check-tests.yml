@@ -9,7 +9,10 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        dev-mode: [ DEV_MODE=0, DEV_MODE=1 ]
+        dev-mode: [
+          DEV_MODE=0,
+          DEV_MODE=1
+        ]
     name: Boot test
     steps:
       - name: Checkout
@@ -30,7 +33,10 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        dev-mode: [ DEV_MODE=0, DEV_MODE=1 ]
+        dev-mode: [
+          DEV_MODE=0,
+          DEV_MODE=1
+        ]
     name: Bash syntax check
     steps:
       - name: Checkout
