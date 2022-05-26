@@ -13,12 +13,8 @@ jobs:
       fail-fast: false
       matrix:
         platform-image: [
-          'spryker/php:7.4-alpine3.12',
-          'spryker/php:7.4-alpine3.13',
           'spryker/php:7.4-alpine3.14',
-          'spryker/php:7.4-alpine3.15',
-          'spryker/php:7.4-debian',
-          'spryker/php:7.4-debian-buster'
+          'spryker/php:7.4-debian'
         ]
         application-store: [ 'DE' ]
         env: [
@@ -56,11 +52,7 @@ jobs:
       fail-fast: false
       matrix:
         platform-image: [
-          'spryker/php:7.4-alpine3.12',
-          'spryker/php:7.4-alpine3.13',
-          'spryker/php:7.4-alpine3.14',
           'spryker/php:7.4-alpine3.15',
-          'spryker/php:7.4-debian',
           'spryker/php:7.4-debian-buster'
         ]
         application-store: [ 'DE' ]
