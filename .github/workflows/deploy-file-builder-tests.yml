@@ -1,38 +1,27 @@
-name: Boot & syntax check & tests
+name: Deploy file builder tests
 
 on:
   - push
-  - pull_request
 
 jobs:
-  build:
+  deploy_file_builder_tests:
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        include:
-          - name: Deploy file builder tests
-            php-version: 7.4
-            script: |
-              cd generator
-              composer install
-              vendor/bin/codecept run
+        php-version: [ 7.4 ]
+    name: Deploy file builder tests
     steps:
       - name: Checkout
         uses: actions/checkout@v2
-
-      - name: Setup packages
-        run: |
-          sudo apt-get -y install \
-            apache2-utils \
-            apt-transport-https \
-            ca-certificates \
-            curl \
-            gnupg-agent \
-            pigz \
-            software-properties-common
 
       - name: Setup PHP with PECL extension
         uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.php-version }}
+
+      - name: Run script
+        run: |
+          cd generator
+          composer install
+          vendor/bin/codecept run
