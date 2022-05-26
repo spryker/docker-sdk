@@ -47,7 +47,6 @@ Service::Scheduler::unpause() {
     # shellcheck disable=SC2016
     # For avoid https://github.com/docker/compose/issues/9104
     Compose::exec 'curl -sLI -X POST ${SPRYKER_SCHEDULER_HOST}:${SPRYKER_SCHEDULER_PORT}/cancelQuietDown' "${DOCKER_COMPOSE_TTY_DISABLED}" >/dev/null || true
-
     Console::end "[DONE]"
 }
 
