@@ -12,10 +12,23 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        platform-image: [ 'spryker/php:7.4-alpine3.15', 'spryker/php:7.4-debian' ]
+        platform-image: [
+          'spryker/php:7.4-alpine3.12',
+          'spryker/php:7.4-alpine3.13',
+          'spryker/php:7.4-alpine3.14',
+          'spryker/php:7.4-alpine3.15',
+          'spryker/php:7.4-debian',
+          'spryker/php:7.4-debian-buster'
+        ]
         application-store: [ 'DE' ]
-        env: [ 'ci.mysql', 'ci.pgsql' ]
-        repo: [ 'https://github.com/spryker-shop/b2b-demo-shop.git', 'https://github.com/spryker-shop/b2c-demo-shop.git' ]
+        env: [
+          'ci.mysql',
+          'ci.pgsql'
+        ]
+        repo: [
+          'https://github.com/spryker-shop/b2b-demo-shop.git',
+          'https://github.com/spryker-shop/b2c-demo-shop.git'
+        ]
     name: "Function Tests(Image: ${{ matrix.platform-image }}, Environment: ${{ matrix.env }}, Repo: ${{ matrix.repo }})"
     steps:
       - name: Checkout
@@ -42,10 +55,23 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        platform-image: [ 'spryker/php:7.4-alpine3.15', 'spryker/php:7.4-debian' ]
+        platform-image: [
+          'spryker/php:7.4-alpine3.12',
+          'spryker/php:7.4-alpine3.13',
+          'spryker/php:7.4-alpine3.14',
+          'spryker/php:7.4-alpine3.15',
+          'spryker/php:7.4-debian',
+          'spryker/php:7.4-debian-buster'
+        ]
         application-store: [ 'DE' ]
-        env: [ 'ci.mysql', 'ci.pgsql' ]
-        repo: [ 'https://github.com/spryker-shop/b2b-demo-shop.git', 'https://github.com/spryker-shop/b2c-demo-shop.git' ]
+        env: [
+          'ci.mysql',
+          'ci.pgsql'
+        ]
+        repo: [
+          'https://github.com/spryker-shop/b2b-demo-shop.git',
+          'https://github.com/spryker-shop/b2c-demo-shop.git'
+        ]
     name: "Glue Tests(Image: ${{ matrix.platform-image }}, Environment: ${{ matrix.env }}, Repo: ${{ matrix.repo }})"
     steps:
       - name: Checkout
