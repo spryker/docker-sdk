@@ -32,7 +32,7 @@ class App:
             app_key_lower = app_key.lower()
             app_unique_key = app_key_lower + '_' + os.environ['SPRYKER_PROJECT_NAME']
             apps[self.APPS_KEY].update({app_key_lower:{}})
-            apps[self.APPS_KEY][app_key_lower].update(app_data | {self.APP_ID_KEY: app_unique_key } | {'app_name': app_key_lower})
+            apps[self.APPS_KEY][app_key_lower].update(app_data | {self.APP_ID_KEY: app_unique_key } | {'app_name': app_key})
 
         logging.info('[APP] The list of registered app: {}'.format(apps))
 
