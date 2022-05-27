@@ -18,16 +18,17 @@ def main():
       Auth0.define_credentials(configs, Auth0.AUTH0_AOP_ATRS)
       auth0_jwt_token = Auth0.get_jwt_token()
 
+      applications = YamlParser.get_applications()
+
       apps = App.get_apps()
       if apps:
           logging.info('[POST-DEPLOY] Apps registration')
-          apps = Atrs.app_registration(auth0_jwt_token, apps, configs)
+          apps = Atrs.app_registration(auth0_jwt_token, apps, applications, configs)
           logging.info('[POST-DEPLOY] Apps registration "{}" has been finished successfully'.format(apps))
 
       if apps is None or apps == {}:
           logging.info('[POST-DEPLOY] Tenants registration')
           tenants = Tenant.get_tenants()
-          applications = YamlParser.get_applications()
           tenants = Atrs.tenant_registration(auth0_jwt_token, tenants, applications, configs)
           logging.info('[POST-DEPLOY] Tenants registration "{}" has been finished successfully'.format(tenants))
 

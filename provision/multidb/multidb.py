@@ -88,6 +88,8 @@ class MultiDb:
              deploy_file_data = yaml_parser.get_deploy_file_data()
              db_host = aws_ssm.ssm_get_parameter('SPRYKER_DB_HOST', aws_ssm.PARAM_STORE_CODEBUILD)
              db_port = aws_ssm.ssm_get_parameter('SPRYKER_DB_PORT', aws_ssm.PARAM_STORE_CODEBUILD)
+             db_username = aws_ssm.ssm_get_parameter('SPRYKER_DB_USERNAME', aws_ssm.PARAM_STORE_CODEBUILD)
+             db_username = aws_ssm.ssm_get_parameter('SPRYKER_DB_PASSWORD', aws_ssm.PARAM_STORE_CODEBUILD)
 
              data = {
                 "version": "1.0",
@@ -98,8 +100,8 @@ class MultiDb:
                  'host': db_host['Parameter']['Value'],
                  'port': db_port['Parameter']['Value'],
                  'database': os.environ['SPRYKER_PROJECT_NAME'],
-                 'username': aws_ssm.ssm_get_parameter('SPRYKER_DB_USERNAME', aws_ssm.PARAM_STORE_CODEBUILD)['Parameter']['Value'],
-                 'password': aws_ssm.ssm_get_parameter('SPRYKER_DB_PASSWORD', aws_ssm.PARAM_STORE_CODEBUILD)['Parameter']['Value'],
+                 'username': db_username['Parameter']['Value'],
+                 'password': db_username['Parameter']['Value'],
                  'character-set': 'utf8',
                  'collate': 'utf8_general_ci'
              }

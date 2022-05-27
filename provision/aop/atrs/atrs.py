@@ -94,7 +94,7 @@ class Atrs:
         return tenants
 
     @classmethod
-    def app_registration(self, jwt_token, apps, configs):
+    def app_registration(self, jwt_token, apps, applications, configs):
         logging.info('[AOP] Infrastructure. Apps registration')
 
         conn = http.client.HTTPSConnection(self._atrs_host)
@@ -104,9 +104,6 @@ class Atrs:
             "Authorization": "Bearer {}".format(jwt_token),
             "Content-Type": "application/json"
         }
-
-        if Config.AOP_APPS_HOST not in configs:
-            raise Exception('[AOP] `Config.AOP_APPS_HOST` configuration key must be defined.')
 
         for app_key, app_data in apps['apps'].items():
             if type(app_data) is not dict:
@@ -122,7 +119,8 @@ class Atrs:
                         "type": "apps",
                         "attributes": {
                             "id": app_data['appId'],
-                            "baseUrl": configs[Config.AOP_APPS_HOST],
+#                             "baseUrl": self.get_zed_url(applications)
+                            "baseUrl": "https://os.apps-staging.aop.demo-spryker.com"
                         }
                     }
                 }
@@ -147,9 +145,9 @@ class Atrs:
             res = conn.getresponse()
             logging.info('[AOP] App registration, status {}'.format(res.status))
 
-            if res.status != 200 and res.status != 204:
+            if res.status != 200 and res.status != 201 and res.status != 204:
                data = json.loads(res.read())
-               if data['errors'][0]['code'] != "910":
+               if data['errors'][0]['code'] != "910" and data['errors'][0]['code'] != "801":
                    logging.info('[AOP] App registration error {}'. format(json.dumps(data)))
                    raise Exception('[AOP] Cannot register App {}'.format(app_key))
                logging.info('[AOP] Tenant "{}" already registered'. format(app_data['appId']))
@@ -158,3 +156,12 @@ class Atrs:
             logging.info('[AOP] Infrastructure. Apps registration has been finished')
 
         return apps
+
+    @staticmethod
+    def get_zed_url(applications):
+        for store_key, endpoints in applications.items():
+            for endpoint_data in endpoints:
+                if endpoint_data['type'] == 'zed' or endpoint_data['type'] == 'backoffice':
+                    return endpoint_data['url']
+
+        raise Exception('Zed or Backoffice application must be defined.')
