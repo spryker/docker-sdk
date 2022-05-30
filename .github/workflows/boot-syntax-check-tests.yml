@@ -1,0 +1,74 @@
+name: Boot & Syntax check & tTests
+
+on:
+  - push
+
+jobs:
+  boot_test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        dev-mode: [
+          DEV_MODE=0,
+          DEV_MODE=1
+        ]
+    name: Boot test
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Boot
+        run: |
+          export ${{ matrix.dev-mode }}
+          chmod +x sdk
+          if [[ $DEV_MODE == 0 ]] ; then ./sdk boot ci/deploy.yml; fi
+          if [[ $DEV_MODE == 1 ]] ; then ./sdk boot ci/deploy.dev.yml; fi
+
+      - name: Run script
+        run: bash ./ci/check_boot.sh
+
+  bash_syntax_check:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        dev-mode: [
+          DEV_MODE=0,
+          DEV_MODE=1
+        ]
+    name: Bash syntax check
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Boot
+        run: |
+          export ${{ matrix.dev-mode }}
+          chmod +x sdk
+          if [[ $DEV_MODE == 0 ]] ; then ./sdk boot ci/deploy.yml; fi
+          if [[ $DEV_MODE == 1 ]] ; then ./sdk boot ci/deploy.dev.yml; fi
+
+      - name: Run script
+        run: bash ./ci/check_boot.sh
+
+  tests:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        dev-mode: [ DEV_MODE=0, DEV_MODE=1 ]
+    name: Tests
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Boot
+        run: |
+          export ${{ matrix.dev-mode }}
+          chmod +x sdk
+          if [[ $DEV_MODE == 0 ]] ; then ./sdk boot ci/deploy.yml; fi
+          if [[ $DEV_MODE == 1 ]] ; then ./sdk boot ci/deploy.dev.yml; fi
+
+      - name: Run script
+        run: bash ./ci/tests.sh

@@ -1,0 +1,88 @@
+name: B2B + B2C Demoshop tests
+on:
+  - push
+
+env:
+  SPRYKER_TESTING_ENABLED: 1
+  PROJECT: suite
+
+jobs:
+  functional_test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        platform-image: [
+          'spryker/php:7.4-alpine3.14',
+          'spryker/php:7.4-debian'
+        ]
+        application-store: [ 'DE' ]
+        env: [
+          'ci.mysql',
+          'ci.pgsql'
+        ]
+        repo: [
+          'https://github.com/spryker-shop/b2b-demo-shop.git',
+          'https://github.com/spryker-shop/b2c-demo-shop.git'
+        ]
+    name: "Function Tests(Image: ${{ matrix.platform-image }}, Environment: ${{ matrix.env }}, Repo: ${{ matrix.repo }})"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Clone demo shop
+        run: cd ../ && git clone --depth=3 --branch=master ${{ matrix.repo }} demo-shop && cp -R docker-sdk demo-shop
+
+      - name: Provide env variables
+        run: |
+          export SPRYKER_PLATFORM_IMAGE=${{ matrix.platform-image}}
+          export APPLICATION_ENV=${{ matrix.env }}
+          export APPLICATION_STORE=${{ matrix.application-store }}
+
+      - name: Run script
+        run: |
+          cd ../demo-shop
+          docker-sdk/sdk boot deploy.ci.functional.mariadb.yml -v
+          docker-sdk/sdk up -t -v
+          docker-sdk/sdk testing codecept run -c codeception.ci.functional.yml
+
+  glue_test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        platform-image: [
+          'spryker/php:7.4-alpine3.15',
+          'spryker/php:7.4-debian-buster'
+        ]
+        application-store: [ 'DE' ]
+        env: [
+          'ci.mysql',
+          'ci.pgsql'
+        ]
+        repo: [
+          'https://github.com/spryker-shop/b2b-demo-shop.git',
+          'https://github.com/spryker-shop/b2c-demo-shop.git'
+        ]
+    name: "Glue Tests(Image: ${{ matrix.platform-image }}, Environment: ${{ matrix.env }}, Repo: ${{ matrix.repo }})"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Clone demo shop
+        run: cd ../ && git clone --depth=3 --branch=master ${{ matrix.repo }} demo-shop && cp -R docker-sdk demo-shop
+
+      - name: Provide env variables
+        run: |
+          export SPRYKER_PLATFORM_IMAGE=${{ matrix.platform-image}}
+          export APPLICATION_ENV=${{ matrix.env }}
+          export APPLICATION_STORE=${{ matrix.application-store }}
+
+      - name: Run script
+        run: |
+          cd ../demo-shop
+          docker-sdk/sdk boot deploy.ci.api.yml -v
+          docker-sdk/sdk up -t -v
+          docker-sdk/sdk testing codecept fixtures
+          docker-sdk/sdk testing console queue:worker:start --stop-when-empty
+          docker-sdk/sdk testing codecept run -c codeception.api.yml
