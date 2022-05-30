@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import logging
 import sys
-from multidb import MultiDb
+from db import Db
 sys.path.append(".")
 
 from common.yml.yml import YamlParser
@@ -11,7 +11,7 @@ logging.basicConfig(level=logging.INFO)
 
 def main():
     try:
-        MultiDb.provision_logical_dbs(yaml_parser=YamlParser(), aws_ssm=AwsSsm())
+        Db.provision_logical_dbs(yaml_parser=YamlParser(), aws_ssm=AwsSsm())
     except Exception as e:
         print(e)
         exit()

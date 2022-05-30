@@ -119,8 +119,7 @@ class Atrs:
                         "type": "apps",
                         "attributes": {
                             "id": app_data['appId'],
-#                             "baseUrl": self.get_zed_url(applications)
-                            "baseUrl": "https://os.apps-staging.aop.demo-spryker.com"
+                            "baseUrl": self.get_zed_url(applications)
                         }
                     }
                 }

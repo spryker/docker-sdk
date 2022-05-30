@@ -3,6 +3,7 @@ import logging
 import os.path
 
 class YamlParser:
+
     def __init__(self):
         logging.info('[YamlParser] YamlParser constructor')
 
@@ -10,11 +11,12 @@ class YamlParser:
     def get_deploy_file_data(self):
         return self.parse("configs/docker/deployment/{}/project.yml".format(os.environ['SPRYKER_PROJECT_NAME']))
 
-    @staticmethod
-    def parse(yaml_file_to_read):
+    @classmethod
+    def parse(self, yaml_file_to_read):
         logging.info('[YamlParser] Reading yml file - {}'.format(yaml_file_to_read))
 
         if not os.path.exists(yaml_file_to_read):
+            logging.info('[YamlParser] File with the name "{}" doesn\'t exist'.format(yaml_file_to_read))
             return None
 
         with open(yaml_file_to_read, "r") as stream:
@@ -46,3 +48,14 @@ class YamlParser:
                     applications[endpoint_data['store']].append(endpoints)
 
         return applications
+
+    @classmethod
+    def get_stores(self):
+        deploy_file_data = self.get_deploy_file_data()
+
+        stores = []
+        for region_name, region_data in deploy_file_data['regions'].items():
+            for store_key, store_data in  region_data['stores'].items():
+                stores.append(store_key)
+
+        return stores

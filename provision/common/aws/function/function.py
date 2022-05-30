@@ -67,7 +67,7 @@ class AwsLambda:
         return role
 
     @classmethod
-    def create_function(self, function_name, handler_name, iam_role, deployment_package):
+    def create_function(self, function_name, handler_name, iam_role, deployment_package, variables = {}):
         """
         Deploys a Lambda function.
 
@@ -83,7 +83,7 @@ class AwsLambda:
         logging.info("[AwsLambda] Creating of Lambda function %s.", function_name)
 
         try:
-            with open('aop/' + deployment_package, 'rb') as f:
+            with open(deployment_package, 'rb') as f:
             	zipped_code = f.read()
 
             function = self.get_function(function_name)
@@ -103,10 +103,9 @@ class AwsLambda:
                 Code={'ZipFile': zipped_code},
                 Publish=True,
                 Environment={
-                        'Variables': {
-                            'PARAMETER_STORE_SLACK_WH_URL': 'PARAMETER_STORE_SLACK_WH_URL',
-                        }
-                    },)
+                    'Variables': variables
+                },
+            )
             function_arn = response['FunctionArn']
             waiter = self.get_lambda_client().get_waiter('function_active_v2')
             waiter.wait(FunctionName=function_name)

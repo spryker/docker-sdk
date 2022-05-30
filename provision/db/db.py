@@ -9,7 +9,7 @@ import secrets
 import mysql.connector
 from mysql.connector import errors
 
-class MultiDb:
+class Db:
 
     DEFAULT_DATABASE_KEY = "_default"
 
@@ -89,7 +89,7 @@ class MultiDb:
              db_host = aws_ssm.ssm_get_parameter('SPRYKER_DB_HOST', aws_ssm.PARAM_STORE_CODEBUILD)
              db_port = aws_ssm.ssm_get_parameter('SPRYKER_DB_PORT', aws_ssm.PARAM_STORE_CODEBUILD)
              db_username = aws_ssm.ssm_get_parameter('SPRYKER_DB_USERNAME', aws_ssm.PARAM_STORE_CODEBUILD)
-             db_username = aws_ssm.ssm_get_parameter('SPRYKER_DB_PASSWORD', aws_ssm.PARAM_STORE_CODEBUILD)
+             db_password = aws_ssm.ssm_get_parameter('SPRYKER_DB_PASSWORD', aws_ssm.PARAM_STORE_CODEBUILD)
 
              data = {
                 "version": "1.0",
@@ -101,7 +101,7 @@ class MultiDb:
                  'port': db_port['Parameter']['Value'],
                  'database': os.environ['SPRYKER_PROJECT_NAME'],
                  'username': db_username['Parameter']['Value'],
-                 'password': db_username['Parameter']['Value'],
+                 'password': db_password['Parameter']['Value'],
                  'character-set': 'utf8',
                  'collate': 'utf8_general_ci'
              }
@@ -160,6 +160,7 @@ class MultiDb:
              return self.merge_two_dicts(paas_services_data, data)
          except Exception as e:
             logging.exception(e)
+            exit(1)
             raise
 
     @classmethod

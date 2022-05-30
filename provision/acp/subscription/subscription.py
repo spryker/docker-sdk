@@ -16,7 +16,7 @@ class Subscription:
     AOP_DL_QUEUE_NAME = '{}_aop_dlq.fifo'
     AOP_DLQ_LAMBDA_ROLE_NAME = 'aop_role_dlq'
     AOP_DLQ_LAMBDA_HANDLER_NAME = 'main'
-    AOP_DLQ_LAMBDA_HANDLER_FILE = 'lambda.zip'
+    AOP_DLQ_LAMBDA_HANDLER_FILE = 'acp/lambda.zip'
     AOP_DLQ_POLICY = 'aop_dlq_policy'
     AOP_SQS_DL_MAX_RECEIVE_COUNT = 3
 
@@ -76,7 +76,10 @@ class Subscription:
             aop_dlq_lambda_name,
             self.AOP_DLQ_LAMBDA_HANDLER_NAME,
             role,
-            self.AOP_DLQ_LAMBDA_HANDLER_FILE
+            self.AOP_DLQ_LAMBDA_HANDLER_FILE,
+            {
+                'PARAMETER_STORE_SLACK_WH_URL': 'PARAMETER_STORE_SLACK_WH_URL',
+            }
         )
 
         AwsLambda.create_event_source_mapping(aop_dlq_lambda_name, dl_queue_arn)

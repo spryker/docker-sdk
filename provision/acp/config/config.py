@@ -31,7 +31,7 @@ class Config:
 
         configs = AwsSsm.ssm_get_parameter('AOP_CONFIGURATION', AwsSsm.PARAM_STORE_SECRET)
         if configs is None:
-            logging.exception('[AOP Config] Please check `AOP_CONFIGURATION` and try again')
+            raise Exception('[AOP Config] Please check `AOP_CONFIGURATION` and try again')
 
         aop_configs = YamlParser.parse(config_path)
         configs = json.loads(configs["Parameter"]["Value"])
