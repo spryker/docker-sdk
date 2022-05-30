@@ -98,6 +98,7 @@ $isAutoloadCacheEnabled = $projectData['_isAutoloadCacheEnabled'] = isAutoloadCa
 $projectData['_requirementAnalyzerData'] = buildDataForRequirementAnalyzer($projectData);
 $projectData['secrets'] = buildSecrets($deploymentDir);
 $projectData = buildDefaultCredentials($projectData);
+$projectData['_isAcpLocalDevelopmentEnabled'] = isAcpLocalDevelopmentEnabled($projectData);
 
 // TODO Make it optional in next major
 // Making webdriver as required service for BC reasons
@@ -1080,6 +1081,20 @@ function isAutoloadCacheEnabled(array $projectData): bool
     }
 
     return $projectData['docker']['cache']['autoload']['enabled'] ?? false;
+}
+
+/**
+ * @param array $projectData
+ *
+ * @return bool
+ */
+function isAcpLocalDevelopmentEnabled(array $projectData): bool
+{
+    if (empty($projectData['image']['environment']['ACP_DOCKER_SDK_FILE'])) {
+        return false;
+    }
+
+    return true;
 }
 
 /**
