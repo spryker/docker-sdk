@@ -6,7 +6,7 @@ function Database::haveTables() {
         export VERBOSE=0
         export PGPASSWORD="${SPRYKER_DB_ROOT_PASSWORD}"
         databases="$(echo ${SPRYKER_PAAS_SERVICES} | jq  '.databases')";
-        if [ "${databases}" == "[]" ]; then
+        if [ -z "${databases}" ] || [ "${databases}" == "[]" ]; then
             psql -lqt \
                 -h "${SPRYKER_DB_HOST}" \
                 -U "${SPRYKER_DB_ROOT_USERNAME}" |
@@ -56,7 +56,7 @@ function Database::init() {
 
         databases="$(echo ${SPRYKER_PAAS_SERVICES} | jq  '.databases')";
 
-        if [ "${databases}" == "[]" ]; then
+        if [ -z "${databases}" ] || [ "${databases}" == "[]" ]; then
             psql \
                 -h "${SPRYKER_DB_HOST}" \
                 -U "${SPRYKER_DB_ROOT_USERNAME}" \

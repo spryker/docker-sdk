@@ -6,7 +6,7 @@ function Database::haveTables() {
         export VERBOSE=0
         export MYSQL_PWD="${SPRYKER_DB_ROOT_PASSWORD}"
         databases="$(echo ${SPRYKER_PAAS_SERVICES} | jq  '.databases')";
-        if [ "${databases}" == "[]" ]; then
+        if [ -z "${databases}" ] || [ "${databases}" == "[]" ]; then
             mysql \
                 -h "${SPRYKER_DB_HOST}" \
                 -u "${SPRYKER_DB_ROOT_USERNAME}" \
@@ -48,7 +48,7 @@ function Database::init() {
         export MYSQL_PWD="${SPRYKER_DB_ROOT_PASSWORD}";
         databases="$(echo ${SPRYKER_PAAS_SERVICES} | jq  '.databases')";
 
-        if [ "${databases}" == "[]" ]; then
+        if [ -z "${databases}" ] || [ "${databases}" == "[]" ]; then
             mysql \
                 -h "${SPRYKER_DB_HOST}" \
                 -u root \
