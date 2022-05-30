@@ -21,6 +21,7 @@ RUN --mount=type=cache,id=aptlib,sharing=locked,target=/var/lib/apt \
      netcat-openbsd \
      git \
      redis-tools \
+     jq \
      python \
      ; fi'
 # Debian contains outdated Yarn package
