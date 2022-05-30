@@ -30,3 +30,4 @@
 {% include "terraform/mail/mail.tf.twig" with {
     serviceData: regionData['services']['mail']
 } %}
+      SPRYKER_ENDPOINT_LIST={{ project['_endpointList'][regionName] | json_encode | tf_var }}

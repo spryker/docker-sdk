@@ -130,6 +130,7 @@ $primal = [];
 $projectData['_entryPoints'] = [];
 $projectData['_endpointMap'] = [];
 $projectData = extendProjectDataWithKeyValueRegionNamespaces($projectData);
+$projectData['_endpointList'] = [];
 $projectData['_storeSpecific'] = getStoreSpecific($projectData);
 $debugPortIndex = 10000;
 $projectData['_endpointDebugMap'] = [];
@@ -189,6 +190,7 @@ foreach ($projectData['groups'] ?? [] as $groupName => $groupData) {
                         $projectData['groups'][$groupName]['applications'][$applicationName]['endpoints'][$endpoint]['primal'] = true;
                     };
                 }
+                $projectData['_endpointList'][$groupName][$store][camel2dashed($applicationName)] = $endpoint;
             }
 
             if (array_key_exists('redirect', $endpointData)) {
@@ -271,6 +273,7 @@ foreach ($projectData['groups'] ?? [] as $groupName => $groupData) {
                     'regionName' => $groupData['region'],
                     'regionData' => $projectData['regions'][$groupData['region']],
                     'brokerConnections' => getBrokerConnections($projectData),
+                    'endpointList' => $projectData['_endpointList'][$groupData['region']]
                 ])
             );
         }
@@ -352,6 +355,7 @@ foreach ($projectData['groups'] ?? [] as $groupName => $groupData) {
                         'storeName' => $endpointData['store'],
                         'services' => $services,
                         'endpointMap' => $endpointMap,
+                        'endpointList' => $projectData['_endpointList'][$groupData['region']],
                     ])
                 );
 
@@ -367,6 +371,7 @@ foreach ($projectData['groups'] ?? [] as $groupName => $groupData) {
                         'storeName' => $endpointData['store'],
                         'services' => $services,
                         'endpointMap' => $endpointMap,
+                        'endpointList' => $projectData['_endpointList'][$groupData['region']],
                     ])
                 );
                 $envVarEncoder->setIsActive(false);
@@ -896,8 +901,8 @@ function buildNewrelicDistributedTracing(array $projectData): array
         'NEWRELIC_TRANSACTION_TRACER_ENABLED' => (int) $distributedTracingData['enabled'] ?? 0,
         'NEWRELIC_DISTRIBUTED_TRACING_ENABLED' => (int) $distributedTracingData['enabled'] ?? 0,
         'NEWRELIC_SPAN_EVENTS_ENABLED' => (int) $distributedTracingData['enabled'] ?? 0,
-        'NEWRELIC_TRANSACTION_TRACER_THRESHOLD' => (int) $distributedTracingData['transaction-tracer-threshold'] ?? 0,
-        'NEWRELIC_DISTRIBUTED_TRACING_EXCLUDE_NEWRELIC_HEADER' => (int) $distributedTracingData['exclude-newrelic-header'] ?? 0,
+        'NEWRELIC_TRANSACTION_TRACER_THRESHOLD' => (int) ($distributedTracingData['transaction-tracer-threshold'] ?? 0),
+        'NEWRELIC_DISTRIBUTED_TRACING_EXCLUDE_NEWRELIC_HEADER' => (int) ($distributedTracingData['exclude-newrelic-header'] ?? 0),
     ];
 }
 
@@ -1383,20 +1388,6 @@ function buildDefaultRegionCredentialsForDatabase(array $projectData): array
         if (array_key_exists('database', $regionConfig['services'])) {
             $regionDbConfig = $regionConfig['services']['database'];
             $regionDbConfig = array_merge($defaultDbRegionCredentials, $regionDbConfig);
-
-            foreach ($regionConfig['stores'] as $storeName => $storeConfig) {
-                $databases['databases'][$storeName] = [
-                    'host' => 'database',
-                    'port' => $databaseServiceData['port'] ?? $databaseServiceData['engine'] === 'mysql' ? 3306 : 5432,
-                    'database' => $regionDbConfig['database'],
-                    'username' => $regionDbConfig['username'],
-                    'password' => $regionDbConfig['password'],
-                    'characterSet' => $regionDbConfig['character-set'] ?? 'utf8',
-                    'collate' => $regionDbConfig['collate'] ?? 'utf8_general_ci',
-                ];
-            }
-
-            $projectData['regions'][$regionName]['services']['databases'] = json_encode($databases);
             $projectData['regions'][$regionName]['services']['database'] = $regionDbConfig;
         }
 
@@ -1473,3 +1464,14 @@ function extendProjectDataWithKeyValueRegionNamespaces(array $projectData): arra
 
     return $projectData;
 }
+
+/**
+ * @param string $className
+ *
+ * @return string
+ */
+function camel2dashed(string $className)
+{
+    return strtolower(preg_replace('/([a-zA-Z])(?=[A-Z])/', '$1-', $className));
+}
+
