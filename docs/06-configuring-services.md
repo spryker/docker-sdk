@@ -165,7 +165,7 @@ services:
         endpoints:
             {custom_endpoint}:
 ```
-2. Adjust host file:
+2. Adjust host file, if `{custom_endpoint}` aren't ending on `.localhost`:
 ```bash
 echo "127.0.0.1 {custom_endpoint}" | sudo tee -a /etc/hosts
 ```
@@ -211,7 +211,7 @@ services:
             {custom_endpoint}:
 ```
 
-2. Adjust the `host` file:
+2. Adjust the `host` file, if `{custom_endpoint}` aren't ending on `.localhost`:
 ```bash
 echo "127.0.0.1 {custom_endpoint}" | sudo tee -a /etc/hosts
 ```
@@ -245,14 +245,14 @@ Follow the steps to configure an endpoint for Redis Commander:
 
 ```yaml
 services:
-...    
+...
     redis-gui:
         engine: redis-commander
         endpoints:
             {custom_endpoint}: //redis-commander.spryker.local:
 ```
 
-2. Adjust hosts file:
+2. Adjust hosts file, if `{custom_endpoint}` aren't ending on `.localhost`:
 ```bash
 echo "127.0.0.1 {custom_endpoint}" | sudo tee -a /etc/hosts
 ```
@@ -374,7 +374,7 @@ Follow the steps to enable New Relic:
 ```yaml
 docker:
     newrelic:
-        license: {new_relic_license)
+        license: {new_relic_license}
 ```
 
 2. Adjust `deploy.*.yml` in the `image:` section:
@@ -427,7 +427,7 @@ ChromeDriver is provided as a webdriver service by default, but you can switch t
 
 ### ChromeDriver
 
-[ChromeDriver](https://chromedriver.chromium.org/) is a thin wrapper on WebDriver and [Chromium](https://chromedriver.chromium.org/) headless browser. It is used for automating web page interaction, JavaScript execution, and other testing-related activities. It provides full-control API to make end-to-end testing flexible and comfortable.  
+[ChromeDriver](https://chromedriver.chromium.org/) is a thin wrapper on WebDriver and [Chromium](https://chromedriver.chromium.org/) headless browser. It is used for automating web page interaction, JavaScript execution, and other testing-related activities. It provides full-control API to make end-to-end testing flexible and comfortable.
 
 
 :::(Warning) (Default service)

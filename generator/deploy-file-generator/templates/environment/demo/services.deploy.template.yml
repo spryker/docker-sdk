@@ -1,0 +1,42 @@
+services:
+    database:
+        engine: mysql
+        version: mariadb-10.4
+        endpoints:
+            localhost:3306:
+                protocol: tcp
+    broker:
+        engine: rabbitmq
+        endpoints:
+            queue.spryker.local:
+            localhost:5672:
+                protocol: tcp
+    session:
+        engine: redis
+    key_value_store:
+        engine: redis
+        endpoints:
+            localhost:16379:
+                protocol: tcp
+    search:
+        engine: elastic
+        version: '7.10'
+        endpoints:
+            localhost:9200:
+                protocol: tcp
+    scheduler:
+        engine: jenkins
+        endpoints:
+            scheduler.spryker.local:
+    mail_catcher:
+        engine: mailhog
+        endpoints:
+            mail.spryker.local:
+    swagger:
+        engine: swagger-ui
+        endpoints:
+            swagger.spryker.local:
+    dashboard:
+        engine: dashboard
+        endpoints:
+            spryker.local:

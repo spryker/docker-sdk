@@ -9,6 +9,13 @@ function Service::Broker::install() {
     local tty
     [ -t -0 ] && tty='' || tty='-T'
 
+    # For avoid https://github.com/docker/compose/issues/9104
+    local ttyDisabledKey='docker_compose_tty_disabled'
+
+    if [ "${DOCKER_COMPOSE_TTY_DISABLED}" = "${ttyDisabledKey}" ]; then
+      tty='-T'
+    fi
+
     # shellcheck disable=SC2016
     output=$(
         Compose::command exec ${tty} \
