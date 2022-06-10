@@ -2,6 +2,14 @@
 ARG SPRYKER_PLATFORM_IMAGE=spryker/php:7.3
 FROM ${SPRYKER_PLATFORM_IMAGE} AS application-basic
 
+# PHP-FPM environment variables
+ENV PHP_FPM_PM=dynamic
+ENV PHP_FPM_PM_MAX_CHILDREN=4
+ENV PHP_FPM_PM_START_SERVERS=2
+ENV PHP_FPM_PM_MIN_SPARE_SERVERS=1
+ENV PHP_FPM_PM_MAX_SPARE_SERVERS=2
+ENV PHP_FPM_PM_MAX_REQUESTS=500
+
 ENV SPRYKER_IN_DOCKER=1
 ENV COMPOSER_IGNORE_CHROMEDRIVER=1
 {% for envName, envValue in _envs %}
@@ -21,14 +29,6 @@ ARG KNOWN_HOSTS
 RUN mkdir -p /home/spryker/.ssh && chmod 0700 /home/spryker/.ssh
 RUN bash -c '[ ! -z "${KNOWN_HOSTS}" ] && ssh-keyscan -t rsa ${KNOWN_HOSTS} >> /home/spryker/.ssh/known_hosts || true'
 RUN chown spryker:spryker -R /home/spryker/.ssh
-
-# PHP-FPM environment variables
-ENV PHP_FPM_PM=dynamic
-ENV PHP_FPM_PM_MAX_CHILDREN=4
-ENV PHP_FPM_PM_START_SERVERS=2
-ENV PHP_FPM_PM_MIN_SPARE_SERVERS=1
-ENV PHP_FPM_PM_MAX_SPARE_SERVERS=2
-ENV PHP_FPM_PM_MAX_REQUESTS=500
 
 # PHP configuration
 COPY php/php-fpm.d/worker.conf /usr/local/etc/php-fpm.d/worker.conf
