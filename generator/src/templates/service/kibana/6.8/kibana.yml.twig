@@ -2,7 +2,7 @@
 {% if project._isArm  %}
     image: volhovm/kibana:6.8.10
 {% else %}
-    image: docker.elastic.co/kibana/kibana:6.8.10
+    image: spryker/kibana:6.8.4-eol
 {% endif %}
     {{ project._platformCompose }}
     networks:
@@ -22,4 +22,4 @@
         - search
     volumes:
         - {{ serviceName }}-{{ serviceData['engine'] }}-data:/usr/share/kibana/data:rw
-        - ./${DEPLOYMENT_PATH}/context/kibana/default/kibana.yml:/usr/share/kibana/config/kibana.yml:ro
+        - ./${DEPLOYMENT_PATH}/context/kibana/6.8/kibana.yml:/usr/share/kibana/config/kibana.yml:ro

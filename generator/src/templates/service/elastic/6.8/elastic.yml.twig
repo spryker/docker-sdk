@@ -2,7 +2,7 @@
 {% if project._isArm  %}
     image: volhovm/elasticsearch:6.8.4-arm
 {% else %}
-    image: docker.elastic.co/elasticsearch/elasticsearch:6.8.4
+    image: spryker/elasticsearch:6.8.4-eol
 {% endif %}
     {{ project._platformCompose }}
     networks:
