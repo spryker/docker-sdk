@@ -8,11 +8,7 @@ x-volumes:
 services:
 
   cli_ssh_relay:
-{% if _isArm  %}
-    image: volhovm/socat
-{% else %}
-    image: bpack/socat
-{% endif %}
+    image: spryker/socat:latest
     privileged: true
     command: UNIX-LISTEN:/tmp/ssh-relay/ssh-auth.sock,fork,unlink-early,user=1000,group=1000,mode=666 UNIX-CONNECT:/tmp/ssh-relay/input-ssh-auth.sock
     networks:
@@ -27,7 +23,6 @@ services:
 
   cli:
     image: ${SPRYKER_DOCKER_PREFIX}_run_cli:${SPRYKER_DOCKER_TAG}
-    {{ project._platformCompose }}
     networks:
       - public
       - private
@@ -51,7 +46,6 @@ services:
       BLACKFIRE_CLIENT_TOKEN: ${BLACKFIRE_CLIENT_TOKEN}
       TIDEWAYS_APIKEY: ${TIDEWAYS_APIKEY}
       TIDEWAYS_CLI_ENABLED: ${TIDEWAYS_CLI_ENABLED}
-      COMPOSER_MEMORY_LIMIT: -1
       TIDEWAYS_ENVIRONMENT_NAME: ${TIDEWAYS_ENVIRONMENT_NAME}
     command:
       - "node"
@@ -59,7 +53,6 @@ services:
 
   frontend:
     image: ${SPRYKER_DOCKER_PREFIX}_run_frontend:${SPRYKER_DOCKER_TAG}
-    {{ project._platformCompose }}
     networks:
         - private
     labels:
@@ -92,10 +85,6 @@ services:
     volumes:
 {% if _mountMode == 'native' %}
       - ./public:/data/public:ro
-{% elseif _mountMode == 'delegated' %}
-      - ./:/data:delegated
-{% elseif _mountMode == 'cached' %}
-      - ./:/data:cached
 {% else %}
       - ${SPRYKER_DOCKER_PREFIX}_${SPRYKER_DOCKER_TAG}_data_sync:/data
 {% endif %}
@@ -103,7 +92,6 @@ services:
 
   gateway:
     image: ${SPRYKER_DOCKER_PREFIX}_gateway:${SPRYKER_DOCKER_TAG}
-    {{ project._platformCompose }}
     ports:
 {% for port in _ports %}
       - "{{ port }}:{{ port }}"
@@ -172,7 +160,7 @@ volumes:
     external: false
   cli_history:
     external: false
-{% if  _mountMode != 'baked' and _mountMode != 'native' and _mountMode != 'delegated' and _mountMode != 'cached' %}
+{% if  _mountMode != 'baked' and _mountMode != 'native' %}
   {{ namespace }}_{{ tag }}_data_sync:
     external: true
 {% endif %}
