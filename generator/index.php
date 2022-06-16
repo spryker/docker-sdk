@@ -3,7 +3,6 @@
 use DeployFileGenerator\DeployFileGeneratorFactory;
 use DeployFileGenerator\Transfer\DeployFileTransfer;
 use Spatie\Url\Url;
-use Symfony\Component\Console\Output\ConsoleOutput;
 use Symfony\Component\Yaml\Parser;
 use Twig\Environment;
 use Twig\Loader\ChainLoader;
@@ -155,6 +154,19 @@ const ENTRY_POINTS = [
     GLUE_STOREFRONT => 'GlueStorefront',
     GLUE_BACKEND => 'GlueBackend',
 ];
+
+const DEBIAN_DISTRO_NAME = 'bullseye';
+const ALPINE_DISTRO_NAME = 'alpine';
+
+const SPRYKER_NODE_IMAGE_DISTRO_ENV_NAME = 'SPRYKER_NODE_IMAGE_DISTRO';
+const SPRYKER_NODE_IMAGE_VERSION_ENV_NAME = 'SPRYKER_NODE_IMAGE_VERSION';
+const SPRYKER_NPM_VERSION_ENV_NAME = 'SPRYKER_NPM_VERSION';
+
+const DEFAULT_NODE_VERSION = 12;
+const DEFAULT_NODE_DISTRO = ALPINE_DISTRO_NAME;
+const DEFAULT_NPM_VERSION = 6;
+
+$projectData['_node_npm_config'] = buildNodeJsNpmBuildConfig($projectData);
 
 foreach ($projectData['groups'] ?? [] as $groupName => $groupData) {
     foreach ($groupData['applications'] ?? [] as $applicationName => $applicationData) {
@@ -1579,4 +1591,114 @@ function isArmArchitecture(): bool
     $currentArchitecture = php_uname('m');
 
     return in_array($currentArchitecture, $possibleValue);
+}
+
+/**
+ * @param array $projectData
+ *
+ * @return array
+ */
+function buildNodeJsNpmBuildConfig(array $projectData): array
+{
+    return [
+        SPRYKER_NODE_IMAGE_DISTRO_ENV_NAME => getNodeDistroName($projectData),
+        SPRYKER_NODE_IMAGE_VERSION_ENV_NAME => getProjectNodeVersion($projectData),
+        SPRYKER_NPM_VERSION_ENV_NAME => getProjectNpmVersion($projectData),
+    ];
+}
+
+/**
+ * @param array $projectData
+ *
+ * @return string
+ */
+function getNodeDistroName(array $projectData): string
+{
+    $nodejsConfig = $projectData['image']['node'] ?? [];
+    $imageName = getProjectImageName($projectData);
+
+    if (array_key_exists('distro', $nodejsConfig) && !empty($nodejsConfig['distro'])) {
+        return $nodejsConfig['distro'];
+    }
+
+    if (array_key_exists($imageName, getSprykerImageUnixDistroMap())) {
+        return getSprykerImageUnixDistroMap()[$imageName];
+    }
+
+    return DEFAULT_NODE_DISTRO;
+}
+
+/**
+ * @param array $projectData
+ *
+ * @return int
+ */
+function getProjectNpmVersion(array $projectData): int
+{
+    $nodejsConfig = $projectData['image']['node'] ?? [];
+    if (!array_key_exists('npm', $nodejsConfig)) {
+        return DEFAULT_NPM_VERSION;
+    }
+
+    return (int)$nodejsConfig['npm'];
+}
+
+/**
+ * @param array $projectData
+ *
+ * @return int
+ */
+function getProjectNodeVersion(array $projectData): int
+{
+    $nodejsConfig = $projectData['image']['node'] ?? [];
+
+    if (!array_key_exists('version', $nodejsConfig)) {
+        return DEFAULT_NODE_VERSION;
+    }
+
+    return (int)$nodejsConfig['version'];
+}
+
+
+/**
+ * @param array $projectData
+ *
+ * @return string
+ */
+function getProjectImageName(array $projectData): string
+{
+    return $projectData['image']['tag'];
+}
+
+/**
+ * @return string[]
+ */
+function getSprykerImageUnixDistroMap(): array
+{
+    return [
+        'spryker/php:latest' => ALPINE_DISTRO_NAME,
+        'spryker/php:8.0' => ALPINE_DISTRO_NAME,
+        'spryker/php:7.4' => ALPINE_DISTRO_NAME,
+        'spryker/php:7.3' => ALPINE_DISTRO_NAME,
+
+        'spryker/php:8.0-alpine3.12' => ALPINE_DISTRO_NAME,
+        'spryker/php:7.4-alpine3.12' => ALPINE_DISTRO_NAME,
+        'spryker/php:7.3-alpine3.12' => ALPINE_DISTRO_NAME,
+
+        'spryker/php:8.0-alpine3.13' => ALPINE_DISTRO_NAME,
+        'spryker/php:7.4-alpine3.13' => ALPINE_DISTRO_NAME,
+
+        'spryker/php:8.0-alpine3.14' => ALPINE_DISTRO_NAME,
+        'spryker/php:7.4-alpine3.14' => ALPINE_DISTRO_NAME,
+
+        'spryker/php:8.0-alpine3.15' => ALPINE_DISTRO_NAME,
+        'spryker/php:7.4-alpine3.15' => ALPINE_DISTRO_NAME,
+
+        'spryker/php:8.0-debian-buster' => DEBIAN_DISTRO_NAME,
+        'spryker/php:7.4-debian-buster' => DEBIAN_DISTRO_NAME,
+        'spryker/php:7.3-debian-buster' => DEBIAN_DISTRO_NAME,
+        'spryker/php:8.0-debian' => DEBIAN_DISTRO_NAME,
+        'spryker/php:7.4-debian' => DEBIAN_DISTRO_NAME,
+        'spryker/php:7.3-debian' => DEBIAN_DISTRO_NAME,
+    ];
 }
