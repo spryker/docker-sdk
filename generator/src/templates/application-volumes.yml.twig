@@ -1,5 +1,5 @@
       - logs:${SPRYKER_LOG_DIRECTORY}:rw
-{% if _mountMode != 'baked' %}
+{% if _mountMode != 'baked' and _mountMode != 'baked-coverage' %}
 {% if _mountMode == 'native' %}
       - ./:/data
 {% else %}

@@ -81,7 +81,7 @@ services:
 {% endif %}
 {% endfor %}
 {% endfor %}
-{% if _mountMode != 'baked' %}
+{% if _mountMode != 'baked' and _mountMode != 'baked-coverage' %}
     volumes:
 {% if _mountMode == 'native' %}
       - ./public:/data/public:ro
@@ -160,7 +160,7 @@ volumes:
     external: false
   cli_history:
     external: false
-{% if  _mountMode != 'baked' and _mountMode != 'native' %}
+{% if  _mountMode != 'baked' and _mountMode != 'baked-coverage' and _mountMode != 'native' %}
   {{ namespace }}_{{ tag }}_data_sync:
     external: true
 {% endif %}

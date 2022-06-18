@@ -73,8 +73,8 @@ $projectData['_platform'] = $platform;
 $mountMode = $projectData['_mountMode'] = retrieveMountMode($projectData, $platform);
 $projectData['_syncIgnore'] = buildSyncIgnore($deploymentDir);
 $projectData['_syncSessionName'] = preg_replace('/[^-a-zA-Z0-9]/', '-', $projectData['namespace'] . '-' . $projectData['tag'] . '-codebase');
-$projectData['_isDevelopment'] = $mountMode !== 'baked';
-$projectData['_fileMode'] = $mountMode === 'baked' ? 'baked' : 'mount';
+$projectData['_isDevelopment'] = $mountMode !== 'baked' && $mountMode !== 'baked-coverage';
+$projectData['_fileMode'] = $mountMode === 'baked' ? 'baked' : ($mountMode === 'baked-coverage' ? 'baked-coverage' : 'mount');
 $projectData['_ports'] = retrieveUniquePorts($projectData);
 $defaultPort = $projectData['_defaultPort'] = getDefaultPort($projectData);
 $hosts = $projectData['_hosts'] = retrieveHostNames($projectData);
@@ -1055,7 +1055,7 @@ function isAutoloadCacheEnabled(array $projectData): bool
  */
 function buildComposerAutoloadConfig(array $projectData): string
 {
-    return trim($projectData['composer']['autoload'] ?? ($projectData['_fileMode'] === 'baked' ? '--classmap-authoritative' : ''));
+    return trim($projectData['composer']['autoload'] ?? ($projectData['_fileMode'] === 'baked' || $projectData['_fileMode'] === 'baked-coverage' ? '--classmap-authoritative' : ''));
 }
 
 function buildDataForRequirementAnalyzer(array $projectData): array
