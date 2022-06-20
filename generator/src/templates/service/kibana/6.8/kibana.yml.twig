@@ -1,5 +1,5 @@
   {{ serviceName }}:
-    image: docker.elastic.co/kibana/kibana:6.8.6
+    image: spryker/kibana:6.8.4-eol
     networks:
         - private
     labels:
@@ -17,4 +17,4 @@
         - search
     volumes:
         - {{ serviceName }}-{{ serviceData['engine'] }}-data:/usr/share/kibana/data:rw
-        - ./${DEPLOYMENT_PATH}/context/kibana/default/kibana.yml:/usr/share/kibana/config/kibana.yml:ro
+        - ./${DEPLOYMENT_PATH}/context/kibana/6.8/kibana.yml:/usr/share/kibana/config/kibana.yml:ro

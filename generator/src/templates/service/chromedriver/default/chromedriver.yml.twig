@@ -10,8 +10,8 @@
     expose:
       - "4444"
     healthcheck:
-      test: [ "CMD", "bash", "-c", "(echo >/dev/tcp/localhost/4444) &>/dev/null" ]
+      test: [ "CMD", "nc", "-z", "localhost", "4444" ]
       interval: 5s
       timeout: 5s
       retries: 5
-    command: [ "--port=4444", "--whitelisted-ips=", "--url-base=/wd/hub" ]
+    command: [ "--port=4444", "--whitelisted-ips=", "--allowed-origins=*", "--url-base=/wd/hub" ]

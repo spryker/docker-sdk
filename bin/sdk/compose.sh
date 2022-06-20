@@ -45,6 +45,17 @@ function Compose::exec() {
     local tty
     [ -t -0 ] && tty='' || tty='-T'
 
+	# For avoid https://github.com/docker/compose/issues/9104
+	local ttyDisabledKey='docker_compose_tty_disabled'
+	local lastArg="${@: -1}"
+	if [ "${DOCKER_COMPOSE_TTY_DISABLED}" = "${lastArg}" ]; then
+		if  [ "${DOCKER_COMPOSE_TTY_DISABLED}" = "${ttyDisabledKey}" ]; then
+			tty='-T'
+		fi
+
+		set -- "${@:1:$(($#-1))}"
+	fi
+
     Compose::command exec ${tty} \
         -e COMMAND="${*}" \
         -e APPLICATION_STORE="${SPRYKER_CURRENT_STORE}" \
@@ -139,14 +150,21 @@ function Compose::up() {
 }
 
 function Compose::run() {
+
     Registry::Flow::runBeforeRun
 
     Console::verbose "${INFO}Running Spryker containers${NC}"
     sync start
-    Compose::command up -d --remove-orphans \
-      --scale "webdriver=$([ -n "${SPRYKER_TESTING_ENABLE}" ] && echo 1 || echo 0)" \
-      --scale "scheduler=$([ -n "${SPRYKER_TESTING_ENABLE}" ] && echo 0 || echo 1)" \
-      "${@}"
+
+    Compose::command --compatibility up -d --remove-orphans --quiet-pull "${@}"
+
+    if [ -n "${SPRYKER_TESTING_ENABLE}" ]; then
+        Compose::command --compatibility stop scheduler
+    fi
+
+    if [ -z "${SPRYKER_TESTING_ENABLE}" ]; then
+        Compose::command --compatibility stop webdriver
+    fi
 
     # Note: Compose::run can be used for running only one container, e.g. CLI.
     Registry::Flow::runAfterRun

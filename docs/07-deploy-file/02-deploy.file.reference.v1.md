@@ -174,7 +174,7 @@ imports:
     parameters:
       {dynamic_parameter_name}: '{dynamic_parameter_value}'
       {dynamic_parameter_name}: '{dynamic_parameter_value}'
-```            
+```
 
 Example:
 ```yaml
@@ -425,6 +425,7 @@ Optional parameters for `application:`:
 * `groups: applications: application: endpoints: endpoint: redirect:` - defines redirect rules.
 * `groups: applications: application: endpoints: endpoint: redirect: code` - defines an HTTP code for a redirect. Allowed values are `301` and `302`.
 * `groups: applications: application: endpoints: endpoint: redirect: url` - defines a URL to redirect to.
+* `groups: applications: application: endpoints: endpoint: redirect: request-uri` - preserves or ignores request-uri due to redirect. Allowed values are `true` or `false`.
 
 * `groups: applications: application: endpoints: real-ip: from:` - defines gateway IP addresses to fetch the real IP address.
 * `groups: applications: application: endpoints: auth:` - defines the basic auth.
@@ -786,7 +787,35 @@ An SQL database management system *Service*.
   - `database: database:` - defines database name.
   - `database: username:`, `database: password:` - defines database credentials.
 
+* Store-specific
 
+  - `databases:` - defines the list of required store-specific databases.
+  - `databases: database-1: username:`,`databases: database-1: password:` - defines database credentials. The default value: `spryker` and `secret`
+  - `databases: database-1: collate:` - defines collation for the database. If not specified, the default value applies: `utf8_general_ci`.
+  - `databases: database-1: character-set` - defines character set for the database. If not specified, the default value applies: `utf8`.
+
+```yaml
+version: "1.0"
+
+regions:
+  REGION-1:
+    services:
+      databases:
+          database-1:
+            collate: 'collate'
+            character-set: 'character-set'
+          database-2:
+    stores:
+      STORE-1:
+        services:
+            database:
+               name: database-1
+      STORE-2:
+        services:
+            database:
+               name: database-2
+
+ ```
 ***
 
 ### key_value_store:
