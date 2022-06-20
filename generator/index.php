@@ -3,7 +3,6 @@
 use DeployFileGenerator\DeployFileGeneratorFactory;
 use DeployFileGenerator\Transfer\DeployFileTransfer;
 use Spatie\Url\Url;
-use Symfony\Component\Console\Output\ConsoleOutput;
 use Symfony\Component\Yaml\Parser;
 use Twig\Environment;
 use Twig\Loader\ChainLoader;
@@ -370,39 +369,6 @@ foreach ($projectData['groups'] ?? [] as $groupName => $groupData) {
                     ])
                 );
                 $envVarEncoder->setIsActive(false);
-            }
-
-            if ($applicationData['application'] === YVES_APP || $applicationData['application'] === GLUE_APP) {
-                $services = [];
-
-                $isEndpointDataHasStore = array_key_exists('store', $endpointData);
-                if ($isEndpointDataHasStore) {
-                    $services = array_replace_recursive(
-                        $projectData['regions'][$groupData['region']]['stores'][$endpointData['store']]['services'],
-                        $endpointData['services'] ?? []
-                    );
-                }
-
-                if ($isEndpointDataHasStore && $endpointData['store'] === ($projectData['docker']['testing']['store'] ?? '')) {
-                    $envVarEncoder->setIsActive(true);
-                    file_put_contents(
-                        $deploymentDir . DS . 'env' . DS . 'cli' . DS . 'testing.env',
-                        $twig->render('env/cli/testing.env.twig', [
-                            'applicationName' => $applicationName,
-                            'applicationData' => $applicationData,
-                            'project' => $projectData,
-                            'host' => strtok($endpoint, ':'),
-                            'port' => strtok($endpoint) ?: $defaultPort,
-                            'regionName' => $groupData['region'],
-                            'regionData' => $projectData['regions'][$groupData['region']],
-                            'brokerConnections' => getBrokerConnections($projectData),
-                            'storeName' => $endpointData['store'],
-                            'services' => $services,
-                            'endpointMap' => $endpointMap,
-                        ])
-                    );
-                    $envVarEncoder->setIsActive(false);
-                }
             }
         }
     }
