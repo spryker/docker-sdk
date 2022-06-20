@@ -38,7 +38,9 @@ image.node.version:
     range-value:
         - 12
 image.node.distro:
-    string-type:
+    only-value:
+        - alpine
+        - debian
 image.node.npm:
     integer-type:
     range-value:

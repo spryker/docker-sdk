@@ -167,7 +167,7 @@ const DEFAULT_NODE_DISTRO = ALPINE_DISTRO_NAME;
 const DEFAULT_NPM_VERSION = 6;
 
 $projectData['_node_npm_config'] = buildNodeJsNpmBuildConfig($projectData);
-
+var_dump($projectData['_node_npm_config']); die();
 foreach ($projectData['groups'] ?? [] as $groupName => $groupData) {
     foreach ($groupData['applications'] ?? [] as $applicationName => $applicationData) {
         foreach ($applicationData['endpoints'] ?? [] as $endpoint => $endpointData) {
@@ -1600,105 +1600,47 @@ function isArmArchitecture(): bool
  */
 function buildNodeJsNpmBuildConfig(array $projectData): array
 {
+    $imageName = $projectData['image']['tag'];
+    $nodejsConfig = $projectData['image']['node'] ?? [];
+
     return [
-        SPRYKER_NODE_IMAGE_DISTRO_ENV_NAME => getNodeDistroName($projectData),
-        SPRYKER_NODE_IMAGE_VERSION_ENV_NAME => getProjectNodeVersion($projectData),
-        SPRYKER_NPM_VERSION_ENV_NAME => getProjectNpmVersion($projectData),
+        SPRYKER_NODE_IMAGE_DISTRO_ENV_NAME => getNodeDistroName($nodejsConfig, $imageName),
+        SPRYKER_NODE_IMAGE_VERSION_ENV_NAME => array_key_exists('version', $nodejsConfig)
+            ? (int)$nodejsConfig['version']
+            : DEFAULT_NODE_VERSION,
+        SPRYKER_NPM_VERSION_ENV_NAME => array_key_exists('npm', $nodejsConfig)
+            ? (int)$nodejsConfig['npm']
+            : DEFAULT_NPM_VERSION,
     ];
 }
 
 /**
- * @param array $projectData
+ * @param array $nodejsConfig
+ * @param string $imageName
  *
  * @return string
  */
-function getNodeDistroName(array $projectData): string
+function getNodeDistroName(array $nodejsConfig, string $imageName): string
 {
-    $nodejsConfig = $projectData['image']['node'] ?? [];
-    $imageName = getProjectImageName($projectData);
+    if (array_key_exists('distro', $nodejsConfig)) {
+        if ($nodejsConfig['distro'] == 'debian') {
+            return DEBIAN_DISTRO_NAME;
+        }
 
-    if (array_key_exists('distro', $nodejsConfig) && !empty($nodejsConfig['distro'])) {
-        return $nodejsConfig['distro'];
+        if ($nodejsConfig['distro'] == 'alpine') {
+            return ALPINE_DISTRO_NAME;
+        }
     }
 
-    if (array_key_exists($imageName, getSprykerImageUnixDistroMap())) {
-        return getSprykerImageUnixDistroMap()[$imageName];
+    $imageData = explode('/', $imageName);
+
+    if ($imageData[0] !== 'spryker') {
+        return DEFAULT_NODE_DISTRO;
     }
 
-    return DEFAULT_NODE_DISTRO;
-}
-
-/**
- * @param array $projectData
- *
- * @return int
- */
-function getProjectNpmVersion(array $projectData): int
-{
-    $nodejsConfig = $projectData['image']['node'] ?? [];
-    if (!array_key_exists('npm', $nodejsConfig)) {
-        return DEFAULT_NPM_VERSION;
+    if (str_contains($imageData[1], 'debian')) {
+        return DEBIAN_DISTRO_NAME;
     }
 
-    return (int)$nodejsConfig['npm'];
-}
-
-/**
- * @param array $projectData
- *
- * @return int
- */
-function getProjectNodeVersion(array $projectData): int
-{
-    $nodejsConfig = $projectData['image']['node'] ?? [];
-
-    if (!array_key_exists('version', $nodejsConfig)) {
-        return DEFAULT_NODE_VERSION;
-    }
-
-    return (int)$nodejsConfig['version'];
-}
-
-
-/**
- * @param array $projectData
- *
- * @return string
- */
-function getProjectImageName(array $projectData): string
-{
-    return $projectData['image']['tag'];
-}
-
-/**
- * @return string[]
- */
-function getSprykerImageUnixDistroMap(): array
-{
-    return [
-        'spryker/php:latest' => ALPINE_DISTRO_NAME,
-        'spryker/php:8.0' => ALPINE_DISTRO_NAME,
-        'spryker/php:7.4' => ALPINE_DISTRO_NAME,
-        'spryker/php:7.3' => ALPINE_DISTRO_NAME,
-
-        'spryker/php:8.0-alpine3.12' => ALPINE_DISTRO_NAME,
-        'spryker/php:7.4-alpine3.12' => ALPINE_DISTRO_NAME,
-        'spryker/php:7.3-alpine3.12' => ALPINE_DISTRO_NAME,
-
-        'spryker/php:8.0-alpine3.13' => ALPINE_DISTRO_NAME,
-        'spryker/php:7.4-alpine3.13' => ALPINE_DISTRO_NAME,
-
-        'spryker/php:8.0-alpine3.14' => ALPINE_DISTRO_NAME,
-        'spryker/php:7.4-alpine3.14' => ALPINE_DISTRO_NAME,
-
-        'spryker/php:8.0-alpine3.15' => ALPINE_DISTRO_NAME,
-        'spryker/php:7.4-alpine3.15' => ALPINE_DISTRO_NAME,
-
-        'spryker/php:8.0-debian-buster' => DEBIAN_DISTRO_NAME,
-        'spryker/php:7.4-debian-buster' => DEBIAN_DISTRO_NAME,
-        'spryker/php:7.3-debian-buster' => DEBIAN_DISTRO_NAME,
-        'spryker/php:8.0-debian' => DEBIAN_DISTRO_NAME,
-        'spryker/php:7.4-debian' => DEBIAN_DISTRO_NAME,
-        'spryker/php:7.3-debian' => DEBIAN_DISTRO_NAME,
-    ];
+    return ALPINE_DISTRO_NAME;
 }
