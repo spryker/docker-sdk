@@ -167,7 +167,7 @@ const DEFAULT_NODE_DISTRO = ALPINE_DISTRO_NAME;
 const DEFAULT_NPM_VERSION = 6;
 
 $projectData['_node_npm_config'] = buildNodeJsNpmBuildConfig($projectData);
-var_dump($projectData['_node_npm_config']); die();
+
 foreach ($projectData['groups'] ?? [] as $groupName => $groupData) {
     foreach ($groupData['applications'] ?? [] as $applicationName => $applicationData) {
         foreach ($applicationData['endpoints'] ?? [] as $endpoint => $endpointData) {
