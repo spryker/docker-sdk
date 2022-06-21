@@ -14,6 +14,34 @@ environment:
 pipeline:
     not-empty:
     string-type:
+environment-configuration.secrets:
+    not-empty:
+environment-configuration.secrets.*.name:
+    not-empty:
+    string-type:
+environment-configuration.secrets.*.bucket:
+    only-value:
+        - app
+        - scheduler
+        - pipeline
+        - common
+environment-configuration.params:
+    not-empty:
+environment-configuration.params.*.name:
+    not-empty:
+    string-type:
+environment-configuration.params.*.default:
+    string-type:
+environment-configuration.params.*.bucket:
+    only-value:
+        - app
+        - scheduler
+        - pipeline
+        - common
+environment-configuration.params.*.grant:
+    only-value:
+        - limited
+        - public
 
 # Region section
 regions:

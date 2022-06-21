@@ -71,6 +71,7 @@ function Command::bootstrap() {
     tmpDeploymentDir="$(cd "${tmpDeploymentDir}" >/dev/null 2>&1 && pwd)"
 
     Command::bootstrap::_validateParameters
+    Command::bootstrap::_pre_build_environment_configuration
 
     Console::info "Using ${projectYaml}"
 
@@ -163,4 +164,17 @@ function Command::bootstrap::_validateParameters() {
     Registry::checkRequirements
 
     return "${TRUE}"
+}
+
+function Command::bootstrap::_pre_build_environment_configuration() {
+    local projectEnvDockerFileName=".env.docker.local"
+    local projectGitIgnoreFileName=".gitignore"
+
+    if [ -f "./${projectEnvDockerFileName}" ]; then
+        cp "./${projectEnvDockerFileName}" "${tmpDeploymentDir}/${projectEnvDockerFileName}"
+    fi
+
+    if [ -f "./${projectGitIgnoreFileName}" ]; then
+        cp "./${projectGitIgnoreFileName}" "${tmpDeploymentDir}/${projectGitIgnoreFileName}"
+    fi
 }

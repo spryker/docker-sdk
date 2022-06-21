@@ -3,7 +3,7 @@ ARG SPRYKER_PHP_VERSION=7.3
 
 FROM spryker/php:${SPRYKER_PHP_VERSION}
 
-RUN apk add --no-cache openssl
+RUN apk add --no-cache openssl bash
 
 WORKDIR /data
 USER spryker

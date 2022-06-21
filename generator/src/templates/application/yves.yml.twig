@@ -18,4 +18,9 @@
       TIDEWAYS_APIKEY: ${TIDEWAYS_APIKEY}
       TIDEWAYS_CLI_ENABLED: ${TIDEWAYS_CLI_ENABLED}
       TIDEWAYS_ENVIRONMENT_NAME: ${TIDEWAYS_ENVIRONMENT_NAME}
+{% if _environmentConfiguration is not empty %}
+{% for envName, envValue in _environmentConfiguration %}
+      {{ "%s: ${%s:-%s}"|format(envName, envName, envValue) }}
+{% endfor %}
+{% endif %}
     <<: *app-volumes
