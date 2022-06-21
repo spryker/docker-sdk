@@ -287,8 +287,7 @@ Defines NodeJs settings for Spryker applications.
 
 * `image: node: version:` - defines NodeJs version. Support only major versions greater than the default. The default version is `12`.
 * `image: node: npm` - defines NPM version. Support only major versions greater than the default. The default version is `6`.
-* `image: node: distro:` - (optional)defines Linux distribution for Node Docker image. Value should be equal to your base PHP image. Default value is `alpine`. Possible value you can find on an official [Node DockerHub page](https://hub.docker.com/_/node).
-
+* `image: node: distro:` - (optional)defines Linux distribution for Node Docker image. Value should be equal to your base PHP image. A possible value is `alpine` and `debian`. Default value is `alpine`.
 ```yaml
 image:
     ...
