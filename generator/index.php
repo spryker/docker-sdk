@@ -158,6 +158,7 @@ const ENTRY_POINTS = [
 ];
 
 const ENV_DOCKER_LOCAL_FILE_NAME = '.env.docker.local';
+const ENV_DOCKER_LIST_FILE_NAME = '.env.docker.list';
 const GIT_IGNORE_FILE_NAME = '.gitignore';
 
 $projectData['_environmentConfiguration'] = buildEnvironmentConfiguration($projectData, $deploymentDir, $twig);
@@ -1615,6 +1616,7 @@ function buildEnvironmentConfiguration(array $projectData, string $deploymentDir
     );
 
     $environmentConfigurationData = buildEnvironmentConfigurationFile($deploymentDir, $environmentConfigurationData, $environmentConfigurationOriginData, $twig);
+    getEnvironmentConfigurationList($projectData, $deploymentDir, $twig);
     buildGitIgnoreFile($deploymentDir, $gitIgnoreData);
 
     if (!$isEnvironmentConfigurationValid) {
@@ -1622,6 +1624,54 @@ function buildEnvironmentConfiguration(array $projectData, string $deploymentDir
     }
 
     return $environmentConfigurationData;
+}
+
+function getEnvironmentConfigurationList(array $projectData, string $deploymentDir, Environment $twig): void
+{
+    $envConfigKey = 'environment-configuration';
+    $envConfigSecretsKey = 'secrets';
+    $envConfigParamsKey = 'params';
+
+    $envConfigNameKey = 'name';
+    $envConfigGrantKey = 'grant';
+    $envConfigBucketKey = 'bucket';
+
+    $secretListTemplate = 'Secret: %s; Bucket: %s; Grant: %s';
+    $paramListTemplate = 'Param: %s; Bucket: %s; Grant: %s';
+
+    $result = [];
+
+    if (!array_key_exists($envConfigKey, $projectData)) {
+        return;
+    }
+
+    $envConfigSecrets = $projectData[$envConfigKey][$envConfigSecretsKey] ?? [];
+    $envConfigParams = $projectData[$envConfigKey][$envConfigParamsKey] ?? [];
+
+    foreach ($envConfigSecrets as $envConfigSecret) {
+        $result[] = sprintf(
+            $secretListTemplate,
+            $envConfigSecret[$envConfigNameKey],
+            $envConfigSecret[$envConfigGrantKey],
+            $envConfigSecret[$envConfigBucketKey],
+        );
+    }
+
+    foreach ($envConfigParams as $envConfigParam) {
+        $result[] = sprintf(
+            $paramListTemplate,
+            $envConfigParam[$envConfigNameKey],
+            $envConfigParam[$envConfigGrantKey],
+            $envConfigParam[$envConfigBucketKey],
+        );
+    }
+
+    file_put_contents(
+        $deploymentDir . DS . ENV_DOCKER_LIST_FILE_NAME,
+        $twig->render('env/env.docker.list.twig', array(
+            'environmentConfigurationList' => $result
+        ))
+    );
 }
 
 function getEnvironmentConfigurationDataFromProjectEnvFile(string $deploymentDir): array
