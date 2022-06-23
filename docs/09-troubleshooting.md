@@ -147,7 +147,7 @@ sudo lsof -nPi:80 | grep LISTEN
 You get the `413 Request Entity Too Large` error.
 
 **then**
-1. Increase the maximum request body size for the related application. See [Deploy File Reference - 1.0](https://documentation.spryker.com/docs/deploy-file-reference-10#groups-applications) to learn how to do that.
+1. Increase the maximum request body size for the related application. See [Deploy File Reference - 1.0](07-deploy-file/02-deploy-file-reference.v1.md#groups-applications) to learn how to do that.
 2. Fetch the update:
 ```bash
 docker/sdk bootstrap
@@ -178,7 +178,7 @@ docker/sdk up
 ### An application is not reachable via http
 
 **when**
-An application like Yves, BackOffice(Zed), Glue, or MerchantPortal is not reachable after installation.
+An application like Yves, BackOffice(Zed), GlueStorefront(Glue), GlueBackend or MerchantPortal is not reachable after installation.
 
 **then**
 In `deploy.*.yml`, ensure that SSL encryption is disabled:
@@ -213,6 +213,42 @@ docker/sdk trouble
 mutagen sync list
 mutagen sync terminate <all sessions in the list>
 docker/sdk up
+```
+
+**when**
+Revert on specific Mutagen version.
+E.G you are using Docker Compose V1 and you don't have the possibility to update to the docker compose v2 (mandatory requirement).
+
+**then**
+
+* Get commit hash from https://github.com/mutagen-io/homebrew-mutagen/commits/master
+* Remove prev mutagen version:
+```
+brew uninstall --ignore-dependencies {{ mutagen || mutagen-beta }}
+```
+
+* Run the commands:
+```
+cd "$(brew --repo mutagen-io/homebrew-mutagen)" && \
+git checkout {{ HASH COMMIT FROM mutagen-io/homebrew-mutagen }} && \
+HOMEBREW_NO_AUTO_UPDATE=1 brew install mutagen-io/mutagen/{{ mutagen || mutagen-beta }} && \
+mutagen daemon stop  && \
+mutagen daemon start && \
+cd -
+```
+
+**when**
+Error:
+```
+unable to bring up Mutagen Compose sidecar service: unable to reconcile Mutagen sessions: unable to connect to Mutagen daemon: client/daemon version mismatch (daemon restart recommended)
+```
+
+**then**
+
+* Run the commands:
+```
+mutagen daemon stop
+docker/sdk prune
 ```
 
 
@@ -278,9 +314,78 @@ Try the following:
     ```
 
 **when**
-It's not possible to establish the dtabase connection from the host machine.
+It's not possible to establish the database connection from the host machine.
 
 **then**
 1. Check that the deploy yml file is used and make sure the port is exposed.
 2. Check that port is not occupied by the local process by running `sudo lsof -nP -i4TCP:3306 | grep LISTEN` (with port declared in the deploy.yml file).
 3. Check if the proper credentials and database name are used. You can find all the required information in the deploy yml file.
+
+
+**when**
+You get an error after running `docker/sdk cli {ARGUMENT_1}`.
+
+**then**
+Wrap the command arguments into single quotes. For example, `docker/sdk cli 'composer require spryker/*'`
+
+**when**
+`Node Sass does not yet support your current environment: Linux Unsupported architecture (arm64) with Node.js`
+
+**then**
+1. remove `node-sass` dependencies in `package.json`
+2. add `sass` and `sass-loader`
+```
+...
+"sass": "~1.32.13",
+"sass-loader": "~10.2.0",
+...
+```
+3. update `@spryker/oryx-for-zed`
+```
+...
+"@spryker/oryx-for-zed": "~2.11.5",
+...
+```
+4. add option to sass-loader (`frontend/configs/development.js`)
+```
+loader: 'sass-loader',
+options: {
+   implementation: require('sass'),
+}
+```
+5. run `docker/sdk cli`
+6. run `npm install` to update `package-lock.json` and install dependencies
+7. (if yarn usage) run `yarn install` to update `package-lock.json` and install dependencies
+8. run `npm run yves` to rebuild yves
+9. run `npm run zed` to rebuild zed
+
+**when**
+Error 403 No valid crumb was included in the request
+
+**then**
+Check your project configuration. Jenkins CSRF protection should be enabled.
+```php
+...
+$config[SchedulerJenkinsConstants::JENKINS_CONFIGURATION] = [
+    SchedulerConfig::SCHEDULER_JENKINS => [
+        SchedulerJenkinsConfig::SCHEDULER_JENKINS_CSRF_ENABLED => true,
+    ],
+];
+...
+```
+You can use `SPRYKER_JENKINS_CSRF_PROTECTION_ENABLED` env variable. This variable depends on deploy file parameter from `scheduler`
+```yaml
+services:
+  scheduler:
+    csrf-protection-enabled: { true | false }
+
+```
+```php
+...
+$config[SchedulerJenkinsConstants::JENKINS_CONFIGURATION] = [
+    SchedulerConfig::SCHEDULER_JENKINS => [
+        SchedulerJenkinsConfig::SCHEDULER_JENKINS_CSRF_ENABLED => (bool)getenv('SPRYKER_JENKINS_CSRF_PROTECTION_ENABLED'),
+    ],
+];
+...
+```

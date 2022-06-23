@@ -1,0 +1,30 @@
+regions:
+    EU:
+        services:
+            mail:
+                sender:
+                    name: Spryker No-Reply
+                    email: no-reply@spryker.local
+            database:
+                database: eu-docker
+        stores:
+            DE:
+                services:
+                    broker:
+                        namespace: de-docker
+                    key_value_store:
+                        namespace: 1
+                    search:
+                        namespace: de_search
+                    session:
+                        namespace: 1
+            AT:
+                services:
+                    broker:
+                        namespace: at-docker
+                    key_value_store:
+                        namespace: 2
+                    search:
+                        namespace: at_search
+                    session:
+                        namespace: 1

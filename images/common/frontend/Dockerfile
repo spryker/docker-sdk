@@ -26,4 +26,5 @@ RUN mkdir -p /usr/share/nginx/ \
   && rm -f /tmp/build.json
 
 ENTRYPOINT [ "/entrypoint.sh" ]
+
 CMD ["nginx", "-g", "daemon off;"]

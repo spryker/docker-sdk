@@ -1,6 +1,9 @@
 <?php
 
+use DeployFileGenerator\DeployFileGeneratorFactory;
+use DeployFileGenerator\Transfer\DeployFileTransfer;
 use Spatie\Url\Url;
+use Symfony\Component\Console\Output\ConsoleOutput;
 use Symfony\Component\Yaml\Parser;
 use Twig\Environment;
 use Twig\Loader\ChainLoader;
@@ -12,7 +15,12 @@ define('APPLICATION_SOURCE_DIR', __DIR__ . DS . 'src');
 include_once __DIR__ . DS . 'vendor' . DS . 'autoload.php';
 
 $deploymentDir = '/data/deployment';
-$projectYaml = $deploymentDir . '/project.yml';
+$projectYaml = buildProjectYaml($deploymentDir . '/project.yml');
+
+if ($projectYaml == '') {
+    exit(1);
+}
+
 $defaultDeploymentDir = getenv('SPRYKER_DOCKER_SDK_DEPLOYMENT_DIR') ?: './';
 $platform = getenv('SPRYKER_DOCKER_SDK_PLATFORM') ?: 'linux'; // Possible values: linux windows macos
 
@@ -89,6 +97,7 @@ $projectData['composer']['autoload'] = buildComposerAutoloadConfig($projectData)
 $isAutoloadCacheEnabled = $projectData['_isAutoloadCacheEnabled'] = isAutoloadCacheEnabled($projectData);
 $projectData['_requirementAnalyzerData'] = buildDataForRequirementAnalyzer($projectData);
 $projectData['secrets'] = buildSecrets($deploymentDir);
+$projectData = buildDefaultCredentials($projectData);
 
 // TODO Make it optional in next major
 // Making webdriver as required service for BC reasons
@@ -120,6 +129,7 @@ verbose('Generating NGINX configuration... [DONE]');
 $primal = [];
 $projectData['_entryPoints'] = [];
 $projectData['_endpointMap'] = [];
+$projectData = extendProjectDataWithKeyValueRegionNamespaces($projectData);
 $projectData['_storeSpecific'] = getStoreSpecific($projectData);
 $debugPortIndex = 10000;
 $projectData['_endpointDebugMap'] = [];
@@ -132,6 +142,8 @@ const GLUE_APP = 'glue';
 const BACKOFFICE_APP = 'backoffice';
 const BACKEND_GATEWAY_APP = 'backend-gateway';
 const MERCHANT_PORTAL = 'merchant-portal';
+const GLUE_STOREFRONT = 'glue-storefront';
+const GLUE_BACKEND = 'glue-backend';
 
 const ENTRY_POINTS = [
     BACKOFFICE_APP => 'Backoffice',
@@ -140,6 +152,8 @@ const ENTRY_POINTS = [
     YVES_APP => 'Yves',
     GLUE_APP => 'Glue',
     MERCHANT_PORTAL => 'MerchantPortal',
+    GLUE_STOREFRONT => 'GlueStorefront',
+    GLUE_BACKEND => 'GlueBackend',
 ];
 
 foreach ($projectData['groups'] ?? [] as $groupName => $groupData) {
@@ -506,6 +520,18 @@ if ($returnCode > 0) {
 
 verbose(implode(PHP_EOL, $output));
 
+$errorMessages = validateServiceVersions($projectData);
+
+if (count($errorMessages) > 0) {
+    $redColorCode = "\033[31m";
+
+    warn($redColorCode . 'Service version compatibility errors:' . PHP_EOL);
+    warn($redColorCode . ' * ' . implode(PHP_EOL . $redColorCode . ' * ' , $errorMessages));
+    warn(PHP_EOL . $redColorCode . 'Please check documentation.');
+
+    exit(1);
+}
+
 // -------------------------
 /**
  * @param array $projectData
@@ -724,6 +750,7 @@ function getStoreSpecific(array $projectData): array
                 # TODO SESSION should not be used in CLI
             ];
         }
+        $storeSpecific[$regionName]['SPRYKER_KEY_VALUE_REGION_NAMESPACES'] = $projectData['regions'][$regionName]['key_value_region_namespaces'];
     }
 
     return $storeSpecific;
@@ -1067,10 +1094,33 @@ function buildComposerAutoloadConfig(array $projectData): string
     return trim($projectData['composer']['autoload'] ?? ($projectData['_fileMode'] === 'baked' ? '--classmap-authoritative' : ''));
 }
 
+function endsWith(string $haystack, string $needle): bool
+{
+    if (function_exists('str_ends_with')) {
+        return str_ends_with($haystack, $needle);
+    }
+
+    if ($needle === '') {
+        return true;
+    }
+
+    $needleLength = strlen($needle);
+
+    return substr($haystack, -$needleLength) === $needle;
+}
+
 function buildDataForRequirementAnalyzer(array $projectData): array
 {
     $hosts = $projectData['_hosts'];
-    unset($hosts['localhost']);
+
+    // all domain names ending with TLD 'localhost' do not need to be listed in /etc/hosts
+    // see https://www.ietf.org/rfc/rfc2606.txt
+    foreach ($hosts as $hostNameKey => $hostNameValue)
+     {
+         if (endsWith($hostNameKey, 'localhost')) {
+            unset($hosts[$hostNameKey]);
+         }
+     }
 
     return [
         'hosts' => implode(' ', $hosts),
@@ -1262,4 +1312,271 @@ function generateToken($tokenLength = 80): string
     }
 
     return $token;
+}
+
+/**
+ * @param string $mainProjectYaml
+ *
+ * @return string
+ */
+function buildProjectYaml(string $mainProjectYaml): string
+{
+    $deployFileTransfer = new DeployFileTransfer();
+    $deployFileTransfer = $deployFileTransfer->setInputFilePath($mainProjectYaml);
+    $deployFileTransfer = $deployFileTransfer->setOutputFilePath($mainProjectYaml);
+
+    $deployFileFactory = new DeployFileGeneratorFactory();
+    $deployFileTransfer = $deployFileFactory->createDeployFileBuildProcessor()->process($deployFileTransfer);
+
+    if ($deployFileTransfer->getValidationMessageBagTransfer()->getValidationResult() == []) {
+        return $deployFileTransfer->getOutputFilePath();
+    }
+
+    $deployFileFactory->createDeployFileOutput()->renderValidationResult($deployFileTransfer);
+
+    return '';
+}
+
+/**
+ * @param array $projectData
+ *
+ * @return array
+ */
+function buildDefaultCredentials(array $projectData): array
+{
+    $projectData = buildDefaultCredentialsForDatabase($projectData);
+    $projectData = buildDefaultCredentialsForBroker($projectData);
+
+    return $projectData;
+}
+
+/**
+ * @param array $projectData
+ *
+ * @return array
+ */
+function buildDefaultCredentialsForDatabase(array $projectData): array
+{
+    $projectData = buildDefaultRootCredentialsForDatabase($projectData);
+    $projectData = buildDefaultRegionCredentialsForDatabase($projectData);
+
+    return $projectData;
+}
+
+/**
+ * @param array $projectData
+ *
+ * @return array
+ */
+function buildDefaultRootCredentialsForDatabase(array $projectData): array
+{
+    if (!isset($projectData['services']['database'])) {
+        return $projectData;
+    }
+
+    $defaultDbServiceRootConfig = [
+        'username' => 'root',
+        'password' => 'secret',
+    ];
+
+    $dbServiceRootConfig = $projectData['services']['database']['root'] ?? [];
+
+    $projectData['services']['database']['root'] = array_merge(
+        $defaultDbServiceRootConfig,
+        $dbServiceRootConfig
+    );
+
+    return $projectData;
+}
+
+/**
+ * @param array $projectData
+ *
+ * @return array
+ */
+function buildDefaultRegionCredentialsForDatabase(array $projectData): array
+{
+    if (!isset($projectData['regions'])) {
+        return $projectData;
+    }
+
+    $defaultDbRegionCredentials = [
+        'username' => 'spryker',
+        'password' => 'secret',
+    ];
+
+    $databaseServiceData = $projectData['services']['database'];
+    foreach ($projectData['regions'] as $regionName => $regionConfig) {
+        $databases = [
+            'version' => '1.0',
+            'databases' => [],
+        ];
+        if (!isset($regionConfig['services']['database']) && !isset($regionConfig['services']['databases'])) {
+            continue;
+        }
+
+        if (array_key_exists('database', $regionConfig['services'])) {
+            $regionDbConfig = $regionConfig['services']['database'];
+            $regionDbConfig = array_merge($defaultDbRegionCredentials, $regionDbConfig);
+            $projectData['regions'][$regionName]['services']['database'] = $regionDbConfig;
+        }
+
+        if (array_key_exists('databases', $regionConfig['services'])) {
+            $regionDbConfigs = $regionConfig['services']['databases'];
+
+            foreach ($regionConfig['stores'] as $storeName => $storeConfig) {
+                $storeDbConfig = $storeConfig['services']['database'];
+
+                foreach ($regionDbConfigs as $dbName => $regionDbConfig) {
+                    if (isset($storeDbConfig['name']) && $storeDbConfig['name'] === $dbName) {
+                        $regionDbConfig = array_merge($defaultDbRegionCredentials, $regionDbConfig ?? []);
+                        $databases['databases'][$storeName] = [
+                            'host' => 'database',
+                            'port' => $databaseServiceData['port'] ?? $databaseServiceData['engine'] === 'mysql' ? 3306 : 5432,
+                            'database' => $dbName,
+                            'username' => $regionDbConfig['username'],
+                            'password' => $regionDbConfig['password'],
+                            'characterSet' => $regionDbConfig['character-set'] ?? 'utf8',
+                            'collate' => $regionDbConfig['collate'] ?? 'utf8_general_ci',
+                        ];
+                    }
+                }
+            }
+
+            $projectData['regions'][$regionName]['services']['databases'] = json_encode($databases);
+        }
+
+    }
+
+    return $projectData;
+}
+
+/**
+ * @param array $projectData
+ *
+ * @return array
+ */
+function buildDefaultCredentialsForBroker(array $projectData): array
+{
+    if (!isset($projectData['services']['broker'])) {
+        return $projectData;
+    }
+
+    $defaultBrokerServiceCredentials = [
+        'username' => 'spryker',
+        'password' => 'secret',
+    ];
+
+    $brokerServiceCredentials = $projectData['services']['broker']['api'] ?? [];
+
+    $projectData['services']['broker']['api'] = array_merge(
+        $defaultBrokerServiceCredentials,
+        $brokerServiceCredentials
+    );
+
+    return $projectData;
+}
+
+/**
+ * @param array $projectData
+ *
+ * @return array
+ */
+function extendProjectDataWithKeyValueRegionNamespaces(array $projectData): array
+{
+    foreach ($projectData['regions'] as $regionName => $regionData) {
+        $keyValueStoreNamespaces = [];
+        foreach ($regionData['stores'] ?? [] as $storeName => $storeData) {
+            $keyValueStoreNamespaces[$storeName] = $storeData['services']['key_value_store']['namespace'];
+        }
+        $projectData['regions'][$regionName]['key_value_region_namespaces'] = json_encode($keyValueStoreNamespaces);
+    }
+
+    return $projectData;
+}
+
+/**
+ * @param array $projectData
+ * @return string[]
+ */
+function validateServiceVersions(array $projectData): array
+{
+    $validationMessageTemplate = '`%s` service with `%s` engine and %s version are unsupported on ARM architecture.';
+    $validationMessages = [];
+
+    if (!isArmArchitecture()) {
+        return $validationMessages;
+    }
+
+    $services = $projectData['services'];
+    $unsupportedServiceVersions = getUnsupportedArmServiceMap();
+
+    foreach ($unsupportedServiceVersions as $serviceName => $serviceEngines) {
+        if (!array_key_exists($serviceName, $services)) {
+            continue;
+        }
+
+        $service = $services[$serviceName];
+        $serviceEngine = $service['engine'] ?? null;
+        $serviceVersion = (string)($service['version'] ?? 'default');
+
+        if($serviceEngine == null || !array_key_exists($serviceEngine, $serviceEngines)) {
+            continue;
+        }
+
+        if (!array_key_exists($serviceVersion, $serviceEngines[$serviceEngine])) {
+            continue;
+        }
+
+        $validationMessages[] = sprintf($validationMessageTemplate, $serviceName, $serviceEngine, $serviceEngines[$serviceEngine][$serviceVersion]);
+    }
+
+    return $validationMessages;
+}
+
+/**
+ * @return string[][][]
+ */
+function getUnsupportedArmServiceMap(): array
+{
+    return [
+        'database' => [
+            'mysql' => [
+                '5.7' => '5.7',
+                'default' => '5.7',
+            ],
+        ],
+        'broker' => [
+            'rabbitmq' => [
+                '3.7' => '3.7',
+                'default' => '3.7',
+            ],
+        ],
+        'webdriver' => [
+            'phantomjs' => ['*'],
+        ],
+        'scheduler' => [
+            'jenkins' => [
+                '2.176' => '2.176',
+                'default' => '2.176',
+            ],
+        ],
+    ];
+}
+
+/**
+ * @return bool
+ */
+function isArmArchitecture(): bool
+{
+    $possibleValue = [
+        'arm',
+        'aarch64_be',
+        'aarch64',
+        'armv8l',
+    ];
+
+    $currentArchitecture = php_uname('m');
+
+    return in_array($currentArchitecture, $possibleValue);
 }

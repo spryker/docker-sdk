@@ -1,4 +1,7 @@
 # Deploy file reference — version 1
+
+
+
 This reference page describes version 1 of the Deploy file format. This is the newest version.
 <div class="bg-section">
 <h2> Glossary</h2>
@@ -16,7 +19,7 @@ This reference page describes version 1 of the Deploy file format. This is the n
  <dd>A store related context a request is processed in.</dd>
 
  <dt>Application</dt>
- <dd>A Spryker application, like Backoffice(Zed), Backend-Gateway, Yves, Glue or MerchantPortal.</dd>
+ <dd>A Spryker application, like Backoffice(Zed), Backend-Gateway, Yves, GlueStorefront(Glue), GlueBackend or MerchantPortal.</dd>
 
  <dt>Service</dt>
  <dd>An external storage or utility service. Represents service type and configuration. The configuration can be defined on different levels: project-wide, region-wide, store-specific or endpoint-specific with limitations based on the service type.</dd>
@@ -38,6 +41,7 @@ Find B2B and B2C deploy file examples for [development](06-installation/installa
 | --- | --- |
 | [B2C Demo Shop deploy file](https://github.com/spryker-shop/b2c-demo-shop/blob/master/deploy.dev.yml) | [B2C Demo Shop deploy file](https://github.com/spryker-shop/b2c-demo-shop/blob/master/deploy.yml) |
 | [B2B Demo Shop deploy file](https://github.com/spryker-shop/b2b-demo-shop/blob/master/deploy.dev.yml) | [B2B Demo Shop deploy file](https://github.com/spryker-shop/b2b-demo-shop/blob/master/deploy.yml) |
+
 
 ***
 ### version:
@@ -77,7 +81,7 @@ namespace: spryker-demo
 
 ### pipeline:
 
-Defines the installation recipe for the Spryker applications to the specific configuration file from the `config/install/` directory. 
+Defines the installation recipe for the Spryker applications to the specific configuration file from the `config/install/` directory.
 
 This variable is optional. If not specified, the default value applies: `pipeline: 'docker'`. Installation recipe configuration file: `config/install/docker.yml`.
 
@@ -123,6 +127,98 @@ version: 1.0
 
 environment: 'docker'
 ```
+
+
+***
+
+### imports:
+
+Defines any of the following:
+
+* Imports of additional deploy files to be included into a build. Supports imports of the same deploy file multiple times. To define a deploy file and dynamic parameters for this type of import, see [imports: {import_name}:](#imports-importname).
+```yaml
+imports:
+    {import_name}:
+        template: {deploy_file_name}
+    {import_name}:
+        template: {deploy_file_name}
+```
+
+* An array of additional deploy files to be included into a build. Supports imports of the same deploy file multiple times. To define dynamic parameters for this type of import, see [imports: parameters:](#imports-parameters)
+```yaml
+imports:
+    - template: {deploy_file_name}
+    - template: {deploy_file_name}
+```
+
+The files must exist on a [project or base layer](/docs/scos/dev/the-docker-sdk/{{page.version}}/deploy-file/deploy-file.html).
+
+
+
+{% info_block infoBox "Merged deploy files" %}
+
+If you include a deploy file, the included deploy file is merged with the original one. The final deploy file is used to build the application. To check how the final deploy file looks without stopping containers, run `docker config {DEPLOY_FILE_NAME}`. For example, if your main deploy file is `deploy.dev.yml`, run `docker config deploy.dev.yml`. The command parses the included deploy files and returns the merged file and validation errors, if any.
+
+{% endinfo_block %}
+
+
+***
+
+### imports: parameters:
+
+Defines the [dynamic parameters](/docs/scos/dev/the-docker-sdk/{{page.version}}/deploy-file/deploy-file.html#dynamic-parameters) to be used when parsing the included deploy file. In the included deploy file, the parameter name should be wrapped in `%`.
+
+```yaml
+imports:
+  - template: {deploy_file_name}
+    parameters:
+      {dynamic_parameter_name}: '{dynamic_parameter_value}'
+      {dynamic_parameter_name}: '{dynamic_parameter_value}'
+```
+
+Example:
+```yaml
+imports:
+  - template: deploy.porject.yml
+    parameters:
+      env-name: 'dev'
+      locale: 'en'
+```
+
+{% info_block warningBox "" %}
+
+Affects the included deploy file that it follows in an array of included deploy files. To learn how you can add dynamic parameters for other types of imports, see [imports: {import_name}:](#imports-importname) and [imports: {deploy_file_name}:](#imports-deployfilename).
+
+{% endinfo_block %}
+
+***
+
+
+### imports: {import_name}:
+
+Defines the configuration of the import:
+* `{import_name}: template:` — defines the deploy file to be included into a build  as part of this import.
+* `{import_name}: parameters:` - defines the [dynamic parameters](/docs/scos/dev/the-docker-sdk/{{page.version}}/deploy-file/deploy-file.html#dynamic-parameters) to be used when parsing the included deploy file. In the included deploy file, the parameter name should be wrapped in `%`.
+
+```yaml
+imports:
+    {import_name}:
+        template: {deploy_file_name}
+        parameters:
+          {dynamic_parameter_name}: '{dynamic_parameter_value}'
+          {dynamic_parameter_name}: '{dynamic_parameter_value}'
+```
+Example:
+```yaml
+imports:
+    base:
+        template: deploy.base.template.yml
+        parameters:
+          env_name: 'dev'
+          locale: 'en'
+```
+
+***
 
 
 ***
@@ -231,7 +327,7 @@ regions:
 
 ### groups:
 
-Defines the list of *Groups**.
+Defines the list of *Groups*.
 
 * `groups: region:` - defines the relation to a *Region* by key.
 * `groups: applications:` - defines the list of *Applications*. See [groups: applications:](#groups-applications-) to learn more.
@@ -320,7 +416,7 @@ The key must be project-wide unique.
 
 Obligatory parameters for `application:`:
 
-* `groups: applications: application:` - defines the type of *Application*. Possible values are `backoffice`, `backend-gateway`, `zed`, `yves`, `glue` and `merchant-portal`.
+* `groups: applications: application:` - defines the type of *Application*. Possible values are `backoffice`, `backend-gateway`, `zed`, `yves`, `glue-storefront`, `glue-backend`,`glue` and `merchant-portal`.
 * `groups: applications: endpoints:` - defines the list of *Endpoints* to access the *Application*. See [groups: applications: endpoints:](#groups-applications-endpoints-) to learn more.
 
 Optional parameters for `application:`:
@@ -329,6 +425,7 @@ Optional parameters for `application:`:
 * `groups: applications: application: endpoints: endpoint: redirect:` - defines redirect rules.
 * `groups: applications: application: endpoints: endpoint: redirect: code` - defines an HTTP code for a redirect. Allowed values are `301` and `302`.
 * `groups: applications: application: endpoints: endpoint: redirect: url` - defines a URL to redirect to.
+* `groups: applications: application: endpoints: endpoint: redirect: request-uri` - preserves or ignores request-uri due to redirect. Allowed values are `true` or `false`.
 
 * `groups: applications: application: endpoints: real-ip: from:` - defines gateway IP addresses to fetch the real IP address.
 * `groups: applications: application: endpoints: auth:` - defines the basic auth.
@@ -345,6 +442,8 @@ Optional parameters for `application:`:
 * `groups: applications: application: http: max-request-body-size:` - defines the maximum allowed size of the request body that can be sent to the application, in MB. If not specified, the default values apply:
 	* `backoffice` - `10m`
     * `merchant-portal` - `10m`
+	* `glue-storefront` - `10m`
+	* `glue-backend` - `10m`
 	* `glue` - `2m`
 	* `yves` - `1m`
 
@@ -688,7 +787,35 @@ An SQL database management system *Service*.
   - `database: database:` - defines database name.
   - `database: username:`, `database: password:` - defines database credentials.
 
+* Store-specific
 
+  - `databases:` - defines the list of required store-specific databases.
+  - `databases: database-1: username:`,`databases: database-1: password:` - defines database credentials. The default value: `spryker` and `secret`
+  - `databases: database-1: collate:` - defines collation for the database. If not specified, the default value applies: `utf8_general_ci`.
+  - `databases: database-1: character-set` - defines character set for the database. If not specified, the default value applies: `utf8`.
+
+```yaml
+version: "1.0"
+
+regions:
+  REGION-1:
+    services:
+      databases:
+          database-1:
+            collate: 'collate'
+            character-set: 'character-set'
+          database-2:
+    stores:
+      STORE-1:
+        services:
+            database:
+               name: database-1
+      STORE-2:
+        services:
+            database:
+               name: database-2
+
+ ```
 ***
 
 ### key_value_store:

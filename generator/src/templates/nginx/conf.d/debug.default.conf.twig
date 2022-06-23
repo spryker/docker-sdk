@@ -12,7 +12,7 @@
     auth: endpointData['auth'] | default([]),
     storeServices: regions[groupData['region']]['stores'][endpointData['store']]['services'] | default([]),
     upstream: (applicationName | lower) ~ ":9001",
-    zedHost: (zedHost | split(':') | first) ~ ':' ~ (_endpointDebugMap[zedEndpoint]),
+    zedHost: (zedHost | split(':') | first) ~ ':' ~ (_endpointDebugMap[zedHost]),
     timeout: '60m',
     project: _context
 } %}

@@ -1,0 +1,9 @@
+assets:
+    image: fholzer/nginx-brotli:v1.18.0
+    mode: production
+    compression:
+        brotli:
+            static: only
+        gzip:
+            static: true
+            level: 5

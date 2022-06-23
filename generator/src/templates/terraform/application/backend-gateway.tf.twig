@@ -1,7 +1,12 @@
 {% include "terraform/environment.common.tf.twig" with _context %}
+{% include "terraform/pm/php-fpm.tf.twig" with {
+    applicationData: applicationData,
+    project: project
+} %}
 {% include "terraform/key_value_store/#{project['services']['key_value_store']['engine']}.tf.twig" with {
     serviceData: project['services']['key_value_store'],
-    serviceName: 'key_value_store'
+    serviceName: 'key_value_store',
+    keyValueRegionNamespaces: regionData['key_value_region_namespaces']
 } %}
 {% include "terraform/search/#{project['services']['search']['engine']}.tf.twig" with {
     serviceData: project['services']['search'],
