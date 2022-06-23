@@ -19,7 +19,7 @@ Service::Scheduler::pause() {
     Console::start -n "Suspending scheduler..."
 
     # shellcheck disable=SC2016
-    Compose::exec 'curl -sLI -X POST ${SPRYKER_SCHEDULER_HOST}:${SPRYKER_SCHEDULER_PORT}/quietDown' >/dev/null || true
+    Compose::exec 'curl -sLI -X POST ${SPRYKER_SCHEDULER_HOST}:${SPRYKER_SCHEDULER_PORT}/quietDown' "${DOCKER_COMPOSE_TTY_DISABLED}" >/dev/null || true
 
     # TODO Send SIGTERM in cli-rpc.js
     local counter=1
@@ -45,8 +45,8 @@ Service::Scheduler::unpause() {
     Console::start -n "Resuming scheduler..."
 
     # shellcheck disable=SC2016
-    Compose::exec 'curl -sLI -X POST ${SPRYKER_SCHEDULER_HOST}:${SPRYKER_SCHEDULER_PORT}/cancelQuietDown' >/dev/null || true
-
+    # For avoid https://github.com/docker/compose/issues/9104
+    Compose::exec 'curl -sLI -X POST ${SPRYKER_SCHEDULER_HOST}:${SPRYKER_SCHEDULER_PORT}/cancelQuietDown' "${DOCKER_COMPOSE_TTY_DISABLED}" >/dev/null || true
     Console::end "[DONE]"
 }
 
