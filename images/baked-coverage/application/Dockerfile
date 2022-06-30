@@ -43,6 +43,9 @@ RUN --mount=type=cache,id=composer,sharing=locked,target=/home/spryker/.composer
 FROM application-production-codebase AS application-production
 
 COPY --chown=spryker:spryker public ${srcRoot}/public
+RUN rm ${srcRoot}/public/Glue/index.php
+RUN mv ${srcRoot}/public/Glue/index-coverage.php ${srcRoot}/public/Glue/index.php
+
 COPY --chown=spryker:spryker frontend ${srcRoot}/frontend
 COPY --chown=spryker:spryker .yarn* ${srcRoot}/.yarn
 COPY --chown=spryker:spryker .* *.* LICENSE ${srcRoot}/
