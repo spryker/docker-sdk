@@ -1589,14 +1589,15 @@ function isArmArchitecture(): bool
 }
 
 /**
- * @param array $projectData
+ * @param string[] $projectData
  * @param string $deploymentDir
  * @param \Twig\Environment $twig
+ *
+ * @return string[]
  *
  * @throws \Twig\Error\LoaderError
  * @throws \Twig\Error\RuntimeError
  * @throws \Twig\Error\SyntaxError
- * @return array
  */
 function buildEnvironmentConfiguration(array $projectData, string $deploymentDir, Environment $twig): array
 {
@@ -1626,6 +1627,17 @@ function buildEnvironmentConfiguration(array $projectData, string $deploymentDir
     return $environmentConfigurationData;
 }
 
+/**
+ * @param string[] $projectData
+ * @param string $deploymentDir
+ * @param \Twig\Environment $twig
+ *
+ * @return void
+ *
+ * @throws \Twig\Error\LoaderError
+ * @throws \Twig\Error\RuntimeError
+ * @throws \Twig\Error\SyntaxError
+ */
 function getEnvironmentConfigurationList(array $projectData, string $deploymentDir, Environment $twig): void
 {
     $envConfigKey = 'environment-configuration';
@@ -1751,12 +1763,21 @@ function getGitIgnoreProjectData(string $deploymentDir): array
     return explode(PHP_EOL, file_get_contents($deploymentDir . DS . GIT_IGNORE_FILE_NAME));
 }
 
+/**
+ * @param string[] $environmentConfigurationOriginData
+ * @param string[] $environmentConfigurationData
+ * @param string[] $gitIgnoreData
+ *
+ * @return bool
+ */
 function validationEnvironmentConfiguration(array $environmentConfigurationOriginData, array $environmentConfigurationData, array $gitIgnoreData): bool
 {
     $boldText = "\033[1m";
     $redColorCode = "\033[31m";
 
     $runGenerateEnvCommandMessage = $boldText . 'Please run: `docker/sdk generate-env`' . PHP_EOL;
+
+    $shouldGenerateEnvCommandBeRun = false;
 
     if (empty($environmentConfigurationOriginData)) {
         warn( $redColorCode . $boldText . PHP_EOL .  'Warning: env file was not generated. ' . $runGenerateEnvCommandMessage);
@@ -1805,18 +1826,28 @@ function validationEnvironmentConfiguration(array $environmentConfigurationOrigi
 
     if ($countMissingEnvVariables > 0) {
         buildEnvironmentConfigurationErrorsAsList('`' . ENV_DOCKER_LOCAL_FILE_NAME . ' missed variables:', $missingEnvVariables);
+        $shouldGenerateEnvCommandBeRun = true;
     }
 
     if (!array_key_exists(ENV_DOCKER_LOCAL_FILE_NAME, array_flip($gitIgnoreData))) {
         warn( $redColorCode . $boldText . PHP_EOL .  '`' . ENV_DOCKER_LOCAL_FILE_NAME . '` is absent in .gitignore file.`');
         warn($redColorCode . '***' . PHP_EOL);
+        $shouldGenerateEnvCommandBeRun = true;
     }
 
-    warn($runGenerateEnvCommandMessage);
+    if ($shouldGenerateEnvCommandBeRun) {
+        warn($runGenerateEnvCommandMessage);
+    }
 
     return false;
 }
 
+/**
+ * @param string $headerMessage
+ * @param string[] $envVariables
+ *
+ * @return void
+ */
 function buildEnvironmentConfigurationErrorsAsList(string $headerMessage, array $envVariables)
 {
     $redColorCode = "\033[31m";
@@ -1827,6 +1858,11 @@ function buildEnvironmentConfigurationErrorsAsList(string $headerMessage, array 
     warn($redColorCode . '***' . PHP_EOL);
 }
 
+/**
+ * @param string[] $projectData
+ *
+ * @return string[]
+ */
 function getEnvironmentConfigurationDataFromProjectData(array $projectData): array
 {
     $envConfigKey = 'environment-configuration';
