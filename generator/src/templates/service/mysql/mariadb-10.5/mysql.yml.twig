@@ -1,5 +1,5 @@
   {{ serviceName }}:
-    image: mariadb:10.5
+    image: ${SPRYKER_CI_MYSQL_IMAGE:-mariadb:10.5}
     networks:
       - private
     labels:

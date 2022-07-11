@@ -1,5 +1,5 @@
   {{ serviceName }}:
-    image: elasticsearch:5.6-alpine
+    image: ${SPRYKER_CI_ELASTICSEARCH_IMAGE:-elasticsearch:5.6-alpine}
     networks:
       - private
     labels:

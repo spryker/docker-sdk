@@ -1,5 +1,5 @@
   {{ serviceName }}:
-    image: wernight/phantomjs:latest
+    image: ${SPRYKER_CI_PHANTOMJS_IMAGE:-wernight/phantomjs:latest}
     networks:
       - public
     labels:

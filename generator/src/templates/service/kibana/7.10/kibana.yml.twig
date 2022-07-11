@@ -1,5 +1,5 @@
   {{ serviceName }}:
-    image: docker.elastic.co/kibana/kibana:7.10.1
+    image: ${SPRYKER_CI_KIBANA_IMAGE:-docker.elastic.co/kibana/kibana:7.10.1}
     networks:
         - private
     labels:

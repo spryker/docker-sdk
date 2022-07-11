@@ -1,5 +1,5 @@
   {{ serviceName }}:
-    image: spryker/chromedriver
+    image: ${SPRYKER_CI_CHROMEDRIVER_IMAGE:-spryker/chromedriver}
     networks:
       - public
     init: true

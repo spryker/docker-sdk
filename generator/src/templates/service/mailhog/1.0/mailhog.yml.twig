@@ -1,5 +1,5 @@
   {{ serviceName }}:
-    image: mailhog/mailhog:v1.0.0
+    image: ${SPRYKER_CI_MAILHOG_IMAGE:-mailhog/mailhog:v1.0.0}
     networks:
       - private
     labels:

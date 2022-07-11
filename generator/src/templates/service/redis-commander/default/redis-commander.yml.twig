@@ -1,5 +1,5 @@
   {{ serviceName }}:
-    image: rediscommander/redis-commander:latest
+    image: ${SPRYKER_CI_REDIS_COMMANDER_IMAGE:-rediscommander/redis-commander:latest}
     networks:
       - private
     labels:

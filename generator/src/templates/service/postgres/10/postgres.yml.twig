@@ -1,5 +1,5 @@
   {{ serviceName }}:
-    image: postgres:10-alpine
+    image: ${SPRYKER_CI_POSTGRES_IMAGE:-postgres:10-alpine}
     networks:
       - private
     labels:
