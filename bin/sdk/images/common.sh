@@ -59,6 +59,9 @@ function Images::_buildApp() {
         --build-arg "KNOWN_HOSTS=${KNOWN_HOSTS}" \
         --build-arg "SPRYKER_BUILD_HASH=${SPRYKER_BUILD_HASH:-"current"}" \
         --build-arg "SPRYKER_BUILD_STAMP=${SPRYKER_BUILD_STAMP:-""}" \
+        --build-arg "SPRYKER_NODE_IMAGE_VERSION=${SPRYKER_NODE_IMAGE_VERSION}" \
+        --build-arg "SPRYKER_NODE_IMAGE_DISTRO=${SPRYKER_NODE_IMAGE_DISTRO}" \
+        --build-arg "SPRYKER_NPM_VERSION=${SPRYKER_NPM_VERSION}" \
         "${DEPLOYMENT_PATH}/context" 1>&2
 
     docker build \

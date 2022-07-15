@@ -157,6 +157,19 @@ const ENTRY_POINTS = [
     GLUE_BACKEND => 'GlueBackend',
 ];
 
+const DEBIAN_DISTRO_NAME = 'bullseye';
+const ALPINE_DISTRO_NAME = 'alpine';
+
+const SPRYKER_NODE_IMAGE_DISTRO_ENV_NAME = 'SPRYKER_NODE_IMAGE_DISTRO';
+const SPRYKER_NODE_IMAGE_VERSION_ENV_NAME = 'SPRYKER_NODE_IMAGE_VERSION';
+const SPRYKER_NPM_VERSION_ENV_NAME = 'SPRYKER_NPM_VERSION';
+
+const DEFAULT_NODE_VERSION = 12;
+const DEFAULT_NODE_DISTRO = ALPINE_DISTRO_NAME;
+const DEFAULT_NPM_VERSION = 6;
+
+$projectData['_node_npm_config'] = buildNodeJsNpmBuildConfig($projectData);
+
 const ENV_DOCKER_LOCAL_FILE_NAME = '.env.docker.local';
 const ENV_DOCKER_LIST_FILE_NAME = '.env.docker.list';
 const GIT_IGNORE_FILE_NAME = '.gitignore';
@@ -1586,6 +1599,58 @@ function isArmArchitecture(): bool
     $currentArchitecture = php_uname('m');
 
     return in_array($currentArchitecture, $possibleValue);
+}
+
+/**
+ * @param array $projectData
+ *
+ * @return array
+ */
+function buildNodeJsNpmBuildConfig(array $projectData): array
+{
+    $imageName = $projectData['image']['tag'];
+    $nodejsConfig = $projectData['image']['node'] ?? [];
+
+    return [
+        SPRYKER_NODE_IMAGE_DISTRO_ENV_NAME => getNodeDistroName($nodejsConfig, $imageName),
+        SPRYKER_NODE_IMAGE_VERSION_ENV_NAME => array_key_exists('version', $nodejsConfig)
+            ? (int)$nodejsConfig['version']
+            : DEFAULT_NODE_VERSION,
+        SPRYKER_NPM_VERSION_ENV_NAME => array_key_exists('npm', $nodejsConfig)
+            ? (int)$nodejsConfig['npm']
+            : DEFAULT_NPM_VERSION,
+    ];
+}
+
+/**
+ * @param array $nodejsConfig
+ * @param string $imageName
+ *
+ * @return string
+ */
+function getNodeDistroName(array $nodejsConfig, string $imageName): string
+{
+    if (array_key_exists('distro', $nodejsConfig)) {
+        if ($nodejsConfig['distro'] == 'debian') {
+            return DEBIAN_DISTRO_NAME;
+        }
+
+        if ($nodejsConfig['distro'] == 'alpine') {
+            return ALPINE_DISTRO_NAME;
+        }
+    }
+
+    $imageData = explode('/', $imageName);
+
+    if ($imageData[0] !== 'spryker') {
+        return DEFAULT_NODE_DISTRO;
+    }
+
+    if (str_contains($imageData[1], 'debian')) {
+        return DEBIAN_DISTRO_NAME;
+    }
+
+    return ALPINE_DISTRO_NAME;
 }
 
 /**
