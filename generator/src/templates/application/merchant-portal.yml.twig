@@ -20,5 +20,5 @@
       TIDEWAYS_APIKEY: ${TIDEWAYS_APIKEY}
       TIDEWAYS_CLI_ENABLED: ${TIDEWAYS_CLI_ENABLED}
       TIDEWAYS_ENVIRONMENT_NAME: ${TIDEWAYS_ENVIRONMENT_NAME}
-      {% include "env/env.configuration.twig" with _context %}
+{% include "env/env.configuration.twig" with _context %}
     <<: *app-volumes
