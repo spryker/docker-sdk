@@ -50,7 +50,7 @@ To start working with Spryker in Docker, see [Quick start guide](docs/01-quick-s
 
 ## Contributing to Spryker Docker SDK
 
-For contribution guidelines, see [Code contribution guide](https://documentation.spryker.com/docs/code-contribution-guide#code-contribution-guide)
+For contribution guidelines, see [Code contribution guide](https://docs.spryker.com/docs/scos/dev/code-contribution-guide.html)
 
 ## Supported services
 
