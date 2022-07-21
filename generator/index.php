@@ -269,7 +269,6 @@ foreach ($projectData['groups'] ?? [] as $groupName => $groupData) {
                     'project' => $projectData,
                     'regionName' => $groupData['region'],
                     'regionData' => $projectData['regions'][$groupData['region']],
-                    'brokerConnections' => getBrokerConnections($projectData),
                 ])
             );
         }
@@ -322,7 +321,7 @@ foreach ($projectData['groups'] ?? [] as $groupName => $groupData) {
             $isEndpointDataHasStore = array_key_exists('store', $endpointData);
             if ($isEndpointDataHasStore) {
                 $services = array_replace_recursive(
-                    $projectData['regions'][$groupData['region']]['stores'][$endpointData['store']]['services'],
+                    $projectData['regions'][$groupData['region']]['stores'][$endpointData['store']]['services'] ?? [],
                     $endpointData['services'] ?? []
                 );
             }
@@ -347,7 +346,6 @@ foreach ($projectData['groups'] ?? [] as $groupName => $groupData) {
                         'project' => $projectData,
                         'regionName' => $groupData['region'],
                         'regionData' => $projectData['regions'][$groupData['region']],
-                        'brokerConnections' => getBrokerConnections($projectData),
                         'storeName' => $endpointData['store'],
                         'services' => $services,
                         'endpointMap' => $endpointMap,
@@ -362,7 +360,6 @@ foreach ($projectData['groups'] ?? [] as $groupName => $groupData) {
                         'project' => $projectData,
                         'regionName' => $groupData['region'],
                         'regionData' => $projectData['regions'][$groupData['region']],
-                        'brokerConnections' => getBrokerConnections($projectData),
                         'storeName' => $endpointData['store'],
                         'services' => $services,
                         'endpointMap' => $endpointMap,
@@ -449,7 +446,6 @@ $envVarEncoder->setIsActive(true);
 file_put_contents(
     $deploymentDir . DS . 'terraform/environment.tf',
     $twig->render('terraform/environment.tf.twig', [
-        'brokerConnections' => getCloudBrokerConnections($projectData),
         'project' => $projectData,
     ])
 );
@@ -669,56 +665,6 @@ function getSSLRedirectPort(array $projectData): int
 /**
  * @param array $projectData
  *
- * @return string
- */
-function getBrokerConnections(array $projectData): string
-{
-    $brokerServiceData = $projectData['services']['broker'];
-
-    $connections = [];
-    foreach ($projectData['regions'] as $regionName => $regionData) {
-        foreach ($regionData['stores'] ?? [] as $storeName => $storeData) {
-            $localServiceData = array_replace($brokerServiceData, $storeData['services']['broker']);
-            $connections[$storeName] = [
-                'RABBITMQ_CONNECTION_NAME' => $storeName . '-connection',
-                'RABBITMQ_HOST' => 'broker',
-                'RABBITMQ_PORT' => $localServiceData['port'] ?? 5672,
-                'RABBITMQ_USERNAME' => $localServiceData['api']['username'],
-                'RABBITMQ_PASSWORD' => $localServiceData['api']['password'],
-                'RABBITMQ_VIRTUAL_HOST' => $localServiceData['namespace'],
-                'RABBITMQ_STORE_NAMES' => [$storeName], // check if connection is shared
-            ];
-        }
-    }
-
-    return json_encode($connections);
-}
-
-/**
- * @param array $projectData
- *
- * @return string
- */
-function getCloudBrokerConnections(array $projectData): string
-{
-    $brokerServiceData = $projectData['services']['broker'];
-
-    $connections = [];
-    foreach ($projectData['regions'] as $regionName => $regionData) {
-        foreach ($regionData['stores'] ?? [] as $storeName => $storeData) {
-            $localServiceData = array_replace($brokerServiceData, $storeData['services']['broker']);
-            $connections[$storeName] = [
-                'RABBITMQ_VIRTUAL_HOST' => $localServiceData['namespace'],
-            ];
-        }
-    }
-
-    return json_encode($connections);
-}
-
-/**
- * @param array $projectData
- *
  * @return array
  */
 function getStoreSpecific(array $projectData): array
@@ -730,10 +676,10 @@ function getStoreSpecific(array $projectData): array
             $services = $storeData['services'];
             $storeSpecific[$storeName] = [
                 'APPLICATION_STORE' => $storeName,
-                'SPRYKER_SEARCH_NAMESPACE' => $services['search']['namespace'],
-                'SPRYKER_KEY_VALUE_STORE_NAMESPACE' => $services['key_value_store']['namespace'],
-                'SPRYKER_BROKER_NAMESPACE' => $services['broker']['namespace'],
-                'SPRYKER_SESSION_BE_NAMESPACE' => $services['session']['namespace'] ?? 1,
+                'SPRYKER_SEARCH_NAMESPACE' => '',
+                'SPRYKER_KEY_VALUE_STORE_NAMESPACE' => '',
+                'SPRYKER_BROKER_NAMESPACE' => '',
+                'SPRYKER_SESSION_BE_NAMESPACE' => 1,
                 # TODO SESSION should not be used in CLI
             ];
         }
