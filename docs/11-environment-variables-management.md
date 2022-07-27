@@ -64,14 +64,14 @@ environment-configuration:                      # Params and secrets section
 1. Check, is `environment-configuration` declaration?
 2. Check, is `.env.docker.local` was exists?
 3. Check `.env.docker.local`
-4. Check `.gitignore` content
+4. Check `.gitignore` content, if file has `.env.docker.local`
 
 ### What happens on command `docker/sdk generate-env`
 
 This command can’t be launched before bootstrap. Its goal is to verify, prepare and generate the local environment file for the local development.
 
 1. Create OR Update `.env.docker.local`
-2. Update `.gitignore`
+2. Add `.env.docker.local` into `.gitignore`
 
 ### What happens on command `list-env`
 
