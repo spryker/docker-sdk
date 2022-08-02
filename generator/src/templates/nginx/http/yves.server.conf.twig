@@ -7,7 +7,7 @@
 {% endblock server %}
 {% block location %}
 {{ parent() }}
-        fastcgi_param SPRYKER_ZED_HOST "{{ zedHost | split(':') | first }}";
+        fastcgi_param SPRYKER_ZED_HOST "{{ (zedHost | split(':'))[0] | default('') }}";
         fastcgi_param SPRYKER_ZED_PORT "{{ (zedHost | split(':'))[1] | default(project['_defaultPort']) }}";
 
         fastcgi_param SPRYKER_SESSION_FE_NAMESPACE "{{ storeServices['session']['namespace'] | default(endpointData['services']['session']['namespace']) }}";

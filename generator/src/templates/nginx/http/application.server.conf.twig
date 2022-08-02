@@ -24,6 +24,8 @@
         try_files $fastcgi_script_name @proxy;
     }
 
+{% include "nginx/http/proxy/reverse-proxy.conf.twig" with _context %}
+
     location @proxy {
 {% block location %}
         include fastcgi.conf;
