@@ -1,5 +1,5 @@
 assets:
-    image: fholzer/nginx-brotli:v1.21.6
+    image: spryker/nginx-brotli:latest
     mode: production
     compression:
         brotli:
