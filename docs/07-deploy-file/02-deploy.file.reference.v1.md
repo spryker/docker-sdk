@@ -133,14 +133,27 @@ environment: 'docker'
 
 ### imports:
 
-Defines additional deploy files to be included into a build. The files must exist on a [project or base layer](/01-deploy-file.md).
+Defines any of the following:
 
+* Imports of additional deploy files to be included into a build. Supports imports of the same deploy file multiple times. To define a deploy file and dynamic parameters for this type of import, see [imports: {import_name}:](#imports-importname).
 ```yaml
-version: 1.0
-
 imports:
-    deploy.base.template.yml:
+    {import_name}:
+        template: {deploy_file_name}
+    {import_name}:
+        template: {deploy_file_name}
 ```
+
+* An array of additional deploy files to be included into a build. Supports imports of the same deploy file multiple times. To define dynamic parameters for this type of import, see [imports: parameters:](#imports-parameters)
+```yaml
+imports:
+    - template: {deploy_file_name}
+    - template: {deploy_file_name}
+```
+
+The files must exist on a [project or base layer](/docs/scos/dev/the-docker-sdk/{{page.version}}/deploy-file/deploy-file.html).
+
+
 
 {% info_block infoBox "Merged deploy files" %}
 
@@ -151,29 +164,62 @@ If you include a deploy file, the included deploy file is merged with the origin
 
 ***
 
-### imports: {deploy_file_name}:
+### imports: parameters:
 
-Defines the configuration to be used when parsing the included deploy file.
-* `{deploy_file_name}: parameters:` - defines the [dynamic parameters](01-deploy-file.md#dynamic-parameters) to be used when parsing the included deploy file. In the included deploy file, the parameter name should be wrapped in `%`.
+Defines the [dynamic parameters](/docs/scos/dev/the-docker-sdk/{{page.version}}/deploy-file/deploy-file.html#dynamic-parameters) to be used when parsing the included deploy file. In the included deploy file, the parameter name should be wrapped in `%`.
 
 ```yaml
-version: 1.0
-
 imports:
-    {deploy_file_name}:
-      parameters:
-        {dynamic_parameter_name}: '{dynamic_parameter_value}'
+  - template: {deploy_file_name}
+    parameters:
+      {dynamic_parameter_name}: '{dynamic_parameter_value}'
+      {dynamic_parameter_name}: '{dynamic_parameter_value}'
+```
+
+Example:
+```yaml
+imports:
+  - template: deploy.porject.yml
+    parameters:
+      env-name: 'dev'
+      locale: 'en'
+```
+
+{% info_block warningBox "" %}
+
+Affects the included deploy file that it follows in an array of included deploy files. To learn how you can add dynamic parameters for other types of imports, see [imports: {import_name}:](#imports-importname) and [imports: {deploy_file_name}:](#imports-deployfilename).
+
+{% endinfo_block %}
+
+***
+
+
+### imports: {import_name}:
+
+Defines the configuration of the import:
+* `{import_name}: template:` — defines the deploy file to be included into a build  as part of this import.
+* `{import_name}: parameters:` - defines the [dynamic parameters](/docs/scos/dev/the-docker-sdk/{{page.version}}/deploy-file/deploy-file.html#dynamic-parameters) to be used when parsing the included deploy file. In the included deploy file, the parameter name should be wrapped in `%`.
+
+```yaml
+imports:
+    {import_name}:
+        template: {deploy_file_name}
+        parameters:
+          {dynamic_parameter_name}: '{dynamic_parameter_value}'
+          {dynamic_parameter_name}: '{dynamic_parameter_value}'
 ```
 Example:
-
 ```yaml
-version: 1.0
-
 imports:
-    deploy.base.template.yml:
-      parameters:
-        env_name: 'dev'
+    base:
+        template: deploy.base.template.yml
+        parameters:
+          env_name: 'dev'
+          locale: 'en'
 ```
+
+***
+
 
 ***
 
@@ -212,6 +258,25 @@ image:
 ```
 ***
 
+### image: node:
+
+Defines Node.js settings.
+
+* `image: node: version:` - defines a Node.js version. Supports only major versions that are greater than the default one. The default version is `12`.
+* `image: node: npm` - defines an NPM version. Supports only major versions that are  greater than the default one. The default version is `6`.
+* `image: node: distro:` - defines a Linux distribution for the Node Docker image. Should be equal to your base PHP image. Possible values are `alpine` and `debian`. This variable is optional with the default value of `alpine`.
+
+```yaml
+image:
+    ...
+    node:
+        version: 18
+        distro: alpine
+        npm: 8
+```
+***
+
+
 ### image: php:
 
 Defines PHP settings for Spryker applications.
@@ -234,6 +299,7 @@ image:
             - tideways
 ```
 ***
+
 ### assets:
 
 Defines the setting of *Assets*.
@@ -379,6 +445,7 @@ Optional parameters for `application:`:
 * `groups: applications: application: endpoints: endpoint: redirect:` - defines redirect rules.
 * `groups: applications: application: endpoints: endpoint: redirect: code` - defines an HTTP code for a redirect. Allowed values are `301` and `302`.
 * `groups: applications: application: endpoints: endpoint: redirect: url` - defines a URL to redirect to.
+* `groups: applications: application: endpoints: endpoint: redirect: request-uri` - preserves or ignores request-uri due to redirect. Allowed values are `true` or `false`.
 
 * `groups: applications: application: endpoints: real-ip: from:` - defines gateway IP addresses to fetch the real IP address.
 * `groups: applications: application: endpoints: auth:` - defines the basic auth.
@@ -740,7 +807,35 @@ An SQL database management system *Service*.
   - `database: database:` - defines database name.
   - `database: username:`, `database: password:` - defines database credentials.
 
+* Store-specific
 
+  - `databases:` - defines the list of required store-specific databases.
+  - `databases: database-1: username:`,`databases: database-1: password:` - defines database credentials. The default value: `spryker` and `secret`
+  - `databases: database-1: collate:` - defines collation for the database. If not specified, the default value applies: `utf8_general_ci`.
+  - `databases: database-1: character-set` - defines character set for the database. If not specified, the default value applies: `utf8`.
+
+```yaml
+version: "1.0"
+
+regions:
+  REGION-1:
+    services:
+      databases:
+          database-1:
+            collate: 'collate'
+            character-set: 'character-set'
+          database-2:
+    stores:
+      STORE-1:
+        services:
+            database:
+               name: database-1
+      STORE-2:
+        services:
+            database:
+               name: database-2
+
+ ```
 ***
 
 ### key_value_store:

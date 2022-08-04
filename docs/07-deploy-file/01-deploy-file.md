@@ -17,6 +17,7 @@ To include a deploy file template into an application's configuration, use the [
 ```yaml
 import:
   custom_deploy_file.yml:
+      template: custom_deploy_file.yml
 ```
 
 ### Dynamic parameters
@@ -31,8 +32,9 @@ version: 1.0
 
 imports:
     deploy.base.template.yml:
-      parameters:
-        env_name: 'dev'
+        template: deploy.base.template.yml
+        parameters:
+            env_name: 'dev'
 ```
 
 The included deploy file includes more deploy files:
@@ -67,9 +69,103 @@ imports:
     environment/dev/docker.deploy.template.yml:
 ```
 
+### Dynamic parameters - filters
 
+Parameter filters provide the possibility to modify dynamic parameter original value.
 
+For example, using `storeName` for groups configuration:
 
+**config/deploy-templates/groups.yml**
+
+```yaml
+groups:
+    EU:
+        region: EU
+        applications:
+            Yves:
+                application: yves
+                endpoints:
+                    %storeName%.%domain%:
+                        store: %storeName|upper%
+```
+
+Groups template `config/deploy-templates/groups.yml` includes into `deploy.dev.yml` with `storeName` as dynamic parameter.
+
+**deploy.dev.yml**
+```yaml
+version: 1.0
+
+imports:
+    groups.yml:
+        template: groups.yml
+        parameters:
+            storeName: de
+            domain: spryker.com
+```
+
+As the result groups section has `storeName` parameter in uppercase:
+
+```yaml
+groups:
+    EU:
+        region: EU
+        applications:
+            Yves:
+                application: yves
+                endpoints:
+                    de.spryker.com:
+                        store: DE
+```
+
+Available filters list:
+* lower - converts a value to lowercase.
+* upper - converts a value to uppercase.
+
+### Import types
+
+You can include a deploy file into an application's configuration using one of the following import types.
+
+* Named array:
+```yaml
+imports:
+    base-deploy-file:
+        template: deploy.base.template.yml
+    project-deploy-file:
+        template: deploy.project.template.yml
+```
+
+* Unnamed array:
+```yaml
+imports:
+    - template: deploy.base.template.yml
+    - template: deploy.project.template.yml
+```
+
+Named and unnamed array imports support including the same deploy file multiple types. This can be useful when you want to add the same configuration multiple times with different parameters.
+
+Example of including the same deploy file with different parameters via a named array import:
+
+```yaml
+imports:
+    project-deploy-file:
+        template: deploy.project.template.yml
+        parameters: 'stage'
+    extended-project-deploy-file:
+        template: deploy.project.template.yml
+        parameters:
+            env_name: 'dev'
+```
+
+Example of including the same deploy file with different parameters via an unnamed array import:
+
+```yaml
+- template: deploy.project.template.yml
+  parameters:
+      env-name: 'stage'
+- template: deploy.project.template.yml
+  parameters:
+      env-name: 'dev'
+```
 
 
 ## Deploy file inheritance

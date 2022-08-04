@@ -54,6 +54,7 @@ class PrepareDeployFileTransferExecutor implements ExecutorInterface
         $deployFileTransfer = $deployFileTransfer->setBaseImports($baseImport);
 
         return $deployFileTransfer;
+
     }
 
     /**
@@ -79,14 +80,19 @@ class PrepareDeployFileTransferExecutor implements ExecutorInterface
     {
         $result = [];
 
-        foreach ($imports as $importFileName => $importData) {
-            $filePathOnProjectLayer = $this->fileFinder->getFilePathOnProjectLayer($importFileName);
+        foreach ($imports as $importName => $importData) {
+            $importData = $importData ?? [];
 
+            if (!array_key_exists(DeployFileGeneratorConstants::YAML_TEMPLATE_KEY, $importData)) {
+                $importData[DeployFileGeneratorConstants::YAML_TEMPLATE_KEY] = $importName;
+            }
+
+            $filePathOnProjectLayer = $this->fileFinder->getFilePathOnProjectLayer($importData[DeployFileGeneratorConstants::YAML_TEMPLATE_KEY]);
             if ($filePathOnProjectLayer == null) {
                 continue;
             }
 
-            $result[$importFileName] = $importData;
+            $result[$importName . DeployFileGeneratorConstants::YAML_IMPORTS_TEMPLATE_KEY_SEPARATOR . $importData[DeployFileGeneratorConstants::YAML_TEMPLATE_KEY]] = $importData;
         }
 
         return $result;
@@ -101,13 +107,19 @@ class PrepareDeployFileTransferExecutor implements ExecutorInterface
     {
         $result = [];
 
-        foreach ($imports as $importFileName => $importData) {
-            $filePathOnBaseLayer = $this->fileFinder->getFilePathOnBaseLayer($importFileName);
+        foreach ($imports as $importName => $importData) {
+            $importData = $importData ?? [];
+
+            if (!array_key_exists(DeployFileGeneratorConstants::YAML_TEMPLATE_KEY, $importData)) {
+                $importData[DeployFileGeneratorConstants::YAML_TEMPLATE_KEY] = $importName;
+            }
+
+            $filePathOnBaseLayer = $this->fileFinder->getFilePathOnBaseLayer($importData[DeployFileGeneratorConstants::YAML_TEMPLATE_KEY]);
             if ($filePathOnBaseLayer == null) {
                 continue;
             }
 
-            $result[$importFileName] = $importData;
+            $result[$importName . DeployFileGeneratorConstants::YAML_IMPORTS_TEMPLATE_KEY_SEPARATOR . $importData[DeployFileGeneratorConstants::YAML_TEMPLATE_KEY]] = $importData;
         }
 
         return $result;

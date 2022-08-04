@@ -165,7 +165,7 @@ services:
         endpoints:
             {custom_endpoint}:
 ```
-2. Adjust host file:
+2. Adjust host file, if `{custom_endpoint}` aren't ending on `.localhost`:
 ```bash
 echo "127.0.0.1 {custom_endpoint}" | sudo tee -a /etc/hosts
 ```
@@ -211,7 +211,7 @@ services:
             {custom_endpoint}:
 ```
 
-2. Adjust the `host` file:
+2. Adjust the `host` file, if `{custom_endpoint}` aren't ending on `.localhost`:
 ```bash
 echo "127.0.0.1 {custom_endpoint}" | sudo tee -a /etc/hosts
 ```
@@ -252,7 +252,7 @@ services:
             {custom_endpoint}: //redis-commander.spryker.local:
 ```
 
-2. Adjust hosts file:
+2. Adjust hosts file, if `{custom_endpoint}` aren't ending on `.localhost`:
 ```bash
 echo "127.0.0.1 {custom_endpoint}" | sudo tee -a /etc/hosts
 ```
