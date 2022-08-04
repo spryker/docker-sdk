@@ -351,35 +351,39 @@ foreach ($projectData['groups'] ?? [] as $groupName => $groupData) {
             }
 
             $envVarEncoder->setIsActive(true);
-            file_put_contents(
-                $deploymentDir . DS . 'env' . DS . 'cli' . DS . strtolower($endpointData['store']) . '.env',
-                $twig->render('env/cli/store.env.twig', [
-                    'applicationName' => $applicationName,
-                    'applicationData' => $applicationData,
-                    'project' => $projectData,
-                    'regionName' => $groupData['region'],
-                    'regionData' => $projectData['regions'][$groupData['region']],
-                    'brokerConnections' => getBrokerConnections($projectData),
-                    'storeName' => $endpointData['store'],
-                    'services' => $services,
-                    'endpointMap' => $endpointMap,
-                ])
-            );
 
-            file_put_contents(
-                $deploymentDir . DS . 'terraform' . DS . 'cli' . DS . strtolower($endpointData['store']) . '.env',
-                $twig->render('terraform/store.env.twig', [
-                    'applicationName' => $applicationName,
-                    'applicationData' => $applicationData,
-                    'project' => $projectData,
-                    'regionName' => $groupData['region'],
-                    'regionData' => $projectData['regions'][$groupData['region']],
-                    'brokerConnections' => getBrokerConnections($projectData),
-                    'storeName' => $endpointData['store'],
-                    'services' => $services,
-                    'endpointMap' => $endpointMap,
-                ])
-            );
+            if (array_key_exists('store', $endpointData)) {
+                file_put_contents(
+                    $deploymentDir . DS . 'env' . DS . 'cli' . DS . strtolower($endpointData['store']) . '.env',
+                    $twig->render('env/cli/store.env.twig', [
+                        'applicationName' => $applicationName,
+                        'applicationData' => $applicationData,
+                        'project' => $projectData,
+                        'regionName' => $groupData['region'],
+                        'regionData' => $projectData['regions'][$groupData['region']],
+                        'brokerConnections' => getBrokerConnections($projectData),
+                        'storeName' => $endpointData['store'],
+                        'services' => $services,
+                        'endpointMap' => $endpointMap,
+                    ])
+                );
+
+                file_put_contents(
+                    $deploymentDir . DS . 'terraform' . DS . 'cli' . DS . strtolower($endpointData['store']) . '.env',
+                    $twig->render('terraform/store.env.twig', [
+                        'applicationName' => $applicationName,
+                        'applicationData' => $applicationData,
+                        'project' => $projectData,
+                        'regionName' => $groupData['region'],
+                        'regionData' => $projectData['regions'][$groupData['region']],
+                        'brokerConnections' => getBrokerConnections($projectData),
+                        'storeName' => $endpointData['store'],
+                        'services' => $services,
+                        'endpointMap' => $endpointMap,
+                    ])
+                );
+            }
+
             $envVarEncoder->setIsActive(false);
         }
     }
