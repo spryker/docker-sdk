@@ -259,12 +259,15 @@ function mapBackendEndpointsWithFallbackZed(array $endpointMap): array
 
     foreach ($zedApplicationsToCheck as $zedApplicationToCheck) {
         foreach ($endpointMap as $store => $storeEndpointMap) {
+            if (!array_key_exists(ZED_APP, $storeEndpointMap)) {
+                continue;
+            }
+
             if (array_key_exists($zedApplicationToCheck, $storeEndpointMap)) {
                 continue;
             }
-            if (array_key_exists(ZED_APP, $storeEndpointMap)) {
-                $endpointMap[$store][$zedApplicationToCheck] = $storeEndpointMap[ZED_APP];
-            }
+
+            $endpointMap[$store][$zedApplicationToCheck] = $storeEndpointMap[ZED_APP];
         }
     }
 
