@@ -1,7 +1,7 @@
 server_names_hash_bucket_size 128;
 server_tokens off;
 
-large_client_header_buffers 4 32k;
+large_client_header_buffers 4 2048k;
 
 {% if assets['compression'] is not empty %}
 {% for compressionEngine, compressionData in assets['compression'] %}
