@@ -19,7 +19,7 @@ map $http_origin $allow_origin_glue_{{ endpointData['store'] | lower }} {
 {% endblock server %}
 {% block location %}
 {{ parent() }}
-        fastcgi_param SPRYKER_ZED_HOST "{{ zedHost | split(':') | first }}";
+        fastcgi_param SPRYKER_ZED_HOST "{{ (zedHost | split(':'))[0] | default('') }}";
         fastcgi_param SPRYKER_ZED_PORT "{{ (zedHost | split(':'))[1] | default(project['_defaultPort']) }}";
 
         fastcgi_param SPRYKER_API_HOST "{{ host }}";

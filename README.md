@@ -50,35 +50,39 @@ To start working with Spryker in Docker, see [Quick start guide](docs/01-quick-s
 
 ## Contributing to Spryker Docker SDK
 
-For contribution guidelines, see [Code contribution guide](https://documentation.spryker.com/docs/code-contribution-guide#code-contribution-guide)
+For contribution guidelines, see [Code contribution guide](https://docs.spryker.com/docs/scos/dev/code-contribution-guide.html)
 
 ## Supported services
 
-| Service  | Engine  | Version(s)  |
-|---|---|---|
-| database  | postgres  | 9.6*  |
-|   |   | 10  |
-|   |   | 11  |
-|   |   | 12  |
-|   | mysql  | 5.7  |
-|   |   | mariadb-10.2  |
-|   |   | mariadb-10.3  |
-|   |   | mariadb-10.4  |
-|   |   | mariadb-10.5  |
-| broker  | rabbitmq  | 3.7  |
-| session  | redis  | 5.0  |
-| key_value_store  | redis  | 5.0  |
-| search  | elastic  | 5.6* |
-|   |   | 6.8  |
-|   |   | 7.6  |
-|   |   | 7.10 |
-| scheduler  | jenkins  | 2.176  |
-| webdriver  | phantomjs  | latest* |
-|   | chromedriver  | latest |
-| mail_catcher  | mailhog  | 1.0  |
-| swagger  | swagger-ui  | v3.24  |
-| kibana  | kibana  | 5.6* |
-|   |   | 6.8 |
-|   |   | 7.6 |
-|   |   | 7.10 |
-| blackfire  | blackfire  | latest |
+| Service         | Engine       | Version(s)   | ARM support | Note                               |
+|-----------------|--------------|--------------|-------------|------------------------------------|
+| database        | postgres     | 9.6*         | &check;     |                                    |
+|                 |              | 10           | &check;     |                                    |
+|                 |              | 11           | &check;     |                                    |
+|                 |              | 12           | &check;     |                                    |
+|                 | mysql        | 5.7          |             |                                    |
+|                 |              | mariadb-10.2 | &check;     |                                    |
+|                 |              | mariadb-10.3 | &check;     |                                    |
+|                 |              | mariadb-10.4 | &check;     |                                    |
+|                 |              | mariadb-10.5 | &check;     |                                    |
+| broker          | rabbitmq     | 3.7          |             |                                    |
+|                 |              | 3.8          | &check;     |                                    |
+|                 |              | 3.9          | &check;     |                                    |
+| session         | redis        | 5.0          | &check;     |                                    |
+| key_value_store | redis        | 5.0          | &check;     |                                    |
+| search          | elastic      | 5.6*         | &check;     | https://www.elastic.co/support/eol |
+|                 |              | 6.8          | &check;     | https://www.elastic.co/support/eol |
+|                 |              | 7.6          | &check;     |                                    |
+|                 |              | 7.10         | &check;     |                                    |
+| scheduler       | jenkins      | 2.176        |             |                                    |
+|                 |              | 2.305        | &check;     |                                    |
+|                 |              | 2.324        | &check;     |                                    |
+| webdriver       | phantomjs    | latest*      |             |                                    |
+|                 | chromedriver | latest       | &check;     |                                    |
+| mail_catcher    | mailhog      | 1.0          | &check;     |                                    |
+| swagger         | swagger-ui   | v3.24        | &check;     |                                    |
+| kibana          | kibana       | 5.6*         | &check;     | https://www.elastic.co/support/eol |
+|                 |              | 6.8          | &check;     | https://www.elastic.co/support/eol |
+|                 |              | 7.6          | &check;     |                                    |
+|                 |              | 7.10         | &check;     |                                    |
+| blackfire       | blackfire    | latest       | &check;     |                                    |

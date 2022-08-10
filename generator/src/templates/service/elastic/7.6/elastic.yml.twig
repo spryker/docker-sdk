@@ -1,5 +1,5 @@
   {{ serviceName }}:
-    image: ${SPRYKER_CI_ELASTICSEARCH_IMAGE:-docker.elastic.co/elasticsearch/elasticsearch:7.6.2}
+    image: spryker/elasticsearch:7.6.2
     networks:
         - private
     labels:

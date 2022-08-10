@@ -6,7 +6,6 @@ function Data::isLoaded() {
 }
 
 function Data::load() {
-
     local brokerInstalled=""
     local schedulerSuspended=""
     local verboseOption=$([ "${VERBOSE}" == "1" ] && echo -n " -vvv" || echo -n '')
@@ -54,7 +53,7 @@ function Data::load() {
             Compose::exec "vendor/bin/install${verboseOption} -r ${SPRYKER_PIPELINE} -s init-storages-per-store"
         done
 
-        SPRYKER_CURRENT_STORE="${SPRYKER_DEFAULT_STORE}"
+        SPRYKER_CURRENT_STORE="${STORES[0]}"
         local demoDataSection=${1:-demodata}
         Compose::exec "vendor/bin/install${verboseOption} -r ${SPRYKER_PIPELINE} -s init-storages-per-region -s ${demoDataSection}"
     done

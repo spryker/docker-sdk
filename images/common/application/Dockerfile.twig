@@ -1,5 +1,14 @@
 # syntax = docker/dockerfile:experimental
 ARG SPRYKER_PLATFORM_IMAGE=spryker/php:7.3
+ARG SPRYKER_NODE_IMAGE_VERSION
+ARG SPRYKER_NODE_IMAGE_DISTRO
+
+FROM node:${SPRYKER_NODE_IMAGE_VERSION}-${SPRYKER_NODE_IMAGE_DISTRO} AS node
+
+ARG SPRYKER_NPM_VERSION
+
+RUN npm install -g npm@${SPRYKER_NPM_VERSION}
+
 FROM ${SPRYKER_PLATFORM_IMAGE} AS application-basic
 
 ENV SPRYKER_IN_DOCKER=1
@@ -51,3 +60,10 @@ COPY --chown=spryker:spryker jenkins/jenkins.docker.xml.twig /home/spryker/jenki
 
 # Build info
 COPY --chown=spryker:spryker php/build.php /home/spryker/build.php
+
+# NodeJS + NPM
+COPY --from=node /usr/lib /usr/lib
+COPY --from=node /usr/local/share /usr/local/share
+COPY --from=node /usr/local/lib /usr/local/lib
+COPY --from=node /usr/local/include /usr/local/include
+COPY --from=node /usr/local/bin /usr/local/bin

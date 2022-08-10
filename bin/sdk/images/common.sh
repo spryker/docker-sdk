@@ -12,6 +12,8 @@ function Images::destroy() {
     # ${XARGS_NO_RUN_IF_EMPTY} must be without quotes
     # shellcheck disable=SC2086
     docker images --filter "reference=${SPRYKER_DOCKER_PREFIX}_*:${SPRYKER_DOCKER_TAG}" --format "{{.ID}}" | xargs ${XARGS_NO_RUN_IF_EMPTY} docker rmi -f
+    docker images --filter "reference=${SPRYKER_DOCKER_PREFIX}_builder_assets*" --format "{{.ID}}" | xargs ${XARGS_NO_RUN_IF_EMPTY} docker rmi -f
+    docker images --filter "reference=spryker_docker_sdk*" --format "{{.ID}}" | xargs ${XARGS_NO_RUN_IF_EMPTY} docker rmi -f
 
     docker rmi -f "${SPRYKER_DOCKER_PREFIX}_cli" || true
     docker rmi -f "${SPRYKER_DOCKER_PREFIX}_app" || true
@@ -27,6 +29,7 @@ function Images::_buildApp() {
 
     local -a sshArgument=()
     local folder=${1}
+    local withPushImages=${2:-${FALSE}}
     local baseAppImage="${SPRYKER_DOCKER_PREFIX}_base_app:${SPRYKER_DOCKER_TAG}"
     local appImage="${SPRYKER_DOCKER_PREFIX}_app:${SPRYKER_DOCKER_TAG}"
     local localAppImage="${SPRYKER_DOCKER_PREFIX}_local_app:${SPRYKER_DOCKER_TAG}"
@@ -57,6 +60,9 @@ function Images::_buildApp() {
         --build-arg "KNOWN_HOSTS=${KNOWN_HOSTS}" \
         --build-arg "SPRYKER_BUILD_HASH=${SPRYKER_BUILD_HASH:-"current"}" \
         --build-arg "SPRYKER_BUILD_STAMP=${SPRYKER_BUILD_STAMP:-""}" \
+        --build-arg "SPRYKER_NODE_IMAGE_VERSION=${SPRYKER_NODE_IMAGE_VERSION}" \
+        --build-arg "SPRYKER_NODE_IMAGE_DISTRO=${SPRYKER_NODE_IMAGE_DISTRO}" \
+        --build-arg "SPRYKER_NPM_VERSION=${SPRYKER_NPM_VERSION}" \
         "${DEPLOYMENT_PATH}/context" 1>&2
 
     docker build \
@@ -129,6 +135,17 @@ function Images::_buildApp() {
             "${DEPLOYMENT_PATH}/context" 1>&2
     fi
 
+    if [ "${withPushImages}" == "${TRUE}" ]; then
+        local jenkinsImage="${SPRYKER_DOCKER_PREFIX}_jenkins:${SPRYKER_DOCKER_TAG}"
+
+        docker build \
+            -t "${jenkinsImage}" \
+            -f "${DEPLOYMENT_PATH}/images/common/services/jenkins/export/Dockerfile" \
+            --progress="${PROGRESS_TYPE}" \
+            --build-arg "SPRYKER_PARENT_IMAGE=${appImage}" \
+            "${DEPLOYMENT_PATH}/" 1>&2
+    fi
+
     Registry::Trap::releaseExitHook 'removeBuildSecrets'
 }
 
@@ -166,6 +183,7 @@ function Images::_buildFrontend() {
             -f "${DEPLOYMENT_PATH}/images/debug/frontend/Dockerfile" \
             --progress="${PROGRESS_TYPE}" \
             --build-arg "SPRYKER_PARENT_IMAGE=${frontendImage}" \
+            --build-arg "SPRYKER_XDEBUG_MODE_ENABLE=${SPRYKER_XDEBUG_MODE_ENABLE}" \
             "${DEPLOYMENT_PATH}/context" 1>&2
     fi
 }

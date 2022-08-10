@@ -3,7 +3,6 @@
 use DeployFileGenerator\DeployFileGeneratorFactory;
 use DeployFileGenerator\Transfer\DeployFileTransfer;
 use Spatie\Url\Url;
-use Symfony\Component\Console\Output\ConsoleOutput;
 use Symfony\Component\Yaml\Parser;
 use Twig\Environment;
 use Twig\Loader\ChainLoader;
@@ -156,6 +155,19 @@ const ENTRY_POINTS = [
     GLUE_STOREFRONT => 'GlueStorefront',
     GLUE_BACKEND => 'GlueBackend',
 ];
+
+const DEBIAN_DISTRO_NAME = 'bullseye';
+const ALPINE_DISTRO_NAME = 'alpine';
+
+const SPRYKER_NODE_IMAGE_DISTRO_ENV_NAME = 'SPRYKER_NODE_IMAGE_DISTRO';
+const SPRYKER_NODE_IMAGE_VERSION_ENV_NAME = 'SPRYKER_NODE_IMAGE_VERSION';
+const SPRYKER_NPM_VERSION_ENV_NAME = 'SPRYKER_NPM_VERSION';
+
+const DEFAULT_NODE_VERSION = 12;
+const DEFAULT_NODE_DISTRO = ALPINE_DISTRO_NAME;
+const DEFAULT_NPM_VERSION = 6;
+
+$projectData['_node_npm_config'] = buildNodeJsNpmBuildConfig($projectData);
 
 foreach ($projectData['groups'] ?? [] as $groupName => $groupData) {
     foreach ($groupData['applications'] ?? [] as $applicationName => $applicationData) {
@@ -524,6 +536,18 @@ if ($returnCode > 0) {
 }
 
 verbose(implode(PHP_EOL, $output));
+
+$errorMessages = validateServiceVersions($projectData);
+
+if (count($errorMessages) > 0) {
+    $redColorCode = "\033[31m";
+
+    warn($redColorCode . 'Service version compatibility errors:' . PHP_EOL);
+    warn($redColorCode . ' * ' . implode(PHP_EOL . $redColorCode . ' * ' , $errorMessages));
+    warn(PHP_EOL . $redColorCode . 'Please check documentation.');
+
+    exit(1);
+}
 
 // -------------------------
 /**
@@ -1087,10 +1111,33 @@ function buildComposerAutoloadConfig(array $projectData): string
     return trim($projectData['composer']['autoload'] ?? ($projectData['_fileMode'] === 'baked' ? '--classmap-authoritative' : ''));
 }
 
+function endsWith(string $haystack, string $needle): bool
+{
+    if (function_exists('str_ends_with')) {
+        return str_ends_with($haystack, $needle);
+    }
+
+    if ($needle === '') {
+        return true;
+    }
+
+    $needleLength = strlen($needle);
+
+    return substr($haystack, -$needleLength) === $needle;
+}
+
 function buildDataForRequirementAnalyzer(array $projectData): array
 {
     $hosts = $projectData['_hosts'];
-    unset($hosts['localhost']);
+
+    // all domain names ending with TLD 'localhost' do not need to be listed in /etc/hosts
+    // see https://www.ietf.org/rfc/rfc2606.txt
+    foreach ($hosts as $hostNameKey => $hostNameValue)
+     {
+         if (endsWith($hostNameKey, 'localhost')) {
+            unset($hosts[$hostNameKey]);
+         }
+     }
 
     return [
         'hosts' => implode(' ', $hosts),
@@ -1208,6 +1255,7 @@ function buildSecrets(string $deploymentDir): array
     $data['SPRYKER_OAUTH_CLIENT_IDENTIFIER'] = 'frontend';
     $data['SPRYKER_OAUTH_CLIENT_SECRET'] = generateToken(48);
     $data['SPRYKER_ZED_REQUEST_TOKEN'] = generateToken(80);
+    $data['SPRYKER_URI_SIGNER_SECRET_KEY'] = generateToken(80);
 
     return $data;
 }
@@ -1412,14 +1460,14 @@ function buildDefaultRegionCredentialsForDatabase(array $projectData): array
                     }
                 }
             }
+
+            $projectData['regions'][$regionName]['services']['databases'] = json_encode($databases);
         }
 
-        $projectData['regions'][$regionName]['services']['databases'] = json_encode($databases);
     }
 
     return $projectData;
 }
-
 
 /**
  * @param array $projectData
@@ -1463,6 +1511,144 @@ function extendProjectDataWithKeyValueRegionNamespaces(array $projectData): arra
     }
 
     return $projectData;
+}
+
+/**
+ * @param array $projectData
+ * @return string[]
+ */
+function validateServiceVersions(array $projectData): array
+{
+    $validationMessageTemplate = '`%s` service with `%s` engine and %s version are unsupported on ARM architecture.';
+    $validationMessages = [];
+
+    if (!isArmArchitecture()) {
+        return $validationMessages;
+    }
+
+    $services = $projectData['services'];
+    $unsupportedServiceVersions = getUnsupportedArmServiceMap();
+
+    foreach ($unsupportedServiceVersions as $serviceName => $serviceEngines) {
+        if (!array_key_exists($serviceName, $services)) {
+            continue;
+        }
+
+        $service = $services[$serviceName];
+        $serviceEngine = $service['engine'] ?? null;
+        $serviceVersion = (string)($service['version'] ?? 'default');
+
+        if($serviceEngine == null || !array_key_exists($serviceEngine, $serviceEngines)) {
+            continue;
+        }
+
+        if (!array_key_exists($serviceVersion, $serviceEngines[$serviceEngine])) {
+            continue;
+        }
+
+        $validationMessages[] = sprintf($validationMessageTemplate, $serviceName, $serviceEngine, $serviceEngines[$serviceEngine][$serviceVersion]);
+    }
+
+    return $validationMessages;
+}
+
+/**
+ * @return string[][][]
+ */
+function getUnsupportedArmServiceMap(): array
+{
+    return [
+        'database' => [
+            'mysql' => [
+                '5.7' => '5.7',
+                'default' => '5.7',
+            ],
+        ],
+        'broker' => [
+            'rabbitmq' => [
+                '3.7' => '3.7',
+                'default' => '3.7',
+            ],
+        ],
+        'webdriver' => [
+            'phantomjs' => ['*'],
+        ],
+        'scheduler' => [
+            'jenkins' => [
+                '2.176' => '2.176',
+                'default' => '2.176',
+            ],
+        ],
+    ];
+}
+
+/**
+ * @return bool
+ */
+function isArmArchitecture(): bool
+{
+    $possibleValue = [
+        'arm',
+        'aarch64_be',
+        'aarch64',
+        'armv8l',
+    ];
+
+    $currentArchitecture = php_uname('m');
+
+    return in_array($currentArchitecture, $possibleValue);
+}
+
+/**
+ * @param array $projectData
+ *
+ * @return array
+ */
+function buildNodeJsNpmBuildConfig(array $projectData): array
+{
+    $imageName = $projectData['image']['tag'];
+    $nodejsConfig = $projectData['image']['node'] ?? [];
+
+    return [
+        SPRYKER_NODE_IMAGE_DISTRO_ENV_NAME => getNodeDistroName($nodejsConfig, $imageName),
+        SPRYKER_NODE_IMAGE_VERSION_ENV_NAME => array_key_exists('version', $nodejsConfig)
+            ? (int)$nodejsConfig['version']
+            : DEFAULT_NODE_VERSION,
+        SPRYKER_NPM_VERSION_ENV_NAME => array_key_exists('npm', $nodejsConfig)
+            ? (int)$nodejsConfig['npm']
+            : DEFAULT_NPM_VERSION,
+    ];
+}
+
+/**
+ * @param array $nodejsConfig
+ * @param string $imageName
+ *
+ * @return string
+ */
+function getNodeDistroName(array $nodejsConfig, string $imageName): string
+{
+    if (array_key_exists('distro', $nodejsConfig)) {
+        if ($nodejsConfig['distro'] == 'debian') {
+            return DEBIAN_DISTRO_NAME;
+        }
+
+        if ($nodejsConfig['distro'] == 'alpine') {
+            return ALPINE_DISTRO_NAME;
+        }
+    }
+
+    $imageData = explode('/', $imageName);
+
+    if ($imageData[0] !== 'spryker') {
+        return DEFAULT_NODE_DISTRO;
+    }
+
+    if (str_contains($imageData[1], 'debian')) {
+        return DEBIAN_DISTRO_NAME;
+    }
+
+    return ALPINE_DISTRO_NAME;
 }
 
 /**
