@@ -1,5 +1,5 @@
   {{ serviceName }}:
-    image: spryker/elasticsearch:7.6.2
+    image: ${SPRYKER_CI_ELASTICSEARCH_IMAGE:-spryker/elasticsearch:7.6.2}
     networks:
         - private
     labels:

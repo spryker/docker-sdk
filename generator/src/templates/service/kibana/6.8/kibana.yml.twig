@@ -1,5 +1,5 @@
   {{ serviceName }}:
-    image: spryker/kibana:6.8.4-eol
+    image: ${SPRYKER_CI_KIBANA_IMAGE:-spryker/kibana:6.8.4-eol}
     networks:
         - private
     labels:
