@@ -19,7 +19,7 @@
 {% if serviceData['replica-services'] is defined %}
 {% for replica in serviceData['replica-services'] %}
   {{ serviceName }}_{{ replica }}:
-      image: redis:5.0-alpine
+      image: ${SPRYKER_CI_REDIS_IMAGE:-redis:5.0-alpine}
       command: "redis-server /usr/local/etc/redis/redis.conf --slaveof {{ serviceName }} 6379"
       depends_on:
         - {{ serviceName }}
