@@ -128,6 +128,7 @@ verbose('Generating NGINX configuration... [DONE]');
 $primal = [];
 $projectData['_entryPoints'] = [];
 $projectData['_endpointMap'] = [];
+$projectData['_endpointList'] = [];
 $projectData = extendProjectDataWithKeyValueRegionNamespaces($projectData);
 $projectData['_storeSpecific'] = getStoreSpecific($projectData);
 $debugPortIndex = 10000;
@@ -201,6 +202,8 @@ foreach ($projectData['groups'] ?? [] as $groupName => $groupData) {
                         $projectData['groups'][$groupName]['applications'][$applicationName]['endpoints'][$endpoint]['primal'] = true;
                     };
                 }
+
+                $projectData['_endpointList'][$groupName][] = $endpoint;
             }
 
             if (array_key_exists('redirect', $endpointData)) {
@@ -283,6 +286,7 @@ foreach ($projectData['groups'] ?? [] as $groupName => $groupData) {
                     'regionName' => $groupData['region'],
                     'regionData' => $projectData['regions'][$groupData['region']],
                     'brokerConnections' => getBrokerConnections($projectData),
+                    'endpointList' => $projectData['_endpointList'][$groupData['region']],
                 ])
             );
         }
@@ -364,6 +368,7 @@ foreach ($projectData['groups'] ?? [] as $groupName => $groupData) {
                         'storeName' => $endpointData['store'],
                         'services' => $services,
                         'endpointMap' => $endpointMap,
+                        'endpointList' => $projectData['_endpointList'][$groupData['region']],
                     ])
                 );
 
