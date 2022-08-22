@@ -1,5 +1,5 @@
   {{ serviceName }}:
-    image: elasticsearch:5.6-alpine
+    image: spryker/elasticsearch:5.6.16-eol
     networks:
       - private
     labels:
@@ -7,12 +7,12 @@
       'spryker.app.type': services
       'spryker.project': ${SPRYKER_DOCKER_PREFIX}:${SPRYKER_DOCKER_TAG}
     healthcheck:
-      test: [ "CMD", "wget", "-q", "--spider", "localhost:9200/_cluster/health" ]
+      test: ["CMD", "curl", "-f", "localhost:9200/_cat/health"]
       interval: 10s
       timeout: 5s
       retries: 10
     environment:
-      ES_JAVA_OPTS: "-Xms384m -Xmx512m"
+      ES_JAVA_OPTS: "-Xms512m -Xmx512m"
     volumes:
       - {{ serviceName }}-{{ serviceData['engine'] }}-data:/usr/share/elasticsearch/data:rw
       - ./${DEPLOYMENT_PATH}/context/elasticsearch/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml:ro

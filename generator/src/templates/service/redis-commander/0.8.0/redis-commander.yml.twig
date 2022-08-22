@@ -1,0 +1,14 @@
+  {{ serviceName }}:
+    image: spryker/redis-commander:0.8.0
+    networks:
+      - private
+    labels:
+      'spryker.app.name': redis-commander
+      'spryker.app.type': hidden
+      'spryker.project': ${SPRYKER_DOCKER_PREFIX}:${SPRYKER_DOCKER_TAG}
+    environment:
+      REDIS_HOSTS: "{{ project.storageData.hosts | merge(serviceData.data.hosts | default([])) | default("") | join(',') }}"
+    depends_on:
+{% for service in project.storageData.services | merge(serviceData.data.services | default([])) | default([]) %}
+      - {{ service }}
+{% endfor %}
