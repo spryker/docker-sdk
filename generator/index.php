@@ -170,6 +170,7 @@ const DEFAULT_NPM_VERSION = 6;
 $projectData['_node_npm_config'] = buildNodeJsNpmBuildConfig($projectData);
 
 foreach ($projectData['groups'] ?? [] as $groupName => $groupData) {
+    $projectData['_endpointList'][$groupName][] = 'localhost';
     foreach ($groupData['applications'] ?? [] as $applicationName => $applicationData) {
         foreach ($applicationData['endpoints'] ?? [] as $endpoint => $endpointData) {
             if ($endpointData === null) {
@@ -354,7 +355,6 @@ foreach ($projectData['groups'] ?? [] as $groupName => $groupData) {
                 || $applicationData['application'] === BACKOFFICE_APP
                 || $applicationData['application'] === MERCHANT_PORTAL
             ) {
-
                 $envVarEncoder->setIsActive(true);
                 file_put_contents(
                     $deploymentDir . DS . 'env' . DS . 'cli' . DS . strtolower($endpointData['store']) . '.env',
