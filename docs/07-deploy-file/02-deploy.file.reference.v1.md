@@ -820,21 +820,12 @@ version: "1.0"
 regions:
   REGION-1:
     services:
-      databases:
+      `databases`:
           database-1:
             collate: 'collate'
             character-set: 'character-set'
           database-2:
-    stores:
-      STORE-1:
-        services:
-            database:
-               name: database-1
-      STORE-2:
-        services:
-            database:
-               name: database-2
-
+          database-n:
  ```
 ***
 

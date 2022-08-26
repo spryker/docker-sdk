@@ -1435,30 +1435,20 @@ function buildDefaultRegionCredentialsForDatabase(array $projectData): array
         }
 
         if (array_key_exists('databases', $regionConfig['services'])) {
-            $regionDbConfigs = $regionConfig['services']['databases'];
-
-            foreach ($regionConfig['stores'] as $storeName => $storeConfig) {
-                $storeDbConfig = $storeConfig['services']['database'];
-
-                foreach ($regionDbConfigs as $dbName => $regionDbConfig) {
-                    if (isset($storeDbConfig['name']) && $storeDbConfig['name'] === $dbName) {
-                        $regionDbConfig = array_merge($defaultDbRegionCredentials, $regionDbConfig ?? []);
-                        $databases['databases'][$storeName] = [
-                            'host' => 'database',
-                            'port' => $databaseServiceData['port'] ?? $databaseServiceData['engine'] === 'mysql' ? 3306 : 5432,
-                            'database' => $dbName,
-                            'username' => $regionDbConfig['username'],
-                            'password' => $regionDbConfig['password'],
-                            'characterSet' => $regionDbConfig['character-set'] ?? 'utf8',
-                            'collate' => $regionDbConfig['collate'] ?? 'utf8_general_ci',
-                        ];
-                    }
-                }
+            foreach ($regionConfig['services']['databases'] as $dbName => $regionDbConfig) {
+                $regionDbConfig = array_merge($defaultDbRegionCredentials, $regionDbConfig ?? []);
+                $databases['databases'][strtoupper($dbName)] = [
+                    'host' => 'database',
+                    'port' => $databaseServiceData['port'] ?? $databaseServiceData['engine'] === 'mysql' ? 3306 : 5432,
+                    'database' => $dbName,
+                    'username' => $regionDbConfig['username'],
+                    'password' => $regionDbConfig['password'],
+                    'characterSet' => $regionDbConfig['character-set'] ?? 'utf8',
+                    'collate' => $regionDbConfig['collate'] ?? 'utf8_general_ci',
+                ];
             }
-
             $projectData['regions'][$regionName]['services']['databases'] = json_encode($databases);
         }
-
     }
 
     return $projectData;
