@@ -1625,6 +1625,10 @@ function buildNodeJsNpmBuildConfig(array $projectData): array
 function getNodeDistroName(array $nodejsConfig, string $imageName): string
 {
     if (array_key_exists('distro', $nodejsConfig)) {
+        if ($nodejsConfig['distro'] == 'debian') {
+            return DEBIAN_BULLSEYE_DISTRO_NAME;
+        }
+
         if ($nodejsConfig['distro'] == 'bullseye') {
             return DEBIAN_BULLSEYE_DISTRO_NAME;
         }
