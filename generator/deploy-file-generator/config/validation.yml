@@ -40,6 +40,7 @@ image.node.version:
 image.node.distro:
     only-value:
         - alpine
+        - debian
         - buster
         - bullseye
 image.node.npm:
