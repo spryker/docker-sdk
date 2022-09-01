@@ -155,8 +155,7 @@ const ENTRY_POINTS = [
     GLUE_BACKEND => 'GlueBackend',
 ];
 
-const DEBIAN_BULLSEYE_DISTRO_NAME = 'bullseye';
-const DEBIAN_BUSTER_DISTRO_NAME = 'buster';
+const DEBIAN_DISTRO_NAME = 'bullseye';
 const ALPINE_DISTRO_NAME = 'alpine';
 
 const SPRYKER_NODE_IMAGE_DISTRO_ENV_NAME = 'SPRYKER_NODE_IMAGE_DISTRO';
@@ -1626,15 +1625,7 @@ function getNodeDistroName(array $nodejsConfig, string $imageName): string
 {
     if (array_key_exists('distro', $nodejsConfig)) {
         if ($nodejsConfig['distro'] == 'debian') {
-            return DEBIAN_BULLSEYE_DISTRO_NAME;
-        }
-
-        if ($nodejsConfig['distro'] == 'bullseye') {
-            return DEBIAN_BULLSEYE_DISTRO_NAME;
-        }
-
-        if ($nodejsConfig['distro'] == 'buster') {
-            return DEBIAN_BUSTER_DISTRO_NAME;
+            return DEBIAN_DISTRO_NAME;
         }
 
         if ($nodejsConfig['distro'] == 'alpine') {
@@ -1648,12 +1639,8 @@ function getNodeDistroName(array $nodejsConfig, string $imageName): string
         return DEFAULT_NODE_DISTRO;
     }
 
-    if (str_contains($imageData[1], 'debian-buster')) {
-        return DEBIAN_BUSTER_DISTRO_NAME;
-    }
-
     if (str_contains($imageData[1], 'debian')) {
-        return DEBIAN_BULLSEYE_DISTRO_NAME;
+        return DEBIAN_DISTRO_NAME;
     }
 
     return ALPINE_DISTRO_NAME;

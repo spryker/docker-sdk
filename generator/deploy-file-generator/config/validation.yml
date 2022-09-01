@@ -41,8 +41,6 @@ image.node.distro:
     only-value:
         - alpine
         - debian
-        - buster
-        - bullseye
 image.node.npm:
     integer-type:
     range-value:
