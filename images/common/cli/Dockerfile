@@ -22,6 +22,7 @@ RUN --mount=type=cache,id=aptlib,sharing=locked,target=/var/lib/apt \
      jq \
      python3 \
      g++ \
+     make \
      ; fi'
 # Debian contains outdated Yarn package
 RUN --mount=type=cache,id=aptlib,sharing=locked,target=/var/lib/apt \
@@ -45,6 +46,7 @@ RUN --mount=type=cache,id=apk,sharing=locked,target=/var/cache/apk mkdir -p /etc
      jq \
      python3 \
      g++ \
+     make \
      ; fi'
 
 # TODO Not-available feature: autoload-cache. Should be switchable
