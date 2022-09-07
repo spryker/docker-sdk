@@ -389,3 +389,14 @@ $config[SchedulerJenkinsConstants::JENKINS_CONFIGURATION] = [
 ];
 ...
 ```
+
+**when**
+Assets install error 
+```bash
+line 1: run-s: not found
+```
+
+**then**
+1. ensure you are using latest docker-sdk and spryker/php image.
+2. run `docker/sdk pull`
+3. run `docker/sdk boot {{your deploy file}} && docker/sdk up --build`
