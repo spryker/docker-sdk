@@ -37,7 +37,7 @@ Follow the steps to install and configure the required software:
 
 5. [Development mode](../02-installation-guides/01-choosing-an-installation-mode.md#development-mode): Install Mutagen:
 ```shell
-brew install mutagen-io/mutagen/mutagen-beta
+brew list | grep mutagen | xargs  brew remove && brew install mutagen-io/mutagen/mutagen mutagen-io/mutagen/mutagen-compose && mutagen daemon stop && mutagen daemon start
 ```
 
 ## Next steps
