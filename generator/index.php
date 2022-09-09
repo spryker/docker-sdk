@@ -260,9 +260,14 @@ function mapBackendEndpointsWithFallbackZed(array $endpointMap): array
 
     foreach ($zedApplicationsToCheck as $zedApplicationToCheck) {
         foreach ($endpointMap as $store => $storeEndpointMap) {
+            if (!array_key_exists(ZED_APP, $storeEndpointMap)) {
+                continue;
+            }
+
             if (array_key_exists($zedApplicationToCheck, $storeEndpointMap)) {
                 continue;
             }
+
             $endpointMap[$store][$zedApplicationToCheck] = $storeEndpointMap[ZED_APP];
         }
     }
@@ -346,13 +351,9 @@ foreach ($projectData['groups'] ?? [] as $groupName => $groupData) {
                 $projectData['_testing']['services'][$endpointData['store']][$applicationData['application']] = $services;
             }
 
-            if ($applicationData['application'] === ZED_APP
-                || $applicationData['application'] === BACKEND_GATEWAY_APP
-                || $applicationData['application'] === BACKOFFICE_APP
-                || $applicationData['application'] === MERCHANT_PORTAL
-            ) {
+            $envVarEncoder->setIsActive(true);
 
-                $envVarEncoder->setIsActive(true);
+            if (array_key_exists('store', $endpointData)) {
                 file_put_contents(
                     $deploymentDir . DS . 'env' . DS . 'cli' . DS . strtolower($endpointData['store']) . '.env',
                     $twig->render('env/cli/store.env.twig', [
@@ -382,8 +383,9 @@ foreach ($projectData['groups'] ?? [] as $groupName => $groupData) {
                         'endpointMap' => $endpointMap,
                     ])
                 );
-                $envVarEncoder->setIsActive(false);
             }
+
+            $envVarEncoder->setIsActive(false);
         }
     }
 }
