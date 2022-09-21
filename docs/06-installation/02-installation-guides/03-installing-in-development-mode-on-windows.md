@@ -46,7 +46,7 @@ Make sure that you are in the correct folder by running the `pwd` command.
 6. In `deploy.dev.yml`, define `image:` with the PHP image compatible with the current release of the Demo Shop:
 
 ```yaml
-image: spryker/php:7.3-alpine3.12
+image: spryker/php:7.4-alpine3.16
 ```
 
 7. Clone the Docker SDK repository:
@@ -55,11 +55,11 @@ git clone https://github.com/spryker/docker-sdk.git --single-branch docker
 ```
 
 :::(Warning) (Verification)
-Make sure `docker 18.09.1+` and `docker-compose 1.23+` are installed:
+Make sure `docker 18.09.1+` and `docker compose 2+` are installed:
 
 ```bash
 $ docker version
-$ docker-compose --version
+$ docker compose version
 ```
 :::
 
