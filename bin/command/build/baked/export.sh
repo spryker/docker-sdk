@@ -16,11 +16,12 @@ function Command::export() {
     local subCommand=''
     local tag=${SPRYKER_DOCKER_TAG}
     local destinationPath='./'
+    local pushDestination=''
 
     subCommand=${1}
     shift || true
 
-    while getopts "t:p:" opt; do
+    while getopts "t:p:d:" opt; do
         case "${opt}" in
             t)
                 tag=${OPTARG}
@@ -28,6 +29,17 @@ function Command::export() {
             p)
                 # Deprecated
                 destinationPath=${OPTARG}
+                ;;
+            d)
+                pushDestination=${OPTARG}
+                local pushDestinationPath="sdk/images/baked/${pushDestination}.sh"
+                local pathToFile="${DEPLOYMENT_PATH}/bin/${pushDestinationPath}"
+                if [ ! -f "${pathToFile}" ]; then
+                    Console::error "\nUnknown export images destination - '${OPTARG}'."
+                    exit 1
+                fi
+
+                import ${pushDestinationPath}
                 ;;
             # Unknown option specified
             \?)
@@ -58,12 +70,20 @@ function Command::export() {
             Assets::export "${tag}" "${destinationPath}"
             ;;
         image | images)
+            Console::verbose "${INFO}Build and export images${NC}"
             Images::buildApplication --force
             Images::tagApplications "${tag}"
             Assets::build --force
             Images::buildFrontend --force
             Images::tagFrontend "${tag}"
-            Images::printAll "${tag}"
+
+            if [ -n "${pushDestination}" ]; then
+                Images::push "${tag}"
+            fi
+
+            if [ -z "${pushDestination}" ]; then
+                Images::printAll "${tag}"
+            fi
             ;;
         *)
             Console::error "Unknown export '${subCommand}' is occurred. No action. Usage: ${HELP_SCR}${SELF_SCRIPT} export images [-t <tag>]" >&2

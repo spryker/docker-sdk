@@ -14,7 +14,7 @@ Review the minimum system requirements in the table:
 
 ## Installing and configuring required software
 Follow the steps to install and configure the required software:
-1. Download and install [Docker](https://docs.docker.com/install/linux/docker-ce/ubuntu/) for Linux.
+1. Download and install [Docker](https://docs.docker.com/engine/install/ubuntu/#installation-methods) for Linux.
 @(Info)()(Signup for Docker Hub is not required.)
 
 2. Enable BuildKit by creating or updating `/etc/docker/daemon.json`:
@@ -30,17 +30,20 @@ Follow the steps to install and configure the required software:
 ```
 3. Restart Docker:
 ```shell
-/etc/init.d/docker restart
+sudo service docker start
 ```
 4. Optional: Configure the `docker` group to manage Docker as a non-root user. See [Manage Docker as a non-root user](https://docs.docker.com/engine/install/linux-postinstall/#manage-docker-as-a-non-root-user) for configuration instructions.
 
 5. Install Docker-compose:
 ```shell
-sudo curl -L "https://github.com/docker/compose/releases/download/1.24.0/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+DOCKER_CONFIG=${DOCKER_CONFIG:-$HOME/.docker}
+mkdir -p $DOCKER_CONFIG/cli-plugins
+curl -SL https://github.com/docker/compose/releases/download/v2.10.2/docker-compose-linux-x86_64 -o $DOCKER_CONFIG/cli-plugins/docker-compose
+chmod +x $DOCKER_CONFIG/cli-plugins/docker-compose
 ```
-6. Apply executable permissions to the binary:
+6. Check Docker-compose version:
 ```shell
-sudo chmod +x /usr/local/bin/docker-compose
+docker compose version
 ```
 
 You've installed and configured the required software.

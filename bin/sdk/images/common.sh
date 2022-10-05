@@ -29,6 +29,7 @@ function Images::_buildApp() {
 
     local -a sshArgument=()
     local folder=${1}
+    local withPushImages=${2:-${FALSE}}
     local baseAppImage="${SPRYKER_DOCKER_PREFIX}_base_app:${SPRYKER_DOCKER_TAG}"
     local appImage="${SPRYKER_DOCKER_PREFIX}_app:${SPRYKER_DOCKER_TAG}"
     local localAppImage="${SPRYKER_DOCKER_PREFIX}_local_app:${SPRYKER_DOCKER_TAG}"
@@ -132,6 +133,17 @@ function Images::_buildApp() {
             --progress="${PROGRESS_TYPE}" \
             --build-arg "SPRYKER_PARENT_IMAGE=${cliImage}" \
             "${DEPLOYMENT_PATH}/context" 1>&2
+    fi
+
+    if [ "${withPushImages}" == "${TRUE}" ]; then
+        local jenkinsImage="${SPRYKER_DOCKER_PREFIX}_jenkins:${SPRYKER_DOCKER_TAG}"
+
+        docker build \
+            -t "${jenkinsImage}" \
+            -f "${DEPLOYMENT_PATH}/images/common/services/jenkins/export/Dockerfile" \
+            --progress="${PROGRESS_TYPE}" \
+            --build-arg "SPRYKER_PARENT_IMAGE=${appImage}" \
+            "${DEPLOYMENT_PATH}/" 1>&2
     fi
 
     Registry::Trap::releaseExitHook 'removeBuildSecrets'
