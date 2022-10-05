@@ -4,6 +4,7 @@ This document describes configuration options of the services shipped with Spryk
 
 *     [Database](#database)
 *     [ElasticSearch](#elasticsearch)
+*     [OpenSearch](#opensearch)
 *     [Kibana UI](#kibana-ui)
 *     [RabbitMQ](#rabbitmq)
 *     [Swagger UI](#swagger-ui)
@@ -144,6 +145,22 @@ services:
         endpoints:
             localhost:9200
                 protocol: tcp
+```
+
+## OpenSearch
+
+[OpenSearch](https://opensearch.org/docs/1.3/) is a search engine based on the Lucene library. It provides a distributed, multitenant-capable full-text search engine with an HTTP web interface and schema-free JSON documents.
+
+### Configuration
+
+Adjust `deploy.*.yml` in the `services:` section to open the port used for accessing OpenSearch:
+```yaml
+services:
+    search:
+        engine: opensearch
+        endpoints:
+            localhost:9200
+              protocol: tcp
 ```
 
 ## Kibana UI
