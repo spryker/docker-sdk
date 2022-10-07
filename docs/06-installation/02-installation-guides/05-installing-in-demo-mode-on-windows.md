@@ -45,11 +45,11 @@ Make sure that you are in the correct folder by running the `pwd` command.
 git clone git@github.com:spryker/docker-sdk.git --single-branch docker
 ```
 :::(Warning) (Verification)
-Make sure `docker 18.09.1+` and `docker-compose 1.23+` are installed:
+Make sure `docker 18.09.1+` and `docker compose 2+` are installed:
 
 ```bash
 $ docker version
-$ docker-compose --version
+$ docker compose version
 ```
 :::
 

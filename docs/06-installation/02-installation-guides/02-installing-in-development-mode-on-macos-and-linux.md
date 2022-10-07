@@ -47,7 +47,7 @@ Make sure that you are in the correct folder by running the `pwd` command.
 5. In `deploy.dev.yml`, define `image:` with the PHP image compatible with the current release of the Demo Shop:
 
 ```yaml
-image: spryker/php:7.3-alpine3.12
+image: spryker/php:7.4-alpine3.16
 ```
 
 6. Clone the Docker SDK repository:
@@ -56,16 +56,16 @@ git clone https://github.com/spryker/docker-sdk.git --single-branch docker
 ```
 
 :::(Warning) (Verification)
-Make sure `docker 18.09.1+` and `docker-compose 1.23+` are installed:
+Make sure `docker 18.09.1+` and `docker compose 2+` are installed:
 
 ```bash
 $ docker version
-$ docker-compose --version
+$ docker compose version
 ```
 :::
 
 7. Bootstrap local docker setup:
-   
+
 ```bash
 docker/sdk bootstrap deploy.dev.yml
 ```
@@ -80,7 +80,7 @@ To double-check if there are any instructions, run `docker/sdk install`.
 :::
 
 9. Build and start the instance:
-    
+
 ```bash
 docker/sdk up
 ```
@@ -92,7 +92,7 @@ docker/sdk up
 To ensure that the installation is successful, make sure you can access the configured endpoints from the Deploy file. See [Deploy file reference - 1.0](../../99-deploy.file.reference.v1.md) to learn about the Deploy file.
 
 :::(Info) (RabbitMQ UI credentials)
-To access RabbitMQ UI, use `spryker` as a username and `secret` as a password. You can adjust the credentials in `deploy.yml`. 
+To access RabbitMQ UI, use `spryker` as a username and `secret` as a password. You can adjust the credentials in `deploy.yml`.
 :::
 
 ## Getting the list of useful commands
