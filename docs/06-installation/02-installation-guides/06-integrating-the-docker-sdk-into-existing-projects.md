@@ -66,11 +66,11 @@ Follow the steps to install the Docker SDK:
 git clone https://github.com/spryker/docker-sdk.git ./docker
 ```
 :::(Warning) (Verification)
-Make sure `docker 18.09.1+` and `docker-compose 1.23+` are installed:
+Make sure `docker 18.09.1+` and `docker compose 2+` are installed:
 
 ```bash
 $ docker version
-$ docker-compose --version
+$ docker compose version
 ```
 :::
 
