@@ -89,7 +89,7 @@ services:
         engine: chromedriver
 ```        
 
-See [webdriver:](99-deploy.file.reference.v1.md#webdriver-) to learn more about webdriver configuration in the deploy file.
+See [webdriver:](../07-deploy-file/02-deploy.file.reference.v1.md#webdriver-) to learn more about webdriver configuration in the deploy file.
 
 ## Configure Codeception
 
