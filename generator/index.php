@@ -155,6 +155,19 @@ const ENTRY_POINTS = [
     GLUE_BACKEND => 'GlueBackend',
 ];
 
+const DEBIAN_DISTRO_NAME = 'bullseye';
+const ALPINE_DISTRO_NAME = 'alpine';
+
+const SPRYKER_NODE_IMAGE_DISTRO_ENV_NAME = 'SPRYKER_NODE_IMAGE_DISTRO';
+const SPRYKER_NODE_IMAGE_VERSION_ENV_NAME = 'SPRYKER_NODE_IMAGE_VERSION';
+const SPRYKER_NPM_VERSION_ENV_NAME = 'SPRYKER_NPM_VERSION';
+
+const DEFAULT_NODE_VERSION = 12;
+const DEFAULT_NODE_DISTRO = ALPINE_DISTRO_NAME;
+const DEFAULT_NPM_VERSION = 6;
+
+$projectData['_node_npm_config'] = buildNodeJsNpmBuildConfig($projectData);
+
 foreach ($projectData['groups'] ?? [] as $groupName => $groupData) {
     foreach ($groupData['applications'] ?? [] as $applicationName => $applicationData) {
         foreach ($applicationData['endpoints'] ?? [] as $endpoint => $endpointData) {
@@ -246,9 +259,14 @@ function mapBackendEndpointsWithFallbackZed(array $endpointMap): array
 
     foreach ($zedApplicationsToCheck as $zedApplicationToCheck) {
         foreach ($endpointMap as $store => $storeEndpointMap) {
+            if (!array_key_exists(ZED_APP, $storeEndpointMap)) {
+                continue;
+            }
+
             if (array_key_exists($zedApplicationToCheck, $storeEndpointMap)) {
                 continue;
             }
+
             $endpointMap[$store][$zedApplicationToCheck] = $storeEndpointMap[ZED_APP];
         }
     }
@@ -332,13 +350,9 @@ foreach ($projectData['groups'] ?? [] as $groupName => $groupData) {
                 $projectData['_testing']['services'][$endpointData['store']][$applicationData['application']] = $services;
             }
 
-            if ($applicationData['application'] === ZED_APP
-                || $applicationData['application'] === BACKEND_GATEWAY_APP
-                || $applicationData['application'] === BACKOFFICE_APP
-                || $applicationData['application'] === MERCHANT_PORTAL
-            ) {
+            $envVarEncoder->setIsActive(true);
 
-                $envVarEncoder->setIsActive(true);
+            if (array_key_exists('store', $endpointData)) {
                 file_put_contents(
                     $deploymentDir . DS . 'env' . DS . 'cli' . DS . strtolower($endpointData['store']) . '.env',
                     $twig->render('env/cli/store.env.twig', [
@@ -368,8 +382,9 @@ foreach ($projectData['groups'] ?? [] as $groupName => $groupData) {
                         'endpointMap' => $endpointMap,
                     ])
                 );
-                $envVarEncoder->setIsActive(false);
             }
+
+            $envVarEncoder->setIsActive(false);
         }
     }
 }
@@ -1237,6 +1252,7 @@ function buildSecrets(string $deploymentDir): array
     $data['SPRYKER_OAUTH_CLIENT_IDENTIFIER'] = 'frontend';
     $data['SPRYKER_OAUTH_CLIENT_SECRET'] = generateToken(48);
     $data['SPRYKER_ZED_REQUEST_TOKEN'] = generateToken(80);
+    $data['SPRYKER_URI_SIGNER_SECRET_KEY'] = generateToken(80);
 
     return $data;
 }
@@ -1517,7 +1533,7 @@ function validateServiceVersions(array $projectData): array
 
         $service = $services[$serviceName];
         $serviceEngine = $service['engine'] ?? null;
-        $serviceVersion = $service['version'] ?? 'default';
+        $serviceVersion = (string)($service['version'] ?? 'default');
 
         if($serviceEngine == null || !array_key_exists($serviceEngine, $serviceEngines)) {
             continue;
@@ -1554,20 +1570,6 @@ function getUnsupportedArmServiceMap(): array
         'webdriver' => [
             'phantomjs' => ['*'],
         ],
-        'search' => [
-            'elastic' => [
-                '5.6' => '5.6',
-                '6.8' => '6.8',
-                'default' => '5.6',
-            ],
-        ],
-        'kibana' => [
-            'kibana' => [
-                '5.6' => '5.6',
-                '6.8' => '6.8',
-                'default' => '5.6',
-            ],
-        ],
         'scheduler' => [
             'jenkins' => [
                 '2.176' => '2.176',
@@ -1592,4 +1594,56 @@ function isArmArchitecture(): bool
     $currentArchitecture = php_uname('m');
 
     return in_array($currentArchitecture, $possibleValue);
+}
+
+/**
+ * @param array $projectData
+ *
+ * @return array
+ */
+function buildNodeJsNpmBuildConfig(array $projectData): array
+{
+    $imageName = $projectData['image']['tag'];
+    $nodejsConfig = $projectData['image']['node'] ?? [];
+
+    return [
+        SPRYKER_NODE_IMAGE_DISTRO_ENV_NAME => getNodeDistroName($nodejsConfig, $imageName),
+        SPRYKER_NODE_IMAGE_VERSION_ENV_NAME => array_key_exists('version', $nodejsConfig)
+            ? (int)$nodejsConfig['version']
+            : DEFAULT_NODE_VERSION,
+        SPRYKER_NPM_VERSION_ENV_NAME => array_key_exists('npm', $nodejsConfig)
+            ? (int)$nodejsConfig['npm']
+            : DEFAULT_NPM_VERSION,
+    ];
+}
+
+/**
+ * @param array $nodejsConfig
+ * @param string $imageName
+ *
+ * @return string
+ */
+function getNodeDistroName(array $nodejsConfig, string $imageName): string
+{
+    if (array_key_exists('distro', $nodejsConfig)) {
+        if ($nodejsConfig['distro'] == 'debian') {
+            return DEBIAN_DISTRO_NAME;
+        }
+
+        if ($nodejsConfig['distro'] == 'alpine') {
+            return ALPINE_DISTRO_NAME;
+        }
+    }
+
+    $imageData = explode('/', $imageName);
+
+    if ($imageData[0] !== 'spryker') {
+        return DEFAULT_NODE_DISTRO;
+    }
+
+    if (str_contains($imageData[1], 'debian')) {
+        return DEBIAN_DISTRO_NAME;
+    }
+
+    return ALPINE_DISTRO_NAME;
 }
