@@ -2,7 +2,7 @@
 
 function Platform::getPlatform() {
     local uname=$(uname)
-    if [ "${uname}" == "Linux" ] && [ "$(uname -a | grep -c -v -i Microsoft | sed 's/^ *//')" -eq 1 ]; then
+    if [ "${uname}" == "Linux" ] && [ "$(uname -a | grep -c -v Microsoft | sed 's/^ *//')" -eq 1 ]; then
         echo "linux"
         return 0
     fi
