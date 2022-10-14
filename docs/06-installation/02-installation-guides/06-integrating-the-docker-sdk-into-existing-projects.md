@@ -10,8 +10,8 @@ To start integrating Docker into your project:
 1. Follow the one of the Docker installation prerequisites:
 
 * [Installing Docker prerequisites on MacOS](../01-installation-prerequisites/01-installing-docker-prerequisites-on-macos.md)
-* [Installing Docker prerequisites on Linux](../01-installation-prerequisites/01-installing-docker-prerequisites-on-linux.md)
-* [Installing Docker prerequisites on Windows](../01-installation-prerequisites/01-installing-docker-prerequisites-on-windows.md)
+* [Installing Docker prerequisites on Linux](../01-installation-prerequisites/02-installing-docker-prerequisites-on-linux.md)
+* [Installing Docker prerequisites on Windows](../01-installation-prerequisites/03-installing-docker-prerequisites-on-windows.md)
 2. Integrate the [Spryker Core](https://documentation.spryker.com/docs/spryker-core-feature-integration) feature into your project.
 
 ## Set up .dockerignore
@@ -44,7 +44,7 @@ Make sure to adjust the configuration for each separate store. See [config_defau
 
 ## Set up a Deploy file
 
-Set up a [Deploy file](07-deploy-file/02-deploy-file-reference.v1.md) per your infruscturcure requirements using the examples in the table:
+Set up a [Deploy file](../../07-deploy-file/02-deploy.file.reference.v1.md) per your infruscturcure requirements using the examples in the table:
 
 | Development mode | Demo mode |
 | --- | --- |
@@ -66,11 +66,11 @@ Follow the steps to install the Docker SDK:
 git clone https://github.com/spryker/docker-sdk.git ./docker
 ```
 :::(Warning) (Verification)
-Make sure `docker 18.09.1+` and `docker-compose 1.23+` are installed:
+Make sure `docker 18.09.1+` and `docker compose 2+` are installed:
 
 ```bash
 $ docker version
-$ docker-compose --version
+$ docker compose version
 ```
 :::
 
@@ -95,7 +95,7 @@ Ensure that, in the `hosts` file in the local environment, all the domains from 
 
 ## Endpoints
 
-To ensure that the installation is successful, make sure you can access the configured endpoints from the Deploy file. See [Deploy file reference - 1.0](07-deploy-file/02-deploy-file-reference.v1.md) to learn about the Deploy file.
+To ensure that the installation is successful, make sure you can access the configured endpoints from the Deploy file. See [Deploy file reference - 1.0](../../07-deploy-file/02-deploy.file.reference.v1.md) to learn about the Deploy file.
 
 :::(Info) (RabbitMQ UI credentials)
 To access RabbitMQ UI, use `spryker` as a username and `secret` as a password. You can adjust the credentials in `deploy.yml`.
@@ -109,9 +109,9 @@ To get the full and up-to-date list of commands, run `docker/sdk help`.
 
 ## Next steps
 
-* [Troubleshooting](../../troubleshooting.md)
-* [Configuring debugging](../../02-development-usage/05-configuring-debugging.md)
-* [Deploy File Reference - 1.0](../../99-deploy.file.reference.v1.md)
+* [Troubleshooting](../../09-troubleshooting.md)
+* [Configuring debugging](../../02-development/05-configuring-debugging.md)
+* [Deploy File Reference - 1.0](../../07-deploy-file/02-deploy.file.reference.v1.md)
 * [Configuring services](../../06-configuring-services.md)
 * [Setting up a self-signed SSL certificate](https://documentation.spryker.com/docs/setting-up-a-self-signed-ssl-certificate)
 * [Additional DevOPS guidelines](https://documentation.spryker.com/docs/additional-devops-guidelines)
