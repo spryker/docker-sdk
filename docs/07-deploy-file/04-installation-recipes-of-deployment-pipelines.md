@@ -1,6 +1,6 @@
-## Installation recipes of deployment pipelines
+# Installation recipes of deployment pipelines
 
-Installation recipes contain the commands that are run during the [install stage of deployment pipelines](https://docs.spryker.com/docs/cloud/dev/spryker-cloud-commerce-os/configure-deployment-pipelines/deployment-pipelines.html#install-stage). The recipes are located in ***config/install/***.  For example, this is how they look in the [B2C Demo Shop](https://github.com/spryker-shop/b2c-demo-shop/tree/master/config/install):
+Installation recipes contain the commands that are run during the [install stage of deployment pipelines](https://docs.spryker.com/docs/cloud/dev/spryker-cloud-commerce-os/configure-deployment-pipelines/deployment-pipelines.html#install-stage). The recipes are located in `config/install/`.  For example, this is how they look in the [B2C Demo Shop](https://github.com/spryker-shop/b2c-demo-shop/tree/master/config/install):
 
 ```
 config
@@ -31,39 +31,41 @@ pipeline: 'docker'
 
 There can be multiple recipes for the same project. For example, there can be recipes for environments, like local, stage, or prod, and for different purposes, like for CI, development, or testing.
 
-### Recipe file structure
+## Recipe file structure
+
 A default recipe file can be split into four logical blocks:
 
 1) Build sections:
 
-    - ***build***: build a pre-generated code base like transfer, cache, and schema.
-    - ***build-production***: build a pre-generated code base specific to the production environment.
-    - ***build-development***: build a pre-generated code base specific to the development environment.
+    - `build`: build a pre-generated code base like transfer, cache, and schema.
+    - `build-production`: build a pre-generated code base specific to the production environment.
+    - `build-development`: build a pre-generated code base specific to the development environment.
 
 2) Assets sections:
 
-    - ***build-static***: install frontend dependencies.
-    - ***build-static-production***: install the dependencies specific to the production environment.
-    - ***build-static-development***: install the dependencies specific to the development environment.
+    - `build-static`: install frontend dependencies.
+    - `build-static-production`: install the dependencies specific to the production environment.
+    - `build-static-development`: install the dependencies specific to the development environment.
 
 3) Data sections:
 
-    - ***init-storage***: initialize the common storage.
-    - ***init-storages-per-region***: initialize, migrate, and validate storages per region.
-    - ***init-storages-per-store***: initialize storages per store.
-    - ***clean-storage***: clean storage.
-    - ***demodata***: import and prepare demo data.
+    - `init-storage`: initialize the common storage.
+    - `init-storages-per-region`: initialize, migrate, and validate storages per region.
+    - `init-storages-per-store`: initialize storages per store.
+    - `clean-storage`: clean storage.
+    - `demodata`: import and prepare demo data.
 
 4) Job sections:
 
-    - ***scheduler-setup***:  set up the scheduler.
-    - ***scheduler-suspend***: suspend the scheduler.
-    - ***scheduler-clean***: clean the scheduler.
+    - `scheduler-setup`:  set up the scheduler.
+    - `scheduler-suspend`: suspend the scheduler.
+    - `scheduler-clean`: clean the scheduler.
 
 These sections are part of the [Docker SDK](https://docs.spryker.com/docs/scos/dev/the-docker-sdk/202204.0/the-docker-sdk.html) and cannot be renamed.
 
-### Customization of recipes
-You can add custom commands to any default sections as follows:
+## Customization of recipes
+
+You can add custom commands to default sections as follows:
 
 ```shell
 build-development:
@@ -72,7 +74,7 @@ build-development:
     ...
 ```
 
-To hide the output of a command, use the ***excluded*** parameter:
+To hide the output of a command, use the `excluded` parameter:
 
 ```shell
 sections:
@@ -91,10 +93,11 @@ jenkins-up:
         stores: true
 ```
 
-For examples, see [b2c-demo-shop](https://github.com/spryker-shop/b2c-demo-shop/blob/master/config/install/development.yml)
+For examples, see [b2c-demo-shop](https://github.com/spryker-shop/b2c-demo-shop/blob/master/config/install/development.yml).
 
-### Staging and Production environment recipes
-For Staging and Production environments, there are [dedicated installation recipes](https://github.com/spryker-shop/b2c-demo-shop/tree/master/config/install/EU) with custom sections:
+## Staging and Production environment recipes
+
+For [Staging and Production](https://docs.spryker.com/docs/cloud/dev/spryker-cloud-commerce-os/environments-overview.html) environments, there are [dedicated installation recipes](https://github.com/spryker-shop/b2c-demo-shop/tree/master/config/install/EU) with custom sections:
 
 - destructive.yml
 - pre-deploy.yml
@@ -111,11 +114,12 @@ image:
         SPRYKER_HOOK_DESTRUCTIVE_INSTALL: 'vendor/bin/install -r EU/destructive --no-ansi -vvv'
 ```
 
-Production recipe is used in a ***Normal deploy*** pipeline that includes all the stages of a complete CI/CD flow. This pipeline does not perform any dangerous data manipulations like database cleanup or scheduler reset. Use it for production deployments.
+Production recipe is used in a `Normal deploy` pipeline that includes all the stages of a complete CI/CD flow. This pipeline does not perform any dangerous data manipulations like database cleanup or scheduler reset. Use it for production deployments.
 
-Destructive recipe is used in a ***Destructive deploy*** pipeline that includes all the stages of a complete CI/CD flow. This pipeline resets all the data in applications. Use it for initial or non-production deployments.
+Destructive recipe is used in a `Destructive deploy` pipeline that includes all the stages of a complete CI/CD flow. This pipeline resets all the data in applications. Use it for initial or non-production deployments.
 
-### Run recipes manually
+## Run recipes manually
+
 To run a recipe manually, run the command:
 
 ```shell
