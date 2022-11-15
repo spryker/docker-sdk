@@ -9,7 +9,7 @@ http_response=$(curl --request POST -LsS \
     -w "%{http_code}" \
     --data "APPLICATION_STORE='${APPLICATION_STORE}' COMMAND='${COMMAND}' cli.sh" \
     --max-time 1000 \
-    --url "http://cli:9000/console")
+    --url "http://${PROJECT_NAME_PREFIX}cli:9000/console")
 
 if [ "${http_response}" != "200" ]; then
     exit 1

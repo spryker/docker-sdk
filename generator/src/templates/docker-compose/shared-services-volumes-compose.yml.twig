@@ -1,0 +1,5 @@
+{% for serviceName, serviceData in sharedServices %}
+  {{ serviceName }}-{{ serviceData['engine'] }}-data:
+    name: {{ serviceName }}-{{ serviceData['engine'] }}-data
+    external: false
+{% endfor %}

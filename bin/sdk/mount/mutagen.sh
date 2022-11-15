@@ -258,6 +258,18 @@ function Mount::Mutagen::checkMutagenVersion() {
     fi
 }
 
+function Mount::dropVolumes() {
+  local volumeNames=($(docker volume ls --filter "name=${SPRYKER_PROJECT_NAME}" --format "{{.Name}}"))
+
+  for volumeName in "${volumeNames[@]}" ; do
+    if [ -z "${volumeName##*'_data_sync'*}" ] || [ -z "${volumeName##*'_logs'*}" ] || [ -z "${volumeName##*'_cli_history'*}" ] ;then
+      continue
+    fi
+
+    docker volume rm "${volumeName}"
+  done
+}
+
 DOCKER_COMPOSE_SUBSTITUTE="$(Mount::Mutagen::getDockerComposeSubstitute)"
 
 Registry::Flow::addBeforeUp 'Mount::Mutagen::beforeUp'

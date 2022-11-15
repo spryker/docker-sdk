@@ -2,6 +2,9 @@
 
 use DeployFileGenerator\DeployFileGeneratorFactory;
 use DeployFileGenerator\Transfer\DeployFileTransfer;
+use DockerSdk\ConstantBuilder\DockerSdkBashConstantBuilder;
+use DockerSdk\DockerSdkConstants;
+use DockerSdk\DockerSdkFactory;
 use Spatie\Url\Url;
 use Symfony\Component\Yaml\Parser;
 use Twig\Environment;
@@ -13,7 +16,9 @@ define('DS', DIRECTORY_SEPARATOR);
 define('APPLICATION_SOURCE_DIR', __DIR__ . DS . 'src');
 include_once __DIR__ . DS . 'vendor' . DS . 'autoload.php';
 
-$deploymentDir = '/data/deployment';
+$deploymentDir = getenv('SPRYKER_DOCKER_SDK_INTERNAL_DEPLOYMENT_DIR');
+generateDockerSdkConstantsPhpFile($deploymentDir);
+
 $projectYaml = buildProjectYaml($deploymentDir . '/project.yml');
 
 if ($projectYaml == '') {
@@ -129,7 +134,6 @@ $primal = [];
 $projectData['_entryPoints'] = [];
 $projectData['_endpointMap'] = [];
 $projectData = extendProjectDataWithKeyValueRegionNamespaces($projectData);
-$projectData['_storeSpecific'] = getStoreSpecific($projectData);
 $debugPortIndex = 10000;
 $projectData['_endpointDebugMap'] = [];
 
@@ -269,11 +273,25 @@ function mapBackendEndpointsWithFallbackZed(array $endpointMap): array
     return $endpointMap;
 }
 
+$factory = new DockerSdkFactory($deploymentDir);
+$config = $factory->getDockerSdkConfig();
+$projectData = $factory->createSharedServicesBuilder()->build($projectData);
+$projectData = $factory->createGatewayBuilder()->build($projectData);
+$projectData = $factory->createMutagenBuilder()->build($projectData);
+$projectData = $factory->createRedisDataBuilderBuilder()->build($projectData);
+$projectData = $factory->createProjectDataBuilder()->build($projectData);
+
+$projectsData = $factory->createJsonReader()->read($config->getProjectDataFilePath());
+$gatewayData = $factory->createJsonReader()->read($config->getGatewayDataFilePath());
+$sharedServices = $factory->createJsonReader()->read($config->getDockerComposeSharedServiceDataFilePath());
+$mutagenData = $factory->createJsonReader()->read($config->getDockerComposeSyncDataFilePath());
+
+$projectData['_storeSpecific'] = getStoreSpecific($projectData);
+// todo: complex logic
 foreach ($projectData['groups'] ?? [] as $groupName => $groupData) {
     foreach ($groupData['applications'] ?? [] as $applicationName => $applicationData) {
         if ($applicationData['application'] !== 'static') {
             $projectData['_applications'][] = $applicationName;
-
             file_put_contents(
                 $deploymentDir . DS . 'env' . DS . $applicationName . '.env',
                 $twig->render(sprintf('env/application/%s.env.twig', $applicationData['application']), [
@@ -307,7 +325,6 @@ foreach ($projectData['groups'] ?? [] as $groupName => $groupData) {
         }
 
         foreach ($applicationData['endpoints'] ?? [] as $endpoint => $endpointData) {
-
             $host = strtok($endpoint, ':');
             $frontend[$host] = [
                 'zone' => getFrontendZoneByDomainLevel($host),
@@ -428,16 +445,29 @@ foreach ($projectData['services'] ?? [] as $serviceName => $serviceData) {
 }
 
 file_put_contents(
+    $deploymentDir . DS . 'context' . DS . 'jenkins' . DS . 'spryker.sh',
+    $twig->render('context/jenkins/spryker.sh.twig', $projectData)
+);
+
+// frontend
+file_put_contents(
     $deploymentDir . DS . 'context' . DS . 'nginx' . DS . 'conf.d' . DS . 'frontend.default.conf.tmpl',
     $twig->render('nginx/conf.d/frontend.default.conf.twig', $projectData)
 );
+// gateway
 file_put_contents(
     $deploymentDir . DS . 'context' . DS . 'nginx' . DS . 'conf.d' . DS . 'gateway.default.conf',
-    $twig->render('nginx/conf.d/gateway.default.conf.twig', $projectData)
+    $twig->render('nginx/conf.d/gateway.default.conf.twig', [
+        'projectsData' => $projectsData,
+        'sharedServices' => $sharedServices,
+    ])
 );
 file_put_contents(
     $deploymentDir . DS . 'context' . DS . 'nginx' . DS . 'stream.d' . DS . 'gateway.default.conf',
-    $twig->render('nginx/stream.d/gateway.default.conf.twig', $projectData)
+    $twig->render('nginx/stream.d/gateway.default.conf.twig', [
+        'projectsData' => $projectsData,
+        'sharedServices' => $sharedServices,
+    ])
 );
 file_put_contents(
     $deploymentDir . DS . 'context' . DS . 'nginx' . DS . 'conf.d' . DS . 'debug.default.conf',
@@ -490,7 +520,13 @@ unlink($deploymentDir . DS . 'images' . DS . 'common' . DS . 'application' . DS 
 
 file_put_contents(
     $deploymentDir . DS . 'docker-compose.yml',
-    $twig->render('docker-compose.yml.twig', $projectData)
+    $twig->render('docker-compose.yml.twig', [
+        'projectsData' => $projectsData,
+        'gatewayData' => $gatewayData,
+        'sharedServices' => $sharedServices,
+        'mutagenData' => $mutagenData,
+        '_internal_project_name' => $config->getInternalProjectName()
+    ])
 );
 
 $envVarEncoder->setIsActive(true);
@@ -1644,4 +1680,78 @@ function getNodeDistroName(array $nodejsConfig, string $imageName): string
     }
 
     return ALPINE_DISTRO_NAME;
+}
+
+function generateDockerSdkConstantsPhpFile(string $deploymentDir): void
+{
+//    $additionalDockerSdkConstant = getAdditionalConstants();
+    $additionalDockerSdkConstant = [
+        'GATEWAY_HOSTS_KEY' => 'hosts',
+        'GATEWAY_PORTS_KEY' => 'ports',
+        'MUTAGEN_DATA_PROJECTS_KEY' => 'projects',
+        'MUTAGEN_DATA_PROJECT_NAME_KEY' => 'project_name',
+        'MUTAGEN_DATA_PROJECT_PATH_KEY' => 'project_path',
+        'MUTAGEN_DATA_SYNC_IGNORE_KEY' => 'sync_ignore',
+        'PROJECT_DATA_DEPLOYMENT_PATH_KEY' => 'deployment_path',
+        'PROJECT_DATA_GROUPS_APPLICATIONS_APPLICATION_DEPLOYMENT_PATH_KEY' => 'deployment_path',
+        'PROJECT_DATA_GROUPS_APPLICATIONS_APPLICATION_NAME_KEY' => '_applicationName',
+        'PROJECT_DATA_GROUPS_APPLICATIONS_KEY' => 'applications',
+        'PROJECT_DATA_GROUPS_KEY' => 'groups',
+        'PROJECT_DATA_HOSTS_KEY' => '_hosts',
+        'PROJECT_DATA_INTERNAL_PROJECT_NAME_KEY' => '_internal_project_name',
+        'PROJECT_DATA_MOUNT_MODE_KEY' => '_mountMode',
+        'PROJECT_DATA_PORTS_KEY' => '_ports',
+        'PROJECT_DATA_PROJECT_NAME_KEY' => '_project_name',
+        'PROJECT_DATA_PROJECT_PATH_KEY' => '_project_path', //todo: deployment-path
+        'PROJECT_DATA_REGIONS_KEY' => 'regions',
+        'PROJECT_DATA_REGIONS_SERVICES_KEY' => 'services',
+        'PROJECT_DATA_REGIONS_SERVICES_DATABASE_KEY' => 'database',
+        'PROJECT_DATA_REGIONS_SERVICES_DATABASE_DATABASE_KEY' => 'database',
+        'PROJECT_DATA_REGIONS_SERVICES_DATABASES_KEY' => 'databases',
+        'PROJECT_DATA_REGIONS_STORES_KEY' => 'stores',
+        'PROJECT_DATA_REGIONS_STORES_SERVICES_KEY' => 'services',
+        'PROJECT_DATA_REGIONS_STORES_SERVICES_BROKER_KEY' => 'broker',
+        'PROJECT_DATA_REGIONS_STORES_SERVICES_BROKER_NAMESPACE_KEY' => 'namespace',
+        'PROJECT_DATA_REGIONS_STORES_SERVICES_SEARCH_KEY' => 'search',
+        'PROJECT_DATA_REGIONS_STORES_SERVICES_SEARCH_NAMESPACE_KEY' => 'namespace',
+        'PROJECT_DATA_REGIONS_STORES_SERVICES_DATABASE_KEY' => 'database',
+        'PROJECT_DATA_REGIONS_STORES_SERVICES_DATABASE_NAME_KEY' => 'name',
+        'PROJECT_DATA_SERVICES_DEPLOYMENT_PATH_KEY' => 'deployment_path',
+        'PROJECT_DATA_SERVICES_ENDPOINTS_KEY' => 'endpoints',
+        'PROJECT_DATA_SERVICES_KEY' => 'services',
+        'PROJECT_DATA_SERVICES_PROJECT_NAME_KEY' => 'project_name',
+        'PROJECT_DATA_SERVICES_STORAGE_DATA_HOSTS_KEY' => 'hosts', //todo: rename
+        'PROJECT_DATA_SERVICES_STORAGE_DATA_KEY' => 'storageData', //todo: rename
+        'PROJECT_DATA_SERVICES_STORAGE_DATA_SERVICES_KEY' => 'services', //todo: rename
+        'PROJECT_DATA_DOCKER_KEY' => 'docker',
+        'PROJECT_DATA_DOCKER_DEBUG_KEY' => 'debug',
+        'PROJECT_DATA_DOCKER_DEBUG_XDEBUG_KEY' => 'xdebug',
+        'PROJECT_DATA_DOCKER_DEBUG_XDEBUG_ENABLED_KEY' => 'enabled',
+        'PROJECT_DATA_DEBUG_MODE_ENABLED_KEY' => '_debug_mode_enabled',
+        'PROJECT_DATA_SYNC_IGNORE_KEY' => '_syncIgnore',
+        'SHARED_SERVICES_DEPLOYMENT_PATH_KEY' => 'deployment_path',
+        'SHARED_SERVICES_ENDPOINTS_KEY' => 'endpoint',
+        'SHARED_SERVICES_SERVICE_NAME_KEY' => '_service_name',
+        'SHARED_SERVICES_PROJECT_NAME_KEY' => 'project_name',
+        'SPRYKER_DOCKER_SDK_DEPLOYMENT_DIR' => 'SPRYKER_DOCKER_SDK_DEPLOYMENT_DIR',
+    ];
+
+    $constantNameListToDelete = [
+        'TRUE',
+        'FALSE',
+    ];
+
+    $envVariableList = [
+        'SPRYKER_DOCKER_SDK_DEPLOYMENT_DIR',
+        'SPRYKER_DOCKER_SDK_INTERNAL_DEPLOYMENT_DIR',
+        'SPRYKER_PROJECT_NAME',
+        'SPRYKER_PROJECT_PATH',
+    ];
+
+    (new DockerSdkBashConstantBuilder(
+        $deploymentDir,
+        $additionalDockerSdkConstant,
+        $envVariableList,
+        $constantNameListToDelete
+    ))->buildDockerSdkConstants();
 }

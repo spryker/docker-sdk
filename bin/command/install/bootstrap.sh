@@ -68,6 +68,8 @@ function Command::bootstrap() {
     fi
     mkdir "${tmpDeploymentDir}"
 
+    Project::bootstrap "${tmpDeploymentDir}"
+
     tmpDeploymentDir="$(cd "${tmpDeploymentDir}" >/dev/null 2>&1 && pwd)"
 
     Command::bootstrap::_validateParameters
@@ -107,10 +109,16 @@ function Command::bootstrap() {
     if [ "${USER_FULL_ID%%:*}" != '0' ]; then
         userToRun=()
     fi
+
     docker run -i --rm "${userToRun[@]}" \
         -e SPRYKER_DOCKER_SDK_PLATFORM="${_PLATFORM}" \
         -e SPRYKER_DOCKER_SDK_DEPLOYMENT_DIR="${DESTINATION_DIR}" \
+        -e SPRYKER_DOCKER_SDK_INTERNAL_DEPLOYMENT_DIR="${SPRYKER_DOCKER_SDK_INTERNAL_DEPLOYMENT_DIR}" \
+        -e SPRYKER_PROJECT_NAME="${SPRYKER_PROJECT_NAME}" \
+        -e SPRYKER_PROJECT_PATH="${SPRYKER_PROJECT_PATH}" \
         -e VERBOSE="${VERBOSE}" \
+        -v "${SOURCE_DIR}/generator/src":/data/src:rw \
+        -v "${SOURCE_DIR}/generator/vendor":/data/vendor:rw \
         -v "${tmpDeploymentDir}":/data/deployment:rw \
         spryker_docker_sdk
 
@@ -142,6 +150,7 @@ function Command::bootstrap::_deploy() {
     [ ! -d "${DESTINATION_DIR}" ] && mkdir "${DESTINATION_DIR}"
     cp -R "${tmpDeploymentDir}/." "${DESTINATION_DIR}"
     rm -rf "${tmpDeploymentDir}"
+    Project::postBootstrap
 }
 
 function Command::bootstrap::_injectDeployment() {

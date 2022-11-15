@@ -3,19 +3,21 @@
 function Service::Scheduler::isInstalled() {
     [ -n "${SPRYKER_TESTING_ENABLE}" ] && return "${TRUE}"
 
-    Runtime::waitFor scheduler
+    Runtime::waitFor ${SPRYKER_INTERNAL_PROJECT_NAME}_scheduler
     Console::start -n "Checking jobs are installed..."
 
     # shellcheck disable=SC2016
     # For avoid https://github.com/docker/compose/issues/9104
-    local jobsCount=$(Jenkins::callJenkins 'scriptText -d "script=println Jenkins.instance.projects.collect{ it.name }.size"| tail -n 1')
+    local script="script=println Jenkins.instance.projects.findAll{ it.name.startsWith('${SPRYKER_PROJECT_NAME}') }.size"
+    local jobsCount=$(Jenkins::callJenkins 'scriptText -d "'"${script}"'" | tail -n 1')
+
     [ "${jobsCount}" -gt 0 ] && Console::end "[INSTALLED]" && return "${TRUE}" || return "${FALSE}"
 }
 
 Service::Scheduler::pause() {
     [ -n "${SPRYKER_TESTING_ENABLE}" ] && return "${TRUE}"
 
-    Runtime::waitFor scheduler
+    Runtime::waitFor ${SPRYKER_INTERNAL_PROJECT_NAME}_scheduler
     Console::start -n "Suspending scheduler..."
 
     # shellcheck disable=SC2016
@@ -41,7 +43,7 @@ Service::Scheduler::pause() {
 Service::Scheduler::unpause() {
     [ -n "${SPRYKER_TESTING_ENABLE}" ] && return "${TRUE}"
 
-    Runtime::waitFor scheduler
+    Runtime::waitFor ${SPRYKER_INTERNAL_PROJECT_NAME}_scheduler
     Console::start -n "Resuming scheduler..."
 
     # shellcheck disable=SC2016
@@ -76,7 +78,7 @@ function Service::Scheduler::clean() {
 function Service::Scheduler::_run() {
     [ -n "${SPRYKER_TESTING_ENABLE}" ] && return "${TRUE}"
 
-    Runtime::waitFor scheduler
+    Runtime::waitFor ${SPRYKER_INTERNAL_PROJECT_NAME}_scheduler
 
     for region in "${SPRYKER_STORES[@]}"; do
         eval "${region}"

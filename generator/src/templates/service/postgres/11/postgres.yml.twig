@@ -1,9 +1,12 @@
-  {{ serviceName }}:
+  {{ serviceData.project_name ~ '_' ~ serviceName }}:
     image: postgres:11-alpine
+    container_name: {{ serviceData.project_name ~ '_' ~ serviceName }}
+    profiles:
+      - {{ serviceData.project_name }}
     networks:
-      - private
+      - {{ _internal_project_name }}_private
     labels:
-      'spryker.app.name': database
+      'spryker.app.name': {{ serviceData.project_name ~ '_' ~ serviceName }}
       'spryker.app.type': services
       'spryker.project': ${SPRYKER_DOCKER_PREFIX}:${SPRYKER_DOCKER_TAG}
     healthcheck:

@@ -1,9 +1,12 @@
-  {{ serviceName }}:
+  {{ serviceData.project_name ~ '_' ~ serviceName }}:
     image: spryker/kibana:5.6.16-eol
+    container_name: {{ serviceData.project_name ~ '_' ~ serviceName }}
     networks:
-        - private
+      - {{ _internal_project_name }}_private
+    profiles:
+      - {{ serviceData.project_name }}
     labels:
-      'spryker.app.name': kibana
+      'spryker.app.name': {{ serviceData.project_name ~ '_' ~ serviceName }}
       'spryker.app.type': services
       'spryker.project': ${SPRYKER_DOCKER_PREFIX}:${SPRYKER_DOCKER_TAG}
     healthcheck:
@@ -17,4 +20,4 @@
       - search
     volumes:
       - {{ serviceName }}-{{ serviceData['engine'] }}-data:/usr/share/kibana/data:rw
-      - ./${DEPLOYMENT_PATH}/context/kibana/default/kibana.yml:/usr/share/kibana/config/kibana.yml:consistent,ro
+      - {{ serviceData.deployment_path }}/context/kibana/default/kibana.yml:/usr/share/kibana/config/kibana.yml:consistent,ro

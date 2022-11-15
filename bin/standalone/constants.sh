@@ -3,3 +3,18 @@
 # shellcheck disable=SC2034
 TRUE=0
 FALSE=1
+
+SPRYKER_DOCKER_SDK_INTERNAL_DEPLOYMENT_DIR='/data/deployment'
+
+SPRYKER_INTERNAL_PROJECT_NAME='docker_sdk_spryker'
+SPRYKER_SHARED_SERVICES_LIST=('gateway' 'broker' 'dashboard' 'database' 'key_value_store' 'kibana' 'mail_catcher' 'redis-gui' 'scheduler' 'search' 'session')
+
+ENABLED_FILENAME='enabled'
+PROJECT_PATH_FILENAME='project_path'
+
+DOCKER_COMPOSE_FILENAME='docker-compose.yml'
+DOCKER_COMPOSE_SHARED_SERVICES_DATA_FILENAME='docker-compose-shared-services-data.json'
+DOCKER_COMPOSE_PROJECTS_DATA_FILENAME='docker-compose-projects-data.json'
+DOCKER_COMPOSE_GATEWAY_DATA_FILENAME='docker-compose-gateway-data.json'
+DOCKER_COMPOSE_SYNC_DATA_FILENAME='docker-compose-sync-data.json'
+DOCKER_COMPOSE_REDIS_DATA_FILENAME='docker-compose-redis-data.json'

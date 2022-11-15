@@ -7,6 +7,6 @@
         proxy_set_header Upgrade $http_upgrade;
         proxy_set_header Connection $connection_upgrade;
         proxy_set_header X-SCHEMA-BASE-URL $scheme://$host;
-        proxy_pass http://cli:9000/glueSchema/;
+        proxy_pass http://{{ project._project_name }}_cli:9000/glueSchema/;
     }
 {% endblock locations %}

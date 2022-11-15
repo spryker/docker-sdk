@@ -1,9 +1,12 @@
-  {{ serviceName }}:
+  {{ serviceData.project_name ~ '_' ~ serviceName }}:
     image: spryker/mailhog:v1.0.0
+    container_name: {{ serviceData.project_name ~ '_' ~ serviceName }}
     networks:
-      - private
+      - {{ _internal_project_name }}_private
+    profiles:
+      - {{ serviceData.project_name }}
     labels:
-      'spryker.app.name': mailcatcher
+      'spryker.app.name': {{ serviceData.project_name ~ '_' ~ serviceName }}
       'spryker.app.type': services
       'spryker.project': ${SPRYKER_DOCKER_PREFIX}:${SPRYKER_DOCKER_TAG}
     environment:

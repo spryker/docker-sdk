@@ -3,5 +3,5 @@
 {% block setup %}{% endblock setup %}
 
 {% block command %}<![CDATA[
-APPLICATION_STORE="{{ job.store }}" COMMAND="{{ job.command | raw }}" bash /usr/bin/spryker.sh
+PROJECT_NAME_PREFIX="{{ project_name ~ '_' | default("") }}" APPLICATION_STORE="{{ job.store }}" COMMAND="{{ job.command | raw }}" bash /usr/bin/spryker.sh
 ]]>{% endblock command %}

@@ -1,9 +1,12 @@
-  {{ serviceName }}:
+  {{ serviceData.project_name ~ '_' ~ serviceName }}:
     image: mysql:5.7
+    container_name: {{ serviceData.project_name ~ '_' ~ serviceName }}
+    profiles:
+      - {{ serviceData.project_name }}
     networks:
-      - private
+      - {{ _internal_project_name }}_private
     labels:
-      'spryker.app.name': database
+      'spryker.app.name': {{ serviceData.project_name ~ '_' ~ serviceName }}
       'spryker.app.type': services
       'spryker.project': ${SPRYKER_DOCKER_PREFIX}:${SPRYKER_DOCKER_TAG}
     healthcheck:
@@ -16,4 +19,4 @@
       LANG: C.UTF-8
     volumes:
       - {{ serviceName }}-{{ serviceData['engine'] }}-data:/var/lib/mysql:rw
-      - ./${DEPLOYMENT_PATH}/context/mysql/my.cnf:/etc/mysql/my.cnf:ro
+      - {{ serviceData.deployment_path }}/context/mysql/my.cnf:/etc/mysql/my.cnf:ro

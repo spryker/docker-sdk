@@ -1,0 +1,12 @@
+{% for serviceName, serviceData in sharedServices %}
+{% set engine = serviceData['engine'] | lower %}
+{% set version = serviceData['version'] | default('default') %}
+{% include "service/" ~ engine ~ "/" ~ version ~ "/" ~  engine ~ ".yml.twig" with {
+    serviceName: serviceName,
+    serviceData: serviceData,
+    engine: engine,
+    version: version,
+    projectsData: projectsData,
+    _internal_project_name: _internal_project_name
+} only %}
+{% endfor %}

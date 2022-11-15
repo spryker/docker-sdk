@@ -10,10 +10,10 @@ function Data::load() {
     local schedulerSuspended=""
     local verboseOption=$([ "${VERBOSE}" == "1" ] && echo -n " -vvv" || echo -n '')
 
-    Runtime::waitFor database
-    Runtime::waitFor broker
-    Runtime::waitFor search
-    Runtime::waitFor key_value_store
+    Runtime::waitFor ${SPRYKER_INTERNAL_PROJECT_NAME}_database
+    Runtime::waitFor ${SPRYKER_INTERNAL_PROJECT_NAME}_broker
+    Runtime::waitFor ${SPRYKER_INTERNAL_PROJECT_NAME}_search
+    Runtime::waitFor ${SPRYKER_INTERNAL_PROJECT_NAME}_key_value_store
 
     local force=''
     if [ "$1" == '--force' ]; then
