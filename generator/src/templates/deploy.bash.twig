@@ -138,6 +138,11 @@ readonly SPRYKER_REPOSITORY_HASH="${SPRYKER_BUILD_HASH:-"$(git rev-parse --verif
 {% include "service/" ~ engine ~ "/" ~ serviceName ~ ".bash.twig" ignore missing with _context %}
 {% endfor %}
 
+# NodeJS variables
+{% for envName, envValue in _node_npm_config %}
+readonly {{ envName }}="{{ "${%s:-%s}" | format(envName, envValue) }}"
+{% endfor %}
+
 # Variables from environment
 SPRYKER_XDEBUG_ENABLE="$([ "${SPRYKER_XDEBUG_ENABLE}" == '1' ] && echo '1' || echo '')"
 SPRYKER_XDEBUG_ENABLE_FOR_CLI=''

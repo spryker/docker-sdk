@@ -147,7 +147,7 @@ sudo lsof -nPi:80 | grep LISTEN
 You get the `413 Request Entity Too Large` error.
 
 **then**
-1. Increase the maximum request body size for the related application. See [Deploy File Reference - 1.0](07-deploy-file/02-deploy-file-reference.v1.md#groups-applications) to learn how to do that.
+1. Increase the maximum request body size for the related application. See [Deploy File Reference - 1.0](07-deploy-file/02-deploy.file.reference.v1.md#groups-applications) to learn how to do that.
 2. Fetch the update:
 ```bash
 docker/sdk bootstrap
@@ -389,3 +389,14 @@ $config[SchedulerJenkinsConstants::JENKINS_CONFIGURATION] = [
 ];
 ...
 ```
+
+**when**
+Assets install error 
+```bash
+line 1: run-s: not found
+```
+
+**then**
+1. ensure you are using latest docker-sdk and spryker/php image.
+2. run `docker/sdk pull`
+3. run `docker/sdk boot {{your deploy file}} && docker/sdk up --build`

@@ -23,8 +23,9 @@ regions.*:
     array-type:
 regions.*.services:
     not-empty:
-regions.*.services.database:
-    require:
+    or:
+        - database
+        - databases
 
 # Image:
 image.tag:
@@ -35,6 +36,18 @@ image.php:
     array-type:
 image.php.enabled-extensions:
     array-type:
+image.node.version:
+    integer-type:
+    range-value:
+        - 12
+image.node.distro:
+    only-value:
+        - alpine
+        - debian
+image.node.npm:
+    integer-type:
+    range-value:
+        - 6
 
 # Assets
 assets.image:

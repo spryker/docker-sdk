@@ -3,7 +3,6 @@
 use DeployFileGenerator\DeployFileGeneratorFactory;
 use DeployFileGenerator\Transfer\DeployFileTransfer;
 use Spatie\Url\Url;
-use Symfony\Component\Console\Output\ConsoleOutput;
 use Symfony\Component\Yaml\Parser;
 use Twig\Environment;
 use Twig\Loader\ChainLoader;
@@ -129,6 +128,7 @@ verbose('Generating NGINX configuration... [DONE]');
 $primal = [];
 $projectData['_entryPoints'] = [];
 $projectData['_endpointMap'] = [];
+$projectData = extendProjectDataWithKeyValueRegionNamespaces($projectData);
 $projectData['_storeSpecific'] = getStoreSpecific($projectData);
 $projectData['_regionSpecific'] = getRegionSpecific($projectData);
 $debugPortIndex = 10000;
@@ -155,6 +155,19 @@ const ENTRY_POINTS = [
     GLUE_STOREFRONT => 'GlueStorefront',
     GLUE_BACKEND => 'GlueBackend',
 ];
+
+const DEBIAN_DISTRO_NAME = 'bullseye';
+const ALPINE_DISTRO_NAME = 'alpine';
+
+const SPRYKER_NODE_IMAGE_DISTRO_ENV_NAME = 'SPRYKER_NODE_IMAGE_DISTRO';
+const SPRYKER_NODE_IMAGE_VERSION_ENV_NAME = 'SPRYKER_NODE_IMAGE_VERSION';
+const SPRYKER_NPM_VERSION_ENV_NAME = 'SPRYKER_NPM_VERSION';
+
+const DEFAULT_NODE_VERSION = 12;
+const DEFAULT_NODE_DISTRO = ALPINE_DISTRO_NAME;
+const DEFAULT_NPM_VERSION = 6;
+
+$projectData['_node_npm_config'] = buildNodeJsNpmBuildConfig($projectData);
 
 foreach ($projectData['groups'] ?? [] as $groupName => $groupData) {
     foreach ($groupData['applications'] ?? [] as $applicationName => $applicationData) {
@@ -266,9 +279,14 @@ function mapBackendEndpointsWithFallbackZed(array $endpointMap): array
 
     foreach ($zedApplicationsToCheck as $zedApplicationToCheck) {
         foreach ($endpointMap as $store => $storeEndpointMap) {
+            if (!array_key_exists(ZED_APP, $storeEndpointMap)) {
+                continue;
+            }
+
             if (array_key_exists($zedApplicationToCheck, $storeEndpointMap)) {
                 continue;
             }
+
             $endpointMap[$store][$zedApplicationToCheck] = $storeEndpointMap[ZED_APP];
         }
     }
@@ -361,18 +379,9 @@ foreach ($projectData['groups'] ?? [] as $groupName => $groupData) {
                 $projectData['_testing']['services'][$endpointData['store']][$applicationData['application']] = $services;
             }
 
-            if ($isEndpointDataHasRegion && $groupData['region'] === ($projectData['docker']['testing']['region'] ?? '')) {
-                $projectData['_testing']['regionName'] = $groupData['region'];
-                $projectData['_testing']['regionServices'] = array_merge($projectData['_testing']['services'] ?? [], $services);
-                $projectData['_testing']['services'][$groupData['region']][$applicationData['application']] = $services;
-            }
+            $envVarEncoder->setIsActive(true);
 
-            if ($isEndpointDataHasStore && ($applicationData['application'] === ZED_APP
-                || $applicationData['application'] === BACKEND_GATEWAY_APP
-                || $applicationData['application'] === BACKOFFICE_APP
-                || $applicationData['application'] === MERCHANT_PORTAL
-            )) {
-                $envVarEncoder->setIsActive(true);
+            if (array_key_exists('store', $endpointData)) {
                 file_put_contents(
                     $deploymentDir . DS . 'env' . DS . 'cli' . DS . strtolower($endpointData['store']) . '.env',
                     $twig->render('env/cli/store.env.twig', [
@@ -404,44 +413,7 @@ foreach ($projectData['groups'] ?? [] as $groupName => $groupData) {
                         'endpointMap' => $endpointMap,
                     ])
                 );
-                $envVarEncoder->setIsActive(false);
-            }
 
-            if ($isEndpointDataHasRegion && ($applicationData['application'] === ZED_APP
-                    || $applicationData['application'] === BACKEND_GATEWAY_APP
-                    || $applicationData['application'] === BACKOFFICE_APP
-                    || $applicationData['application'] === MERCHANT_PORTAL
-                )) {
-                $envVarEncoder->setIsActive(true);
-                file_put_contents(
-                    $deploymentDir . DS . 'env' . DS . 'cli' . DS . strtolower($groupData['region']) . '.env',
-                    $twig->render('env/cli/region.env.twig', [
-                        'applicationName' => $applicationName,
-                        'applicationData' => $applicationData,
-                        'project' => $projectData,
-                        'regionName' => $groupData['region'],
-                        'regionData' => $projectData['regions'][$groupData['region']],
-                        'brokerConnections' => getBrokerConnections($projectData),
-                        'keyValueStoreConnections' => getKeyValueStores($projectData),
-                        'services' => $services,
-                        'endpointMap' => $endpointMap,
-                    ])
-                );
-
-                file_put_contents(
-                    $deploymentDir . DS . 'terraform' . DS . 'cli' . DS . strtolower($groupData['region']) . '.env',
-                    $twig->render('terraform/region.env.twig', [
-                        'applicationName' => $applicationName,
-                        'applicationData' => $applicationData,
-                        'project' => $projectData,
-                        'regionName' => $groupData['region'],
-                        'regionData' => $projectData['regions'][$groupData['region']],
-                        'brokerConnections' => getBrokerConnections($projectData),
-                        'keyValueStoreConnections' => getKeyValueStores($projectData),
-                        'services' => $services,
-                        'endpointMap' => $endpointMap,
-                    ])
-                );
                 $envVarEncoder->setIsActive(false);
             }
         }
@@ -880,6 +852,7 @@ function getStoreSpecific(array $projectData): array
                 $storeSpecific[$storeName]['SPRYKER_BROKER_NAMESPACE'] = $services['broker']['namespace'];
             }
         }
+        $storeSpecific[$regionName]['SPRYKER_KEY_VALUE_REGION_NAMESPACES'] = $projectData['regions'][$regionName]['key_value_region_namespaces'];
     }
 
     return $storeSpecific;
@@ -1398,6 +1371,7 @@ function buildSecrets(string $deploymentDir): array
     $data['SPRYKER_OAUTH_CLIENT_IDENTIFIER'] = 'frontend';
     $data['SPRYKER_OAUTH_CLIENT_SECRET'] = generateToken(48);
     $data['SPRYKER_ZED_REQUEST_TOKEN'] = generateToken(80);
+    $data['SPRYKER_URI_SIGNER_SECRET_KEY'] = generateToken(80);
 
     return $data;
 }
@@ -1565,20 +1539,51 @@ function buildDefaultRegionCredentialsForDatabase(array $projectData): array
         'password' => 'secret',
     ];
 
+    $databaseServiceData = $projectData['services']['database'];
     foreach ($projectData['regions'] as $regionName => $regionConfig) {
-        if (!isset($regionConfig['services']['database'])) {
+        $databases = [
+            'version' => '1.0',
+            'databases' => [],
+        ];
+        if (!isset($regionConfig['services']['database']) && !isset($regionConfig['services']['databases'])) {
             continue;
         }
 
-        $regionDbConfig = $regionConfig['services']['database'];
-        $regionDbConfig = array_merge($defaultDbRegionCredentials, $regionDbConfig);
+        if (array_key_exists('database', $regionConfig['services'])) {
+            $regionDbConfig = $regionConfig['services']['database'];
+            $regionDbConfig = array_merge($defaultDbRegionCredentials, $regionDbConfig);
+            $projectData['regions'][$regionName]['services']['database'] = $regionDbConfig;
+        }
 
-        $projectData['regions'][$regionName]['services']['database'] = $regionDbConfig;
+        if (array_key_exists('databases', $regionConfig['services'])) {
+            $regionDbConfigs = $regionConfig['services']['databases'];
+
+            foreach ($regionConfig['stores'] as $storeName => $storeConfig) {
+                $storeDbConfig = $storeConfig['services']['database'];
+
+                foreach ($regionDbConfigs as $dbName => $regionDbConfig) {
+                    if (isset($storeDbConfig['name']) && $storeDbConfig['name'] === $dbName) {
+                        $regionDbConfig = array_merge($defaultDbRegionCredentials, $regionDbConfig ?? []);
+                        $databases['databases'][$storeName] = [
+                            'host' => 'database',
+                            'port' => $databaseServiceData['port'] ?? $databaseServiceData['engine'] === 'mysql' ? 3306 : 5432,
+                            'database' => $dbName,
+                            'username' => $regionDbConfig['username'],
+                            'password' => $regionDbConfig['password'],
+                            'characterSet' => $regionDbConfig['character-set'] ?? 'utf8',
+                            'collate' => $regionDbConfig['collate'] ?? 'utf8_general_ci',
+                        ];
+                    }
+                }
+            }
+
+            $projectData['regions'][$regionName]['services']['databases'] = json_encode($databases);
+        }
+
     }
 
     return $projectData;
 }
-
 
 /**
  * @param array $projectData
@@ -1608,6 +1613,24 @@ function buildDefaultCredentialsForBroker(array $projectData): array
 
 /**
  * @param array $projectData
+ *
+ * @return array
+ */
+function extendProjectDataWithKeyValueRegionNamespaces(array $projectData): array
+{
+    foreach ($projectData['regions'] as $regionName => $regionData) {
+        $keyValueStoreNamespaces = [];
+        foreach ($regionData['stores'] ?? [] as $storeName => $storeData) {
+            $keyValueStoreNamespaces[$storeName] = $storeData['services']['key_value_store']['namespace'];
+        }
+        $projectData['regions'][$regionName]['key_value_region_namespaces'] = json_encode($keyValueStoreNamespaces);
+    }
+
+    return $projectData;
+}
+
+/**
+ * @param array $projectData
  * @return string[]
  */
 function validateServiceVersions(array $projectData): array
@@ -1629,7 +1652,7 @@ function validateServiceVersions(array $projectData): array
 
         $service = $services[$serviceName];
         $serviceEngine = $service['engine'] ?? null;
-        $serviceVersion = $service['version'] ?? 'default';
+        $serviceVersion = (string)($service['version'] ?? 'default');
 
         if($serviceEngine == null || !array_key_exists($serviceEngine, $serviceEngines)) {
             continue;
@@ -1666,20 +1689,6 @@ function getUnsupportedArmServiceMap(): array
         'webdriver' => [
             'phantomjs' => ['*'],
         ],
-        'search' => [
-            'elastic' => [
-                '5.6' => '5.6',
-                '6.8' => '6.8',
-                'default' => '5.6',
-            ],
-        ],
-        'kibana' => [
-            'kibana' => [
-                '5.6' => '5.6',
-                '6.8' => '6.8',
-                'default' => '5.6',
-            ],
-        ],
         'scheduler' => [
             'jenkins' => [
                 '2.176' => '2.176',
@@ -1704,4 +1713,56 @@ function isArmArchitecture(): bool
     $currentArchitecture = php_uname('m');
 
     return in_array($currentArchitecture, $possibleValue);
+}
+
+/**
+ * @param array $projectData
+ *
+ * @return array
+ */
+function buildNodeJsNpmBuildConfig(array $projectData): array
+{
+    $imageName = $projectData['image']['tag'];
+    $nodejsConfig = $projectData['image']['node'] ?? [];
+
+    return [
+        SPRYKER_NODE_IMAGE_DISTRO_ENV_NAME => getNodeDistroName($nodejsConfig, $imageName),
+        SPRYKER_NODE_IMAGE_VERSION_ENV_NAME => array_key_exists('version', $nodejsConfig)
+            ? (int)$nodejsConfig['version']
+            : DEFAULT_NODE_VERSION,
+        SPRYKER_NPM_VERSION_ENV_NAME => array_key_exists('npm', $nodejsConfig)
+            ? (int)$nodejsConfig['npm']
+            : DEFAULT_NPM_VERSION,
+    ];
+}
+
+/**
+ * @param array $nodejsConfig
+ * @param string $imageName
+ *
+ * @return string
+ */
+function getNodeDistroName(array $nodejsConfig, string $imageName): string
+{
+    if (array_key_exists('distro', $nodejsConfig)) {
+        if ($nodejsConfig['distro'] == 'debian') {
+            return DEBIAN_DISTRO_NAME;
+        }
+
+        if ($nodejsConfig['distro'] == 'alpine') {
+            return ALPINE_DISTRO_NAME;
+        }
+    }
+
+    $imageData = explode('/', $imageName);
+
+    if ($imageData[0] !== 'spryker') {
+        return DEFAULT_NODE_DISTRO;
+    }
+
+    if (str_contains($imageData[1], 'debian')) {
+        return DEBIAN_DISTRO_NAME;
+    }
+
+    return ALPINE_DISTRO_NAME;
 }
