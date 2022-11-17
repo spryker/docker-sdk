@@ -9,7 +9,7 @@
       BLACKFIRE_CLIENT_ID: ${BLACKFIRE_CLIENT_ID}
       BLACKFIRE_CLIENT_TOKEN: ${BLACKFIRE_CLIENT_TOKEN}
     networks:
-      - {{ _internal_project_name }}_private
+      - {{ internal_project_name }}_private
     labels:
       'spryker.app.name': {{ serviceData.project_name ~ '_' ~ serviceName }}
       'spryker.app.type': agents

@@ -14,13 +14,13 @@ class LocalhostFilterPlugin extends AbstractPlugin implements GatewayPluginInter
 {
     public function build(array $gatewayData): array
     {
-        $hosts = $gatewayData[DockerSdkConstants::GATEWAY_HOSTS_KEY] ?? [];
+        $hosts = $gatewayData[DockerSdkConstants::HOSTS_KEY] ?? [];
         // todo: plugin
         $hosts = array_filter($hosts, function ($host) {
             return $host !== 'localhost';
         });
 
-        $gatewayData[DockerSdkConstants::GATEWAY_HOSTS_KEY] = $hosts;
+        $gatewayData[DockerSdkConstants::HOSTS_KEY] = $hosts;
 
         return $gatewayData;
     }

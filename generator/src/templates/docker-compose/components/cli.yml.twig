@@ -2,8 +2,8 @@
     image: {{ projectName }}_run_cli:{{ projectData.tag }}
     container_name: {{ projectName }}_cli
     networks:
-      - {{ projectData._internal_project_name }}_public
-      - {{ projectData._internal_project_name }}_private
+      - {{ projectData.internal_project_name }}_public
+      - {{ projectData.internal_project_name }}_private
     labels:
       'spryker.app.name': {{ projectName }}_cli
       'spryker.app.type': console

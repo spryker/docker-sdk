@@ -24,3 +24,23 @@ function Project::getListOfEnabledProjects() {
 
   echo "${profiles[*]}"
 }
+
+function Project::getProjectList() {
+  local paths=($(ls -d ${DEPLOYMENT_DIR}/../*))
+  declare -a projects
+  declare -a uniqProjects
+
+  for i in "${paths[@]}" ; do
+    local projectName=$(basename "${i}")
+
+    if [ "${projectName}" = ${SPRYKER_INTERNAL_PROJECT_NAME} ]; then
+        continue
+    fi
+
+    projects+=(${projectName})
+  done
+
+  uniqProjects=($(for project in "${projects[@]}"; do echo "${project}"; done | sort -u))
+
+  echo "${uniqProjects[*]}"
+}

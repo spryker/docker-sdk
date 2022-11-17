@@ -4,7 +4,7 @@
     profiles:
       - {{ serviceData.project_name }}
     networks:
-      - {{ _internal_project_name }}_public
+      - {{ internal_project_name }}_public
     labels:
       'spryker.app.name': {{ serviceData.project_name ~ '_' ~ serviceName }}
       'spryker.app.type': services

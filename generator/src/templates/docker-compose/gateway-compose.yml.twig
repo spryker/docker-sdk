@@ -1,19 +1,19 @@
-  {{ _internal_project_name }}_gateway:
-    container_name: {{ _internal_project_name }}_gateway
+  {{ internal_project_name }}_gateway:
+    container_name: {{ internal_project_name }}_gateway
     image: ${SPRYKER_DOCKER_PREFIX}_gateway:${SPRYKER_DOCKER_TAG}
     profiles:
-        - {{ _internal_project_name }}
+        - {{ internal_project_name }}
     ports:
 {% for port in gatewayData.ports %}
       - "{{ port }}:{{ port }}"
 {% endfor %}
     networks:
-      {{ _internal_project_name }}_private:
+      {{ internal_project_name }}_private:
         aliases:
 {% for host in gatewayData.hosts %}
           - {{ host }}
 {% endfor %}
-      {{ _internal_project_name }}_public:
+      {{ internal_project_name }}_public:
         aliases:
 {% for host in gatewayData.hosts %}
           - {{ host }}
@@ -27,6 +27,6 @@
       SPRYKER_XDEBUG_ENABLE: ${SPRYKER_XDEBUG_ENABLE}
 {% endif %}
     labels:
-      'spryker.app.name': {{ _internal_project_name }}_gateway
+      'spryker.app.name': {{ internal_project_name }}_gateway
       'spryker.app.type': proxy
       'spryker.project': ${SPRYKER_DOCKER_PREFIX}:${SPRYKER_DOCKER_TAG}

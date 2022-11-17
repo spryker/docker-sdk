@@ -2,12 +2,13 @@
     build:
       context: {{ serviceData.deployment_path }}
       dockerfile: images/common/dashboard/Dockerfile
+    image: {{ serviceData.project_name ~ '_' ~ serviceName }}
     container_name: {{ serviceData.project_name ~ '_' ~ serviceName }}
     profiles:
       - {{ serviceData.project_name }}
     networks:
-      - {{ _internal_project_name }}_public
-      - {{ _internal_project_name }}_private
+      - {{ internal_project_name }}_public
+      - {{ internal_project_name }}_private
     labels:
       'spryker.app.name': {{ serviceData.project_name ~ '_' ~ serviceName }}
       'spryker.app.type': hidden

@@ -30,6 +30,7 @@ class ProjectBuilder extends AbstractBuilder
         $projectData = $this->buildSearch($projectData);
         $projectData = $this->buildBrokerNamespaces($projectData);
         $projectData = $this->buildDb($projectData);
+        $projectData = $this->buildApplications($projectData);
 
         $projectDataFromFile[$this->config->getSprykerProjectName()] = $projectData;
 
@@ -50,8 +51,7 @@ class ProjectBuilder extends AbstractBuilder
             $groupsApplications = $groupData[DockerSdkConstants::PROJECT_DATA_GROUPS_APPLICATIONS_KEY];
 
             foreach ($groupsApplications as $applicationName => $applicationData) {
-                $applicationData[DockerSdkConstants::PROJECT_DATA_GROUPS_APPLICATIONS_APPLICATION_NAME_KEY] = $this->config->getSprykerProjectName();
-                $applicationData[DockerSdkConstants::PROJECT_DATA_GROUPS_APPLICATIONS_APPLICATION_DEPLOYMENT_PATH_KEY] = $this->config->getProjectDeploymentDir();
+                $applicationData[DockerSdkConstants::DEPLOYMENT_PATH_KEY] = $this->config->getProjectDeploymentDir();
 
                 $projectGroups[$groupName][$applicationName] = $applicationData;
             }
@@ -71,28 +71,28 @@ class ProjectBuilder extends AbstractBuilder
 
     private function addProjectName(array $projectData): array
     {
-        $projectData[DockerSdkConstants::PROJECT_DATA_PROJECT_NAME_KEY] = $this->config->getSprykerProjectName();
+        $projectData[DockerSdkConstants::PROJECT_NAME_KEY] = $this->config->getSprykerProjectName();
 
         return $projectData;
     }
 
     private function addDeployPath(array $projectData): array
     {
-        $projectData[DockerSdkConstants::PROJECT_DATA_DEPLOYMENT_PATH_KEY] = $this->config->getProjectDeploymentDir();
+        $projectData[DockerSdkConstants::DEPLOYMENT_PATH_KEY] = $this->config->getProjectDeploymentDir();
 
         return $projectData;
     }
 
     private function addSharedServicesData(array $projectData): array
     {
-        $projectServices = $projectData[DockerSdkConstants::PROJECT_DATA_SERVICES_KEY];
+        $projectServices = $projectData[DockerSdkConstants::SERVICES_KEY];
         $sharedServicesData = $this->reader->read($this->config->getDockerComposeSharedServiceDataFilePath());
 
         foreach ($sharedServicesData as $servicesName => $servicesData) {
             $projectServices[$servicesName] = $servicesData;
         }
 
-        $projectData[DockerSdkConstants::PROJECT_DATA_SERVICES_KEY] = $projectServices;
+        $projectData[DockerSdkConstants::SERVICES_KEY] = $projectServices;
 
         return $projectData;
     }
@@ -118,7 +118,7 @@ class ProjectBuilder extends AbstractBuilder
 
     private function buildServices(array $projectData): array
     {
-        $projectServices = $projectData[DockerSdkConstants::PROJECT_DATA_SERVICES_KEY];
+        $projectServices = $projectData[DockerSdkConstants::SERVICES_KEY];
         $sharedServicesData = $this->reader->read($this->config->getDockerComposeSharedServiceDataFilePath());
 
         foreach ($projectServices as $serviceName => $serviceData) {
@@ -126,13 +126,13 @@ class ProjectBuilder extends AbstractBuilder
                 continue;
             }
 
-            $serviceData[DockerSdkConstants::PROJECT_DATA_SERVICES_DEPLOYMENT_PATH_KEY] = $this->config->getProjectDeploymentDir();
-            $serviceData[DockerSdkConstants::PROJECT_DATA_SERVICES_PROJECT_NAME_KEY] = $this->config->getSprykerProjectName();
+            $serviceData[DockerSdkConstants::DEPLOYMENT_PATH_KEY] = $this->config->getProjectDeploymentDir();
+            $serviceData[DockerSdkConstants::PROJECT_NAME_KEY] = $this->config->getSprykerProjectName();
 
             $projectServices[$serviceName] = $serviceData;
         }
 
-        $projectData[DockerSdkConstants::PROJECT_DATA_SERVICES_KEY] = $projectServices;
+        $projectData[DockerSdkConstants::SERVICES_KEY] = $projectServices;
 
         return $projectData;
     }
@@ -145,16 +145,16 @@ class ProjectBuilder extends AbstractBuilder
             $stores = $regionData[DockerSdkConstants::PROJECT_DATA_REGIONS_STORES_KEY];
 
             foreach ($stores as $storeName => $storeData) {
-                $services = $storeData[DockerSdkConstants::PROJECT_DATA_REGIONS_STORES_SERVICES_KEY];
+                $services = $storeData[DockerSdkConstants::SERVICES_KEY];
                 $broker = $services[DockerSdkConstants::PROJECT_DATA_REGIONS_STORES_SERVICES_BROKER_KEY];
-                $namespace = $broker[DockerSdkConstants::PROJECT_DATA_REGIONS_STORES_SERVICES_BROKER_NAMESPACE_KEY];
+                $namespace = $broker[DockerSdkConstants::NAMESPACE_KEY];
                 $namespace = sprintf(
                     '%s-%s',
-                    $projectData[DockerSdkConstants::PROJECT_DATA_PROJECT_NAME_KEY],
+                    $projectData[DockerSdkConstants::PROJECT_NAME_KEY],
                     $namespace
                 );
-                $services[DockerSdkConstants::PROJECT_DATA_REGIONS_STORES_SERVICES_BROKER_KEY][DockerSdkConstants::PROJECT_DATA_REGIONS_STORES_SERVICES_BROKER_NAMESPACE_KEY] = $namespace;
-                $storeData[DockerSdkConstants::PROJECT_DATA_REGIONS_STORES_SERVICES_KEY] = $services;
+                $services[DockerSdkConstants::PROJECT_DATA_REGIONS_STORES_SERVICES_BROKER_KEY][DockerSdkConstants::NAMESPACE_KEY] = $namespace;
+                $storeData[DockerSdkConstants::SERVICES_KEY] = $services;
                 $stores[$storeName] = $storeData;
             }
 
@@ -174,16 +174,16 @@ class ProjectBuilder extends AbstractBuilder
             $stores = $regionData[DockerSdkConstants::PROJECT_DATA_REGIONS_STORES_KEY];
 
             foreach ($stores as $storeName => $storeData) {
-                $services = $storeData[DockerSdkConstants::PROJECT_DATA_REGIONS_STORES_SERVICES_KEY];
+                $services = $storeData[DockerSdkConstants::SERVICES_KEY];
                 $search = $services[DockerSdkConstants::PROJECT_DATA_REGIONS_STORES_SERVICES_SEARCH_KEY];
-                $namespace = $search[DockerSdkConstants::PROJECT_DATA_REGIONS_STORES_SERVICES_SEARCH_NAMESPACE_KEY];
+                $namespace = $search[DockerSdkConstants::NAMESPACE_KEY];
                 $namespace = sprintf(
                     '%s_%s',
-                    $projectData[DockerSdkConstants::PROJECT_DATA_PROJECT_NAME_KEY],
+                    $projectData[DockerSdkConstants::PROJECT_NAME_KEY],
                     $namespace
                 );
-                $services[DockerSdkConstants::PROJECT_DATA_REGIONS_STORES_SERVICES_SEARCH_KEY][DockerSdkConstants::PROJECT_DATA_REGIONS_STORES_SERVICES_SEARCH_NAMESPACE_KEY] = $namespace;
-                $storeData[DockerSdkConstants::PROJECT_DATA_REGIONS_STORES_SERVICES_KEY] = $services;
+                $services[DockerSdkConstants::PROJECT_DATA_REGIONS_STORES_SERVICES_SEARCH_KEY][DockerSdkConstants::NAMESPACE_KEY] = $namespace;
+                $storeData[DockerSdkConstants::SERVICES_KEY] = $services;
                 $stores[$storeName] = $storeData;
             }
 
@@ -200,42 +200,42 @@ class ProjectBuilder extends AbstractBuilder
         $regions = $projectData[DockerSdkConstants::PROJECT_DATA_REGIONS_KEY];
 
         foreach ($regions as $regionName => $regionData) {
-            $services = $regionData[DockerSdkConstants::PROJECT_DATA_REGIONS_SERVICES_KEY];
+            $services = $regionData[DockerSdkConstants::SERVICES_KEY];
 
-            if (array_key_exists(DockerSdkConstants::PROJECT_DATA_REGIONS_SERVICES_DATABASE_KEY, $services)) {
-                $database = $services[DockerSdkConstants::PROJECT_DATA_REGIONS_SERVICES_DATABASE_KEY];
-                $databaseName = $database[DockerSdkConstants::PROJECT_DATA_REGIONS_SERVICES_DATABASE_DATABASE_KEY];
+            if (array_key_exists(DockerSdkConstants::DATABASE_KEY, $services)) {
+                $database = $services[DockerSdkConstants::DATABASE_KEY];
+                $databaseName = $database[DockerSdkConstants::DATABASE_KEY];
                 $databaseName = sprintf(
                     '%s-%s',
-                    $projectData[DockerSdkConstants::PROJECT_DATA_PROJECT_NAME_KEY],
+                    $projectData[DockerSdkConstants::PROJECT_NAME_KEY],
                     $databaseName
                 );
 
-                $database[DockerSdkConstants::PROJECT_DATA_REGIONS_SERVICES_DATABASE_DATABASE_KEY] = $databaseName;
-                $services[DockerSdkConstants::PROJECT_DATA_REGIONS_SERVICES_DATABASE_KEY] = $database;
-                $regions[$regionName][DockerSdkConstants::PROJECT_DATA_REGIONS_SERVICES_KEY] = $services;
+                $database[DockerSdkConstants::DATABASE_KEY] = $databaseName;
+                $services[DockerSdkConstants::DATABASE_KEY] = $database;
+                $regions[$regionName][DockerSdkConstants::SERVICES_KEY] = $services;
 
                 continue;
             }
 
-            $databases = $services[DockerSdkConstants::PROJECT_DATA_REGIONS_SERVICES_DATABASES_KEY];
+            $databases = $services[DockerSdkConstants::DATABASES_KEY];
             $databasesResult = [];
 
             foreach ($databases as $databaseName => $databaseData) {
                 $databaseNameWithProjectPrefix = sprintf(
                     '%s-%s',
-                    $projectData[DockerSdkConstants::PROJECT_DATA_PROJECT_NAME_KEY],
+                    $projectData[DockerSdkConstants::PROJECT_NAME_KEY],
                     $databaseName
                 );
 
                 $stores = $regionData[DockerSdkConstants::PROJECT_DATA_REGIONS_STORES_KEY];
 
                 foreach ($stores as $storeName => $storeData) {
-                    $services = $storeData[DockerSdkConstants::PROJECT_DATA_REGIONS_STORES_SERVICES_KEY];
-                    $database = $services[DockerSdkConstants::PROJECT_DATA_REGIONS_STORES_SERVICES_DATABASE_KEY];
+                    $services = $storeData[DockerSdkConstants::SERVICES_KEY];
+                    $database = $services[DockerSdkConstants::DATABASE_KEY];
                     $database[DockerSdkConstants::PROJECT_DATA_REGIONS_STORES_SERVICES_DATABASE_NAME_KEY] = $databaseNameWithProjectPrefix;
-                    $services[DockerSdkConstants::PROJECT_DATA_REGIONS_STORES_SERVICES_DATABASE_KEY] = $database;
-                    $storeData[DockerSdkConstants::PROJECT_DATA_REGIONS_STORES_SERVICES_KEY] = $services;
+                    $services[DockerSdkConstants::DATABASE_KEY] = $database;
+                    $storeData[DockerSdkConstants::SERVICES_KEY] = $services;
                     $stores[$storeName] = $storeData;
                 }
 
@@ -243,12 +243,33 @@ class ProjectBuilder extends AbstractBuilder
                 $regionData[DockerSdkConstants::PROJECT_DATA_REGIONS_STORES_KEY] = $stores;
             }
 
-            $services[DockerSdkConstants::PROJECT_DATA_REGIONS_SERVICES_DATABASES_KEY] = $databasesResult;
-            $regionData[DockerSdkConstants::PROJECT_DATA_REGIONS_SERVICES_KEY] = $services;
+            $services[DockerSdkConstants::DATABASES_KEY] = $databasesResult;
+            $regionData[DockerSdkConstants::SERVICES_KEY] = $services;
             $regions[$regionName] = $regionData;
         }
 
         $projectData[DockerSdkConstants::PROJECT_DATA_REGIONS_KEY] = $regions;
+
+        return $projectData;
+    }
+
+    private function buildApplications(array $projectData): array
+    {
+        $result = [];
+        $groups = $projectData[DockerSdkConstants::PROJECT_DATA_GROUPS_KEY];
+
+        foreach ($groups as $groupData) {
+            $applications = $groupData[DockerSdkConstants::PROJECT_DATA_GROUPS_APPLICATIONS_KEY];
+
+            foreach ($applications as $applicationName => $applicationData) {
+                // todo: const
+                if ($applicationData['application'] !== 'static') {
+                    $result[] = $applicationName;
+                }
+            }
+        }
+//        todo: const
+        $projectData['_applications'] = $result;
 
         return $projectData;
     }

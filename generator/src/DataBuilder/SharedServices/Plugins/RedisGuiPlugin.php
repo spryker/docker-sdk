@@ -42,18 +42,21 @@ class RedisGuiPlugin extends AbstractPlugin implements SharedServicesPluginInter
         $sharedServiceStorageData = $sharedServiceData[DockerSdkConstants::PROJECT_DATA_SERVICES_STORAGE_DATA_KEY] ?? [];
         $projectStorageData = $projectServiceData[DockerSdkConstants::PROJECT_DATA_SERVICES_STORAGE_DATA_KEY] ?? [];
 
-        $storageData = array_merge_recursive(
-            $projectStorageData,
-            $sharedServiceStorageData
-        );
+        $hosts = array_unique(array_merge(
+        $sharedServiceStorageData[DockerSdkConstants::HOSTS_KEY] ?? [],
+        $projectStorageData[DockerSdkConstants::HOSTS_KEY] ?? [],
+        ));
+        $services = array_unique(array_merge(
+        $sharedServiceStorageData[DockerSdkConstants::SERVICES_KEY] ?? [],
+        $projectStorageData[DockerSdkConstants::SERVICES_KEY] ?? [],
+        ));
+
+        $storageData = [
+            DockerSdkConstants::HOSTS_KEY => $hosts,
+            DockerSdkConstants::SERVICES_KEY => $services,
+        ];
 
         $sharedServiceData[DockerSdkConstants::PROJECT_DATA_SERVICES_STORAGE_DATA_KEY] = $storageData;
-
-        $hosts = array_unique($sharedServiceData[DockerSdkConstants::PROJECT_DATA_SERVICES_STORAGE_DATA_KEY][DockerSdkConstants::PROJECT_DATA_SERVICES_STORAGE_DATA_HOSTS_KEY]);
-        $services = array_unique($sharedServiceData[DockerSdkConstants::PROJECT_DATA_SERVICES_STORAGE_DATA_KEY][DockerSdkConstants::PROJECT_DATA_SERVICES_STORAGE_DATA_SERVICES_KEY]);
-
-        $sharedServiceData[DockerSdkConstants::PROJECT_DATA_SERVICES_STORAGE_DATA_KEY][DockerSdkConstants::PROJECT_DATA_SERVICES_STORAGE_DATA_HOSTS_KEY] = $hosts;
-        $sharedServiceData[DockerSdkConstants::PROJECT_DATA_SERVICES_STORAGE_DATA_KEY][DockerSdkConstants::PROJECT_DATA_SERVICES_STORAGE_DATA_SERVICES_KEY] = $services;
 
         return $sharedServiceData;
     }
@@ -63,7 +66,7 @@ class RedisGuiPlugin extends AbstractPlugin implements SharedServicesPluginInter
         $result = [];
         $sharedServices = array_flip($this->config->getSharedServiceList());
 
-        $services = $projectStorageData[DockerSdkConstants::PROJECT_DATA_SERVICES_STORAGE_DATA_SERVICES_KEY] ?? [];
+        $services = $projectStorageData[DockerSdkConstants::SERVICES_KEY] ?? [];
 
         foreach ($services as $serviceName) {
             if (array_key_exists($serviceName, $sharedServices)) {
@@ -75,7 +78,7 @@ class RedisGuiPlugin extends AbstractPlugin implements SharedServicesPluginInter
             $result[] = $this->config->getSprykerProjectName() . '_' . $serviceName;
         }
 
-        $projectStorageData[DockerSdkConstants::PROJECT_DATA_SERVICES_STORAGE_DATA_SERVICES_KEY] = $result;
+        $projectStorageData[DockerSdkConstants::SERVICES_KEY] = $result;
 
         return $projectStorageData;
     }
@@ -85,7 +88,7 @@ class RedisGuiPlugin extends AbstractPlugin implements SharedServicesPluginInter
         $result = [];
         $sharedServices = array_flip($this->config->getSharedServiceList());
 
-        $hosts = $projectStorageData[DockerSdkConstants::PROJECT_DATA_SERVICES_STORAGE_DATA_HOSTS_KEY] ?? [];
+        $hosts = $projectStorageData[DockerSdkConstants::HOSTS_KEY] ?? [];
 
         foreach ($hosts as $host) {
             $host = explode(':', $host);
@@ -103,7 +106,7 @@ class RedisGuiPlugin extends AbstractPlugin implements SharedServicesPluginInter
             $result[] = implode(':', $host);
         }
 
-        $projectStorageData[DockerSdkConstants::PROJECT_DATA_SERVICES_STORAGE_DATA_HOSTS_KEY] = $result;
+        $projectStorageData[DockerSdkConstants::HOSTS_KEY] = $result;
 
         return $projectStorageData;
     }

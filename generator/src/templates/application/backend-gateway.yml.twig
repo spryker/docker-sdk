@@ -2,7 +2,7 @@
     image: {{ projectName }}_run_app:{{ project.tag }}-{{ applicationName | lower }}
     container_name: {{ projectName }}_{{ applicationName | lower }}
     networks:
-      - {{ project._internal_project_name }}_private
+      - {{ project.internal_project_name }}_private
     profiles:
       - {{ projectName }}
     labels:

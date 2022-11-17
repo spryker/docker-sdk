@@ -18,10 +18,10 @@ use Twig\Loader\FilesystemLoader;
 class DockerSdkBashConstantBuilder
 {
     private const DOCKER_SDK_CONSTANTS_FILE_PATH = 'bin/standalone/constants.sh';
-    private const DOCKER_SDK_CONSTANTS_PHP_PATH = '/data/src/DockerSdkConstants.php';
+    private const DOCKER_SDK_CONSTANTS_PHP_PATH = '/data/src/Generated/DockerSdkBashConstants.php';
 
     private const TEMPLATE_DIRECTORY_PATH = APPLICATION_SOURCE_DIR .'/ConstantBuilder/template';
-    private const TEMPLATE_NAME = 'DockerSdkConstants.php.twig';
+    private const TEMPLATE_NAME = 'DockerSdkBashConstants.php.twig';
 
     private const VALUE_KEY = 'value';
     private const TYPE_KEY = 'type';
@@ -34,30 +34,23 @@ class DockerSdkBashConstantBuilder
     /**
      * @var array
      */
-    private $additionalConstants;
-    /**
-     * @var array
-     */
     private $environmentVariables;
     /**
      * @var array
      */
-    private $constantNameListForDelete;
+    private $constantNameListForDelete = [
+        'TRUE',
+        'FALSE',
+    ];
 
     /**
      * @param string $deploymentPath
+     * @param array $environmentVariables
      */
-    public function __construct(
-        string $deploymentPath,
-        array $additionalConstants = [],
-        array $environmentVariables = [],
-        array $constantNameListForDelete = []
-    )
+    public function __construct(string $deploymentPath, array $environmentVariables = [])
     {
         $this->deploymentPath = $deploymentPath;
-        $this->additionalConstants = $additionalConstants;
         $this->environmentVariables = $environmentVariables;
-        $this->constantNameListForDelete = $constantNameListForDelete;
     }
 
     /**
@@ -69,7 +62,6 @@ class DockerSdkBashConstantBuilder
     public function buildDockerSdkConstants(): void
     {
         $data = $this->getDockerSdkBashConstants();
-        $data = $this->addAdditionalConstants($data);
         $data = $this->addRequiredEnvVariables($data);
         $data = $this->addMetaData($data);
 
@@ -153,19 +145,6 @@ class DockerSdkBashConstantBuilder
             }
 
             unset($data[$constantName]);
-        }
-
-        return $data;
-    }
-
-    private function addAdditionalConstants(array $data): array
-    {
-        foreach ($this->additionalConstants as $constantName => $constantValue) {
-            if (array_key_exists($constantName, $data)) {
-                throw new Exception('Duplicate: ' . $constantName);
-            }
-
-            $data[$constantName] = $constantValue;
         }
 
         return $data;

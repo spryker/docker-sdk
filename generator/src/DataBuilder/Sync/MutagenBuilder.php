@@ -39,7 +39,7 @@ class MutagenBuilder extends AbstractBuilder
 
         if (!array_key_exists($projectName, $mutagenProjectsData)) {
             $mutagenProjectsData[$projectName] = [
-                DockerSdkConstants::MUTAGEN_DATA_PROJECT_NAME_KEY => $projectName,
+                DockerSdkConstants::PROJECT_NAME_KEY => $projectName,
                 DockerSdkConstants::MUTAGEN_DATA_PROJECT_PATH_KEY => $projectPath,
             ];
         }

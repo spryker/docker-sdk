@@ -31,7 +31,7 @@ class GatewayBuilder extends AbstractBuilder
 
         $gatewayData = $this->reader->read($this->config->getGatewayDataFilePath());
 
-        $hosts = array_merge($projectHosts, $gatewayData[DockerSdkConstants::GATEWAY_HOSTS_KEY] ?? []);
+        $hosts = array_merge($projectHosts, $gatewayData[DockerSdkConstants::HOSTS_KEY] ?? []);
         $ports = array_merge($projectPorts, $gatewayData[DockerSdkConstants::GATEWAY_PORTS_KEY] ?? []);
 // todo: plugin
         $hosts = array_filter($hosts, function ($host) {
@@ -44,7 +44,7 @@ class GatewayBuilder extends AbstractBuilder
         sort($ports);
 
         return [
-            DockerSdkConstants::GATEWAY_HOSTS_KEY => $hosts,
+            DockerSdkConstants::HOSTS_KEY => $hosts,
             DockerSdkConstants::GATEWAY_PORTS_KEY => $ports,
         ];
     }

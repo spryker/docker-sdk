@@ -12,7 +12,7 @@ services:
   'projectName': projectName,
   'projectData': projectData,
   'sharedServices': sharedServices,
-  '_internal_project_name': _internal_project_name,
+  'internal_project_name': internal_project_name,
 } %}
 {% endfor %}
 
@@ -21,7 +21,7 @@ volumes:
 {% include "docker-compose/project-volumes-compose.yml.twig" with {
   'projectsData': projectsData,
   'sharedServices': sharedServices,
-  '_internal_project_name': _internal_project_name,
+  'internal_project_name': internal_project_name,
 } %}
 
 {% include "docker-compose/x-mutagen.yml.twig" with {

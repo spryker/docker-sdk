@@ -2,7 +2,7 @@
     image: {{ projectName }}_run_frontend:{{ projectData.tag }}
     container_name: {{ projectName }}_frontend
     networks:
-      - {{ _internal_project_name }}_private
+      - {{ internal_project_name }}_private
     labels:
       'spryker.app.name': {{ projectName }}_frontend
       'spryker.app.type': proxy

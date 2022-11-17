@@ -103,14 +103,14 @@ readonly DEPLOYMENT_DIR="$(cd "${BASH_SOURCE%/*}" >/dev/null 2>&1 && pwd)"
 readonly DEPLOYMENT_PATH="${DEPLOYMENT_DIR/$PROJECT_DIR/.}"
 readonly SECRETS_FILE_PATH="${DEPLOYMENT_DIR}/.secrets"
 readonly PROGRESS_TYPE=${PROGRESS_TYPE:-tty}
-{# todo: why #}
-readonly SPRYKER_PROJECT_NAME={{ _project_name }}
-readonly SPRYKER_PROJECT_PATH={{ _project_path }}
-readonly SPRYKER_INTERNAL_PROJECT_NAME={{ _internal_project_name }}
+readonly SPRYKER_PROJECT_NAME={{ project_name }}
+readonly SPRYKER_PROJECT_PATH={{ project_path }}
+readonly SPRYKER_INTERNAL_PROJECT_NAME={{ internal_project_name }}
 VERBOSE=${VERBOSE:-0}
 
 # Predefined constants
 readonly APPLICATION_ENV="{{ environment | default('docker') }}"
+{# todo: fix #}
 declare -a -r SPRYKER_APPLICATIONS=({{ _applications | join(' ') | raw }})
 declare -a -r SPRYKER_ENTRYPOINTS=({{ _entryPoints | join(' ') | raw }})
 readonly COMPOSE_PROJECT_NAME={{ namespace | default('spryker') }}
@@ -128,8 +128,8 @@ readonly SPRYKER_STORES=({{ regions | map((regionData, region) => "'local REGION
 readonly SPRYKER_DEFAULT_STORE="{{ (regions | first)['stores'] | keys | first }}"
 readonly SPRYKER_FILE_MODE="{{ _fileMode }}"
 readonly SPRYKER_XDEBUG_MODE_ENABLE="{{ docker['debug']['xdebug']['enabled'] is not defined or docker['debug']['xdebug']['enabled'] == true ? '1' : '' }}"
-readonly SPRYKER_SYNC_SESSION_NAME="{{ _project_name ~ '-codebase' }}"
-readonly SPRYKER_SYNC_VOLUME="{{ _project_name ~ '-_data_sync' }}"
+readonly SPRYKER_SYNC_SESSION_NAME="{{ project_name ~ '-codebase' }}"
+readonly SPRYKER_SYNC_VOLUME="{{ project_name ~ '_data_sync' }}"
 readonly DOCKER_COMPOSE_FILES_EXTRA="{{ docker['compose']['yamls'] | default([]) | join(' ') }}"
 readonly SPRYKER_DASHBOARD_ENDPOINT="{{ _dashboardEndpoint }}"
 readonly KNOWN_HOSTS="{{ _knownHosts | default("") }}"

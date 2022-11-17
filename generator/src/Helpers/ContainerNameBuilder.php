@@ -7,7 +7,7 @@
 
 namespace DockerSdk\Helpers;
 
-use DockerSdk\DockerSdkConstants;
+use DockerSdk\Generated\DockerSdkBashConstants;
 
 class ContainerNameBuilder
 {
@@ -15,13 +15,13 @@ class ContainerNameBuilder
 
     public static function build(string $serviceName): string
     {
-        $sharedServices = DockerSdkConstants::SPRYKER_SHARED_SERVICES_LIST;
+        $sharedServices = DockerSdkBashConstants::SPRYKER_SHARED_SERVICES_LIST;
         $sharedServices = array_flip($sharedServices);
 
         if (!array_key_exists($serviceName, $sharedServices)) {
-            return sprintf(self::TEMPLATE, DockerSdkConstants::SPRYKER_PROJECT_NAME, $serviceName);
+            return sprintf(self::TEMPLATE, DockerSdkBashConstants::SPRYKER_PROJECT_NAME, $serviceName);
         }
 
-        return sprintf(self::TEMPLATE, DockerSdkConstants::SPRYKER_INTERNAL_PROJECT_NAME, $serviceName);
+        return sprintf(self::TEMPLATE, DockerSdkBashConstants::SPRYKER_INTERNAL_PROJECT_NAME, $serviceName);
     }
 }

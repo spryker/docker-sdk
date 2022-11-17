@@ -2,7 +2,7 @@
     image: spryker/jenkins:2.305
     container_name: {{ serviceData.project_name ~ '_' ~ serviceName }}
     networks:
-      - {{ _internal_project_name }}_private
+      - {{ internal_project_name }}_private
     profiles:
       - {{ serviceData.project_name }}
     labels:

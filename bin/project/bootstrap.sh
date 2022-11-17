@@ -2,6 +2,7 @@
 
 function Project::bootstrap() {
   Project::bootstrap::_createProjectPathFile "${1}"
+  Project::bootstrap::_createDockerNetworks
   Project::bootstrap::_createMutagenVolume
   Project::bootstrap::_copySharedData "${1}"
 }
@@ -41,6 +42,22 @@ function Project::bootstrap::_createProjectPathFile() {
 
 function Project::postBootstrap::_moveComposeFiles() {
   mv "${DESTINATION_DIR}/${DOCKER_COMPOSE_FILENAME}" "${DEPLOYMENT_DIR}/${SPRYKER_INTERNAL_PROJECT_NAME}/${DOCKER_COMPOSE_FILENAME}"
+}
+
+function Project::bootstrap::_createDockerNetworks() {
+  local publicNetworkId
+  local privateNetworkId
+
+  publicNetworkId=$(docker network ls --filter="name=${SPRYKER_INTERNAL_PROJECT_NAME}_${DOCKER_PUBLIC_NETWORK_NAME}" --format {{.ID}})
+  privateNetworkId=$(docker network ls --filter="name=${SPRYKER_INTERNAL_PROJECT_NAME}_${DOCKER_PRIVATE_NETWORK_NAME}" --format {{.ID}})
+
+  if [ -z "${publicNetworkId}" ] ; then
+    docker network create "${SPRYKER_INTERNAL_PROJECT_NAME}_public" >/dev/null
+  fi
+
+  if [ -z "${privateNetworkId}" ] ; then
+    docker network create "${SPRYKER_INTERNAL_PROJECT_NAME}_private" >/dev/null
+  fi
 }
 
 function Project::bootstrap::_copySharedData() {

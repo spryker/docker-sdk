@@ -21,7 +21,7 @@
 {% set version = serviceData['version'] | default('default') %}
 {% include "service/" ~ engine ~ "/" ~ version ~ "/" ~  engine ~ ".yml.twig" with {
     project: projectData,
-    _internal_project_name: projectData._internal_project_name,
+    internal_project_name: projectData.internal_project_name,
     serviceName: serviceName,
     serviceData: serviceData,
     engine: engine,

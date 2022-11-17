@@ -4,7 +4,7 @@
     privileged: true
     command: UNIX-LISTEN:/tmp/ssh-relay/ssh-auth.sock,fork,unlink-early,user=1000,group=1000,mode=666 UNIX-CONNECT:/tmp/ssh-relay/input-ssh-auth.sock
     networks:
-      - {{ _internal_project_name }}_private
+      - {{ internal_project_name }}_private
     volumes:
       - {{ projectName }}_ssh_relay:/tmp/ssh-relay
 {%  if _platform == 'macos' %}

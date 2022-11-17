@@ -45,7 +45,7 @@ class RedisDataBuilder extends AbstractBuilder
             '*.'
             . DockerSdkConstants::PROJECT_DATA_REGIONS_STORES_KEY
             . '.*.'
-            . DockerSdkConstants::PROJECT_DATA_REGIONS_SERVICES_KEY
+            . DockerSdkConstants::SERVICES_KEY
             . '.key_value_store.namespace'
         );
 
