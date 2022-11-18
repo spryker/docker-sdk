@@ -45,7 +45,15 @@ class RangeValueRule extends AbstractRule
                 return true;
             }
 
-            return !($data < $this->ruleConfig[0] || $data > $this->ruleConfig[1]);
+            if ($data < $this->ruleConfig[0]) {
+                return false;
+            }
+
+            if (array_key_exists(1, $this->ruleConfig) && $data > $this->ruleConfig[1]) {
+                return false;
+            }
+
+            return true;
         }
 
         foreach ($data as $range) {
@@ -53,7 +61,11 @@ class RangeValueRule extends AbstractRule
                 continue;
             }
 
-            if ($range > $this->ruleConfig[0] || $range < $this->ruleConfig[1]) {
+            if ($range < $this->ruleConfig[0]) {
+                return false;
+            }
+
+            if (array_key_exists(1, $this->ruleConfig) && $range > $this->ruleConfig[1]) {
                 return false;
             }
         }
@@ -68,6 +80,6 @@ class RangeValueRule extends AbstractRule
      */
     public function getValidationMessage(string $fieldName): string
     {
-        return sprintf(static::VALIDATION_MESSAGE_TEMPLATE, $fieldName, $this->ruleConfig[0] . '...' . $this->ruleConfig[1]);
+        return sprintf(static::VALIDATION_MESSAGE_TEMPLATE, $fieldName, $this->ruleConfig[0] . '...' . $this->ruleConfig[1] ?? '');
     }
 }

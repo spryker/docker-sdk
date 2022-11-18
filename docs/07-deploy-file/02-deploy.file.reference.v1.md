@@ -35,7 +35,7 @@ This reference page describes version 1 of the Deploy file format. This is the n
 The topics below are organized alphabetically for top-level keys and sub-level keys to describe the hierarchy.
 
 You can use the extended YAML syntax according to [YAML™ Version 1.2](https://yaml.org/spec/1.2/spec.html).
-Find B2B and B2C deploy file examples for [development](06-installation/installation-guides/choosing-an-installation-mode#development-mode) and [demo](06-installation/installation-guides/choosing-an-installation-mode#demo-mode) environments in the table:
+Find B2B and B2C deploy file examples for [development](../06-installation/02-installation-guides/01-choosing-an-installation-mode#development-mode) and [demo](../06-installation/02-installation-guides/01-choosing-an-installation-mode#demo-mode) environments in the table:
 
 | Development mode | Demo mode |
 | --- | --- |
@@ -258,6 +258,25 @@ image:
 ```
 ***
 
+### image: node:
+
+Defines Node.js settings.
+
+* `image: node: version:` - defines a Node.js version. Supports only major versions that are greater than the default one. The default version is `12`.
+* `image: node: npm` - defines an NPM version. Supports only major versions that are  greater than the default one. The default version is `6`.
+* `image: node: distro:` - defines a Linux distribution for the Node Docker image. Should be equal to your base PHP image. Possible values are `alpine` and `debian`. This variable is optional with the default value of `alpine`.
+
+```yaml
+image:
+    ...
+    node:
+        version: 18
+        distro: alpine
+        npm: 8
+```
+***
+
+
 ### image: php:
 
 Defines PHP settings for Spryker applications.
@@ -280,6 +299,7 @@ image:
             - tideways
 ```
 ***
+
 ### assets:
 
 Defines the setting of *Assets*.
@@ -787,7 +807,35 @@ An SQL database management system *Service*.
   - `database: database:` - defines database name.
   - `database: username:`, `database: password:` - defines database credentials.
 
+* Store-specific
 
+  - `databases:` - defines the list of required store-specific databases.
+  - `databases: database-1: username:`,`databases: database-1: password:` - defines database credentials. The default value: `spryker` and `secret`
+  - `databases: database-1: collate:` - defines collation for the database. If not specified, the default value applies: `utf8_general_ci`.
+  - `databases: database-1: character-set` - defines character set for the database. If not specified, the default value applies: `utf8`.
+
+```yaml
+version: "1.0"
+
+regions:
+  REGION-1:
+    services:
+      databases:
+          database-1:
+            collate: 'collate'
+            character-set: 'character-set'
+          database-2:
+    stores:
+      STORE-1:
+        services:
+            database:
+               name: database-1
+      STORE-2:
+        services:
+            database:
+               name: database-2
+
+ ```
 ***
 
 ### key_value_store:

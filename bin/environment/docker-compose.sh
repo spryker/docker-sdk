@@ -21,6 +21,8 @@ function Environment::checkDockerComposeVersion() {
         exit 1
     fi
 
+    updateComposeCovertWindowsPaths
+
     Console::end "[OK]"
 }
 
@@ -67,15 +69,23 @@ function Environment::getDockerComposeSubstitute() {
 
 # For avoid https://github.com/docker/compose/issues/9104
 function Environment::getDockerComposeTTY() {
-	local ttyDisabledKey='docker_compose_tty_disabled'
-	local ttyEnabledKey='docker_compose_tty_enabled'
-	local installedVersion=$(Environment::getDockerComposeVersion)
-	local dockerComposeVersion="2.2.3"
+  local ttyDisabledKey='docker_compose_tty_disabled'
+  local ttyEnabledKey='docker_compose_tty_enabled'
+  local installedVersion=$(Version::parse "$(Environment::getDockerComposeVersion)")
+
+  if [ "${installedVersion:0:1}" -ge 2 ]; then
+    echo "${ttyDisabledKey}"
+  else
+    echo "${ttyEnabledKey}"
+  fi
+}
+
+# https://github.com/docker/compose/issues/9428
+function updateComposeCovertWindowsPaths() {
+    local dockerComposeVersion="2.5.0"
 
     if [ "$(Version::parse "${installedVersion}")" -ge "$(Version::parse "${dockerComposeVersion}")" ]; then
-		echo "${ttyDisabledKey}"
-	else
-		echo "${ttyEnabledKey}"
+        export COMPOSE_CONVERT_WINDOWS_PATHS=0
     fi
 }
 
