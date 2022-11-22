@@ -1618,7 +1618,8 @@ function isArmArchitecture(): bool
  */
 function buildNodeJsNpmBuildConfig(array $projectData): array
 {
-    $imageName = $projectData['image']['tag'];
+    $imageName = getenv('SPRYKER_PLATFORM_IMAGE') != '' ? getenv('SPRYKER_PLATFORM_IMAGE') : $projectData['image']['tag'];
+
     $nodejsConfig = $projectData['image']['node'] ?? [];
 
     return [
