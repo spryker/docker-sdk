@@ -2,7 +2,7 @@
 
 # shellcheck disable=SC2155
 
-require docker docker-compose tr awk wc sed grep
+require docker tr awk wc sed grep
 
 Registry::Flow::addBoot "Compose::verboseMode"
 
