@@ -1253,6 +1253,8 @@ function buildSecrets(string $deploymentDir): array
     $data['SPRYKER_OAUTH_CLIENT_SECRET'] = generateToken(48);
     $data['SPRYKER_ZED_REQUEST_TOKEN'] = generateToken(80);
     $data['SPRYKER_URI_SIGNER_SECRET_KEY'] = generateToken(80);
+    $data['SPRYKER_PRODUCT_CONFIGURATOR_ENCRYPTION_KEY'] = generateToken(10);
+    $data['SPRYKER_PRODUCT_CONFIGURATOR_HEX_INITIALIZATION_VECTOR'] = generateRandomHex(16);
 
     return $data;
 }
@@ -1327,6 +1329,16 @@ function generateToken($tokenLength = 80): string
     }
 
     return $token;
+}
+
+/**
+ * @param int $num_bytes
+ *
+ * @return string
+ */
+function generateRandomHex(int $num_bytes=4): string
+{
+    return bin2hex(random_bytes($num_bytes));
 }
 
 /**
