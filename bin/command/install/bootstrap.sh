@@ -109,6 +109,7 @@ function Command::bootstrap() {
         userToRun=()
     fi
     docker run -i --rm "${userToRun[@]}" \
+        -e SPRYKER_PLATFORM_IMAGE="${SPRYKER_PLATFORM_IMAGE:-""}" \
         -e SPRYKER_DOCKER_SDK_PLATFORM="${_PLATFORM}" \
         -e SPRYKER_DOCKER_SDK_DEPLOYMENT_DIR="${DESTINATION_DIR}" \
         -e VERBOSE="${VERBOSE}" \

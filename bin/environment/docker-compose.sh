@@ -3,7 +3,7 @@
 export COMPOSE_HTTP_TIMEOUT=400
 export COMPOSE_CONVERT_WINDOWS_PATHS=1
 
-require docker-compose tr
+require tr
 
 function Environment::checkDockerComposeVersion() {
     Console::verbose::start "Checking docker-compose version..."
