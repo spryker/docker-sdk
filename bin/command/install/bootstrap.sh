@@ -118,7 +118,6 @@ function Command::bootstrap() {
         -e SPRYKER_PROJECT_PATH="${SPRYKER_PROJECT_PATH}" \
         -e VERBOSE="${VERBOSE}" \
         -v "${SOURCE_DIR}/generator/src":/data/src:rw \
-        -v "${SOURCE_DIR}/generator/vendor":/data/vendor:rw \
         -v "${tmpDeploymentDir}":/data/deployment:rw \
         spryker_docker_sdk
 
