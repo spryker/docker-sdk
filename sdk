@@ -22,7 +22,7 @@ import command/install/config.sh
 import project/project.sh
 
 SPRYKER_PROJECT_PATH=$(pwd)
-SPRYKER_PROJECT_NAME=$(Project::getNameFromPath "${SPRYKER_PROJECT_PATH}")
+SPRYKER_PROJECT_NAME=${SPRYKER_PROJECT_NAME:-$(Project::getNameFromPath "${SPRYKER_PROJECT_PATH}")}
 
 while getopts ":p:" opt; do
     case ${opt} in
@@ -54,8 +54,6 @@ System::Bootstrap
 readonly DEPLOYMENT_DIR="${SOURCE_DIR}/deployment"
 readonly DESTINATION_DIR="${DEPLOYMENT_DIR}/${SPRYKER_PROJECT_NAME}"
 readonly DEPLOY_SCRIPT=${DESTINATION_DIR}/deploy
-
-Project::validate
 
 Registry::Help::section 'Quick start:'
 Registry::Help::row "${SELF_SCRIPT} bootstrap && ${SELF_SCRIPT} up"

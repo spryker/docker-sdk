@@ -9,7 +9,13 @@ function Project::getNameFromPath() {
 }
 
 function Project::info() {
-  Console::info "Project name: ${SPRYKER_PROJECT_NAME}\nProject path: ${SPRYKER_PROJECT_PATH}\n"
+  local sprykerProjectPath="${SPRYKER_PROJECT_PATH}"
+
+  if [ -f "${DESTINATION_DIR}/${PROJECT_PATH_FILENAME}" ]; then
+      sprykerProjectPath=$(cat "${DESTINATION_DIR}/${PROJECT_PATH_FILENAME}")
+  fi
+
+  Console::info "Project name: ${SPRYKER_PROJECT_NAME}\nProject path: ${sprykerProjectPath}\n"
 }
 
 function Project::getListOfEnabledProjects() {

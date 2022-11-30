@@ -160,6 +160,7 @@ if [ -n "${GITHUB_TOKEN}" ]; then
     readonly TOKEN_BASED_COMPOSER_AUTH="{\"github-oauth\":{\"github.com\":\"${GITHUB_TOKEN}\"}}"
 fi
 readonly COMPOSER_AUTH=${COMPOSER_AUTH:-${TOKEN_BASED_COMPOSER_AUTH}}
+{# todo: https://github.com/docker/for-mac/issues/4242 #}
 readonly SSH_AUTH_SOCK_ON_HOST=${SSH_AUTH_SOCK:-"${DEPLOYMENT_PATH}/context/ssh/ssh-agent.mock"}
 readonly SSH_AUTH_SOCK_IN_CLI="$([ -n "${SSH_AUTH_SOCK}" ] && [ -z "${COMPOSER_AUTH}" ] && echo '/home/spryker/ssh-relay/ssh-auth.sock' || echo '')"
 

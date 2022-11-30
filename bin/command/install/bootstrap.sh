@@ -4,6 +4,7 @@ require docker
 
 import environment/docker.sh
 import environment/docker-compose.sh
+import project/project.sh
 
 Registry::addCommand "boot" "Command::bootstrap"
 Registry::addCommand "bootstrap" "Command::bootstrap"
@@ -40,6 +41,8 @@ function Command::bootstrap() {
         esac
     done
     shift $((OPTIND - 1))
+
+    Project::validate
 
     local gitHash=$(git rev-parse --verify HEAD 2>/dev/null || true)
     local tmpDeploymentDir="${SOURCE_DIR}/deployment/_tmp"
@@ -134,7 +137,8 @@ function Command::bootstrap() {
     fi
 
     Console::info "Deployment is generated into ${LGRAY}${DESTINATION_DIR}"
-    Console::log "Use ${OK}docker/sdk$([ "${SPRYKER_PROJECT_NAME}" != 'default' ] && echo -n " -p ${SPRYKER_PROJECT_NAME}") up${NC} to start the application."
+
+    Console::log "Use ${OK}docker/sdk$([ "${SPRYKER_PROJECT_NAME}" != $(basename $(pwd)) ] && echo -n " -p ${SPRYKER_PROJECT_NAME}") up${NC} to start the application."
     Console::log ''
 }
 
