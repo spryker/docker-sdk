@@ -48,15 +48,15 @@ function Project::bootstrap::_createDockerNetworks() {
   local publicNetworkId
   local privateNetworkId
 
-  publicNetworkId=$(docker network ls --filter="name=${SPRYKER_INTERNAL_PROJECT_NAME}_${DOCKER_PUBLIC_NETWORK_NAME}" --format {{.ID}})
-  privateNetworkId=$(docker network ls --filter="name=${SPRYKER_INTERNAL_PROJECT_NAME}_${DOCKER_PRIVATE_NETWORK_NAME}" --format {{.ID}})
+  publicNetworkId=$(docker network ls --filter="name=${DOCKER_PUBLIC_NETWORK_NAME}" --format {{.ID}})
+  privateNetworkId=$(docker network ls --filter="name=${DOCKER_PRIVATE_NETWORK_NAME}" --format {{.ID}})
 
   if [ -z "${publicNetworkId}" ] ; then
-    docker network create "${SPRYKER_INTERNAL_PROJECT_NAME}_public" >/dev/null
+    docker network create "${DOCKER_PUBLIC_NETWORK_NAME}" >/dev/null
   fi
 
   if [ -z "${privateNetworkId}" ] ; then
-    docker network create "${SPRYKER_INTERNAL_PROJECT_NAME}_private" >/dev/null
+    docker network create "${DOCKER_PRIVATE_NETWORK_NAME}" >/dev/null
   fi
 }
 
