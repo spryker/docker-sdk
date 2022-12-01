@@ -286,6 +286,7 @@ Defines PHP settings for Spryker applications.
   * `blackfire`
   * `newrelic`
   * `tideways`
+  * `xhprof`
 
 ```yaml
 image:
@@ -297,6 +298,7 @@ image:
             - blackfire
             - newrelic
             - tideways
+            - xhprof
 ```
 ***
 
