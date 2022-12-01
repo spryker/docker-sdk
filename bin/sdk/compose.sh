@@ -136,6 +136,10 @@ function Compose::up() {
 
     Registry::Flow::runBeforeUp
 
+    if [ "${doBuild}" = "--force" ]; then
+      Compose::cleanSourceDirectory
+    fi
+
     Images::buildApplication ${noCache} ${doBuild}
     Codebase::build ${noCache} ${doBuild}
     Assets::build ${noCache} ${doAssets}
@@ -203,4 +207,14 @@ function Compose::cleanEverything() {
     Console::verbose "${INFO}Stopping and removing all Spryker containers and volumes${NC}"
     Compose::command down -v --remove-orphans --rmi all
     Registry::Flow::runAfterDown
+}
+
+function Compose::cleanSourceDirectory() {
+  local projectPath
+  local srcGeneratedPath='src/Generated'
+
+  projectPath=$(pwd)
+  if [ -d "${projectPath}/${srcGeneratedPath}" ]; then
+      rm -rf "${projectPath}/${srcGeneratedPath}"
+  fi
 }
