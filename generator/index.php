@@ -100,11 +100,12 @@ $projectData = buildDefaultCredentials($projectData);
 
 // TODO Make it optional in next major
 // Making webdriver as required service for BC reasons
-if (empty($projectData['services']['webdriver'])) {
-    $projectData['services']['webdriver'] = [
-        'engine' => 'phantomjs',
-    ];
-}
+// todo: waitFor refactoring dependency + document + testing mode
+//if (empty($projectData['services']['webdriver'])) {
+//    $projectData['services']['webdriver'] = [
+//        'engine' => 'phantomjs',
+//    ];
+//}
 
 $projectData['_dashboardEndpoint'] = '';
 if (!empty($projectData['services']['dashboard'])) {
@@ -165,6 +166,63 @@ const SPRYKER_NPM_VERSION_ENV_NAME = 'SPRYKER_NPM_VERSION';
 const DEFAULT_NODE_VERSION = 12;
 const DEFAULT_NODE_DISTRO = ALPINE_DISTRO_NAME;
 const DEFAULT_NPM_VERSION = 6;
+
+const DATABASE_SERVICE = 'database';
+const BROKER_SERVICE = 'broker';
+const KEY_VALUE_STORE_SERVICE = 'key_value_store';
+const SESSION_SERVICE = 'session';
+const SEARCH_SERVICE = 'search';
+
+const SERVICES_APPLICATIONS_DEPENDENCIES = [
+    DATABASE_SERVICE => [
+        BACKOFFICE_APP,
+        BACKEND_GATEWAY_APP,
+        ZED_APP,
+        MERCHANT_PORTAL,
+        GLUE_BACKEND,
+    ],
+    BROKER_SERVICE => [
+        BACKOFFICE_APP,
+        BACKEND_GATEWAY_APP,
+        ZED_APP,
+        MERCHANT_PORTAL,
+        GLUE_BACKEND,
+    ],
+    KEY_VALUE_STORE_SERVICE => [
+        BACKOFFICE_APP,
+        BACKEND_GATEWAY_APP,
+        ZED_APP,
+        YVES_APP,
+        MERCHANT_PORTAL,
+        GLUE_APP,
+        GLUE_STOREFRONT,
+        GLUE_BACKEND,
+    ],
+    SESSION_SERVICE => [
+        BACKOFFICE_APP,
+        ZED_APP,
+        YVES_APP,
+        MERCHANT_PORTAL,
+        GLUE_BACKEND,
+    ],
+    SEARCH_SERVICE => [
+        BACKOFFICE_APP,
+        BACKEND_GATEWAY_APP,
+        ZED_APP,
+        YVES_APP,
+        MERCHANT_PORTAL,
+        GLUE_APP,
+        GLUE_STOREFRONT,
+        GLUE_BACKEND,
+    ],
+    GLUE_BACKEND => [
+        DATABASE_SERVICE,
+        BROKER_SERVICE,
+        KEY_VALUE_STORE_SERVICE,
+        SESSION_SERVICE,
+        SEARCH_SERVICE,
+    ],
+];
 
 $projectData['_node_npm_config'] = buildNodeJsNpmBuildConfig($projectData);
 
@@ -546,6 +604,8 @@ if (count($errorMessages) > 0) {
     exit(1);
 }
 
+getApplicationServiceDependencyWarningMessage($projectData);
+
 // -------------------------
 /**
  * @param array $projectData
@@ -700,19 +760,24 @@ function getSSLRedirectPort(array $projectData): int
  */
 function getBrokerConnections(array $projectData): string
 {
-    $brokerServiceData = $projectData['services']['broker'];
-
     $connections = [];
+    $brokerServiceData = $projectData['services']['broker'] ?? [];
+
+    if ($brokerServiceData == []) {
+        return json_encode($connections);
+    }
+
     foreach ($projectData['regions'] as $regionName => $regionData) {
         foreach ($regionData['stores'] ?? [] as $storeName => $storeData) {
             $localServiceData = array_replace($brokerServiceData, $storeData['services']['broker']);
+
             $connections[$storeName] = [
                 'RABBITMQ_CONNECTION_NAME' => $storeName . '-connection',
                 'RABBITMQ_HOST' => 'broker',
                 'RABBITMQ_PORT' => $localServiceData['port'] ?? 5672,
-                'RABBITMQ_USERNAME' => $localServiceData['api']['username'],
-                'RABBITMQ_PASSWORD' => $localServiceData['api']['password'],
-                'RABBITMQ_VIRTUAL_HOST' => $localServiceData['namespace'],
+                'RABBITMQ_USERNAME' => $localServiceData['api']['username'] ?? '',
+                'RABBITMQ_PASSWORD' => $localServiceData['api']['password'] ?? '',
+                'RABBITMQ_VIRTUAL_HOST' => $localServiceData['namespace'] ?? '',
                 'RABBITMQ_STORE_NAMES' => [$storeName], // check if connection is shared
             ];
         }
@@ -728,9 +793,9 @@ function getBrokerConnections(array $projectData): string
  */
 function getCloudBrokerConnections(array $projectData): string
 {
-    $brokerServiceData = $projectData['services']['broker'];
-
     $connections = [];
+    $brokerServiceData = $projectData['services']['broker'] ?? [];
+
     foreach ($projectData['regions'] as $regionName => $regionData) {
         foreach ($regionData['stores'] ?? [] as $storeName => $storeData) {
             $localServiceData = array_replace($brokerServiceData, $storeData['services']['broker']);
@@ -1432,7 +1497,8 @@ function buildDefaultRegionCredentialsForDatabase(array $projectData): array
         'password' => 'secret',
     ];
 
-    $databaseServiceData = $projectData['services']['database'];
+    $databaseServiceData = $projectData['services']['database'] ?? [];
+
     foreach ($projectData['regions'] as $regionName => $regionConfig) {
         $databases = [
             'version' => '1.0',
@@ -1659,4 +1725,81 @@ function getNodeDistroName(array $nodejsConfig, string $imageName): string
     }
 
     return ALPINE_DISTRO_NAME;
+}
+
+/**
+ * @param array $projectData
+ *
+ * @return void
+ */
+function getApplicationServiceDependencyWarningMessage(array $projectData): void
+{
+    $servicesKey = 'services';
+    $projectServices = $projectData[$servicesKey] ?? [];
+
+    $result = [];
+    $projectApplicationList = getProjectApplicationTypeList($projectData);
+
+    foreach (SERVICES_APPLICATIONS_DEPENDENCIES as $serviceName => $applicationList) {
+        if (array_key_exists($serviceName, $projectServices)) {
+            continue;
+        }
+
+        foreach ($applicationList as $applicationName) {
+            if (!in_array($applicationName, $projectApplicationList)) {
+                continue;
+            }
+
+            $result[$serviceName][] = $applicationName;
+        }
+    }
+
+    if ($result == []) {
+        return;
+    }
+
+    echo "We found missing services in your deploy file. We recommend enabling the following services:\n\n";
+    printf("%-20s%-20s\n----\n", "Service Name", "Application Dependencies");
+
+    foreach ($result as $serviceName => $applicationList) {
+        printf("%-20s%-20s\n", $serviceName, implode(', ', $applicationList));
+    }
+}
+
+/**
+ * @param array $projectData
+ *
+ * @return array
+ */
+function getProjectApplicationTypeList(array $projectData): array
+{
+    $groupKey = 'groups';
+    $applicationsKey = 'applications';
+    $applicationKey = 'application';
+
+    if (!array_key_exists($groupKey, $projectData)) {
+        return [];
+    }
+
+    $projectApplicationList = [];
+
+    $groups = $projectData[$groupKey];
+
+    foreach ($groups as $groupData) {
+        if (!array_key_exists($applicationsKey, $groupData)) {
+            continue;
+        }
+
+        $groupApplications = $groupData[$applicationsKey];
+
+        foreach ($groupApplications as $groupApplication) {
+            if (!array_key_exists($applicationKey, $groupApplication)) {
+                continue;
+            }
+
+            $projectApplicationList[] = $groupApplication[$applicationKey];
+        }
+    }
+
+    return array_unique($projectApplicationList);
 }
