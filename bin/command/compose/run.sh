@@ -7,7 +7,7 @@ Registry::Help::command -c "run | start" "Runs Spryker containers."
 
 function Command::run() {
     Compose::run
-    Compose::command restart frontend gateway
+    Compose::command restart ${SPRYKER_PROJECT_NAME}_frontend ${SPRYKER_INTERNAL_PROJECT_NAME}_gateway
 
     Runtime::waitFor ${SPRYKER_INTERNAL_PROJECT_NAME}_database
     Runtime::waitFor ${SPRYKER_INTERNAL_PROJECT_NAME}_search

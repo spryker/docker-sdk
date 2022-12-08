@@ -1,6 +1,8 @@
   {{ projectName }}_cli_ssh_relay:
     image: spryker/socat:latest
     container_name: {{ projectName }}_cli_ssh_relay
+    profiles:
+      - {{ projectName }}
     privileged: true
     command: UNIX-LISTEN:/tmp/ssh-relay/ssh-auth.sock,fork,unlink-early,user=1000,group=1000,mode=666 UNIX-CONNECT:/tmp/ssh-relay/input-ssh-auth.sock
     networks:

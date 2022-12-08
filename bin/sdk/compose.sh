@@ -200,7 +200,20 @@ function Compose::restart() {
 
 function Compose::stop() {
     Console::verbose "${INFO}Stopping all containers${NC}"
-    Compose::command $(Project::getProfilesForTerminate) stop
+
+    if [ ! -f "${DEPLOYMENT_DIR}/${ENABLED_FILENAME}" ]; then
+      return
+    fi
+
+    local enabledProjects=($(Project::getListOfEnabledProjects))
+    local enabledProjectsCount=${#enabledProjects[@]}
+
+    if [ "${enabledProjectsCount}" == 1 ]; then
+      Compose::command --profile ${SPRYKER_INTERNAL_PROJECT_NAME} --profile ${SPRYKER_PROJECT_NAME} stop
+    else
+      docker stop $(docker ps --filter "name=${SPRYKER_PROJECT_NAME}" --format="{{.ID}}")
+    fi
+
     Registry::Flow::runAfterStop
 }
 
