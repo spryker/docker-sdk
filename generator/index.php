@@ -101,11 +101,11 @@ $projectData = buildDefaultCredentials($projectData);
 // TODO Make it optional in next major
 // Making webdriver as required service for BC reasons
 // todo: waitFor refactoring dependency + document + testing mode
-//if (empty($projectData['services']['webdriver'])) {
-//    $projectData['services']['webdriver'] = [
-//        'engine' => 'phantomjs',
-//    ];
-//}
+if (empty($projectData['services']['webdriver'])) {
+    $projectData['services']['webdriver'] = [
+        'engine' => 'phantomjs',
+    ];
+}
 
 $projectData['_dashboardEndpoint'] = '';
 if (!empty($projectData['services']['dashboard'])) {

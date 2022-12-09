@@ -1,6 +1,10 @@
 #!/bin/bash
 
 function Database::haveTables() {
+    if [ ! $(Service::isServiceExist database) ]; then
+      return;
+    fi
+
     tableCount=$(
         Compose::exec <<'EOF'
         export VERBOSE=0
@@ -50,6 +54,10 @@ EOF
 }
 
 function Database::init() {
+    if [ ! $(Service::isServiceExist database) ]; then
+      return;
+    fi
+
     Compose::exec <<'EOF'
         export VERBOSE=0
         export PGPASSWORD="${SPRYKER_DB_ROOT_PASSWORD}"
