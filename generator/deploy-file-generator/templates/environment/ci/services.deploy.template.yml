@@ -5,8 +5,10 @@ services:
         engine: rabbitmq
     session:
         engine: redis
+        version: '6.2'
     key_value_store:
         engine: redis
+        version: '6.2'
     search:
         engine: elastic
         version: 7.6

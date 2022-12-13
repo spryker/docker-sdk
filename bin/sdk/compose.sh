@@ -2,7 +2,7 @@
 
 # shellcheck disable=SC2155
 
-require docker docker-compose tr awk wc sed grep
+require docker tr awk wc sed grep
 
 Registry::Flow::addBoot "Compose::verboseMode"
 
@@ -137,6 +137,10 @@ function Compose::up() {
 
     Registry::Flow::runBeforeUp
 
+    if [ "${doBuild}" = "--force" ]; then
+      Compose::cleanSourceDirectory
+    fi
+
     Images::buildApplication ${noCache} ${doBuild}
     Codebase::build ${noCache} ${doBuild}
     Assets::build ${noCache} ${doAssets}
@@ -210,4 +214,14 @@ function Compose::runCliDependencyServices() {
     if [ "${TIDEWAYS_EXTENSION_ENABLED}" = "${TRUE}" ]; then
         Compose::run --no-deps tideways
     fi
+}
+
+function Compose::cleanSourceDirectory() {
+  local projectPath
+  local srcGeneratedPath='src/Generated'
+
+  projectPath=$(pwd)
+  if [ -d "${projectPath}/${srcGeneratedPath}" ]; then
+      rm -rf "${projectPath}/${srcGeneratedPath}"
+  fi
 }
