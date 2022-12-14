@@ -2,7 +2,7 @@
 
 
 function Database::haveTables() {
-    if [ ! $(Service::isServiceExist database) ]; then
+    if ! Service::isServiceExist database; then
         return;
     fi
 
@@ -49,7 +49,7 @@ EOF
 }
 
 function Database::init() {
-      if [ ! $(Service::isServiceExist database) ]; then
+      if ! Service::isServiceExist database; then
           return;
       fi
 

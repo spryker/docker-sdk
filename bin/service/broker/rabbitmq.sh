@@ -1,7 +1,7 @@
 #!/bin/bash
 
 function Service::Broker::install() {
-    if [ ! $(Service::isServiceExist broker) ]; then
+    if ! Service::isServiceExist broker; then
         return;
     fi
 
