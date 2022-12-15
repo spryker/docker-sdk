@@ -33,6 +33,16 @@
         set $upstream "{{ upstream }}";
         fastcgi_pass "$upstream";
 
+        set $maintenance_mode ${SPRYKER_MAINTENANCE_MODE_ENABLED};
+
+        if ($is_whitelisted_ip = 1) {
+            set $maintenance_mode "0";
+        }
+
+        if ($maintenance_mode = "1") {
+            return 503;
+        }
+
 {% include "nginx/http/default.location.conf.twig" with _context %}
 
 {% include "nginx/http/store.params.conf.twig" with _context %}
