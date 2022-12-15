@@ -41,6 +41,7 @@
         fastcgi_param SPRYKER_ZED_SSL_ENABLED {{ (project['docker']['ssl']['enabled'] | default(false)) ? 1 : 0 }};
         fastcgi_param HTTPS {{ (project['docker']['ssl']['enabled'] | default(false)) ? 'on' : 'off' }};
         fastcgi_param SPRYKER_JENKINS_CSRF_PROTECTION_ENABLED {{ (services['scheduler']['csrf-protection-enabled'] | default(false)) ? 1 : 0 }};
+        fastcgi_param HTTP_X_REQUEST_START "t=${msec}";
 {% endblock location %}
     }
 {% endblock locations %}
