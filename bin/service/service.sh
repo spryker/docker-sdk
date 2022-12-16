@@ -11,5 +11,3 @@ function Service::isServiceExist() {
 
   return ${TRUE}
 }
-
-
