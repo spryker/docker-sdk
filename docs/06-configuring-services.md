@@ -18,6 +18,19 @@ This document describes configuration options of the services shipped with Spryk
 
 
 :::(Info) ()
+* All services is optional. If you have issues with install process, first of all check your install recipe.
+
+* List of dependency:
+
+| Service name    | Application Dependencies                                                                     |
+|-----------------|----------------------------------------------------------------------------------------------|
+| database        | backoffice, backend-gateway, zed, merchant-portal, glue-backend                              |
+| broker          | backoffice, backend-gateway, zed, merchant-portal, glue-backend                              |
+| key_value_store | backoffice, backend-gateway, zed, yves, merchant-portal, glue, glue-storefront, glue-backend |
+| session         | backoffice, zed, yves, merchant-portal, glue-backend                                         |
+| search          | backoffice, backend-gateway, zed, yves, merchant-portal, glue, glue-storefront, glue-backend |
+
+
 * Before you start configuring a service, make sure to install or update the Docker SDK to the latest version:
 ```bash
 git clone https://github.com/spryker/docker-sdk.git ./docker
