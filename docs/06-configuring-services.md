@@ -422,17 +422,13 @@ You can pass the New Relic license only with the `docker/sdk up` command.
 :::
 
 ## Webdriver
-ChromeDriver is provided as a webdriver service by default, but you can switch to PhantomJS as described below.
+PhantomJS is provided as a webdriver service by default, but you can switch to ChromeDriver as described below.
 
 
 ### ChromeDriver
 
 [ChromeDriver](https://chromedriver.chromium.org/) is a thin wrapper on WebDriver and [Chromium](https://chromedriver.chromium.org/) headless browser. It is used for automating web page interaction, JavaScript execution, and other testing-related activities. It provides full-control API to make end-to-end testing flexible and comfortable.
 
-
-:::(Warning) (Default service)
-Chromedriver is provided as a service by default. You may only need to use this configuration if you are running an older version of the Docker SDK or if you've previously switched to another WebDriver.
-:::
 
 #### Configuration
 To enable Chromedriver, adjust `deploy.*.yml` as follows:
