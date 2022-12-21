@@ -1,9 +1,5 @@
   {{ applicationName | lower }}:
     image: ${SPRYKER_DOCKER_PREFIX}_run_app:${SPRYKER_DOCKER_TAG}-{{ applicationName | lower }}
-    depends_on:
-      - key_value_store
-      - session
-      - search
     networks:
       - private
     labels:

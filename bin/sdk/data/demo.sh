@@ -11,9 +11,6 @@ function Data::load() {
     local verboseOption=$([ "${VERBOSE}" == "1" ] && echo -n " -vvv" || echo -n '')
 
     Runtime::waitFor database
-    Runtime::waitFor broker
-    Runtime::waitFor search
-    Runtime::waitFor key_value_store
 
     local force=''
     if [ "$1" == '--force' ]; then
@@ -30,11 +27,6 @@ function Data::load() {
 
         if [ -z "${force}" ] && Data::isLoaded; then
             continue
-        fi
-
-        if [ -z "${brokerInstalled}" ]; then
-            Service::Broker::install
-            brokerInstalled=1
         fi
 
         if [ -z "${schedulerSuspended}" ]; then

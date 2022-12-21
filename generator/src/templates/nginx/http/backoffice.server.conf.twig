@@ -19,7 +19,7 @@
         fastcgi_param SPRYKER_ZED_HOST "zed.calls.are.forbidden.from.zed";
         fastcgi_param SPRYKER_ZED_PORT "{{ project['_defaultPort'] }}";
 
-        fastcgi_param SPRYKER_SESSION_BE_NAMESPACE "{{ storeServices['session']['namespace'] | default(endpointData['services']['session']['namespace']) }}";
+        fastcgi_param SPRYKER_SESSION_BE_NAMESPACE "";
         fastcgi_param SPRYKER_BE_HOST "{{ host }}";
         fastcgi_param SPRYKER_BE_PORT "{{ externalPort }}";
 

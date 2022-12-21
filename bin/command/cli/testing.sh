@@ -15,10 +15,6 @@ function Command::testing() {
     SPRYKER_TESTING_ENABLE_FOR_CLI="${SPRYKER_TESTING_ENABLE}"
 
     Runtime::waitFor database
-    Runtime::waitFor broker
-    Runtime::waitFor search
-    Runtime::waitFor key_value_store
-    Runtime::waitFor session
     Runtime::waitFor webdriver
 
     Compose::exec "${@}"
