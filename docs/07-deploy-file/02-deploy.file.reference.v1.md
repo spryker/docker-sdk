@@ -35,7 +35,7 @@ This reference page describes version 1 of the Deploy file format. This is the n
 The topics below are organized alphabetically for top-level keys and sub-level keys to describe the hierarchy.
 
 You can use the extended YAML syntax according to [YAML™ Version 1.2](https://yaml.org/spec/1.2/spec.html).
-Find B2B and B2C deploy file examples for [development](06-installation/installation-guides/choosing-an-installation-mode#development-mode) and [demo](06-installation/installation-guides/choosing-an-installation-mode#demo-mode) environments in the table:
+Find B2B and B2C deploy file examples for [development](../06-installation/02-installation-guides/01-choosing-an-installation-mode#development-mode) and [demo](../06-installation/02-installation-guides/01-choosing-an-installation-mode#demo-mode) environments in the table:
 
 | Development mode | Demo mode |
 | --- | --- |
@@ -258,6 +258,25 @@ image:
 ```
 ***
 
+### image: node:
+
+Defines Node.js settings.
+
+* `image: node: version:` - defines a Node.js version. Supports only major versions that are greater than the default one. The default version is `12`.
+* `image: node: npm` - defines an NPM version. Supports only major versions that are  greater than the default one. The default version is `6`.
+* `image: node: distro:` - defines a Linux distribution for the Node Docker image. Should be equal to your base PHP image. Possible values are `alpine` and `debian`. This variable is optional with the default value of `alpine`.
+
+```yaml
+image:
+    ...
+    node:
+        version: 18
+        distro: alpine
+        npm: 8
+```
+***
+
+
 ### image: php:
 
 Defines PHP settings for Spryker applications.
@@ -267,6 +286,7 @@ Defines PHP settings for Spryker applications.
   * `blackfire`
   * `newrelic`
   * `tideways`
+  * `xhprof`
 
 ```yaml
 image:
@@ -278,8 +298,10 @@ image:
             - blackfire
             - newrelic
             - tideways
+            - xhprof
 ```
 ***
+
 ### assets:
 
 Defines the setting of *Assets*.
@@ -654,7 +676,22 @@ docker:
  ```
 * `docker: debug: xdebug: enabled:` - defines if Xdebug is enabled.
 
-***
+
+### docker: maintenance:
+
+Maintenance mode configuration.
+
+If `docker: maintenance: enabled:` is set to `true`, all applications work in maintenance mode. The default value is `false`.
+```yaml
+version: 1.0
+
+docker:
+    maintenance:
+        enabled: true
+
+ ```
+
+
 ### docker: logs:
 * `docker: logs: path:` defines the path to the directory with Docker logs. This variable is optional. If not specified, the default value applies: `path: '/var/log/spryker`.
 

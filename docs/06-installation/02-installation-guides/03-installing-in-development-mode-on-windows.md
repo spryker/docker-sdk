@@ -5,7 +5,7 @@ This document describes how to install Spryker in [Development Mode](01-choosing
 
 ## Installing Docker prerequisites on Windows
 
-To install Docker prerequisites for Windows, follow [Installing Docker prerequisites on Windows](../01-installation-prerequisites/01-installing-docker-prerequisites-on-windows.md).
+To install Docker prerequisites for Windows, follow [Installing Docker prerequisites on Windows](../01-installation-prerequisites/03-installing-docker-prerequisites-on-windows.md).
 
 
 
@@ -46,7 +46,7 @@ Make sure that you are in the correct folder by running the `pwd` command.
 6. In `deploy.dev.yml`, define `image:` with the PHP image compatible with the current release of the Demo Shop:
 
 ```yaml
-image: spryker/php:7.3-alpine3.12
+image: spryker/php:7.4-alpine3.16
 ```
 
 7. Clone the Docker SDK repository:
@@ -55,11 +55,11 @@ git clone https://github.com/spryker/docker-sdk.git --single-branch docker
 ```
 
 :::(Warning) (Verification)
-Make sure `docker 18.09.1+` and `docker-compose 1.23+` are installed:
+Make sure `docker 18.09.1+` and `docker compose 2+` are installed:
 
 ```bash
 $ docker version
-$ docker-compose --version
+$ docker compose version
 ```
 :::
 
@@ -114,7 +114,7 @@ Depending on the hardware performance, the first project launch can take up to 2
 
 ## Endpoints
 
-To ensure that the installation is successful, make sure you can access the configured endpoints from the Deploy file. See [Deploy file reference - 1.0](../../99-deploy.file.reference.v1.md) to learn about the Deploy file.
+To ensure that the installation is successful, make sure you can access the configured endpoints from the Deploy file. See [Deploy file reference - 1.0](../../07-deploy-file/02-deploy.file.reference.v1.md) to learn about the Deploy file.
 
 :::(Info) (RabbitMQ UI credentials)
 To access RabbitMQ UI, use `spryker` as a username and `secret` as a password. You can adjust the credentials in `deploy.yml`.
@@ -126,9 +126,9 @@ To get the full and up-to-date list of commands, run `docker/sdk help`.
 
 ## Next steps
 
-* [Troubleshooting](../../troubleshooting.md)
-* [Configuring debugging](../../02-development-usage/05-configuring-debugging.md)
-* [Deploy file reference - 1.0](../../99-deploy.file.reference.v1.md)
+* [Troubleshooting](../../09-troubleshooting.md)
+* [Configuring debugging](../../02-development/05-configuring-debugging.md)
+* [Deploy file reference - 1.0](../../07-deploy-file/02-deploy.file.reference.v1.md)
 * [Configuring services](../../06-configuring-services.md)
 * [Setting up a self-signed SSL certificate](https://documentation.spryker.com/docs/setting-up-a-self-signed-ssl-certificate)
 * [Additional DevOPS guidelines](https://documentation.spryker.com/docs/additional-devops-guidelines)
