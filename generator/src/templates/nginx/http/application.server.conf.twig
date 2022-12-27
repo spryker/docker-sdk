@@ -35,7 +35,7 @@
 
         set $maintenance_mode ${SPRYKER_MAINTENANCE_MODE_ENABLED};
 
-        if ($is_whitelisted_ip = 1) {
+        if ($is_whitelisted_ip = "1") {
             set $maintenance_mode "0";
         }
 
