@@ -692,6 +692,63 @@ docker:
  ```
 
 
+Maintenance mode. Ips whitelisting.
+
+Defines the whitelisted Ips IP(s) address(es) for the maintenance mode.
+
+Note: it's necessary to define gateway IP addresses to fetch the real IP for `all` defined applications.
+
+```yaml
+x-real-ip: &real-ip
+    real-ip:
+        from:
+            - 10.0.0.0/8 # AWS VPC network
+
+x-frontend-auth: &frontend-auth
+    <<: *real-ip
+
+groups:
+    EU:
+        region: EU
+        applications:
+            boffice:
+                application: backoffice
+                endpoints:
+                    backoffice.de.spryker.com:
+                        store: DE
+                        primal: true
+                        <<: *frontend-auth
+                    backoffice.at.spryker,com:
+                        store: AT
+                        <<: *frontend-auth
+            Yves:
+                application: yves
+                endpoints:
+                    www.de.spryker.com:
+                        store: DE
+                        <<: *frontend-auth
+                    www.at.spryker.com:
+                        store: AT
+                        <<: *frontend-auth
+            ...
+```
+
+* `docker: maintenance: whitelist: ips:` - defines the whitelist of the Ips addresses.
+
+```yaml
+version: 1.0
+
+docker:
+    maintenance:
+        enabled: true
+        whitelist:
+          ips:
+              - 0.0.0.0
+              - 1.1.1.1
+ ```
+
+
+
 ### docker: logs:
 * `docker: logs: path:` defines the path to the directory with Docker logs. This variable is optional. If not specified, the default value applies: `path: '/var/log/spryker`.
 
