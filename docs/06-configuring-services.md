@@ -17,6 +17,14 @@ This document describes configuration options of the services shipped with Spryk
 *     [Tideways](#tideways)
 
 
+## Prerequisites
+
+Install or update the Docker SDK to the latest version:
+```bash
+git clone https://github.com/spryker/docker-sdk.git ./docker
+```
+
+
 ## Optional services
 
 All services are optional, but each application requires certain services to work properly. Dependencies per service:
@@ -30,27 +38,6 @@ All services are optional, but each application requires certain services to wor
 | search          | backoffice, backend-gateway, zed, yves, merchant-portal, glue, glue-storefront, glue-backend |
 
 
-## Prerequisites
-
-Install or update the Docker SDK to the latest version:
-```bash
-git clone https://github.com/spryker/docker-sdk.git ./docker
-```
-
-* After enabling a service, make sure to apply the new configuration:
-    1. Bootstrap docker setup:
-    ```bash
-    docker/sdk boot {deploy.yml | deploy.dev.yml}
-    ```
-
-    2. Once the job finishes, build and start the instance:
-    ```bash
-    docker/sdk up
-    ```
-
-
-
-:::
 
 ## Database
 [MariaDB](https://mariadb.org/) is provided as a service by default, but you can switch to MySQL or PostgreSQL as described below.
