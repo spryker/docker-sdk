@@ -17,10 +17,9 @@ This document describes configuration options of the services shipped with Spryk
 *     [Tideways](#tideways)
 
 
-:::(Info) ()
-* All services is optional. If you have issues with install process, first of all check your install recipe.
+## Optional services
 
-* List of dependency:
+All services are optional, but each application requires certain services to work properly. Dependencies per service:
 
 | Service name    | Application Dependencies                                                                     |
 |-----------------|----------------------------------------------------------------------------------------------|
@@ -31,7 +30,9 @@ This document describes configuration options of the services shipped with Spryk
 | search          | backoffice, backend-gateway, zed, yves, merchant-portal, glue, glue-storefront, glue-backend |
 
 
-* Before you start configuring a service, make sure to install or update the Docker SDK to the latest version:
+## Prerequisites
+
+Install or update the Docker SDK to the latest version:
 ```bash
 git clone https://github.com/spryker/docker-sdk.git ./docker
 ```
@@ -149,7 +150,7 @@ See:
 
 ### Configuration
 
-Adjust `deploy.*.yml` in the `services:` section to open the port used for accessing ElasticSearch:
+1. Adjust `deploy.*.yml` in the `services:` section to open the port used for accessing ElasticSearch:
 ```yaml
 services:
     search:
@@ -157,6 +158,12 @@ services:
         endpoints:
             localhost:9200
                 protocol: tcp
+```
+
+2. Bootstrap the docker setup and rebuild the application:
+```bash
+docker/sdk boot deploy.*.yml &&\
+docker/sdk up
 ```
 
 ## Kibana UI
@@ -183,13 +190,19 @@ services:
 echo "127.0.0.1 {custom_endpoint}" | sudo tee -a /etc/hosts
 ```
 
+3. 2. Bootstrap the docker setup and rebuild the application:
+```bash
+docker/sdk boot deploy.*.yml &&\
+docker/sdk up
+```
+
 ## RabbitMQ
 
 [RabbitMQ](https://www.rabbitmq.com/) is a messaging broker - an intermediary for messaging. It gives your applications a common platform to send and receive messages, and your messages a safe place to live until received.
 
 ### Configuration
 
-Adjust `deploy.*.yml` in the `services:` section to open the port used for accessing RabbitMQ:
+1. Adjust `deploy.*.yml` in the `services:` section to open the port used for accessing RabbitMQ:
 ```yaml
 services:
     broker:
@@ -200,6 +213,13 @@ services:
                 protocol: tcp
             api.queue.spryker.local:
 ```
+
+2. Bootstrap the docker setup and rebuild the application:
+```bash
+docker/sdk boot deploy.*.yml &&\
+docker/sdk up
+```
+
 ## Swagger UI
 
 [Swagger UI](https://swagger.io/tools/swagger-ui/) allows anyone — be it your development team or your end consumers — to visualize and interact with the API’s resources without having any of the implementation logic in place. It’s automatically generated from your OpenAPI (formerly known as Swagger) Specification, with the visual documentation making it easy for back end implementation and client-side consumption.
@@ -229,6 +249,11 @@ services:
 echo "127.0.0.1 {custom_endpoint}" | sudo tee -a /etc/hosts
 ```
 
+3. Bootstrap the docker setup and rebuild the application:
+```bash
+docker/sdk boot deploy.*.yml &&\
+docker/sdk up
+```
 ## Redis
 
 [Redis](https://redis.io) is an open source (BSD licensed), in-memory data structure store, used as a database, cache and message broker. It supports data structures such as strings, hashes, lists, sets, sorted sets with range queries, bitmaps, hyperloglogs, geospatial indexes with radius queries and streams.
@@ -237,7 +262,7 @@ See [Redis documentation](https://redis.io/documentation) for more details.
 
 ### Configuration
 
-Adjust `deploy.*.yml` in the `services:` section to open the port used for accessing Redis:
+1. Adjust `deploy.*.yml` in the `services:` section to open the port used for accessing Redis:
 ```yaml
 services:
     key_value_store:
@@ -247,6 +272,11 @@ services:
                 protocol: tcp
 ```
 
+2. Bootstrap the docker setup and rebuild the application:
+```bash
+docker/sdk boot deploy.*.yml &&\
+docker/sdk up
+```
 
 ## Redis GUI
 [Redis Commander](http://joeferner.github.io/redis-commander/) is a web management tool that provides a graphical user interface to access Redis databases and perform basic operations like view keys as a tree, view CRUD keys or import/export databases.
@@ -271,7 +301,11 @@ echo "127.0.0.1 {custom_endpoint}" | sudo tee -a /etc/hosts
 ```
 
 
-
+3. Bootstrap the docker setup and rebuild the application:
+```bash
+docker/sdk boot deploy.*.yml &&\
+docker/sdk up
+```
 
 ## MailHog
 
@@ -288,7 +322,8 @@ By default the following applies:
 * Login is not required
 :::
 ### Configuration
-Adjust `deploy.*.yml` in the `services:` section to specify a custom endpoint:
+
+1. Adjust `deploy.*.yml` in the `services:` section to specify a custom endpoint:
 ```yaml
 services:
         ...
@@ -296,6 +331,11 @@ services:
                 engine: mailhog
                 endpoints:
                           {custom_endpoint}:
+```
+2. Bootstrap the docker setup and rebuild the application:
+```bash
+docker/sdk boot deploy.*.yml &&\
+docker/sdk up
 ```
 
 ## Blackfire
@@ -327,6 +367,12 @@ services:
         server-token: {server_token}
         client-id: {client_id}
         client-token: {client-token}
+```
+
+3. Bootstrap the docker setup and rebuild the application:
+```bash
+docker/sdk boot deploy.*.yml &&\
+docker/sdk up
 ```
 
 ### Alternative Configuration
@@ -371,6 +417,12 @@ BLACKFIRE_SERVER_ID={client-token} BLACKFIRE_SERVER_TOKEN={server_token} docker/
 You can pass the server details only with the `docker/sdk up` command.
 :::
 
+5. Bootstrap the docker setup and rebuild the application:
+```bash
+docker/sdk boot deploy.*.yml &&\
+docker/sdk up
+```
+
 It is not obligatory to pass all the details as environment variables or define all the details in the deploy file. You can pass the details in any combination.
 
 ## New Relic
@@ -399,6 +451,12 @@ image:
         ...
         enabled-extensions:
             - newrelic
+```
+
+3. Bootstrap the docker setup and rebuild the application:
+```bash
+docker/sdk boot deploy.*.yml &&\
+docker/sdk up
 ```
 
 ### Alternative Configuration
@@ -433,6 +491,12 @@ NEWRELIC_LICENSE={new_relic_license} docker/sdk up
 :::(Warning) (Note)
 You can pass the New Relic license only with the `docker/sdk up` command.
 :::
+
+4. Bootstrap the docker setup and rebuild the application:
+```bash
+docker/sdk boot deploy.*.yml &&\
+docker/sdk up
+```
 
 ## Webdriver
 PhantomJS is provided as a webdriver service by default, but you can switch to ChromeDriver as described below.
@@ -475,7 +539,7 @@ Dashboard is a tool that helps to monitor logs in real time. You can monitor log
 
 ### Configuration
 
-To configure Вashboard, adjust your `deploy.*.yml` as follows:
+1. Adjust your `deploy.*.yml` as follows:
 
 ```yaml
 dashboard:
@@ -484,17 +548,30 @@ dashboard:
             {custom_endpoint}:
 ```
 
+2. Bootstrap the docker setup and rebuild the application:
+```bash
+docker/sdk boot deploy.*.yml &&\
+docker/sdk up
+```
+
 ## Tideways
 
 [Tideways](https://tideways.com/) is an application profiler used for testing and debugging. Its main functions are profiling, monitoring, and exception tracking.
 
 
 ### Configuration
-To configure Tideways, adjust your `deploy.*.yml` as follows:
+
+1. Adjust your `deploy.*.yml` as follows:
 
 ```yaml
 tideways:
     apikey: {tideways_api_key}
     environment-name: {tideways_environment_name}
     cli-enabled: {true|false}
+```
+
+2. Bootstrap the docker setup and rebuild the application:
+```bash
+docker/sdk boot deploy.*.yml &&\
+docker/sdk up
 ```
