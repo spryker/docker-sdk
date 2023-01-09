@@ -737,8 +737,6 @@ groups:
 
 #### Define allowlisted IP addresses
 
-To allow access from particular IP addresses, define them in the needed deploy file. Example:
-
 * `docker: maintenance: whitelist: ips:` - defines the allowlisted IP addresses from which the applications in the maintenance mode can be accessed.
 
 ```yaml
