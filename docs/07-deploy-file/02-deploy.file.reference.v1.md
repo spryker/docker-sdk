@@ -692,11 +692,13 @@ docker:
  ```
 
 
-Maintenance mode. Ips whitelisting.
+### docker: maintenance: whitelist: ips:
 
-Defines the whitelisted Ips IP(s) address(es) for the maintenance mode.
+When you enable maintenance mode for an application, visitors see a maintenance page and can't access the application. To enable access to an application in maintenance mode, you can allowlist IP addresses as follows.
 
-Note: it's necessary to define gateway IP addresses to fetch the real IP for `all` defined applications.
+#### [CLOUD] Define gateway IP addresses
+
+Note: it's necessary to define gateway IP addresses for AWS to fetch the real IP for `all` defined applications.
 
 ```yaml
 x-real-ip: &real-ip
@@ -733,7 +735,11 @@ groups:
             ...
 ```
 
-* `docker: maintenance: whitelist: ips:` - defines the whitelist of the Ips addresses.
+#### Define allowlisted IP addresses
+
+To allow access from particular IP addresses, define them in the needed deploy file. Example:
+
+* `docker: maintenance: whitelist: ips:` - defines the allowlisted IP addresses from which the applications in the maintenance mode can be accessed.
 
 ```yaml
 version: 1.0
@@ -743,9 +749,11 @@ docker:
         enabled: true
         whitelist:
           ips:
-              - 0.0.0.0
-              - 1.1.1.1
+              - { IP address 1 }
+              - { IP address 2 }
+              ...
  ```
+Now you can access the applications from the `{ IP address 1 }` and `{ IP address 2 }` IP addresses.
 
 
 

@@ -5,7 +5,7 @@ large_client_header_buffers 4 32k;
 
 map $remote_addr $is_whitelisted_ip {
      default         "0";
-{% if docker['maintenance']['enabled'] and docker['maintenance']['whitelist']['ips'] is defined %}
+{% if docker['maintenance']['whitelist']['ips'] is defined %}
 {% for ip in docker['maintenance']['whitelist']['ips'] | default([]) %}
     {{ ip }}        "1";
 {% endfor %}
