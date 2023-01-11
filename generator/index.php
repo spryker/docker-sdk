@@ -171,12 +171,6 @@ const DEFAULT_NODE_VERSION = 12;
 const DEFAULT_NODE_DISTRO = ALPINE_DISTRO_NAME;
 const DEFAULT_NPM_VERSION = 6;
 
-const DATABASE_SERVICE = 'database';
-const BROKER_SERVICE = 'broker';
-const KEY_VALUE_STORE_SERVICE = 'key_value_store';
-const SESSION_SERVICE = 'session';
-const SEARCH_SERVICE = 'search';
-
 $projectData['_node_npm_config'] = buildNodeJsNpmBuildConfig($projectData);
 
 foreach ($projectData['groups'] ?? [] as $groupName => $groupData) {
