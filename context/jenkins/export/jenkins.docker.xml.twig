@@ -5,5 +5,5 @@
 {% block command %}<![CDATA[
 . /envs/{{ job.store | lower }}.env
 cd /data
-{{ job.command }}
+{{ job.command | raw }}
 ]]>{% endblock command %}
