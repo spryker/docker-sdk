@@ -173,57 +173,6 @@ const KEY_VALUE_STORE_SERVICE = 'key_value_store';
 const SESSION_SERVICE = 'session';
 const SEARCH_SERVICE = 'search';
 
-const SERVICES_APPLICATIONS_DEPENDENCIES = [
-    DATABASE_SERVICE => [
-        BACKOFFICE_APP,
-        BACKEND_GATEWAY_APP,
-        ZED_APP,
-        MERCHANT_PORTAL,
-        GLUE_BACKEND,
-    ],
-    BROKER_SERVICE => [
-        BACKOFFICE_APP,
-        BACKEND_GATEWAY_APP,
-        ZED_APP,
-        MERCHANT_PORTAL,
-        GLUE_BACKEND,
-    ],
-    KEY_VALUE_STORE_SERVICE => [
-        BACKOFFICE_APP,
-        BACKEND_GATEWAY_APP,
-        ZED_APP,
-        YVES_APP,
-        MERCHANT_PORTAL,
-        GLUE_APP,
-        GLUE_STOREFRONT,
-        GLUE_BACKEND,
-    ],
-    SESSION_SERVICE => [
-        BACKOFFICE_APP,
-        ZED_APP,
-        YVES_APP,
-        MERCHANT_PORTAL,
-        GLUE_BACKEND,
-    ],
-    SEARCH_SERVICE => [
-        BACKOFFICE_APP,
-        BACKEND_GATEWAY_APP,
-        ZED_APP,
-        YVES_APP,
-        MERCHANT_PORTAL,
-        GLUE_APP,
-        GLUE_STOREFRONT,
-        GLUE_BACKEND,
-    ],
-    GLUE_BACKEND => [
-        DATABASE_SERVICE,
-        BROKER_SERVICE,
-        KEY_VALUE_STORE_SERVICE,
-        SESSION_SERVICE,
-        SEARCH_SERVICE,
-    ],
-];
-
 $projectData['_node_npm_config'] = buildNodeJsNpmBuildConfig($projectData);
 
 foreach ($projectData['groups'] ?? [] as $groupName => $groupData) {
@@ -603,8 +552,6 @@ if (count($errorMessages) > 0) {
 
     exit(1);
 }
-
-getApplicationServiceDependencyWarningMessage($projectData);
 
 // -------------------------
 /**
@@ -1725,81 +1672,4 @@ function getNodeDistroName(array $nodejsConfig, string $imageName): string
     }
 
     return ALPINE_DISTRO_NAME;
-}
-
-/**
- * @param array $projectData
- *
- * @return void
- */
-function getApplicationServiceDependencyWarningMessage(array $projectData): void
-{
-    $servicesKey = 'services';
-    $projectServices = $projectData[$servicesKey] ?? [];
-
-    $result = [];
-    $projectApplicationList = getProjectApplicationTypeList($projectData);
-
-    foreach (SERVICES_APPLICATIONS_DEPENDENCIES as $serviceName => $applicationList) {
-        if (array_key_exists($serviceName, $projectServices)) {
-            continue;
-        }
-
-        foreach ($applicationList as $applicationName) {
-            if (!in_array($applicationName, $projectApplicationList)) {
-                continue;
-            }
-
-            $result[$serviceName][] = $applicationName;
-        }
-    }
-
-    if ($result == []) {
-        return;
-    }
-
-    echo "We found missing services in your deploy file. We recommend enabling the following services:\n\n";
-    printf("%-20s%-20s\n----\n", "Service Name", "Application Dependencies");
-
-    foreach ($result as $serviceName => $applicationList) {
-        printf("%-20s%-20s\n", $serviceName, implode(', ', $applicationList));
-    }
-}
-
-/**
- * @param array $projectData
- *
- * @return array
- */
-function getProjectApplicationTypeList(array $projectData): array
-{
-    $groupKey = 'groups';
-    $applicationsKey = 'applications';
-    $applicationKey = 'application';
-
-    if (!array_key_exists($groupKey, $projectData)) {
-        return [];
-    }
-
-    $projectApplicationList = [];
-
-    $groups = $projectData[$groupKey];
-
-    foreach ($groups as $groupData) {
-        if (!array_key_exists($applicationsKey, $groupData)) {
-            continue;
-        }
-
-        $groupApplications = $groupData[$applicationsKey];
-
-        foreach ($groupApplications as $groupApplication) {
-            if (!array_key_exists($applicationKey, $groupApplication)) {
-                continue;
-            }
-
-            $projectApplicationList[] = $groupApplication[$applicationKey];
-        }
-    }
-
-    return array_unique($projectApplicationList);
 }
