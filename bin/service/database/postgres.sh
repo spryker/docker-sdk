@@ -1,8 +1,8 @@
 #!/bin/bash
 
 function Database::haveTables() {
-    if [ ! $(Service::isServiceExist database) ]; then
-      return;
+    if ! Service::isServiceExist database; then
+      return "${FALSE}"
     fi
 
     tableCount=$(
@@ -54,8 +54,8 @@ EOF
 }
 
 function Database::init() {
-    if [ ! $(Service::isServiceExist database) ]; then
-      return;
+    if ! Service::isServiceExist database; then
+      return "${FALSE}"
     fi
 
     Compose::exec <<'EOF'

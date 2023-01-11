@@ -131,6 +131,7 @@ readonly KNOWN_HOSTS="{{ _knownHosts | default("") }}"
 readonly SPRYKER_BUILD_HASH="${SPRYKER_BUILD_HASH}"
 readonly SPRYKER_BUILD_DATE="${SPRYKER_BUILD_DATE}"
 readonly SPRYKER_REPOSITORY_HASH="${SPRYKER_BUILD_HASH:-"$(git rev-parse --verify HEAD 2>/dev/null || echo "head")"}"
+readonly SPRYKER_MAINTENANCE_MODE_ENABLED="{{ docker['maintenance']['enabled'] | default('false') }}"
 
 # Specific variables
 {% for serviceName, serviceData in services %}

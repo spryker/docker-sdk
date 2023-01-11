@@ -1,7 +1,7 @@
 #!/bin/bash
 
 function Service::Scheduler::isInstalled() {
-    if [ ! $(Service::isServiceExist scheduler) ]; then
+    if ! Service::isServiceExist scheduler; then
         return;
     fi
 
@@ -17,7 +17,7 @@ function Service::Scheduler::isInstalled() {
 }
 
 Service::Scheduler::pause() {
-    if [ ! $(Service::isServiceExist scheduler) ]; then
+    if ! Service::isServiceExist scheduler; then
         return;
     fi
 
@@ -47,7 +47,7 @@ Service::Scheduler::pause() {
 }
 
 Service::Scheduler::unpause() {
-    if [ ! $(Service::isServiceExist scheduler) ]; then
+    if ! Service::isServiceExist scheduler; then
         return;
     fi
 
@@ -63,7 +63,7 @@ Service::Scheduler::unpause() {
 }
 
 function Service::Scheduler::start() {
-    if [ ! $(Service::isServiceExist scheduler) ]; then
+    if ! Service::isServiceExist scheduler; then
         return;
     fi
 
@@ -81,7 +81,7 @@ function Service::Scheduler::start() {
 }
 
 function Service::Scheduler::stop() {
-    if [ ! $(Service::isServiceExist scheduler) ]; then
+    if ! Service::isServiceExist scheduler; then
         return;
     fi
 
@@ -89,7 +89,7 @@ function Service::Scheduler::stop() {
 }
 
 function Service::Scheduler::clean() {
-    if [ ! $(Service::isServiceExist scheduler) ]; then
+    if ! Service::isServiceExist scheduler; then
         return;
     fi
 
@@ -97,7 +97,7 @@ function Service::Scheduler::clean() {
 }
 
 function Service::Scheduler::_run() {
-    if [ ! $(Service::isServiceExist scheduler) ]; then
+    if ! Service::isServiceExist scheduler; then
         return;
     fi
 
