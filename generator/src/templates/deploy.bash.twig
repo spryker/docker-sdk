@@ -79,9 +79,10 @@ import installer/autoload-cache.sh
 {% endif %}
 
 # Services
-import service/database/{{ services['database']['engine'] }}.sh
-import service/broker/{{ services['broker']['engine'] }}.sh
-import service/scheduler/{{ services['scheduler']['engine'] }}.sh
+import service/service.sh
+import service/database/{{ services['database']['engine'] | default('mysql') }}.sh
+import service/broker/{{ services['broker']['engine'] | default('rabbitmq') }}.sh
+import service/scheduler/{{ services['scheduler']['engine'] | default('jenkins') }}.sh
 
 # Implementation
 import sdk/compose.sh
