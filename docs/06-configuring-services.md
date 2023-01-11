@@ -479,7 +479,7 @@ If you update the name of an application, [contact support](https://docs.spryker
 docker:
     newrelic:
         license: {new_relic_license}
-	distributed tracing:
+    distributed tracing:
             enabled: true
 ```
 
