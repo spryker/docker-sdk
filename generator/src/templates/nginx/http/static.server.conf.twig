@@ -14,6 +14,12 @@
         etag on;
         try_files   $uri $uri/ =404;
     }
+    
+    location ~* \.(?:yml|yaml)$ {
+        expires     off;
+        add_header  Last-Modified 'Thu, 01 Jan 1970 00:00:00 GMT';
+        add_header  Cache-Control 'no-store, no-cache';
+    }
 
     root /data/public/{{ endpointData['entry-point'] }};
 {% endif %}
