@@ -75,8 +75,6 @@ To configure a mount mode, see [Configuring a mount mode](07-configuring-a-mount
 
 Synchronization mount modes, such as mutagen or docker-sync, use algorithms to synchronize your code between host machine and a docker volume. This allows you to run applications at full speed avoiding file system mount latency.
 
-![](../images/mutagen-diagram.png)
-
 - Mutagen daemon listens to the host file system changes.
 - Mutagen sidecar container listens to the VM file system changes.
 - The daemon and the sidecar interact and update files on each side.
