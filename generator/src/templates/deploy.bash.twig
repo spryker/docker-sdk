@@ -160,7 +160,7 @@ readonly SSH_AUTH_SOCK_IN_CLI="$([ -n "${SSH_AUTH_SOCK}" ] && [ -z "${COMPOSER_A
 
 # Global variables
 readonly USER_FULL_ID=$(Environment::getFullUserId)
-readonly SPRYKER_XDEBUG_HOST_IP=$(Environment::getHostIp)
+readonly SPRYKER_XDEBUG_HOST_IP="$([ "${SPRYKER_XDEBUG_HOST_IP}" != '' ] && echo ${SPRYKER_XDEBUG_HOST_IP} || echo $(Environment::getHostIp))"
 readonly SECRETS_ENVIRONMENT=("COMPOSER_AUTH='${COMPOSER_AUTH}'")
 
 command=${1}

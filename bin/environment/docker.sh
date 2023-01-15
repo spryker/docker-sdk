@@ -55,13 +55,25 @@ function Environment::getDockerIp() {
 }
 
 # ------------------
+function Environment::isWSL() {
+    # See https://github.com/microsoft/WSL/issues/423#issuecomment-221627364
+    if grep -sqi microsoft /proc/sys/kernel/osrelease; then
+        return "${TRUE}"
+    fi
+
+    return "${FALSE}"
+}
+
+# ------------------
 function Environment::getHostIp() {
 
     local myIp='host.docker.internal'
 
     case ${_PLATFORM} in
         linux)
-            myIp=$(ip route get 1 | sed 's/^.*src \([^ ]*\).*$/\1/;q')
+            if ! Environment::isWSL; then
+                myIp=$(ip route get 1 | sed 's/^.*src \([^ ]*\).*$/\1/;q')
+            fi
             ;;
         macos)
             if Environment::isDockerMachineActive; then
