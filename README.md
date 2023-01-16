@@ -76,7 +76,7 @@ For contribution guidelines, see [Code contribution guide](https://docs.spryker.
 |                 |              | 6.8          | &check;     | https://www.elastic.co/support/eol |
 |                 |              | 7.6          | &check;     |                                    |
 |                 |              | 7.10         | &check;     |                                    |
-|                 | open_search  | 1.3          | &check;     |                                    |
+|                 | opensearch   | 1.3          | &check;     |                                    |
 | scheduler       | jenkins      | 2.176        |             |                                    |
 |                 |              | 2.305        | &check;     |                                    |
 |                 |              | 2.324        | &check;     |                                    |
