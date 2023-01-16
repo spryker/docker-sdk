@@ -3,6 +3,15 @@ server_tokens off;
 
 large_client_header_buffers 4 32k;
 
+map $remote_addr $is_whitelisted_ip {
+     default         "0";
+{% if docker['maintenance']['whitelist']['ips'] is defined %}
+{% for ip in docker['maintenance']['whitelist']['ips'] | default([]) %}
+    {{ ip }}        "1";
+{% endfor %}
+{% endif %}
+}
+
 {% if assets['compression'] is not empty %}
 {% for compressionEngine, compressionData in assets['compression'] %}
 
