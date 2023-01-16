@@ -1,5 +1,5 @@
 #!/bin/sh
-{% set envVariables = ["\$ALLOWED_IP", "\$SPRYKER_BUILD_HASH"] %}
+{% set envVariables = ["\$ALLOWED_IP", "\$SPRYKER_BUILD_HASH", "\$SPRYKER_MAINTENANCE_MODE_ENABLED"] %}
 {% for groupData in groups %}
 {% for applicationName, applicationData in groupData['applications'] %}
 {% if applicationData['application'] != 'static' %}

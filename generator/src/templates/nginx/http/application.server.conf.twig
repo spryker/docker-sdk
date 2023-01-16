@@ -24,12 +24,24 @@
         try_files $fastcgi_script_name @proxy;
     }
 
+{% include "nginx/http/proxy/reverse-proxy.conf.twig" with _context %}
+
     location @proxy {
 {% block location %}
         include fastcgi.conf;
 {# Variable is necessary for https://www.nginx.com/blog/dns-service-discovery-nginx-plus/#domain-name-upstream-group #}
         set $upstream "{{ upstream }}";
         fastcgi_pass "$upstream";
+
+        set $maintenance_mode ${SPRYKER_MAINTENANCE_MODE_ENABLED};
+
+        if ($is_whitelisted_ip = "1") {
+            set $maintenance_mode "0";
+        }
+
+        if ($maintenance_mode = "1") {
+            return 503;
+        }
 
 {% include "nginx/http/default.location.conf.twig" with _context %}
 

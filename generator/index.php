@@ -3,7 +3,6 @@
 use DeployFileGenerator\DeployFileGeneratorFactory;
 use DeployFileGenerator\Transfer\DeployFileTransfer;
 use Spatie\Url\Url;
-use Symfony\Component\Console\Output\ConsoleOutput;
 use Symfony\Component\Yaml\Parser;
 use Twig\Environment;
 use Twig\Loader\ChainLoader;
@@ -74,6 +73,10 @@ $yamlParser = new Parser();
 
 $projectData = $yamlParser->parseFile($projectYaml);
 
+if (!array_key_exists('services', $projectData)) {
+    $projectData['services'] = [];
+}
+
 $projectData['_knownHosts'] = buildKnownHosts($deploymentDir);
 $projectData['_defaultDeploymentDir'] = $defaultDeploymentDir;
 $projectData['tag'] = $projectData['tag'] ?? uniqid();
@@ -101,6 +104,7 @@ $projectData = buildDefaultCredentials($projectData);
 
 // TODO Make it optional in next major
 // Making webdriver as required service for BC reasons
+// todo: waitFor refactoring dependency + document + testing mode
 if (empty($projectData['services']['webdriver'])) {
     $projectData['services']['webdriver'] = [
         'engine' => 'phantomjs',
@@ -155,6 +159,19 @@ const ENTRY_POINTS = [
     GLUE_STOREFRONT => 'GlueStorefront',
     GLUE_BACKEND => 'GlueBackend',
 ];
+
+const DEBIAN_DISTRO_NAME = 'bullseye';
+const ALPINE_DISTRO_NAME = 'alpine';
+
+const SPRYKER_NODE_IMAGE_DISTRO_ENV_NAME = 'SPRYKER_NODE_IMAGE_DISTRO';
+const SPRYKER_NODE_IMAGE_VERSION_ENV_NAME = 'SPRYKER_NODE_IMAGE_VERSION';
+const SPRYKER_NPM_VERSION_ENV_NAME = 'SPRYKER_NPM_VERSION';
+
+const DEFAULT_NODE_VERSION = 12;
+const DEFAULT_NODE_DISTRO = ALPINE_DISTRO_NAME;
+const DEFAULT_NPM_VERSION = 6;
+
+$projectData['_node_npm_config'] = buildNodeJsNpmBuildConfig($projectData);
 
 foreach ($projectData['groups'] ?? [] as $groupName => $groupData) {
     foreach ($groupData['applications'] ?? [] as $applicationName => $applicationData) {
@@ -247,9 +264,14 @@ function mapBackendEndpointsWithFallbackZed(array $endpointMap): array
 
     foreach ($zedApplicationsToCheck as $zedApplicationToCheck) {
         foreach ($endpointMap as $store => $storeEndpointMap) {
+            if (!array_key_exists(ZED_APP, $storeEndpointMap)) {
+                continue;
+            }
+
             if (array_key_exists($zedApplicationToCheck, $storeEndpointMap)) {
                 continue;
             }
+
             $endpointMap[$store][$zedApplicationToCheck] = $storeEndpointMap[ZED_APP];
         }
     }
@@ -333,13 +355,9 @@ foreach ($projectData['groups'] ?? [] as $groupName => $groupData) {
                 $projectData['_testing']['services'][$endpointData['store']][$applicationData['application']] = $services;
             }
 
-            if ($applicationData['application'] === ZED_APP
-                || $applicationData['application'] === BACKEND_GATEWAY_APP
-                || $applicationData['application'] === BACKOFFICE_APP
-                || $applicationData['application'] === MERCHANT_PORTAL
-            ) {
+            $envVarEncoder->setIsActive(true);
 
-                $envVarEncoder->setIsActive(true);
+            if (array_key_exists('store', $endpointData)) {
                 file_put_contents(
                     $deploymentDir . DS . 'env' . DS . 'cli' . DS . strtolower($endpointData['store']) . '.env',
                     $twig->render('env/cli/store.env.twig', [
@@ -369,8 +387,9 @@ foreach ($projectData['groups'] ?? [] as $groupName => $groupData) {
                         'endpointMap' => $endpointMap,
                     ])
                 );
-                $envVarEncoder->setIsActive(false);
             }
+
+            $envVarEncoder->setIsActive(false);
         }
     }
 }
@@ -686,19 +705,24 @@ function getSSLRedirectPort(array $projectData): int
  */
 function getBrokerConnections(array $projectData): string
 {
-    $brokerServiceData = $projectData['services']['broker'];
-
     $connections = [];
+    $brokerServiceData = $projectData['services']['broker'] ?? [];
+
+    if ($brokerServiceData == []) {
+        return json_encode($connections);
+    }
+
     foreach ($projectData['regions'] as $regionName => $regionData) {
         foreach ($regionData['stores'] ?? [] as $storeName => $storeData) {
             $localServiceData = array_replace($brokerServiceData, $storeData['services']['broker']);
+
             $connections[$storeName] = [
                 'RABBITMQ_CONNECTION_NAME' => $storeName . '-connection',
                 'RABBITMQ_HOST' => 'broker',
                 'RABBITMQ_PORT' => $localServiceData['port'] ?? 5672,
-                'RABBITMQ_USERNAME' => $localServiceData['api']['username'],
-                'RABBITMQ_PASSWORD' => $localServiceData['api']['password'],
-                'RABBITMQ_VIRTUAL_HOST' => $localServiceData['namespace'],
+                'RABBITMQ_USERNAME' => $localServiceData['api']['username'] ?? '',
+                'RABBITMQ_PASSWORD' => $localServiceData['api']['password'] ?? '',
+                'RABBITMQ_VIRTUAL_HOST' => $localServiceData['namespace'] ?? '',
                 'RABBITMQ_STORE_NAMES' => [$storeName], // check if connection is shared
             ];
         }
@@ -714,9 +738,9 @@ function getBrokerConnections(array $projectData): string
  */
 function getCloudBrokerConnections(array $projectData): string
 {
-    $brokerServiceData = $projectData['services']['broker'];
-
     $connections = [];
+    $brokerServiceData = $projectData['services']['broker'] ?? [];
+
     foreach ($projectData['regions'] as $regionName => $regionData) {
         foreach ($regionData['stores'] ?? [] as $storeName => $storeData) {
             $localServiceData = array_replace($brokerServiceData, $storeData['services']['broker']);
@@ -1238,6 +1262,9 @@ function buildSecrets(string $deploymentDir): array
     $data['SPRYKER_OAUTH_CLIENT_IDENTIFIER'] = 'frontend';
     $data['SPRYKER_OAUTH_CLIENT_SECRET'] = generateToken(48);
     $data['SPRYKER_ZED_REQUEST_TOKEN'] = generateToken(80);
+    $data['SPRYKER_URI_SIGNER_SECRET_KEY'] = generateToken(80);
+    $data['SPRYKER_PRODUCT_CONFIGURATOR_ENCRYPTION_KEY'] = generateToken(10);
+    $data['SPRYKER_PRODUCT_CONFIGURATOR_HEX_INITIALIZATION_VECTOR'] = generateRandomHex(16);
 
     return $data;
 }
@@ -1312,6 +1339,16 @@ function generateToken($tokenLength = 80): string
     }
 
     return $token;
+}
+
+/**
+ * @param int $num_bytes
+ *
+ * @return string
+ */
+function generateRandomHex(int $num_bytes=4): string
+{
+    return bin2hex(random_bytes($num_bytes));
 }
 
 /**
@@ -1405,7 +1442,8 @@ function buildDefaultRegionCredentialsForDatabase(array $projectData): array
         'password' => 'secret',
     ];
 
-    $databaseServiceData = $projectData['services']['database'];
+    $databaseServiceData = $projectData['services']['database'] ?? [];
+
     foreach ($projectData['regions'] as $regionName => $regionConfig) {
         $databases = [
             'version' => '1.0',
@@ -1579,4 +1617,57 @@ function isArmArchitecture(): bool
     $currentArchitecture = php_uname('m');
 
     return in_array($currentArchitecture, $possibleValue);
+}
+
+/**
+ * @param array $projectData
+ *
+ * @return array
+ */
+function buildNodeJsNpmBuildConfig(array $projectData): array
+{
+    $imageName = getenv('SPRYKER_PLATFORM_IMAGE') != '' ? getenv('SPRYKER_PLATFORM_IMAGE') : $projectData['image']['tag'];
+
+    $nodejsConfig = $projectData['image']['node'] ?? [];
+
+    return [
+        SPRYKER_NODE_IMAGE_DISTRO_ENV_NAME => getNodeDistroName($nodejsConfig, $imageName),
+        SPRYKER_NODE_IMAGE_VERSION_ENV_NAME => array_key_exists('version', $nodejsConfig)
+            ? (int)$nodejsConfig['version']
+            : DEFAULT_NODE_VERSION,
+        SPRYKER_NPM_VERSION_ENV_NAME => array_key_exists('npm', $nodejsConfig)
+            ? (int)$nodejsConfig['npm']
+            : DEFAULT_NPM_VERSION,
+    ];
+}
+
+/**
+ * @param array $nodejsConfig
+ * @param string $imageName
+ *
+ * @return string
+ */
+function getNodeDistroName(array $nodejsConfig, string $imageName): string
+{
+    if (array_key_exists('distro', $nodejsConfig)) {
+        if ($nodejsConfig['distro'] == 'debian') {
+            return DEBIAN_DISTRO_NAME;
+        }
+
+        if ($nodejsConfig['distro'] == 'alpine') {
+            return ALPINE_DISTRO_NAME;
+        }
+    }
+
+    $imageData = explode('/', $imageName);
+
+    if ($imageData[0] !== 'spryker') {
+        return DEFAULT_NODE_DISTRO;
+    }
+
+    if (str_contains($imageData[1], 'debian')) {
+        return DEBIAN_DISTRO_NAME;
+    }
+
+    return ALPINE_DISTRO_NAME;
 }

@@ -1,0 +1,9 @@
+{% extends 'jenkins-job.default.xml.twig' %}
+
+{% block setup %}{% endblock setup %}
+
+{% block command %}<![CDATA[
+. /envs/{{ job.store | lower }}.env
+cd /data
+{{ job.command | raw }}
+]]>{% endblock command %}
