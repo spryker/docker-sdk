@@ -73,6 +73,10 @@ $yamlParser = new Parser();
 
 $projectData = $yamlParser->parseFile($projectYaml);
 
+if (!array_key_exists('services', $projectData)) {
+    $projectData['services'] = [];
+}
+
 $projectData['_knownHosts'] = buildKnownHosts($deploymentDir);
 $projectData['_defaultDeploymentDir'] = $defaultDeploymentDir;
 $projectData['tag'] = $projectData['tag'] ?? uniqid();
@@ -100,6 +104,7 @@ $projectData = buildDefaultCredentials($projectData);
 
 // TODO Make it optional in next major
 // Making webdriver as required service for BC reasons
+// todo: waitFor refactoring dependency + document + testing mode
 if (empty($projectData['services']['webdriver'])) {
     $projectData['services']['webdriver'] = [
         'engine' => 'phantomjs',
@@ -769,9 +774,13 @@ function getSSLRedirectPort(array $projectData): int
  */
 function getBrokerConnections(array $projectData): string
 {
-    $brokerServiceData = $projectData['services']['broker'];
-
     $connections = [];
+    $brokerServiceData = $projectData['services']['broker'] ?? [];
+
+    if ($brokerServiceData == []) {
+        return json_encode($connections);
+    }
+
     foreach ($projectData['regions'] as $regionName => $regionData) {
         $regionServiceData = $brokerServiceData;
         if (isset($regionData['services']['broker'])) {
@@ -780,9 +789,9 @@ function getBrokerConnections(array $projectData): string
                 'RABBITMQ_CONNECTION_NAME' => $regionName . '-connection',
                 'RABBITMQ_HOST' => 'broker',
                 'RABBITMQ_PORT' => $regionServiceData['port'] ?? 5672,
-                'RABBITMQ_USERNAME' => $regionServiceData['api']['username'],
-                'RABBITMQ_PASSWORD' => $regionServiceData['api']['password'],
-                'RABBITMQ_VIRTUAL_HOST' => $regionServiceData['namespace'],
+                'RABBITMQ_USERNAME' => $regionServiceData['api']['username'] ?? '',
+                'RABBITMQ_PASSWORD' => $regionServiceData['api']['password'] ?? '',
+                'RABBITMQ_VIRTUAL_HOST' => $regionServiceData['namespace']?? '',
                 'RABBITMQ_STORE_NAMES' => [],
             ];
         }
@@ -790,14 +799,16 @@ function getBrokerConnections(array $projectData): string
             if (!isset($storeData['services']['broker'])) {
                 continue;
             }
-            $localServiceData = array_replace($regionServiceData, $storeData['services']['broker']);
+
+            $localServiceData = array_replace($brokerServiceData, $storeData['services']['broker']);
+
             $connections[$storeName] = [
                 'RABBITMQ_CONNECTION_NAME' => $storeName . '-connection',
                 'RABBITMQ_HOST' => 'broker',
                 'RABBITMQ_PORT' => $localServiceData['port'] ?? 5672,
-                'RABBITMQ_USERNAME' => $localServiceData['api']['username'],
-                'RABBITMQ_PASSWORD' => $localServiceData['api']['password'],
-                'RABBITMQ_VIRTUAL_HOST' => $localServiceData['namespace'],
+                'RABBITMQ_USERNAME' => $localServiceData['api']['username'] ?? '',
+                'RABBITMQ_PASSWORD' => $localServiceData['api']['password'] ?? '',
+                'RABBITMQ_VIRTUAL_HOST' => $localServiceData['namespace'] ?? '',
                 'RABBITMQ_STORE_NAMES' => [$storeName], // check if connection is shared
             ];
         }
@@ -839,9 +850,9 @@ function getKeyValueStores(array $projectData): string
  */
 function getCloudBrokerConnections(array $projectData): string
 {
-    $brokerServiceData = $projectData['services']['broker'];
-
     $connections = [];
+    $brokerServiceData = $projectData['services']['broker'] ?? [];
+
     foreach ($projectData['regions'] as $regionName => $regionData) {
         $regionServiceData = $brokerServiceData;
         if (isset($regionData['services']['broker'])) {
@@ -854,7 +865,7 @@ function getCloudBrokerConnections(array $projectData): string
             if (!isset($storeData['services']['broker'])) {
                 continue;
             }
-            $localServiceData = array_replace($regionServiceData, $storeData['services']['broker']);
+            $localServiceData = array_replace($brokerServiceData, $storeData['services']['broker']);
             $connections[$storeName] = [
                 'RABBITMQ_VIRTUAL_HOST' => $localServiceData['namespace'],
             ];
@@ -879,6 +890,8 @@ function getStoreSpecific(array $projectData): array
             $storeSpecific[$storeName] = [
                 'APPLICATION_STORE' => $storeName,
                 'SPRYKER_SEARCH_NAMESPACE' => $services['search']['namespace'],
+                'SPRYKER_KEY_VALUE_STORE_NAMESPACE' => $services['key_value_store']['namespace'],
+                'SPRYKER_BROKER_NAMESPACE' => $services['broker']['namespace'],
                 'SPRYKER_SESSION_BE_NAMESPACE' => $services['session']['namespace'] ?? 1,
                 # TODO SESSION should not be used in CLI
             ];
@@ -1410,6 +1423,8 @@ function buildSecrets(string $deploymentDir): array
     $data['SPRYKER_OAUTH_CLIENT_SECRET'] = generateToken(48);
     $data['SPRYKER_ZED_REQUEST_TOKEN'] = generateToken(80);
     $data['SPRYKER_URI_SIGNER_SECRET_KEY'] = generateToken(80);
+    $data['SPRYKER_PRODUCT_CONFIGURATOR_ENCRYPTION_KEY'] = generateToken(10);
+    $data['SPRYKER_PRODUCT_CONFIGURATOR_HEX_INITIALIZATION_VECTOR'] = generateRandomHex(16);
 
     return $data;
 }
@@ -1484,6 +1499,16 @@ function generateToken($tokenLength = 80): string
     }
 
     return $token;
+}
+
+/**
+ * @param int $num_bytes
+ *
+ * @return string
+ */
+function generateRandomHex(int $num_bytes=4): string
+{
+    return bin2hex(random_bytes($num_bytes));
 }
 
 /**
@@ -1577,7 +1602,8 @@ function buildDefaultRegionCredentialsForDatabase(array $projectData): array
         'password' => 'secret',
     ];
 
-    $databaseServiceData = $projectData['services']['database'];
+    $databaseServiceData = $projectData['services']['database'] ?? [];
+
     foreach ($projectData['regions'] as $regionName => $regionConfig) {
         $databases = [
             'version' => '1.0',

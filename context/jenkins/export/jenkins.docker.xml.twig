@@ -9,5 +9,5 @@
 . /envs/{{ job.store | lower }}.env
 {% endif %}
 cd /data
-{{ job.command }}
+{{ job.command | raw }}
 ]]>{% endblock command %}
