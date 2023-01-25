@@ -162,7 +162,7 @@ function Compose::run() {
 
     Compose::command --compatibility up -d --remove-orphans --quiet-pull "${@}"
 
-    if [ -n "${SPRYKER_TESTING_ENABLE}" ]; then
+    if [ -n "${SPRYKER_TESTING_ENABLE}" ] && Service::isServiceExist scheduler; then
         Compose::command --compatibility stop scheduler
     fi
 
