@@ -33,6 +33,8 @@ function waitForJenkinsToStart(){
 }
 
 mkdir -p ~/.jenkins/updates
+rm -rf ~/.jenkins/plugins || echo 'plugins did not exists anyway'
+mkdir -p ~/.jenkins/plugins
 test -f ~/.jenkins/jenkins.model.JenkinsLocationConfiguration.xml || envsubst < /opt/jenkins.model.JenkinsLocationConfiguration.xml > ~/.jenkins/jenkins.model.JenkinsLocationConfiguration.xml
 
 trap 'waitForFinishOfActiveJobs; kill ${pid}; exit 0;' SIGTERM
