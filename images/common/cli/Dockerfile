@@ -50,6 +50,14 @@ RUN --mount=type=cache,id=apk,sharing=locked,target=/var/cache/apk mkdir -p /etc
      make \
      ; fi'
 
+# Install pcov extension for PHP, enabling fast code coverage reports
+ENV COVERAGE_DRIVER=$COVERAGE_DRIVER
+RUN bash -c 'if [ "${COVERAGE_DRIVER}" == "pcov" ]; then \
+      apk add autoconf && \
+      pecl install pcov && \
+      docker-php-ext-enable pcov \
+      ; fi'
+
 # TODO Not-available feature: autoload-cache. Should be switchable
 #RUN --mount=type=cache,id=composer,sharing=locked,target=/home/spryker/.composer/cache \
 #    chown spryker:spryker /home/spryker/.composer/cache && chmod 0777 /home/spryker/.composer/cache
