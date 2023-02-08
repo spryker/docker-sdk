@@ -1,4 +1,4 @@
-{% set regionServices = project['regions'][groupData['region']]['services'] | default([]) %}
+{% set regionServices = regionData['services'] | default([]) %}
         fastcgi_param SPRYKER_CURRENT_REGION "{{ endpointData['region'] }}";
         fastcgi_param SPRYKER_SEARCH_NAMESPACE "{{ regionServices['search']['namespace'] | default(endpointData['services']['search']['namespace'])  }}";
         fastcgi_param SPRYKER_KEY_VALUE_STORE_NAMESPACE "{{ regionServices['key_value_store']['namespace'] | default(endpointData['services']['key_value_store']['namespace'])  }}";
