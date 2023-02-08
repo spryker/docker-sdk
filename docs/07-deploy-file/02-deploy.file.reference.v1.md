@@ -986,10 +986,10 @@ A scheduler *Service* used to run application-specific jobs periodically in the 
 ***
 ### search:
 
-A search *Service* that provides a distributed, multitenant-capable full-text search engine.
+A search *Service* that provides a distributed, multi-tenant capable full-text search engine.
 
 * Project-wide
-  * `search: engine:` - possible value is `elastic`.
+  * `search: engine:` - possible value is `elastic` or `opensearch`.
   * `search: endpoints:` - defines the service's port and web interface that can be accessed via given endpoints.
 ***
 
