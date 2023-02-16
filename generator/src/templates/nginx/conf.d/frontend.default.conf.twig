@@ -43,8 +43,7 @@ server {
     upstream: "${SPRYKER_NGINX_CGI_" ~ (applicationName | upper) ~ "}",
     zedHost: zedHost,
     timeout: '1m',
-    project: _context,
-    regionEndpointMap: _context
+    project: _context
 } %}
 {% endfor %}
 {% endfor %}

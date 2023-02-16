@@ -32,19 +32,18 @@ function printLogo() {
 }
 
 function getEnvFile() {
-    echo "${HOME}/env/$(echo "${APPLICATION_STORE:-$SPRYKER_CURRENT_REGION}" | tr '[:upper:]' '[:lower:]').env"
+    if [ -n "${APPLICATION_STORE}" ]
+    then
+        echo "${HOME}/env/$(echo "${APPLICATION_STORE}" | tr '[:upper:]' '[:lower:]').env"
+    else
+        echo "${HOME}/env/$(echo "${SPRYKER_CURRENT_REGION}" | tr '[:upper:]' '[:lower:]').env"
+    fi
 }
 
 function setPrompt() {
     local status=""
-    if [ -n "${SPRYKER_CURRENT_REGION}" ]
-    then
-        status+="${YELLOW}Region${NC}: ${GREEN}${SPRYKER_CURRENT_REGION}${NC}"
-    fi
-     if [ -n "${APPLICATION_STORE}" ]
-    then
-        status+="${YELLOW}Store${NC}: ${GREEN}${APPLICATION_STORE}${NC}"
-    fi
+    status+="${YELLOW}Region${NC}: ${GREEN}${SPRYKER_CURRENT_REGION}${NC}"
+    status+=" | ${YELLOW}Store${NC}: ${GREEN}${APPLICATION_STORE}${NC}"
     status+=" | ${YELLOW}Env${NC}: ${GREEN}${APPLICATION_ENV}${NC}"
     if [ -n "${SPRYKER_XDEBUG_MODE_ENABLE}" ]; then
         status+=" | ${PLUM}Debug${NC}: ($([ -n "${SPRYKER_XDEBUG_ENABLE_FOR_CLI}" ] && echo "${GREEN}X" || echo "${DGRAY}.")${NC})"
