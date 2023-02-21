@@ -7,3 +7,6 @@ path.repo: ["/usr/share/elasticsearch/data/snapshots"]
 
 # Network ################################
 http.host: 0.0.0.0
+
+# Http ###################################
+http.max_content_length: 10mb

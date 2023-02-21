@@ -26,7 +26,7 @@ class ServiceMergeResolver implements MergeResolverInterface
             return $resultData;
         }
 
-        $services = $resultData[DeployFileGeneratorConstants::YAML_SERVICES_KEY];
+        $services = $resultData[DeployFileGeneratorConstants::YAML_SERVICES_KEY] ?? [];
 
         foreach ($services as $serviceName => $serviceParams) {
             if ($serviceParams == null) {

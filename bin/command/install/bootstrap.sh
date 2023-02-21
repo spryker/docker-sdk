@@ -79,7 +79,6 @@ function Command::bootstrap() {
     Console::verbose::start "Building generator..."
     docker build -t spryker_docker_sdk \
         -f "${SOURCE_DIR}/generator/Dockerfile" \
-        --progress="${PROGRESS_TYPE:-auto}" \
         --build-arg="USER_UID=${USER_FULL_ID%%:*}" \
         -q \
         "${SOURCE_DIR}/generator" >/dev/null
@@ -108,6 +107,7 @@ function Command::bootstrap() {
         userToRun=()
     fi
     docker run -i --rm "${userToRun[@]}" \
+        -e SPRYKER_PLATFORM_IMAGE="${SPRYKER_PLATFORM_IMAGE:-""}" \
         -e SPRYKER_DOCKER_SDK_PLATFORM="${_PLATFORM}" \
         -e SPRYKER_DOCKER_SDK_DEPLOYMENT_DIR="${DESTINATION_DIR}" \
         -e VERBOSE="${VERBOSE}" \

@@ -4,6 +4,7 @@ This document describes configuration options of the services shipped with Spryk
 
 *     [Database](#database)
 *     [ElasticSearch](#elasticsearch)
+*     [OpenSearch](#opensearch)
 *     [Kibana UI](#kibana-ui)
 *     [RabbitMQ](#rabbitmq)
 *     [Swagger UI](#swagger-ui)
@@ -17,26 +18,27 @@ This document describes configuration options of the services shipped with Spryk
 *     [Tideways](#tideways)
 
 
-:::(Info) ()
-* Before you start configuring a service, make sure to install or update the Docker SDK to the latest version:
+## Prerequisites
+
+Install or update the Docker SDK to the latest version:
 ```bash
 git clone https://github.com/spryker/docker-sdk.git ./docker
 ```
 
-* After enabling a service, make sure to apply the new configuration:
-    1. Bootstrap docker setup:
-    ```bash
-    docker/sdk boot {deploy.yml | deploy.dev.yml}
-    ```
 
-    2. Once the job finishes, build and start the instance:
-    ```bash
-    docker/sdk up
-    ```
+## Optional services
+
+All services are optional, but each application requires certain services to work properly. Dependencies per service:
+
+| Service name    | Application Dependencies                                                                     |
+|-----------------|----------------------------------------------------------------------------------------------|
+| database        | backoffice, backend-gateway, zed, merchant-portal, glue-backend                              |
+| broker          | backoffice, backend-gateway, zed, merchant-portal, glue-backend                              |
+| key_value_store | backoffice, backend-gateway, zed, yves, merchant-portal, glue, glue-storefront, glue-backend |
+| session         | backoffice, zed, yves, merchant-portal, glue-backend                                         |
+| search          | backoffice, backend-gateway, zed, yves, merchant-portal, glue, glue-storefront, glue-backend |
 
 
-
-:::
 
 ## Database
 [MariaDB](https://mariadb.org/) is provided as a service by default, but you can switch to MySQL or PostgreSQL as described below.
@@ -136,7 +138,7 @@ See:
 
 ### Configuration
 
-Adjust `deploy.*.yml` in the `services:` section to open the port used for accessing ElasticSearch:
+1. Adjust `deploy.*.yml` in the `services:` section to open the port used for accessing ElasticSearch:
 ```yaml
 services:
     search:
@@ -144,6 +146,33 @@ services:
         endpoints:
             localhost:9200
                 protocol: tcp
+```
+
+2. Bootstrap the docker setup and rebuild the application:
+```bash
+docker/sdk boot deploy.*.yml &&\
+docker/sdk up
+
+## OpenSearch
+
+[OpenSearch](https://opensearch.org/docs/1.3/) is a search engine based on the Lucene library. It provides a distributed, multitenant-capable full-text search engine with an HTTP web interface and schema-free JSON documents.
+
+### Configuration
+
+1. Adjust `deploy.*.yml` in the `services:` section to open the port used for accessing OpenSearch:
+```yaml
+services:
+    search:
+        engine: opensearch
+        endpoints:
+            localhost:9200
+              protocol: tcp
+
+
+2. Bootstrap the docker setup and rebuild the application:
+```bash
+docker/sdk boot deploy.*.yml &&\
+docker/sdk up
 ```
 
 ## Kibana UI
@@ -170,13 +199,19 @@ services:
 echo "127.0.0.1 {custom_endpoint}" | sudo tee -a /etc/hosts
 ```
 
+3. 2. Bootstrap the docker setup and rebuild the application:
+```bash
+docker/sdk boot deploy.*.yml &&\
+docker/sdk up
+```
+
 ## RabbitMQ
 
 [RabbitMQ](https://www.rabbitmq.com/) is a messaging broker - an intermediary for messaging. It gives your applications a common platform to send and receive messages, and your messages a safe place to live until received.
 
 ### Configuration
 
-Adjust `deploy.*.yml` in the `services:` section to open the port used for accessing RabbitMQ:
+1. Adjust `deploy.*.yml` in the `services:` section to open the port used for accessing RabbitMQ:
 ```yaml
 services:
     broker:
@@ -187,6 +222,13 @@ services:
                 protocol: tcp
             api.queue.spryker.local:
 ```
+
+2. Bootstrap the docker setup and rebuild the application:
+```bash
+docker/sdk boot deploy.*.yml &&\
+docker/sdk up
+```
+
 ## Swagger UI
 
 [Swagger UI](https://swagger.io/tools/swagger-ui/) allows anyone — be it your development team or your end consumers — to visualize and interact with the API’s resources without having any of the implementation logic in place. It’s automatically generated from your OpenAPI (formerly known as Swagger) Specification, with the visual documentation making it easy for back end implementation and client-side consumption.
@@ -216,6 +258,11 @@ services:
 echo "127.0.0.1 {custom_endpoint}" | sudo tee -a /etc/hosts
 ```
 
+3. Bootstrap the docker setup and rebuild the application:
+```bash
+docker/sdk boot deploy.*.yml &&\
+docker/sdk up
+```
 ## Redis
 
 [Redis](https://redis.io) is an open source (BSD licensed), in-memory data structure store, used as a database, cache and message broker. It supports data structures such as strings, hashes, lists, sets, sorted sets with range queries, bitmaps, hyperloglogs, geospatial indexes with radius queries and streams.
@@ -224,7 +271,7 @@ See [Redis documentation](https://redis.io/documentation) for more details.
 
 ### Configuration
 
-Adjust `deploy.*.yml` in the `services:` section to open the port used for accessing Redis:
+1. Adjust `deploy.*.yml` in the `services:` section to open the port used for accessing Redis:
 ```yaml
 services:
     key_value_store:
@@ -234,6 +281,11 @@ services:
                 protocol: tcp
 ```
 
+2. Bootstrap the docker setup and rebuild the application:
+```bash
+docker/sdk boot deploy.*.yml &&\
+docker/sdk up
+```
 
 ## Redis GUI
 [Redis Commander](http://joeferner.github.io/redis-commander/) is a web management tool that provides a graphical user interface to access Redis databases and perform basic operations like view keys as a tree, view CRUD keys or import/export databases.
@@ -258,7 +310,11 @@ echo "127.0.0.1 {custom_endpoint}" | sudo tee -a /etc/hosts
 ```
 
 
-
+3. Bootstrap the docker setup and rebuild the application:
+```bash
+docker/sdk boot deploy.*.yml &&\
+docker/sdk up
+```
 
 ## MailHog
 
@@ -275,7 +331,8 @@ By default the following applies:
 * Login is not required
 :::
 ### Configuration
-Adjust `deploy.*.yml` in the `services:` section to specify a custom endpoint:
+
+1. Adjust `deploy.*.yml` in the `services:` section to specify a custom endpoint:
 ```yaml
 services:
         ...
@@ -283,6 +340,11 @@ services:
                 engine: mailhog
                 endpoints:
                           {custom_endpoint}:
+```
+2. Bootstrap the docker setup and rebuild the application:
+```bash
+docker/sdk boot deploy.*.yml &&\
+docker/sdk up
 ```
 
 ## Blackfire
@@ -314,6 +376,12 @@ services:
         server-token: {server_token}
         client-id: {client_id}
         client-token: {client-token}
+```
+
+3. Bootstrap the docker setup and rebuild the application:
+```bash
+docker/sdk boot deploy.*.yml &&\
+docker/sdk up
 ```
 
 ### Alternative Configuration
@@ -358,81 +426,166 @@ BLACKFIRE_SERVER_ID={client-token} BLACKFIRE_SERVER_TOKEN={server_token} docker/
 You can pass the server details only with the `docker/sdk up` command.
 :::
 
+5. Bootstrap the docker setup and rebuild the application:
+```bash
+docker/sdk boot deploy.*.yml &&\
+docker/sdk up
+```
+
 It is not obligatory to pass all the details as environment variables or define all the details in the deploy file. You can pass the details in any combination.
 
 ## New Relic
-[New Relic](https://newrelic.com/) is a tool used to track the performance of services, environment to quickly find and fix issues.
 
-The solution consists of a client and a server. The client is used to collect the data about applications in an environment and send it to the server for further analysis and presentation. The server is used to aggregate, analyse and present the data.
+[New Relic](https://newrelic.com/) is a tool used to track the performance of services and the environment to quickly find and fix issues.
 
-### Configuration
+The solution consists of a client and a server. The client is used to collect data about applications in an environment and send it to the server for further analysis and presentation. The server is used to aggregate, analyse, and present the data.
 
-Follow the steps to enable New Relic:
+### Prerequisites
 
-1. Adjust `deploy.*.yml` in the `docker:` section:
+* Access to New Relic with an APM account.
+* Local: [New Relic license key](https://docs.newrelic.com/docs/apis/intro-apis/new-relic-api-keys/).
+* The New Relic module.
+
+Spryker provides its own New Relic licenses for use with its PaaS environments. A New Relic license key is only required if you wish to set up your own local monitoring.
+
+### Install the New Relic module
+
+While most environments come with New Relic already available, you may need to add the module to your project. Add the module to your `composer.json`:
+
+```bash
+composer require spryker-eco/new-relic
+```
+
+### SCCOS: Configure New Relic
+
+1. Adjust `deploy.*.yml` in the `image:` section:
+
+```yaml
+image:
+    tag: spryker/php:7.4 # the image tag that has been previously used in `image`
+    php:
+        ...
+        enabled-extensions:
+            ...
+            - newrelic
+```
+
+2. Push and deploy the changes using one of the following guides:
+
+  * [Deploying in a staging environment](https://docs.spryker.com/docs/cloud/dev/spryker-cloud-commerce-os/deploying-in-a-staging-environment.html)
+  * [Deploying in a production environment](https://docs.spryker.com/docs/cloud/dev/spryker-cloud-commerce-os/deploying-in-a-production-environment.html)
+
+
+
+3. Submit an infrastructure change request via the [Support Portal](https://docs.spryker.com/docs/scos/user/intro-to-spryker/support/how-to-use-the-support-portal.html).
+  We will confirm that a New Relic APM account is available for you and ensure that the correct application naming convention is set up to cascade to the appropriate APM.
+
+Once New Relic is enabled, in the New Relic dashboard, you may see either `company-staging-newrelic-app` or `YVES-DE (docker.dev)`. New Relic displays these APM names by the application name setup in the configuration files.
+
+![screenshot](https://lh3.googleusercontent.com/drive-viewer/AJc5JmRPsydm6Ds2eRmKS_lMRNjBnqhBLsvtN_ul_R1EMO7Z4pj74Mbpw3kMdAnjH6gIwLt9cvOqLcI=w1920-h919)
+
+
+{% info_block infoBox %}
+
+If you update the name of an application, [contact support](https://docs.spryker.com/docs/scos/user/intro-to-spryker/support/how-to-use-the-support-portal.html) to update the changes in your APM.
+
+{% endinfo_block %}
+
+
+
+### Local: Configure New Relic
+
+1. In `deploy.*.yml`, adjust the `docker` section:
 
 ```yaml
 docker:
     newrelic:
         license: {new_relic_license}
+    distributed tracing:
+            enabled: true
 ```
 
-2. Adjust `deploy.*.yml` in the `image:` section:
+2. In the `deploy.*.yml`, adjust the `image` section:
 
 ```yaml
 image:
-    tag: spryker/php:7.3 # the image tag that has been previously used in `image:`
+    tag: spryker/php:7.4 # the image tag that has been previously used in `image`
     php:
         ...
         enabled-extensions:
+            ...
             - newrelic
 ```
 
-### Alternative Configuration
-
-Use this configuration if you are going to change New Relic license often or don’t want to define it in the deploy file.
-
-Follow the steps to enable New Relic:
-
-1. Adjust `deploy.*.yml` in the `docker:` section:
-
-```yaml
-docker:
-    newrelic:
-```
-
-2. Adjust `deploy.*.yml` in the `image:` section:
-
-```yaml
-image:
-    tag: spryker/php:7.3 # the image tag that has been previously used in `image:`
-    php:
-        ...
-        enabled-extensions:
-            - newrelic
-```
-
-3. Pass the New Relic license:
-
+3. Bootstrap the docker setup and rebuild the application:
 ```bash
-NEWRELIC_LICENSE={new_relic_license} docker/sdk up
+docker/sdk boot deploy.*.yml &&\
+docker/sdk up
 ```
-:::(Warning) (Note)
-You can pass the New Relic license only with the `docker/sdk up` command.
-:::
+
+
+### Configure YVES, ZED, and GLUE as separate APMs
+
+By default, in the New Relic dashboard, the APM is displayed as `company-staging-newrelic-app`. To improve visibility, you may want to configure each application as a separate APM. For example, `YVES-DE (docker.dev)`.
+
+To do it, adjust the Monitoring service in `src/Pyz/Service/Monitoring/MonitoringDependencyProvider.php`:  
+
+```php
+<?php declare(strict_types = 1);
+
+/**
+ * This file is part of the Spryker Commerce OS.
+ * For full license information, please view the LICENSE file that was distributed with this source code.
+ */
+
+namespace Pyz\Service\Monitoring;
+
+use Spryker\Service\Monitoring\MonitoringDependencyProvider as SprykerMonitoringDependencyProvider;
+use SprykerEco\Service\NewRelic\Plugin\NewRelicMonitoringExtensionPlugin;
+
+class MonitoringDependencyProvider extends SprykerMonitoringDependencyProvider
+{
+    /**
+     * @return \Spryker\Service\MonitoringExtension\Dependency\Plugin\MonitoringExtensionPluginInterface[]
+     */
+    protected function getMonitoringExtensions(): array
+    {
+        return [
+            new NewRelicMonitoringExtensionPlugin(),
+        ];
+    }
+}
+```
+
+{% info_block infoBox %}
+
+* Some builds have the Monitoring service built into the Yves application. If `src/Pyz/Service/Monitoring/MonitoringDependencyProvider.php` does not exist, you may want to check `src/Pyz/Yves/Monitoring/`.
+
+* If the class is missing from the Monitoring service, create it.
+
+
+{% endinfo_block %}
+
+
+
+With `new \SprykerEco\Service\NewRelic\Plugin\NewRelicMonitoringExtensionPlugin()` being returned with the `getMonitoringExtensions()` function, the Monitoring class includes New Relic. Now applications are displayed as separate APMs, and an appropriate endpoint or class is displayed with each transaction.
+
+![screenshot](https://lh3.googleusercontent.com/drive-viewer/AJc5JmTs7PzBBgaotIid707cuXeru3hc5L6PZv9a_zQAyDMhp2FWKiCSTc2kmqHCaLVsBtjIcoUVYKY=w1920-h919)
+
+4. Bootstrap the docker setup and rebuild the application:
+```bash
+docker/sdk boot deploy.*.yml &&\
+docker/sdk up
+```
 
 ## Webdriver
-ChromeDriver is provided as a webdriver service by default, but you can switch to PhantomJS as described below.
+PhantomJS is provided as a webdriver service by default, but you can switch to ChromeDriver as described below.
 
 
 ### ChromeDriver
 
 [ChromeDriver](https://chromedriver.chromium.org/) is a thin wrapper on WebDriver and [Chromium](https://chromedriver.chromium.org/) headless browser. It is used for automating web page interaction, JavaScript execution, and other testing-related activities. It provides full-control API to make end-to-end testing flexible and comfortable.
 
-
-:::(Warning) (Default service)
-Chromedriver is provided as a service by default. You may only need to use this configuration if you are running an older version of the Docker SDK or if you've previously switched to another WebDriver.
-:::
 
 #### Configuration
 To enable Chromedriver, adjust `deploy.*.yml` as follows:
@@ -466,7 +619,7 @@ Dashboard is a tool that helps to monitor logs in real time. You can monitor log
 
 ### Configuration
 
-To configure Вashboard, adjust your `deploy.*.yml` as follows:
+1. Adjust your `deploy.*.yml` as follows:
 
 ```yaml
 dashboard:
@@ -475,17 +628,30 @@ dashboard:
             {custom_endpoint}:
 ```
 
+2. Bootstrap the docker setup and rebuild the application:
+```bash
+docker/sdk boot deploy.*.yml &&\
+docker/sdk up
+```
+
 ## Tideways
 
 [Tideways](https://tideways.com/) is an application profiler used for testing and debugging. Its main functions are profiling, monitoring, and exception tracking.
 
 
 ### Configuration
-To configure Tideways, adjust your `deploy.*.yml` as follows:
+
+1. Adjust your `deploy.*.yml` as follows:
 
 ```yaml
 tideways:
     apikey: {tideways_api_key}
     environment-name: {tideways_environment_name}
     cli-enabled: {true|false}
+```
+
+2. Bootstrap the docker setup and rebuild the application:
+```bash
+docker/sdk boot deploy.*.yml &&\
+docker/sdk up
 ```

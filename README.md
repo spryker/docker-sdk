@@ -8,7 +8,7 @@ Spryker Docker SDK helps to set up a Docker environment for your Spryker project
 This repository does not contain a specific Dockerfile or Docker Compose files. It contains a tool that prepares those files to match the infrastructure of your Spryker project.
 
 
-Spryker Docker SDK reads a [Deploy file](docs/99-deploy-file-reference.v1.md) and builds a production-like Docker infrastructure for Spryker accordingly.
+Spryker Docker SDK reads a [Deploy file](docs/07-deploy-file/02-deploy.file.reference.v1.md) and builds a production-like Docker infrastructure for Spryker accordingly.
 
 The tool is used for:
 
@@ -68,12 +68,15 @@ For contribution guidelines, see [Code contribution guide](https://docs.spryker.
 | broker          | rabbitmq     | 3.7          |             |                                    |
 |                 |              | 3.8          | &check;     |                                    |
 |                 |              | 3.9          | &check;     |                                    |
-| session         | redis        | 5.0          | &check;     |                                    |
-| key_value_store | redis        | 5.0          | &check;     |                                    |
+| session         | redis        | 5.0*         | &check;     |                                    |
+|                 | redis        | 6.2          | &check;     |                                    |
+| key_value_store | redis        | 5.0*         | &check;     |                                    |
+|                 | redis        | 6.2          | &check;     |                                    |
 | search          | elastic      | 5.6*         | &check;     | https://www.elastic.co/support/eol |
 |                 |              | 6.8          | &check;     | https://www.elastic.co/support/eol |
 |                 |              | 7.6          | &check;     |                                    |
 |                 |              | 7.10         | &check;     |                                    |
+|                 | opensearch   | 1.3          | &check;     |                                    |
 | scheduler       | jenkins      | 2.176        |             |                                    |
 |                 |              | 2.305        | &check;     |                                    |
 |                 |              | 2.324        | &check;     |                                    |
