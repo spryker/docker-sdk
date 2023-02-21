@@ -67,6 +67,7 @@ function Command::bootstrap() {
         rm -rf "${tmpDeploymentDir}"
     fi
     mkdir "${tmpDeploymentDir}"
+    mkdir "${tmpDeploymentDir}/project-deploy-templates"
 
     tmpDeploymentDir="$(cd "${tmpDeploymentDir}" >/dev/null 2>&1 && pwd)"
 
