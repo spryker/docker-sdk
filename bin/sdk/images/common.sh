@@ -83,6 +83,7 @@ function Images::_buildApp() {
         --build-arg "SPRYKER_COMPOSER_AUTOLOAD=${SPRYKER_COMPOSER_AUTOLOAD}" \
         --build-arg "SPRYKER_BUILD_HASH=${SPRYKER_BUILD_HASH:-"current"}" \
         --build-arg "SPRYKER_BUILD_STAMP=${SPRYKER_BUILD_STAMP:-""}" \
+        --build-arg "SPRYKER_ENDPOINT_LIST=${SPRYKER_ENDPOINT_LIST}" \
         . 1>&2
 
     docker build \

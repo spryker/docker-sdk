@@ -25,6 +25,8 @@ RUN chmod 600 ${srcRoot}/config/Zed/*.key 2>/dev/null || true
 RUN --mount=type=cache,id=composer,sharing=locked,target=/home/spryker/.composer/cache,uid=1000 \
   composer dump-autoload -o
 
+ARG SPRYKER_ENDPOINT_LIST
+ENV SPRYKER_ENDPOINT_LIST=${SPRYKER_ENDPOINT_LIST}
 ARG SPRYKER_PIPELINE
 ENV SPRYKER_PIPELINE=${SPRYKER_PIPELINE}
 ARG APPLICATION_ENV
@@ -32,6 +34,7 @@ ARG SPRYKER_DB_ENGINE
 ENV APPLICATION_ENV=${APPLICATION_ENV}
 ENV SPRYKER_DB_ENGINE=${SPRYKER_DB_ENGINE}
 
+COPY --chown=spryker:spryker .gitlab* ${srcRoot}/.gitlab
 COPY --chown=spryker:spryker data ${srcRoot}/data
 RUN vendor/bin/install -r ${SPRYKER_PIPELINE} -s build -s build-production -vvv
 
