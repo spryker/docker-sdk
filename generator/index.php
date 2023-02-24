@@ -73,6 +73,10 @@ $yamlParser = new Parser();
 
 $projectData = $yamlParser->parseFile($projectYaml);
 
+if (!array_key_exists('services', $projectData)) {
+    $projectData['services'] = [];
+}
+
 $projectData['_knownHosts'] = buildKnownHosts($deploymentDir);
 $projectData['_defaultDeploymentDir'] = $defaultDeploymentDir;
 $projectData['tag'] = $projectData['tag'] ?? uniqid();
@@ -101,6 +105,7 @@ $projectData['_isAcpLocalDevelopmentEnabled'] = isAcpLocalDevelopmentEnabled($pr
 
 // TODO Make it optional in next major
 // Making webdriver as required service for BC reasons
+// todo: waitFor refactoring dependency + document + testing mode
 if (empty($projectData['services']['webdriver'])) {
     $projectData['services']['webdriver'] = [
         'engine' => 'phantomjs',
@@ -701,19 +706,24 @@ function getSSLRedirectPort(array $projectData): int
  */
 function getBrokerConnections(array $projectData): string
 {
-    $brokerServiceData = $projectData['services']['broker'];
-
     $connections = [];
+    $brokerServiceData = $projectData['services']['broker'] ?? [];
+
+    if ($brokerServiceData == []) {
+        return json_encode($connections);
+    }
+
     foreach ($projectData['regions'] as $regionName => $regionData) {
         foreach ($regionData['stores'] ?? [] as $storeName => $storeData) {
             $localServiceData = array_replace($brokerServiceData, $storeData['services']['broker']);
+
             $connections[$storeName] = [
                 'RABBITMQ_CONNECTION_NAME' => $storeName . '-connection',
                 'RABBITMQ_HOST' => 'broker',
                 'RABBITMQ_PORT' => $localServiceData['port'] ?? 5672,
-                'RABBITMQ_USERNAME' => $localServiceData['api']['username'],
-                'RABBITMQ_PASSWORD' => $localServiceData['api']['password'],
-                'RABBITMQ_VIRTUAL_HOST' => $localServiceData['namespace'],
+                'RABBITMQ_USERNAME' => $localServiceData['api']['username'] ?? '',
+                'RABBITMQ_PASSWORD' => $localServiceData['api']['password'] ?? '',
+                'RABBITMQ_VIRTUAL_HOST' => $localServiceData['namespace'] ?? '',
                 'RABBITMQ_STORE_NAMES' => [$storeName], // check if connection is shared
             ];
         }
@@ -729,9 +739,9 @@ function getBrokerConnections(array $projectData): string
  */
 function getCloudBrokerConnections(array $projectData): string
 {
-    $brokerServiceData = $projectData['services']['broker'];
-
     $connections = [];
+    $brokerServiceData = $projectData['services']['broker'] ?? [];
+
     foreach ($projectData['regions'] as $regionName => $regionData) {
         foreach ($regionData['stores'] ?? [] as $storeName => $storeData) {
             $localServiceData = array_replace($brokerServiceData, $storeData['services']['broker']);
@@ -1447,7 +1457,8 @@ function buildDefaultRegionCredentialsForDatabase(array $projectData): array
         'password' => 'secret',
     ];
 
-    $databaseServiceData = $projectData['services']['database'];
+    $databaseServiceData = $projectData['services']['database'] ?? [];
+
     foreach ($projectData['regions'] as $regionName => $regionConfig) {
         $databases = [
             'version' => '1.0',
