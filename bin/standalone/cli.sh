@@ -41,7 +41,7 @@ function setPrompt() {
     then
         status+="${YELLOW}Region${NC}: ${GREEN}${SPRYKER_CURRENT_REGION}${NC}"
     fi
-     if [ -n "${APPLICATION_STORE}" ]
+    if [ -n "${APPLICATION_STORE}" ]
     then
         status+="${YELLOW}Store${NC}: ${GREEN}${APPLICATION_STORE}${NC}"
     fi

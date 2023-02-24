@@ -72,3 +72,17 @@ function getBrokerHosts(array $projectData, string $currentRegion): string
 
     return implode(' ', array_values($hosts));
 }
+
+/**
+ * @param array $projectData
+ *
+ * @return string
+ */
+function getDefaultRegionName($projectData): string
+{
+    $keys = array_keys($projectData['groups']);
+
+    return $projectData['groups'][array_pop($keys)]['region'] ?? '';
+}
+
+
