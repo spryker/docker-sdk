@@ -511,7 +511,7 @@ foreach ($projectData['services'] ?? [] as $serviceName => $serviceData) {
     }
 }
 
-$projectData['brokerHosts'] = $brokernHosts ?? getBrokerHosts($projectData, '');
+$projectData['brokerHosts'] = $brokernHosts ?? getBrokerHosts($projectData, getDefaultRegionName($projectData));
 $projectData['regionEndpointMap'] = getRegionEndpointMap($projectData, getDefaultRegionName($projectData));
 $projectData['regionData'] = $projectData['regions'][getDefaultRegionName($projectData)] ?? [];
 
