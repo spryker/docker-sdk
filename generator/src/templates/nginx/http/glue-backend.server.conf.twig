@@ -14,6 +14,7 @@
     fastcgi_param SPRYKER_SESSION_BE_NAMESPACE "{{ storeServices['session']['namespace'] | default(endpointData['services']['session']['namespace']) }}";
     fastcgi_param SPRYKER_GLUE_BACKEND_HOST "{{ host }}";
     fastcgi_param SPRYKER_GLUE_BACKEND_PORT "{{ externalPort }}";
+    fastcgi_param SPRYKER_GLUE_BACKEND_APPLICATION_CORS_ALLOW_ORIGIN "{{ endpointData['cors-allow-origin'] | default('') | nginx_var }}";
 
 {% if storeServices['mail']['sender']['email'] is not empty %}
     fastcgi_param SPRYKER_MAIL_SENDER_EMAIL "{{ storeServices['mail']['sender']['email'] }}";
