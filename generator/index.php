@@ -187,6 +187,7 @@ foreach ($projectData['groups'] ?? [] as $groupName => $groupData) {
             $application = $applicationData['application'];
             $store = $endpointData['store'] ?? null;
             $region = $endpointData['region'] ?? null;
+            $projectData['groups'][$groupName]['applications'][$applicationName]['endpoints'][$endpoint]['identifier'] = $store ? $store : $region;
             $projectData['groups'][$groupName]['applications'][$applicationName]['endpoints'][$endpoint]['primal'] = false;
             while (!empty($projectData['_ports'][$debugPortIndex])) {
                 $debugPortIndex++;
