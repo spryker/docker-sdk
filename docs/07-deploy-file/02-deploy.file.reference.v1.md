@@ -285,6 +285,7 @@ Defines PHP settings for Spryker applications.
 * `image: php: enabled-extensions` - defines enabled PHP extensions. The following extensions are allowed:
   * `blackfire`
   * `newrelic`
+  * `pcov`
   * `tideways`
   * `xhprof`
 

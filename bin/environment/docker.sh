@@ -31,7 +31,22 @@ function Environment::checkDockerVersion() {
         exit 1
     fi
 
+    Environment::checkDependenciesByVersion "${installedVersion}"
     Console::end "[OK]"
+}
+
+function Environment::checkDependenciesByVersion() {
+    local installedVersion=${1}
+    local requiredMinimalVersionWithBuildx='23.0.0'
+
+    if [ "$(Version::parse "${installedVersion}")" -ge "$(Version::parse "${requiredMinimalVersionWithBuildx}")" ]; then
+        local isBuildxExist=$(docker --help | grep buildx)
+
+        if [ -z "${isBuildxExist}" ]; then
+            Console::error "Docker Buildx plugin is not installed. Please, make sure Docker Buildx plugin is installed. How to install Docker Buildx(https://docs.docker.com/build/install-buildx/)"
+            exit 1
+        fi
+    fi
 }
 
 # ------------------
