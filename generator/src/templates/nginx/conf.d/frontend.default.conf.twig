@@ -44,7 +44,7 @@ server {
     zedHost: zedHost,
     timeout: '1m',
     project: _context,
-    regionEndpointMap: _context['regionEndpointMap']
+    regionEndpointMap: _context['regionEndpointMap'][endpointData['identifier']]
 } %}
 {% endfor %}
 {% endfor %}

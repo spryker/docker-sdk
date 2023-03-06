@@ -6,9 +6,13 @@
  *
  * @return array
  */
-function getRegionEndpointMap(array $projectData, string $region): array
+function getRegionEndpointMap(array $projectData, string $region = ''): array
 {
-    return $projectData['_endpointMap'][$region] ?? [];
+    if ($region) {
+        return $projectData['_endpointMap'][$region] ?? [];
+    }
+
+    return $projectData['_endpointMap'];
 }
 
 /**

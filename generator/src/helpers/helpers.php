@@ -57,7 +57,7 @@ function getKeyValueStores(array $projectData): string
  *
  * @return string
  */
-function getBrokerHosts(array $projectData, string $currentRegion): string
+function getBrokerHosts(array $projectData, string $currentRegion = ''): string
 {
     $hosts = null;
     $storesData = $projectData['regions'][$currentRegion]['stores'] ?? null;

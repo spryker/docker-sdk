@@ -303,7 +303,6 @@ function mapBackendEndpointsWithFallbackZed(array $endpointMap): array
 foreach ($projectData['groups'] ?? [] as $groupName => $groupData) {
     foreach ($groupData['applications'] ?? [] as $applicationName => $applicationData) {
         $currentRegionName = $groupData['region'];
-
         $brokerHosts = getBrokerHosts($projectData, $currentRegionName);
 
         if ($applicationData['application'] !== 'static') {
@@ -512,9 +511,9 @@ foreach ($projectData['services'] ?? [] as $serviceName => $serviceData) {
     }
 }
 
-$projectData['brokerHosts'] = $brokernHosts ?? getBrokerHosts($projectData, getDefaultRegionName($projectData));
-$projectData['regionEndpointMap'] = getRegionEndpointMap($projectData, getDefaultRegionName($projectData));
-$projectData['regionData'] = $projectData['regions'][getDefaultRegionName($projectData)] ?? [];
+$projectData['brokerHosts'] = $brokernHosts ?? getBrokerHosts($projectData);
+$projectData['regionEndpointMap'] = getRegionEndpointMap($projectData);
+$projectData['regionData'] = $projectData['regions'] ?? [];
 
 file_put_contents(
     $deploymentDir . DS . 'context' . DS . 'nginx' . DS . 'conf.d' . DS . 'frontend.default.conf.tmpl',
