@@ -13,17 +13,17 @@ class DeployFileGeneratorConfig
     /**
      * @var string
      */
-    protected const PROJECT_DEPLOY_FILE_DIRECTORY_PATH = './deployment/project-deploy-templates/';
+    protected const PROJECT_DEPLOY_FILE_DIRECTORY_PATH = '/deployment/project-deploy-templates/';
 
     /**
      * @var string
      */
-    protected const BASE_DEPLOY_FILE_DIRECTORY_PATH = './deploy-file-generator/templates/';
+    protected const BASE_DEPLOY_FILE_DIRECTORY_PATH = '/deploy-file-generator/templates/';
 
     /**
      * @var string
      */
-    protected const VALIDATION_RULES_FILE_PATH = './deploy-file-generator/config/validation.yml';
+    protected const VALIDATION_RULES_FILE_PATH = '/deploy-file-generator/config/validation.yml';
 
     /**
      * @var array<string>
@@ -47,7 +47,7 @@ class DeployFileGeneratorConfig
      */
     public function getProjectDirectoryPath(): string
     {
-        return static::PROJECT_DEPLOY_FILE_DIRECTORY_PATH;
+        return $this->getRealPath(static::PROJECT_DEPLOY_FILE_DIRECTORY_PATH);
     }
 
     /**
@@ -55,7 +55,7 @@ class DeployFileGeneratorConfig
      */
     public function getBaseDirectoryPath(): string
     {
-        return static::BASE_DEPLOY_FILE_DIRECTORY_PATH;
+        return $this->getRealPath(static::BASE_DEPLOY_FILE_DIRECTORY_PATH);
     }
 
     /**
@@ -71,7 +71,7 @@ class DeployFileGeneratorConfig
      */
     public function getValidationRulesFilePath(): string
     {
-        return static::VALIDATION_RULES_FILE_PATH;
+        return $this->getRealPath(static::VALIDATION_RULES_FILE_PATH);
     }
 
     /**
@@ -81,4 +81,14 @@ class DeployFileGeneratorConfig
     {
         return static::DEPLOY_FILE_KEY_ORDER;
     }
+
+    /**
+     * @param string $relativePath
+     * @return string
+     */
+    public function getRealPath(string $relativePath): string
+    {
+        return realpath( __DIR__ . '/../../') . $relativePath ;
+    }
+
 }

@@ -76,7 +76,6 @@ $projectData = $yamlParser->parseFile($projectYaml);
 if (!array_key_exists('services', $projectData)) {
     $projectData['services'] = [];
 }
-
 $projectData['_knownHosts'] = buildKnownHosts($deploymentDir);
 $projectData['_defaultDeploymentDir'] = $defaultDeploymentDir;
 $projectData['tag'] = $projectData['tag'] ?? uniqid();
@@ -95,6 +94,7 @@ $projectData['_envs'] = array_merge(
     getAdditionalEnvVariables($projectData),
     buildNewrelicEnvVariables($projectData)
 );
+$dynamicStoreMode = $projectData['_envs']['SPRYKER_DYNAMIC_STORE_MODE'] ?? false;
 $projectData['storageData'] = retrieveStorageData($projectData);
 $projectData['composer']['autoload'] = buildComposerAutoloadConfig($projectData);
 $isAutoloadCacheEnabled = $projectData['_isAutoloadCacheEnabled'] = isAutoloadCacheEnabled($projectData);
@@ -318,7 +318,7 @@ foreach ($projectData['groups'] ?? [] as $groupName => $groupData) {
                     'regionName' => $currentRegionName,
                     'regionData' => $projectData['regions'][$currentRegionName],
                     'brokerConnections' => getBrokerConnections($projectData),
-                    'keyValueStoreConnections' => getKeyValueStores($projectData),
+                    'keyValueStoreConnections' => $dynamicStoreMode ? getKeyValueStores($projectData) : false,
                     'brokerHosts' => getBrokerHosts($projectData, $currentRegionName),
                     'regionEndpointMap' => getRegionEndpointMap($projectData, $currentRegionName),
                 ])
@@ -409,7 +409,7 @@ foreach ($projectData['groups'] ?? [] as $groupName => $groupData) {
                         'regionName' => $currentRegionName,
                         'regionData' => $projectData['regions'][$currentRegionName],
                         'brokerConnections' => getBrokerConnections($projectData),
-                        'keyValueStoreConnections' => getKeyValueStores($projectData),
+                        'keyValueStoreConnections' => $dynamicStoreMode ? getKeyValueStores($projectData) : false,
                         'storeName' => $endpointData['store'],
                         'services' => $services,
                         'endpointMap' => $endpointMap
@@ -425,7 +425,7 @@ foreach ($projectData['groups'] ?? [] as $groupName => $groupData) {
                         'regionName' => $currentRegionName,
                         'regionData' => $projectData['regions'][$currentRegionName],
                         'brokerConnections' => getBrokerConnections($projectData),
-                        'keyValueStoreConnections' => getKeyValueStores($projectData),
+                        'keyValueStoreConnections' => $dynamicStoreMode ? getKeyValueStores($projectData) : false,
                         'storeName' => $endpointData['store'],
                         'services' => $services,
                         'endpointMap' => $endpointMap,
@@ -443,7 +443,7 @@ foreach ($projectData['groups'] ?? [] as $groupName => $groupData) {
                         'regionName' => $currentRegionName,
                         'regionData' => $projectData['regions'][$currentRegionName],
                         'brokerConnections' => getBrokerConnections($projectData),
-                        'keyValueStoreConnections' => getKeyValueStores($projectData),
+                        'keyValueStoreConnections' => $dynamicStoreMode ? getKeyValueStores($projectData) : false,
                         'services' => $services,
                         'endpointMap' => $endpointMap,
                         'regionEndpointMap' => getRegionEndpointMap($projectData, $currentRegionName),
@@ -459,7 +459,7 @@ foreach ($projectData['groups'] ?? [] as $groupName => $groupData) {
                         'regionName' => $currentRegionName,
                         'regionData' => $projectData['regions'][$currentRegionName],
                         'brokerConnections' => getBrokerConnections($projectData),
-                        'keyValueStoreConnections' => getKeyValueStores($projectData),
+                        'keyValueStoreConnections' => $dynamicStoreMode ? getKeyValueStores($projectData) : false,
                         'services' => $services,
                         'endpointMap' => $endpointMap,
                         'regionEndpointMap' => getRegionEndpointMap($projectData, $currentRegionName),
@@ -552,6 +552,7 @@ file_put_contents(
     $deploymentDir . DS . 'terraform/environment.tf',
     $twig->render('terraform/environment.tf.twig', [
         'brokerConnections' => getCloudBrokerConnections($projectData),
+        'keyValueStoreConnections' => $dynamicStoreMode ? getKeyValueStores($projectData) : false,
         'project' => $projectData,
     ])
 );
