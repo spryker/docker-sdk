@@ -45,7 +45,7 @@ function Database::haveTables() {
 EOF
     )
 
-    [ "$tableCount" -gt 0 ] && return "${TRUE}" || return "${FALSE}"
+    ( [ ! -z "${tableCount}" ] &&  [ "${tableCount}" -gt 0 ]) && return "${TRUE}" || return "${FALSE}"
 }
 
 function Database::init() {
