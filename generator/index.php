@@ -95,6 +95,7 @@ $projectData['_envs'] = array_merge(
     buildNewrelicEnvVariables($projectData)
 );
 $dynamicStoreMode = $projectData['_envs']['SPRYKER_DYNAMIC_STORE_MODE'] ?? false;
+$projectData['dynamicStoreMode'] = $dynamicStoreMode;
 $projectData['storageData'] = retrieveStorageData($projectData);
 $projectData['composer']['autoload'] = buildComposerAutoloadConfig($projectData);
 $isAutoloadCacheEnabled = $projectData['_isAutoloadCacheEnabled'] = isAutoloadCacheEnabled($projectData);
