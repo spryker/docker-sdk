@@ -23,6 +23,6 @@ function getRegionEndpointMap(array $projectData, string $region = ''): array
 function getBrokerHostNamesMap(array $servicesDataToMap): array
 {
     return array_map(function(array $servicesData) {
-        return $servicesData['services']['broker']['namespace'];
+        return $servicesData['services']['broker']['namespace'] ?? '';
     }, $servicesDataToMap);
 }
