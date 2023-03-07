@@ -319,7 +319,7 @@ foreach ($projectData['groups'] ?? [] as $groupName => $groupData) {
                     'regionData' => $projectData['regions'][$currentRegionName],
                     'brokerConnections' => getBrokerConnections($projectData),
                     'keyValueStoreConnections' => $dynamicStoreMode ? getKeyValueStores($projectData) : false,
-                    'brokerHosts' => getBrokerHosts($projectData, $currentRegionName),
+                    'brokerHosts' => $brokerHosts,
                     'regionEndpointMap' => getRegionEndpointMap($projectData, $currentRegionName),
                 ])
             );
@@ -512,7 +512,7 @@ foreach ($projectData['services'] ?? [] as $serviceName => $serviceData) {
     }
 }
 
-$projectData['brokerHosts'] = $brokernHosts ?? getBrokerHosts($projectData);
+$projectData['brokerHosts'] = getBrokerHosts($projectData);
 $projectData['regionEndpointMap'] = getRegionEndpointMap($projectData);
 $projectData['regionData'] = $projectData['regions'] ?? [];
 

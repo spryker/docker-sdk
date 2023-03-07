@@ -67,7 +67,20 @@ function getBrokerHosts(array $projectData, string $currentRegion = ''): string
     }
 
     if ($hosts === null) {
-        $hosts = getBrokerHostNamesMap($projectData['regions']);
+        $hosts = [];
+        foreach ($projectData['regions'] as $config) {
+            if (!isset($config['stores'])) {
+                continue;
+            }
+            $regionStores = array_values($config['stores']);
+            array_walk($regionStores, function(array $store) use (&$hosts) {
+                $namespace = $store['services']['broker']['namespace'] ?? '';
+                array_push($hosts, $namespace);
+            });
+        }
+        if (!count($hosts)) {
+            $hosts = getBrokerHostNamesMap($projectData['regions']);
+        }
     }
 
     return implode(' ', array_values($hosts));
