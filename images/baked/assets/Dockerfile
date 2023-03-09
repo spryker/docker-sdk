@@ -5,7 +5,7 @@ FROM ${SPRYKER_PARENT_IMAGE} AS assets-builder
 
 USER spryker
 
-RUN srcRoot = "$srcRoot/current"
+ENV srcRoot "$srcRoot/current"
 COPY --chown=spryker:spryker package.json package-lock.json ${srcRoot}/
 COPY --chown=spryker:spryker frontend* ${srcRoot}/frontend
 COPY --chown=spryker:spryker tsconfig*.json ${srcRoot}/

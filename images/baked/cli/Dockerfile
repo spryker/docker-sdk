@@ -6,7 +6,7 @@ FROM ${SPRYKER_PARENT_IMAGE} as cli-production
 USER spryker
 
 # Install composer modules for Spryker
-RUN srcRoot = "$srcRoot/current"
+ENV srcRoot "$srcRoot/current"
 COPY --chown=spryker:spryker composer.json composer.lock ${srcRoot}/
 ARG SPRYKER_COMPOSER_MODE
 RUN --mount=type=cache,id=composer,sharing=locked,target=/home/spryker/.composer/cache,uid=1000 \
