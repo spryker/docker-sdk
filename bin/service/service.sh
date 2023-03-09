@@ -5,7 +5,10 @@ function Service::isServiceExist() {
 
   local isServiceExist=$(Compose::command config --services | grep "${serviceName}")
 
+  echo "------------------------------| serviceName - ${serviceName} | isServiceExist - ${isServiceExist} |------------------------------"
+
   if [ -z "${isServiceExist}" ]; then
+        echo "------------------------------| serviceName - ${serviceName} | not available |------------------------------"
         return ${FALSE};
   fi
 
