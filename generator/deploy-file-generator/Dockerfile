@@ -6,7 +6,7 @@ FROM spryker/php:${SPRYKER_PHP_VERSION}
 WORKDIR /data
 USER spryker
 
-RUN $srcRoot = "$srcRoot/current"
+RUN srcRoot = "$srcRoot/current"
 COPY --chown=spryker:spryker composer.json composer.lock ${srcRoot}/
 RUN --mount=type=cache,id=composer,sharing=locked,target=/home/spryker/.composer/cache,uid=1000 \
     composer install --no-interaction --optimize-autoloader --no-dev
