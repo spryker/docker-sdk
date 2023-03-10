@@ -23,6 +23,9 @@ regions.*:
     array-type:
 regions.*.services:
     not-empty:
+    or:
+        - database
+        - databases
 
 # Image:
 image.tag:

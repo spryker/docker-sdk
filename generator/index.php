@@ -73,6 +73,10 @@ $yamlParser = new Parser();
 
 $projectData = $yamlParser->parseFile($projectYaml);
 
+if (!array_key_exists('services', $projectData)) {
+    $projectData['services'] = [];
+}
+
 $projectData['_knownHosts'] = buildKnownHosts($deploymentDir);
 $projectData['_defaultDeploymentDir'] = $defaultDeploymentDir;
 $projectData['tag'] = $projectData['tag'] ?? uniqid();
@@ -100,6 +104,7 @@ $projectData = buildDefaultCredentials($projectData);
 
 // TODO Make it optional in next major
 // Making webdriver as required service for BC reasons
+// todo: waitFor refactoring dependency + document + testing mode
 if (empty($projectData['services']['webdriver'])) {
     $projectData['services']['webdriver'] = [
         'engine' => 'phantomjs',
@@ -263,9 +268,14 @@ function mapBackendEndpointsWithFallbackZed(array $endpointMap): array
 
     foreach ($zedApplicationsToCheck as $zedApplicationToCheck) {
         foreach ($endpointMap as $store => $storeEndpointMap) {
+            if (!array_key_exists(ZED_APP, $storeEndpointMap)) {
+                continue;
+            }
+
             if (array_key_exists($zedApplicationToCheck, $storeEndpointMap)) {
                 continue;
             }
+
             $endpointMap[$store][$zedApplicationToCheck] = $storeEndpointMap[ZED_APP];
         }
     }
@@ -350,12 +360,9 @@ foreach ($projectData['groups'] ?? [] as $groupName => $groupData) {
                 $projectData['_testing']['services'][$endpointData['store']][$applicationData['application']] = $services;
             }
 
-            if ($applicationData['application'] === ZED_APP
-                || $applicationData['application'] === BACKEND_GATEWAY_APP
-                || $applicationData['application'] === BACKOFFICE_APP
-                || $applicationData['application'] === MERCHANT_PORTAL
-            ) {
-                $envVarEncoder->setIsActive(true);
+            $envVarEncoder->setIsActive(true);
+
+            if (array_key_exists('store', $endpointData)) {
                 file_put_contents(
                     $deploymentDir . DS . 'env' . DS . 'cli' . DS . strtolower($endpointData['store']) . '.env',
                     $twig->render('env/cli/store.env.twig', [
@@ -386,8 +393,9 @@ foreach ($projectData['groups'] ?? [] as $groupName => $groupData) {
                         'endpointMap' => $endpointMap,
                     ])
                 );
-                $envVarEncoder->setIsActive(false);
             }
+
+            $envVarEncoder->setIsActive(false);
         }
     }
 }
@@ -703,19 +711,24 @@ function getSSLRedirectPort(array $projectData): int
  */
 function getBrokerConnections(array $projectData): string
 {
-    $brokerServiceData = $projectData['services']['broker'];
-
     $connections = [];
+    $brokerServiceData = $projectData['services']['broker'] ?? [];
+
+    if ($brokerServiceData == []) {
+        return json_encode($connections);
+    }
+
     foreach ($projectData['regions'] as $regionName => $regionData) {
         foreach ($regionData['stores'] ?? [] as $storeName => $storeData) {
             $localServiceData = array_replace($brokerServiceData, $storeData['services']['broker']);
+
             $connections[$storeName] = [
                 'RABBITMQ_CONNECTION_NAME' => $storeName . '-connection',
                 'RABBITMQ_HOST' => 'broker',
                 'RABBITMQ_PORT' => $localServiceData['port'] ?? 5672,
-                'RABBITMQ_USERNAME' => $localServiceData['api']['username'],
-                'RABBITMQ_PASSWORD' => $localServiceData['api']['password'],
-                'RABBITMQ_VIRTUAL_HOST' => $localServiceData['namespace'],
+                'RABBITMQ_USERNAME' => $localServiceData['api']['username'] ?? '',
+                'RABBITMQ_PASSWORD' => $localServiceData['api']['password'] ?? '',
+                'RABBITMQ_VIRTUAL_HOST' => $localServiceData['namespace'] ?? '',
                 'RABBITMQ_STORE_NAMES' => [$storeName], // check if connection is shared
             ];
         }
@@ -731,9 +744,9 @@ function getBrokerConnections(array $projectData): string
  */
 function getCloudBrokerConnections(array $projectData): string
 {
-    $brokerServiceData = $projectData['services']['broker'];
-
     $connections = [];
+    $brokerServiceData = $projectData['services']['broker'] ?? [];
+
     foreach ($projectData['regions'] as $regionName => $regionData) {
         foreach ($regionData['stores'] ?? [] as $storeName => $storeData) {
             $localServiceData = array_replace($brokerServiceData, $storeData['services']['broker']);
@@ -1256,6 +1269,8 @@ function buildSecrets(string $deploymentDir): array
     $data['SPRYKER_OAUTH_CLIENT_SECRET'] = generateToken(48);
     $data['SPRYKER_ZED_REQUEST_TOKEN'] = generateToken(80);
     $data['SPRYKER_URI_SIGNER_SECRET_KEY'] = generateToken(80);
+    $data['SPRYKER_PRODUCT_CONFIGURATOR_ENCRYPTION_KEY'] = generateToken(10);
+    $data['SPRYKER_PRODUCT_CONFIGURATOR_HEX_INITIALIZATION_VECTOR'] = generateRandomHex(16);
 
     return $data;
 }
@@ -1330,6 +1345,16 @@ function generateToken($tokenLength = 80): string
     }
 
     return $token;
+}
+
+/**
+ * @param int $num_bytes
+ *
+ * @return string
+ */
+function generateRandomHex(int $num_bytes=4): string
+{
+    return bin2hex(random_bytes($num_bytes));
 }
 
 /**
@@ -1423,7 +1448,8 @@ function buildDefaultRegionCredentialsForDatabase(array $projectData): array
         'password' => 'secret',
     ];
 
-    $databaseServiceData = $projectData['services']['database'];
+    $databaseServiceData = $projectData['services']['database'] ?? [];
+
     foreach ($projectData['regions'] as $regionName => $regionConfig) {
         $databases = [
             'version' => '1.0',
@@ -1606,7 +1632,8 @@ function isArmArchitecture(): bool
  */
 function buildNodeJsNpmBuildConfig(array $projectData): array
 {
-    $imageName = $projectData['image']['tag'];
+    $imageName = getenv('SPRYKER_PLATFORM_IMAGE') != '' ? getenv('SPRYKER_PLATFORM_IMAGE') : $projectData['image']['tag'];
+
     $nodejsConfig = $projectData['image']['node'] ?? [];
 
     return [

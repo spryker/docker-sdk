@@ -20,8 +20,11 @@ RUN --mount=type=cache,id=aptlib,sharing=locked,target=/var/lib/apt \
      git \
      redis-tools \
      jq \
-     python \
+     python3 \
+     g++ \
+     make \
      ; fi'
+
 # Debian contains outdated Yarn package
 RUN --mount=type=cache,id=aptlib,sharing=locked,target=/var/lib/apt \
     --mount=type=cache,id=aptcache,sharing=locked,target=/var/cache/apt \
@@ -42,6 +45,9 @@ RUN --mount=type=cache,id=apk,sharing=locked,target=/var/cache/apk mkdir -p /etc
      redis \
      yarn \
      jq \
+     python3 \
+     g++ \
+     make \
      ; fi'
 
 # TODO Not-available feature: autoload-cache. Should be switchable
