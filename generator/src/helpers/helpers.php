@@ -1,7 +1,7 @@
 <?php
 
 const PROJECT_DATA_REGIONS_KEY = 'regions';
-const PROJECT_DATA_STORE_KEY = 'store';
+const PROJECT_DATA_STORE_KEY = 'stores';
 const PROJECT_DATA_SERVICES_KEY = 'services';
 const PROJECT_DATA_BROKER_KEY = 'broker';
 const PROJECT_DATA_NAMESPACE_KEY = 'namespace';
