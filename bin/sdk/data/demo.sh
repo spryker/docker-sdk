@@ -46,9 +46,16 @@ function Data::load() {
         Console::info "Loading demo data for ${SPRYKER_CURRENT_REGION} region."
         Compose::exec "vendor/bin/install${verboseOption} -r ${SPRYKER_PIPELINE} -s clean-storage -s init-storage"
 
-        if Service::isServiceExist "database"; then
-            Database::init
-        fi
+        for i in {1..10}
+        do
+           if Service::isServiceExist "database"; then
+              break;
+           fi
+
+           Database::init
+           sleep 5
+           Console::info "Database::init $i times"
+        done
 
         for store in "${STORES[@]}"; do
             SPRYKER_CURRENT_STORE="${store}"
