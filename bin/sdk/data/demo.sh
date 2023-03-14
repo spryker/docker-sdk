@@ -44,6 +44,7 @@ function Data::load() {
         fi
 
         Console::info "Loading demo data for ${SPRYKER_CURRENT_REGION} region."
+        Compose::ps
         for i in {1..10}
         do
            if Service::isServiceExist "database"; then
