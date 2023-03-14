@@ -46,13 +46,19 @@ function Data::load() {
         Console::info "Loading demo data for ${SPRYKER_CURRENT_REGION} region."
         Compose::exec "vendor/bin/install${verboseOption} -r ${SPRYKER_PIPELINE} -s clean-storage -s init-storage"
 
+        local isExist=$(Compose::command config --services | grep "database")
+        Console::info "+++++++++++++++++| databaseExist - ${isExist} |+++++++++++++++++"
+
+        if Service::isServiceExist "database"; then
+            Database::init
+        fi
+
         for i in {1..10}
         do
            if Service::isServiceExist "database"; then
               break;
            fi
 
-           Database::init
            sleep 5
            Console::info "Database::init $i times"
         done
