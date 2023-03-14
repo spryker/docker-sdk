@@ -9,8 +9,8 @@ Registry::addCommand "boot" "Command::bootstrap"
 Registry::addCommand "bootstrap" "Command::bootstrap"
 
 Registry::Help::section "Installation:"
-Registry::Help::command -s -c "bootstrap" -a "[-v] <project-yml-file>" "Prepares all the files to run the application based on ${HELP_HIGH}<project-yml-file>${HELP_DESC}."
-Registry::Help::command -s -c "bootstrap" -a "[-v]" "Prepares all the files to run the application based on ${HELP_HIGH}deploy.local.yml${HELP_DESC} or ${HELP_HIGH}deploy.yml${HELP_DESC}."
+Registry::Help::command -s -c "bootstrap | boot" -a "[-v] <project-yml-file>" "Prepares all the files to run the application based on ${HELP_HIGH}<project-yml-file>${HELP_DESC}."
+Registry::Help::command -s -c "bootstrap | boot" -a "[-v]" "Prepares all the files to run the application based on ${HELP_HIGH}deploy.local.yml${HELP_DESC} or ${HELP_HIGH}deploy.yml${HELP_DESC}."
 
 function Command::bootstrap() {
 
