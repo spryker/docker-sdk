@@ -45,7 +45,7 @@ function Data::load() {
 
         Console::info "Loading demo data for ${SPRYKER_CURRENT_REGION} region."
         Console::info "vendor/bin/install${verboseOption} -r ${SPRYKER_PIPELINE} -s clean-storage -s init-storage"
-        Console::exec "vendor/bin/install${verboseOption} -r ${SPRYKER_PIPELINE} -s clean-storage -s init-storage"
+        Compose::exec "vendor/bin/install${verboseOption} -r ${SPRYKER_PIPELINE} -s clean-storage -s init-storage"
         Console::info "+++++++ Finish execution of cleaning +++++++"
 
         local isExist=$(Compose::command config --services | grep "database")
