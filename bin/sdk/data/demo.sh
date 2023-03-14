@@ -44,11 +44,8 @@ function Data::load() {
         fi
 
         Console::info "Loading demo data for ${SPRYKER_CURRENT_REGION} region."
-        Compose::ps
         Compose::ensureCliRunning
-        Compose::ps
         Compose::exec "vendor/bin/install${verboseOption} -r ${SPRYKER_PIPELINE} -s clean-storage -s init-storage"
-
         if Service::isServiceExist "database"; then
             Database::init
         fi
