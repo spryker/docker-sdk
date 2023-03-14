@@ -44,6 +44,16 @@ function Data::load() {
         fi
 
         Console::info "Loading demo data for ${SPRYKER_CURRENT_REGION} region."
+        for i in {1..10}
+        do
+           if Service::isServiceExist "database"; then
+              break;
+           fi
+
+           sleep 5
+           Console::info "Database::init $i times"
+        done
+
         Console::info "vendor/bin/install${verboseOption} -r ${SPRYKER_PIPELINE} -s clean-storage -s init-storage"
         Compose::exec "vendor/bin/install${verboseOption} -r ${SPRYKER_PIPELINE} -s clean-storage -s init-storage"
         Console::info "+++++++ Finish execution of cleaning +++++++"
@@ -54,16 +64,6 @@ function Data::load() {
         if Service::isServiceExist "database"; then
             Database::init
         fi
-
-        for i in {1..10}
-        do
-           if Service::isServiceExist "database"; then
-              break;
-           fi
-
-           sleep 5
-           Console::info "Database::init $i times"
-        done
 
         for store in "${STORES[@]}"; do
             SPRYKER_CURRENT_STORE="${store}"
