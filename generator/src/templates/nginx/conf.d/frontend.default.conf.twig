@@ -25,6 +25,7 @@ server {
 {% for applicationName, applicationData in groupData['applications'] %}
 {% for endpoint, endpointData in applicationData['endpoints'] %}
 {% set zedHost = _endpointMap[endpointData['store']]['backend-gateway'] | default('') %}
+{% set base_zed_host = endpointData['gateway'] is defined ? endpointData['gateway'] : zedHost %}
 {% include "nginx/http/#{applicationData['application']}.server.conf.twig" with {
     endpoint: endpoint,
     endpointData: endpointData,
@@ -32,7 +33,7 @@ server {
     auth: endpointData['auth'] | default([]),
     storeServices: regions[groupData['region']]['stores'][endpointData['store']]['services'] | default([]),
     upstream: "${SPRYKER_NGINX_CGI_" ~ (applicationName | upper) ~ "}",
-    zedHost: zedHost,
+    zedHost: base_zed_host,
     timeout: applicationData['http']['timeout'] | default('1m'),
     project: _context
 } %}
