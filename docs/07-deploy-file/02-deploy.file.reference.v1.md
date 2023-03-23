@@ -35,7 +35,7 @@ This reference page describes version 1 of the Deploy file format. This is the n
 The topics below are organized alphabetically for top-level keys and sub-level keys to describe the hierarchy.
 
 You can use the extended YAML syntax according to [YAML™ Version 1.2](https://yaml.org/spec/1.2/spec.html).
-Find B2B and B2C deploy file examples for [development](06-installation/installation-guides/choosing-an-installation-mode#development-mode) and [demo](06-installation/installation-guides/choosing-an-installation-mode#demo-mode) environments in the table:
+Find B2B and B2C deploy file examples for [development](../06-installation/02-installation-guides/01-choosing-an-installation-mode#development-mode) and [demo](../06-installation/02-installation-guides/01-choosing-an-installation-mode#demo-mode) environments in the table:
 
 | Development mode | Demo mode |
 | --- | --- |
@@ -285,7 +285,9 @@ Defines PHP settings for Spryker applications.
 * `image: php: enabled-extensions` - defines enabled PHP extensions. The following extensions are allowed:
   * `blackfire`
   * `newrelic`
+  * `pcov`
   * `tideways`
+  * `xhprof`
 
 ```yaml
 image:
@@ -297,6 +299,7 @@ image:
             - blackfire
             - newrelic
             - tideways
+            - xhprof
 ```
 ***
 
@@ -674,7 +677,85 @@ docker:
  ```
 * `docker: debug: xdebug: enabled:` - defines if Xdebug is enabled.
 
-***
+
+### docker: maintenance:
+
+Maintenance mode configuration.
+
+If `docker: maintenance: enabled:` is set to `true`, all applications work in maintenance mode. The default value is `false`.
+```yaml
+version: 1.0
+
+docker:
+    maintenance:
+        enabled: true
+
+ ```
+
+
+### docker: maintenance: whitelist: ips:
+
+When you enable maintenance mode for an application, visitors see a maintenance page and can't access the application. To enable access to an application in maintenance mode, you can allowlist IP addresses as follows.
+
+#### [CLOUD] Define gateway IP addresses
+
+Note: it's necessary to define gateway IP addresses for AWS to fetch the real IP for `all` defined applications.
+
+```yaml
+x-real-ip: &real-ip
+    real-ip:
+        from:
+            - 10.0.0.0/8 # AWS VPC network
+
+x-frontend-auth: &frontend-auth
+    <<: *real-ip
+
+groups:
+    EU:
+        region: EU
+        applications:
+            boffice:
+                application: backoffice
+                endpoints:
+                    backoffice.de.spryker.com:
+                        store: DE
+                        primal: true
+                        <<: *frontend-auth
+                    backoffice.at.spryker,com:
+                        store: AT
+                        <<: *frontend-auth
+            Yves:
+                application: yves
+                endpoints:
+                    www.de.spryker.com:
+                        store: DE
+                        <<: *frontend-auth
+                    www.at.spryker.com:
+                        store: AT
+                        <<: *frontend-auth
+            ...
+```
+
+#### Define allowlisted IP addresses
+
+* `docker: maintenance: whitelist: ips:` - defines the allowlisted IP addresses from which the applications in the maintenance mode can be accessed.
+
+```yaml
+version: 1.0
+
+docker:
+    maintenance:
+        enabled: true
+        whitelist:
+          ips:
+              - { IP address 1 }
+              - { IP address 2 }
+              ...
+ ```
+Now you can access the applications from the `{ IP address 1 }` and `{ IP address 2 }` IP addresses.
+
+
+
 ### docker: logs:
 * `docker: logs: path:` defines the path to the directory with Docker logs. This variable is optional. If not specified, the default value applies: `path: '/var/log/spryker`.
 
@@ -905,10 +986,10 @@ A scheduler *Service* used to run application-specific jobs periodically in the 
 ***
 ### search:
 
-A search *Service* that provides a distributed, multitenant-capable full-text search engine.
+A search *Service* that provides a distributed, multi-tenant capable full-text search engine.
 
 * Project-wide
-  * `search: engine:` - possible value is `elastic`.
+  * `search: engine:` - possible value is `elastic` or `opensearch`.
   * `search: endpoints:` - defines the service's port and web interface that can be accessed via given endpoints.
 ***
 

@@ -1,6 +1,11 @@
 #!/bin/bash
 
+
 function Database::haveTables() {
+    if ! Service::isServiceExist database; then
+        return;
+    fi
+
     tableCount=$(
         Compose::exec <<'EOF'
         export VERBOSE=0
@@ -40,10 +45,14 @@ function Database::haveTables() {
 EOF
     )
 
-    [ "$tableCount" -gt 0 ] && return "${TRUE}" || return "${FALSE}"
+    ( [ ! -z "${tableCount}" ] &&  [ "${tableCount}" -gt 0 ]) && return "${TRUE}" || return "${FALSE}"
 }
 
 function Database::init() {
+      if ! Service::isServiceExist database; then
+          return;
+      fi
+
       Compose::exec <<'EOF'
         export MYSQL_PWD="${SPRYKER_DB_ROOT_PASSWORD}";
         databases="$(echo ${SPRYKER_PAAS_SERVICES} | jq  '.databases')";
