@@ -10,6 +10,8 @@ export SPRYKER_NGINX_CGI_{{ applicationName | upper}}=${SPRYKER_NGINX_CGI_{{ (ap
 {% endfor %}
 
 envsubst '{{ envVariables | join(' ') }}' < /etc/nginx/template/default.conf.tmpl > /etc/nginx/conf.d/default.conf
+sed -i 's/#tmp[1-3]\?//g' /etc/nginx/template/default.conf.tmpl
+sed -i 's/#tmp[1-3]\?//g' /etc/nginx/conf.d/default.conf
 
 if [ -z "${SPRYKER_DNS_RESOLVER_IP}" ]; then
     export SPRYKER_DNS_RESOLVER_IP=$(grep "nameserver" /etc/resolv.conf | awk '{print $2}')
@@ -19,6 +21,8 @@ envsubst '$SPRYKER_DNS_RESOLVER_IP ${SPRYKER_DNS_RESOLVER_FLAGS} {{ envVariables
 
 if [ -n "${SPRYKER_XDEBUG_MODE_ENABLE}" ]; then
 envsubst '{{ envVariables | join(' ') }}' < /etc/nginx/template/debug.default.conf > /etc/nginx/conf.d/debug.default.conf
+sed -i 's/#tmp[1-3]\?//g' /etc/nginx/template/debug.default.conf
+sed -i 's/#tmp[1-3]\?//g' /etc/nginx/conf.d/debug.default.conf
 fi
 
 exec "$@"
