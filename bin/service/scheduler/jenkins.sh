@@ -107,12 +107,13 @@ function Service::Scheduler::_run() {
 
     for region in "${SPRYKER_STORES[@]}"; do
         eval "${region}"
-        SPRYKER_CURRENT_REGION="${REGION}"
         if [ ${#STORES[@]} -eq 0 ]; then
+            SPRYKER_CURRENT_REGION="${REGION}"
             Console::info "${2} scheduler jobs for ${SPRYKER_CURRENT_REGION} region."
             Compose::exec "vendor/bin/install -r ${SPRYKER_PIPELINE} -s scheduler-${1}"
         else
             for store in "${STORES[@]}"; do
+                SPRYKER_CURRENT_REGION=""
                 SPRYKER_CURRENT_STORE="${store}"
                 Console::info "${2} scheduler jobs for ${SPRYKER_CURRENT_STORE} store."
                 Compose::exec "vendor/bin/install -r ${SPRYKER_PIPELINE} -s scheduler-${1}"
