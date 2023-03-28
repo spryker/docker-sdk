@@ -65,6 +65,7 @@ For contribution guidelines, see [Code contribution guide](https://docs.spryker.
 |                 |              | mariadb-10.3 | &check;     |                                    |
 |                 |              | mariadb-10.4 | &check;     |                                    |
 |                 |              | mariadb-10.5 | &check;     |                                    |
+|                 |              | mariadb-10.6 | &check;     |                                    |
 | broker          | rabbitmq     | 3.7          |             |                                    |
 |                 |              | 3.8          | &check;     |                                    |
 |                 |              | 3.9          | &check;     |                                    |
