@@ -1481,7 +1481,7 @@ function buildDefaultRegionCredentialsForDatabase(array $projectData): array
 }
 
 /**
- * @param string $dbName
+ * @param string $dbKey
  * @param string $dbName
  * @param array $databaseServiceData
  * @param array $regionDbConfig
