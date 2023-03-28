@@ -1458,25 +1458,49 @@ function buildDefaultRegionCredentialsForDatabase(array $projectData): array
             $regionDbConfig = array_merge($defaultDbRegionCredentials, $regionDbConfig);
             $projectData['regions'][$regionName]['services']['database'] = $regionDbConfig;
         }
-
         if (array_key_exists('databases', $regionConfig['services'])) {
             foreach ($regionConfig['services']['databases'] as $dbName => $regionDbConfig) {
-                $regionDbConfig = array_merge($defaultDbRegionCredentials, $regionDbConfig ?? []);
-                $databases['databases'][strtoupper($dbName)] = [
-                    'host' => 'database',
-                    'port' => $databaseServiceData['port'] ?? $databaseServiceData['engine'] === 'mysql' ? 3306 : 5432,
-                    'database' => $dbName,
-                    'username' => $regionDbConfig['username'],
-                    'password' => $regionDbConfig['password'],
-                    'characterSet' => $regionDbConfig['character-set'] ?? 'utf8',
-                    'collate' => $regionDbConfig['collate'] ?? 'utf8_general_ci',
-                ];
+                foreach ($regionConfig['stores'] as $storeName => $storeConfig) {
+                    if (isset($processedDbs[$dbName])) {
+                        continue;
+                    }
+                    $processedDbs[$dbName] = [];
+                    $regionDbConfig = array_merge($defaultDbRegionCredentials, $regionDbConfig ?? []);
+                    if (isset($storeConfig['services']['database']['name']) && $storeConfig['services']['database']['name'] === $dbName) {
+                        $databases = getDatabaseData($storeName, $dbName, $databaseServiceData, $regionDbConfig, $databases);
+                        continue;
+                    }
+                    $databases = getDatabaseData($dbName, $dbName, $databaseServiceData, $regionDbConfig, $databases);
+                }
             }
             $projectData['regions'][$regionName]['services']['databases'] = json_encode($databases);
         }
     }
 
     return $projectData;
+}
+
+/**
+ * @param string $dbName
+ * @param string $dbName
+ * @param array $databaseServiceData
+ * @param array $regionDbConfig
+ * @param array $databases
+ *
+ * @return array
+ */
+function getDatabaseData(string $dbKey, string $dbName, array $databaseServiceData, array $regionDbConfig, array $databases): array {
+    $databases['databases'][strtoupper($dbKey)] = [
+        'host' => 'database',
+        'port' => $databaseServiceData['port'] ?? $databaseServiceData['engine'] === 'mysql' ? 3306 : 5432,
+        'database' => strtolower($dbName),
+        'username' => $regionDbConfig['username'],
+        'password' => $regionDbConfig['password'],
+        'characterSet' => $regionDbConfig['character-set'] ?? 'utf8',
+        'collate' => $regionDbConfig['collate'] ?? 'utf8_general_ci',
+    ];
+
+    return $databases;
 }
 
 /**
