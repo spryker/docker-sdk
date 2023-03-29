@@ -174,6 +174,10 @@ function Compose::run() {
     Registry::Flow::runAfterRun
 }
 
+function Compose::performExec() {
+    Compose::command exec "${@}"
+}
+
 function Compose::ps() {
     Compose::command ps "${@}"
 }
