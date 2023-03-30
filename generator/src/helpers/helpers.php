@@ -1,6 +1,8 @@
 <?php
 
 const PROJECT_DATA_REGIONS_KEY = 'regions';
+const PROJECT_DATA_REGION_KEY = 'region';
+const PROJECT_DATA_GROUPS_KEY = 'groups';
 const PROJECT_DATA_STORE_KEY = 'stores';
 const PROJECT_DATA_SERVICES_KEY = 'services';
 const PROJECT_DATA_BROKER_KEY = 'broker';
@@ -101,9 +103,9 @@ function getBrokerHosts(array $projectData, string $currentRegion = ''): string
  */
 function getDefaultRegionName($projectData): string
 {
-    $keys = array_keys($projectData['groups']);
+    $keys = array_keys(PROJECT_DATA_GROUPS_KEY);
 
-    return $projectData['groups'][array_pop($keys)]['region'] ?? '';
+    return $projectData[PROJECT_DATA_GROUPS_KEY][array_pop($keys)][PROJECT_DATA_REGION_KEY] ?? '';
 }
 
 

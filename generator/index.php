@@ -301,6 +301,9 @@ function mapBackendEndpointsWithFallbackZed(array $endpointMap): array
     return $endpointMap;
 }
 
+$keyValueStoreConnections = $dynamicStoreMode ? getKeyValueStores($projectData) : false;
+$brokerConnections = getBrokerConnections($projectData);
+
 foreach ($projectData['groups'] ?? [] as $groupName => $groupData) {
     foreach ($groupData['applications'] ?? [] as $applicationName => $applicationData) {
         $currentRegionName = $groupData['region'];
@@ -317,8 +320,8 @@ foreach ($projectData['groups'] ?? [] as $groupName => $groupData) {
                     'project' => $projectData,
                     'regionName' => $currentRegionName,
                     'regionData' => $projectData['regions'][$currentRegionName],
-                    'brokerConnections' => getBrokerConnections($projectData),
-                    'keyValueStoreConnections' => $dynamicStoreMode ? getKeyValueStores($projectData) : false,
+                    'brokerConnections' => $brokerConnections,
+                    'keyValueStoreConnections' => $keyValueStoreConnections,
                     'brokerHosts' => $brokerHosts,
                     'regionEndpointMap' => getRegionEndpointMap($projectData, $currentRegionName),
                 ])
@@ -408,11 +411,11 @@ foreach ($projectData['groups'] ?? [] as $groupName => $groupData) {
                         'project' => $projectData,
                         'regionName' => $currentRegionName,
                         'regionData' => $projectData['regions'][$currentRegionName],
-                        'brokerConnections' => getBrokerConnections($projectData),
-                        'keyValueStoreConnections' => $dynamicStoreMode ? getKeyValueStores($projectData) : false,
+                        'brokerConnections' => $brokerConnections,
+                        'keyValueStoreConnections' => $keyValueStoreConnections,
                         'storeName' => $endpointData['store'],
                         'services' => $services,
-                        'endpointMap' => $endpointMap
+                        'endpointMap' => $endpointMap,
                     ])
                 );
 
@@ -424,8 +427,8 @@ foreach ($projectData['groups'] ?? [] as $groupName => $groupData) {
                         'project' => $projectData,
                         'regionName' => $currentRegionName,
                         'regionData' => $projectData['regions'][$currentRegionName],
-                        'brokerConnections' => getBrokerConnections($projectData),
-                        'keyValueStoreConnections' => $dynamicStoreMode ? getKeyValueStores($projectData) : false,
+                        'brokerConnections' => $brokerConnections,
+                        'keyValueStoreConnections' => $keyValueStoreConnections,
                         'storeName' => $endpointData['store'],
                         'services' => $services,
                         'endpointMap' => $endpointMap,
@@ -442,8 +445,8 @@ foreach ($projectData['groups'] ?? [] as $groupName => $groupData) {
                         'project' => $projectData,
                         'regionName' => $currentRegionName,
                         'regionData' => $projectData['regions'][$currentRegionName],
-                        'brokerConnections' => getBrokerConnections($projectData),
-                        'keyValueStoreConnections' => $dynamicStoreMode ? getKeyValueStores($projectData) : false,
+                        'brokerConnections' => $brokerConnections,
+                        'keyValueStoreConnections' => $keyValueStoreConnections,
                         'services' => $services,
                         'endpointMap' => $endpointMap,
                         'regionEndpointMap' => getRegionEndpointMap($projectData, $currentRegionName),
@@ -458,8 +461,8 @@ foreach ($projectData['groups'] ?? [] as $groupName => $groupData) {
                         'project' => $projectData,
                         'regionName' => $currentRegionName,
                         'regionData' => $projectData['regions'][$currentRegionName],
-                        'brokerConnections' => getBrokerConnections($projectData),
-                        'keyValueStoreConnections' => $dynamicStoreMode ? getKeyValueStores($projectData) : false,
+                        'brokerConnections' => $brokerConnections,
+                        'keyValueStoreConnections' => $keyValueStoreConnections,
                         'services' => $services,
                         'endpointMap' => $endpointMap,
                         'regionEndpointMap' => getRegionEndpointMap($projectData, $currentRegionName),
@@ -584,9 +587,10 @@ file_put_contents(
 );
 
 $envVarEncoder->setIsActive(true);
+$testingEnvTemplate = isset($projectData['_testing']['regionName']) ? 'env/cli/region.testing.env.twig' : 'env/cli/testing.env.twig';
 file_put_contents(
     $deploymentDir . DS . 'env' . DS . 'cli' . DS . 'testing.env',
-    $twig->render(isset($projectData['_testing']['regionName']) ? 'env/cli/region.testing.env.twig' : 'env/cli/testing.env.twig', $projectData['_testing'])
+    $twig->render($testingEnvTemplate, $projectData['_testing'])
 );
 
 verbose('Generating scripts... [DONE]');
