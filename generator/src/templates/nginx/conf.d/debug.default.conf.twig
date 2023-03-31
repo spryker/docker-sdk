@@ -2,7 +2,7 @@
 {% for applicationName, applicationData in groupData['applications'] %}
 {% for endpoint, endpointData in applicationData['endpoints'] %}
 {% if applicationData['application'] != 'static' %}
-{% set zedHost = _endpointMap[endpointData['store']]['backend-gateway'] | default('') %}
+{% set zedHost = _endpointMap[endpointData['identifier']]['backend-gateway'] | default('') %}
 
 {% include "nginx/http/#{applicationData['application']}.server.conf.twig" with {
     portToListen: _endpointDebugMap[endpoint],
@@ -10,11 +10,12 @@
     endpointData: endpointData,
     applicationData: applicationData,
     auth: endpointData['auth'] | default([]),
-    storeServices: regions[groupData['region']]['stores'][endpointData['store']]['services'] | default([]),
+    storeServices: regions[groupData['region']]['stores'][endpointData['store']]['services'] ?? regions[groupData['region']]['services'] | default([]),
     upstream: (applicationName | lower) ~ ":9001",
     zedHost: (zedHost | split(':') | first) ~ ':' ~ (_endpointDebugMap[zedHost]),
     timeout: '60m',
-    project: _context
+    project: _context,
+    regionEndpointMap: _context['regionEndpointMap'][endpointData['identifier']]
 } %}
 {% endif %}
 {% endfor %}

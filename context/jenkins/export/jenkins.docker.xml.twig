@@ -3,7 +3,11 @@
 {% block setup %}{% endblock setup %}
 
 {% block command %}<![CDATA[
+{% if job.region is not empty %}
+. /envs/{{ job.region | lower }}.env
+{% elseif job.store is not empty %}
 . /envs/{{ job.store | lower }}.env
+{% endif %}
 cd /data
 {{ job.command | raw }}
 ]]>{% endblock command %}

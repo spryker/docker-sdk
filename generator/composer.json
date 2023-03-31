@@ -12,7 +12,10 @@
     "autoload": {
         "psr-4": {
             "DeployFileGenerator\\": "deploy-file-generator/src/"
-        }
+        },
+        "files": [
+            "src/include.php"
+        ]
     },
     "autoload-dev": {
         "psr-4": {
