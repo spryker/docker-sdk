@@ -76,7 +76,6 @@ $projectData = $yamlParser->parseFile($projectYaml);
 if (!array_key_exists('services', $projectData)) {
     $projectData['services'] = [];
 }
-
 $projectData['_knownHosts'] = buildKnownHosts($deploymentDir);
 $projectData['_defaultDeploymentDir'] = $defaultDeploymentDir;
 $projectData['tag'] = $projectData['tag'] ?? uniqid();
@@ -95,6 +94,8 @@ $projectData['_envs'] = array_merge(
     getAdditionalEnvVariables($projectData),
     buildNewrelicEnvVariables($projectData)
 );
+$dynamicStoreMode = $projectData['_envs']['SPRYKER_DYNAMIC_STORE_MODE'] ?? false;
+$projectData['dynamicStoreMode'] = $dynamicStoreMode;
 $projectData['storageData'] = retrieveStorageData($projectData);
 $projectData['composer']['autoload'] = buildComposerAutoloadConfig($projectData);
 $isAutoloadCacheEnabled = $projectData['_isAutoloadCacheEnabled'] = isAutoloadCacheEnabled($projectData);
@@ -135,6 +136,7 @@ $projectData['_entryPoints'] = [];
 $projectData['_endpointMap'] = [];
 $projectData = extendProjectDataWithKeyValueRegionNamespaces($projectData);
 $projectData['_storeSpecific'] = getStoreSpecific($projectData);
+$projectData['_regionSpecific'] = getRegionSpecific($projectData);
 $debugPortIndex = 10000;
 $projectData['_endpointDebugMap'] = [];
 
@@ -185,6 +187,8 @@ foreach ($projectData['groups'] ?? [] as $groupName => $groupData) {
 
             $application = $applicationData['application'];
             $store = $endpointData['store'] ?? null;
+            $region = $endpointData['region'] ?? null;
+            $projectData['groups'][$groupName]['applications'][$applicationName]['endpoints'][$endpoint]['identifier'] = $store ? $store : $region;
             $projectData['groups'][$groupName]['applications'][$applicationName]['endpoints'][$endpoint]['primal'] = false;
             while (!empty($projectData['_ports'][$debugPortIndex])) {
                 $debugPortIndex++;
@@ -225,6 +229,24 @@ foreach ($projectData['groups'] ?? [] as $groupName => $groupData) {
 
                 $projectData['groups'][$groupName]['applications'][$applicationName]['endpoints'][$endpoint]['redirect']['url']
                     = ensureUrlScheme($redirect['url'], $projectData);
+            }
+
+            if (!$store && $region && !array_key_exists('redirect', $endpointData)) {
+                # primal is true, or the first one
+                $isPrimal = !empty($endpointData['primal']) || empty($primal[$store][$application]);
+                if ($isPrimal) {
+                    $regionName = $groupData['region'];
+                    $primal[$regionName][$application] = function (&$projectData) use (
+                        $groupName,
+                        $applicationName,
+                        $application,
+                        $endpoint,
+                        $regionName
+                    ) {
+                        $projectData['_endpointMap'][$regionName][$application] = $endpoint;
+                        $projectData['groups'][$groupName]['applications'][$applicationName]['endpoints'][$endpoint]['primal'] = true;
+                    };
+                }
             }
         }
     }
@@ -279,8 +301,14 @@ function mapBackendEndpointsWithFallbackZed(array $endpointMap): array
     return $endpointMap;
 }
 
+$keyValueStoreConnections = $dynamicStoreMode ? getKeyValueStores($projectData) : false;
+$brokerConnections = getBrokerConnections($projectData);
+
 foreach ($projectData['groups'] ?? [] as $groupName => $groupData) {
     foreach ($groupData['applications'] ?? [] as $applicationName => $applicationData) {
+        $currentRegionName = $groupData['region'];
+        $brokerHosts = getBrokerHosts($projectData, $currentRegionName);
+
         if ($applicationData['application'] !== 'static') {
             $projectData['_applications'][] = $applicationName;
 
@@ -290,9 +318,12 @@ foreach ($projectData['groups'] ?? [] as $groupName => $groupData) {
                     'applicationName' => $applicationName,
                     'applicationData' => $applicationData,
                     'project' => $projectData,
-                    'regionName' => $groupData['region'],
-                    'regionData' => $projectData['regions'][$groupData['region']],
-                    'brokerConnections' => getBrokerConnections($projectData),
+                    'regionName' => $currentRegionName,
+                    'regionData' => $projectData['regions'][$currentRegionName],
+                    'brokerConnections' => $brokerConnections,
+                    'keyValueStoreConnections' => $keyValueStoreConnections,
+                    'brokerHosts' => $brokerHosts,
+                    'regionEndpointMap' => getRegionEndpointMap($projectData, $currentRegionName),
                 ])
             );
         }
@@ -343,30 +374,45 @@ foreach ($projectData['groups'] ?? [] as $groupName => $groupData) {
 
             $services = [];
             $isEndpointDataHasStore = array_key_exists('store', $endpointData);
+            $isEndpointDataHasRegion = array_key_exists('region', $endpointData);
             if ($isEndpointDataHasStore) {
                 $services = array_replace_recursive(
                     $projectData['regions'][$groupData['region']]['stores'][$endpointData['store']]['services'],
                     $endpointData['services'] ?? []
                 );
             }
+            if ($isEndpointDataHasRegion) {
+                $services = array_replace_recursive(
+                    $projectData['regions'][$groupData['region']]['services'],
+                    $endpointData['services'] ?? []
+                );
+            }
+
             if ($isEndpointDataHasStore && $endpointData['store'] === ($projectData['docker']['testing']['store'] ?? '')) {
                 $projectData['_testing']['storeName'] = $endpointData['store'];
                 $projectData['_testing']['regionServices'] = array_merge($projectData['_testing']['services'] ?? [], $services);
                 $projectData['_testing']['services'][$endpointData['store']][$applicationData['application']] = $services;
             }
 
+            if ($isEndpointDataHasRegion && $groupData['region'] === ($projectData['docker']['testing']['region'] ?? '')) {
+                $projectData['_testing']['regionName'] = $groupData['region'];
+                $projectData['_testing']['regionServices'] = array_merge($projectData['_testing']['services'] ?? [], $services);
+                $projectData['_testing']['services'][$groupData['region']][$applicationData['application']] = $services;
+            }
+
             $envVarEncoder->setIsActive(true);
 
-            if (array_key_exists('store', $endpointData)) {
+            if ($isEndpointDataHasStore) {
                 file_put_contents(
                     $deploymentDir . DS . 'env' . DS . 'cli' . DS . strtolower($endpointData['store']) . '.env',
                     $twig->render('env/cli/store.env.twig', [
                         'applicationName' => $applicationName,
                         'applicationData' => $applicationData,
                         'project' => $projectData,
-                        'regionName' => $groupData['region'],
-                        'regionData' => $projectData['regions'][$groupData['region']],
-                        'brokerConnections' => getBrokerConnections($projectData),
+                        'regionName' => $currentRegionName,
+                        'regionData' => $projectData['regions'][$currentRegionName],
+                        'brokerConnections' => $brokerConnections,
+                        'keyValueStoreConnections' => $keyValueStoreConnections,
                         'storeName' => $endpointData['store'],
                         'services' => $services,
                         'endpointMap' => $endpointMap,
@@ -379,12 +425,47 @@ foreach ($projectData['groups'] ?? [] as $groupName => $groupData) {
                         'applicationName' => $applicationName,
                         'applicationData' => $applicationData,
                         'project' => $projectData,
-                        'regionName' => $groupData['region'],
-                        'regionData' => $projectData['regions'][$groupData['region']],
-                        'brokerConnections' => getBrokerConnections($projectData),
+                        'regionName' => $currentRegionName,
+                        'regionData' => $projectData['regions'][$currentRegionName],
+                        'brokerConnections' => $brokerConnections,
+                        'keyValueStoreConnections' => $keyValueStoreConnections,
                         'storeName' => $endpointData['store'],
                         'services' => $services,
                         'endpointMap' => $endpointMap,
+                    ])
+                );
+            }
+
+            if ($isEndpointDataHasRegion) {
+                file_put_contents(
+                    $deploymentDir . DS . 'env' . DS . 'cli' . DS . strtolower($groupData['region']) . '.env',
+                    $twig->render('env/cli/region.env.twig', [
+                        'applicationName' => $applicationName,
+                        'applicationData' => $applicationData,
+                        'project' => $projectData,
+                        'regionName' => $currentRegionName,
+                        'regionData' => $projectData['regions'][$currentRegionName],
+                        'brokerConnections' => $brokerConnections,
+                        'keyValueStoreConnections' => $keyValueStoreConnections,
+                        'services' => $services,
+                        'endpointMap' => $endpointMap,
+                        'regionEndpointMap' => getRegionEndpointMap($projectData, $currentRegionName),
+                    ])
+                );
+
+                file_put_contents(
+                    $deploymentDir . DS . 'terraform' . DS . 'cli' . DS . strtolower($groupData['region']) . '.env',
+                    $twig->render('terraform/region.env.twig', [
+                        'applicationName' => $applicationName,
+                        'applicationData' => $applicationData,
+                        'project' => $projectData,
+                        'regionName' => $currentRegionName,
+                        'regionData' => $projectData['regions'][$currentRegionName],
+                        'brokerConnections' => $brokerConnections,
+                        'keyValueStoreConnections' => $keyValueStoreConnections,
+                        'services' => $services,
+                        'endpointMap' => $endpointMap,
+                        'regionEndpointMap' => getRegionEndpointMap($projectData, $currentRegionName),
                     ])
                 );
             }
@@ -434,6 +515,10 @@ foreach ($projectData['services'] ?? [] as $serviceName => $serviceData) {
     }
 }
 
+$projectData['brokerHosts'] = getBrokerHosts($projectData);
+$projectData['regionEndpointMap'] = getRegionEndpointMap($projectData);
+$projectData['regionData'] = $projectData['regions'] ?? [];
+
 file_put_contents(
     $deploymentDir . DS . 'context' . DS . 'nginx' . DS . 'conf.d' . DS . 'frontend.default.conf.tmpl',
     $twig->render('nginx/conf.d/frontend.default.conf.twig', $projectData)
@@ -470,6 +555,7 @@ file_put_contents(
     $deploymentDir . DS . 'terraform/environment.tf',
     $twig->render('terraform/environment.tf.twig', [
         'brokerConnections' => getCloudBrokerConnections($projectData),
+        'keyValueStoreConnections' => $dynamicStoreMode ? getKeyValueStores($projectData) : false,
         'project' => $projectData,
     ])
 );
@@ -501,9 +587,10 @@ file_put_contents(
 );
 
 $envVarEncoder->setIsActive(true);
+$testingEnvTemplate = isset($projectData['_testing']['regionName']) ? 'env/cli/region.testing.env.twig' : 'env/cli/testing.env.twig';
 file_put_contents(
     $deploymentDir . DS . 'env' . DS . 'cli' . DS . 'testing.env',
-    $twig->render('env/cli/testing.env.twig', $projectData['_testing'])
+    $twig->render($testingEnvTemplate, $projectData['_testing'])
 );
 
 verbose('Generating scripts... [DONE]');
@@ -713,7 +800,24 @@ function getBrokerConnections(array $projectData): string
     }
 
     foreach ($projectData['regions'] as $regionName => $regionData) {
+        $regionServiceData = $brokerServiceData;
+        if (isset($regionData['services']['broker'])) {
+            $regionServiceData = array_replace($regionServiceData, $regionData['services']['broker']);
+            $connections[$regionName] = [
+                'RABBITMQ_CONNECTION_NAME' => $regionName . '-connection',
+                'RABBITMQ_HOST' => 'broker',
+                'RABBITMQ_PORT' => $regionServiceData['port'] ?? 5672,
+                'RABBITMQ_USERNAME' => $regionServiceData['api']['username'] ?? '',
+                'RABBITMQ_PASSWORD' => $regionServiceData['api']['password'] ?? '',
+                'RABBITMQ_VIRTUAL_HOST' => $regionServiceData['namespace']?? '',
+                'RABBITMQ_STORE_NAMES' => [],
+            ];
+        }
         foreach ($regionData['stores'] ?? [] as $storeName => $storeData) {
+            if (!isset($storeData['services']['broker'])) {
+                continue;
+            }
+
             $localServiceData = array_replace($brokerServiceData, $storeData['services']['broker']);
 
             $connections[$storeName] = [
@@ -742,7 +846,17 @@ function getCloudBrokerConnections(array $projectData): string
     $brokerServiceData = $projectData['services']['broker'] ?? [];
 
     foreach ($projectData['regions'] as $regionName => $regionData) {
+        $regionServiceData = $brokerServiceData;
+        if (isset($regionData['services']['broker'])) {
+            $regionServiceData = array_replace($regionServiceData, $regionData['services']['broker']);
+            $connections[$regionName] = [
+                'RABBITMQ_VIRTUAL_HOST' => $regionServiceData['namespace'],
+            ];
+        }
         foreach ($regionData['stores'] ?? [] as $storeName => $storeData) {
+            if (!isset($storeData['services']['broker'])) {
+                continue;
+            }
             $localServiceData = array_replace($brokerServiceData, $storeData['services']['broker']);
             $connections[$storeName] = [
                 'RABBITMQ_VIRTUAL_HOST' => $localServiceData['namespace'],
@@ -773,6 +887,13 @@ function getStoreSpecific(array $projectData): array
                 'SPRYKER_SESSION_BE_NAMESPACE' => $services['session']['namespace'] ?? 1,
                 # TODO SESSION should not be used in CLI
             ];
+
+            if (isset($services['key_value_store']['namespace'])) {
+                $storeSpecific[$storeName]['SPRYKER_KEY_VALUE_STORE_NAMESPACE'] = $services['key_value_store']['namespace'];
+            }
+            if (isset($services['broker']['namespace'])) {
+                $storeSpecific[$storeName]['SPRYKER_BROKER_NAMESPACE'] = $services['broker']['namespace'];
+            }
         }
         $storeSpecific[$regionName]['SPRYKER_KEY_VALUE_REGION_NAMESPACES'] = $projectData['regions'][$regionName]['key_value_region_namespaces'];
     }
@@ -1055,7 +1176,13 @@ function retrieveRegionsStorageHosts(array $regions, array $storageServices, int
 {
     $regionsStorageHosts = [];
     foreach ($regions ?? [] as $regionName => $regionData) {
-        foreach ($regionData['stores'] as $storeData) {
+        foreach ($regionData['services'] ?? [] as $serviceName => $serviceNamespace) {
+            if (in_array($serviceName, $storageServices, true)) {
+                $regionsStorageHosts[] = sprintf('%s:%s:%s:%s', $serviceName, $serviceName, $defaultPort,
+                    $serviceNamespace['namespace']);
+            }
+        }
+        foreach ($regionData['stores'] ?? [] as $storeData) {
             foreach ($storeData['services'] ?? [] as $serviceName => $serviceNamespace) {
                 if (in_array($serviceName, $storageServices, true)) {
                     $regionsStorageHosts[] = sprintf('%s:%s:%s:%s', $serviceName, $serviceName, $defaultPort,
