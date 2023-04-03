@@ -1666,16 +1666,51 @@ function extendProjectDataWithKeyValueRegionNamespaces(array $projectData): arra
  */
 function validateServiceVersions(array $projectData): array
 {
-    $validationMessageTemplate = '`%s` service with `%s` engine and %s version are unsupported on ARM architecture.';
-    $validationMessages = [];
+	return array_merge(
+		validateUnsupportedArmServiceVersions($projectData),
+		validateDeprecatedServiceVersions($projectData)
+	);
+}
 
-    if (!isArmArchitecture()) {
-        return $validationMessages;
-    }
+/**
+ * @param array $projectData
+ * @return string[]
+ */
+function validateUnsupportedArmServiceVersions(array $projectData): array
+{
+	if (!isArmArchitecture()) {
+		return [];
+	}
 
-    $services = $projectData['services'];
-    $unsupportedServiceVersions = getUnsupportedArmServiceMap();
+	return validateVersions(
+		$projectData['services'],
+		getUnsupportedArmServiceMap(),
+		'`%s` service with `%s` engine and %s version are unsupported on ARM architecture.'
+	);
+}
 
+/**
+ * @param array $projectData
+ * @return string[]
+ */
+function validateDeprecatedServiceVersions(array $projectData): array
+{
+	return validateVersions(
+		$projectData['services'],
+		getDeprecatedServiceMap(),
+		'`%s` service with `%s` engine and %s version is deprecated.'
+	);
+}
+
+/**
+ * @param array $services
+ * @param $unsupportedServiceVersions
+ * @param $validationMessageTemplate
+ * @return string[]
+ */
+function validateVersions(array $services, $unsupportedServiceVersions, $validationMessageTemplate): array
+{
+	$validationMessages = [];
     foreach ($unsupportedServiceVersions as $serviceName => $serviceEngines) {
         if (!array_key_exists($serviceName, $services)) {
             continue;
@@ -1685,7 +1720,7 @@ function validateServiceVersions(array $projectData): array
         $serviceEngine = $service['engine'] ?? null;
         $serviceVersion = (string)($service['version'] ?? 'default');
 
-        if($serviceEngine == null || !array_key_exists($serviceEngine, $serviceEngines)) {
+        if ($serviceEngine == null || !array_key_exists($serviceEngine, $serviceEngines)) {
             continue;
         }
 
@@ -1693,8 +1728,13 @@ function validateServiceVersions(array $projectData): array
             continue;
         }
 
-        $validationMessages[] = sprintf($validationMessageTemplate, $serviceName, $serviceEngine, $serviceEngines[$serviceEngine][$serviceVersion]);
-    }
+		$validationMessages[] = sprintf(
+			$validationMessageTemplate,
+			$serviceName,
+			$serviceEngine,
+			$serviceEngines[$serviceEngine][$serviceVersion]
+		);
+	}
 
     return $validationMessages;
 }
@@ -1727,6 +1767,20 @@ function getUnsupportedArmServiceMap(): array
             ],
         ],
     ];
+}
+
+/**
+ * @return string[][][]
+ */
+function getDeprecatedServiceMap(): array
+{
+	return [
+		'database' => [
+			'mysql' => [
+				'mariadb-10.2' => 'mariadb-10.2',
+			],
+		],
+	];
 }
 
 /**
