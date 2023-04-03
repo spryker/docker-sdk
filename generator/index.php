@@ -1459,19 +1459,22 @@ function buildDefaultRegionCredentialsForDatabase(array $projectData): array
             $projectData['regions'][$regionName]['services']['database'] = $regionDbConfig;
         }
         if (array_key_exists('databases', $regionConfig['services'])) {
+            $processedDbs = [];
             foreach ($regionConfig['services']['databases'] as $dbName => $regionDbConfig) {
                 foreach ($regionConfig['stores'] as $storeName => $storeConfig) {
-                    if (isset($processedDbs[$dbName])) {
-                        continue;
-                    }
-                    $processedDbs[$dbName] = [];
                     $regionDbConfig = array_merge($defaultDbRegionCredentials, $regionDbConfig ?? []);
-                    if (isset($storeConfig['services']['database']['name']) && $storeConfig['services']['database']['name'] === $dbName) {
+                    if (isset($storeConfig['services']['database']['name']) && $storeConfig['services']['database']['name'] == $dbName) {
                         $databases = getDatabaseData($storeName, $dbName, $databaseServiceData, $regionDbConfig, $databases);
-                        continue;
+                        $processedDbs[$dbName] = [];
+                        $processedDbs[$storeName] = [];
                     }
-                    $databases = getDatabaseData($dbName, $dbName, $databaseServiceData, $regionDbConfig, $databases);
                 }
+
+                if (isset($processedDbs[$dbName])) {
+                    continue;
+                }
+
+                $databases = getDatabaseData($dbName, $dbName, $databaseServiceData, $regionDbConfig, $databases);
             }
             $projectData['regions'][$regionName]['services']['databases'] = json_encode($databases);
         }
@@ -1481,7 +1484,7 @@ function buildDefaultRegionCredentialsForDatabase(array $projectData): array
 }
 
 /**
- * @param string $dbName
+ * @param string $dbKey
  * @param string $dbName
  * @param array $databaseServiceData
  * @param array $regionDbConfig
