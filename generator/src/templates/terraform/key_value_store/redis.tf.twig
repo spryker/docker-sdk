@@ -1,3 +1,6 @@
-      SPRYKER_KEY_VALUE_STORE_ENGINE = "redis"
-      SPRYKER_KEY_VALUE_STORE_CONNECTION_OPTIONS = {{ serviceData['options'] | tf_var }}
-      SPRYKER_KEY_VALUE_REGION_NAMESPACES = {{ keyValueRegionNamespaces | default('{}') | tf_var }}
+      SPRYKER_KEY_VALUE_STORE_ENGINE="redis"
+      SPRYKER_KEY_VALUE_STORE_CONNECTION_OPTIONS={{ serviceData['options'] | tf_var }}
+{% if keyValueStoreConnections is not empty  %}
+      SPRYKER_KEY_VALUE_STORE_CONNECTIONS={{ keyValueStoreConnections | tf_var }}
+{% endif %}
+      SPRYKER_KEY_VALUE_REGION_NAMESPACES={{ keyValueRegionNamespaces | default('{}') | tf_var }}

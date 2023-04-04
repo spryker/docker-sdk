@@ -1,6 +1,10 @@
 #!/bin/bash
 
 function Service::Broker::install() {
+    if ! Service::isServiceExist broker; then
+        return;
+    fi
+
     Runtime::waitFor broker
 
     Console::start "${INFO}Configuring broker...${NC}"

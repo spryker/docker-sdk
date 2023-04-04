@@ -9,11 +9,11 @@ function Data::load() {
     local brokerInstalled=""
     local schedulerSuspended=""
     local verboseOption=$([ "${VERBOSE}" == "1" ] && echo -n " -vvv" || echo -n '')
+    local requireServices=(database broker search key_value_store)
 
-    Runtime::waitFor database
-    Runtime::waitFor broker
-    Runtime::waitFor search
-    Runtime::waitFor key_value_store
+    for serviceName in "${requireServices[@]}" ; do
+      Runtime::waitFor "${serviceName}"
+    done
 
     local force=''
     if [ "$1" == '--force' ]; then
@@ -28,24 +28,28 @@ function Data::load() {
         SPRYKER_CURRENT_REGION="${REGION}"
         SPRYKER_CURRENT_STORE="${STORES[0]}"
 
-        if [ -z "${force}" ] && Data::isLoaded; then
+        if Service::isServiceExist "database" && [ -z "${force}" ] && Data::isLoaded; then
             continue
         fi
 
-        if [ -z "${brokerInstalled}" ]; then
+        if Service::isServiceExist "broker" && [ -z "${brokerInstalled}" ]; then
             Service::Broker::install
             brokerInstalled=1
         fi
 
-        if [ -z "${schedulerSuspended}" ]; then
+        if Service::isServiceExist "scheduler" &&[ -z "${schedulerSuspended}" ]; then
             schedulerSuspended=1
             Service::Scheduler::pause
             Registry::Trap::addExitHook 'resumeScheduler' 'Service::Scheduler::unpause'
         fi
 
         Console::info "Loading demo data for ${SPRYKER_CURRENT_REGION} region."
+        Compose::ensureCliRunning
         Compose::exec "vendor/bin/install${verboseOption} -r ${SPRYKER_PIPELINE} -s clean-storage -s init-storage"
-        Database::init
+
+        if Service::isServiceExist "database"; then
+            Database::init
+        fi
 
         for store in "${STORES[@]}"; do
             SPRYKER_CURRENT_STORE="${store}"

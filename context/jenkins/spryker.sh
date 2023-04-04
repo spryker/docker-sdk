@@ -7,7 +7,7 @@ echo "> ${COMMAND}"
 http_response=$(curl --request POST -LsS \
     -o /dev/stderr \
     -w "%{http_code}" \
-    --data "APPLICATION_STORE='${APPLICATION_STORE}' COMMAND='${COMMAND}' cli.sh" \
+    --data "APPLICATION_STORE='${APPLICATION_STORE}' SPRYKER_CURRENT_REGION='${SPRYKER_CURRENT_REGION}' COMMAND='${COMMAND}' cli.sh" \
     --max-time 1000 \
     --url "http://cli:9000/console")
 
