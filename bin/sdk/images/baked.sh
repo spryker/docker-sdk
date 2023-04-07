@@ -40,3 +40,22 @@ function Images::buildFrontend() {
     Images::_buildGateway
     Images::tagFrontend "${SPRYKER_DOCKER_TAG}"
 }
+
+function Images::buildCli() {
+    for arg in "${@}"; do
+        case "${arg}" in
+            '--force')
+                # it is always it.
+                ;;
+            '--no-cache')
+                # TODO implement --no-cache for build images
+                ;;
+            *)
+                Console::verbose "\nUnknown option ${INFO}${arg}${WARN} is acquired for Images::buildCli."
+                ;;
+        esac
+    done
+
+    Images::_buildAppCli baked
+    Images::tagApplications "${SPRYKER_DOCKER_TAG}"
+}

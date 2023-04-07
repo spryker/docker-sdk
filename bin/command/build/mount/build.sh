@@ -16,6 +16,9 @@ function Command::build() {
             Assets::build
             Images::buildFrontend --force
             ;;
+        cli)
+            Images::buildCli --force
+            ;;    
         codebase | code)
             Codebase::build --force
             ;;
