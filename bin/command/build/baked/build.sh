@@ -7,7 +7,7 @@ Registry::Help::command -c "build images" "[Deprecated for non-dev mode] Builds 
 Registry::Help::command -c "build assets" "[Deprecated for non-dev mode] Builds assets."
 
 function Command::build() {
-set -ex
+
     Console::warn 'This command is deprecated for baked mount mode. Please, use up or export commands as well.'
 
     subCommand=${1}
