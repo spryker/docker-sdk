@@ -22,7 +22,7 @@ function Command::build() {
             Images::buildFrontend --force
             ;;
         cli)
-            Images::buildCli --force
+            Images::buildApplication --force
             ;;   
         '')
             Images::buildApplication --force
