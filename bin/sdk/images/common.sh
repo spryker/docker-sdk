@@ -34,7 +34,11 @@ function Images::_buildApp() {
     local appImage="${SPRYKER_DOCKER_PREFIX}_app:${SPRYKER_DOCKER_TAG}"
     local localAppImage="${SPRYKER_DOCKER_PREFIX}_local_app:${SPRYKER_DOCKER_TAG}"
     local runtimeImage="${SPRYKER_DOCKER_PREFIX}_run_app:${SPRYKER_DOCKER_TAG}"
-    
+    local baseCliImage="${SPRYKER_DOCKER_PREFIX}_base_cli:${SPRYKER_DOCKER_TAG}"
+    local cliImage="${SPRYKER_DOCKER_PREFIX}_cli:${SPRYKER_DOCKER_TAG}"
+    local pipelineImage="${SPRYKER_DOCKER_PREFIX}_pipeline:${SPRYKER_DOCKER_TAG}"
+    local runtimeCliImage="${SPRYKER_DOCKER_PREFIX}_run_cli:${SPRYKER_DOCKER_TAG}"
+
     if [ -n "${SSH_AUTH_SOCK_IN_CLI}" ]; then
         sshArgument=('--ssh' 'default')
     fi
@@ -98,33 +102,6 @@ function Images::_buildApp() {
             "${DEPLOYMENT_PATH}/context" 1>&2
     fi
 
-    Images::_buildAppCli ${folder}
-
-    if [ "${withPushImages}" == "${TRUE}" ]; then
-        local jenkinsImage="${SPRYKER_DOCKER_PREFIX}_jenkins:${SPRYKER_DOCKER_TAG}"
-
-        docker build \
-            -t "${jenkinsImage}" \
-            -f "${DEPLOYMENT_PATH}/images/common/services/jenkins/export/Dockerfile" \
-            --progress="${PROGRESS_TYPE}" \
-            --build-arg "SPRYKER_PARENT_IMAGE=${appImage}" \
-            "${DEPLOYMENT_PATH}/" 1>&2
-    fi
-
-    Registry::Trap::releaseExitHook 'removeBuildSecrets'
-}
-
-function Images::_buildAppCli() {
-    local -a sshArgument=()
-    local folder=${1}
-    local baseCliImage="${SPRYKER_DOCKER_PREFIX}_base_cli:${SPRYKER_DOCKER_TAG}"
-    local cliImage="${SPRYKER_DOCKER_PREFIX}_cli:${SPRYKER_DOCKER_TAG}"
-    local pipelineImage="${SPRYKER_DOCKER_PREFIX}_pipeline:${SPRYKER_DOCKER_TAG}"
-    local localAppImage="${SPRYKER_DOCKER_PREFIX}_local_app:${SPRYKER_DOCKER_TAG}"
-    local runtimeCliImage="${SPRYKER_DOCKER_PREFIX}_run_cli:${SPRYKER_DOCKER_TAG}"
-
-    Images::_prepareSecrets
-    
     Console::verbose "${INFO}Building CLI images${NC}"
 
     docker build \
@@ -156,7 +133,20 @@ function Images::_buildAppCli() {
             --progress="${PROGRESS_TYPE}" \
             --build-arg "SPRYKER_PARENT_IMAGE=${cliImage}" \
             "${DEPLOYMENT_PATH}/context" 1>&2
-    fi    
+    fi
+
+    if [ "${withPushImages}" == "${TRUE}" ]; then
+        local jenkinsImage="${SPRYKER_DOCKER_PREFIX}_jenkins:${SPRYKER_DOCKER_TAG}"
+
+        docker build \
+            -t "${jenkinsImage}" \
+            -f "${DEPLOYMENT_PATH}/images/common/services/jenkins/export/Dockerfile" \
+            --progress="${PROGRESS_TYPE}" \
+            --build-arg "SPRYKER_PARENT_IMAGE=${appImage}" \
+            "${DEPLOYMENT_PATH}/" 1>&2
+    fi
+
+    Registry::Trap::releaseExitHook 'removeBuildSecrets'
 }
 
 function Images::_buildFrontend() {
