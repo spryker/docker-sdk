@@ -1,52 +1,75 @@
 #!/bin/bash
 
-HOST=localhost
-PORT=8080
+HOST=${HOSTNAME}
+PORT=${TCPPORT}
+JENKINS_CLI_PATH=${JENKINS_CLI_PATH}
 
-function suspendJenkins(){
-  curl -sLI -X POST http://${HOST}:${PORT}/quietDown
-}
-
-function countRunningJobs(){
-  curl -s http://${HOST}:${PORT}/computer/api/json|jq .busyExecutors
-}
-
-function waitForFinishOfActiveJobs(){
-  suspendJenkins
-
-  COUNT=$(countRunningJobs|wc -l)
-
-  while test ${COUNT} -gt 0; do
-    COUNT=$(countRunningJobs)
-    echo "Active jobs count: ${COUNT}"
+function waitForJenkinsCliEndpointToRespondHealthy(){
+  unset STATUS
+  while [ $(test -z $${STATUS} && echo 0 || echo $${STATUS} ) -ne 200 ]; do
+    echo "Waiting for Jenkins CLI endpoint to respond with a 200 Status Code"
+    STATUS=$(curl -s -f http://$${HOST}:$${PORT}/cli/ -o /dev/null -w "%%{http_code}")
     sleep 1
   done
-  echo "No running jobs. Exiting..."
 }
 
 function waitForJenkinsToStart(){
-  while [ $(test -z ${STATUS} && echo 0 || echo ${STATUS} ) -ne 200 ]; do
-    echo "Waiting for HTTP port ${PORT} on ${HOST}.."
-    STATUS=$(curl -s -f http://${HOST}:${PORT} -o /dev/null -w "%{http_code}")
-    sleep 1
+  unset STATUS
+  while [ $(test -z $${STATUS} && echo 0 || echo $${STATUS} ) -ne 200 ]; do
+    echo "Waiting for HTTP port $${PORT} on $${HOST}"
+    STATUS=$(curl -s -f http://$${HOST}:$${PORT} -o /dev/null -w "%%{http_code}")
+    sleep 2
   done
 }
 
-mkdir -p ~/.jenkins/updates
-rm -rf ~/.jenkins/plugins || echo 'plugins did not exists anyway'
-mkdir -p ~/.jenkins/plugins
-test -f ~/.jenkins/jenkins.model.JenkinsLocationConfiguration.xml || envsubst < /opt/jenkins.model.JenkinsLocationConfiguration.xml > ~/.jenkins/jenkins.model.JenkinsLocationConfiguration.xml
+function waitForJenkinsPluginConfigurationAsCodeToStart(){
+  unset STATUS
+  while [ $(test -z $${STATUS} && echo 0 || echo $${STATUS} ) -ne 200 ]; do
+    echo "Waiting for HTTP port $${PORT} on $${HOST}"
+    STATUS=$(curl -s -f http://$${HOST}:$${PORT}/configuration-as-code/ -o /dev/null -w "%%{http_code}")
+    sleep 2
+  done
+}
 
-trap 'waitForFinishOfActiveJobs; kill ${pid}; exit 0;' SIGTERM
-cp -r /usr/share/jenkins/ref/plugins/* /root/.jenkins/plugins/
-java ${JAVA_OPTS} -Djenkins.install.runSetupWizard=false -jar /usr/share/jenkins/jenkins.war ${JENKINS_OPTS} & pid=$!
+function version { echo "$@" | awk -F. '{ printf("%d%03d%03d%03d\n", $1,$2,$3,$4); }'; }
+
+function checkJenkinsVersion {
+  JENKINS_VERSION=$(java -jar $${JENKINS_CLI_PATH} -s http://$${HOST}:$${PORT}/ version)
+  JENKINS_MINIMUM_VERSION=2.289
+  if [ [$(version $${JENKINS_VERSION})] -ge [$(version $${JENKINS_MINIMUM_VERSION})] ]; then
+    echo "Version $${JENKINS_VERSION} not supported for newrelic plugin, jenkins $${JENKINS_MINIMUM_VERSION} is the minimum requirement."
+    exit
+  fi
+  echo "Jenkins version requirement (v$${JENKINS_MINIMUM_VERSION}) met: v$${JENKINS_VERSION} installed"
+}
 
 waitForJenkinsToStart
-echo "HTTP port ${PORT} on ${HOST} all started up.."
-test ! -f /usr/share/jenkins/jenkins-cli.jar && wget ${HOST}:${PORT}/jnlpJars/jenkins-cli.jar
+waitForJenkinsCliEndpointToRespondHealthy
+checkJenkinsVersion
 
-### uncomment these two lines if datadog agent shall be installed
-# curl -L http://updates.jenkins-ci.org/update-center.json | sed '1d;$d' > /root/.jenkins/updates/default.json
-# java -jar jenkins-cli.jar -s http://${HOST}:${PORT} install-plugin datadog -restart
+rm -f /root/.jenkins/nr_plugin.zip
+rm -f $${JENKINS_CLI_PATH}
+wget -O $${JENKINS_CLI_PATH} http://$${HOST}:$${PORT}/jnlpJars/jenkins-cli.jar
+waitForJenkinsCliEndpointToRespondHealthy
 
-wait ${pid}
+# java -jar $${JENKINS_CLI_PATH} -s http://$${HOST}:$${PORT}/ install-plugin credentials
+# echo "installed jenkins credentials plugin.."
+# java -jar $${JENKINS_CLI_PATH} -s http://$${HOST}:$${PORT}/ install-plugin token-macro
+# echo "installed jenkins token-macro plugin.."
+java -jar $${JENKINS_CLI_PATH} -s http://$${HOST}:$${PORT}/ install-plugin configuration-as-code -restart
+echo "installed jenkins configuration-as-code plugin(restart).."
+waitForJenkinsToStart
+waitForJenkinsCliEndpointToRespondHealthy
+
+java -jar $${JENKINS_CLI_PATH} -s http://$${HOST}:$${PORT}/ delete-credentials system::system::jenkins "(global)" newrelic-insight-key
+echo "deleted old newrelic credentials.."
+waitForJenkinsCliEndpointToRespondHealthy
+
+java -jar $${JENKINS_CLI_PATH} -s http://$${HOST}:$${PORT}/ create-credentials-by-xml system::system::jenkins "(global)" < /root/.jenkins/nr-credentials.xml
+echo "deployed new newrelic credentials.."
+waitForJenkinsCliEndpointToRespondHealthy
+
+waitForJenkinsPluginConfigurationAsCodeToStart
+curl -v -X POST -T /root/.jenkins/nr-config-as-code.yaml "http://$${HOST}:$${PORT}/configuration-as-code/apply"
+echo "deployed and configured jenkins newrelic plugin."
+date > /root/.jenkins/nr-plugin-deployed.txt
