@@ -2,7 +2,7 @@
 
 Registry::addCommand "config" "Command::config"
 
-Registry::Help::command -c "config" "Prebuild deploy.yml file."
+Registry::Help::command -s -c "config" "Outputs deploy file into the cli."
 
 function Command::config() {
     shift $((OPTIND - 1))

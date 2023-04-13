@@ -44,8 +44,8 @@
         }
 
 {% include "nginx/http/default.location.conf.twig" with _context %}
-
-{% include "nginx/http/store.params.conf.twig" with _context %}
+{% set view = endpointData['region'] is defined ? 'region' : 'store'%}
+{% include "nginx/http/#{view}.params.conf.twig" with _context %}
 
         fastcgi_param SPRYKER_SSL_ENABLE {{ (project['docker']['ssl']['enabled'] | default(false)) ? 1 : 0 }};
         fastcgi_param SPRYKER_ZED_SSL_ENABLED {{ (project['docker']['ssl']['enabled'] | default(false)) ? 1 : 0 }};

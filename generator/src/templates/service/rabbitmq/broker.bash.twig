@@ -1,2 +1,2 @@
-readonly SPRYKER_RABBITMQ_VIRTUAL_HOSTS='{{ regions | map(regionData => regionData['stores'] | map((storeData, store) => storeData['services']['broker']['namespace']) | join(' ')) | join(' ') }}'
+readonly SPRYKER_RABBITMQ_VIRTUAL_HOSTS='{{ brokerHosts | trim }}'
 readonly SPRYKER_RABBITMQ_API_USERNAME="{{ services['broker']['api']['username'] }}"
