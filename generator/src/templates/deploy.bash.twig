@@ -121,6 +121,9 @@ readonly SPRYKER_ASSETS_MODE="{{ assets['mode'] | default('development') }}"
 readonly SPRYKER_DB_ENGINE="{{ services['database']['engine'] == 'mysql' ? 'mysql' : 'pgsql' }}"
 readonly SPRYKER_STORES=({{ regions | map((regionData, region) => "'local REGION=" ~ '"' ~ region ~ '"' ~ "; local STORES=(" ~ (regionData['stores'] | keys | join(' ')) ~ ")'") | join(' ') | raw }})
 readonly SPRYKER_DEFAULT_STORE="{{ (regions | first)['stores'] | keys | first }}"
+{% if dynamicStoreMode == true %}
+readonly SPRYKER_DEFAULT_REGION="{{ regions | keys | first }}"
+{% endif %}
 readonly SPRYKER_FILE_MODE="{{ _fileMode }}"
 readonly SPRYKER_XDEBUG_MODE_ENABLE="{{ docker['debug']['xdebug']['enabled'] is not defined or docker['debug']['xdebug']['enabled'] == true ? '1' : '' }}"
 readonly SPRYKER_SYNC_SESSION_NAME="{{ _syncSessionName }}"
@@ -150,6 +153,9 @@ SPRYKER_XDEBUG_ENABLE_FOR_CLI=''
 SPRYKER_TESTING_ENABLE="$([ "${SPRYKER_TESTING_ENABLE}" == '1' ] && echo '1' || echo '')"
 SPRYKER_TESTING_ENABLE_FOR_CLI=''
 SPRYKER_CURRENT_STORE=${SPRYKER_STORE:-${APPLICATION_STORE:-${SPRYKER_DEFAULT_STORE}}}
+{% if dynamicStoreMode == true %}
+SPRYKER_CURRENT_REGION=${SPRYKER_REGION:-${SPRYKER_CURRENT_REGION:-${SPRYKER_DEFAULT_REGION}}}
+{% endif %}
 readonly GITHUB_TOKEN=${GITHUB_TOKEN:-''}
 if [ -n "${GITHUB_TOKEN}" ]; then
     readonly TOKEN_BASED_COMPOSER_AUTH="{\"github-oauth\":{\"github.com\":\"${GITHUB_TOKEN}\"}}"
