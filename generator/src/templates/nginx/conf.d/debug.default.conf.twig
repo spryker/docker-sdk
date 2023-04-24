@@ -14,7 +14,8 @@
     upstream: (applicationName | lower) ~ ":9001",
     zedHost: (zedHost | split(':') | first) ~ ':' ~ (_endpointDebugMap[zedHost]),
     timeout: '60m',
-    project: _context
+    project: _context,
+    regionEndpointMap: _context['regionEndpointMap'][endpointData['identifier']]
 } %}
 {% endif %}
 {% endfor %}
