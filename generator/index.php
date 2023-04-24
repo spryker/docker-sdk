@@ -1477,35 +1477,52 @@ function buildDefaultRegionCredentialsForDatabase(array $projectData): array
             $regionDbConfig = array_merge($defaultDbRegionCredentials, $regionDbConfig);
             $projectData['regions'][$regionName]['services']['database'] = $regionDbConfig;
         }
-
         if (array_key_exists('databases', $regionConfig['services'])) {
-            $regionDbConfigs = $regionConfig['services']['databases'];
-
-            foreach ($regionConfig['stores'] as $storeName => $storeConfig) {
-                $storeDbConfig = $storeConfig['services']['database'];
-
-                foreach ($regionDbConfigs as $dbName => $regionDbConfig) {
-                    if (isset($storeDbConfig['name']) && $storeDbConfig['name'] === $dbName) {
-                        $regionDbConfig = array_merge($defaultDbRegionCredentials, $regionDbConfig ?? []);
-                        $databases['databases'][$storeName] = [
-                            'host' => 'database',
-                            'port' => $databaseServiceData['port'] ?? $databaseServiceData['engine'] === 'mysql' ? 3306 : 5432,
-                            'database' => $dbName,
-                            'username' => $regionDbConfig['username'],
-                            'password' => $regionDbConfig['password'],
-                            'characterSet' => $regionDbConfig['character-set'] ?? 'utf8',
-                            'collate' => $regionDbConfig['collate'] ?? 'utf8_general_ci',
-                        ];
+            $processedDbs = [];
+            foreach ($regionConfig['services']['databases'] as $dbName => $regionDbConfig) {
+                foreach ($regionConfig['stores'] as $storeName => $storeConfig) {
+                    $regionDbConfig = array_merge($defaultDbRegionCredentials, $regionDbConfig ?? []);
+                    if (isset($storeConfig['services']['database']['name']) && $storeConfig['services']['database']['name'] == $dbName) {
+                        $databases = getDatabaseData($storeName, $dbName, $databaseServiceData, $regionDbConfig, $databases);
+                        $processedDbs[$dbName] = [];
+                        $processedDbs[$storeName] = [];
                     }
                 }
-            }
 
+                if (isset($processedDbs[$dbName])) {
+                    continue;
+                }
+
+                $databases = getDatabaseData($dbName, $dbName, $databaseServiceData, $regionDbConfig, $databases);
+            }
             $projectData['regions'][$regionName]['services']['databases'] = json_encode($databases);
         }
-
     }
 
     return $projectData;
+}
+
+/**
+ * @param string $dbKey
+ * @param string $dbName
+ * @param array $databaseServiceData
+ * @param array $regionDbConfig
+ * @param array $databases
+ *
+ * @return array
+ */
+function getDatabaseData(string $dbKey, string $dbName, array $databaseServiceData, array $regionDbConfig, array $databases): array {
+    $databases['databases'][strtoupper($dbKey)] = [
+        'host' => 'database',
+        'port' => $databaseServiceData['port'] ?? $databaseServiceData['engine'] === 'mysql' ? 3306 : 5432,
+        'database' => strtolower($dbName),
+        'username' => $regionDbConfig['username'],
+        'password' => $regionDbConfig['password'],
+        'characterSet' => $regionDbConfig['character-set'] ?? 'utf8',
+        'collate' => $regionDbConfig['collate'] ?? 'utf8_general_ci',
+    ];
+
+    return $databases;
 }
 
 /**
