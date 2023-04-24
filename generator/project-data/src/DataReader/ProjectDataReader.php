@@ -7,40 +7,10 @@
 
 namespace ProjectData\DataReader;
 
-use ProjectData\ProjectDataConstants;
+use ProjectData\Constant\ProjectDataConstants;
 
 class ProjectDataReader
 {
-    /**
-     * @param array $projectData
-     *
-     * @return array
-     */
-    public static function getServices(array $projectData): array
-    {
-        return $projectData[ProjectDataConstants::PROJECT_DATA_SERVICES_KEY] ?? [];
-    }
-
-    /**
-     * @param array $projectData
-     *
-     * @return array
-     */
-    public static function getRegions(array $projectData): array
-    {
-        return $projectData[ProjectDataConstants::PROJECT_DATA_REGIONS_KEY] ?? [];
-    }
-
-    /**
-     * @param array $projectData
-     *
-     * @return array
-     */
-    public static function getGroups(array $projectData): array
-    {
-        return $projectData[ProjectDataConstants::PROJECT_DATA_GROUPS_KEY] ?? [];
-    }
-
     /**
      * @param array $projectData
      *

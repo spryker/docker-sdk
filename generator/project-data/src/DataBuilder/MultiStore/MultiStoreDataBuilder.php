@@ -12,6 +12,11 @@ use ProjectData\DataReader\ProjectDataReader;
 
 class MultiStoreDataBuilder extends AbstractDataBuilder
 {
+    /**
+     * @param array $projectData
+     *
+     * @return array
+     */
     public function build(array $projectData): array
     {
         if (!ProjectDataReader::isDynamicStoreModeEnabled($projectData)) {

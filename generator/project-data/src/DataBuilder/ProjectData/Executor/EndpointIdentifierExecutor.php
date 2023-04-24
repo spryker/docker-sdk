@@ -7,28 +7,34 @@
 
 namespace ProjectData\DataBuilder\ProjectData\Executor;
 
+use ProjectData\Constant\ProjectDataGroupsConstants;
 use ProjectData\DataBuilder\DataExecutor\DataExecutorInterface;
 
 class EndpointIdentifierExecutor implements DataExecutorInterface
 {
+    /**
+     * @param array $projectData
+     *
+     * @return array
+     */
     public function exec(array $projectData): array
     {
-        $groups = $projectData['groups'] ?? [];
+        $groups = $projectData[ProjectDataGroupsConstants::GROUPS_KEY] ?? [];
 
         foreach ($groups as $groupName => $groupData) {
-            $groupApplications = $groupData['applications'] ?? [];
+            $groupApplications = $groupData[ProjectDataGroupsConstants::APPLICATIONS_KEY] ?? [];
 
             foreach ($groupApplications as $applicationName => $applicationData) {
-                $applicationEndpoints = $applicationData['endpoints'] ?? [];
+                $applicationEndpoints = $applicationData[ProjectDataGroupsConstants::ENDPOINTS_KEY] ?? [];
 
                 foreach ($applicationEndpoints as $endpoint => $endpointData) {
                     if ($endpointData === null) {
                         $endpointData = [];
                     }
 
-                    $store = $endpointData['store'] ?? null;
-                    $region = $endpointData['region'] ?? null;
-                    $projectData['groups'][$groupName]['applications'][$applicationName]['endpoints'][$endpoint]['identifier'] = $store ?: $region;
+                    $store = $endpointData[ProjectDataGroupsConstants::STORE_KEY] ?? null;
+                    $region = $endpointData[ProjectDataGroupsConstants::REGION_KEY] ?? null;
+                    $projectData[ProjectDataGroupsConstants::GROUPS_KEY][$groupName][ProjectDataGroupsConstants::APPLICATIONS_KEY][$applicationName][ProjectDataGroupsConstants::ENDPOINTS_KEY][$endpoint][ProjectDataGroupsConstants::IDENTIFIER_KEY] = $store ?: $region;
                 }
             }
         }

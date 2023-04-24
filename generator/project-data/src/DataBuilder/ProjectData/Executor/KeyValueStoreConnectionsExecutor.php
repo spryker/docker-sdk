@@ -7,35 +7,42 @@
 
 namespace ProjectData\DataBuilder\ProjectData\Executor;
 
+use ProjectData\Constant\ProjectDataConstants;
+use ProjectData\Constant\ProjectDataRegionsConstants;
+use ProjectData\Constant\ProjectDataServicesConstants;
 use ProjectData\DataBuilder\DataExecutor\DataExecutorInterface;
-use ProjectData\ProjectDataConstants;
 
 class KeyValueStoreConnectionsExecutor implements DataExecutorInterface
 {
+    /**
+     * @param array $projectData
+     *
+     * @return array
+     */
     public function exec(array $projectData): array
     {
         $connections = [];
 
-        $keyValueStoreData = $projectData[ProjectDataConstants::PROJECT_DATA_SERVICES_KEY][ProjectDataConstants::PROJECT_DATA_KEY_VALUE_STORE_KEY];
+        $keyValueStoreData = $projectData[ProjectDataServicesConstants::SERVICES_KEY][ProjectDataServicesConstants::KEY_VALUE_STORE_KEY];
 
-        foreach ($projectData[ProjectDataConstants::PROJECT_DATA_REGIONS_KEY] as $regionName => $regionData) {
+        foreach ($projectData[ProjectDataRegionsConstants::REGIONS_KEY] as $regionName => $regionData) {
             $regionKeyValueStoreData = $keyValueStoreData;
 
-            if (isset($regionData[ProjectDataConstants::PROJECT_DATA_SERVICES_KEY][ProjectDataConstants::PROJECT_DATA_KEY_VALUE_STORE_KEY])) {
+            if (isset($regionData[ProjectDataServicesConstants::SERVICES_KEY][ProjectDataServicesConstants::KEY_VALUE_STORE_KEY])) {
                 $connections[$regionName] = $regionKeyValueStoreData = array_replace(
                     $regionKeyValueStoreData,
-                    $regionData[ProjectDataConstants::PROJECT_DATA_SERVICES_KEY][ProjectDataConstants::PROJECT_DATA_KEY_VALUE_STORE_KEY]
+                    $regionData[ProjectDataServicesConstants::SERVICES_KEY][ProjectDataServicesConstants::KEY_VALUE_STORE_KEY]
                 );
             }
 
-            foreach ($regionData[ProjectDataConstants::PROJECT_DATA_STORE_KEY] ?? [] as $storeName => $storeData) {
-                if (!isset($storeData[ProjectDataConstants::PROJECT_DATA_SERVICES_KEY][ProjectDataConstants::PROJECT_DATA_KEY_VALUE_STORE_KEY])) {
+            foreach ($regionData[ProjectDataRegionsConstants::STORES_KEY] ?? [] as $storeName => $storeData) {
+                if (!isset($storeData[ProjectDataServicesConstants::SERVICES_KEY][ProjectDataServicesConstants::KEY_VALUE_STORE_KEY])) {
                     continue;
                 }
 
                 $connections[$storeName] = array_replace(
                     $regionKeyValueStoreData,
-                    $storeData[ProjectDataConstants::PROJECT_DATA_SERVICES_KEY][ProjectDataConstants::PROJECT_DATA_KEY_VALUE_STORE_KEY]
+                    $storeData[ProjectDataServicesConstants::SERVICES_KEY][ProjectDataServicesConstants::KEY_VALUE_STORE_KEY]
                 );
             }
         }

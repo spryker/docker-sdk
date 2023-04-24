@@ -7,37 +7,60 @@
 
 namespace ProjectData\DataBuilder\MultiStore\Executor;
 
+use ProjectData\Constant\ProjectDataRegionsConstants;
+use ProjectData\Constant\ProjectDataServicesConstants;
+use ProjectData\Constant\ProjectDataStorageDataConstants;
 use ProjectData\DataBuilder\DataExecutor\DataExecutorInterface;
-use ProjectData\DataReader\ProjectDataReader;
 
 class StorageDataExecutor implements DataExecutorInterface
 {
+    /**
+     * @param array $projectData
+     *
+     * @return array
+     */
     public function exec(array $projectData): array
     {
-        $storageData = $projectData['storageData'];
-        $hosts = $storageData['hosts'];
+        $storageData = $projectData[ProjectDataStorageDataConstants::STORAGE_DATA_KEY] ?? [];
+        $hosts = $storageData[ProjectDataStorageDataConstants::STORAGE_DATA_HOSTS_KEY] ?? [];
         $hosts = array_merge(
             $hosts,
             $this->buildRegionsStorageHosts($projectData),
         );
 
-        $projectData['storageData']['hosts'] = $hosts;
+        $storageData[ProjectDataStorageDataConstants::STORAGE_DATA_HOSTS_KEY] = $hosts;
+        $projectData[ProjectDataStorageDataConstants::STORAGE_DATA_KEY] = $storageData;
 
         return $projectData;
     }
 
-    private function buildRegionsStorageHosts(array $projectData): array
+    /**
+     * @param array $projectData
+     *
+     * @return array
+     */
+    protected function buildRegionsStorageHosts(array $projectData): array
     {
         $regionsStorageHosts = [];
-        $regions = ProjectDataReader::getRegions($projectData);
-        $storageServices = $projectData['storageData']['services'] ?? [];
+
+        $regions = $projectData[ProjectDataRegionsConstants::REGIONS_KEY] ?? [];
+        $storageData = $projectData[ProjectDataStorageDataConstants::STORAGE_DATA_KEY] ?? [];
+        $storageServices = $storageData[ProjectDataStorageDataConstants::STORAGE_DATA_SERVICE_KEY] ?? [];
+
         $defaultPort = 6379;
 
         foreach ($regions as $regionData) {
-            foreach ($regionData['services'] ?? [] as $serviceName => $serviceNamespace) {
+            $regionServices = $regionData[ProjectDataServicesConstants::SERVICES_KEY] ?? [];
+
+            foreach ($regionServices as $serviceName => $serviceNamespace) {
                 if (in_array($serviceName, $storageServices, true)) {
-                    $regionsStorageHosts[] = sprintf('%s:%s:%s:%s', $serviceName, $serviceName, $defaultPort,
-                        $serviceNamespace['namespace']);
+                    $regionsStorageHosts[] = sprintf(
+                        '%s:%s:%s:%s',
+                        $serviceName,
+                        $serviceName,
+                        $defaultPort,
+                        $serviceNamespace[ProjectDataServicesConstants::SERVICES_NAMESPACE_KEY]
+                    );
                 }
             }
         }

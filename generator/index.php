@@ -2,7 +2,7 @@
 
 use DeployFileGenerator\DeployFileGeneratorFactory;
 use DeployFileGenerator\Transfer\DeployFileTransfer;
-use ProjectData\ProjectDataConstants;
+use ProjectData\Constant\ProjectDataConstants;
 use ProjectData\ProjectDataFactory;
 use Spatie\Url\Url;
 use Symfony\Component\Yaml\Parser;
@@ -481,8 +481,6 @@ foreach ($projectData['services'] ?? [] as $serviceName => $serviceData) {
         ];
     }
 }
-
-$projectData['regionData'] = $projectData['regions'] ?? []; //todo: wtf?
 
 file_put_contents(
     $deploymentDir . DS . 'context' . DS . 'nginx' . DS . 'conf.d' . DS . 'frontend.default.conf.tmpl',

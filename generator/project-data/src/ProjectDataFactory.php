@@ -8,12 +8,13 @@
 namespace ProjectData;
 
 use ProjectData\DataBuilder\DataBuilder\DataBuilderInterface;
-use ProjectData\DataBuilder\DataExecutor\DataExecutorInterface;
 use ProjectData\DataBuilder\MultiStore\Executor\BrokerHostsExecutor as MultiStoreBrokerHostsExecutor;
 use ProjectData\DataBuilder\MultiStore\Executor\DynamicStoreModeExecutor;
 use ProjectData\DataBuilder\MultiStore\Executor\EntrypointIdentifierExecutor;
 use ProjectData\DataBuilder\MultiStore\Executor\StorageDataExecutor;
-use ProjectData\DataBuilder\MultiStore\Executor\StoreSpecificExecutor;
+use ProjectData\DataBuilder\MultiStore\Executor\StoreSpecific\StoreSpecificBrokerExecutor;
+use ProjectData\DataBuilder\MultiStore\Executor\StoreSpecific\StoreSpecificKeyValueStoreExecutor;
+use ProjectData\DataBuilder\MultiStore\Executor\StoreSpecific\StoreSpecificSessionExecutor;
 use ProjectData\DataBuilder\MultiStore\MultiStoreDataBuilder;
 use ProjectData\DataBuilder\ProjectData\Executor\BrokerConnectionsExecutor;
 use ProjectData\DataBuilder\ProjectData\Executor\BrokerHostsExecutor;
@@ -55,7 +56,9 @@ class ProjectDataFactory
         return [
             new MultiStoreBrokerHostsExecutor(),
             new DynamicStoreModeExecutor(),
-            new StoreSpecificExecutor(),
+            new StoreSpecificBrokerExecutor(),
+            new StoreSpecificKeyValueStoreExecutor(),
+            new StoreSpecificSessionExecutor(),
             new StorageDataExecutor(),
         ];
     }

@@ -7,12 +7,17 @@
 
 namespace ProjectData\DataBuilder\MultiStore\Executor;
 
+use ProjectData\Constant\ProjectDataConstants;
 use ProjectData\DataBuilder\DataExecutor\DataExecutorInterface;
 use ProjectData\DataReader\ProjectDataReader;
-use ProjectData\ProjectDataConstants;
 
 class DynamicStoreModeExecutor implements DataExecutorInterface
 {
+    /**
+     * @param array $projectData
+     *
+     * @return array
+     */
     public function exec(array $projectData): array
     {
         $projectData[ProjectDataConstants::PROJECT_DATA_DYNAMIC_STORE_MODE_KEY] = ProjectDataReader::isDynamicStoreModeEnabled($projectData);

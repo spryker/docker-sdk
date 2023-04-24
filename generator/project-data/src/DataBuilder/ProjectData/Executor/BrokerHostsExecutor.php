@@ -7,27 +7,35 @@
 
 namespace ProjectData\DataBuilder\ProjectData\Executor;
 
+use ProjectData\Constant\ProjectDataConstants;
+use ProjectData\Constant\ProjectDataRegionsConstants;
+use ProjectData\Constant\ProjectDataServicesConstants;
 use ProjectData\DataBuilder\DataExecutor\DataExecutorInterface;
-use ProjectData\DataReader\ProjectDataReader;
-use ProjectData\ProjectDataConstants;
 
 class BrokerHostsExecutor implements DataExecutorInterface
 {
+    /**
+     * @param array $projectData
+     *
+     * @return array
+     */
     public function exec(array $projectData): array
     {
         $hosts = [];
 
-        $regions = ProjectDataReader::getRegions($projectData);
+        $regions = $projectData[ProjectDataRegionsConstants::REGIONS_KEY] ?? [];
 
-        foreach ($regions as $regionName => $regionData) {
-            $stores = $regionData[ProjectDataConstants::PROJECT_DATA_STORE_KEY] ?? [];
+        foreach ($regions as $regionData) {
+            $stores = $regionData[ProjectDataRegionsConstants::STORES_KEY] ?? [];
 
             foreach ($stores as $storeData) {
-                $host = $storeData['services']['broker']['namespace'] ?? null;
+                $host = $storeData[ProjectDataServicesConstants::SERVICES_KEY][ProjectDataServicesConstants::BROKER_KEY][ProjectDataServicesConstants::SERVICES_NAMESPACE_KEY] ?? null;
 
-                if ($host !== null) {
-                    $hosts[] = $host;
+                if ($host === null) {
+                    continue;
                 }
+
+                $hosts[] = $host;
             }
         }
 
