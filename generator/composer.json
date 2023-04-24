@@ -16,11 +16,6 @@
             "ProjectData\\": "project-data/src/"
         }
     },
-    "autoload-dev": {
-        "psr-4": {
-            "Unit\\": "tests/unit"
-        }
-    },
     "minimum-stability": "dev",
     "prefer-stable": true,
     "config": {
