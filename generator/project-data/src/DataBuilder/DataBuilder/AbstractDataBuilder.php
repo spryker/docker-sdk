@@ -22,6 +22,11 @@ abstract class AbstractDataBuilder implements DataBuilderInterface
         $this->executors = $executors;
     }
 
+    /**
+     * @param array $projectData
+     *
+     * @return array
+     */
     public function build(array $projectData): array
     {
         foreach ($this->executors as $projectDataExecutor) {

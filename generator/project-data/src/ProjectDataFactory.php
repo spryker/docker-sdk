@@ -8,6 +8,7 @@
 namespace ProjectData;
 
 use ProjectData\DataBuilder\DataBuilder\DataBuilderInterface;
+use ProjectData\DataBuilder\DataExecutor\DataExecutorInterface;
 use ProjectData\DataBuilder\MultiStore\Executor\BrokerHostsExecutor as MultiStoreBrokerHostsExecutor;
 use ProjectData\DataBuilder\MultiStore\Executor\DynamicStoreModeExecutor;
 use ProjectData\DataBuilder\MultiStore\Executor\EntrypointIdentifierExecutor;
@@ -25,6 +26,9 @@ use ProjectData\DataBuilder\ProjectDataBuildProcessor;
 class ProjectDataFactory
 {
 
+    /**
+     * @return \ProjectData\DataBuilder\ProjectDataBuildProcessor
+     */
     public function createProjectDataBuildProcessor(): ProjectDataBuildProcessor
     {
         return new ProjectDataBuildProcessor([
@@ -33,6 +37,9 @@ class ProjectDataFactory
         ]);
     }
 
+    /**
+     * @return \ProjectData\DataBuilder\DataBuilder\DataBuilderInterface
+     */
     public function createMultiStoreDataBuilder(): DataBuilderInterface
     {
         return new MultiStoreDataBuilder(
@@ -40,17 +47,22 @@ class ProjectDataFactory
         );
     }
 
+    /**
+     * @return \ProjectData\DataBuilder\DataExecutor\DataExecutorInterface[]
+     */
     public function getMultiStoreExecutorList(): array
     {
         return [
             new MultiStoreBrokerHostsExecutor(),
             new DynamicStoreModeExecutor(),
             new StoreSpecificExecutor(),
-            new EntrypointIdentifierExecutor(),
             new StorageDataExecutor(),
         ];
     }
 
+    /**
+     * @return \ProjectData\DataBuilder\DataBuilder\DataBuilderInterface
+     */
     public function createProjectDataBuilder(): DataBuilderInterface
     {
         return new ProjectDataBuilder(
@@ -58,6 +70,9 @@ class ProjectDataFactory
         );
     }
 
+    /**
+     * @return \ProjectData\DataBuilder\DataExecutor\DataExecutorInterface[]
+     */
     public function getProjectDataExecutorList(): array
     {
         return [

@@ -9,5 +9,10 @@ namespace ProjectData\DataBuilder\DataBuilder;
 
 interface DataBuilderInterface
 {
+    /**
+     * @param array $projectData
+     *
+     * @return array
+     */
     public function build(array $projectData): array;
 }

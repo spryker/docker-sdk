@@ -11,21 +11,41 @@ use ProjectData\ProjectDataConstants;
 
 class ProjectDataReader
 {
+    /**
+     * @param array $projectData
+     *
+     * @return array
+     */
     public static function getServices(array $projectData): array
     {
         return $projectData[ProjectDataConstants::PROJECT_DATA_SERVICES_KEY] ?? [];
     }
 
+    /**
+     * @param array $projectData
+     *
+     * @return array
+     */
     public static function getRegions(array $projectData): array
     {
         return $projectData[ProjectDataConstants::PROJECT_DATA_REGIONS_KEY] ?? [];
     }
 
+    /**
+     * @param array $projectData
+     *
+     * @return array
+     */
     public static function getGroups(array $projectData): array
     {
         return $projectData[ProjectDataConstants::PROJECT_DATA_GROUPS_KEY] ?? [];
     }
 
+    /**
+     * @param array $projectData
+     *
+     * @return bool
+     */
     public static function isDynamicStoreModeEnabled(array $projectData): bool
     {
         $envs = $projectData[ProjectDataConstants::PROJECT_DATA_ENVS_KEY] ?? [];

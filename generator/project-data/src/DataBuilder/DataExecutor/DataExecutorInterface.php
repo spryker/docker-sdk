@@ -9,5 +9,10 @@ namespace ProjectData\DataBuilder\DataExecutor;
 
 interface DataExecutorInterface
 {
+    /**
+     * @param array $projectData
+     *
+     * @return array
+     */
     public function exec(array $projectData): array;
 }
