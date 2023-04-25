@@ -11,25 +11,25 @@
     fastcgi_param SPRYKER_ZED_HOST "zed.calls.are.forbidden.from.zed";
     fastcgi_param SPRYKER_ZED_PORT "{{ project['_defaultPort'] }}";
 
-    {% if project['_endpointMap'][endpointData['store']]['backoffice'] is not empty %}
-        fastcgi_param SPRYKER_BE_HOST "{{ (project['_endpointMap'][endpointData['store']]['backoffice'] | split(':'))[0] | default('') }}";
-        fastcgi_param SPRYKER_BE_PORT "{{ (project['_endpointMap'][endpointData['store']]['backoffice'] | split(':'))[1] | default(project['_defaultPort']) }}";
-    {% endif %}
+{% if project['_endpointMap'][endpointData['store']]['backoffice'] is not empty %}
+    fastcgi_param SPRYKER_BE_HOST "{{ (project['_endpointMap'][endpointData['store']]['backoffice'] | split(':'))[0] | default('') }}";
+    fastcgi_param SPRYKER_BE_PORT "{{ (project['_endpointMap'][endpointData['store']]['backoffice'] | split(':'))[1] | default(project['_defaultPort']) }}";
+{% endif %}
 
-    {% if storeServices['mail']['sender']['email'] is not empty %}
-        fastcgi_param SPRYKER_MAIL_SENDER_EMAIL "{{ storeServices['mail']['sender']['email'] }}";
-    {% endif %}
-    {% if storeServices['mail']['sender']['name'] is not empty %}
-        fastcgi_param SPRYKER_MAIL_SENDER_NAME "{{ storeServices['mail']['sender']['name'] }}";
-    {% endif %}
+{% if storeServices['mail']['sender']['email'] is not empty %}
+    fastcgi_param SPRYKER_MAIL_SENDER_EMAIL "{{ storeServices['mail']['sender']['email'] }}";
+{% endif %}
+{% if storeServices['mail']['sender']['name'] is not empty %}
+    fastcgi_param SPRYKER_MAIL_SENDER_NAME "{{ storeServices['mail']['sender']['name'] }}";
+{% endif %}
 
-    {% if project['_endpointMap'][endpointData['store']]['yves'] is not empty %}
-        fastcgi_param SPRYKER_FE_HOST "{{ (project['_endpointMap'][endpointData['store']]['yves'] | split(':'))[0] | default('') }}";
-        fastcgi_param SPRYKER_FE_PORT "{{ (project['_endpointMap'][endpointData['store']]['yves'] | split(':'))[1] | default(project['_defaultPort']) }}";
-    {% endif %}
+{% if regionEndpointMap['yves'] is not empty %}
+    fastcgi_param SPRYKER_FE_HOST "{{ (regionEndpointMap['yves'] | split(':'))[0] | default('') }}";
+    fastcgi_param SPRYKER_FE_PORT "{{ (regionEndpointMap['yves'] | split(':'))[1] | default(project['_defaultPort']) }}";
+{% endif %}
 
-    {% if project['_endpointMap'][endpointData['store']]['glue'] is not empty %}
-        fastcgi_param SPRYKER_API_HOST "{{ (project['_endpointMap'][endpointData['store']]['glue'] | split(':'))[0] | default('') }}";
-        fastcgi_param SPRYKER_API_PORT "{{ (project['_endpointMap'][endpointData['store']]['glue'] | split(':'))[1] | default(project['_defaultPort']) }}";
-    {% endif %}
+{% if regionEndpointMap['glue'] is not empty %}
+    fastcgi_param SPRYKER_API_HOST "{{ (regionEndpointMap['glue'] | split(':'))[0] | default('') }}";
+    fastcgi_param SPRYKER_API_PORT "{{ (regionEndpointMap['glue'] | split(':'))[1] | default(project['_defaultPort']) }}";
+{% endif %}
 {% endblock location %}

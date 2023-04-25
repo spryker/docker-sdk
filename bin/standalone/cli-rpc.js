@@ -99,6 +99,7 @@ class Server {
 
     constructor(dispatcher) {
         this._server = http.createServer(this._onRequest.bind(this));
+        this._server.setTimeout(0);
         this._dispatcher = dispatcher;
     }
 
