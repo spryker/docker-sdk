@@ -482,6 +482,23 @@ Optional parameters for `application:`:
             store: STORE-1
  ```
 
+* `groups: applications: application: http: timeout` - define a common timeout for proxy_connect_timeout, proxy_read_timeout, proxy_send_timeout, fastcgi_send_timeout, fastcgi_read_timeout, client_body_timeout, client_header_timeout, send_timeout, keepalive_timeout. If not specified, the default values apply:
+    * `backoffice` - `1m`
+    * `merchant-portal` - `1m`
+    * `glue-storefront` - `1m`
+    * `glue-backend` - `1m`
+    * `glue` - `1m`
+    * `yves` - `1m`
+```yaml
+...
+    applications:
+        yves:
+        application: yves
+        http:
+            timeout: 5m
+        ...
+```
+
 * `groups: applications: application: limits: workers` - defines the maximum number of concurrent child processes a process manager can serve simultaneously.
 
 ```yaml
@@ -498,7 +515,7 @@ Optional parameters for `application:`:
 To disable the validation of request body size against this parameter, set it to `0`. We do not recommended disabling it.
 :::
 
-* `groups: applications: application: timeouts: vhost-timeout` - define a common timeout for proxy_connect_timeout, proxy_read_timeout, proxy_send_timeout, fastcgi_send_timeout, fastcgi_read_timeout, client_body_timeout, client_header_timeout, send_timeout, keepalive_timeout. If not specified, the default values apply:
+* `groups: applications: application: limits: request-terminate-timeout` - define the timeout for serving a single request after which the worker process will be killed. If not specified, the default values apply:
     * `backoffice` - `1m`
     * `merchant-portal` - `1m`
     * `glue-storefront` - `1m`
@@ -510,24 +527,7 @@ To disable the validation of request body size against this parameter, set it to
     applications:
         yves:
         application: yves
-        timeouts:
-            vhost-timeout: 5m
-        ...
-```
-
-* `groups: applications: application: timeouts: request-terminate-timeout` - define the timeout for serving a single request after which the worker process will be killed. If not specified, the default values apply:
-    * `backoffice` - `1m`
-    * `merchant-portal` - `1m`
-    * `glue-storefront` - `1m`
-    * `glue-backend` - `1m`
-    * `glue` - `1m`
-    * `yves` - `1m`
-```yaml
-...
-    applications:
-        yves:
-        application: yves
-        timeouts:
+        limits:
             request-terminate-timeout: 10m
         ...
 ```
