@@ -1,8 +1,8 @@
 {% set host = endpoint | split(':') | first %}
 {% set isPortCustom = (endpoint | split(':'))[1] is defined %}
-{% set port = (endpoint | split(':'))[1] | default(ssl ? 443 :80) %}
+{% set port = (endpoint | split(':'))[1] | default(ssl ? sslPort :80) %}
 {% set desiredProtocol = ssl ? 'https' : 'http' %}
-{% set opositePort = ssl ? 80 : 443 %}
+{% set opositePort = ssl ? 80 : sslPort %}
 server {
     listen {{ portToListen | default(port) }} {{ ssl ? 'ssl http2' }};
     listen [::]:{{ portToListen | default(port) }} {{ ssl ? 'ssl http2' }};

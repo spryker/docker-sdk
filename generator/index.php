@@ -766,11 +766,21 @@ function retrieveHostNames(array $projectData): array
  *
  * @return int
  */
+function getSslPort(array $projectData): int
+{
+    return $projectData['docker']['ssl']['port'] ?? 443;
+}
+
+/**
+ * @param array $projectData
+ *
+ * @return int
+ */
 function getDefaultPort(array $projectData): int
 {
     $sslEnabled = $projectData['docker']['ssl']['enabled'] ?? false;
 
-    return $sslEnabled ? 443 : 80;
+    return $sslEnabled ? getSslPort($projectData) : 80;
 }
 
 /**
@@ -782,7 +792,7 @@ function getSSLRedirectPort(array $projectData): int
 {
     $sslEnabled = $projectData['docker']['ssl']['enabled'] ?? false;
 
-    return $sslEnabled ? 80 : 443;
+    return $sslEnabled ? 80 : getSslPort($projectData);
 }
 
 /**

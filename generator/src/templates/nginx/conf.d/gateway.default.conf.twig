@@ -1,4 +1,5 @@
 {% set ssl = (docker['ssl']['enabled'] | default(false)) ? true : false %}
+{% set sslPort = (docker['ssl']['port'] | default(443)) %}
 
 # Important for proxy server. E.g. to pass gzip correctly.
 proxy_http_version 1.1;
@@ -35,7 +36,7 @@ map "${SPRYKER_TESTING_ENABLE}" $testing_mode {
 
 server {
     server_name _ default_ssl; # This is just an invalid value which will never trigger on a real hostname.
-    listen 443 ssl http2;
+    listen {{ sslPort }} ssl http2;
     error_page 497 https://$host:$server_port$request_uri;
     include /etc/nginx/vhost.d/ssl.default.conf;
     return 502;
@@ -67,6 +68,7 @@ upstream {{ upstream }}_xdebug {
 {% endif %}
 {% include "nginx/http/gateway/#{applicationData['application']}.server.conf.twig" with {
     ssl: ssl,
+    sslPort: sslPort,
     endpoint: endpoint,
     endpointData: endpointData,
     upstream: upstream ~ '$xdebug_mode',
@@ -78,6 +80,7 @@ upstream {{ upstream }}_xdebug {
 {% include "nginx/http/gateway/#{applicationData['application']}.server.conf.twig" with {
     portToListen: debugPort,
     ssl: ssl,
+    sslPort: sslPort,
     endpoint: endpoint,
     endpointData: endpointData,
     upstream: upstream ~ '_xdebug',
