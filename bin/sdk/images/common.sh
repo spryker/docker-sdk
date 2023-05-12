@@ -48,10 +48,12 @@ function Images::_buildApp() {
 
     Console::verbose "${INFO}Building Application images${NC}"
 
+    echo "$(date): Building base image" >> /tmp/profile.tmp
     docker build \
         -t "${baseAppImage}" \
         -f "${DEPLOYMENT_PATH}/images/common/application/Dockerfile" \
         --progress="${PROGRESS_TYPE}" \
+        --cache-from "${baseAppImage}" \
         --build-arg "SPRYKER_PLATFORM_IMAGE=${SPRYKER_PLATFORM_IMAGE}" \
         --build-arg "SPRYKER_LOG_DIRECTORY=${SPRYKER_LOG_DIRECTORY}" \
         --build-arg "SPRYKER_PIPELINE=${SPRYKER_PIPELINE}" \
@@ -65,12 +67,14 @@ function Images::_buildApp() {
         --build-arg "SPRYKER_NPM_VERSION=${SPRYKER_NPM_VERSION}" \
         "${DEPLOYMENT_PATH}/context" 1>&2
 
+    echo "$(date): Building application image" >> /tmp/profile.tmp
     docker build \
         -t "${appImage}" \
         -f "${DEPLOYMENT_PATH}/images/${folder}/application/Dockerfile" \
         "${sshArgument[@]}" \
         --secret "id=secrets-env,src=$SECRETS_FILE_PATH" \
         --progress="${PROGRESS_TYPE}" \
+        --cache-from "${appImage}" \
         --build-arg "SPRYKER_PARENT_IMAGE=${baseAppImage}" \
         --build-arg "SPRYKER_DOCKER_PREFIX=${SPRYKER_DOCKER_PREFIX}" \
         --build-arg "SPRYKER_DOCKER_TAG=${SPRYKER_DOCKER_TAG}" \
@@ -85,11 +89,13 @@ function Images::_buildApp() {
         --build-arg "SPRYKER_BUILD_STAMP=${SPRYKER_BUILD_STAMP:-""}" \
         . 1>&2
 
+    echo "$(date): Building local image" >> /tmp/profile.tmp
     docker build \
         -t "${localAppImage}" \
         -t "${runtimeImage}" \
         -f "${DEPLOYMENT_PATH}/images/common/application-local/Dockerfile" \
         --progress="${PROGRESS_TYPE}" \
+        --cache-from "${localAppImage}" \
         --build-arg "SPRYKER_PARENT_IMAGE=${appImage}" \
         "${DEPLOYMENT_PATH}/context" 1>&2
 
@@ -98,20 +104,24 @@ function Images::_buildApp() {
             -t "${runtimeImage}" \
             -f "${DEPLOYMENT_PATH}/images/debug/application/Dockerfile" \
             --progress="${PROGRESS_TYPE}" \
+            --cache-from "${runtimeImage}" \
             --build-arg "SPRYKER_PARENT_IMAGE=${localAppImage}" \
             "${DEPLOYMENT_PATH}/context" 1>&2
     fi
 
     Console::verbose "${INFO}Building CLI images${NC}"
 
+    echo "$(date): Building pipeline image" >> /tmp/profile.tmp
     docker build \
         -t "${baseCliImage}" \
         -t "${pipelineImage}" \
         -f "${DEPLOYMENT_PATH}/images/common/cli/Dockerfile" \
         --progress="${PROGRESS_TYPE}" \
+        --cache-from "${baseCliImage}" \
         --build-arg "SPRYKER_PARENT_IMAGE=${localAppImage}" \
         "${DEPLOYMENT_PATH}/context" 1>&2
 
+    echo "$(date): Building runtimecli image" >> /tmp/profile.tmp
     docker build \
         -t "${cliImage}" \
         -t "${runtimeCliImage}" \
@@ -119,12 +129,14 @@ function Images::_buildApp() {
         "${sshArgument[@]}" \
         --secret "id=secrets-env,src=$SECRETS_FILE_PATH" \
         --progress="${PROGRESS_TYPE}" \
+        --cache-from "${cliImage}" \
         --build-arg "SPRYKER_PARENT_IMAGE=${baseCliImage}" \
         --build-arg "DEPLOYMENT_PATH=${DEPLOYMENT_PATH}" \
         --build-arg "SPRYKER_PIPELINE=${SPRYKER_PIPELINE}" \
         --build-arg "SPRYKER_BUILD_HASH=${SPRYKER_BUILD_HASH:-"current"}" \
         --build-arg "SPRYKER_BUILD_STAMP=${SPRYKER_BUILD_STAMP:-""}" \
         .  1>&2
+    echo "$(date): finished building" >> /tmp/profile.tmp
 
     if [ -n "${SPRYKER_XDEBUG_MODE_ENABLE}" ]; then
         docker build \
@@ -180,6 +192,7 @@ function Images::_buildFrontend() {
         "${DEPLOYMENT_PATH}/context" 1>&2
 
     if [ -n "${SPRYKER_XDEBUG_MODE_ENABLE}" ]; then
+        echo "SPRYKER_XDEBUG_MODE_ENABLE enabled" >> /tmp/profile.tmp
         docker build \
             -t "${runtimeFrontendImage}" \
             -f "${DEPLOYMENT_PATH}/images/debug/frontend/Dockerfile" \
