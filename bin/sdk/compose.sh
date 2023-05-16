@@ -153,18 +153,41 @@ function Compose::run() {
     Registry::Flow::runBeforeRun
     Console::verbose "${INFO}Running Spryker containers${NC}"
 
-    local profiles=( "--profile ${SPRYKER_PROJECT_NAME}" )
+    local args=()
+    local profiles=()
 
-    for projectName in $(Project::getListOfEnabledProjects) ; do
-      if [ "${projectName}" == "${SPRYKER_PROJECT_NAME}" ]; then
-          continue
-      fi
+    while (( "$#" )); do
+        case "$1" in
+            --profile)
+                if [ "${2}" == "${SPRYKER_PROJECT_NAME}" ]; then
+                  shift 2
+                  continue
+                fi
 
-      profiles+=( "--profile ${projectName}" )
+                profiles+=( "--profile ${2}" )
+                shift 2
+                ;;
+            *)
+                args+=("$1")
+                shift
+                ;;
+        esac
     done
+    set -- "${args[@]}"
+
+    if [ ${#profiles[@]} -eq 0 ]; then
+        for projectName in $(Project::getListOfEnabledProjects) ; do
+          if [ "${projectName}" == "${SPRYKER_PROJECT_NAME}" ]; then
+              continue
+          fi
+
+          profiles+=( "--profile ${projectName}" )
+        done
+    fi
+
+    profiles+=( "--profile ${SPRYKER_PROJECT_NAME}" )
 
     Compose::command --compatibility --profile ${SPRYKER_INTERNAL_PROJECT_NAME} ${profiles[*]} up -d --remove-orphans --quiet-pull "${@}"
-
 #   todo: env variable for each project
     if [ -n "${SPRYKER_TESTING_ENABLE}" ]; then
       Service::Scheduler::stop

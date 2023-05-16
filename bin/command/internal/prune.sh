@@ -15,7 +15,7 @@ function Command::prune() {
   sync clean # TODO deprecated, use Registry::Flow::addAfterDown in mounts
   Console::error "This will delete ALL docker images and volumes on the host."
 
-  docker volume prune ${forceArg}
+  docker volume prune -a ${forceArg}
   dropImages ${forceArg}
 #  docker system prune -a ${forceArg}
   docker builder prune -a ${forceArg}
