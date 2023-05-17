@@ -1388,14 +1388,14 @@ function buildSecrets(string $deploymentDir): array
     $data['SPRYKER_OAUTH_ENCRYPTION_KEY'] = generateToken(48);
     $data['SPRYKER_OAUTH_CLIENT_IDENTIFIER'] = 'frontend';
     $data['SPRYKER_OAUTH_CLIENT_SECRET'] = generateToken(48);
-    $data['SPRYKER_OAUTH_CLIENT_CONFIGURATION'] = json_encode([
+    $data['SPRYKER_OAUTH_CLIENT_CONFIGURATION'] = json_encode([[
         "identifier" => "frontend",
         "secret" => generateToken(48),
         "isConfidential" => true,
         "name" => "Customer client",
         "redirectUri" => null,
         "isDefault" => true
-    ]);
+    ]]);
     $data['SPRYKER_ZED_REQUEST_TOKEN'] = generateToken(80);
     $data['SPRYKER_URI_SIGNER_SECRET_KEY'] = generateToken(80);
     $data['SPRYKER_PRODUCT_CONFIGURATOR_ENCRYPTION_KEY'] = generateToken(10);
