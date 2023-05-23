@@ -15,9 +15,8 @@ locals {
 {% endif %}
 {% endfor %}
 {% endfor %}
-  }
-  e2e = {
-      SPRYKER_E2E_PROJECT_NANE = "b2b"
+    e2e = {
 {% include  "terraform/e2e/e2e.tf.twig" with _context %}
+    }
   }
 }
