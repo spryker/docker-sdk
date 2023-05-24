@@ -52,7 +52,7 @@ function Images::_buildApp() {
 
     Console::verbose "${INFO}Building Application images${NC}"
 
-    echo "$(date): Building base image" >> /tmp/profile.tmp
+    echo "$(date): Building base image"
     docker build \
         -t "${baseAppImage}" \
         -f "${DEPLOYMENT_PATH}/images/common/application/Dockerfile" \
@@ -70,7 +70,7 @@ function Images::_buildApp() {
         --build-arg "SPRYKER_NPM_VERSION=${SPRYKER_NPM_VERSION}" \
         "${DEPLOYMENT_PATH}/context" 1>&2
 
-    echo "$(date): Building application image" >> /tmp/profile.tmp
+    echo "$(date): Building application image"
     docker build \
         -t "${appImage}" \
         -f "${DEPLOYMENT_PATH}/images/${folder}/application/Dockerfile" \
