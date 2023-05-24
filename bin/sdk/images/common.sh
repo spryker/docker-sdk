@@ -39,6 +39,10 @@ function Images::_buildApp() {
     local pipelineImage="${SPRYKER_DOCKER_PREFIX}_pipeline:${SPRYKER_DOCKER_TAG}"
     local runtimeCliImage="${SPRYKER_DOCKER_PREFIX}_run_cli:${SPRYKER_DOCKER_TAG}"
 
+    if [ "${withPushImages}" == "${TRUE}" -a "${BUILDKIT_INLINE_CACHE_ENABLE}" == "true" ]; then
+        local baseAppCacheFrom=('--cache-from' "type=registry,ref=${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${SPRYKER_PROJECT_NAME}-cache:latest" '--cache-to' "mode=max,image-manifest=true,oci-mediatypes=true,type=registry,ref=${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${SPRYKER_PROJECT_NAME}-cache:latest")
+    fi
+
     if [ -n "${SSH_AUTH_SOCK_IN_CLI}" ]; then
         sshArgument=('--ssh' 'default')
     fi
@@ -53,7 +57,6 @@ function Images::_buildApp() {
         -t "${baseAppImage}" \
         -f "${DEPLOYMENT_PATH}/images/common/application/Dockerfile" \
         --progress="${PROGRESS_TYPE}" \
-        --cache-from "${baseAppImage}" \
         --build-arg "SPRYKER_PLATFORM_IMAGE=${SPRYKER_PLATFORM_IMAGE}" \
         --build-arg "SPRYKER_LOG_DIRECTORY=${SPRYKER_LOG_DIRECTORY}" \
         --build-arg "SPRYKER_PIPELINE=${SPRYKER_PIPELINE}" \
@@ -72,9 +75,9 @@ function Images::_buildApp() {
         -t "${appImage}" \
         -f "${DEPLOYMENT_PATH}/images/${folder}/application/Dockerfile" \
         "${sshArgument[@]}" \
+        "${baseAppCacheFrom[@]}" \
         --secret "id=secrets-env,src=$SECRETS_FILE_PATH" \
         --progress="${PROGRESS_TYPE}" \
-        --cache-from "${appImage}" \
         --build-arg "SPRYKER_PARENT_IMAGE=${baseAppImage}" \
         --build-arg "SPRYKER_DOCKER_PREFIX=${SPRYKER_DOCKER_PREFIX}" \
         --build-arg "SPRYKER_DOCKER_TAG=${SPRYKER_DOCKER_TAG}" \
@@ -95,7 +98,6 @@ function Images::_buildApp() {
         -t "${runtimeImage}" \
         -f "${DEPLOYMENT_PATH}/images/common/application-local/Dockerfile" \
         --progress="${PROGRESS_TYPE}" \
-        --cache-from "${localAppImage}" \
         --build-arg "SPRYKER_PARENT_IMAGE=${appImage}" \
         "${DEPLOYMENT_PATH}/context" 1>&2
 
@@ -104,7 +106,6 @@ function Images::_buildApp() {
             -t "${runtimeImage}" \
             -f "${DEPLOYMENT_PATH}/images/debug/application/Dockerfile" \
             --progress="${PROGRESS_TYPE}" \
-            --cache-from "${runtimeImage}" \
             --build-arg "SPRYKER_PARENT_IMAGE=${localAppImage}" \
             "${DEPLOYMENT_PATH}/context" 1>&2
     fi
@@ -117,7 +118,6 @@ function Images::_buildApp() {
         -t "${pipelineImage}" \
         -f "${DEPLOYMENT_PATH}/images/common/cli/Dockerfile" \
         --progress="${PROGRESS_TYPE}" \
-        --cache-from "${baseCliImage}" \
         --build-arg "SPRYKER_PARENT_IMAGE=${localAppImage}" \
         "${DEPLOYMENT_PATH}/context" 1>&2
 
@@ -129,7 +129,6 @@ function Images::_buildApp() {
         "${sshArgument[@]}" \
         --secret "id=secrets-env,src=$SECRETS_FILE_PATH" \
         --progress="${PROGRESS_TYPE}" \
-        --cache-from "${cliImage}" \
         --build-arg "SPRYKER_PARENT_IMAGE=${baseCliImage}" \
         --build-arg "DEPLOYMENT_PATH=${DEPLOYMENT_PATH}" \
         --build-arg "SPRYKER_PIPELINE=${SPRYKER_PIPELINE}" \
