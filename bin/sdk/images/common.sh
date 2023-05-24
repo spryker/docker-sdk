@@ -75,12 +75,13 @@ function Images::_buildApp() {
 
     echo "$(date): Building application image"
     echo "${baseAppCacheFrom[@]}"
+    docker images
 
+    #    "${baseAppCacheFrom[@]}" \
     docker build \
         -t "${appImage}" \
         -f "${DEPLOYMENT_PATH}/images/${folder}/application/Dockerfile" \
         "${sshArgument[@]}" \
-        "${baseAppCacheFrom[@]}" \
         ${loadFlag} \
         --secret "id=secrets-env,src=$SECRETS_FILE_PATH" \
         --progress="${PROGRESS_TYPE}" \
