@@ -79,7 +79,7 @@ function Images::_buildApp() {
 
     #    "${baseAppCacheFrom[@]}" \
         #${loadFlag} \
-    docker build \
+    docker buildx build \
         -t "${appImage}" \
         -f "${DEPLOYMENT_PATH}/images/${folder}/application/Dockerfile" \
         "${sshArgument[@]}" \
