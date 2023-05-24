@@ -73,6 +73,8 @@ function Images::_buildApp() {
         "${DEPLOYMENT_PATH}/context" 1>&2
 
     echo "$(date): Building application image"
+    echo "${baseAppCacheFrom[@]}"
+
     docker build \
         -t "${appImage}" \
         -f "${DEPLOYMENT_PATH}/images/${folder}/application/Dockerfile" \
