@@ -41,6 +41,7 @@ function Images::_buildApp() {
 
     if [ "${withPushImages}" == "${TRUE}" -a "${BUILDKIT_INLINE_CACHE_ENABLE}" == "true" ]; then
         local baseAppCacheFrom=('--cache-from' "type=registry,ref=${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${SPRYKER_PROJECT_NAME}-cache:latest" '--cache-to' "mode=max,image-manifest=true,oci-mediatypes=true,type=registry,ref=${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${SPRYKER_PROJECT_NAME}-cache:latest")
+        local loadFlag="--load"
     fi
 
     if [ -n "${SSH_AUTH_SOCK_IN_CLI}" ]; then
@@ -56,6 +57,7 @@ function Images::_buildApp() {
     docker build \
         -t "${baseAppImage}" \
         -f "${DEPLOYMENT_PATH}/images/common/application/Dockerfile" \
+        ${loadFlag} \
         --build-arg "SPRYKER_PLATFORM_IMAGE=${SPRYKER_PLATFORM_IMAGE}" \
         --build-arg "SPRYKER_LOG_DIRECTORY=${SPRYKER_LOG_DIRECTORY}" \
         --build-arg "SPRYKER_PIPELINE=${SPRYKER_PIPELINE}" \
@@ -75,6 +77,7 @@ function Images::_buildApp() {
         -f "${DEPLOYMENT_PATH}/images/${folder}/application/Dockerfile" \
         "${sshArgument[@]}" \
         "${baseAppCacheFrom[@]}" \
+        ${loadFlag} \
         --secret "id=secrets-env,src=$SECRETS_FILE_PATH" \
         --build-arg "SPRYKER_PARENT_IMAGE=${baseAppImage}" \
         --build-arg "SPRYKER_DOCKER_PREFIX=${SPRYKER_DOCKER_PREFIX}" \
