@@ -55,10 +55,10 @@ function Images::_buildApp() {
     Console::verbose "${INFO}Building Application images${NC}"
 
     echo "$(date): Building base image"
+        #${loadFlag} \
     docker build \
         -t "${baseAppImage}" \
         -f "${DEPLOYMENT_PATH}/images/common/application/Dockerfile" \
-        ${loadFlag} \
         --progress="${PROGRESS_TYPE}" \
         --build-arg "SPRYKER_PLATFORM_IMAGE=${SPRYKER_PLATFORM_IMAGE}" \
         --build-arg "SPRYKER_LOG_DIRECTORY=${SPRYKER_LOG_DIRECTORY}" \
@@ -78,11 +78,11 @@ function Images::_buildApp() {
     docker images
 
     #    "${baseAppCacheFrom[@]}" \
+        #${loadFlag} \
     docker build \
         -t "${appImage}" \
         -f "${DEPLOYMENT_PATH}/images/${folder}/application/Dockerfile" \
         "${sshArgument[@]}" \
-        ${loadFlag} \
         --secret "id=secrets-env,src=$SECRETS_FILE_PATH" \
         --progress="${PROGRESS_TYPE}" \
         --build-arg "SPRYKER_PARENT_IMAGE=${baseAppImage}" \
