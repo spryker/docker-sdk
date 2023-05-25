@@ -45,6 +45,7 @@ function Images::_buildApp() {
         local localAppImageCache=('--cache-from' "type=registry,ref=${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${SPRYKER_PROJECT_NAME}-cache:local-app-latest" '--cache-to' "mode=max,image-manifest=true,oci-mediatypes=true,type=registry,ref=${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${SPRYKER_PROJECT_NAME}-cache:local-app-latest")
         local pipelineImageCache=('--cache-from' "type=registry,ref=${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${SPRYKER_PROJECT_NAME}-cache:pipeline-latest" '--cache-to' "mode=max,image-manifest=true,oci-mediatypes=true,type=registry,ref=${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${SPRYKER_PROJECT_NAME}-cache:pipeline-latest")
         local jenkinsImageCache=('--cache-from' "type=registry,ref=${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${SPRYKER_PROJECT_NAME}-cache:jenkins-latest" '--cache-to' "mode=max,image-manifest=true,oci-mediatypes=true,type=registry,ref=${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${SPRYKER_PROJECT_NAME}-cache:jenkins-latest")
+        local cliImageCache=('--cache-from' "type=registry,ref=${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${SPRYKER_PROJECT_NAME}-cache:cli-latest" '--cache-to' "mode=max,image-manifest=true,oci-mediatypes=true,type=registry,ref=${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${SPRYKER_PROJECT_NAME}-cache:cli-latest")
         local loadFlag="--load"
     fi
 
@@ -125,7 +126,7 @@ function Images::_buildApp() {
 
     echo "$(date): Building pipeline image"
     echo "I'm here"
-    docker build --build-context "${localAppImage}=oci-layout://./local_app" \
+    docker build --output "type=oci,dest=base_cli,tar=false" --build-context "${localAppImage}=oci-layout://./local_app" \
         -t "${baseCliImage}" \
         -t "${pipelineImage}" \
         -f "${DEPLOYMENT_PATH}/images/common/cli/Dockerfile" \
@@ -136,21 +137,20 @@ function Images::_buildApp() {
         "${DEPLOYMENT_PATH}/context" 1>&2
 
     echo "$(date): Building runtimecli image"
-    if [ "${withPushImages}" == "${FALSE}" ]; then
-        docker build \
-          -t "${cliImage}" \
-          -t "${runtimeCliImage}" \
-          -f "${DEPLOYMENT_PATH}/images/${folder}/cli/Dockerfile" \
-          "${sshArgument[@]}" \
-          --secret "id=secrets-env,src=$SECRETS_FILE_PATH" \
-          --progress="${PROGRESS_TYPE}" \
-          --build-arg "SPRYKER_PARENT_IMAGE=${baseCliImage}" \
-          --build-arg "DEPLOYMENT_PATH=${DEPLOYMENT_PATH}" \
-          --build-arg "SPRYKER_PIPELINE=${SPRYKER_PIPELINE}" \
-          --build-arg "SPRYKER_BUILD_HASH=${SPRYKER_BUILD_HASH:-"current"}" \
-          --build-arg "SPRYKER_BUILD_STAMP=${SPRYKER_BUILD_STAMP:-""}" \
-          .  1>&2
-    fi
+    docker build --output "type=oci,dest=cli,tar=false" --build-context "${baseCliImage}=oci-layout://./base_cli" \
+      -t "${cliImage}" \
+      -t "${runtimeCliImage}" \
+      -f "${DEPLOYMENT_PATH}/images/${folder}/cli/Dockerfile" \
+      "${cliImageCache[@]}" \
+      "${sshArgument[@]}" \
+      --secret "id=secrets-env,src=$SECRETS_FILE_PATH" \
+      --progress="${PROGRESS_TYPE}" \
+      --build-arg "SPRYKER_PARENT_IMAGE=${baseCliImage}" \
+      --build-arg "DEPLOYMENT_PATH=${DEPLOYMENT_PATH}" \
+      --build-arg "SPRYKER_PIPELINE=${SPRYKER_PIPELINE}" \
+      --build-arg "SPRYKER_BUILD_HASH=${SPRYKER_BUILD_HASH:-"current"}" \
+      --build-arg "SPRYKER_BUILD_STAMP=${SPRYKER_BUILD_STAMP:-""}" \
+      .  1>&2
     echo "$(date): finished building"
 
     if [ -n "${SPRYKER_XDEBUG_MODE_ENABLE}" ] && [ "${withPushImages}" == "${FALSE}" ]; then
@@ -204,7 +204,7 @@ function Images::_buildFrontend() {
         --build-arg "SPRYKER_MAINTENANCE_MODE_ENABLED=${SPRYKER_MAINTENANCE_MODE_ENABLED}" \
         "${DEPLOYMENT_PATH}/context" 1>&2
 
-    docker build --build-context "${baseFrontendImage}=oci-layout://./base_frontend"\
+    docker build --build-context "${baseFrontendImage}=oci-layout://./base_frontend" --build-context "${builderAssetsImage}=oci-layout://./assets" \
         -t "${frontendImage}" \
         -t "${runtimeFrontendImage}" \
         -f "${DEPLOYMENT_PATH}/images/${folder}/frontend/Dockerfile" \
