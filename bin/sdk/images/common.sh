@@ -112,6 +112,8 @@ function Images::_buildApp() {
         "${DEPLOYMENT_PATH}/context" 1>&2
 
     if [ -n "${SPRYKER_XDEBUG_MODE_ENABLE}" ]; then
+        echo "$(date): Building runtimeImage"
+        echo "${SPRYKER_XDEBUG_MODE_ENABLE}"
         docker build \
             -t "${runtimeImage}" \
             -f "${DEPLOYMENT_PATH}/images/debug/application/Dockerfile" \
@@ -208,7 +210,7 @@ function Images::_buildFrontend() {
         "${DEPLOYMENT_PATH}/context" 1>&2
 
     if [ -n "${SPRYKER_XDEBUG_MODE_ENABLE}" ]; then
-        echo "SPRYKER_XDEBUG_MODE_ENABLE enabled" >> /tmp/profile.tmp
+        echo "SPRYKER_XDEBUG_MODE_ENABLE enabled"
         docker build \
             -t "${runtimeFrontendImage}" \
             -f "${DEPLOYMENT_PATH}/images/debug/frontend/Dockerfile" \
