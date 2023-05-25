@@ -124,6 +124,7 @@ function Images::_buildApp() {
     Console::verbose "${INFO}Building CLI images${NC}"
 
     echo "$(date): Building pipeline image"
+    echo "I'm here"
     docker build --build-context "${localAppImage}=oci-layout://./local_app" \
         -t "${baseCliImage}" \
         -t "${pipelineImage}" \
