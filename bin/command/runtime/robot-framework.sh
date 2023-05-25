@@ -15,7 +15,7 @@ function Command::robot-framework() {
     Console::info "${INFO}Running robot-framework${NC}"
     docker run --rm -it --network=${networks} \
         -v `pwd`/results:/opt/robotframework/results:Z \
-        -v /Users/artemstromets/Work/cloud/robotframework-suite-tests:/opt/robotframework:Z \
+        -v `pwd`/vendor/spryker/robotframework:/opt/robotframework:Z \
         robot_framework_docker_sdk ${@}
 
     Console::end "[DONE]"
