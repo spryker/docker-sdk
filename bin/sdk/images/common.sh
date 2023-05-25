@@ -185,11 +185,17 @@ function Images::_buildFrontend() {
     local frontendImage="${SPRYKER_DOCKER_PREFIX}_frontend:${SPRYKER_DOCKER_TAG}"
     local runtimeFrontendImage="${SPRYKER_DOCKER_PREFIX}_run_frontend:${SPRYKER_DOCKER_TAG}"
 
+    if [ "${withPushImages}" == "${TRUE}" -a "${BUILDKIT_REGISTRY_CACHE_ENABLE}" == "true" ]; then
+        local baseFrontendImageCache=('--cache-from' "type=registry,ref=${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${SPRYKER_PROJECT_NAME}-cache:base-frontend-latest" '--cache-to' "mode=max,image-manifest=true,oci-mediatypes=true,type=registry,ref=${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${SPRYKER_PROJECT_NAME}-cache:base-frontend-latest")
+        local frontendImageCache=('--cache-from' "type=registry,ref=${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${SPRYKER_PROJECT_NAME}-cache:frontend-latest" '--cache-to' "mode=max,image-manifest=true,oci-mediatypes=true,type=registry,ref=${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${SPRYKER_PROJECT_NAME}-cache:frontend-latest")
+    fi
+
     Console::verbose "${INFO}Building Frontend images${NC}"
 
-    docker build \
+    docker build --output "type=oci,dest=base_frontend,tar=false" \
         -t "${baseFrontendImage}" \
         -f "${DEPLOYMENT_PATH}/images/common/frontend/Dockerfile" \
+        "${baseFrontendImageCache[@]}" \
         --progress="${PROGRESS_TYPE}" \
         --build-arg "SPRYKER_FRONTEND_IMAGE=${SPRYKER_FRONTEND_IMAGE}" \
         --build-arg "SPRYKER_BUILD_HASH=${SPRYKER_BUILD_HASH:-"current"}" \
@@ -197,10 +203,12 @@ function Images::_buildFrontend() {
         --build-arg "SPRYKER_MAINTENANCE_MODE_ENABLED=${SPRYKER_MAINTENANCE_MODE_ENABLED}" \
         "${DEPLOYMENT_PATH}/context" 1>&2
 
-    docker build \
+    docker build --build-context "${baseFrontendImage}=oci-layout://./base_frontend"\
         -t "${frontendImage}" \
         -t "${runtimeFrontendImage}" \
         -f "${DEPLOYMENT_PATH}/images/${folder}/frontend/Dockerfile" \
+        "${frontendImageCache[@]}" \
+        ${loadFlag} \
         --progress="${PROGRESS_TYPE}" \
         --build-arg "SPRYKER_PARENT_IMAGE=${baseFrontendImage}" \
         --build-arg "SPRYKER_ASSETS_BUILDER_IMAGE=${builderAssetsImage}" \
