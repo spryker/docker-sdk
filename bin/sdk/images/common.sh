@@ -79,7 +79,7 @@ function Images::_buildApp() {
     docker info
     docker buildx ls
     baseImageHash=$(docker inspect --format='{{index .Id}}' ${baseAppImage})
-    echo $baseImageCache
+    echo $baseImageHash
     echo ${baseAppImage}
 
     #    "${baseAppCacheFrom[@]}" \
