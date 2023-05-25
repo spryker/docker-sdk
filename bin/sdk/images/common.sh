@@ -40,7 +40,10 @@ function Images::_buildApp() {
     local runtimeCliImage="${SPRYKER_DOCKER_PREFIX}_run_cli:${SPRYKER_DOCKER_TAG}"
 
     if [ "${withPushImages}" == "${TRUE}" -a "${BUILDKIT_INLINE_CACHE_ENABLE}" == "true" ]; then
-        local appCache=('--cache-from' "type=registry,ref=${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${SPRYKER_PROJECT_NAME}-app-cache:latest" '--cache-to' "mode=max,image-manifest=true,oci-mediatypes=true,type=registry,ref=${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${SPRYKER_PROJECT_NAME}-app-cache:latest")
+    if [ "${withPushImages}" == "${TRUE}" -a "${BUILDKIT_INLINE_CACHE_ENABLE}" == "true" ]; then
+        local baseAppImageCache=('--cache-from' "type=registry,ref=${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${SPRYKER_PROJECT_NAME}-cache:base-app-latest" '--cache-to' "mode=max,image-manifest=true,oci-mediatypes=true,type=registry,ref=${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${SPRYKER_PROJECT_NAME}-cache:base-app-latest")
+        local appImageCache=('--cache-from' "type=registry,ref=${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${SPRYKER_PROJECT_NAME}-cache:app-latest" '--cache-to' "mode=max,image-manifest=true,oci-mediatypes=true,type=registry,ref=${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${SPRYKER_PROJECT_NAME}-cache:app-latest")
+        local pipelineImageCache=('--cache-from' "type=registry,ref=${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${SPRYKER_PROJECT_NAME}-cache:pipeline-latest" '--cache-to' "mode=max,image-manifest=true,oci-mediatypes=true,type=registry,ref=${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${SPRYKER_PROJECT_NAME}-cache:pipeline-latest")
         local loadFlag="--load"
     fi
 
@@ -57,6 +60,7 @@ function Images::_buildApp() {
     docker build --output "type=oci,dest=base_app,tar=false" \
         -t "${baseAppImage}" \
         -f "${DEPLOYMENT_PATH}/images/common/application/Dockerfile" \
+        "${baseAppImageCache[@]}" \
         --progress="${PROGRESS_TYPE}" \
         --build-arg "SPRYKER_PLATFORM_IMAGE=${SPRYKER_PLATFORM_IMAGE}" \
         --build-arg "SPRYKER_LOG_DIRECTORY=${SPRYKER_LOG_DIRECTORY}" \
@@ -72,30 +76,32 @@ function Images::_buildApp() {
         "${DEPLOYMENT_PATH}/context" 1>&2
 
     echo "$(date): Building application image"
-    docker build --build-context "${baseAppImage}=oci-layout://./base_app" \
-        -t "${appImage}" \
-        -f "${DEPLOYMENT_PATH}/images/${folder}/application/Dockerfile" \
-        "${sshArgument[@]}" \
-        ${loadFlag} \
-        "${appCache[@]}" \
-        --secret "id=secrets-env,src=$SECRETS_FILE_PATH" \
-        --progress="${PROGRESS_TYPE}" \
-        --build-arg "SPRYKER_PARENT_IMAGE=${baseAppImage}" \
-        --build-arg "SPRYKER_DOCKER_PREFIX=${SPRYKER_DOCKER_PREFIX}" \
-        --build-arg "SPRYKER_DOCKER_TAG=${SPRYKER_DOCKER_TAG}" \
-        --build-arg "USER_UID=${USER_FULL_ID%%:*}" \
-        --build-arg "DEPLOYMENT_PATH=${DEPLOYMENT_PATH}" \
-        --build-arg "SPRYKER_PIPELINE=${SPRYKER_PIPELINE}" \
-        --build-arg "APPLICATION_ENV=${APPLICATION_ENV}" \
-        --build-arg "SPRYKER_DB_ENGINE=${SPRYKER_DB_ENGINE}" \
-        --build-arg "SPRYKER_COMPOSER_MODE=${SPRYKER_COMPOSER_MODE}" \
-        --build-arg "SPRYKER_COMPOSER_AUTOLOAD=${SPRYKER_COMPOSER_AUTOLOAD}" \
-        --build-arg "SPRYKER_BUILD_HASH=${SPRYKER_BUILD_HASH:-"current"}" \
-        --build-arg "SPRYKER_BUILD_STAMP=${SPRYKER_BUILD_STAMP:-""}" \
-        . 1>&2
+    for output_type in ${loadFlag} "--output \"type=oci,dest=app,tar=false\""; do
+        docker build  --build-context "${baseAppImage}=oci-layout://./base_app" \
+            -t "${appImage}" \
+            -f "${DEPLOYMENT_PATH}/images/${folder}/application/Dockerfile" \
+            "${sshArgument[@]}" \
+            $output_type \
+            "${appImageCache[@]}" \
+            --secret "id=secrets-env,src=$SECRETS_FILE_PATH" \
+            --progress="${PROGRESS_TYPE}" \
+            --build-arg "SPRYKER_PARENT_IMAGE=${baseAppImage}" \
+            --build-arg "SPRYKER_DOCKER_PREFIX=${SPRYKER_DOCKER_PREFIX}" \
+            --build-arg "SPRYKER_DOCKER_TAG=${SPRYKER_DOCKER_TAG}" \
+            --build-arg "USER_UID=${USER_FULL_ID%%:*}" \
+            --build-arg "DEPLOYMENT_PATH=${DEPLOYMENT_PATH}" \
+            --build-arg "SPRYKER_PIPELINE=${SPRYKER_PIPELINE}" \
+            --build-arg "APPLICATION_ENV=${APPLICATION_ENV}" \
+            --build-arg "SPRYKER_DB_ENGINE=${SPRYKER_DB_ENGINE}" \
+            --build-arg "SPRYKER_COMPOSER_MODE=${SPRYKER_COMPOSER_MODE}" \
+            --build-arg "SPRYKER_COMPOSER_AUTOLOAD=${SPRYKER_COMPOSER_AUTOLOAD}" \
+            --build-arg "SPRYKER_BUILD_HASH=${SPRYKER_BUILD_HASH:-"current"}" \
+            --build-arg "SPRYKER_BUILD_STAMP=${SPRYKER_BUILD_STAMP:-""}" \
+            . 1>&2
+    done
 
     echo "$(date): Building local image"
-    docker build --build-context "${baseAppImage}=oci-layout://./base_app" \
+    docker build --build-context "${baseAppImage}=oci-layout://./app" \
         -t "${localAppImage}" \
         -t "${runtimeImage}" \
         -f "${DEPLOYMENT_PATH}/images/common/application-local/Dockerfile" \
@@ -121,6 +127,7 @@ function Images::_buildApp() {
         -t "${baseCliImage}" \
         -t "${pipelineImage}" \
         -f "${DEPLOYMENT_PATH}/images/common/cli/Dockerfile" \
+        "${pipelineImageCache[@]}" \
         ${loadFlag} \
         --progress="${PROGRESS_TYPE}" \
         --build-arg "SPRYKER_PARENT_IMAGE=${localAppImage}" \
