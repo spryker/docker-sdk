@@ -181,6 +181,7 @@ function Images::_buildApp() {
 
 function Images::_buildFrontend() {
     local folder=${1}
+    local withPushImages=${2:-${FALSE}}
     local cliImage="${SPRYKER_DOCKER_PREFIX}_cli:${SPRYKER_DOCKER_TAG}"
     local builderAssetsImage="$(Assets::getImageTag)"
     local baseFrontendImage="${SPRYKER_DOCKER_PREFIX}_base_frontend:${SPRYKER_DOCKER_TAG}"
