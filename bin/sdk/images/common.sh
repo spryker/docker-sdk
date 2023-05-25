@@ -55,7 +55,7 @@ function Images::_buildApp() {
     Console::verbose "${INFO}Building Application images${NC}"
 
     echo "$(date): Building base image"
-    docker build --builder=remote \
+    docker build \
         -t "${baseAppImage}" \
         -f "${DEPLOYMENT_PATH}/images/common/application/Dockerfile" \
         --progress="${PROGRESS_TYPE}" \
@@ -79,7 +79,7 @@ function Images::_buildApp() {
     docker buildx ls
 
     #    "${baseAppCacheFrom[@]}" \
-    docker buildx build --builder=remote --build-context ${SPRYKER_DOCKER_PREFIX}_base_app=docker-image://spryker-cloud_base_app:1.0 \
+    docker buildx build --build-context "${SPRYKER_DOCKER_PREFIX}"_base_app=docker-image://"${baseAppImage}" \
         -t "${appImage}" \
         -f "${DEPLOYMENT_PATH}/images/${folder}/application/Dockerfile" \
         "${sshArgument[@]}" \
