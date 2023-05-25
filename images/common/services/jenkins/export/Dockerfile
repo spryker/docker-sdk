@@ -1,4 +1,4 @@
-# syntax = docker/dockerfile:experimental
+# syntax = docker/dockerfile:1.5
 ARG SPRYKER_PARENT_IMAGE
 
 FROM spryker/jenkins-boilerplate:2.361.1 as spryker-jenkins-boilerplate

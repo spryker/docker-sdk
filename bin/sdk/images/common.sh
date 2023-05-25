@@ -40,8 +40,7 @@ function Images::_buildApp() {
     local runtimeCliImage="${SPRYKER_DOCKER_PREFIX}_run_cli:${SPRYKER_DOCKER_TAG}"
 
     if [ "${withPushImages}" == "${TRUE}" -a "${BUILDKIT_INLINE_CACHE_ENABLE}" == "true" ]; then
-        #'--cache-from' "type=registry,ref=${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${SPRYKER_PROJECT_NAME}-cache:cache"
-        local baseAppCacheFrom=('--cache-to' "mode=max,image-manifest=true,oci-mediatypes=true,type=registry,ref=${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${SPRYKER_PROJECT_NAME}-cache:cache")
+        local appCache=('--cache-from' "type=registry,ref=${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${SPRYKER_PROJECT_NAME}-app-cache:latest" '--cache-to' "mode=max,image-manifest=true,oci-mediatypes=true,type=registry,ref=${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${SPRYKER_PROJECT_NAME}-app-cache:latest")
         local loadFlag="--load"
     fi
 
@@ -55,7 +54,6 @@ function Images::_buildApp() {
     Console::verbose "${INFO}Building Application images${NC}"
 
     echo "$(date): Building base image"
-        #${loadFlag} \
     docker build --output "type=oci,dest=base_app,tar=false" \
         -t "${baseAppImage}" \
         -f "${DEPLOYMENT_PATH}/images/common/application/Dockerfile" \
@@ -74,14 +72,12 @@ function Images::_buildApp() {
         "${DEPLOYMENT_PATH}/context" 1>&2
 
     echo "$(date): Building application image"
-    echo "${baseAppCacheFrom[@]}"
-
     docker build --build-context "${baseAppImage}=oci-layout://./base_app" \
         -t "${appImage}" \
         -f "${DEPLOYMENT_PATH}/images/${folder}/application/Dockerfile" \
         "${sshArgument[@]}" \
         ${loadFlag} \
-        "${baseAppCacheFrom[@]}" \
+        "${appCache[@]}" \
         --secret "id=secrets-env,src=$SECRETS_FILE_PATH" \
         --progress="${PROGRESS_TYPE}" \
         --build-arg "SPRYKER_PARENT_IMAGE=${baseAppImage}" \
@@ -103,6 +99,7 @@ function Images::_buildApp() {
         -t "${localAppImage}" \
         -t "${runtimeImage}" \
         -f "${DEPLOYMENT_PATH}/images/common/application-local/Dockerfile" \
+        ${loadFlag} \
         --progress="${PROGRESS_TYPE}" \
         --build-arg "SPRYKER_PARENT_IMAGE=${appImage}" \
         "${DEPLOYMENT_PATH}/context" 1>&2
@@ -111,6 +108,7 @@ function Images::_buildApp() {
         docker build \
             -t "${runtimeImage}" \
             -f "${DEPLOYMENT_PATH}/images/debug/application/Dockerfile" \
+            ${loadFlag} \
             --progress="${PROGRESS_TYPE}" \
             --build-arg "SPRYKER_PARENT_IMAGE=${localAppImage}" \
             "${DEPLOYMENT_PATH}/context" 1>&2
@@ -123,12 +121,13 @@ function Images::_buildApp() {
         -t "${baseCliImage}" \
         -t "${pipelineImage}" \
         -f "${DEPLOYMENT_PATH}/images/common/cli/Dockerfile" \
+        ${loadFlag} \
         --progress="${PROGRESS_TYPE}" \
         --build-arg "SPRYKER_PARENT_IMAGE=${localAppImage}" \
         "${DEPLOYMENT_PATH}/context" 1>&2
 
     echo "$(date): Building runtimecli image"
-    if [ "${withPushImages}" == "${TRUE}" ]; then
+    if [ "${withPushImages}" == "${FALSE}" ]; then
         docker build \
           -t "${cliImage}" \
           -t "${runtimeCliImage}" \
@@ -160,6 +159,7 @@ function Images::_buildApp() {
         docker build --build-context "${baseAppImage}=oci-layout://./base_app" \
             -t "${jenkinsImage}" \
             -f "${DEPLOYMENT_PATH}/images/common/services/jenkins/export/Dockerfile" \
+            ${loadFlag} \
             --progress="${PROGRESS_TYPE}" \
             --build-arg "SPRYKER_PARENT_IMAGE=${appImage}" \
             "${DEPLOYMENT_PATH}/" 1>&2

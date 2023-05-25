@@ -1,4 +1,4 @@
-# syntax = docker/dockerfile:experimental
+# syntax = docker/dockerfile:1.5
 FROM python:latest
 
 COPY --chown=root:root provision provision

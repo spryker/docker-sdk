@@ -1,4 +1,4 @@
-# syntax = docker/dockerfile:experimental
+# syntax = docker/dockerfile:1.5
 ARG SPRYKER_GATEWAY_IMAGE=nginx:alpine
 
 FROM ${SPRYKER_GATEWAY_IMAGE} as gateway
