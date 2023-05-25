@@ -78,12 +78,12 @@ function Images::_buildApp() {
     docker images
     docker info
     docker buildx ls
-    baseImageCache=$(docker inspect --format='{{index .Id}}' ${baseAppImage})
+    baseImageHash=$(docker inspect --format='{{index .Id}}' ${baseAppImage})
     echo $baseImageCache
     echo ${baseAppImage}
 
     #    "${baseAppCacheFrom[@]}" \
-    docker buildx build --build-context "${baseAppImage}"=docker-image://@"${baseImageCache}" \
+    docker buildx build --build-context "${baseAppImage}"=docker-image://${baseAppImage}@"${baseImageHash}" \
         -t "${appImage}" \
         -f "${DEPLOYMENT_PATH}/images/${folder}/application/Dockerfile" \
         "${sshArgument[@]}" \
