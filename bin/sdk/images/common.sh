@@ -43,6 +43,7 @@ function Images::_buildApp() {
         local baseAppImageCache=('--cache-from' "type=registry,ref=${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${SPRYKER_PROJECT_NAME}-cache:base-app-latest" '--cache-to' "mode=max,image-manifest=true,oci-mediatypes=true,type=registry,ref=${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${SPRYKER_PROJECT_NAME}-cache:base-app-latest")
         local appImageCache=('--cache-from' "type=registry,ref=${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${SPRYKER_PROJECT_NAME}-cache:app-latest" '--cache-to' "mode=max,image-manifest=true,oci-mediatypes=true,type=registry,ref=${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${SPRYKER_PROJECT_NAME}-cache:app-latest")
         local pipelineImageCache=('--cache-from' "type=registry,ref=${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${SPRYKER_PROJECT_NAME}-cache:pipeline-latest" '--cache-to' "mode=max,image-manifest=true,oci-mediatypes=true,type=registry,ref=${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${SPRYKER_PROJECT_NAME}-cache:pipeline-latest")
+        local jenkinsImageCache=('--cache-from' "type=registry,ref=${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${SPRYKER_PROJECT_NAME}-cache:jenkins-latest" '--cache-to' "mode=max,image-manifest=true,oci-mediatypes=true,type=registry,ref=${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${SPRYKER_PROJECT_NAME}-cache:jenkins-latest")
         local loadFlag="--load"
     fi
 
@@ -100,11 +101,10 @@ function Images::_buildApp() {
     done
 
     echo "$(date): Building local image"
-    docker build --build-context "${baseAppImage}=oci-layout://./app" \
+    docker build --output "type=oci,dest=local_app,tar=false" --build-context "${appImage}=oci-layout://./app" \
         -t "${localAppImage}" \
         -t "${runtimeImage}" \
         -f "${DEPLOYMENT_PATH}/images/common/application-local/Dockerfile" \
-        ${loadFlag} \
         --progress="${PROGRESS_TYPE}" \
         --build-arg "SPRYKER_PARENT_IMAGE=${appImage}" \
         "${DEPLOYMENT_PATH}/context" 1>&2
@@ -122,7 +122,7 @@ function Images::_buildApp() {
     Console::verbose "${INFO}Building CLI images${NC}"
 
     echo "$(date): Building pipeline image"
-    docker build --build-context "${baseAppImage}=oci-layout://./base_app" \
+    docker build --build-context "${localAppImage}=oci-layout://./local_app" \
         -t "${baseCliImage}" \
         -t "${pipelineImage}" \
         -f "${DEPLOYMENT_PATH}/images/common/cli/Dockerfile" \
@@ -162,9 +162,10 @@ function Images::_buildApp() {
     if [ "${withPushImages}" == "${TRUE}" ]; then
         local jenkinsImage="${SPRYKER_DOCKER_PREFIX}_jenkins:${SPRYKER_DOCKER_TAG}"
 
-        docker build --build-context "${baseAppImage}=oci-layout://./base_app" \
+        docker build --build-context "${appImage}=oci-layout://./app" \
             -t "${jenkinsImage}" \
             -f "${DEPLOYMENT_PATH}/images/common/services/jenkins/export/Dockerfile" \
+            "${jenkinsImageCache[@]}" \
             ${loadFlag} \
             --progress="${PROGRESS_TYPE}" \
             --build-arg "SPRYKER_PARENT_IMAGE=${appImage}" \
