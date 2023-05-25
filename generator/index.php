@@ -92,8 +92,7 @@ $projectData['_phpExtensions'] = buildPhpExtensionList($projectData);
 $projectData['_phpIni'] = buildPhpIniAdditionalConfig($projectData);
 $projectData['_envs'] = array_merge(
     getAdditionalEnvVariables($projectData),
-    buildNewrelicEnvVariables($projectData),
-    buildBlackfireEnvVariables($projectData)
+    buildNewrelicEnvVariables($projectData)
 );
 $dynamicStoreMode = $projectData['_envs']['SPRYKER_DYNAMIC_STORE_MODE'] ?? false;
 $projectData['dynamicStoreMode'] = $dynamicStoreMode;
@@ -1039,21 +1038,6 @@ function buildNewrelicEnvVariables(array $projectData): array
         $newrelicEnvVariables['NEWRELIC_' . strtoupper($key)] = $value;
     }
      return $newrelicEnvVariables;
-}
-
-/**
- * @param array $projectData
- *
- * @return string[]
- */
-function buildBlackfireEnvVariables(array $projectData): array
-{
-    $envs = [];
-    if(!isset($projectData['image']['environment']['BLACKFIRE_APM_ENABLED'])){
-        $envs['BLACKFIRE_APM_ENABLED'] = empty($projectData['services']['blackfire']) ? 0 : 1;
-    }
-
-    return $envs;
 }
 
 /**
