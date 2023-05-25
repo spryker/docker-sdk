@@ -153,7 +153,7 @@ function Images::_buildApp() {
     fi
     echo "$(date): finished building"
 
-    if [ -n "${SPRYKER_XDEBUG_MODE_ENABLE}" ]; then
+    if [ -n "${SPRYKER_XDEBUG_MODE_ENABLE}" ] && [ "${withPushImages}" == "${FALSE}" ]; then
         docker build \
             -t "${runtimeCliImage}" \
             -f "${DEPLOYMENT_PATH}/images/debug/cli/Dockerfile" \
