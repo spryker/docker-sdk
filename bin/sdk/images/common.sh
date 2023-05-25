@@ -125,16 +125,17 @@ function Images::_buildApp() {
     Console::verbose "${INFO}Building CLI images${NC}"
 
     echo "$(date): Building pipeline image"
-    echo "I'm here"
-    docker build --output "type=oci,dest=base_cli,tar=false" --build-context "${localAppImage}=oci-layout://./local_app" \
-        -t "${baseCliImage}" \
-        -t "${pipelineImage}" \
-        -f "${DEPLOYMENT_PATH}/images/common/cli/Dockerfile" \
-        "${pipelineImageCache[@]}" \
-        ${loadFlag} \
-        --progress="${PROGRESS_TYPE}" \
-        --build-arg "SPRYKER_PARENT_IMAGE=${localAppImage}" \
-        "${DEPLOYMENT_PATH}/context" 1>&2
+    for output_type in ${loadFlag} "--output type=oci,dest=base_cli,tar=false"; do
+        docker build --build-context "${localAppImage}=oci-layout://./local_app" \
+            -t "${baseCliImage}" \
+            -t "${pipelineImage}" \
+            -f "${DEPLOYMENT_PATH}/images/common/cli/Dockerfile" \
+            $output_type \
+            "${pipelineImageCache[@]}" \
+            --progress="${PROGRESS_TYPE}" \
+            --build-arg "SPRYKER_PARENT_IMAGE=${localAppImage}" \
+            "${DEPLOYMENT_PATH}/context" 1>&2
+    done
 
     echo "$(date): Building runtimecli image"
     docker build --output "type=oci,dest=cli,tar=false" --build-context "${baseCliImage}=oci-layout://./base_cli" \
