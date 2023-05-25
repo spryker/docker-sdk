@@ -76,11 +76,6 @@ function Images::_buildApp() {
     echo "$(date): Building application image"
     echo "${baseAppCacheFrom[@]}"
     docker images
-    docker info
-    docker buildx ls
-    baseImageHash=$(docker inspect --format='{{index .Id}}' ${baseAppImage})
-    echo $baseImageHash
-    echo ${baseAppImage}
 
     #    "${baseAppCacheFrom[@]}" \
     docker buildx build --build-context "${baseAppImage}=oci-layout://./oci_output_directory" \
