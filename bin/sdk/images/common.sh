@@ -83,7 +83,7 @@ function Images::_buildApp() {
     echo ${baseAppImage}
 
     #    "${baseAppCacheFrom[@]}" \
-    docker buildx build --build-context foo=oci-layout://./oci_output_directory \
+    docker buildx build --build-context "${baseAppImage}=oci-layout://./oci_output_directory" \
         -t "${appImage}" \
         -f "${DEPLOYMENT_PATH}/images/${folder}/application/Dockerfile" \
         "${sshArgument[@]}" \
