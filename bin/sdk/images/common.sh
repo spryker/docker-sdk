@@ -79,7 +79,7 @@ function Images::_buildApp() {
     docker buildx ls
 
     #    "${baseAppCacheFrom[@]}" \
-    docker buildx build --builder=remote \
+    docker buildx build --builder=remote --build-context ${SPRYKER_DOCKER_PREFIX}_base_app=docker-image://spryker-cloud_base_app:1.0 \
         -t "${appImage}" \
         -f "${DEPLOYMENT_PATH}/images/${folder}/application/Dockerfile" \
         "${sshArgument[@]}" \
