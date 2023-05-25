@@ -39,7 +39,7 @@ function Images::_buildApp() {
     local pipelineImage="${SPRYKER_DOCKER_PREFIX}_pipeline:${SPRYKER_DOCKER_TAG}"
     local runtimeCliImage="${SPRYKER_DOCKER_PREFIX}_run_cli:${SPRYKER_DOCKER_TAG}"
 
-    if [ "${withPushImages}" == "${TRUE}" -a "${BUILDKIT_INLINE_CACHE_ENABLE}" == "true" ]; then
+    if [ "${withPushImages}" == "${TRUE}" -a "${BUILDKIT_REGISTRY_CACHE_ENABLE}" == "true" ]; then
         local baseAppImageCache=('--cache-from' "type=registry,ref=${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${SPRYKER_PROJECT_NAME}-cache:base-app-latest" '--cache-to' "mode=max,image-manifest=true,oci-mediatypes=true,type=registry,ref=${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${SPRYKER_PROJECT_NAME}-cache:base-app-latest")
         local appImageCache=('--cache-from' "type=registry,ref=${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${SPRYKER_PROJECT_NAME}-cache:app-latest" '--cache-to' "mode=max,image-manifest=true,oci-mediatypes=true,type=registry,ref=${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${SPRYKER_PROJECT_NAME}-cache:app-latest")
         local localAppImageCache=('--cache-from' "type=registry,ref=${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${SPRYKER_PROJECT_NAME}-cache:local-app-latest" '--cache-to' "mode=max,image-manifest=true,oci-mediatypes=true,type=registry,ref=${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${SPRYKER_PROJECT_NAME}-cache:local-app-latest")
@@ -112,13 +112,10 @@ function Images::_buildApp() {
         --build-arg "SPRYKER_PARENT_IMAGE=${appImage}" \
         "${DEPLOYMENT_PATH}/context" 1>&2
 
-    if [ -n "${SPRYKER_XDEBUG_MODE_ENABLE}" ]; then
-        echo "$(date): Building runtimeImage"
-        echo "${SPRYKER_XDEBUG_MODE_ENABLE}"
+    if [ -n "${SPRYKER_XDEBUG_MODE_ENABLE}" ] && [ "${withPushImages}" == "${FALSE}" ]; then
         docker build \
             -t "${runtimeImage}" \
             -f "${DEPLOYMENT_PATH}/images/debug/application/Dockerfile" \
-            ${loadFlag} \
             --progress="${PROGRESS_TYPE}" \
             --build-arg "SPRYKER_PARENT_IMAGE=${localAppImage}" \
             "${DEPLOYMENT_PATH}/context" 1>&2
@@ -210,7 +207,7 @@ function Images::_buildFrontend() {
         --build-arg "SPRYKER_MAINTENANCE_MODE_ENABLED=${SPRYKER_MAINTENANCE_MODE_ENABLED}" \
         "${DEPLOYMENT_PATH}/context" 1>&2
 
-    if [ -n "${SPRYKER_XDEBUG_MODE_ENABLE}" ]; then
+    if [ -n "${SPRYKER_XDEBUG_MODE_ENABLE}" ] && [ "${withPushImages}" == "${FALSE}" ]; then
         echo "SPRYKER_XDEBUG_MODE_ENABLE enabled"
         docker build \
             -t "${runtimeFrontendImage}" \
