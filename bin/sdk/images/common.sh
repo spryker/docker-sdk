@@ -76,7 +76,8 @@ function Images::_buildApp() {
         "${DEPLOYMENT_PATH}/context" 1>&2
 
     echo "$(date): Building application image"
-    for output_type in ${loadFlag} "--output \"type=oci,dest=app,tar=false\""; do
+    for output_type in ${loadFlag} "--output type=oci,dest=app,tar=false"; do
+        echo $output_type
         docker build  --build-context "${baseAppImage}=oci-layout://./base_app" \
             -t "${appImage}" \
             -f "${DEPLOYMENT_PATH}/images/${folder}/application/Dockerfile" \
