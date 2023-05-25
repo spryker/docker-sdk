@@ -78,7 +78,7 @@ function Images::_buildApp() {
     docker images
     docker info
     docker buildx ls
-    baseImageCache=$(docker inspect --format='{{index .RepoDigests 0}}' ${baseAppImage})
+    baseImageCache=$(docker inspect --format='{{index .Id}}' ${baseAppImage})
     echo $baseImageCache
     echo ${baseAppImage}
 
