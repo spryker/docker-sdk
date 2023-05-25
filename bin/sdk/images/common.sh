@@ -56,7 +56,7 @@ function Images::_buildApp() {
 
     echo "$(date): Building base image"
         #${loadFlag} \
-    docker build --output "type=oci,dest=oci_output_directory,tar=false" \
+    docker build --platform linux/amd64 --output "type=oci,dest=oci_output_directory,tar=false" \
         -t "${baseAppImage}" \
         -f "${DEPLOYMENT_PATH}/images/common/application/Dockerfile" \
         --progress="${PROGRESS_TYPE}" \
