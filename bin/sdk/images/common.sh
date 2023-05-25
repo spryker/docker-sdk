@@ -56,7 +56,7 @@ function Images::_buildApp() {
 
     echo "$(date): Building base image"
         #${loadFlag} \
-    docker build --platform linux/amd64 --output "type=oci,dest=oci_output_directory,tar=false" \
+    docker build --output "type=oci,dest=base_app,tar=false" \
         -t "${baseAppImage}" \
         -f "${DEPLOYMENT_PATH}/images/common/application/Dockerfile" \
         --progress="${PROGRESS_TYPE}" \
@@ -75,14 +75,13 @@ function Images::_buildApp() {
 
     echo "$(date): Building application image"
     echo "${baseAppCacheFrom[@]}"
-    docker images
 
-    #    "${baseAppCacheFrom[@]}" \
-    docker buildx build --build-context "${baseAppImage}=oci-layout://./oci_output_directory" \
+    docker build --build-context "${baseAppImage}=oci-layout://./base_app" \
         -t "${appImage}" \
         -f "${DEPLOYMENT_PATH}/images/${folder}/application/Dockerfile" \
         "${sshArgument[@]}" \
         ${loadFlag} \
+        "${baseAppCacheFrom[@]}" \
         --secret "id=secrets-env,src=$SECRETS_FILE_PATH" \
         --progress="${PROGRESS_TYPE}" \
         --build-arg "SPRYKER_PARENT_IMAGE=${baseAppImage}" \
@@ -99,8 +98,8 @@ function Images::_buildApp() {
         --build-arg "SPRYKER_BUILD_STAMP=${SPRYKER_BUILD_STAMP:-""}" \
         . 1>&2
 
-    echo "$(date): Building local image" >> /tmp/profile.tmp
-    docker build \
+    echo "$(date): Building local image"
+    docker build --build-context "${baseAppImage}=oci-layout://./base_app" \
         -t "${localAppImage}" \
         -t "${runtimeImage}" \
         -f "${DEPLOYMENT_PATH}/images/common/application-local/Dockerfile" \
@@ -119,8 +118,8 @@ function Images::_buildApp() {
 
     Console::verbose "${INFO}Building CLI images${NC}"
 
-    echo "$(date): Building pipeline image" >> /tmp/profile.tmp
-    docker build \
+    echo "$(date): Building pipeline image"
+    docker build --build-context "${baseAppImage}=oci-layout://./base_app" \
         -t "${baseCliImage}" \
         -t "${pipelineImage}" \
         -f "${DEPLOYMENT_PATH}/images/common/cli/Dockerfile" \
@@ -128,21 +127,23 @@ function Images::_buildApp() {
         --build-arg "SPRYKER_PARENT_IMAGE=${localAppImage}" \
         "${DEPLOYMENT_PATH}/context" 1>&2
 
-    echo "$(date): Building runtimecli image" >> /tmp/profile.tmp
-    docker build \
-        -t "${cliImage}" \
-        -t "${runtimeCliImage}" \
-        -f "${DEPLOYMENT_PATH}/images/${folder}/cli/Dockerfile" \
-        "${sshArgument[@]}" \
-        --secret "id=secrets-env,src=$SECRETS_FILE_PATH" \
-        --progress="${PROGRESS_TYPE}" \
-        --build-arg "SPRYKER_PARENT_IMAGE=${baseCliImage}" \
-        --build-arg "DEPLOYMENT_PATH=${DEPLOYMENT_PATH}" \
-        --build-arg "SPRYKER_PIPELINE=${SPRYKER_PIPELINE}" \
-        --build-arg "SPRYKER_BUILD_HASH=${SPRYKER_BUILD_HASH:-"current"}" \
-        --build-arg "SPRYKER_BUILD_STAMP=${SPRYKER_BUILD_STAMP:-""}" \
-        .  1>&2
-    echo "$(date): finished building" >> /tmp/profile.tmp
+    echo "$(date): Building runtimecli image"
+    if [ "${withPushImages}" == "${TRUE}" ]; then
+        docker build \
+          -t "${cliImage}" \
+          -t "${runtimeCliImage}" \
+          -f "${DEPLOYMENT_PATH}/images/${folder}/cli/Dockerfile" \
+          "${sshArgument[@]}" \
+          --secret "id=secrets-env,src=$SECRETS_FILE_PATH" \
+          --progress="${PROGRESS_TYPE}" \
+          --build-arg "SPRYKER_PARENT_IMAGE=${baseCliImage}" \
+          --build-arg "DEPLOYMENT_PATH=${DEPLOYMENT_PATH}" \
+          --build-arg "SPRYKER_PIPELINE=${SPRYKER_PIPELINE}" \
+          --build-arg "SPRYKER_BUILD_HASH=${SPRYKER_BUILD_HASH:-"current"}" \
+          --build-arg "SPRYKER_BUILD_STAMP=${SPRYKER_BUILD_STAMP:-""}" \
+          .  1>&2
+    fi
+    echo "$(date): finished building"
 
     if [ -n "${SPRYKER_XDEBUG_MODE_ENABLE}" ]; then
         docker build \
@@ -156,7 +157,7 @@ function Images::_buildApp() {
     if [ "${withPushImages}" == "${TRUE}" ]; then
         local jenkinsImage="${SPRYKER_DOCKER_PREFIX}_jenkins:${SPRYKER_DOCKER_TAG}"
 
-        docker build \
+        docker build --build-context "${baseAppImage}=oci-layout://./base_app" \
             -t "${jenkinsImage}" \
             -f "${DEPLOYMENT_PATH}/images/common/services/jenkins/export/Dockerfile" \
             --progress="${PROGRESS_TYPE}" \
