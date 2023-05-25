@@ -190,6 +190,7 @@ function Images::_buildFrontend() {
     if [ "${withPushImages}" == "${TRUE}" -a "${BUILDKIT_REGISTRY_CACHE_ENABLE}" == "true" ]; then
         local baseFrontendImageCache=('--cache-from' "type=registry,ref=${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${SPRYKER_PROJECT_NAME}-cache:base-frontend-latest" '--cache-to' "mode=max,image-manifest=true,oci-mediatypes=true,type=registry,ref=${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${SPRYKER_PROJECT_NAME}-cache:base-frontend-latest")
         local frontendImageCache=('--cache-from' "type=registry,ref=${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${SPRYKER_PROJECT_NAME}-cache:frontend-latest" '--cache-to' "mode=max,image-manifest=true,oci-mediatypes=true,type=registry,ref=${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${SPRYKER_PROJECT_NAME}-cache:frontend-latest")
+        local loadFlag="--load"
     fi
 
     Console::verbose "${INFO}Building Frontend images${NC}"
@@ -218,6 +219,7 @@ function Images::_buildFrontend() {
         --build-arg "SPRYKER_ASSETS_BUILDER_IMAGE=${builderAssetsImage}" \
         --build-arg "SPRYKER_MAINTENANCE_MODE_ENABLED=${SPRYKER_MAINTENANCE_MODE_ENABLED}" \
         "${DEPLOYMENT_PATH}/context" 1>&2
+    echo "finished building frontend"
 
     if [ -n "${SPRYKER_XDEBUG_MODE_ENABLE}" ] && [ "${withPushImages}" == "${FALSE}" ]; then
         echo "SPRYKER_XDEBUG_MODE_ENABLE enabled"
