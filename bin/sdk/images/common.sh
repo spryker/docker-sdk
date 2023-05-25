@@ -55,11 +55,11 @@ function Images::_buildApp() {
     Console::verbose "${INFO}Building Application images${NC}"
 
     echo "$(date): Building base image"
-    docker build \
+    docker build --output type=oci,dest=oci_output_directory,tar=false \
         -t "${baseAppImage}" \
         -f "${DEPLOYMENT_PATH}/images/common/application/Dockerfile" \
         --progress="${PROGRESS_TYPE}" \
-        ${loadFlag} \
+        #${loadFlag} \
         --build-arg "SPRYKER_PLATFORM_IMAGE=${SPRYKER_PLATFORM_IMAGE}" \
         --build-arg "SPRYKER_LOG_DIRECTORY=${SPRYKER_LOG_DIRECTORY}" \
         --build-arg "SPRYKER_PIPELINE=${SPRYKER_PIPELINE}" \
@@ -83,7 +83,7 @@ function Images::_buildApp() {
     echo ${baseAppImage}
 
     #    "${baseAppCacheFrom[@]}" \
-    docker buildx build --build-context "${baseAppImage}"=docker-image://${baseAppImage}@"${baseImageHash}" \
+    docker buildx build --build-context foo=oci-layout://./oci_output_directory \
         -t "${appImage}" \
         -f "${DEPLOYMENT_PATH}/images/${folder}/application/Dockerfile" \
         "${sshArgument[@]}" \
