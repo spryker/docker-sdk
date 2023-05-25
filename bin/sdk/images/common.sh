@@ -194,6 +194,7 @@ function Images::_buildFrontend() {
 
     Console::verbose "${INFO}Building Frontend images${NC}"
 
+    echo "building base_frontend"
     docker build --output "type=oci,dest=base_frontend,tar=false" \
         -t "${baseFrontendImage}" \
         -f "${DEPLOYMENT_PATH}/images/common/frontend/Dockerfile" \
@@ -205,6 +206,7 @@ function Images::_buildFrontend() {
         --build-arg "SPRYKER_MAINTENANCE_MODE_ENABLED=${SPRYKER_MAINTENANCE_MODE_ENABLED}" \
         "${DEPLOYMENT_PATH}/context" 1>&2
 
+    echo "building frontend"
     docker build --build-context "${baseFrontendImage}=oci-layout://./base_frontend" --build-context "${builderAssetsImage}=oci-layout://./assets" \
         -t "${frontendImage}" \
         -t "${runtimeFrontendImage}" \

@@ -92,7 +92,8 @@ function Assets::build() {
     local cliImage="${SPRYKER_DOCKER_PREFIX}_cli:${SPRYKER_DOCKER_TAG}"
     local mode=${SPRYKER_ASSETS_MODE:-development}
 
-    if [ "${withPushImages}" == "${TRUE}" -a "${BUILDKIT_REGISTRY_CACHE_ENABLE}" == "true" ]; then
+    # somehow check if "${withPushImages}" == "${TRUE}"
+    if [ "${BUILDKIT_REGISTRY_CACHE_ENABLE}" == "true" ]; then
         local assetsImageCache=('--cache-from' "type=registry,ref=${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${SPRYKER_PROJECT_NAME}-cache:assets-latest" '--cache-to' "mode=max,image-manifest=true,oci-mediatypes=true,type=registry,ref=${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${SPRYKER_PROJECT_NAME}-cache:assets-latest")
     fi
 
