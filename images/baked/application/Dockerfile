@@ -47,6 +47,43 @@ COPY --chown=spryker:spryker .yarn* ${srcRoot}/.yarn
 COPY --chown=spryker:spryker .* *.* LICENSE ${srcRoot}/
 
 USER root
+
+## remove built-time dependencies to reduce image size
+ARG PHP_BUILD_DEPS="\
+    autoconf \
+    bzip2-dev \
+    freetype-dev \
+    gmp-dev \
+    icu-dev \
+    icu-data-full \
+    libjpeg-turbo-dev \
+    libpng-dev \
+    libwebp-dev \
+    libxml2-dev \
+    libxpm-dev \
+    libzip-dev \
+    postgresql-dev"
+
+RUN apk --purge del \
+    bash \
+    coreutils \
+    g++ \
+    git \
+    graphviz \
+    make \
+    mysql-client \
+    netcat-openbsd \
+    openssh \
+    postgresql-client \
+    procps \
+    python3 \
+    shadow \
+    unzip \
+    linux-headers \
+    && \
+    apk --purge del .php-build-deps
+##
+
 RUN rm -rf /var/run/opcache/*
 RUN chown -R spryker:spryker /home/spryker
 

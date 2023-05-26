@@ -58,11 +58,13 @@ function Images::_buildApp() {
 
     Console::verbose "${INFO}Building Application images${NC}"
 
+    # TBD: remove loadFlag for base_app
     echo "$(date): Building base image"
     docker build --output "type=oci,dest=base_app,tar=false" \
         -t "${baseAppImage}" \
         -f "${DEPLOYMENT_PATH}/images/common/application/Dockerfile" \
         "${baseAppImageCache[@]}" \
+        ${loadFlag}
         --progress="${PROGRESS_TYPE}" \
         --build-arg "SPRYKER_PLATFORM_IMAGE=${SPRYKER_PLATFORM_IMAGE}" \
         --build-arg "SPRYKER_LOG_DIRECTORY=${SPRYKER_LOG_DIRECTORY}" \
