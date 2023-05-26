@@ -81,7 +81,7 @@ RUN apk --purge del \
     unzip \
     linux-headers \
     && \
-    apk --purge del .php-build-deps
+    apk --purge del ${PHP_BUILD_DEP}
 ##
 
 RUN rm -rf /var/run/opcache/*
