@@ -65,7 +65,7 @@ ARG PHP_BUILD_DEPS="\
     postgresql-dev"
 
 RUN apk --purge del \
-    bash \
+#    bash \
     coreutils \
     g++ \
     git \
