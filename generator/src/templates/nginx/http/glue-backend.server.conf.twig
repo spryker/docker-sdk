@@ -14,6 +14,7 @@
     fastcgi_param SPRYKER_SESSION_BE_NAMESPACE "{{ storeServices['session']['namespace'] | default(endpointData['services']['session']['namespace']) }}";
     fastcgi_param SPRYKER_GLUE_BACKEND_HOST "{{ host }}";
     fastcgi_param SPRYKER_GLUE_BACKEND_PORT "{{ externalPort }}";
+    fastcgi_param SPRYKER_GLUE_BACKEND_APPLICATION_CORS_ALLOW_ORIGIN "{{ endpointData['cors-allow-origin'] | default('') | nginx_var }}";
 
 {% if storeServices['mail']['sender']['email'] is not empty %}
     fastcgi_param SPRYKER_MAIL_SENDER_EMAIL "{{ storeServices['mail']['sender']['email'] }}";
@@ -22,18 +23,18 @@
     fastcgi_param SPRYKER_MAIL_SENDER_NAME "{{ storeServices['mail']['sender']['name'] }}";
 {% endif %}
 
-{% if project['_endpointMap'][endpointData['store']]['yves'] is not empty %}
-    fastcgi_param SPRYKER_FE_HOST "{{ (project['_endpointMap'][endpointData['store']]['yves'] | split(':'))[0] | default('') }}";
-    fastcgi_param SPRYKER_FE_PORT "{{ (project['_endpointMap'][endpointData['store']]['yves'] | split(':'))[1] | default(project['_defaultPort']) }}";
+{% if regionEndpointMap['yves'] is not empty %}
+    fastcgi_param SPRYKER_FE_HOST "{{ (regionEndpointMap['yves'] | split(':'))[0] | default('') }}";
+    fastcgi_param SPRYKER_FE_PORT "{{ (regionEndpointMap['yves'] | split(':'))[1] | default(project['_defaultPort']) }}";
 {% endif %}
 
-{% if project['_endpointMap'][endpointData['store']]['glue'] is not empty %}
-    fastcgi_param SPRYKER_API_HOST "{{ (project['_endpointMap'][endpointData['store']]['glue'] | split(':'))[0] | default('') }}";
-    fastcgi_param SPRYKER_API_PORT "{{ (project['_endpointMap'][endpointData['store']]['glue'] | split(':'))[1] | default(project['_defaultPort']) }}";
+{% if regionEndpointMap['glue'] is not empty %}
+    fastcgi_param SPRYKER_API_HOST "{{ (regionEndpointMap['glue'] | split(':'))[0] | default('') }}";
+    fastcgi_param SPRYKER_API_PORT "{{ (regionEndpointMap['glue'] | split(':'))[1] | default(project['_defaultPort']) }}";
 {% endif %}
 
-{% if project['_endpointMap'][endpointData['store']]['glue-storefront'] is not empty %}
-    fastcgi_param SPRYKER_API_HOST "{{ (project['_endpointMap'][endpointData['store']]['glue-storefront'] | split(':'))[0] | default('') }}";
-    fastcgi_param SPRYKER_API_PORT "{{ (project['_endpointMap'][endpointData['store']]['glue-storefront'] | split(':'))[1] | default(project['_defaultPort']) }}";
+{% if regionEndpointMap['glue-storefront'] is not empty %}
+    fastcgi_param SPRYKER_API_HOST "{{ (regionEndpointMap['glue-storefront'] | split(':'))[0] | default('') }}";
+    fastcgi_param SPRYKER_API_PORT "{{ (regionEndpointMap['glue-storefront'] | split(':'))[1] | default(project['_defaultPort']) }}";
 {% endif %}
 {% endblock location %}
