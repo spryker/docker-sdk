@@ -46,7 +46,7 @@ function Images::_buildApp() {
     Images::_prepareSecrets
     Registry::Trap::addExitHook 'removeBuildSecrets' "rm -f ${SECRETS_FILE_PATH}"
 
-    Console::verbose "${INFO}Building Application images${NC}"
+    Console::verbose "$(date) ${INFO}Building base_app ${NC}"
 
     docker build \
         -t "${baseAppImage}" \
@@ -65,6 +65,7 @@ function Images::_buildApp() {
         --build-arg "SPRYKER_NPM_VERSION=${SPRYKER_NPM_VERSION}" \
         "${DEPLOYMENT_PATH}/context" 1>&2
 
+    Console::verbose "$(date) ${INFO}Building app ${NC}"
     docker build \
         -t "${appImage}" \
         -f "${DEPLOYMENT_PATH}/images/${folder}/application/Dockerfile" \
@@ -85,6 +86,7 @@ function Images::_buildApp() {
         --build-arg "SPRYKER_BUILD_STAMP=${SPRYKER_BUILD_STAMP:-""}" \
         . 1>&2
 
+    Console::verbose "$(date) ${INFO}Building local_app ${NC}"
     docker build \
         -t "${localAppImage}" \
         -t "${runtimeImage}" \
@@ -94,6 +96,7 @@ function Images::_buildApp() {
         "${DEPLOYMENT_PATH}/context" 1>&2
 
     if [ -n "${SPRYKER_XDEBUG_MODE_ENABLE}" ]; then
+        Console::verbose "$(date) ${INFO}Building runtimeImage ${NC}"
         docker build \
             -t "${runtimeImage}" \
             -f "${DEPLOYMENT_PATH}/images/debug/application/Dockerfile" \
@@ -102,7 +105,7 @@ function Images::_buildApp() {
             "${DEPLOYMENT_PATH}/context" 1>&2
     fi
 
-    Console::verbose "${INFO}Building CLI images${NC}"
+    Console::verbose "$(date) ${INFO}Building base_cli${NC}"
 
     docker build \
         -t "${baseCliImage}" \
@@ -112,6 +115,7 @@ function Images::_buildApp() {
         --build-arg "SPRYKER_PARENT_IMAGE=${localAppImage}" \
         "${DEPLOYMENT_PATH}/context" 1>&2
 
+    Console::verbose "$(date) ${INFO}Building cli${NC}"
     docker build \
         -t "${cliImage}" \
         -t "${runtimeCliImage}" \
@@ -127,6 +131,7 @@ function Images::_buildApp() {
         .  1>&2
 
     if [ -n "${SPRYKER_XDEBUG_MODE_ENABLE}" ]; then
+        Console::verbose "$(date) ${INFO}Building runtime_cli${NC}"
         docker build \
             -t "${runtimeCliImage}" \
             -f "${DEPLOYMENT_PATH}/images/debug/cli/Dockerfile" \
@@ -138,6 +143,7 @@ function Images::_buildApp() {
     if [ "${withPushImages}" == "${TRUE}" ]; then
         local jenkinsImage="${SPRYKER_DOCKER_PREFIX}_jenkins:${SPRYKER_DOCKER_TAG}"
 
+        Console::verbose "$(date) ${INFO}Building jenknins${NC}"
         docker build \
             -t "${jenkinsImage}" \
             -f "${DEPLOYMENT_PATH}/images/common/services/jenkins/export/Dockerfile" \
@@ -157,7 +163,7 @@ function Images::_buildFrontend() {
     local frontendImage="${SPRYKER_DOCKER_PREFIX}_frontend:${SPRYKER_DOCKER_TAG}"
     local runtimeFrontendImage="${SPRYKER_DOCKER_PREFIX}_run_frontend:${SPRYKER_DOCKER_TAG}"
 
-    Console::verbose "${INFO}Building Frontend images${NC}"
+    Console::verbose "$(date) ${INFO}Building base_frontend${NC}"
 
     docker build \
         -t "${baseFrontendImage}" \
@@ -169,6 +175,7 @@ function Images::_buildFrontend() {
         --build-arg "SPRYKER_MAINTENANCE_MODE_ENABLED=${SPRYKER_MAINTENANCE_MODE_ENABLED}" \
         "${DEPLOYMENT_PATH}/context" 1>&2
 
+    Console::verbose "$(date) ${INFO}Building frontend${NC}"
     docker build \
         -t "${frontendImage}" \
         -t "${runtimeFrontendImage}" \
@@ -179,6 +186,7 @@ function Images::_buildFrontend() {
         --build-arg "SPRYKER_MAINTENANCE_MODE_ENABLED=${SPRYKER_MAINTENANCE_MODE_ENABLED}" \
         "${DEPLOYMENT_PATH}/context" 1>&2
 
+    Console::verbose "$(date) ${INFO}Building runtime frontend${NC}"
     if [ -n "${SPRYKER_XDEBUG_MODE_ENABLE}" ]; then
         docker build \
             -t "${runtimeFrontendImage}" \
@@ -193,7 +201,7 @@ function Images::_buildFrontend() {
 function Images::_buildGateway() {
     local gatewayImage="${SPRYKER_DOCKER_PREFIX}_gateway:${SPRYKER_DOCKER_TAG}"
 
-    Console::verbose "${INFO}Building Gateway image${NC}"
+    Console::verbose "$(date)  ${INFO}Building Gateway image${NC}"
 
     docker build \
         -t "${gatewayImage}" \

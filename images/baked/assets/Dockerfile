@@ -15,7 +15,7 @@ ENV SPRYKER_ASSETS_MODE=${SPRYKER_ASSETS_MODE}
 ARG SPRYKER_PIPELINE
 ENV SPRYKER_PIPELINE=${SPRYKER_PIPELINE}
 
-RUN --mount=type=cache,id=npm,sharing=locked,target=/root/.npm \
+RUN --mount=type=cache,id=npm,sharing=locked,target=/home/spryker/.npm,uid=1000 \
     echo "BUILD HASH: ${SPRYKER_BUILD_HASH}" \
     && echo "MODE: ${SPRYKER_ASSETS_MODE}" \
     && vendor/bin/install -r ${SPRYKER_PIPELINE} -s build-static -s build-static-${SPRYKER_ASSETS_MODE} -vvv
