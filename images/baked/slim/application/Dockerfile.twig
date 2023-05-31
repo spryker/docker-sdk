@@ -1,0 +1,123 @@
+# syntax = docker/dockerfile:1.5
+ARG SPRYKER_PLATFORM_IMAGE=spryker/php:7.3
+ARG SPRYKER_NPM_VERSION
+ARG COMPOSER_VERSION=2.5.5
+
+FROM ${SPRYKER_PLATFORM_IMAGE} AS application-build
+
+RUN apk add nodejs npm && \
+    npm install -g npm@${SPRYKER_NPM_VERSION} && \
+    # Install composer
+    curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/bin --filename=composer --version=${COMPOSER_VERSION}
+
+USER spryker
+ENV COMPOSER_MEMORY_LIMIT=-1
+RUN mkdir -p /home/spryker/.composer
+RUN bash -c '[[ $COMPOSER_VERSION == "1"* ]] && composer global require hirak/prestissimo && rm -rf /home/spryker/.composer/cache || true'
+
+ENV SPRYKER_IN_DOCKER=1
+ENV COMPOSER_IGNORE_CHROMEDRIVER=1
+{% for envName, envValue in _envs %}
+ENV {{ envName }}='{{ envValue }}'
+{% endfor %}
+
+# Install composer modules for Spryker
+COPY --chown=spryker:spryker composer.json composer.lock ${srcRoot}/
+ARG SPRYKER_COMPOSER_MODE
+RUN --mount=type=cache,id=composer,sharing=locked,target=/home/spryker/.composer/cache,uid=1000 \
+  --mount=type=ssh,uid=1000 --mount=type=secret,id=secrets-env,uid=1000 \
+  set -o allexport && . /run/secrets/secrets-env && set +o allexport \
+  && composer install --no-scripts --no-interaction ${SPRYKER_COMPOSER_MODE} -vvv \
+  && find vendor -type d -name \.git -exec rm -rf {} \;
+
+
+COPY --chown=spryker:spryker *.php ${srcRoot}/
+# TODO: Move codebase related stuff from data folder to src. In ideal: translations in /data are needed for build below
+COPY --chown=spryker:spryker data ${srcRoot}/data
+COPY --chown=spryker:spryker config ${srcRoot}/config
+RUN chmod 600 ${srcRoot}/config/Zed/*.key 2>/dev/null || true
+COPY --chown=spryker:spryker src ${srcRoot}/src
+
+RUN --mount=type=cache,id=composer,sharing=locked,target=/home/spryker/.composer/cache,uid=1000 \
+  composer dump-autoload -o
+
+ARG SPRYKER_PIPELINE
+ENV SPRYKER_PIPELINE=${SPRYKER_PIPELINE}
+ARG APPLICATION_ENV
+ARG SPRYKER_DB_ENGINE
+ENV APPLICATION_ENV=${APPLICATION_ENV}
+ENV SPRYKER_DB_ENGINE=${SPRYKER_DB_ENGINE}
+
+COPY --chown=spryker:spryker data ${srcRoot}/data
+RUN vendor/bin/install -r ${SPRYKER_PIPELINE} -s build -s build-production -vvv
+
+ARG SPRYKER_COMPOSER_AUTOLOAD
+RUN --mount=type=cache,id=composer,sharing=locked,target=/home/spryker/.composer/cache,uid=1000 \
+  composer dump-autoload ${SPRYKER_COMPOSER_AUTOLOAD}
+
+WORKDIR /data
+
+# Create log directory
+ARG SPRYKER_LOG_DIRECTORY
+ENV SPRYKER_LOG_DIRECTORY=${SPRYKER_LOG_DIRECTORY}
+RUN mkdir -p ${SPRYKER_LOG_DIRECTORY} && \
+chown spryker:spryker ${SPRYKER_LOG_DIRECTORY}
+
+# Creates the list of known hosts
+ARG KNOWN_HOSTS
+RUN mkdir -p /home/spryker/.ssh && chmod 0700 /home/spryker/.ssh
+RUN bash -c '[ ! -z "${KNOWN_HOSTS}" ] && ssh-keyscan -t rsa ${KNOWN_HOSTS} >> /home/spryker/.ssh/known_hosts || true'
+RUN chown spryker:spryker -R /home/spryker/.ssh
+
+# PHP-FPM environment variables
+ENV PHP_FPM_PM=dynamic
+ENV PHP_FPM_PM_MAX_CHILDREN=4
+ENV PHP_FPM_PM_START_SERVERS=2
+ENV PHP_FPM_PM_MIN_SPARE_SERVERS=1
+ENV PHP_FPM_PM_MAX_SPARE_SERVERS=2
+ENV PHP_FPM_PM_MAX_REQUESTS=500
+ENV PHP_FPM_REQUEST_TERMINATE_TIMEOUT=1m
+
+# PHP configuration
+COPY php/php-fpm.d/worker.conf /usr/local/etc/php-fpm.d/worker.conf
+RUN bash -c "php -r 'exit(PHP_VERSION_ID > 70400 ? 1 : 0);' && sed -i '' -e 's/decorate_workers_output/;decorate_workers_output/g' /usr/local/etc/php-fpm.d/worker.conf || true"
+COPY php/php.ini /usr/local/etc/php/
+COPY php/conf.d/90-opcache.ini /usr/local/etc/php/conf.d
+# removing default opcache.ini
+RUN rm -f /usr/local/etc/php/conf.d/opcache.ini
+
+{% if _phpExtensions is defined and _phpExtensions is not empty %}
+{% for phpExtention in _phpExtensions %}
+RUN mv /usr/local/etc/php/disabled/{{phpExtention}}.ini /usr/local/etc/php/conf.d/90-{{phpExtention}}.ini
+{% endfor %}
+{% endif %}
+
+COPY php/conf.d/99-from-deploy-yaml-php.ini /usr/local/etc/php/conf.d/
+
+# Jenkins
+COPY --chown=spryker:spryker jenkins/jenkins.docker.xml.twig /home/spryker/jenkins.docker.xml.twig
+
+# Build info
+COPY --chown=spryker:spryker php/build.php /home/spryker/build.php
+
+
+
+FROM ${SPRYKER_PLATFORM_IMAGE} AS application-production
+
+COPY --chown=spryker:spryker public ${srcRoot}/public
+COPY --chown=spryker:spryker frontend ${srcRoot}/frontend
+COPY --chown=spryker:spryker .yarn* ${srcRoot}/.yarn
+COPY --chown=spryker:spryker .* *.* LICENSE ${srcRoot}/
+
+USER root
+RUN rm -rf /var/run/opcache/*
+RUN chown -R spryker:spryker /home/spryker
+
+ARG SPRYKER_BUILD_HASH='current'
+ENV SPRYKER_BUILD_HASH=${SPRYKER_BUILD_HASH}
+ARG SPRYKER_BUILD_STAMP=''
+ENV SPRYKER_BUILD_STAMP=${SPRYKER_BUILD_STAMP}
+
+CMD [ "php-fpm", "--nodaemonize" ]
+EXPOSE 9000
+
