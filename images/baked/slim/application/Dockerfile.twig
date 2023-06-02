@@ -2,67 +2,6 @@
 #ARG SPRYKER_PLATFORM_IMAGE=spryker/php:7.3
 ARG SPRYKER_DOCKER_SDK_CONTEXT_BUILD_IMAGE
 
-#FROM ${SPRYKER_PLATFORM_IMAGE} AS application-build
-FROM oleg1628/docker-php:slim AS application-build
-
-
-ARG SPRYKER_NPM_VERSION
-ARG COMPOSER_VERSION=2.5.5
-
-WORKDIR /data
-
-#RUN apk add nodejs npm && \
-#    npm install -g npm@${SPRYKER_NPM_VERSION} && \
-
-#    Install composer \
-RUN apk add --no-cache git && \
-    sh -c 'curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/bin --filename=composer --version='"$COMPOSER_VERSION"
-
-USER spryker
-ENV COMPOSER_MEMORY_LIMIT=-1
-RUN mkdir -p /home/spryker/.composer
-RUN sh -c '[[ $COMPOSER_VERSION == "1"* ]] && composer global require hirak/prestissimo && rm -rf /home/spryker/.composer/cache || true'
-
-ENV SPRYKER_IN_DOCKER=1
-ENV COMPOSER_IGNORE_CHROMEDRIVER=1
-{% for envName, envValue in _envs %}
-ENV {{ envName }}='{{ envValue }}'
-{% endfor %}
-
-# Install composer modules for Spryker
-COPY --chown=spryker:spryker composer.json composer.lock ${srcRoot}/
-ARG SPRYKER_COMPOSER_MODE
-RUN --mount=type=cache,id=composer,sharing=locked,target=/home/spryker/.composer/cache,uid=1000 \
-  --mount=type=ssh,uid=1000 --mount=type=secret,id=secrets-env,uid=1000 \
-  set -o allexport && . /run/secrets/secrets-env && set +o allexport \
-  && composer install --no-scripts --no-interaction ${SPRYKER_COMPOSER_MODE} -vvv \
-  && find vendor -type d -name \.git -prune -exec rm -rf {} +
-
-
-COPY --chown=spryker:spryker *.php ${srcRoot}/
-# TODO: Move codebase related stuff from data folder to src. In ideal: translations in /data are needed for build below
-COPY --chown=spryker:spryker data ${srcRoot}/data
-COPY --chown=spryker:spryker config ${srcRoot}/config
-RUN chmod 600 ${srcRoot}/config/Zed/*.key 2>/dev/null || true
-COPY --chown=spryker:spryker src ${srcRoot}/src
-
-RUN --mount=type=cache,id=composer,sharing=locked,target=/home/spryker/.composer/cache,uid=1000 \
-  composer dump-autoload -o
-
-ARG SPRYKER_PIPELINE
-ENV SPRYKER_PIPELINE=${SPRYKER_PIPELINE}
-ARG APPLICATION_ENV
-ARG SPRYKER_DB_ENGINE
-ENV APPLICATION_ENV=${APPLICATION_ENV}
-ENV SPRYKER_DB_ENGINE=${SPRYKER_DB_ENGINE}
-
-COPY --chown=spryker:spryker data ${srcRoot}/data
-RUN vendor/bin/install -r ${SPRYKER_PIPELINE} -s build -s build-production -vvv
-
-ARG SPRYKER_COMPOSER_AUTOLOAD
-RUN --mount=type=cache,id=composer,sharing=locked,target=/home/spryker/.composer/cache,uid=1000 \
-  composer dump-autoload ${SPRYKER_COMPOSER_AUTOLOAD}
-
 FROM ${SPRYKER_DOCKER_SDK_CONTEXT_BUILD_IMAGE} as docker-sdk-context-build
 
 FROM oleg1628/docker-php:slim AS application-production

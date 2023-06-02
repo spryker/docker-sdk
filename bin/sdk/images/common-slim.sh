@@ -41,9 +41,8 @@ function Images::_buildApp() {
 
     docker build \
         -t "${appBuildImage}" \
-        -f "${DEPLOYMENT_PATH}/images/baked/slim/application/Dockerfile" \
+        -f "${DEPLOYMENT_PATH}/images/baked/slim/application-build/Dockerfile" \
         --progress="${PROGRESS_TYPE}" \
-        --target "application-build" \
         --build-arg "SPRYKER_PLATFORM_IMAGE=${SPRYKER_PLATFORM_IMAGE}" \
         --build-arg "SPRYKER_COMPOSER_MODE=${SPRYKER_COMPOSER_MODE}" \
         --build-arg "SPRYKER_PIPELINE=${SPRYKER_PIPELINE}" \
@@ -69,7 +68,6 @@ function Images::_buildApp() {
         -t "${appImage}" \
         -f "${DEPLOYMENT_PATH}/images/baked/slim/application/Dockerfile" \
         --progress="${PROGRESS_TYPE}" \
-        --build-arg "SPRYKER_PLATFORM_IMAGE=${SPRYKER_PLATFORM_IMAGE}" \
         --build-arg "SPRYKER_LOG_DIRECTORY=${SPRYKER_LOG_DIRECTORY}" \
         --build-arg "KNOWN_HOSTS=${KNOWN_HOSTS}" \
         --build-arg "SPRYKER_BUILD_HASH=${SPRYKER_BUILD_HASH:-"current"}" \
@@ -78,7 +76,6 @@ function Images::_buildApp() {
         --build-arg "APPLICATION_ENV=${APPLICATION_ENV}" \
         --build-arg "SPRYKER_DB_ENGINE=${SPRYKER_DB_ENGINE}" \
         --build-arg "SPRYKER_DOCKER_SDK_CONTEXT_BUILD_IMAGE=${dockerSdkContextBuildImage}" \
-        --secret "id=secrets-env,src=$SECRETS_FILE_PATH" \
         . 1>&2
 
     Console::verbose "$(date) ${INFO}Building pipeline (cli)${NC}"
