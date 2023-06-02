@@ -1,19 +1,22 @@
 # syntax = docker/dockerfile:1.5
 ARG SPRYKER_PLATFORM_IMAGE=spryker/php:7.3
-ARG SPRYKER_NPM_VERSION
-ARG COMPOSER_VERSION=2.5.5
 
 FROM ${SPRYKER_PLATFORM_IMAGE} AS application-build
 
+ARG SPRYKER_NPM_VERSION
+ARG COMPOSER_VERSION=2.5.5
+
+WORKDIR /data
+
 RUN apk add nodejs npm && \
     npm install -g npm@${SPRYKER_NPM_VERSION} && \
-    # Install composer
-    curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/bin --filename=composer --version=${COMPOSER_VERSION}
+#    Install composer \
+    sh -c 'curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/bin --filename=composer --version='"$COMPOSER_VERSION"
 
 USER spryker
 ENV COMPOSER_MEMORY_LIMIT=-1
 RUN mkdir -p /home/spryker/.composer
-RUN bash -c '[[ $COMPOSER_VERSION == "1"* ]] && composer global require hirak/prestissimo && rm -rf /home/spryker/.composer/cache || true'
+RUN sh -c '[[ $COMPOSER_VERSION == "1"* ]] && composer global require hirak/prestissimo && rm -rf /home/spryker/.composer/cache || true'
 
 ENV SPRYKER_IN_DOCKER=1
 ENV COMPOSER_IGNORE_CHROMEDRIVER=1
@@ -55,7 +58,24 @@ ARG SPRYKER_COMPOSER_AUTOLOAD
 RUN --mount=type=cache,id=composer,sharing=locked,target=/home/spryker/.composer/cache,uid=1000 \
   composer dump-autoload ${SPRYKER_COMPOSER_AUTOLOAD}
 
-WORKDIR /data
+
+FROM ${SPRYKER_PLATFORM_IMAGE} AS application-production
+
+# TBD: Not sure if it's only needed for build stage or also during application runtime. Clarify. If not used, then delete the block
+ENV SPRYKER_IN_DOCKER=1
+ENV COMPOSER_IGNORE_CHROMEDRIVER=1
+{% for envName, envValue in _envs %}
+ENV {{ envName }}='{{ envValue }}'
+{% endfor %}
+
+ARG SPRYKER_PIPELINE
+ENV SPRYKER_PIPELINE=${SPRYKER_PIPELINE}
+ARG APPLICATION_ENV
+ARG SPRYKER_DB_ENGINE
+ENV APPLICATION_ENV=${APPLICATION_ENV}
+ENV SPRYKER_DB_ENGINE=${SPRYKER_DB_ENGINE}
+#####
+
 
 # Create log directory
 ARG SPRYKER_LOG_DIRECTORY
@@ -66,7 +86,7 @@ chown spryker:spryker ${SPRYKER_LOG_DIRECTORY}
 # Creates the list of known hosts
 ARG KNOWN_HOSTS
 RUN mkdir -p /home/spryker/.ssh && chmod 0700 /home/spryker/.ssh
-RUN bash -c '[ ! -z "${KNOWN_HOSTS}" ] && ssh-keyscan -t rsa ${KNOWN_HOSTS} >> /home/spryker/.ssh/known_hosts || true'
+RUN sh -c '[ ! -z "${KNOWN_HOSTS}" ] && ssh-keyscan -t rsa ${KNOWN_HOSTS} >> /home/spryker/.ssh/known_hosts || true'
 RUN chown spryker:spryker -R /home/spryker/.ssh
 
 # PHP-FPM environment variables
@@ -78,11 +98,6 @@ ENV PHP_FPM_PM_MAX_SPARE_SERVERS=2
 ENV PHP_FPM_PM_MAX_REQUESTS=500
 ENV PHP_FPM_REQUEST_TERMINATE_TIMEOUT=1m
 
-# PHP configuration
-COPY php/php-fpm.d/worker.conf /usr/local/etc/php-fpm.d/worker.conf
-RUN bash -c "php -r 'exit(PHP_VERSION_ID > 70400 ? 1 : 0);' && sed -i '' -e 's/decorate_workers_output/;decorate_workers_output/g' /usr/local/etc/php-fpm.d/worker.conf || true"
-COPY php/php.ini /usr/local/etc/php/
-COPY php/conf.d/90-opcache.ini /usr/local/etc/php/conf.d
 # removing default opcache.ini
 RUN rm -f /usr/local/etc/php/conf.d/opcache.ini
 
@@ -92,17 +107,8 @@ RUN mv /usr/local/etc/php/disabled/{{phpExtention}}.ini /usr/local/etc/php/conf.
 {% endfor %}
 {% endif %}
 
-COPY php/conf.d/99-from-deploy-yaml-php.ini /usr/local/etc/php/conf.d/
-
-# Jenkins
-COPY --chown=spryker:spryker jenkins/jenkins.docker.xml.twig /home/spryker/jenkins.docker.xml.twig
-
-# Build info
-COPY --chown=spryker:spryker php/build.php /home/spryker/build.php
-
-
-
-FROM ${SPRYKER_PLATFORM_IMAGE} AS application-production
+## Jenkins
+#COPY --chown=spryker:spryker jenkins/jenkins.docker.xml.twig /home/spryker/jenkins.docker.xml.twig
 
 COPY --chown=spryker:spryker public ${srcRoot}/public
 COPY --chown=spryker:spryker frontend ${srcRoot}/frontend

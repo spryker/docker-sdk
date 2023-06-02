@@ -1,17 +1,24 @@
 #!/bin/bash
+set -eo
 
-import sdk/images/baked-slim.sh
+import sdk/images/common-slim.sh
 
 function Images::buildApplication() {
     Console::verbose "${INFO}Building application images for AWS ECR${NC}"
+    Images::_buildApp
+    Console::end "[DONE]"
+}
 
-    Images::_buildApp baked "${TRUE}"
+function Assets::build() {
+    Console::start "Building assets for AWS ECR"
+    Images::_buildAssets
+    Console::end "[DONE]"
 }
 
 function Images::buildFrontend() {
     Console::verbose "${INFO}Building Frontend image for AWS ECR${NC}"
-
-    Images::_buildFrontend baked
+    Images::_buildFrontend
+    Console::end "[DONE]"
 }
 
 function Images::tagApplications() {

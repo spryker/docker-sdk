@@ -582,6 +582,12 @@ file_put_contents(
 unlink($deploymentDir . DS . 'images' . DS . 'common' . DS . 'application' . DS . 'Dockerfile.twig');
 
 file_put_contents(
+    $deploymentDir . DS . 'images' . DS . 'baked' . DS . 'slim' . DS . 'application' . DS . 'Dockerfile',
+    $twig->render('images' . DS . 'baked' . DS . 'slim' . DS . 'application' . DS . 'Dockerfile.twig', $projectData)
+);
+unlink($deploymentDir . DS . 'images' . DS . 'baked' . DS . 'slim' . DS . 'application' . DS . 'Dockerfile.twig');
+
+file_put_contents(
     $deploymentDir . DS . 'docker-compose.yml',
     $twig->render('docker-compose.yml.twig', $projectData)
 );
