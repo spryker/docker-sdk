@@ -1,6 +1,9 @@
 # syntax = docker/dockerfile:1.5
 #ARG SPRYKER_PLATFORM_IMAGE=spryker/php:7.3
 ARG SPRYKER_DOCKER_SDK_CONTEXT_BUILD_IMAGE
+ARG SPRYKER_APP_BUILD_IMAGE
+
+FROM ${SPRYKER_APP_BUILD_IMAGE} as application-build
 
 FROM ${SPRYKER_DOCKER_SDK_CONTEXT_BUILD_IMAGE} as docker-sdk-context-build
 

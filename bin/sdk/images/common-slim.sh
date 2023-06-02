@@ -76,6 +76,7 @@ function Images::_buildApp() {
         --build-arg "APPLICATION_ENV=${APPLICATION_ENV}" \
         --build-arg "SPRYKER_DB_ENGINE=${SPRYKER_DB_ENGINE}" \
         --build-arg "SPRYKER_DOCKER_SDK_CONTEXT_BUILD_IMAGE=${dockerSdkContextBuildImage}" \
+        --build-arg "SPRYKER_APP_BUILD_IMAGE=${appBuildImage}" \
         . 1>&2
 
     Console::verbose "$(date) ${INFO}Building pipeline (cli)${NC}"
