@@ -1,8 +1,10 @@
 # syntax = docker/dockerfile:1.5
-ARG SPRYKER_PLATFORM_IMAGE=spryker/php:7.3
+#ARG SPRYKER_PLATFORM_IMAGE=spryker/php:7.3
 ARG SPRYKER_DOCKER_SDK_CONTEXT_BUILD_IMAGE
 
-FROM ${SPRYKER_PLATFORM_IMAGE} AS application-build
+#FROM ${SPRYKER_PLATFORM_IMAGE} AS application-build
+FROM oleg1628/docker-php:slim AS application-build
+
 
 ARG SPRYKER_NPM_VERSION
 ARG COMPOSER_VERSION=2.5.5
@@ -62,7 +64,8 @@ RUN --mount=type=cache,id=composer,sharing=locked,target=/home/spryker/.composer
 
 FROM ${SPRYKER_DOCKER_SDK_CONTEXT_BUILD_IMAGE} as docker-sdk-context-build
 
-FROM ${SPRYKER_PLATFORM_IMAGE} AS application-production
+FROM oleg1628/docker-php:slim AS application-production
+#FROM ${SPRYKER_PLATFORM_IMAGE} AS application-production
 
 COPY --from=application-build /data /data
 COPY --from=docker-sdk-context-build /usr/local/etc/php-fpm.d/worker.conf /usr/local/etc/php-fpm.d/worker.conf
