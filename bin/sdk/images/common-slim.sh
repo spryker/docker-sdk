@@ -121,29 +121,19 @@ function Images::_buildAssets() {
 
 function Images::_buildFrontend() {
     local assetsBuildImage="${SPRYKER_DOCKER_PREFIX}_assets_build:${SPRYKER_DOCKER_TAG}"
-    local builderAssetsImage="$(Assets::getImageTag)"
-    local baseFrontendImage="${SPRYKER_DOCKER_PREFIX}_base_frontend:${SPRYKER_DOCKER_TAG}"
     local frontendImage="${SPRYKER_DOCKER_PREFIX}_frontend:${SPRYKER_DOCKER_TAG}"
-    local runtimeFrontendImage="${SPRYKER_DOCKER_PREFIX}_run_frontend:${SPRYKER_DOCKER_TAG}"
-
-    Console::verbose "$(date) ${INFO}Building base_frontend${NC}"
-
-    docker build \
-        -t "${baseFrontendImage}" \
-        -f "${DEPLOYMENT_PATH}/images/common/frontend/Dockerfile" \
-        --progress="${PROGRESS_TYPE}" \
-        --build-arg "SPRYKER_FRONTEND_IMAGE=${SPRYKER_FRONTEND_IMAGE}" \
-        "${DEPLOYMENT_PATH}/context" 1>&2
 
     Console::verbose "$(date) ${INFO}Building frontend${NC}"
+
     docker build \
         -t "${frontendImage}" \
-        -t "${runtimeFrontendImage}" \
-        -f "${DEPLOYMENT_PATH}/images/${folder}/frontend/Dockerfile" \
+        -f "${DEPLOYMENT_PATH}/images/baked/slim/frontend/Dockerfile" \
         --progress="${PROGRESS_TYPE}" \
-        --build-arg "SPRYKER_PARENT_IMAGE=${baseFrontendImage}" \
-        --build-arg "SPRYKER_ASSETS_BUILDER_IMAGE=${builderAssetsImage}" \
+        --build-arg "SPRYKER_FRONTEND_IMAGE=${SPRYKER_FRONTEND_IMAGE}" \
         --build-arg "SPRYKER_MAINTENANCE_MODE_ENABLED=${SPRYKER_MAINTENANCE_MODE_ENABLED}" \
+        --build-arg "SPRYKER_PARENT_IMAGE=${assetsBuildImage}" \
+        --build-arg "SPRYKER_BUILD_HASH=${SPRYKER_BUILD_HASH:-"current"}" \
+        --build-arg "SPRYKER_BUILD_STAMP=${SPRYKER_BUILD_STAMP:-""}" \
         "${DEPLOYMENT_PATH}/context" 1>&2
 }
 
