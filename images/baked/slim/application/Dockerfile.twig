@@ -15,7 +15,8 @@ WORKDIR /data
 #    npm install -g npm@${SPRYKER_NPM_VERSION} && \
 
 #    Install composer \
-RUN sh -c 'curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/bin --filename=composer --version='"$COMPOSER_VERSION"
+RUN apk add --no-cache git && \
+    sh -c 'curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/bin --filename=composer --version='"$COMPOSER_VERSION"
 
 USER spryker
 ENV COMPOSER_MEMORY_LIMIT=-1
