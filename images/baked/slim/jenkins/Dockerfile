@@ -12,7 +12,7 @@ COPY --from=spryker-jenkins-boilerplate /usr/share/jenkins/jenkins.war /usr/shar
 COPY --from=spryker-jenkins-boilerplate /usr/share/jenkins/jenkins-cli.jar /usr/share/jenkins/jenkins-cli.jar
 
 # Install packages on Alpine
-RUN bash -c 'if [ ! -z "$(which apk)" ]; then apk --no-cache add \
+RUN sh -c 'if [ ! -z "$(which apk)" ]; then apk --no-cache add \
 	curl \
     bash \
     openjdk11 \
@@ -23,7 +23,7 @@ RUN bash -c 'if [ ! -z "$(which apk)" ]; then apk --no-cache add \
     ; fi'
 
 # Install packages on Debian
-RUN bash -c 'if [ ! -z "$(which apt)" ]; then apt update -y && \
+RUN sh -c 'if [ ! -z "$(which apt)" ]; then apt update -y && \
 	apt-get install -y software-properties-common && \
 	apt-add-repository "deb http://security.debian.org/debian-security stretch/updates main" && \
 	apt-add-repository "deb http://ftp.de.debian.org/debian buster main" && \

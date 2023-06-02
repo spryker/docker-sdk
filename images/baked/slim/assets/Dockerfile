@@ -1,7 +1,21 @@
 # syntax = docker/dockerfile:1.5
-ARG SPRYKER_PARENT_IMAGE
+ARG SPRYKER_NODE_IMAGE_VERSION
+ARG SPRYKER_NODE_IMAGE_DISTRO
 
+FROM node:${SPRYKER_NODE_IMAGE_VERSION}-${SPRYKER_NODE_IMAGE_DISTRO} AS node
+ARG SPRYKER_NPM_VERSION
+RUN npm install -g npm@${SPRYKER_NPM_VERSION}
+
+
+ARG SPRYKER_PARENT_IMAGE
 FROM ${SPRYKER_PARENT_IMAGE} AS assets-builder
+
+# NodeJS + NPM
+COPY --from=node /usr/lib /usr/lib
+COPY --from=node /usr/local/share /usr/local/share
+COPY --from=node /usr/local/lib /usr/local/lib
+COPY --from=node /usr/local/include /usr/local/include
+COPY --from=node /usr/local/bin /usr/local/bin
 
 USER spryker
 
@@ -14,7 +28,10 @@ ENV SPRYKER_ASSETS_MODE=${SPRYKER_ASSETS_MODE}
 ARG SPRYKER_PIPELINE
 ENV SPRYKER_PIPELINE=${SPRYKER_PIPELINE}
 
-RUN --mount=type=cache,id=npm,sharing=locked,target=/home/spryker/.npm,uid=1000 \
+RUN --mount=type=cache,id=npm,sharing=locked,target=/home/spryker/.npm,uid=1000 --mount=type=cache,id=npm,sharing=locked,target=/data/node_modules,uid=1000 \
+    sh -c 'npm install --prefer-offline || npm ci --prefer-offline'
+
+RUN --mount=type=cache,id=npm,sharing=locked,target=/home/spryker/.npm,uid=1000 --mount=type=cache,id=npm,sharing=locked,target=/data/node_modules,uid=1000 \
     echo "BUILD HASH: ${SPRYKER_BUILD_HASH}" \
     && echo "MODE: ${SPRYKER_ASSETS_MODE}" \
-    && vendor/bin/install -r ${SPRYKER_PIPELINE} -s build-static -s build-static-${SPRYKER_ASSETS_MODE} -vvv
+    && vendor/bin/install -r ${SPRYKER_PIPELINE} -s build-static-${SPRYKER_ASSETS_MODE} -vvv

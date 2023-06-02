@@ -32,6 +32,7 @@ function Images::_buildApp() {
     local appBuildImage="${SPRYKER_DOCKER_PREFIX}_app_build:${SPRYKER_DOCKER_TAG}"
     local pipelineImage="${SPRYKER_DOCKER_PREFIX}_pipeline:${SPRYKER_DOCKER_TAG}"
     local jenkinsImage="${SPRYKER_DOCKER_PREFIX}_jenkins:${SPRYKER_DOCKER_TAG}"
+    local dockerSdkContextBuildImage="${SPRYKER_DOCKER_PREFIX}_docker_sdk_context_build:${SPRYKER_DOCKER_TAG}"
 
     Images::_prepareSecrets
     Registry::Trap::addExitHook 'removeBuildSecrets' "rm -f ${SECRETS_FILE_PATH}"
@@ -44,24 +45,23 @@ function Images::_buildApp() {
         --progress="${PROGRESS_TYPE}" \
         --target "application-build" \
         --build-arg "SPRYKER_PLATFORM_IMAGE=${SPRYKER_PLATFORM_IMAGE}" \
-        --build-arg "SPRYKER_NPM_VERSION=${SPRYKER_NPM_VERSION}" \
         --build-arg "SPRYKER_COMPOSER_MODE=${SPRYKER_COMPOSER_MODE}" \
         --build-arg "SPRYKER_PIPELINE=${SPRYKER_PIPELINE}" \
         --build-arg "APPLICATION_ENV=${APPLICATION_ENV}" \
         --build-arg "SPRYKER_DB_ENGINE=${SPRYKER_DB_ENGINE}" \
         --build-arg "SPRYKER_COMPOSER_AUTOLOAD=${SPRYKER_COMPOSER_AUTOLOAD}" \
+        --build-arg "SPRYKER_DOCKER_SDK_CONTEXT_BUILD_IMAGE=${dockerSdkContextBuildImage}" \
         --secret "id=secrets-env,src=$SECRETS_FILE_PATH" \
         . 1>&2
 
     Console::verbose "$(date) ${INFO}Building docker-sdk-context-build ${NC}"
 
-    # have to build separately due to different path
+    # have to build separately due to different path.
     docker build \
-        -t "docker-sdk-context-build" \
+        -t "${dockerSdkContextBuildImage}" \
         -f "${DEPLOYMENT_PATH}/images/baked/slim/docker-sdk-context-build/Dockerfile" \
         --progress="${PROGRESS_TYPE}" \
         --build-arg "SPRYKER_PARENT_IMAGE=${appBuildImage}" \
-        --target "docker-sdk-context-build" \
         "${DEPLOYMENT_PATH}/context" 1>&2
 
     Console::verbose "$(date) ${INFO}Building app ${NC}"
@@ -69,6 +69,7 @@ function Images::_buildApp() {
         -t "${appImage}" \
         -f "${DEPLOYMENT_PATH}/images/baked/slim/application/Dockerfile" \
         --progress="${PROGRESS_TYPE}" \
+        --build-arg "SPRYKER_PLATFORM_IMAGE=${SPRYKER_PLATFORM_IMAGE}" \
         --build-arg "SPRYKER_LOG_DIRECTORY=${SPRYKER_LOG_DIRECTORY}" \
         --build-arg "KNOWN_HOSTS=${KNOWN_HOSTS}" \
         --build-arg "SPRYKER_BUILD_HASH=${SPRYKER_BUILD_HASH:-"current"}" \
@@ -76,7 +77,8 @@ function Images::_buildApp() {
         --build-arg "SPRYKER_PIPELINE=${SPRYKER_PIPELINE}" \
         --build-arg "APPLICATION_ENV=${APPLICATION_ENV}" \
         --build-arg "SPRYKER_DB_ENGINE=${SPRYKER_DB_ENGINE}" \
-        --build-arg "DEPLOYMENT_PATH=${DEPLOYMENT_PATH}" \
+        --build-arg "SPRYKER_DOCKER_SDK_CONTEXT_BUILD_IMAGE=${dockerSdkContextBuildImage}" \
+        --secret "id=secrets-env,src=$SECRETS_FILE_PATH" \
         . 1>&2
 
     Console::verbose "$(date) ${INFO}Building pipeline (cli)${NC}"
@@ -111,11 +113,14 @@ function Images::_buildAssets() {
         --build-arg "SPRYKER_PARENT_IMAGE=${appImage}" \
         --build-arg "SPRYKER_PIPELINE=${SPRYKER_PIPELINE}" \
         --build-arg "SPRYKER_BUILD_HASH=${SPRYKER_BUILD_HASH:-"current"}" \
+        --build-arg "SPRYKER_NPM_VERSION=${SPRYKER_NPM_VERSION}" \
+        --build-arg "SPRYKER_NODE_IMAGE_VERSION=${SPRYKER_NODE_IMAGE_VERSION}" \
+        --build-arg "SPRYKER_NODE_IMAGE_DISTRO=${SPRYKER_NODE_IMAGE_DISTRO}" \
         . 1>&2
 }
 
 function Images::_buildFrontend() {
-    local cliImage="${SPRYKER_DOCKER_PREFIX}_cli:${SPRYKER_DOCKER_TAG}"
+    local assetsBuildImage="${SPRYKER_DOCKER_PREFIX}_assets_build:${SPRYKER_DOCKER_TAG}"
     local builderAssetsImage="$(Assets::getImageTag)"
     local baseFrontendImage="${SPRYKER_DOCKER_PREFIX}_base_frontend:${SPRYKER_DOCKER_TAG}"
     local frontendImage="${SPRYKER_DOCKER_PREFIX}_frontend:${SPRYKER_DOCKER_TAG}"
@@ -128,9 +133,6 @@ function Images::_buildFrontend() {
         -f "${DEPLOYMENT_PATH}/images/common/frontend/Dockerfile" \
         --progress="${PROGRESS_TYPE}" \
         --build-arg "SPRYKER_FRONTEND_IMAGE=${SPRYKER_FRONTEND_IMAGE}" \
-        --build-arg "SPRYKER_BUILD_HASH=${SPRYKER_BUILD_HASH:-"current"}" \
-        --build-arg "SPRYKER_BUILD_STAMP=${SPRYKER_BUILD_STAMP:-""}" \
-        --build-arg "SPRYKER_MAINTENANCE_MODE_ENABLED=${SPRYKER_MAINTENANCE_MODE_ENABLED}" \
         "${DEPLOYMENT_PATH}/context" 1>&2
 
     Console::verbose "$(date) ${INFO}Building frontend${NC}"
@@ -143,17 +145,6 @@ function Images::_buildFrontend() {
         --build-arg "SPRYKER_ASSETS_BUILDER_IMAGE=${builderAssetsImage}" \
         --build-arg "SPRYKER_MAINTENANCE_MODE_ENABLED=${SPRYKER_MAINTENANCE_MODE_ENABLED}" \
         "${DEPLOYMENT_PATH}/context" 1>&2
-
-    Console::verbose "$(date) ${INFO}Building runtime frontend${NC}"
-    if [ -n "${SPRYKER_XDEBUG_MODE_ENABLE}" ]; then
-        docker build \
-            -t "${runtimeFrontendImage}" \
-            -f "${DEPLOYMENT_PATH}/images/debug/frontend/Dockerfile" \
-            --progress="${PROGRESS_TYPE}" \
-            --build-arg "SPRYKER_PARENT_IMAGE=${frontendImage}" \
-            --build-arg "SPRYKER_XDEBUG_MODE_ENABLE=${SPRYKER_XDEBUG_MODE_ENABLE}" \
-            "${DEPLOYMENT_PATH}/context" 1>&2
-    fi
 }
 
 function Images::_tagByApp() {

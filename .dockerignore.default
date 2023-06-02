@@ -26,3 +26,6 @@ node_modules
 
 /tests/*/*/*/_output/*
 /tests/*/*/*/_support/_generated/*
+
+# Ignore .git folders in the root directory and all its subdirectories
+**/.git

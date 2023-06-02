@@ -4,7 +4,7 @@ set -eo
 import sdk/images/common-slim.sh
 
 function Images::buildApplication() {
-    Console::verbose "${INFO}Building application images for AWS ECR${NC}"
+    Console::start "Building application images for AWS ECR"
     Images::_buildApp
     Console::end "[DONE]"
 }
@@ -16,7 +16,7 @@ function Assets::build() {
 }
 
 function Images::buildFrontend() {
-    Console::verbose "${INFO}Building Frontend image for AWS ECR${NC}"
+    Console::start "Building Frontend image for AWS ECR"
     Images::_buildFrontend
     Console::end "[DONE]"
 }
