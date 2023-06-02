@@ -64,11 +64,12 @@ function Images::_buildApp() {
         "${DEPLOYMENT_PATH}/context" 1>&2
 
     Console::verbose "$(date) ${INFO}Building app ${NC}"
+    local application="$(echo "${SPRYKER_APPLICATIONS[0]}" | tr '[:upper:]' '[:lower:]')"
     docker build \
         -t "${appImage}" \
         -f "${DEPLOYMENT_PATH}/images/baked/slim/application/Dockerfile" \
         --build-arg BUILDKIT_INLINE_CACHE=1 \
-        --cache-from type=registry,ref="${AWS_ACCOUNT_ID}".dkr.ecr."${AWS_REGION}".amazonaws.com/"${SPRYKER_PROJECT_NAME}"-"${SPRYKER_APPLICATIONS[0]}":latest \
+        --cache-from type=registry,ref="${AWS_ACCOUNT_ID}".dkr.ecr."${AWS_REGION}".amazonaws.com/"${SPRYKER_PROJECT_NAME}"-"${application}":latest \
         --progress="${PROGRESS_TYPE}" \
         --build-arg "SPRYKER_LOG_DIRECTORY=${SPRYKER_LOG_DIRECTORY}" \
         --build-arg "KNOWN_HOSTS=${KNOWN_HOSTS}" \
