@@ -67,6 +67,7 @@ function Images::_buildApp() {
     local application="$(echo "${SPRYKER_APPLICATIONS[0]}" | tr '[:upper:]' '[:lower:]')"
     docker build \
         -t "${appImage}" \
+        -t "${AWS_ACCOUNT_ID}".dkr.ecr."${AWS_REGION}".amazonaws.com/"${SPRYKER_PROJECT_NAME}"-"${application}":latest \
         -f "${DEPLOYMENT_PATH}/images/baked/slim/application/Dockerfile" \
         --build-arg BUILDKIT_INLINE_CACHE=1 \
         --cache-from type=registry,ref="${AWS_ACCOUNT_ID}".dkr.ecr."${AWS_REGION}".amazonaws.com/"${SPRYKER_PROJECT_NAME}"-"${application}":latest \
