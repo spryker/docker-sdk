@@ -73,7 +73,7 @@ COPY --chown=spryker:spryker .yarn* ${srcRoot}/.yarn
 COPY --chown=spryker:spryker .* *.* LICENSE ${srcRoot}/
 
 USER root
-RUN rm -rf /var/run/opcache/* \
+RUN rm -rf /var/run/opcache/* && \
     chown -R spryker:spryker /home/spryker
 
 ARG SPRYKER_BUILD_HASH='current'
