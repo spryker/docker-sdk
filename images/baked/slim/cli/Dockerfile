@@ -35,19 +35,18 @@ RUN --mount=type=cache,id=aptlib,sharing=locked,target=/var/lib/apt \
      yarn \
      ; fi'
 
-RUN --mount=type=cache,id=apk,sharing=locked,target=/var/cache/apk mkdir -p /etc/apk && ln -vsf /var/cache/apk /etc/apk/cache && \
-  sh -c 'if [ ! -z "$(which apk)" ]; then apk update && apk add \
-     inotify-tools \
-     netcat-openbsd \
-     coreutils \
-     ncurses \
-     git \
-     redis \
-     yarn \
-     jq \
+RUN sh -c 'if [ ! -z "$(which apk)" ]; then apk add --no-cache \
+#     inotify-tools \
+#     netcat-openbsd \
+#     coreutils \
+#     ncurses \
+#     git \
+#     redis \
+#     yarn \
+#     jq \
      python3 \
-     g++ \
-     make \
+#     g++ \
+#     make \
 #    bash \
 #    curl \
 #    graphviz \

@@ -10,13 +10,6 @@ FROM ${SPRYKER_DOCKER_SDK_CONTEXT_BUILD_IMAGE} as docker-sdk-context-build
 FROM oleg1628/docker-php:slim AS application-production
 #FROM ${SPRYKER_PLATFORM_IMAGE} AS application-production
 
-COPY --from=application-build /data /data
-COPY --from=docker-sdk-context-build /usr/local/etc/php-fpm.d/worker.conf /usr/local/etc/php-fpm.d/worker.conf
-COPY --from=docker-sdk-context-build /usr/local/etc/php/php.ini /usr/local/etc/php/php.ini
-COPY --from=docker-sdk-context-build /usr/local/etc/php/conf.d/90-opcache.ini /usr/local/etc/php/conf.d/90-opcache.ini
-COPY --from=docker-sdk-context-build /usr/local/etc/php/conf.d/99-from-deploy-yaml-php.ini /usr/local/etc/php/conf.d/99-from-deploy-yaml-php.ini
-COPY --from=docker-sdk-context-build /home/spryker/build.php /home/spryker/build.php
-
 # TBD: Not sure if it's only needed for build stage or also during application runtime. Clarify. If not used, then delete the block
 ENV SPRYKER_IN_DOCKER=1
 ENV COMPOSER_IGNORE_CHROMEDRIVER=1
@@ -39,11 +32,15 @@ ENV SPRYKER_LOG_DIRECTORY=${SPRYKER_LOG_DIRECTORY}
 RUN mkdir -p ${SPRYKER_LOG_DIRECTORY} && \
 chown spryker:spryker ${SPRYKER_LOG_DIRECTORY}
 
-# Creates the list of known hosts
+
 ARG KNOWN_HOSTS
-RUN mkdir -p /home/spryker/.ssh && chmod 0700 /home/spryker/.ssh
-RUN sh -c '[ ! -z "${KNOWN_HOSTS}" ] && ssh-keyscan -t rsa ${KNOWN_HOSTS} >> /home/spryker/.ssh/known_hosts || true'
-RUN chown spryker:spryker -R /home/spryker/.ssh
+RUN # Creates the list of known hosts \
+    mkdir -p /home/spryker/.ssh && chmod 0700 /home/spryker/.ssh && \
+    sh -c '[ ! -z "${KNOWN_HOSTS}" ] && ssh-keyscan -t rsa ${KNOWN_HOSTS} >> /home/spryker/.ssh/known_hosts || true' && \
+    chown spryker:spryker -R /home/spryker/.ssh && \
+    # removing default opcache.ini
+    rm -f /usr/local/etc/php/conf.d/opcache.ini
+
 
 # PHP-FPM environment variables
 ENV PHP_FPM_PM=dynamic
@@ -54,8 +51,6 @@ ENV PHP_FPM_PM_MAX_SPARE_SERVERS=2
 ENV PHP_FPM_PM_MAX_REQUESTS=500
 ENV PHP_FPM_REQUEST_TERMINATE_TIMEOUT=1m
 
-# removing default opcache.ini
-RUN rm -f /usr/local/etc/php/conf.d/opcache.ini
 
 {% if _phpExtensions is defined and _phpExtensions is not empty %}
 {% for phpExtention in _phpExtensions %}
@@ -63,6 +58,14 @@ RUN mv /usr/local/etc/php/disabled/{{phpExtention}}.ini /usr/local/etc/php/conf.
 {% endfor %}
 {% endif %}
 
+COPY --from=docker-sdk-context-build /usr/local/etc/php-fpm.d/worker.conf /usr/local/etc/php-fpm.d/worker.conf
+COPY --from=docker-sdk-context-build /usr/local/etc/php/php.ini /usr/local/etc/php/php.ini
+COPY --from=docker-sdk-context-build /usr/local/etc/php/conf.d/90-opcache.ini /usr/local/etc/php/conf.d/90-opcache.ini
+COPY --from=docker-sdk-context-build /usr/local/etc/php/conf.d/99-from-deploy-yaml-php.ini /usr/local/etc/php/conf.d/99-from-deploy-yaml-php.ini
+COPY --from=docker-sdk-context-build /home/spryker/build.php /home/spryker/build.php
+COPY --from=application-build /data /data
+
+# do we need the files below in the backend image? Should some of that be moved to assets image?
 COPY --chown=spryker:spryker public ${srcRoot}/public
 COPY --chown=spryker:spryker frontend ${srcRoot}/frontend
 COPY --chown=spryker:spryker .yarn* ${srcRoot}/.yarn
@@ -70,8 +73,8 @@ COPY --chown=spryker:spryker .yarn* ${srcRoot}/.yarn
 COPY --chown=spryker:spryker .* *.* LICENSE ${srcRoot}/
 
 USER root
-RUN rm -rf /var/run/opcache/*
-RUN chown -R spryker:spryker /home/spryker
+RUN rm -rf /var/run/opcache/* \
+    chown -R spryker:spryker /home/spryker
 
 ARG SPRYKER_BUILD_HASH='current'
 ENV SPRYKER_BUILD_HASH=${SPRYKER_BUILD_HASH}

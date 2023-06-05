@@ -45,8 +45,8 @@ COPY --chown=spryker:spryker config ${srcRoot}/config
 RUN chmod 600 ${srcRoot}/config/Zed/*.key 2>/dev/null || true
 COPY --chown=spryker:spryker src ${srcRoot}/src
 
-#RUN --mount=type=cache,id=composer,sharing=locked,target=/home/spryker/.composer/cache,uid=1000 \
-#  composer dump-autoload -o
+RUN --mount=type=cache,id=composer,sharing=locked,target=/home/spryker/.composer/cache,uid=1000 \
+  composer dump-autoload -o
 
 ARG SPRYKER_PIPELINE
 ENV SPRYKER_PIPELINE=${SPRYKER_PIPELINE}

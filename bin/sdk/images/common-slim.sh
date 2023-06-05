@@ -67,7 +67,6 @@ function Images::_buildApp() {
     local application="$(echo "${SPRYKER_APPLICATIONS[0]}" | tr '[:upper:]' '[:lower:]')"
     docker build \
         -t "${appImage}" \
-        -t "${AWS_ACCOUNT_ID}".dkr.ecr."${AWS_REGION}".amazonaws.com/"${SPRYKER_PROJECT_NAME}"-"${application}":latest \
         -f "${DEPLOYMENT_PATH}/images/baked/slim/application/Dockerfile" \
         --progress="${PROGRESS_TYPE}" \
         --build-arg "SPRYKER_LOG_DIRECTORY=${SPRYKER_LOG_DIRECTORY}" \
@@ -81,6 +80,7 @@ function Images::_buildApp() {
         --build-arg "SPRYKER_APP_BUILD_IMAGE=${appBuildImage}" \
         . 1>&2
 
+#        -t "${AWS_ACCOUNT_ID}".dkr.ecr."${AWS_REGION}".amazonaws.com/"${SPRYKER_PROJECT_NAME}"-"${application}":latest \
 #        --build-arg BUILDKIT_INLINE_CACHE=1 \
 #        --cache-from type=registry,ref="${AWS_ACCOUNT_ID}".dkr.ecr."${AWS_REGION}".amazonaws.com/"${SPRYKER_PROJECT_NAME}"-"${application}":latest \
 
