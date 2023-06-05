@@ -2,7 +2,7 @@
 
 # shellcheck disable=SC2155
 
-require docker docker-compose tr awk wc sed grep
+require docker tr awk wc sed grep
 
 Registry::Flow::addBoot "Compose::verboseMode"
 
@@ -18,6 +18,7 @@ function Compose::getComposeFiles() {
 
 function Compose::ensureTestingMode() {
     SPRYKER_TESTING_ENABLE=1
+#    todo: chould be project namespace
     local isTestMode=$(docker ps --filter 'status=running' --filter "name=${SPRYKER_INTERNAL_PROJECT_NAME}_webdriver_*" --format "{{.Names}}")
     if [ -z "${isTestMode}" ]; then
         Compose::run
@@ -35,6 +36,8 @@ function Compose::ensureRunning() {
 function Compose::ensureCliRunning() {
     local isCliRunning=$(docker ps --filter 'status=running' --filter "ancestor=${SPRYKER_DOCKER_PREFIX}_run_cli:${SPRYKER_DOCKER_TAG}" --filter "name=${SPRYKER_DOCKER_PREFIX}_cli_*" --format "{{.Names}}")
     if [ -z "${isCliRunning}" ]; then
+#        todo: check
+        Compose::runCliDependencyServices
         Compose::run --no-deps ${SPRYKER_PROJECT_NAME}_cli ${SPRYKER_PROJECT_NAME}_cli_ssh_relay
         Registry::Flow::runAfterCliReady
     fi
@@ -136,6 +139,10 @@ function Compose::up() {
 
     Registry::Flow::runBeforeUp
 
+    if [ "${doBuild}" = "--force" ]; then
+      Compose::cleanSourceDirectory
+    fi
+
     Images::buildApplication ${noCache} ${doBuild}
     Codebase::build ${noCache} ${doBuild}
     Assets::build ${noCache} ${doAssets}
@@ -188,9 +195,10 @@ function Compose::run() {
     profiles+=( "--profile ${SPRYKER_PROJECT_NAME}" )
 
     Compose::command --compatibility --profile ${SPRYKER_INTERNAL_PROJECT_NAME} ${profiles[*]} up -d --remove-orphans --quiet-pull "${@}"
-#   todo: env variable for each project
-    if [ -n "${SPRYKER_TESTING_ENABLE}" ]; then
-      Service::Scheduler::stop
+# todo: env variable for each project
+# todo: check
+    if [ -n "${SPRYKER_TESTING_ENABLE}" ] && Service::isServiceExist scheduler; then
+        Service::Scheduler::stop
     fi
 
     if [ -z "${SPRYKER_TESTING_ENABLE}" ]; then
@@ -273,4 +281,20 @@ function Compose::cleanEverything() {
     Console::verbose "${INFO}Stopping and removing all Spryker containers and volumes${NC}"
     Compose::downProject
     Registry::Flow::runAfterDown
+}
+
+function Compose::runCliDependencyServices() {
+    if [ "${TIDEWAYS_EXTENSION_ENABLED}" = "${TRUE}" ]; then
+        Compose::run --no-deps tideways
+    fi
+}
+# todo: wtf
+function Compose::cleanSourceDirectory() {
+  local projectPath
+  local srcGeneratedPath='src/Generated'
+
+  projectPath=$(pwd)
+  if [ -d "${projectPath}/${srcGeneratedPath}" ]; then
+      rm -rf "${projectPath}/${srcGeneratedPath}"
+  fi
 }

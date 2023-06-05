@@ -15,9 +15,7 @@
       timeout: 10s
       retries: 5
     environment:
-      - NODE_OPTIONS=--max-old-space-size=5000
-    depends_on:
-      - search
+        - NODE_OPTIONS=--max-old-space-size=5000
     volumes:
       - {{ serviceName }}-{{ serviceData['engine'] }}-data:/usr/share/kibana/data:rw
       - {{ serviceData.deployment_path }}/context/kibana/6.8/kibana.yml:/usr/share/kibana/config/kibana.yml:ro

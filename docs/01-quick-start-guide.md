@@ -10,8 +10,8 @@ To run the Docker SDK in a local environment, follow the instructions below.
 
 For Docker installation instructions, see one of the following:
 * [Installing Docker prerequisites on MacOS](06-installation/01-installation-prerequisites/01-installing-docker-prerequisites-on-macos.md)
-* [Installing Docker prerequisites on Linux](06-installation/01-installation-prerequisites/01-installing-docker-prerequisites-on-linux.md)
-* [Installing Docker prerequisites on Windows](06-installation/01-installation-prerequisites/01-installing-docker-prerequisites-on-windows.md)
+* [Installing Docker prerequisites on Linux](06-installation/01-installation-prerequisites/02-installing-docker-prerequisites-on-linux.md)
+* [Installing Docker prerequisites on Windows](06-installation/01-installation-prerequisites/03-installing-docker-prerequisites-on-windows.md)
 
 ### Setting up a project with the Docker SDK
 
@@ -87,6 +87,6 @@ For solutions to common issues, see [Troubleshooting](09-troubleshooting.md).
 
 ## What documents should I use to start developing and configuring my project?
 <!--- [02-development-usage] --->
-[Deploy file reference — 1.0](07-deploy-file/02-deploy-file-reference.v1.md)
+[Deploy file reference — 1.0](07-deploy-file/02-deploy.file.reference.v1.md)
 [Configuration reference](10-configuration-reference.md)
 [Configuring servces](06-configuring-services.md)

@@ -1,7 +1,12 @@
 #!/bin/bash
 
 function Service::Broker::install() {
-    Runtime::waitFor ${SPRYKER_INTERNAL_PROJECT_NAME}_broker
+    local service_name="${SPRYKER_INTERNAL_PROJECT_NAME}_broker"
+    if ! Service::isServiceExist "${service_name}"; then
+        return;
+    fi
+
+    Runtime::waitFor "${service_name}"
 
     Console::start "${INFO}Configuring broker...${NC}"
 
@@ -21,7 +26,7 @@ function Service::Broker::install() {
         Compose::command exec ${tty} \
             -e SPRYKER_RABBITMQ_VIRTUAL_HOSTS="${SPRYKER_RABBITMQ_VIRTUAL_HOSTS}" \
             -e SPRYKER_RABBITMQ_API_USERNAME="${SPRYKER_RABBITMQ_API_USERNAME}" \
-            ${SPRYKER_INTERNAL_PROJECT_NAME}_broker \
+            "${service_name}" \
             bash -c 'for host in $(echo ${SPRYKER_RABBITMQ_VIRTUAL_HOSTS}); do rabbitmqctl add_vhost ${host}; rabbitmqctl set_permissions -p ${host} ${SPRYKER_RABBITMQ_API_USERNAME} ".*" ".*" ".*"; done'
     )
     Console::end "[DONE]"

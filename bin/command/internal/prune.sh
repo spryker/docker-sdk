@@ -1,28 +1,83 @@
 #!/bin/bash
 
 Registry::addCommand "prune" "Command::prune"
+Registry::Help::command -c "prune [--f] [--a]" "Remove all docker data(images, volume, system and builder) and project artifacts."
 
 function Command::prune() {
-	local forceArg=${1}
+    local forceArg=''
+    local artifactsArg=${FALSE}
 
-	if [ "${forceArg}" == "--f" ]; then
-		forceArg='-f'
-	else
-		forceArg=''
-	fi
+    for ARG in "$@"; do
+      if [ "${ARG}" == '--f' ]; then
+        forceArg='-f'
+      fi
 
-  Compose::command down
-  sync clean # TODO deprecated, use Registry::Flow::addAfterDown in mounts
-  Console::error "This will delete ALL docker images and volumes on the host."
+      if [ "${ARG}" == '--a' ]; then
+        artifactsArg=${TRUE}
+      fi
+    done
 
-  docker volume prune -a ${forceArg}
-  dropImages ${forceArg}
-#  docker system prune -a ${forceArg}
-  docker builder prune -a ${forceArg}
+    Compose::command down
+    sync clean # TODO deprecated, use Registry::Flow::addAfterDown in mounts
+    Console::error "This will delete ALL docker images and volumes on the host."
+    dropImages ${forceArg} # -a
+    docker volume prune ${forceArg} # -a
+    docker system prune -a ${forceArg}
+    docker builder prune -a ${forceArg}
 
-  return "${TRUE}"
+    if [ "${artifactsArg}" == "${TRUE}" ]; then
+      Command::_prune_artifacts ${forceArg}
+    fi
+
+    return "${TRUE}"
 }
 
+function Command::_prune_artifacts() {
+#    todo: per project
+  local forceArg=${1}
+
+  Command::_dropDirectory 'vendor/' ${forceArg}
+  Command::_dropDirectory 'src/Generated/' ${forceArg}
+  Command::_dropDirectory 'node_modules/' ${forceArg}
+  Command::_dropDirectory 'public/*/assets/' ${forceArg}
+}
+
+function Command::_dropDirectory() {
+#    todo: per project
+  local directoryPath=${1}
+  local forceArg=${2}
+  local promptAnswer=${FALSE}
+  local choice
+  local dirSize=0B
+
+  if [ "${forceArg}" == "-f" ]; then
+    promptAnswer=${TRUE}
+  else
+    read -rp "Drop '${directoryPath}'? [y/N] " choice
+    case "${choice}" in
+    y | Y)
+      promptAnswer=${TRUE}
+      ;;
+    n | N)
+      promptAnswer=${FALSE}
+      ;;
+    *)
+      promptAnswer=${FALSE}
+      ;;
+    esac
+  fi
+
+  if [ "${promptAnswer}" == "${TRUE}" ]; then
+    if [ -n "$(ls -d ${directoryPath} 2> /dev/null)" ]; then
+      dirSize=$(du -sch ${directoryPath} | grep total | cut -f -1)
+    fi
+
+    rm -rf ${directoryPath}
+  fi
+
+  echo "Total reclaimed space: ${dirSize}"
+}
+# todo: rename
 function dropImages() {
   local forceArg=${1}
   local projects=($(Project::getProjectList))

@@ -10,8 +10,9 @@
       'spryker.app.type': hidden
       'spryker.project': ${SPRYKER_DOCKER_PREFIX}:${SPRYKER_DOCKER_TAG}
     environment:
-      REDIS_HOSTS: "{{ serviceData.storageData.hosts | join(',') }}"
-    depends_on:
-{% for service in serviceData.storageData.services %}
-      - {{ service }}
-{% endfor %}
+      REDIS_HOSTS: "{{ project.storageData.hosts | merge(serviceData.data.hosts | default([])) | default("") | join(',') }}"
+
+{#todo: check this part of generation#}
+{#{% for service in serviceData.storageData.services %}#}
+{#      - {{ service }}#}
+{#{% endfor %}#}

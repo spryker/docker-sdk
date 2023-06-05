@@ -1,6 +1,10 @@
 #!/bin/bash
 
 function Service::Scheduler::isInstalled() {
+    if ! Service::isServiceExist scheduler; then
+        return;
+    fi
+
     [ -n "${SPRYKER_TESTING_ENABLE}" ] && return "${TRUE}"
 
     Runtime::waitFor ${SPRYKER_INTERNAL_PROJECT_NAME}_scheduler
@@ -15,6 +19,10 @@ function Service::Scheduler::isInstalled() {
 }
 
 Service::Scheduler::pause() {
+    if ! Service::isServiceExist scheduler; then
+        return;
+    fi
+
     [ -n "${SPRYKER_TESTING_ENABLE}" ] && return "${TRUE}"
 
     Runtime::waitFor ${SPRYKER_INTERNAL_PROJECT_NAME}_scheduler
@@ -41,6 +49,10 @@ Service::Scheduler::pause() {
 }
 
 Service::Scheduler::unpause() {
+    if ! Service::isServiceExist scheduler; then
+        return;
+    fi
+
     [ -n "${SPRYKER_TESTING_ENABLE}" ] && return "${TRUE}"
 
     Runtime::waitFor ${SPRYKER_INTERNAL_PROJECT_NAME}_scheduler
@@ -53,6 +65,9 @@ Service::Scheduler::unpause() {
 }
 
 function Service::Scheduler::start() {
+    if ! Service::isServiceExist scheduler; then
+        return;
+    fi
 
     local force=''
     if [ "$1" == '--force' ]; then
@@ -68,25 +83,44 @@ function Service::Scheduler::start() {
 }
 
 function Service::Scheduler::stop() {
+    if ! Service::isServiceExist scheduler; then
+        return;
+    fi
+
     Service::Scheduler::_run suspend "Suspending"
 }
 
 function Service::Scheduler::clean() {
+    if ! Service::isServiceExist scheduler; then
+        return;
+    fi
+
     Service::Scheduler::_run clean "Cleaning"
 }
 
 function Service::Scheduler::_run() {
+    if ! Service::isServiceExist scheduler; then
+        return;
+    fi
+
     [ -n "${SPRYKER_TESTING_ENABLE}" ] && return "${TRUE}"
 
     Runtime::waitFor ${SPRYKER_INTERNAL_PROJECT_NAME}_scheduler
 
     for region in "${SPRYKER_STORES[@]}"; do
         eval "${region}"
-        for store in "${STORES[@]}"; do
-            SPRYKER_CURRENT_STORE="${store}"
-            Console::info "${2} scheduler jobs for ${SPRYKER_CURRENT_STORE} store."
+        if [ ${#STORES[@]} -eq 0 ]; then
+            SPRYKER_CURRENT_REGION="${REGION}"
+            Console::info "${2} scheduler jobs for ${SPRYKER_CURRENT_REGION} region."
             Compose::exec "vendor/bin/install -r ${SPRYKER_PIPELINE} -s scheduler-${1}"
-        done
+        else
+            for store in "${STORES[@]}"; do
+                SPRYKER_CURRENT_REGION=""
+                SPRYKER_CURRENT_STORE="${store}"
+                Console::info "${2} scheduler jobs for ${SPRYKER_CURRENT_STORE} store."
+                Compose::exec "vendor/bin/install -r ${SPRYKER_PIPELINE} -s scheduler-${1}"
+            done
+        fi
     done
 }
 

@@ -2,6 +2,10 @@ version: "3.7"
 
 {% include "docker-compose/application-volumes.yml.twig" with _context %}
 
+{#todo: cli BLACKFIRE_APM_ENABLED: ${BLACKFIRE_APM_ENABLED}#}
+{#todo: gateway BLACKFIRE_APM_ENABLED: ${BLACKFIRE_APM_ENABLED}#}
+{#todo: front BLACKFIRE_APM_ENABLED: ${BLACKFIRE_APM_ENABLED}#}
+
 services:
 {% include "docker-compose/gateway-compose.yml.twig" with _context %}
 

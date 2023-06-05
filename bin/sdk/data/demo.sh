@@ -9,11 +9,12 @@ function Data::load() {
     local brokerInstalled=""
     local schedulerSuspended=""
     local verboseOption=$([ "${VERBOSE}" == "1" ] && echo -n " -vvv" || echo -n '')
+    local requireServices=(database broker search key_value_store)
 
-    Runtime::waitFor ${SPRYKER_INTERNAL_PROJECT_NAME}_database
-    Runtime::waitFor ${SPRYKER_INTERNAL_PROJECT_NAME}_broker
-    Runtime::waitFor ${SPRYKER_INTERNAL_PROJECT_NAME}_search
-    Runtime::waitFor ${SPRYKER_INTERNAL_PROJECT_NAME}_key_value_store
+#    todo: refactoring
+    for serviceName in "${requireServices[@]}" ; do
+      Runtime::waitFor "${SPRYKER_INTERNAL_PROJECT_NAME}_${serviceName}"
+    done
 
     local force=''
     if [ "$1" == '--force' ]; then
@@ -28,24 +29,29 @@ function Data::load() {
         SPRYKER_CURRENT_REGION="${REGION}"
         SPRYKER_CURRENT_STORE="${STORES[0]}"
 
-        if [ -z "${force}" ] && Data::isLoaded; then
+#        todo: refactoring
+        if Service::isServiceExist "${SPRYKER_INTERNAL_PROJECT_NAME}_database" && [ -z "${force}" ] && Data::isLoaded; then
             continue
         fi
 
-        if [ -z "${brokerInstalled}" ]; then
+        if Service::isServiceExist "${SPRYKER_INTERNAL_PROJECT_NAME}_broker" && [ -z "${brokerInstalled}" ]; then
             Service::Broker::install
             brokerInstalled=1
         fi
 
-        if [ -z "${schedulerSuspended}" ]; then
+        if Service::isServiceExist "${SPRYKER_INTERNAL_PROJECT_NAME}_scheduler" &&[ -z "${schedulerSuspended}" ]; then
             schedulerSuspended=1
             Service::Scheduler::pause
             Registry::Trap::addExitHook 'resumeScheduler' 'Service::Scheduler::unpause'
         fi
 
         Console::info "Loading demo data for ${SPRYKER_CURRENT_REGION} region."
+        Compose::ensureCliRunning # todo: check this method
         Compose::exec "vendor/bin/install${verboseOption} -r ${SPRYKER_PIPELINE} -s clean-storage -s init-storage"
-        Database::init
+
+        if Service::isServiceExist "${SPRYKER_INTERNAL_PROJECT_NAME}_database"; then
+            Database::init
+        fi
 
         for store in "${STORES[@]}"; do
             SPRYKER_CURRENT_STORE="${store}"
