@@ -16,11 +16,14 @@ COPY --from=spryker-jenkins-boilerplate /usr/share/jenkins/jenkins-cli.jar /usr/
 RUN sh -c 'if [ ! -z "$(which apk)" ]; then apk --no-cache add \
 	curl \
     bash \
-    openjdk11 fontconfig ttf-dejavu \
+    openjdk11-jre-headless fontconfig ttf-dejavu \
     gettext \
     jq && \
     mkdir -p /envs \
     ; fi'
+
+# Otherwise Jenkins can't find fonts when running in headless mode
+ENV LD_LIBRARY_PATH=/usr/lib
 
 # Install packages on Debian
 RUN sh -c 'if [ ! -z "$(which apt)" ]; then apt update -y && \
