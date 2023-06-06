@@ -15,8 +15,7 @@ COPY --from=spryker-jenkins-boilerplate /usr/share/jenkins/jenkins-cli.jar /usr/
 RUN sh -c 'if [ ! -z "$(which apk)" ]; then apk --no-cache add \
 	curl \
     bash \
-    openjdk11-jre-headless \
-    ttf-dejavu \
+    openjdk11-jre-headless fontconfig ttf-dejavu \
     gettext \
     jq && \
     mkdir -p /envs \
