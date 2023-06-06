@@ -10,9 +10,6 @@ ARG COMPOSER_VERSION=2.5.5
 
 WORKDIR /data
 
-#RUN apk add nodejs npm && \
-#    npm install -g npm@${SPRYKER_NPM_VERSION} && \
-
 #    Install composer \
 RUN apk add --no-cache git && \
     sh -c 'curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/bin --filename=composer --version='"$COMPOSER_VERSION"
@@ -63,3 +60,5 @@ RUN --mount=type=cache,id=composer,sharing=locked,target=/home/spryker/.composer
   composer dump-autoload -o ${SPRYKER_COMPOSER_AUTOLOAD}
 
 #RUN tar -czf /tmp/data.tar.gz /data
+
+

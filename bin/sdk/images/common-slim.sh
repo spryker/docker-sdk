@@ -30,6 +30,7 @@ function Images::_buildApp() {
 
     local appImage="${SPRYKER_DOCKER_PREFIX}_app:${SPRYKER_DOCKER_TAG}"
     local appBuildImage="${SPRYKER_DOCKER_PREFIX}_app_build:${SPRYKER_DOCKER_TAG}"
+    local composerCacheImage="${SPRYKER_DOCKER_PREFIX}-cache:latest"
     local pipelineImage="${SPRYKER_DOCKER_PREFIX}_pipeline:${SPRYKER_DOCKER_TAG}"
     local jenkinsImage="${SPRYKER_DOCKER_PREFIX}_jenkins:${SPRYKER_DOCKER_TAG}"
     local dockerSdkContextBuildImage="${SPRYKER_DOCKER_PREFIX}_docker_sdk_context_build:${SPRYKER_DOCKER_TAG}"
@@ -37,8 +38,15 @@ function Images::_buildApp() {
     Images::_prepareSecrets
     Registry::Trap::addExitHook 'removeBuildSecrets' "rm -f ${SECRETS_FILE_PATH}"
 
-    Console::verbose "$(date) ${INFO}Building application-build ${NC}"
+    Console::verbose "$(date) ${INFO}Importing composer cache ${NC}"
+    # it's expected to fail first time, since cache image doesn't yet exist in ECR
+    docker build \
+        -f "${DEPLOYMENT_PATH}/images/baked/slim/composer-cache-import/Dockerfile" \
+        --progress="${PROGRESS_TYPE}" \
+        --build-arg "COMPOSER_CACHE_IMAGE=${composerCacheImage}" \
+        . 1>&2 | true
 
+    Console::verbose "$(date) ${INFO}Building application-build ${NC}"
     docker build \
         -t "${appBuildImage}" \
         -f "${DEPLOYMENT_PATH}/images/baked/slim/application-build/Dockerfile" \
@@ -51,6 +59,13 @@ function Images::_buildApp() {
         --build-arg "SPRYKER_COMPOSER_AUTOLOAD=${SPRYKER_COMPOSER_AUTOLOAD}" \
         --build-arg "SPRYKER_DOCKER_SDK_CONTEXT_BUILD_IMAGE=${dockerSdkContextBuildImage}" \
         --secret "id=secrets-env,src=$SECRETS_FILE_PATH" \
+        . 1>&2
+
+    Console::verbose "$(date) ${INFO}Exporting composer cache ${NC}"
+    docker build \
+        -t "${composerCacheImage}" \
+        -f "${DEPLOYMENT_PATH}/images/baked/slim/composer-cache-export/Dockerfile" \
+        --progress="${PROGRESS_TYPE}" \
         . 1>&2
 
     Console::verbose "$(date) ${INFO}Building docker-sdk-context-build ${NC}"
