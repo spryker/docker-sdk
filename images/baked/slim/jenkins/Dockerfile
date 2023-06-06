@@ -11,11 +11,12 @@ COPY --from=spryker-jenkins-boilerplate /usr/share/jenkins/ref/plugins /usr/shar
 COPY --from=spryker-jenkins-boilerplate /usr/share/jenkins/jenkins.war /usr/share/jenkins/jenkins.war
 COPY --from=spryker-jenkins-boilerplate /usr/share/jenkins/jenkins-cli.jar /usr/share/jenkins/jenkins-cli.jar
 
+#    openjdk11-jre-headless fontconfig ttf-dejavu \
 # Install packages on Alpine
 RUN sh -c 'if [ ! -z "$(which apk)" ]; then apk --no-cache add \
 	curl \
     bash \
-    openjdk11-jre-headless fontconfig ttf-dejavu \
+    openjdk11 fontconfig ttf-dejavu \
     gettext \
     jq && \
     mkdir -p /envs \
