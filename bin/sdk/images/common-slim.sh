@@ -30,7 +30,7 @@ function Images::_buildApp() {
 
     local appImage="${SPRYKER_DOCKER_PREFIX}_app:${SPRYKER_DOCKER_TAG}"
     local appBuildImage="${SPRYKER_DOCKER_PREFIX}_app_build:${SPRYKER_DOCKER_TAG}"
-    local composerCacheImage="${SPRYKER_DOCKER_PREFIX}-cache:latest"
+    local composerCacheImage="${SPRYKER_DOCKER_PREFIX}-cache:composer-cache-latest"
     local pipelineImage="${SPRYKER_DOCKER_PREFIX}_pipeline:${SPRYKER_DOCKER_TAG}"
     local jenkinsImage="${SPRYKER_DOCKER_PREFIX}_jenkins:${SPRYKER_DOCKER_TAG}"
     local dockerSdkContextBuildImage="${SPRYKER_DOCKER_PREFIX}_docker_sdk_context_build:${SPRYKER_DOCKER_TAG}"
