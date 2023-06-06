@@ -61,3 +61,5 @@ RUN vendor/bin/install -r ${SPRYKER_PIPELINE} -s build -s build-production -vvv
 ARG SPRYKER_COMPOSER_AUTOLOAD
 RUN --mount=type=cache,id=composer,sharing=locked,target=/home/spryker/.composer/cache,uid=1000 \
   composer dump-autoload -o ${SPRYKER_COMPOSER_AUTOLOAD}
+
+#RUN tar -czf /tmp/data.tar.gz /data

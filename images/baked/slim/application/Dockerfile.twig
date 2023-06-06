@@ -64,6 +64,8 @@ COPY --from=docker-sdk-context-build /usr/local/etc/php/conf.d/90-opcache.ini /u
 COPY --from=docker-sdk-context-build /usr/local/etc/php/conf.d/99-from-deploy-yaml-php.ini /usr/local/etc/php/conf.d/99-from-deploy-yaml-php.ini
 COPY --from=docker-sdk-context-build /home/spryker/build.php /home/spryker/build.php
 COPY --from=application-build /data /data
+#COPY --from=application-build /tmp/data.tar.gz /tmp/data.tar.gz
+#RUN tar -xzf /tmp/data.tar.gz -C /data/ && rm /tmp/data.tar.gz
 
 # do we need the files below in the backend image? Should some of that be moved to assets image?
 COPY --chown=spryker:spryker public ${srcRoot}/public
