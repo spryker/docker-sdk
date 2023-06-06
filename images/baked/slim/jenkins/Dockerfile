@@ -15,7 +15,7 @@ COPY --from=spryker-jenkins-boilerplate /usr/share/jenkins/jenkins-cli.jar /usr/
 RUN sh -c 'if [ ! -z "$(which apk)" ]; then apk --no-cache add \
 	curl \
     bash \
-    openjdk11 \
+    openjdk11-jre-headless \
     ttf-dejavu \
     gettext \
     jq && \
@@ -45,3 +45,5 @@ COPY context/jenkins/export/nr-credentials.xml /opt/nr-credentials.xml
 RUN chmod +x /entrypoint.sh
 
 ENTRYPOINT ["/entrypoint.sh"]
+
+# TBD: Do we need /data/src on Jenkins or /data/vendor is enough
