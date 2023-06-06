@@ -3,7 +3,7 @@
 export DOCKER_BUILDKIT=1
 
 require docker tr
-require:linux ip grep awk
+require:linux grep awk
 require:macos ipconfig
 require:windows tail cut
 
