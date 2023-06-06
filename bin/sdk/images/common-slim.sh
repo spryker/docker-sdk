@@ -30,7 +30,7 @@ function Images::_buildApp() {
 
     local appImage="${SPRYKER_DOCKER_PREFIX}_app:${SPRYKER_DOCKER_TAG}"
     local appBuildImage="${SPRYKER_DOCKER_PREFIX}_app_build:${SPRYKER_DOCKER_TAG}"
-    local composerCacheImage="${SPRYKER_DOCKER_PREFIX}-cache:composer-cache-latest"
+    local composerCacheImage="${SPRYKER_DOCKER_PREFIX}_composer_cache:${SPRYKER_DOCKER_TAG}"
     local pipelineImage="${SPRYKER_DOCKER_PREFIX}_pipeline:${SPRYKER_DOCKER_TAG}"
     local jenkinsImage="${SPRYKER_DOCKER_PREFIX}_jenkins:${SPRYKER_DOCKER_TAG}"
     local dockerSdkContextBuildImage="${SPRYKER_DOCKER_PREFIX}_docker_sdk_context_build:${SPRYKER_DOCKER_TAG}"
@@ -43,7 +43,7 @@ function Images::_buildApp() {
     docker build \
         -f "${DEPLOYMENT_PATH}/images/baked/slim/composer-cache-import/Dockerfile" \
         --progress="${PROGRESS_TYPE}" \
-        --build-arg "COMPOSER_CACHE_IMAGE=${composerCacheImage}" \
+        --build-arg "COMPOSER_CACHE_IMAGE=${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${SPRYKER_PROJECT_NAME}-cache:composer-cache-latest" \
         . 1>&2 | true
 
     Console::verbose "$(date) ${INFO}Building application-build ${NC}"
