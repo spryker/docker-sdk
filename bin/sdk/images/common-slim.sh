@@ -122,6 +122,15 @@ function Images::_buildApp() {
 function Images::_buildAssets() {
     local assetsBuildImage="${SPRYKER_DOCKER_PREFIX}_assets_build:${SPRYKER_DOCKER_TAG}"
     local appImage="${SPRYKER_DOCKER_PREFIX}_app:${SPRYKER_DOCKER_TAG}"
+    local nodeCacheImage="${SPRYKER_DOCKER_PREFIX}_node_cache:${SPRYKER_DOCKER_TAG}"
+
+    Console::verbose "$(date) ${INFO}Importing node cache ${NC}"
+    # it's expected to fail first time, since cache image doesn't yet exist in ECR
+    docker build \
+        -f "${DEPLOYMENT_PATH}/images/baked/slim/node-cache-import/Dockerfile" \
+        --progress="${PROGRESS_TYPE}" \
+        --build-arg "NODE_CACHE_IMAGE=${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${SPRYKER_PROJECT_NAME}-cache:node-cache-latest" \
+        . 1>&2 | true
 
     Console::verbose "$(date) ${INFO}Building assets${NC}"
     docker build \
@@ -134,6 +143,13 @@ function Images::_buildAssets() {
         --build-arg "SPRYKER_NPM_VERSION=${SPRYKER_NPM_VERSION}" \
         --build-arg "SPRYKER_NODE_IMAGE_VERSION=${SPRYKER_NODE_IMAGE_VERSION}" \
         --build-arg "SPRYKER_NODE_IMAGE_DISTRO=${SPRYKER_NODE_IMAGE_DISTRO}" \
+        . 1>&2
+
+    Console::verbose "$(date) ${INFO}Exporting node cache ${NC}"
+    docker build \
+        -t "${nodeCacheImage}" \
+        -f "${DEPLOYMENT_PATH}/images/baked/slim/node-cache-export/Dockerfile" \
+        --progress="${PROGRESS_TYPE}" \
         . 1>&2
 }
 
