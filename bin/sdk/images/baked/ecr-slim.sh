@@ -12,6 +12,7 @@ function Images::buildApplication() {
 function Assets::build() {
     Console::start "Building assets for AWS ECR"
     Images::_buildAssets
+    Assets::_tagAssets
     Console::end "[DONE]"
 }
 
@@ -37,6 +38,11 @@ function Images::tagApplications() {
     docker tag "${SPRYKER_DOCKER_PREFIX}_pipeline:${SPRYKER_DOCKER_TAG}" "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${SPRYKER_PROJECT_NAME}-pipeline:latest"
 
     docker tag "${SPRYKER_DOCKER_PREFIX}_composer_cache:${SPRYKER_DOCKER_TAG}" "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${SPRYKER_PROJECT_NAME}-cache:composer-cache-latest"
+}
+
+function Assets::_tagAssets() {
+    local tag=${SPRYKER_DOCKER_TAG}
+
     docker tag "${SPRYKER_DOCKER_PREFIX}_node_cache:${SPRYKER_DOCKER_TAG}" "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${SPRYKER_PROJECT_NAME}-cache:node-cache-latest"
 }
 
