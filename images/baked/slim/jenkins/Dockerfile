@@ -13,9 +13,11 @@ COPY --from=spryker-jenkins-boilerplate /usr/share/jenkins/jenkins-cli.jar /usr/
 
 #    openjdk11-jre-headless fontconfig ttf-dejavu \
 # Install packages on Alpine
+# procps is required for some Jenkins jobs that use "ps -p"
 RUN sh -c 'if [ ! -z "$(which apk)" ]; then apk --no-cache add \
 	curl \
     bash \
+    procps \
     openjdk11-jre fontconfig ttf-dejavu gettext \
     jq && \
     mkdir -p /envs \
