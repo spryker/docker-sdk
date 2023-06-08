@@ -17,12 +17,13 @@ RUN sh -c 'if [ ! -z "$(which apk)" ]; then apk --no-cache add \
 	curl \
     bash \
     openjdk11-jre-headless fontconfig ttf-dejavu font-dejavu libfontenc gettext \
+    mkfontscale encodings lcms2 giflib alsa-lib libxtst libxi p11-kit-trust libtasn1 p11-kit gettext-libs libgomp gettext-envsubst openjdk11-jre \
     jq && \
     mkdir -p /envs \
     ; fi'
 
-# Otherwise Jenkins can't find fonts when running in headless mode
-ENV LD_LIBRARY_PATH=/usr/lib
+## Otherwise Jenkins can't find fonts when running in headless mode
+#ENV LD_LIBRARY_PATH=/usr/lib
 
 # Install packages on Debian
 RUN sh -c 'if [ ! -z "$(which apt)" ]; then apt update -y && \
