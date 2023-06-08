@@ -32,7 +32,11 @@ RUN --mount=type=cache,id=composer,sharing=locked,target=/home/spryker/.composer
   --mount=type=ssh,uid=1000 --mount=type=secret,id=secrets-env,uid=1000 \
   set -o allexport && . /run/secrets/secrets-env && set +o allexport \
   && composer install --no-scripts --no-interaction --prefer-dist ${SPRYKER_COMPOSER_MODE} \
-  && find vendor -type d -name \.git -prune -exec rm -rf {} +
+  && find vendor -type d -name \.git -prune -exec rm -rf {} + \
+  && find  vendor/spryker/spryker/Bundles -type d -maxdepth 2 -mindepth 2 \( -name "\.github" \) -prune -exec rm -rf {} + \
+  && find  vendor/spryker/spryker/Bundles -type f -maxdepth 2 -mindepth 2 ! -name "composer.json" -prune -exec rm -rf {} +\
+  && find  vendor/spryker/spryker-shop/Bundles -type d -maxdepth 2 -mindepth 2 \( -name "\.github" \) -prune -exec rm -rf {} + \
+  && find  vendor/spryker/spryker-shop/Bundles -type f -maxdepth 2 -mindepth 2 ! -name "composer.json" -prune -exec rm -rf {} +
 
 
 COPY --chown=spryker:spryker *.php ${srcRoot}/
