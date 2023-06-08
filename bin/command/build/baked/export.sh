@@ -87,11 +87,18 @@ function Command::export() {
             ;;
         image-slim | images-slim)
             Console::verbose "${INFO}Build and export slim images${NC}"
+
+            # We do it asynchronously in the beginning to avoid additional waiting time later on during the assets build
+            Images::importNodeCache &
+
             Images::buildApplication --force
             Images::tagApplications "${tag}"
             if [ -n "${pushDestination}" ]; then
                 Images::pushApplications "${tag}"
             fi
+
+            # Ensure Images::importNodeCache is finished
+            wait
 
             Assets::build --force
             if [ -n "${pushDestination}" ]; then

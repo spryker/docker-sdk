@@ -9,6 +9,12 @@ function Images::buildApplication() {
     Console::end "[DONE]"
 }
 
+function Images::importNodeCache() {
+    Console::start "Building node cache image"
+    Images::_importNodeCache
+    Console::end "[DONE]"
+}
+
 function Assets::build() {
     Console::start "Building assets for AWS ECR"
     Images::_buildAssets
