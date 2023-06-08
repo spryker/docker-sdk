@@ -85,6 +85,29 @@ function Command::export() {
                 Images::printAll "${tag}"
             fi
             ;;
+        slim-image | slim-images)
+            Console::verbose "${INFO}Build and export slim images${NC}"
+            Images::buildApplication --force
+            Images::tagApplications "${tag}"
+            if [ -n "${pushDestination}" ]; then
+                Images::pushApplications "${tag}"
+            fi
+
+            Assets::build --force
+            if [ -n "${pushDestination}" ]; then
+                Images::pushAssets "${tag}"
+            fi
+
+            Images::buildFrontend --force
+            Images::tagFrontend "${tag}"
+            if [ -n "${pushDestination}" ]; then
+                Images::pushFrontend "${tag}"
+            fi
+
+            if [ -z "${pushDestination}" ]; then
+                Images::printAll "${tag}"
+            fi
+            ;;
         *)
             Console::error "Unknown export '${subCommand}' is occurred. No action. Usage: ${HELP_SCR}${SELF_SCRIPT} export images [-t <tag>]" >&2
             exit 1
