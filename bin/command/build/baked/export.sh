@@ -85,7 +85,7 @@ function Command::export() {
                 Images::printAll "${tag}"
             fi
             ;;
-        slim-image | slim-images)
+        image-slim | images-slim)
             Console::verbose "${INFO}Build and export slim images${NC}"
             Images::buildApplication --force
             Images::tagApplications "${tag}"
