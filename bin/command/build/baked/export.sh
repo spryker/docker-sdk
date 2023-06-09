@@ -114,6 +114,9 @@ function Command::export() {
             if [ -z "${pushDestination}" ]; then
                 Images::printAll "${tag}"
             fi
+
+            # Ensure all background processes finish
+            wait
             ;;
         *)
             Console::error "Unknown export '${subCommand}' is occurred. No action. Usage: ${HELP_SCR}${SELF_SCRIPT} export images [-t <tag>]" >&2
