@@ -24,8 +24,8 @@ RUN bash -c 'if [ ! -z "$(which apk)" ]; then apk --no-cache add \
 # Install packages on Debian
 RUN bash -c 'if [ ! -z "$(which apt)" ]; then apt update -y && \
 	apt-get install -y software-properties-common && \
-	apt-add-repository "deb http://security.debian.org/debian-security bullseye-security main contrib non-free" && \
-	apt-add-repository "deb http://ftp.de.debian.org/debian bullseye main contrib non-free" && \
+	apt-add-repository "deb http://security.debian.org/debian-security bullseye-security main" && \
+	apt-add-repository "deb http://ftp.de.debian.org/debian bullseye main" && \
 	apt update -y && apt install -y \
 	curl \
     bash \
