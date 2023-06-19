@@ -18,7 +18,7 @@ function Images::importNodeCache() {
 function Assets::build() {
     Console::start "Building assets for AWS ECR"
     Images::_buildAssets
-#    Assets::_tagAssets
+    Assets::_tagAssets
     Console::end "[DONE]"
 }
 
