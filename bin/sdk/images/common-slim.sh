@@ -148,10 +148,11 @@ function Images::_buildAssets() {
         . 1>&2
 
     Console::verbose "$(date) ${INFO}Exporting node cache ${NC}"
+#        -t "${nodeCacheImage}" \
     docker build \
-        -t "${nodeCacheImage}" \
         -f "${DEPLOYMENT_PATH}/images/baked/slim/node-cache-export/Dockerfile" \
         --progress="${PROGRESS_TYPE}" \
+        --output "type=image,name=${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${SPRYKER_PROJECT_NAME}-cache:node-cache-latest,oci-mediatypes=true,compression=zstd,compression-level=0,force-compression=true,push=true" \
         . 1>&2
 }
 

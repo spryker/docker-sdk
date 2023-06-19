@@ -101,9 +101,9 @@ function Command::export() {
             wait
 
             Assets::build --force
-            if [ -n "${pushDestination}" ]; then
-                Images::pushAssets "${tag}"
-            fi
+#            if [ -n "${pushDestination}" ]; then
+#                Images::pushAssets "${tag}"
+#            fi
 
             Images::buildFrontend --force
             Images::tagFrontend "${tag}"
