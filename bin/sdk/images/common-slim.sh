@@ -148,10 +148,14 @@ function Images::_buildAssets() {
         . 1>&2
 
     Console::verbose "$(date) ${INFO}Exporting node cache ${NC}"
-    docker build \
+#    docker build \
+#        -t "${nodeCacheImage}" \
+#        -f "${DEPLOYMENT_PATH}/images/baked/slim/node-cache-export/Dockerfile" \
+#        --progress="${PROGRESS_TYPE}" \
+#        . 1>&2
+    podman build \
         -t "${nodeCacheImage}" \
         -f "${DEPLOYMENT_PATH}/images/baked/slim/node-cache-export/Dockerfile" \
-        --progress="${PROGRESS_TYPE}" \
         . 1>&2
 }
 
