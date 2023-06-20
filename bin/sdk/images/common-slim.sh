@@ -139,9 +139,19 @@ function Images::_buildAssets() {
         . 1>&2
 
     Console::verbose "$(date) ${INFO}Exporting node cache ${NC}"
-    docker build \
-        -t "${nodeCacheImage}" \
+    docker buildx create --name zstd-builder \
+        --driver docker-container \
+        --driver-opt image=moby/buildkit:v0.11.6
+    docker buildx use zstd-builder
+
+#    docker build \
+#        -t "${nodeCacheImage}" \
+#        -f "${DEPLOYMENT_PATH}/images/baked/slim/node-cache-export/Dockerfile" \
+#        --progress="${PROGRESS_TYPE}" \
+#        . 1>&2
+    docker buildx build \
         -f "${DEPLOYMENT_PATH}/images/baked/slim/node-cache-export/Dockerfile" \
+        --output "type=image,name=${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${SPRYKER_PROJECT_NAME}-cache:node-cache-latest,oci-mediatypes=true,compression=gzip,compression-level=0,force-compression=true,push=true" \
         --progress="${PROGRESS_TYPE}" \
         . 1>&2
 }
