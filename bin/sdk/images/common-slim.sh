@@ -4,7 +4,7 @@ set -eo
 require docker
 
 function Images::pull() {
-    docker pull "${SPRYKER_PLATFORM_IMAGE}" || true
+    podman pull "${SPRYKER_PLATFORM_IMAGE}" || true
 }
 
 function Images::destroy() {
@@ -174,7 +174,7 @@ function Images::_tagByApp() {
     local applicationPrefix="$(echo "$applicationName" | tr '[:upper:]' '[:lower:]')"
     local tag="${imageName}-${applicationPrefix}"
 
-    docker tag "${baseImageName}" "${tag}"
+    podman tag "${baseImageName}" "${tag}"
 }
 
 function Images::tagApplications() {
