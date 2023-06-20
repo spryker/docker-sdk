@@ -4,7 +4,7 @@ set -eo
 require docker
 
 function Images::pull() {
-    podman pull "${SPRYKER_PLATFORM_IMAGE}" || true
+    docker pull "${SPRYKER_PLATFORM_IMAGE}" || true
 }
 
 function Images::destroy() {
@@ -40,13 +40,13 @@ function Images::_buildApp() {
 
     Console::verbose "$(date) ${INFO}Importing composer cache ${NC}"
     # it's expected to fail first time, since cache image doesn't yet exist in ECR
-    podman build \
+    docker build \
         -f "${DEPLOYMENT_PATH}/images/baked/slim/composer-cache-import/Dockerfile" \
         --build-arg "COMPOSER_CACHE_IMAGE=${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${SPRYKER_PROJECT_NAME}-cache:composer-cache-latest" \
         . 1>&2 | true
 
     Console::verbose "$(date) ${INFO}Building application-build ${NC}"
-    podman build \
+    docker build \
         -t "${appBuildImage}" \
         -f "${DEPLOYMENT_PATH}/images/baked/slim/application-build/Dockerfile" \
         --build-arg "SPRYKER_PLATFORM_IMAGE=${SPRYKER_PLATFORM_IMAGE}" \
@@ -60,7 +60,7 @@ function Images::_buildApp() {
         . 1>&2
 
     Console::verbose "$(date) ${INFO}Exporting composer cache ${NC}"
-    podman build \
+    docker build \
         -t "${composerCacheImage}" \
         -f "${DEPLOYMENT_PATH}/images/baked/slim/composer-cache-export/Dockerfile" \
         . 1>&2
@@ -68,7 +68,7 @@ function Images::_buildApp() {
     Console::verbose "$(date) ${INFO}Building docker-sdk-context-build ${NC}"
 
     # have to build separately due to different path.
-    podman build \
+    docker build \
         -t "${dockerSdkContextBuildImage}" \
         -f "${DEPLOYMENT_PATH}/images/baked/slim/docker-sdk-context-build/Dockerfile" \
         --build-arg "SPRYKER_PARENT_IMAGE=${appBuildImage}" \
@@ -76,7 +76,7 @@ function Images::_buildApp() {
 
     Console::verbose "$(date) ${INFO}Building app ${NC}"
     local application="$(echo "${SPRYKER_APPLICATIONS[0]}" | tr '[:upper:]' '[:lower:]')"
-    podman build \
+    docker build \
         -t "${appImage}" \
         -f "${DEPLOYMENT_PATH}/images/baked/slim/application/Dockerfile" \
         --build-arg "SPRYKER_LOG_DIRECTORY=${SPRYKER_LOG_DIRECTORY}" \
@@ -96,14 +96,14 @@ function Images::_buildApp() {
 
     Console::verbose "$(date) ${INFO}Building pipeline (cli)${NC}"
 
-    podman build \
+    docker build \
         -t "${pipelineImage}" \
         -f "${DEPLOYMENT_PATH}/images/baked/slim/cli/Dockerfile" \
         --build-arg "SPRYKER_PARENT_IMAGE=${appImage}" \
         "${DEPLOYMENT_PATH}/context" 1>&2
 
     Console::verbose "$(date) ${INFO}Building Jenkins${NC}"
-    podman build \
+    docker build \
         -t "${jenkinsImage}" \
         -f "${DEPLOYMENT_PATH}/images/baked/slim/jenkins/Dockerfile" \
         --build-arg "SPRYKER_PARENT_IMAGE=${appImage}" \
@@ -115,7 +115,7 @@ function Images::_buildApp() {
 Images::_importNodeCache() {
     Console::verbose "$(date) ${INFO}Importing node cache ${NC}"
     # it's expected to fail first time, since cache image doesn't yet exist in ECR
-    podman build \
+    docker build \
         -f "${DEPLOYMENT_PATH}/images/baked/slim/node-cache-import/Dockerfile" \
         --build-arg "NODE_CACHE_IMAGE=${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${SPRYKER_PROJECT_NAME}-cache:node-cache-latest" \
         . 1>&2 | true
@@ -127,7 +127,7 @@ function Images::_buildAssets() {
     local nodeCacheImage="${SPRYKER_DOCKER_PREFIX}_node_cache:${SPRYKER_DOCKER_TAG}"
 
     Console::verbose "$(date) ${INFO}Building assets${NC}"
-    podman build \
+    docker build \
         -t "${assetsBuildImage}" \
         -f "${DEPLOYMENT_PATH}/images/baked/slim/assets/Dockerfile" \
         --build-arg "SPRYKER_PARENT_IMAGE=${appImage}" \
@@ -139,14 +139,10 @@ function Images::_buildAssets() {
         . 1>&2
 
     Console::verbose "$(date) ${INFO}Exporting node cache ${NC}"
-#    podman build \
-#        -t "${nodeCacheImage}" \
-#        -f "${DEPLOYMENT_PATH}/images/baked/slim/node-cache-export/Dockerfile" \
-#        --progress="${PROGRESS_TYPE}" \
-#        . 1>&2
-    podman build \
+    docker build \
         -t "${nodeCacheImage}" \
         -f "${DEPLOYMENT_PATH}/images/baked/slim/node-cache-export/Dockerfile" \
+        --progress="${PROGRESS_TYPE}" \
         . 1>&2
 }
 
@@ -156,7 +152,7 @@ function Images::_buildFrontend() {
 
     Console::verbose "$(date) ${INFO}Building frontend${NC}"
 
-    podman build \
+    docker build \
         -t "${frontendImage}" \
         -f "${DEPLOYMENT_PATH}/images/baked/slim/frontend/Dockerfile" \
         --build-arg "SPRYKER_FRONTEND_IMAGE=${SPRYKER_FRONTEND_IMAGE}" \
@@ -174,7 +170,7 @@ function Images::_tagByApp() {
     local applicationPrefix="$(echo "$applicationName" | tr '[:upper:]' '[:lower:]')"
     local tag="${imageName}-${applicationPrefix}"
 
-    podman tag "${baseImageName}" "${tag}"
+    docker tag "${baseImageName}" "${tag}"
 }
 
 function Images::tagApplications() {
