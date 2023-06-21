@@ -159,7 +159,7 @@ function Images::_buildAssets() {
     docker buildx build \
         -f "${DEPLOYMENT_PATH}/images/baked/slim/node-cache-export-zstd/Dockerfile" \
         --build-context "node-cache-updated=node_cache" \
-        --output "type=image,name=${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${SPRYKER_PROJECT_NAME}-cache:node-cache-latest,oci-mediatypes=true,compression=gzip,compression-level=0,force-compression=true,push=true" \
+        --output "type=image,name=${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${SPRYKER_PROJECT_NAME}-cache:node-cache-latest,oci-mediatypes=true,compression=zstd,compression-level=0,force-compression=true,push=true" \
         --progress="${PROGRESS_TYPE}" \
         . 1>&2
 }
