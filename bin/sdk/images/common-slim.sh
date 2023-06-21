@@ -144,14 +144,17 @@ function Images::_buildAssets() {
         --driver-opt image=moby/buildkit:v0.11.6
     docker buildx use zstd-builder
 
-#    docker build \
-#        -t "${nodeCacheImage}" \
-#        -f "${DEPLOYMENT_PATH}/images/baked/slim/node-cache-export/Dockerfile" \
-#        --progress="${PROGRESS_TYPE}" \
-#        . 1>&2
-    docker buildx ls
     docker build \
+        -t "${nodeCacheImage}" \
         -f "${DEPLOYMENT_PATH}/images/baked/slim/node-cache-export/Dockerfile" \
+        --progress="${PROGRESS_TYPE}" \
+        . 1>&2
+
+    docker buildx ls
+    docker buildx create --driver-opt image=moby/buildkit:master --use
+    docker build \
+        -f "${DEPLOYMENT_PATH}/images/baked/slim/node-cache-export-zstd/Dockerfile" \
+        --build-context node_cache="${nodeCacheImage}"
         --output "type=image,name=${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${SPRYKER_PROJECT_NAME}-cache:node-cache-latest,oci-mediatypes=true,compression=zstd,compression-level=3,force-compression=true,push=true" \
         --progress="${PROGRESS_TYPE}" \
         . 1>&2
