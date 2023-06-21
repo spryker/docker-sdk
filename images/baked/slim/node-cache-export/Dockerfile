@@ -1,3 +1,4 @@
+# syntax = docker/dockerfile:1.5
 FROM alpine AS node-cache-export
 
 RUN --mount=type=cache,id=npm-cache,sharing=locked,target=/home/spryker/.npm,uid=1000 --mount=type=cache,id=npm-modules,sharing=locked,target=/data/node_modules,uid=1000 \

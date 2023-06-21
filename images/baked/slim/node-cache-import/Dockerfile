@@ -1,3 +1,4 @@
+# syntax = docker/dockerfile:1.5
 ARG NODE_CACHE_IMAGE
 
 FROM ${NODE_CACHE_IMAGE} AS node-cache-import

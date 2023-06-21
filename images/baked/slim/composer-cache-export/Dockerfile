@@ -1,3 +1,4 @@
+# syntax = docker/dockerfile:1.5
 FROM alpine AS composer-cache-export
 
 RUN --mount=type=cache,id=composer,sharing=locked,target=/home/spryker/.composer/cache,uid=1000 \

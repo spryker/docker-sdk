@@ -1,3 +1,4 @@
+# syntax = docker/dockerfile:1.5
 ARG COMPOSER_CACHE_IMAGE
 
 FROM ${COMPOSER_CACHE_IMAGE} AS composer-cache-import
