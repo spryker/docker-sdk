@@ -143,7 +143,7 @@ function Images::_buildAssets() {
     mkdir node_cache
     docker build \
         -t "${nodeCacheImage}" \
-        --output "type=tar,dest=node_cache" \
+        --output "type=tar,dest=node_cache/node_cache.tar" \
         -f "${DEPLOYMENT_PATH}/images/baked/slim/node-cache-export/Dockerfile" \
         --progress="${PROGRESS_TYPE}" \
         . 1>&2
