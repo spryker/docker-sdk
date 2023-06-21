@@ -148,11 +148,13 @@ function Images::_buildAssets() {
 
     docker buildx ls
     docker buildx create --driver-opt image=moby/buildkit:master --use
+
 #        --build-context "node_cache=oci-layout://./node_cache" \
-    node_cache_digest=$(docker images --no-trunc --quiet "${nodeCacheImage}")
+    local node_cache_digest=$(docker images --no-trunc --quiet "${nodeCacheImage}")
+    local nodeCacheImagePinned="${SPRYKER_DOCKER_PREFIX}_node_cache@${node_cache_digest}"
     docker build \
         -f "${DEPLOYMENT_PATH}/images/baked/slim/node-cache-export-zstd/Dockerfile" \
-        --build-context "node-cache-updated=docker-image://${nodeCacheImage}@${node_cache_digest}" \
+        --build-context "node-cache-updated=docker-image://${nodeCacheImagePinned}" \
         --output "type=image,name=${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${SPRYKER_PROJECT_NAME}-cache:node-cache-latest,oci-mediatypes=true,compression=zstd,compression-level=3,force-compression=true,push=true" \
         --progress="${PROGRESS_TYPE}" \
         . 1>&2
