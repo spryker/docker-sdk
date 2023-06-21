@@ -1,12 +1,9 @@
 FROM alpine as tmp
 COPY --from=node-cache-updated /node_cache.tar /tmp/node_cache.tar
-RUN tar -xvf /tmp/node_cache.tar
-RUN ls /
-RUN ls /tmp
-RUN ls /node_cache
+RUN mkdir /tmp/temp & \
+    cd /tmp/temp & \
+    tar -xvf /tmp/node_cache.tar
 
 FROM alpine AS node-cache-export
-COPY --from=tmp /node_cache /tmp
-RUN ls /
+COPY --from=tmp /tmp/temp/tmp/ /tmp
 RUN ls /tmp
-RUN ls /node_cache
