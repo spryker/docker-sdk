@@ -140,12 +140,15 @@ function Images::_buildAssets() {
 
     Console::verbose "$(date) ${INFO}Exporting node cache ${NC}"
 #        --output "type=oci,dest=node_cache,tar=false" \
+    mkdir node_cache
     docker build \
         -t "${nodeCacheImage}" \
-        --output "type=local,dest=node_cache" \
+        --output "type=tar,dest=node_cache" \
         -f "${DEPLOYMENT_PATH}/images/baked/slim/node-cache-export/Dockerfile" \
         --progress="${PROGRESS_TYPE}" \
         . 1>&2
+
+    ls -lh node_cache
 
     docker buildx ls
     docker buildx create --driver-opt image=moby/buildkit:master --use
