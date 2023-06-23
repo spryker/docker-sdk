@@ -20,7 +20,7 @@ COPY --from=node /usr/local/bin /usr/local/bin
 USER spryker
 
 COPY --chown=spryker:spryker frontend* ${srcRoot}/frontend
-COPY --chown=spryker:spryker config/Yves* ${srcRoot}/config/Yves
+COPY --chown=spryker:spryker config*/Yves* ${srcRoot}/config/Yves
 COPY --chown=spryker:spryker package.json* package-lock.json* tsconfig*.json ${srcRoot}/
 
 ARG SPRYKER_ASSETS_MODE='production'
