@@ -69,7 +69,7 @@ COPY --from=application-build /data /data
 
 # do we need the files below in the backend image? Should some of that be moved to assets image?
 COPY --chown=spryker:spryker public ${srcRoot}/public
-COPY --chown=spryker:spryker frontend ${srcRoot}/frontend
+COPY --chown=spryker:spryker frontend* ${srcRoot}/frontend
 COPY --chown=spryker:spryker .yarn* ${srcRoot}/.yarn
 # this command doesn't copy subdirectories as long as they don't have a dot in their name
 COPY --chown=spryker:spryker .* *.* LICENSE ${srcRoot}/
