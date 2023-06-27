@@ -70,7 +70,8 @@ function Images::pushApplications() {
     Images::push "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${SPRYKER_PROJECT_NAME}-cache:composer-cache-latest" &
 
     Images::push "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${SPRYKER_PROJECT_NAME}-jenkins:${tag}" &
-    Images::push "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${SPRYKER_PROJECT_NAME}-pipeline:${tag}" &
+    # Using zstd compressed image as Codebuild environment images isn't yet supported by AWS Codebuild
+    docker push "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${SPRYKER_PROJECT_NAME}-pipeline:${tag}" &
     for application in "${SPRYKER_APPLICATIONS[@]}"; do
         local application="$(echo "$application" | tr '[:upper:]' '[:lower:]')"
         Images::push "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${SPRYKER_PROJECT_NAME}-${application}:${tag}" &
@@ -78,7 +79,8 @@ function Images::pushApplications() {
 #    wait
 
     Images::push "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${SPRYKER_PROJECT_NAME}-jenkins:latest" &
-    Images::push "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${SPRYKER_PROJECT_NAME}-pipeline:latest" &
+    # Using zstd compressed image as Codebuild environment images isn't yet supported by AWS Codebuild
+    docker push "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${SPRYKER_PROJECT_NAME}-pipeline:latest" &
     for application in "${SPRYKER_APPLICATIONS[@]}"; do
         local application="$(echo "$application" | tr '[:upper:]' '[:lower:]')"
         Images::push "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${SPRYKER_PROJECT_NAME}-${application}:latest" &
