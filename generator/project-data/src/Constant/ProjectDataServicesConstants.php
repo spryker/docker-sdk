@@ -12,9 +12,7 @@ interface ProjectDataServicesConstants
     const BROKER_KEY = 'broker';
     const KEY_VALUE_STORE_KEY = 'key_value_store';
     const SESSION_KEY = 'session';
-
     const SERVICES_NAMESPACE_KEY = 'namespace';
-
     const SERVICES_KEY = 'services';
     const SERVICE_PORT_KEY = 'port';
     const SERVICE_API_KEY = 'api';

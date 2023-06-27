@@ -7,7 +7,7 @@
 
 namespace ProjectData\DataBuilder\DataBuilder;
 
-abstract class AbstractDataBuilder implements DataBuilderInterface
+abstract class AbstractDataBuilderStrategy implements DataBuilderStrategyInterface
 {
     /**
      * @var \ProjectData\DataBuilder\DataExecutor\DataExecutorInterface[]

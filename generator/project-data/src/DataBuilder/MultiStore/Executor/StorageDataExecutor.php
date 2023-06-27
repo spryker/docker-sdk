@@ -14,6 +14,8 @@ use ProjectData\DataBuilder\DataExecutor\DataExecutorInterface;
 
 class StorageDataExecutor implements DataExecutorInterface
 {
+    protected const DEFAULT_PORT = 6379;
+
     /**
      * @param array $projectData
      *
@@ -47,8 +49,6 @@ class StorageDataExecutor implements DataExecutorInterface
         $storageData = $projectData[ProjectDataStorageDataConstants::STORAGE_DATA_KEY] ?? [];
         $storageServices = $storageData[ProjectDataStorageDataConstants::STORAGE_DATA_SERVICE_KEY] ?? [];
 
-        $defaultPort = 6379;
-
         foreach ($regions as $regionData) {
             $regionServices = $regionData[ProjectDataServicesConstants::SERVICES_KEY] ?? [];
 
@@ -58,7 +58,7 @@ class StorageDataExecutor implements DataExecutorInterface
                         '%s:%s:%s:%s',
                         $serviceName,
                         $serviceName,
-                        $defaultPort,
+                        static::DEFAULT_PORT,
                         $serviceNamespace[ProjectDataServicesConstants::SERVICES_NAMESPACE_KEY]
                     );
                 }

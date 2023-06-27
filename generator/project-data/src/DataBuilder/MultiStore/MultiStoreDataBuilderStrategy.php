@@ -7,11 +7,21 @@
 
 namespace ProjectData\DataBuilder\MultiStore;
 
-use ProjectData\DataBuilder\DataBuilder\AbstractDataBuilder;
+use ProjectData\DataBuilder\DataBuilder\AbstractDataBuilderStrategy;
 use ProjectData\DataReader\ProjectDataReader;
 
-class MultiStoreDataBuilder extends AbstractDataBuilder
+class MultiStoreDataBuilderStrategy extends AbstractDataBuilderStrategy
 {
+    /**
+     * @param array $projectData
+     *
+     * @return bool
+     */
+    public function isApplicable(array $projectData): bool
+    {
+        return ProjectDataReader::isDynamicStoreModeEnabled($projectData);
+    }
+
     /**
      * @param array $projectData
      *
@@ -19,10 +29,6 @@ class MultiStoreDataBuilder extends AbstractDataBuilder
      */
     public function build(array $projectData): array
     {
-        if (!ProjectDataReader::isDynamicStoreModeEnabled($projectData)) {
-            return $projectData;
-        }
-
         return parent::build($projectData);
     }
 }

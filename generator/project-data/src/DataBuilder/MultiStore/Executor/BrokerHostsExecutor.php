@@ -17,7 +17,7 @@ class BrokerHostsExecutor implements DataExecutorInterface
     public function exec(array $projectData): array
     {
         $hosts = [];
-        $regions = $projectData[ProjectDataRegionsConstants::REGIONS_KEY] ?? [];;
+        $regions = $projectData[ProjectDataRegionsConstants::REGIONS_KEY] ?? [];
 
         foreach ($regions as $regionData) {
             $services = $regionData[ProjectDataServicesConstants::SERVICES_KEY] ?? [];

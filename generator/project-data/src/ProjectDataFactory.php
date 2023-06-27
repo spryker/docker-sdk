@@ -7,21 +7,20 @@
 
 namespace ProjectData;
 
-use ProjectData\DataBuilder\DataBuilder\DataBuilderInterface;
+use ProjectData\DataBuilder\DataBuilder\DataBuilderStrategyInterface;
 use ProjectData\DataBuilder\MultiStore\Executor\BrokerHostsExecutor as MultiStoreBrokerHostsExecutor;
 use ProjectData\DataBuilder\MultiStore\Executor\DynamicStoreModeExecutor;
-use ProjectData\DataBuilder\MultiStore\Executor\EntrypointIdentifierExecutor;
 use ProjectData\DataBuilder\MultiStore\Executor\StorageDataExecutor;
 use ProjectData\DataBuilder\MultiStore\Executor\StoreSpecific\StoreSpecificBrokerExecutor;
 use ProjectData\DataBuilder\MultiStore\Executor\StoreSpecific\StoreSpecificKeyValueStoreExecutor;
 use ProjectData\DataBuilder\MultiStore\Executor\StoreSpecific\StoreSpecificSessionExecutor;
-use ProjectData\DataBuilder\MultiStore\MultiStoreDataBuilder;
+use ProjectData\DataBuilder\MultiStore\MultiStoreDataBuilderStrategy;
 use ProjectData\DataBuilder\ProjectData\Executor\BrokerConnectionsExecutor;
 use ProjectData\DataBuilder\ProjectData\Executor\BrokerHostsExecutor;
 use ProjectData\DataBuilder\ProjectData\Executor\CloudBrokerConnectionsExecutor;
 use ProjectData\DataBuilder\ProjectData\Executor\EndpointIdentifierExecutor;
 use ProjectData\DataBuilder\ProjectData\Executor\KeyValueStoreConnectionsExecutor;
-use ProjectData\DataBuilder\ProjectData\ProjectDataBuilder;
+use ProjectData\DataBuilder\ProjectData\ProjectDataBuilderStrategy;
 use ProjectData\DataBuilder\ProjectDataBuildProcessor;
 
 class ProjectDataFactory
@@ -33,17 +32,17 @@ class ProjectDataFactory
     public function createProjectDataBuildProcessor(): ProjectDataBuildProcessor
     {
         return new ProjectDataBuildProcessor([
-            $this->createProjectDataBuilder(),
-            $this->createMultiStoreDataBuilder(),
+            $this->createProjectDataBuilderStrategy(),
+            $this->createMultiStoreDataBuilderStrategy(),
         ]);
     }
 
     /**
-     * @return \ProjectData\DataBuilder\DataBuilder\DataBuilderInterface
+     * @return \ProjectData\DataBuilder\DataBuilder\DataBuilderStrategyInterface
      */
-    public function createMultiStoreDataBuilder(): DataBuilderInterface
+    public function createMultiStoreDataBuilderStrategy(): DataBuilderStrategyInterface
     {
-        return new MultiStoreDataBuilder(
+        return new MultiStoreDataBuilderStrategy(
             $this->getMultiStoreExecutorList(),
         );
     }
@@ -64,11 +63,11 @@ class ProjectDataFactory
     }
 
     /**
-     * @return \ProjectData\DataBuilder\DataBuilder\DataBuilderInterface
+     * @return \ProjectData\DataBuilder\DataBuilder\DataBuilderStrategyInterface
      */
-    public function createProjectDataBuilder(): DataBuilderInterface
+    public function createProjectDataBuilderStrategy(): DataBuilderStrategyInterface
     {
-        return new ProjectDataBuilder(
+        return new ProjectDataBuilderStrategy(
             $this->getProjectDataExecutorList()
         );
     }

@@ -7,17 +7,15 @@
 
 namespace ProjectData\DataBuilder;
 
-use ProjectData\DataBuilder\DataBuilder\DataBuilderInterface;
-
 class ProjectDataBuildProcessor
 {
     /**
-     * @var DataBuilderInterface[]
+     * @var \ProjectData\DataBuilder\DataBuilder\DataBuilderStrategyInterface[]
      */
     protected array $dataBuilderList;
 
     /**
-     * @param DataBuilderInterface[] $dataBuilderList
+     * @param \ProjectData\DataBuilder\DataBuilder\DataBuilderStrategyInterface[] $dataBuilderList
      */
     public function __construct(array $dataBuilderList)
     {
@@ -32,6 +30,9 @@ class ProjectDataBuildProcessor
     public function run(array $projectData): array
     {
         foreach ($this->dataBuilderList as $dataBuilder) {
+            if (!$dataBuilder->isApplicable($projectData)) {
+                continue;
+            }
             $projectData = $dataBuilder->build($projectData);
         }
 

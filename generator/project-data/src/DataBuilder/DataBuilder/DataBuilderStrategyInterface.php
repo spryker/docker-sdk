@@ -7,8 +7,15 @@
 
 namespace ProjectData\DataBuilder\DataBuilder;
 
-interface DataBuilderInterface
+interface DataBuilderStrategyInterface
 {
+    /**
+     * @param array $projectData
+     *
+     * @return bool
+     */
+    public function isApplicable(array $projectData): bool;
+
     /**
      * @param array $projectData
      *
