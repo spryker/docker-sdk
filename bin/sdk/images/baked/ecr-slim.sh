@@ -110,6 +110,6 @@ function Images::push() {
     if [ -z "${SKOPEO_IMAGE_PUSH}" ] ; then
         docker push "$image_tag"
     else
-        skopeo copy --format oci --dest-compress-format zstd --dest-compress-level 1 docker-daemon:"${image_tag}" docker://"${image_tag}"
+        skopeo copy --dest-compress-format zstd --dest-compress-level 1 docker-daemon:"${image_tag}" docker://"${image_tag}"
     fi
 }
