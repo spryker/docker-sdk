@@ -3,7 +3,7 @@
 export DOCKER_BUILDKIT=1
 
 require docker tr
-require:linux ip grep awk
+require:linux grep awk
 require:macos ipconfig
 require:windows tail cut
 
@@ -87,7 +87,11 @@ function Environment::getHostIp() {
     case ${_PLATFORM} in
         linux)
             if ! Environment::isWSL; then
-                myIp=$(ip route get 1 | sed 's/^.*src \([^ ]*\).*$/\1/;q')
+                if command -v ip &> /dev/null; then
+                    myIp=$(ip route get 1 | sed 's/^.*src \([^ ]*\).*$/\1/;q')
+                else
+                    myIp=$(hostname -i | awk '{ print $1 }')
+                fi
             fi
             ;;
         macos)
