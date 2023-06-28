@@ -67,24 +67,22 @@ function Images::pushApplications() {
     local tag=${1:-${SPRYKER_DOCKER_TAG}}
 
     echo "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${SPRYKER_PROJECT_NAME}-cache:composer-cache-latest"
-    Images::push "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${SPRYKER_PROJECT_NAME}-cache:composer-cache-latest" &
+    docker push "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${SPRYKER_PROJECT_NAME}-cache:composer-cache-latest" &
 
-    Images::pushAddingLatestTag "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${SPRYKER_PROJECT_NAME}-jenkins" "${tag}" &
-    # Using zstd compressed image as Codebuild environment images isn't yet supported by AWS Codebuild
-    Images::pushAddingLatestTag "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${SPRYKER_PROJECT_NAME}-pipeline" "${tag}" "true" &
+    docker push "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${SPRYKER_PROJECT_NAME}-jenkins:${tag}" &
+    docker push "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${SPRYKER_PROJECT_NAME}-pipeline:${tag}" &
     for application in "${SPRYKER_APPLICATIONS[@]}"; do
         local application="$(echo "$application" | tr '[:upper:]' '[:lower:]')"
-        Images::pushAddingLatestTag "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${SPRYKER_PROJECT_NAME}-${application}" "${tag}" &
+        docker push "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${SPRYKER_PROJECT_NAME}-${application}:${tag}" &
     done
 #    wait
 
-#    Images::push "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${SPRYKER_PROJECT_NAME}-jenkins:latest" &
-#    # Using zstd compressed image as Codebuild environment images isn't yet supported by AWS Codebuild
-#    docker push "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${SPRYKER_PROJECT_NAME}-pipeline:latest" &
-#    for application in "${SPRYKER_APPLICATIONS[@]}"; do
-#        local application="$(echo "$application" | tr '[:upper:]' '[:lower:]')"
-#        Images::push "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${SPRYKER_PROJECT_NAME}-${application}:latest" &
-#    done
+    docker push "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${SPRYKER_PROJECT_NAME}-jenkins:latest" &
+    docker push "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${SPRYKER_PROJECT_NAME}-pipeline:latest" &
+    for application in "${SPRYKER_APPLICATIONS[@]}"; do
+        local application="$(echo "$application" | tr '[:upper:]' '[:lower:]')"
+        docker push "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${SPRYKER_PROJECT_NAME}-${application}:latest" &
+    done
 #    wait
 }
 
@@ -93,38 +91,15 @@ function Images::pushAssets() {
     local tag=${1:-${SPRYKER_DOCKER_TAG}}
 
     echo "Pushing assets to ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${SPRYKER_PROJECT_NAME}-cache:node-cache-latest"
-    Images::push "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${SPRYKER_PROJECT_NAME}-cache:node-cache-latest" &
+    docker push "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${SPRYKER_PROJECT_NAME}-cache:node-cache-latest" &
 }
 
 function Images::pushFrontend() {
     Console::verbose "${INFO}Pushing frontend image to AWS ECR${NC}"
     local tag=${1:-${SPRYKER_DOCKER_TAG}}
 
-    Images::pushAddingLatestTag "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${SPRYKER_PROJECT_NAME}-frontend" "${tag}" &
+    docker push "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${SPRYKER_PROJECT_NAME}-frontend:${tag}" &
 #    wait
-#    Images::push "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${SPRYKER_PROJECT_NAME}-frontend:latest" &
+    docker push "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${SPRYKER_PROJECT_NAME}-frontend:latest" &
 #    wait
-}
-
-function Images::push() {
-    local image_tag=${1}
-
-    if [ -z "${SKOPEO_IMAGE_PUSH}" ] ; then
-        docker push "${image_tag}"
-    else
-        skopeo --debug copy --dest-precompute-digests --dest-compress-format zstd --dest-compress-level 1 docker-daemon:"${image_tag}" oci://"${image_tag}"
-    fi
-}
-
-function Images::pushAddingLatestTag() {
-    local image=${1}
-    local tag=${2}
-    local force_using_docker=${3}
-
-    if [ -z "${SKOPEO_IMAGE_PUSH}" ] || [ -n "${force_using_docker}" ] ; then
-        docker push "${image}:${tag}"
-        docker push "${image}:latest"
-    else
-        skopeo --debug copy --additional-tag "${image}:latest" --dest-precompute-digests --dest-compress-format zstd --dest-compress-level 1 docker-daemon:"${image}:${tag}" oci://"${image}:${tag}"
-    fi
 }
