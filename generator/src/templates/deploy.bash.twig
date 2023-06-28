@@ -103,7 +103,7 @@ readonly DEPLOYMENT_DIR="$(cd "${BASH_SOURCE%/*}" >/dev/null 2>&1 && pwd)"
 readonly DEPLOYMENT_PATH="${DEPLOYMENT_DIR/$PROJECT_DIR/.}"
 readonly SECRETS_FILE_PATH="${DEPLOYMENT_DIR}/.secrets"
 readonly SPRYKER_SDK_REVISION="{{ _sdk_revision | raw }}"
-readonly PROGRESS_TYPE=${PROGRESS_TYPE:-tty}
+readonly PROGRESS_TYPE=${PROGRESS_TYPE:-auto}
 VERBOSE=${VERBOSE:-0}
 
 # Predefined constants
