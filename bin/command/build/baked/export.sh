@@ -90,6 +90,7 @@ function Command::export() {
 
             # We do it asynchronously in the beginning to avoid additional waiting time later on during the assets build
             Images::importNodeCache &
+            import_node_cache_pid=$!
 
             Images::buildApplication --force
             Images::tagApplications "${tag}"
@@ -98,7 +99,7 @@ function Command::export() {
             fi
 
             # Ensure Images::importNodeCache is finished
-            wait
+            wait $import_node_cache_pid
 
             Assets::build --force
             if [ -n "${pushDestination}" ]; then
