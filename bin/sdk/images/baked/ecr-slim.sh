@@ -125,6 +125,6 @@ function Images::pushAddingLatestTag() {
         docker push "${image}:${tag}"
         docker push "${image}:latest"
     else
-        skopeo copy --additional-tag latest --retry-times 2 --dest-precompute-digests --dest-compress-format zstd --dest-compress-level 1 docker-daemon:"${image}:${tag}" docker://"${image}:${tag}"
+        skopeo copy --additional-tag "${image}:latest" --retry-times 2 --dest-precompute-digests --dest-compress-format zstd --dest-compress-level 1 docker-daemon:"${image}:${tag}" docker://"${image}:${tag}"
     fi
 }
