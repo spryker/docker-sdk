@@ -1,10 +1,17 @@
-# syntax = docker/dockerfile:experimental
-ARG SPRYKER_PARENT_IMAGE
-ARG SPRYKER_ASSETS_BUILDER_IMAGE
+FROM frontend-basic as frontend-before-stamp
+LABEL "spryker.image" "none"
 
-FROM ${SPRYKER_ASSETS_BUILDER_IMAGE} as assets-builder
+RUN mkdir -p ${srcRoot}/public && chmod 0777 ${srcRoot}/public
+COPY --from=assets-builder --chown=root:root ${srcRoot}/public ${srcRoot}/public
 
-FROM ${SPRYKER_PARENT_IMAGE} as frontend-production
+FROM frontend-before-stamp as frontend
+LABEL "spryker.image" "frontend"
 
-RUN mkdir -p /data/public && chmod 0777 /data/public
-COPY --from=assets-builder --chown=root:root /data/public /data/public
+ARG SPRYKER_BUILD_HASH
+ENV SPRYKER_BUILD_HASH=${SPRYKER_BUILD_HASH}
+ARG SPRYKER_BUILD_STAMP
+ENV SPRYKER_BUILD_STAMP=${SPRYKER_BUILD_STAMP}
+
+RUN mkdir -p /usr/share/nginx/ \
+  && envsubst '${SPRYKER_BUILD_HASH} ${SPRYKER_BUILD_STAMP}' < /tmp/build.json > /usr/share/nginx/build.json \
+  && rm -f /tmp/build.json

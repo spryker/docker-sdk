@@ -2,7 +2,7 @@
 
 import sdk/images/common.sh
 
-function Images::buildApplication() {
+function Images::build() {
     for arg in "${@}"; do
         case "${arg}" in
             '--force')
@@ -12,31 +12,15 @@ function Images::buildApplication() {
                 # TODO implement --no-cache for build images
                 ;;
             *)
-                Console::verbose "\nUnknown option ${INFO}${arg}${WARN} is acquired for Images::buildApplication."
+                Console::verbose "\nUnknown option ${INFO}${arg}${WARN} is acquired for Images::build."
                 ;;
         esac
     done
 
-    Images::_buildApp mount
-    Images::tagApplications "${SPRYKER_DOCKER_TAG}"
+    Images::_build mount
 }
 
-function Images::buildFrontend() {
-    for arg in "${@}"; do
-        case "${arg}" in
-            '--force')
-                # it is always it.
-                ;;
-            '--no-cache')
-                # TODO implement --no-cache for build images
-                ;;
-            *)
-                Console::verbose "\nUnknown option ${INFO}${arg}${WARN} is acquired for Images::buildFrontend."
-                ;;
-        esac
-    done
-
-    Images::_buildFrontend mount
-    Images::_buildGateway
-    Images::tagFrontend "${SPRYKER_DOCKER_TAG}"
+function Images::export() {
+    Console::error "Export is not available in development mode."
+    exit 1
 }

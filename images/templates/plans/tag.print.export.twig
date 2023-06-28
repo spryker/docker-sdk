@@ -1,0 +1,2 @@
+{% macro tagApplication(application, separator) %}"${SPRYKER_DOCKER_PREFIX}_app:${TARGET_TAG}-{{ application | lower }}"{{ separator }}{% endmacro %}
+{% macro tagService(service, separator) %}"${SPRYKER_DOCKER_PREFIX}-{{ service | lower }}:${TARGET_TAG}-{{ service | lower }}"{{ separator }}{% endmacro %}

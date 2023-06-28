@@ -13,18 +13,15 @@ function Command::build() {
     subCommand=${1}
     case ${subCommand} in
         images | image)
-            Images::buildApplication --force
-            Assets::build
-            Images::buildFrontend --force
+            Images::build --force
             ;;
         assets | asset)
+            Images::build --force
             Assets::build --force
-            Images::buildFrontend --force
             ;;
         '')
-            Images::buildApplication --force
+            Images::build --force
             Assets::build --force
-            Images::buildFrontend --force
             ;;
         *)
             Console::error "Unknown build target '${subCommand}' is occurred. No action." >&2

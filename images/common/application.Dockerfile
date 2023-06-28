@@ -1,15 +1,5 @@
-# syntax = docker/dockerfile:experimental
-ARG SPRYKER_PLATFORM_IMAGE=spryker/php:7.3
-ARG SPRYKER_NODE_IMAGE_VERSION
-ARG SPRYKER_NODE_IMAGE_DISTRO
-
-FROM node:${SPRYKER_NODE_IMAGE_VERSION}-${SPRYKER_NODE_IMAGE_DISTRO} AS node
-
-ARG SPRYKER_NPM_VERSION
-
-RUN npm install -g npm@${SPRYKER_NPM_VERSION}
-
 FROM ${SPRYKER_PLATFORM_IMAGE} AS application-basic
+LABEL "spryker.image" "none"
 
 ENV SPRYKER_IN_DOCKER=1
 ENV COMPOSER_IGNORE_CHROMEDRIVER=1
@@ -41,10 +31,11 @@ ENV PHP_FPM_PM_MAX_REQUESTS=500
 ENV PHP_FPM_REQUEST_TERMINATE_TIMEOUT=1m
 
 # PHP configuration
-COPY php/php-fpm.d/worker.conf /usr/local/etc/php-fpm.d/worker.conf
+ARG DEPLOYMENT_PATH
+COPY ${DEPLOYMENT_PATH}/context/php/php-fpm.d/worker.conf /usr/local/etc/php-fpm.d/worker.conf
 RUN bash -c "php -r 'exit(PHP_VERSION_ID > 70400 ? 1 : 0);' && sed -i '' -e 's/decorate_workers_output/;decorate_workers_output/g' /usr/local/etc/php-fpm.d/worker.conf || true"
-COPY php/php.ini /usr/local/etc/php/
-COPY php/conf.d/90-opcache.ini /usr/local/etc/php/conf.d
+COPY ${DEPLOYMENT_PATH}/context/php/php.ini /usr/local/etc/php/
+COPY ${DEPLOYMENT_PATH}/context/php/conf.d/90-opcache.ini /usr/local/etc/php/conf.d
 # removing default opcache.ini
 RUN rm -f /usr/local/etc/php/conf.d/opcache.ini
 
@@ -54,17 +45,10 @@ RUN mv /usr/local/etc/php/disabled/{{phpExtention}}.ini /usr/local/etc/php/conf.
 {% endfor %}
 {% endif %}
 
-COPY php/conf.d/99-from-deploy-yaml-php.ini /usr/local/etc/php/conf.d/
+COPY ${DEPLOYMENT_PATH}/context/php/conf.d/99-from-deploy-yaml-php.ini /usr/local/etc/php/conf.d/
 
 # Jenkins
-COPY --chown=spryker:spryker jenkins/jenkins.docker.xml.twig /home/spryker/jenkins.docker.xml.twig
+COPY --chown=spryker:spryker ${DEPLOYMENT_PATH}/context/jenkins/jenkins.docker.xml.twig /home/spryker/jenkins.docker.xml.twig
 
 # Build info
-COPY --chown=spryker:spryker php/build.php /home/spryker/build.php
-
-# NodeJS + NPM
-COPY --from=node /usr/lib /usr/lib
-COPY --from=node /usr/local/share /usr/local/share
-COPY --from=node /usr/local/lib /usr/local/lib
-COPY --from=node /usr/local/include /usr/local/include
-COPY --from=node /usr/local/bin /usr/local/bin
+COPY --chown=spryker:spryker ${DEPLOYMENT_PATH}/context/php/build.php /home/spryker/build.php

@@ -1,7 +1,12 @@
-# syntax = docker/dockerfile:experimental
-ARG SPRYKER_PARENT_IMAGE
+FROM pipeline-basic as pipeline-before-stamp
+LABEL "spryker.image" "none"
 
-FROM ${SPRYKER_PARENT_IMAGE} as cli-development
+USER spryker
 
-ENV DEVELOPMENT_CONSOLE_COMMANDS=1
+FROM pipeline-before-stamp as pipeline
+LABEL "spryker.image" "pipeline"
 
+ARG SPRYKER_BUILD_HASH
+ENV SPRYKER_BUILD_HASH=${SPRYKER_BUILD_HASH}
+ARG SPRYKER_BUILD_STAMP
+ENV SPRYKER_BUILD_STAMP=${SPRYKER_BUILD_STAMP}

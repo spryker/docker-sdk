@@ -1,4 +1,5 @@
 FROM node:alpine AS dashboard
+LABEL "spryker.image" "dashboard"
 
 RUN mkdir -p /dashboard
 WORKDIR /dashboard

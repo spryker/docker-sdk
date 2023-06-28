@@ -1,4 +1,5 @@
-FROM debian:stable-slim AS tideways-daemon
+FROM debian:stable-slim AS tidewaysDaemon
+LABEL "spryker.image" "tideways-deamon"
 
 ARG TIDEWAYS_ENVIRONMENT_DEFAULT=production
 ENV TIDEWAYS_ENVIRONMENT=$TIDEWAYS_ENVIRONMENT_DEFAULT

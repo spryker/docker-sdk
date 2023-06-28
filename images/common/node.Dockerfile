@@ -1,0 +1,5 @@
+FROM node:${SPRYKER_NODE_IMAGE_VERSION}-${SPRYKER_NODE_IMAGE_DISTRO} AS node-distributive
+LABEL "spryker.image" "none"
+
+ARG SPRYKER_NPM_VERSION
+RUN npm install -g npm@${SPRYKER_NPM_VERSION}

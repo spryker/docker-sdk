@@ -16,7 +16,7 @@ COPY --chown=spryker:spryker deploy-file-generator ${srcRoot}/deploy-file-genera
 USER root
 
 ARG USER_UID
-RUN usermod -u ${USER_UID} spryker && find / -user 1000 -exec chown -h spryker {} \ || true;
+RUN usermod -u ${USER_UID} spryker && find / -user 1000 -exec chown -h spryker {} \; || true;
 
 USER spryker
 

@@ -2,7 +2,7 @@
 {% set port = docker['mount'][_mountMode]['anticache']['port'] | default(8998) %}
 {% if enabled is not empty %}
   anticache:
-    image: ${SPRYKER_DOCKER_PREFIX}_cli:${SPRYKER_DOCKER_TAG}
+    image: ${SPRYKER_DOCKER_PREFIX}_run_cli:${SPRYKER_DOCKER_TAG}
     ports:
       - "{{ port }}:8998"
     healthcheck:
