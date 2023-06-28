@@ -69,22 +69,22 @@ function Images::pushApplications() {
     echo "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${SPRYKER_PROJECT_NAME}-cache:composer-cache-latest"
     Images::push "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${SPRYKER_PROJECT_NAME}-cache:composer-cache-latest" &
 
-    Images::push "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${SPRYKER_PROJECT_NAME}-jenkins:${tag}" &
+    Images::pushAddingLatestTag "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${SPRYKER_PROJECT_NAME}-jenkins" "${tag}" &
     # Using zstd compressed image as Codebuild environment images isn't yet supported by AWS Codebuild
-    docker push "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${SPRYKER_PROJECT_NAME}-pipeline:${tag}" &
+    Images::pushAddingLatestTag "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${SPRYKER_PROJECT_NAME}-pipeline" "${tag}" "true" &
     for application in "${SPRYKER_APPLICATIONS[@]}"; do
         local application="$(echo "$application" | tr '[:upper:]' '[:lower:]')"
-        Images::push "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${SPRYKER_PROJECT_NAME}-${application}:${tag}" &
+        Images::pushAddingLatestTag "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${SPRYKER_PROJECT_NAME}-${application}" "${tag}" &
     done
 #    wait
 
-    Images::push "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${SPRYKER_PROJECT_NAME}-jenkins:latest" &
-    # Using zstd compressed image as Codebuild environment images isn't yet supported by AWS Codebuild
-    docker push "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${SPRYKER_PROJECT_NAME}-pipeline:latest" &
-    for application in "${SPRYKER_APPLICATIONS[@]}"; do
-        local application="$(echo "$application" | tr '[:upper:]' '[:lower:]')"
-        Images::push "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${SPRYKER_PROJECT_NAME}-${application}:latest" &
-    done
+#    Images::push "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${SPRYKER_PROJECT_NAME}-jenkins:latest" &
+#    # Using zstd compressed image as Codebuild environment images isn't yet supported by AWS Codebuild
+#    docker push "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${SPRYKER_PROJECT_NAME}-pipeline:latest" &
+#    for application in "${SPRYKER_APPLICATIONS[@]}"; do
+#        local application="$(echo "$application" | tr '[:upper:]' '[:lower:]')"
+#        Images::push "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${SPRYKER_PROJECT_NAME}-${application}:latest" &
+#    done
 #    wait
 }
 
@@ -100,9 +100,9 @@ function Images::pushFrontend() {
     Console::verbose "${INFO}Pushing frontend image to AWS ECR${NC}"
     local tag=${1:-${SPRYKER_DOCKER_TAG}}
 
-    Images::push "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${SPRYKER_PROJECT_NAME}-frontend:${tag}" &
+    Images::pushAddingLatestTag "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${SPRYKER_PROJECT_NAME}-frontend" "${tag}" &
 #    wait
-    Images::push "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${SPRYKER_PROJECT_NAME}-frontend:latest" &
+#    Images::push "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${SPRYKER_PROJECT_NAME}-frontend:latest" &
 #    wait
 }
 
@@ -110,8 +110,21 @@ function Images::push() {
     local image_tag=${1}
 
     if [ -z "${SKOPEO_IMAGE_PUSH}" ] ; then
-        docker push "$image_tag"
+        docker push "${image_tag}"
     else
-        skopeo copy --dest-compress-format zstd --dest-compress-level 1 docker-daemon:"${image_tag}" docker://"${image_tag}"
+        skopeo copy --retry-times 2 --dest-precompute-digests --dest-compress-format zstd --dest-compress-level 1 docker-daemon:"${image_tag}" docker://"${image_tag}"
+    fi
+}
+
+function Images::pushAddingLatestTag() {
+    local image=${1}
+    local tag=${2}
+    local force_using_docker=${3}
+
+    if [ -z "${SKOPEO_IMAGE_PUSH}" ] || [ -n "${force_using_docker}" ] ; then
+        docker push "${image}:${tag}"
+        docker push "${image}:latest"
+    else
+        skopeo copy --additional-tag latest --retry-times 2 --dest-precompute-digests --dest-compress-format zstd --dest-compress-level 1 docker-daemon:"${image}:${tag}" docker://"${image}:${tag}"
     fi
 }
