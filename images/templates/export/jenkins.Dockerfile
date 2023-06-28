@@ -44,7 +44,7 @@ RUN --mount=type=cache,id=aptlib,sharing=locked,target=/var/lib/apt \
 COPY ${DEPLOYMENT_PATH}/terraform/cli /envs/
 COPY ${DEPLOYMENT_PATH}/context/jenkins/export/entrypoint.sh /entrypoint.sh
 COPY ${DEPLOYMENT_PATH}/context/jenkins/export/jenkins.model.JenkinsLocationConfiguration.xml /opt/jenkins.model.JenkinsLocationConfiguration.xml
-COPY context/jenkins/export/nr-credentials.xml /opt/nr-credentials.xml
+COPY ${DEPLOYMENT_PATH}/context/jenkins/export/nr-credentials.xml /opt/nr-credentials.xml
 RUN chmod +x /entrypoint.sh
 
 ENTRYPOINT ["/entrypoint.sh"]
