@@ -32,7 +32,6 @@ function Images::_build::perform() {
 
     arguments+=($(Images::_build::prepareArguments))
 
-    local -a pids
     local targetData
     for targetData in "${TARGET_TAGS[@]}"; do
         eval "${targetData}"
@@ -49,16 +48,10 @@ function Images::_build::perform() {
         Console::verbose "${YELLOW}Hash:${NC}"
         Images::build::_runBuild --target "${TARGET}" "${arguments[@]}" "${tagArguments[@]}"
 
-        Images::_build::afterTaggingAnImage "${TAGS[@]}" &
-        pids+=($!)
+        Images::_build::afterTaggingAnImage "${TAGS[@]}"
     done
 
     docker rmi -f "${targetImage}" >/dev/null 2>&1 || true
-
-    local pid
-    for pid in "$pids[@]"; do
-        wait $pid || exit 1
-    done
 }
 
 function Images::build::_runBuild {

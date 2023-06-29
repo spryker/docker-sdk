@@ -32,7 +32,7 @@ function Images::_build() {
 
     # Checking availability of docker bake or buildx
     if docker buildx >/dev/null 2>&1; then
-        if Images::_checkBuildxVersion "0.8.99"; then
+        if Images::_checkBuildxVersion "0.6.99"; then
             import sdk/images/engine/bake.sh
         else
             import sdk/images/engine/buildx.sh
