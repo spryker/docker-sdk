@@ -1,7 +1,9 @@
 {% import "images/templates/plans/tag." ~ buildDestination ~ "." ~ tagMode ~ ".twig" as tagMacro %}
 group "default" {
     targets = [
-        "application",
+{% for application in _applications %}
+        "app-{{ application | lower }}",
+{% endfor %}
         "frontend",
         "pipeline",
         "jenkins",
@@ -10,15 +12,16 @@ group "default" {
 
 {% include "images/templates/plans/common.docker-bake.hcl" with { folder: 'export'} %}
 
-target "application" {
+{% for application in _applications %}
+target "app-{{ application | lower }}" {
     inherits = ["_common"]
     target = "application"
     tags = [
-{% for application in _applications %}
         {{ tagMacro.tagApplication(application, ",\n        ") | spaceless }}
-{% endfor %}
     ]
 }
+
+{% endfor %}
 
 target "frontend" {
     inherits = ["_common"]
