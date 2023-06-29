@@ -18,13 +18,29 @@ function Images::destroy() {
     docker rmi -f "${SPRYKER_PLATFORM_IMAGE}" 2>/dev/null || true
 }
 
+function Images::_checkBuildxVersion() {
+    min_version=${1}
+    version_regex="v([0-9]+\.[0-9]+\.[0-9]+)"
+    actual_version=$([[ $(docker buildx version) =~ $version_regex ]] && echo "${BASH_REMATCH[1]}")
+    greater_version=$(printf "%s\n%s\n" "${actual_version}" "${min_version}" | sort -t '.' -k 1,1 -k 2,2 -k 3,3 -g | tail -n 1)
+    if [ "$min_version" == "$greater_version" ]; then
+        return "${FALSE}"
+    fi
+}
+
 function Images::_build() {
 
-    # Checking availability of docker bake
-    if docker buildx --help | grep bake >/dev/null 2>&1; then
-        import sdk/images/engine/bake.sh
+    # Checking availability of docker bake or buildx
+    if docker buildx >/dev/null 2>&1; then
+        if Images::_checkBuildxVersion "0.8.99"; then
+            import sdk/images/engine/bake.sh
+        else
+            import sdk/images/engine/buildx.sh
+            Console::warn 'Warning! Upgrade `buildx` docker plugin to the latest version for better performance'
+        fi
     else
         import sdk/images/engine/build.sh
+        Console::warn 'Warning! Install `buildx` docker plugin for better performance'
     fi
 
     # Using temporary file for secrets as `docker secret` is only available for swarm mode.

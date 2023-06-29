@@ -29,8 +29,6 @@ LABEL "spryker.image" "none"
 
 USER spryker
 
-RUN composer dump-autoload -o
-
 ARG SPRYKER_PIPELINE
 ENV SPRYKER_PIPELINE=${SPRYKER_PIPELINE}
 ARG SPRYKER_DB_ENGINE
