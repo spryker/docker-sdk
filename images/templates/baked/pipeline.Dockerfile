@@ -10,7 +10,7 @@ RUN --mount=type=cache,id=composer,sharing=locked,target=/home/spryker/.composer
   --mount=type=ssh,uid=1000 --mount=type=secret,id=secrets-env,uid=1000 \
   set -o allexport && . /run/secrets/secrets-env && set +o allexport \
   && composer install --no-interaction \
-  && find ./vendor -type d -name \.git -prune -exec rm -rf {} +
+  && find ./vendor -type d -name "\.git*" -prune -exec rm -rf {}/** +
 
 # Tests contain transfer declaration
 COPY --chown=spryker:spryker tests ${srcRoot}/tests
