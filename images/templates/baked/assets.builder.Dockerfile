@@ -54,7 +54,7 @@ ENV SPRYKER_PIPELINE=${SPRYKER_PIPELINE}
 COPY --from=npm-precacher /tmp/.dependency* /tmp/
 
 RUN --mount=type=cache,id=npm,sharing=locked,target=/home/spryker/.npm,uid=1000 \
-    --mount=type=cache,id=node_modules,sharing=locked,target=${srcRoot}/node_modules \
+    --mount=type=cache,id=node_modules,sharing=locked,target=${srcRoot}/node_modules,uid=1000 \
     echo "MODE: ${SPRYKER_ASSETS_MODE}" \
     && vendor/bin/console transfer:generate \
     && vendor/bin/install -r ${SPRYKER_PIPELINE} -s build-static -s build-static-${SPRYKER_ASSETS_MODE} -vvv
