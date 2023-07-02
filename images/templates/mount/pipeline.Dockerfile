@@ -1,7 +1,7 @@
 FROM pipeline-basic as pipeline-before-stamp
 LABEL "spryker.image" "none"
 
-USER spryker
+USER spryker:spryker
 
 FROM pipeline-before-stamp as pipeline
 LABEL "spryker.image" "pipeline"

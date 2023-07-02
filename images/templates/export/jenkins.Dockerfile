@@ -4,12 +4,16 @@ LABEL "spryker.image" "none"
 FROM application-before-stamp as jenkins
 LABEL "spryker.image" "jenkins"
 
-EXPOSE 8080
 COPY ${DEPLOYMENT_PATH}/context/jenkins/export/jenkins.docker.xml.twig ./config/Zed/cronjobs/jenkins.docker.xml.twig
 
-COPY --from=jenkins-boilerplate /usr/share/jenkins/ref/plugins /usr/share/jenkins/ref/plugins
-COPY --from=jenkins-boilerplate /usr/share/jenkins/jenkins.war /usr/share/jenkins/jenkins.war
-COPY --from=jenkins-boilerplate /usr/share/jenkins/jenkins-cli.jar /usr/share/jenkins/jenkins-cli.jar
+COPY --link --from=jenkins-boilerplate /usr/share/jenkins/ref/plugins /usr/share/jenkins/ref/plugins
+COPY --link --from=jenkins-boilerplate /usr/share/jenkins/jenkins.war /usr/share/jenkins/jenkins.war
+COPY --link --from=jenkins-boilerplate /usr/share/jenkins/jenkins-cli.jar /usr/share/jenkins/jenkins-cli.jar
+
+COPY --link ${DEPLOYMENT_PATH}/terraform/cli /envs/
+COPY --link --chmod=755 ${DEPLOYMENT_PATH}/context/jenkins/export/entrypoint.sh /entrypoint.sh
+COPY --link ${DEPLOYMENT_PATH}/context/jenkins/export/jenkins.model.JenkinsLocationConfiguration.xml /opt/jenkins.model.JenkinsLocationConfiguration.xml
+COPY --link ${DEPLOYMENT_PATH}/context/jenkins/export/nr-credentials.xml /opt/nr-credentials.xml
 
 # Install packages on Alpine
 RUN --mount=type=cache,id=apk,sharing=locked,target=/var/cache/apk mkdir -p /etc/apk && ln -vsf /var/cache/apk /etc/apk/cache && \
@@ -41,11 +45,7 @@ RUN --mount=type=cache,id=aptlib,sharing=locked,target=/var/lib/apt \
       mkdir -p /envs \
       ; fi'
 
-COPY ${DEPLOYMENT_PATH}/terraform/cli /envs/
-COPY ${DEPLOYMENT_PATH}/context/jenkins/export/entrypoint.sh /entrypoint.sh
-COPY ${DEPLOYMENT_PATH}/context/jenkins/export/jenkins.model.JenkinsLocationConfiguration.xml /opt/jenkins.model.JenkinsLocationConfiguration.xml
-COPY ${DEPLOYMENT_PATH}/context/jenkins/export/nr-credentials.xml /opt/nr-credentials.xml
-RUN chmod +x /entrypoint.sh
+EXPOSE 8080
 
 ENTRYPOINT ["/entrypoint.sh"]
 

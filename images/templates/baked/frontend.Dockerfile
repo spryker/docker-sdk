@@ -1,8 +1,7 @@
 FROM frontend-basic as frontend-before-stamp
 LABEL "spryker.image" "none"
 
-RUN mkdir -p ${srcRoot}/public && chmod 0777 ${srcRoot}/public
-COPY --from=assets-builder --chown=root:root ${srcRoot}/public ${srcRoot}/public
+COPY --from=assets-builder --link --chown=root:root --chmod=755 ${srcRoot}/public ${srcRoot}/public
 
 FROM frontend-before-stamp as frontend
 LABEL "spryker.image" "frontend"
