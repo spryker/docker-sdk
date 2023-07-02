@@ -51,8 +51,7 @@ RUN --mount=type=cache,id=composer,sharing=locked,target=/home/spryker/.composer
   --mount=type=ssh,uid=1000 --mount=type=secret,id=secrets-env,uid=1000 \
   --mount=type=cache,id=vendor,target=/data/vendor,uid=1000 \
   set -o allexport && . /run/secrets/secrets-env && set +o allexport \
-  && rm -rf vendor/composer \
-  && rm -rf vendor/bin \
+  && rm -rf vendor/** \
   && composer install --no-scripts --no-interaction ${SPRYKER_COMPOSER_MODE}
 
 # Dependency: rsync is needed for next steps
@@ -72,7 +71,7 @@ COPY --from=application-codebase --chown=spryker:spryker ${srcRoot}/composer.* $
 RUN --mount=type=cache,id=vendor,target=/vendor,uid=1000 \
   --mount=type=cache,id=rsync,target=/rsync,uid=1000 \
   --mount=type=tmpfs,target=/var/run/opcache/ \
-  LD_LIBRARY_PATH=/rsync time /rsync/rsync -ap --chown=spryker:spryker /vendor/ ./vendor/ --exclude '.git*/' \
+  LD_LIBRARY_PATH=/rsync /rsync/rsync -ap --chown=spryker:spryker /vendor/ ./vendor/ --exclude '.git*/' \
     --exclude 'tests/' --exclude 'assets/' --exclude '*.ts' --exclude '*.scss' --exclude '*.js' --exclude '*.md' \
     --exclude 'composer.json' --exclude 'composer.lock' --exclude 'codeception.yml' --exclude '.scrutinizer.yml'
 
