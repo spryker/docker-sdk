@@ -41,6 +41,7 @@ COPY --from=stash-data --chown=spryker:spryker /data-without-import ${srcRoot}/d
 COPY --from=npm-precacher /tmp/.dependency* /tmp/
 COPY --from=application-codebase /tmp/.dependency* /tmp/
 
+ARG SPRYKER_ASSETS_MODE
 RUN --mount=type=cache,id=npm,sharing=locked,target=/home/spryker/.npm,uid=1000 \
   --mount=type=cache,id=node_modules,sharing=locked,target=${srcRoot}/node_modules,uid=1000 \
   --mount=type=cache,id=vendor,target=/data/vendor,uid=1000 \
