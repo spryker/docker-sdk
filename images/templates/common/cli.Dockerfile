@@ -10,8 +10,8 @@ RUN mkdir -p /tmp/blackfire \
     && mv /tmp/blackfire/blackfire /usr/bin/blackfire \
     && rm -Rf /tmp/blackfire
 
-FROM pipeline-before-stamp as cli
-LABEL "spryker.image" "cli"
+FROM pipeline-before-stamp as cli-basic
+LABEL "spryker.image" "none"
 
 USER root
 
@@ -46,8 +46,3 @@ RUN mkdir -p /home/spryker/env \
   && mkdir -p /home/spryker/ssh-relay/ && chmod 777 /home/spryker/ssh-relay && touch /home/spryker/ssh-relay/ssh-auth.sock && chmod 666 /home/spryker/ssh-relay/ssh-auth.sock \
   && touch /tmp/stdout && touch /tmp/stderr && chmod 666 /tmp/stdout && chmod 666 /tmp/stderr \
   && mkdir -p /home/spryker/history && touch /home/spryker/history/.bash_history && chmod 0600 /home/spryker/history/.bash_history
-
-ARG SPRYKER_BUILD_HASH
-ENV SPRYKER_BUILD_HASH=${SPRYKER_BUILD_HASH}
-ARG SPRYKER_BUILD_STAMP
-ENV SPRYKER_BUILD_STAMP=${SPRYKER_BUILD_STAMP}

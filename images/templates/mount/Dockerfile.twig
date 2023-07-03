@@ -38,6 +38,10 @@
 # -----------------------------
 
 {% include "images/templates/common/cli.Dockerfile" with _context %}
+
+# -----------------------------
+
+{% include "images/templates/mount/cli.Dockerfile" with _context %}
 {%if _context['docker']['debug']['enabled'] %}
 {% include "images/templates/common/debug/cli.Dockerfile" with _context %}
 {%endif%}
