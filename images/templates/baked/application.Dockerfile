@@ -1,10 +1,3 @@
-FROM busybox AS stash-data
-LABEL "spryker.image" "none"
-
-COPY --chown=spryker:spryker data /data-without-import
-
-RUN rm -rf /data-without-import/import
-
 # -----------------------------
 
 FROM busybox AS stash-src
@@ -14,9 +7,17 @@ COPY --chown=spryker:spryker data /data-without-import
 RUN mkdir /data
 
 COPY src /data/src
+COPY public /data/public
 COPY config /data/config
 COPY resource[s] /data/resources
 COPY LICENSE /data
+
+FROM stash-src AS stash-src-with-data-excluding-import
+LABEL "spryker.image" "none"
+
+COPY data /data/data
+
+RUN rm -rf /data/data/import
 
 # -----------------------------
 
@@ -75,20 +76,15 @@ RUN --mount=type=cache,id=vendor,target=/vendor,uid=1000 \
     --include 'tests/dd.php' --exclude 'tests/*' --exclude 'assets/' --exclude '*.ts' --exclude '*.scss' --exclude '*.js' \
     --exclude '*.md' --exclude 'composer.json' --exclude 'composer.lock' --exclude 'codeception.yml' --exclude '.scrutinizer.yml'
 
-COPY --from=stash-src --chown=spryker:spryker /data ${srcRoot}
-COPY --from=stash-data --chown=spryker:spryker /data-without-import ${srcRoot}/data
+COPY --from=stash-src-with-data-excluding-import --chown=spryker:spryker /data ${srcRoot}
 
 ARG SPRYKER_COMPOSER_AUTOLOAD
 RUN --mount=type=tmpfs,target=/var/run/opcache/ \
   bash -c 'chmod 600 ${srcRoot}/config/Zed/*.key 2>/dev/null || true' \
-  && ls -al  \
   && vendor/bin/install -r ${SPRYKER_PIPELINE} -s build -s build-production \
   && composer dump-autoload ${SPRYKER_COMPOSER_AUTOLOAD}
 
-COPY --chown=spryker:spryker public ${srcRoot}/public
-
 USER root
-# RUN chown -R spryker:spryker /home/spryker
 
 CMD [ "php-fpm", "--nodaemonize" ]
 EXPOSE 9000

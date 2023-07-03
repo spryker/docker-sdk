@@ -32,10 +32,8 @@ USER spryker:spryker
 
 COPY --chown=spryker:spryker package.json* package-lock.json* tsconfig*.json .* *.* ${srcRoot}/
 COPY --chown=spryker:spryker frontend* ${srcRoot}/frontend
-COPY --chown=spryker:spryker public* ${srcRoot}/public
 COPY --chown=spryker:spryker .yarn* ${srcRoot}/.yarn
-COPY --from=stash-src --chown=spryker:spryker /data ${srcRoot}
-COPY --from=stash-data --chown=spryker:spryker /data-without-import ${srcRoot}/data
+COPY --from=stash-src-with-data-excluding-import --chown=spryker:spryker /data ${srcRoot}
 
 # This instruction is necessary to ouline dependency on precacher to make sure assets are built after
 COPY --from=npm-precacher /tmp/.dependency* /tmp/

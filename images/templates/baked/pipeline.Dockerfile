@@ -31,6 +31,7 @@ RUN --mount=type=cache,id=composer,sharing=locked,target=/home/spryker/.composer
   && bash -c 'if composer run --list | grep post-install-cmd; then composer run post-install-cmd; fi'
 
 COPY --from=stash-src --chown=spryker:spryker /data ${srcRoot}
+# Data with import
 COPY --chown=spryker:spryker data ${srcRoot}/data
 # Tests contain transfer declaration
 COPY --chown=spryker:spryker test[s] /${srcRoot}/tests
