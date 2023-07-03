@@ -30,7 +30,7 @@ RUN --mount=type=cache,id=apk,sharing=locked,target=/var/cache/apk mkdir -p /etc
 
 USER spryker:spryker
 
-COPY --chown=spryker:spryker package.json* package-lock.json* tsconfig*.json .* *.* ${srcRoot}/
+COPY --chown=spryker:spryker package.json* package-lock.json* tsconfig*.json .es*.* .npm* ${srcRoot}/
 COPY --chown=spryker:spryker frontend* ${srcRoot}/frontend
 COPY --chown=spryker:spryker .yarn* ${srcRoot}/.yarn
 COPY --from=stash-src-with-data-excluding-import --chown=spryker:spryker /data ${srcRoot}

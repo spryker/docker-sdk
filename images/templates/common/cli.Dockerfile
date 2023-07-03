@@ -36,6 +36,7 @@ RUN --mount=type=cache,id=apk,sharing=locked,target=/var/cache/apk mkdir -p /etc
 
 USER spryker:spryker
 
+ENV PATH=/home/spryker/bin:$PATH
 ENV HISTFILE=/home/spryker/history/.bash_history
 ENV NEWRELIC_ENABLED=0
 
