@@ -1,6 +1,6 @@
 FROM stash-src AS stash-src-after-app
 
-COPY --from=application-before-stamp ${srcRoot}/src /data/src
+COPY --from=application-before-stamp /data/src /data/src
 
 # -----------------------------
 
