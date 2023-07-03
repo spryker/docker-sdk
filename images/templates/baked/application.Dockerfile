@@ -73,8 +73,10 @@ RUN --mount=type=cache,id=vendor,target=/vendor,uid=1000 \
   --mount=type=cache,id=rsync,target=/rsync,uid=1000 \
   --mount=type=tmpfs,target=/var/run/opcache/ \
   LD_LIBRARY_PATH=/rsync /rsync/rsync -ap --chown=spryker:spryker /vendor/ ./vendor/ --exclude '.git*/' \
-    --include 'tests/dd.php' --exclude 'tests/*' --exclude 'assets/' --exclude '*.ts' --exclude '*.scss' --exclude '*.js' \
-    --exclude '*.md' --exclude 'composer.json' --exclude 'composer.lock' --exclude 'codeception.yml' --exclude '.scrutinizer.yml'
+    --include 'tests/dd.php' --exclude 'tests/*' --exclude 'codeception.yml' \
+    --exclude '*.md --exclude 'composer.lock' --exclude '.scrutinizer.yml' \
+    --exclude 'assets/' --exclude '*.ts' --exclude '*.scss' --exclude '*.js' \
+    --exclude 'package.json' --exclude 'package-lock.json'
 
 COPY --from=stash-src-with-data-excluding-import --chown=spryker:spryker /data ${srcRoot}
 

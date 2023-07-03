@@ -27,7 +27,7 @@ RUN --mount=type=cache,id=composer,sharing=locked,target=/home/spryker/.composer
   --mount=type=cache,id=rsync,target=/rsync,uid=1000 \
   --mount=type=tmpfs,target=/var/run/opcache/ \
   set -o allexport && . /run/secrets/secrets-env && set +o allexport \
-  && LD_LIBRARY_PATH=/rsync /rsync/rsync -ap --chown=spryker:spryker /vendor/ ./vendor/ --exclude '.git*/' \
+  && LD_LIBRARY_PATH=/rsync /rsync/rsync -ap --chown=spryker:spryker /vendor/ ./vendor/ \
   && bash -c 'if composer run --list | grep post-install-cmd; then composer run post-install-cmd; fi'
 
 COPY --from=stash-src --chown=spryker:spryker /data ${srcRoot}
