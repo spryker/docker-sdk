@@ -1,3 +1,9 @@
+FROM stash-src AS stash-src-after-app
+
+COPY --from=application-before-stamp ${srcRoot}/src /data/src
+
+# -----------------------------
+
 FROM application-codebase AS application-codebase-dev
 LABEL "spryker.image" "none"
 
@@ -30,7 +36,7 @@ RUN --mount=type=cache,id=composer,sharing=locked,target=/home/spryker/.composer
   && LD_LIBRARY_PATH=/rsync /rsync/rsync -ap --chown=spryker:spryker /vendor/ ./vendor/ --exclude '.git*/' \
   && bash -c 'if composer run --list | grep post-install-cmd; then composer run post-install-cmd; fi'
 
-COPY --from=stash-src --chown=spryker:spryker /data ${srcRoot}
+COPY --from=stash-src-after-app --chown=spryker:spryker /data ${srcRoot}
 # Data with import
 COPY --chown=spryker:spryker data ${srcRoot}/data
 # Tests contain transfer declaration
@@ -41,7 +47,7 @@ ENV DEVELOPMENT_CONSOLE_COMMANDS=1
 ARG SPRYKER_COMPOSER_AUTOLOAD
 RUN --mount=type=tmpfs,target=/var/run/opcache/ \
   bash -c 'chmod 600 ${srcRoot}/config/Zed/*.key 2>/dev/null || true' \
-  && vendor/bin/install -r ${SPRYKER_PIPELINE} -s build -s build-development -s build-production \
+  && vendor/bin/install -r ${SPRYKER_PIPELINE} -s build -s build-development \
   && composer dump-autoload ${SPRYKER_COMPOSER_AUTOLOAD}
 
 COPY --link --chown=spryker:spryker fronten[d] ${srcRoot}/frontend

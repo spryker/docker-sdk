@@ -45,4 +45,4 @@ RUN --mount=type=cache,id=npm,sharing=locked,target=/home/spryker/.npm,uid=1000 
   --mount=type=cache,id=vendor,target=/data/vendor,uid=1000 \
   echo "MODE: ${SPRYKER_ASSETS_MODE}" \
   && vendor/bin/console transfer:generate \
-  && vendor/bin/install -r ${SPRYKER_PIPELINE} -s build-static -s build-static-${SPRYKER_ASSETS_MODE} -vvv
+  && vendor/bin/install -r ${SPRYKER_PIPELINE} -s build-static -s build-static-${SPRYKER_ASSETS_MODE}

@@ -2,10 +2,6 @@
 
 FROM busybox AS stash-src
 
-COPY --chown=spryker:spryker data /data-without-import
-
-RUN mkdir /data
-
 COPY src /data/src
 COPY public /data/public
 COPY config /data/config
