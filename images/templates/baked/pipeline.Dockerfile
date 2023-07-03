@@ -40,7 +40,8 @@ ENV DEVELOPMENT_CONSOLE_COMMANDS=1
 
 ARG SPRYKER_COMPOSER_AUTOLOAD
 RUN --mount=type=tmpfs,target=/var/run/opcache/ \
-  vendor/bin/install -r ${SPRYKER_PIPELINE} -s build -s build-development -s build-production \
+  bash -c 'chmod 600 ${srcRoot}/config/Zed/*.key 2>/dev/null || true' \
+  && vendor/bin/install -r ${SPRYKER_PIPELINE} -s build -s build-development -s build-production \
   && composer dump-autoload ${SPRYKER_COMPOSER_AUTOLOAD}
 
 COPY --link --chown=spryker:spryker fronten[d] ${srcRoot}/frontend
