@@ -6,7 +6,7 @@ COPY src /data/src
 COPY public /data/public
 COPY config /data/config
 COPY resource[s] /data/resources
-COPY LICENSE /data
+COPY composer.json composer.lock *.php LICENSE /data
 
 FROM stash-src AS stash-src-with-data-excluding-import
 LABEL "spryker.image" "none"
@@ -31,8 +31,8 @@ RUN --mount=type=cache,id=apk,sharing=locked,target=/var/cache/apk mkdir -p /etc
     rsync \
     ; fi'
 
-RUN --mount=type=cache,id=rsync,target=/rsync,uid=1000 \
-  cp -fp /usr/bin/rsync /rsync/ \
+RUN mkdir -p /rsync/ \
+  && cp -fp /usr/bin/rsync /rsync/ \
   && ldd /usr/bin/rsync | awk '/=>/ { print $3 }' | xargs -I '{}' cp -fp '{}' /rsync
 
 # -----------------------------
@@ -46,13 +46,8 @@ COPY --chown=spryker:spryker composer.json composer.lock *.php ${srcRoot}/
 ARG SPRYKER_COMPOSER_MODE
 RUN --mount=type=cache,id=composer,sharing=locked,target=/home/spryker/.composer/cache,uid=1000 \
   --mount=type=ssh,uid=1000 --mount=type=secret,id=secrets-env,uid=1000 \
-  --mount=type=cache,id=vendor,target=/data/vendor,uid=1000 \
-  set -o allexport && . /run/secrets/secrets-env && set +o allexport \
-  && rm -rf vendor/** \
-  && composer install --no-scripts --no-interaction ${SPRYKER_COMPOSER_MODE}
-
-# Dependency: rsync is needed for next steps
-COPY --from=stash-rsync /tmp/.dependency* /tmp/
+  set -o allexport && . /run/secrets/secrets-env && set +o allexport && \
+  composer install --no-scripts --no-interaction ${SPRYKER_COMPOSER_MODE}
 
 # -----------------------------
 
@@ -61,12 +56,9 @@ LABEL "spryker.image" "none"
 
 USER spryker:spryker
 
-# Dependency: Run ONLY after vendor folder is
-COPY --from=application-codebase --chown=spryker:spryker ${srcRoot}/composer.* ${srcRoot}/*.php ${srcRoot}/
-
 # Install composer modules for Spryker
-RUN --mount=type=cache,id=vendor,target=/vendor,uid=1000 \
-  --mount=type=cache,id=rsync,target=/rsync,uid=1000 \
+RUN --mount=type=bind,from=application-codebase,source=/data/vendor,target=/vendor \
+  --mount=type=bind,from=stash-rsync,source=/rsync,target=/rsync \
   --mount=type=tmpfs,target=/var/run/opcache/ \
   LD_LIBRARY_PATH=/rsync /rsync/rsync -ap --chown=spryker:spryker /vendor/ ./vendor/ --exclude '.git*/' \
     --include 'tests/dd.php' --exclude 'tests/*' --exclude 'codeception.yml' \

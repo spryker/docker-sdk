@@ -4,8 +4,8 @@ LABEL "spryker.image" "cli"
 USER spryker:spryker
 
 # Copying .git folders that was skipped in pipeline
-RUN --mount=type=cache,id=vendor-dev,target=/vendor,uid=1000 \
-  --mount=type=cache,id=rsync,target=/rsync,uid=1000 \
+RUN --mount=type=bind,from=application-codebase-dev,source=/data/vendor,target=/vendor \
+  --mount=type=bind,from=stash-rsync,source=/rsync,target=/rsync \
   LD_LIBRARY_PATH=/rsync /rsync/rsync -ap --chown=spryker:spryker /vendor/ ./vendor/ --include '.git*/' --exclude '*'
 
 ARG SPRYKER_BUILD_HASH

@@ -7,14 +7,8 @@ COPY --from=application-before-stamp /data/src /data/src
 FROM application-codebase AS application-codebase-dev
 LABEL "spryker.image" "none"
 
-RUN --mount=type=cache,id=rsync,target=/rsync,uid=1000 \
-  --mount=type=cache,id=vendor,target=/data/vendor,uid=1000 \
-  --mount=type=cache,id=vendor-dev,target=/data/vendor.dev,uid=1000 \
-  LD_LIBRARY_PATH=/rsync /rsync/rsync -ap ./vendor/ ./vendor.dev
-
 RUN --mount=type=cache,id=composer,sharing=locked,target=/home/spryker/.composer/cache,uid=1000 \
   --mount=type=ssh,uid=1000 --mount=type=secret,id=secrets-env,uid=1000 \
-  --mount=type=cache,id=vendor-dev,target=/data/vendor,uid=1000 \
   set -o allexport && . /run/secrets/secrets-env && set +o allexport \
   && composer install --no-scripts --no-interaction
 
@@ -25,15 +19,14 @@ LABEL "spryker.image" "none"
 
 USER spryker:spryker
 
-COPY --from=application-codebase-dev --chown=spryker:spryker ${srcRoot}/composer.* ${srcRoot}/*.php ${srcRoot}/
 # Install dev modules for Spryker
 RUN --mount=type=cache,id=composer,sharing=locked,target=/home/spryker/.composer/cache,uid=1000 \
   --mount=type=ssh,uid=1000 --mount=type=secret,id=secrets-env,uid=1000 \
-  --mount=type=cache,id=vendor-dev,target=/vendor,uid=1000 \
-  --mount=type=cache,id=rsync,target=/rsync,uid=1000 \
+  --mount=type=bind,from=application-codebase-dev,source=/data/vendor,target=/vendor \
+  --mount=type=bind,from=stash-rsync,source=/rsync,target=/rsync \
   --mount=type=tmpfs,target=/var/run/opcache/ \
-  set -o allexport && . /run/secrets/secrets-env && set +o allexport \
-  && LD_LIBRARY_PATH=/rsync /rsync/rsync -ap --chown=spryker:spryker /vendor/ ./vendor/ --exclude '.git*/' \
+  set -o allexport && . /run/secrets/secrets-env && set +o allexport && \
+  LD_LIBRARY_PATH=/rsync /rsync/rsync -ap --chown=spryker:spryker /vendor/ ./vendor/ --exclude '.git*/' \
   && bash -c 'if composer run --list | grep post-install-cmd; then composer run post-install-cmd; fi'
 
 COPY --from=stash-src-after-app --chown=spryker:spryker /data ${srcRoot}

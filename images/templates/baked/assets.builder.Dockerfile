@@ -38,12 +38,14 @@ COPY --from=stash-src-with-data-excluding-import --chown=spryker:spryker /data $
 
 # This instruction is necessary to ouline dependency on precacher to make sure assets are built after
 COPY --from=npm-precacher /tmp/.dependency* /tmp/
-COPY --from=application-codebase /tmp/.dependency* /tmp/
 
 ARG SPRYKER_ASSETS_MODE
 RUN --mount=type=cache,id=npm,sharing=locked,target=/home/spryker/.npm,uid=1000 \
   --mount=type=cache,id=node_modules,sharing=locked,target=${srcRoot}/node_modules,uid=1000 \
-  --mount=type=cache,id=vendor,target=/data/vendor,uid=1000 \
-  echo "MODE: ${SPRYKER_ASSETS_MODE}" \
+  --mount=type=bind,from=application-codebase,source=/data/vendor,target=/vendor \
+  --mount=type=bind,from=stash-rsync,source=/rsync,target=/rsync \
+  --mount=type=tmpfs,target=/var/run/opcache/ \
+  LD_LIBRARY_PATH=/rsync /rsync/rsync -ap --chown=spryker:spryker /vendor/ ./vendor/ --exclude '.git*/' \
+  && echo "MODE: ${SPRYKER_ASSETS_MODE}" \
   && vendor/bin/console transfer:generate \
   && vendor/bin/install -r ${SPRYKER_PIPELINE} -s build-static -s build-static-${SPRYKER_ASSETS_MODE}
