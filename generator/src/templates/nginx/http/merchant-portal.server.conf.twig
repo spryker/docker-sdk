@@ -12,8 +12,8 @@
         fastcgi_param SPRYKER_ZED_PORT "{{ project['_defaultPort'] }}";
 
         fastcgi_param SPRYKER_SESSION_BE_NAMESPACE "{{ storeServices['session']['namespace'] | default(endpointData['services']['session']['namespace']) }}";
-        fastcgi_param SPRYKER_BE_HOST "{{ host }}";
-        fastcgi_param SPRYKER_BE_PORT "{{ externalPort }}";
+        fastcgi_param SPRYKER_MP_HOST "{{ host }}";
+        fastcgi_param SPRYKER_MP_PORT "{{ externalPort }}";
 
 {% if storeServices['mail']['sender']['email'] is not empty %}
         fastcgi_param SPRYKER_MAIL_SENDER_EMAIL "{{ storeServices['mail']['sender']['email'] }}";
@@ -30,5 +30,10 @@
 {% if regionEndpointMap['glue'] is not empty %}
         fastcgi_param SPRYKER_API_HOST "{{ (regionEndpointMap['glue'] | split(':'))[0] | default('') }}";
         fastcgi_param SPRYKER_API_PORT "{{ (regionEndpointMap['glue'] | split(':'))[1] | default(project['_defaultPort']) }}";
+{% endif %}
+
+{% if regionEndpointMap['backoffice'] is not empty %}
+    fastcgi_param SPRYKER_BE_HOST "{{ (regionEndpointMap['backoffice'] | split(':'))[0] | default('') }}";
+    fastcgi_param SPRYKER_BE_PORT "{{ (regionEndpointMap['backoffice'] | split(':'))[1] | default(project['_defaultPort']) }}";
 {% endif %}
 {% endblock location %}
