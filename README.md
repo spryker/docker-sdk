@@ -61,8 +61,8 @@ For contribution guidelines, see [Code contribution guide](https://docs.spryker.
 |                 |              | 11           | &check;     |                                    |
 |                 |              | 12           | &check;     |                                    |
 |                 | mysql        | 5.7          |             |                                    |
-|                 |              | mariadb-10.2 | &check;     |                                    |
-|                 |              | mariadb-10.3 | &check;     |                                    |
+|                 |              | mariadb-10.2 | &check;     | https://endoflife.date/mariadb     |
+|                 |              | mariadb-10.3 | &check;     | https://endoflife.date/mariadb     |
 |                 |              | mariadb-10.4 | &check;     |                                    |
 |                 |              | mariadb-10.5 | &check;     |                                    |
 |                 |              | mariadb-10.6 | &check;     |                                    |

@@ -38,6 +38,7 @@ Registry::Help::row ''
 import command/cli/cli.sh
 import command/cli/console.sh
 import command/cli/testing.sh
+import command/compose/exec.sh
 
 # Runtime
 Registry::Help::row ''
@@ -136,6 +137,11 @@ readonly SPRYKER_BUILD_DATE="${SPRYKER_BUILD_DATE}"
 readonly SPRYKER_REPOSITORY_HASH="${SPRYKER_BUILD_HASH:-"$(git rev-parse --verify HEAD 2>/dev/null || echo "head")"}"
 readonly SPRYKER_MAINTENANCE_MODE_ENABLED="{{ docker['maintenance']['enabled'] | default('false') }}"
 
+# PHP extensions
+{% for phpExtensionName in _phpExtensions %}
+readonly {{ phpExtensionName | upper }}_EXTENSION_ENABLED="${TRUE}"
+{% endfor %}
+
 # Specific variables
 {% for serviceName, serviceData in services %}
 {% set engine = serviceData['engine'] | lower %}
@@ -217,6 +223,7 @@ export BLACKFIRE_SERVER_ID=${BLACKFIRE_SERVER_ID}
 export BLACKFIRE_SERVER_TOKEN=${BLACKFIRE_SERVER_TOKEN}
 export BLACKFIRE_CLIENT_ID=${BLACKFIRE_CLIENT_ID}
 export BLACKFIRE_CLIENT_TOKEN=${BLACKFIRE_CLIENT_TOKEN}
+export BLACKFIRE_APM_ENABLED=${BLACKFIRE_APM_ENABLED:-{{ image['environment']['BLACKFIRE_APM_ENABLED'] is defined ? image['environment']['BLACKFIRE_APM_ENABLED'] : services['blackfire'] is defined ? 1 : 0 }}}
 export TIDEWAYS_APIKEY=${TIDEWAYS_APIKEY}
 export TIDEWAYS_CLI_ENABLED=${TIDEWAYS_CLI_ENABLED}
 export TIDEWAYS_ENVIRONMENT_NAME=${TIDEWAYS_ENVIRONMENT_NAME}
