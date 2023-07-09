@@ -1,8 +1,6 @@
   {{ serviceData.project_name ~ '_' ~ serviceName }}:
     image: wernight/phantomjs:latest
     container_name: {{ serviceData.project_name ~ '_' ~ serviceName }}
-    profiles:
-      - {{ serviceData.project_name }}
     networks:
       - {{ internal_project_name }}_public
     labels:

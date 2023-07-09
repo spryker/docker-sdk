@@ -2,10 +2,7 @@
     build:
       context: {{ serviceData.deployment_path }}
       dockerfile: images/common/dashboard/Dockerfile
-    image: {{ serviceData.project_name ~ '_' ~ serviceName }}
     container_name: {{ serviceData.project_name ~ '_' ~ serviceName }}
-    profiles:
-      - {{ serviceData.project_name }}
     networks:
       - {{ internal_project_name }}_public
       - {{ internal_project_name }}_private
@@ -19,9 +16,6 @@
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - {{ serviceData.deployment_path }}/context/dashboard/environment:/dashboard/environment:consistent,ro
-{% for projectName, projectData in projectsData %}
-{% include "docker-compose/components/application-volumes.yml.twig" with {
-  project_name: projectData.project_name
-} %}
-{% endfor %}
     privileged: true
+
+{# todo: need to fix #}

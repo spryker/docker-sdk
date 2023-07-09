@@ -1,8 +1,6 @@
   {{ serviceData.project_name ~ '_' ~ serviceName }}:
     image: postgres:9.6-alpine
     container_name: {{ serviceData.project_name ~ '_' ~ serviceName }}
-    profiles:
-      - {{ serviceData.project_name }}
     networks:
       - {{ internal_project_name }}_private
     labels:
@@ -18,4 +16,4 @@
       POSTGRES_USER: "{{ serviceData['root']['username'] }}"
       POSTGRES_PASSWORD: "{{ serviceData['root']['password'] }}"
     volumes:
-      - {{ serviceName }}-{{ serviceData['engine'] }}-data:/var/lib/postgresql/data:rw
+      - {{ serviceData.project_name ~ '-' ~ serviceName }}-{{ serviceData['engine'] }}-data:/var/lib/postgresql/data:rw

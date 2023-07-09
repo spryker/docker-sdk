@@ -3,8 +3,6 @@
     container_name: {{ projectName }}_{{ applicationName | lower }}
     networks:
       - {{ project.internal_project_name }}_private
-    profiles:
-      - {{ projectName }}
     labels:
       'spryker.app.name': {{ projectName}}_{{ applicationName | lower }}
       'spryker.app.type': glue-backend

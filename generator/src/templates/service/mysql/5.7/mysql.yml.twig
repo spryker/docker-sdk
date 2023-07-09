@@ -1,8 +1,6 @@
   {{ serviceData.project_name ~ '_' ~ serviceName }}:
     image: mysql:5.7
     container_name: {{ serviceData.project_name ~ '_' ~ serviceName }}
-    profiles:
-      - {{ serviceData.project_name }}
     networks:
       - {{ internal_project_name }}_private
     labels:
@@ -18,5 +16,5 @@
       MYSQL_ROOT_PASSWORD: "{{ serviceData['root']['password'] }}"
       LANG: C.UTF-8
     volumes:
-      - {{ serviceName }}-{{ serviceData['engine'] }}-data:/var/lib/mysql:rw
+      - {{ serviceData.project_name ~ '-' ~ serviceName }}-{{ serviceData['engine'] }}-data:/var/lib/mysql:rw
       - {{ serviceData.deployment_path }}/context/mysql/my.cnf:/etc/mysql/my.cnf:ro

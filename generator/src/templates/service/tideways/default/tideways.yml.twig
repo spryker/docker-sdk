@@ -5,8 +5,6 @@
       dockerfile: Dockerfile
       args:
         TIDEWAYS_ENVIRONMENT_DEFAULT: "{{ serviceData.environment | default('production') }}"
-    profiles:
-      - {{ serviceData.project_name }}
     networks:
       - {{ internal_project_name }}_private
     labels:

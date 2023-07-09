@@ -4,8 +4,6 @@
   {{ serviceData.project_name ~ '_' ~ serviceName }}:
     image: spryker/swagger-ui:v3.24.3
     container_name: {{ serviceData.project_name ~ '_' ~ serviceName }}
-    profiles:
-      - {{ serviceData.project_name }}
     networks:
       - {{ internal_project_name }}_private
     labels:

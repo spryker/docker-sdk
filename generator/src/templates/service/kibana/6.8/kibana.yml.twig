@@ -3,8 +3,6 @@
     container_name: {{ serviceData.project_name ~ '_' ~ serviceName }}
     networks:
       - {{ internal_project_name }}_private
-    profiles:
-      - {{ serviceData.project_name }}
     labels:
       'spryker.app.name': {{ serviceData.project_name ~ '_' ~ serviceName }}
       'spryker.app.type': services
@@ -17,5 +15,5 @@
     environment:
         - NODE_OPTIONS=--max-old-space-size=5000
     volumes:
-      - {{ serviceName }}-{{ serviceData['engine'] }}-data:/usr/share/kibana/data:rw
+      - {{ serviceData.project_name ~ '-' ~ serviceName }}-{{ serviceData['engine'] }}-data:/usr/share/kibana/data:rw
       - {{ serviceData.deployment_path }}/context/kibana/6.8/kibana.yml:/usr/share/kibana/config/kibana.yml:ro

@@ -1,8 +1,7 @@
   {{ projectName }}_cli:
     image: {{ projectName }}_run_cli:{{ projectData.tag }}
     container_name: {{ projectName }}_cli
-    profiles:
-      - {{ projectName }}
+
     networks:
       - {{ projectData.internal_project_name }}_public
       - {{ projectData.internal_project_name }}_private
