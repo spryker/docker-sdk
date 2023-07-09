@@ -5,6 +5,7 @@ use DeployFileGenerator\Transfer\DeployFileTransfer;
 use DockerSdk\ConstantBuilder\DockerSdkBashConstantBuilder;
 use DockerSdk\DockerSdkConstants;
 use DockerSdk\DockerSdkFactory;
+use DockerSdk\Generated\DockerSdkBashConstants;
 use Spatie\Url\Url;
 use Symfony\Component\Yaml\Parser;
 use Twig\Environment;
@@ -33,7 +34,8 @@ $loaders = new ChainLoader([
     new FilesystemLoader(APPLICATION_SOURCE_DIR . DS . 'templates'),
     new FilesystemLoader($deploymentDir),
 ]);
-$twig = new Environment($loaders);
+$twig = new Environment($loaders, ['debug' => true]);
+$twig->addExtension(new \Twig\Extension\DebugExtension());
 $nginxVarEncoder = new class() {
     public function encode($value)
     {
@@ -624,13 +626,43 @@ file_put_contents(
 unlink($deploymentDir . DS . 'images' . DS . 'common' . DS . 'application' . DS . 'Dockerfile.twig');
 
 file_put_contents(
-    $deploymentDir . DS . 'docker-compose.yml',
-    $twig->render('docker-compose.yml.twig', [
+    $deploymentDir . DS  . 'gateway.docker-compose.yml',
+    $twig->render('docker-compose' . DS . 'gateway-compose.yml.twig', [
         'projectsData' => $projectsData,
-        'gatewayData' => $gatewayData,
         'sharedServices' => $sharedServices,
-        'mutagenData' => $mutagenData,
+        'gatewayData' => $gatewayData,
         'internal_project_name' => $config->getInternalProjectName()
+    ])
+);
+
+file_put_contents(
+    $deploymentDir . DS . 'shared-services.docker-compose.yml',
+    $twig->render('docker-compose' . DS . 'shared-services-compose.yml.twig', [
+        'projectsData' => $projectsData,
+        'sharedServices' => $sharedServices,
+        'gatewayData' => $gatewayData,
+        'internal_project_name' => $config->getInternalProjectName()
+    ])
+);
+
+$sharedServicesList = $config->getSharedServiceList();
+$projectServices = $projectData['services'] ?? [];
+
+foreach ($sharedServicesList as $sharedServiceName) {
+    if (isset($projectServices[$sharedServiceName])) {
+        unset($projectServices[$sharedServiceName]);
+    }
+}
+
+file_put_contents(
+    $deploymentDir . DS . $projectData[DockerSdkConstants::PROJECT_NAME_KEY] .'.docker-compose.yml',
+    $twig->render('docker-compose' . DS . 'project-compose.yml.twig', [
+        'projectName' => $projectData[DockerSdkConstants::PROJECT_NAME_KEY],
+        'internal_project_name' => $config->getInternalProjectName(),
+        'projectData' => $projectData,
+        'project_services' => $projectServices,
+        'mutagenData' => $mutagenData,
+        'project_path' => $config->getSprykerProjectPath(),
     ])
 );
 
