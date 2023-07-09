@@ -14,12 +14,12 @@ function Command::testing() {
     # shellcheck disable=SC2034
     SPRYKER_TESTING_ENABLE_FOR_CLI="${SPRYKER_TESTING_ENABLE}"
 
-    Runtime::waitFor ${SPRYKER_INTERNAL_PROJECT_NAME}_database
-    Runtime::waitFor ${SPRYKER_INTERNAL_PROJECT_NAME}_broker
-    Runtime::waitFor ${SPRYKER_INTERNAL_PROJECT_NAME}_search
-    Runtime::waitFor ${SPRYKER_INTERNAL_PROJECT_NAME}_key_value_store
-    Runtime::waitFor ${SPRYKER_INTERNAL_PROJECT_NAME}_session
-    Runtime::waitFor ${SPRYKER_PROJECT_NAME}_webdriver
+    Runtime::waitFor database
+    Runtime::waitFor broker
+    Runtime::waitFor search
+    Runtime::waitFor key_value_store
+    Runtime::waitFor session
+    Runtime::waitFor webdriver
 
     Compose::exec "${@}"
 }

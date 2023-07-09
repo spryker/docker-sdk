@@ -10,7 +10,3 @@ function sync() {
 
     return "${TRUE}"
 }
-
-function Mount::dropVolumes() {
-  docker volume rm $(docker volume ls --filter "name=${SPRYKER_PROJECT_NAME}" --format "{{.Name}}")
-}

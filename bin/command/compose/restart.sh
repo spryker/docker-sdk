@@ -6,9 +6,9 @@ Registry::Help::command -c "restart" "Restarts Spryker containers."
 
 function Command::restart() {
     Compose::restart
-    Runtime::waitFor ${SPRYKER_INTERNAL_PROJECT_NAME}_database
-    Runtime::waitFor ${SPRYKER_INTERNAL_PROJECT_NAME}_search
-    Runtime::waitFor ${SPRYKER_INTERNAL_PROJECT_NAME}_key_value_store
+    Runtime::waitFor database
+    Runtime::waitFor search
+    Runtime::waitFor key_value_store
 
     return "${TRUE}"
 }

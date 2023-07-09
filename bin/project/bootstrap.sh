@@ -41,7 +41,20 @@ function Project::bootstrap::_createProjectPathFile() {
 }
 
 function Project::postBootstrap::_moveComposeFiles() {
-  mv "${DESTINATION_DIR}/${DOCKER_COMPOSE_FILENAME}" "${DEPLOYMENT_DIR}/${SPRYKER_INTERNAL_PROJECT_NAME}/${DOCKER_COMPOSE_FILENAME}"
+#    find all compose files
+#    move them to deployment dir
+
+    local composeFiles=($(find "${DESTINATION_DIR}" -name "*.docker-compose.yml"))
+
+    for composeFile in "${composeFiles[@]}"; do
+        local composeFileName
+        local destinationComposeFilePath
+
+        composeFileName=$(basename "${composeFile}")
+        destinationComposeFilePath="${DEPLOYMENT_DIR}/${SPRYKER_INTERNAL_PROJECT_NAME}/${composeFileName}"
+
+        mv "${composeFile}" "${destinationComposeFilePath}"
+    done
 }
 
 function Project::bootstrap::_createDockerNetworks() {

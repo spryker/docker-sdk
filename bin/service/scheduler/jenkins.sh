@@ -7,7 +7,7 @@ function Service::Scheduler::isInstalled() {
 
     [ -n "${SPRYKER_TESTING_ENABLE}" ] && return "${TRUE}"
 
-    Runtime::waitFor ${SPRYKER_INTERNAL_PROJECT_NAME}_scheduler
+    Runtime::waitFor scheduler
     Console::start -n "Checking jobs are installed..."
 
     # shellcheck disable=SC2016
@@ -25,7 +25,7 @@ Service::Scheduler::pause() {
 
     [ -n "${SPRYKER_TESTING_ENABLE}" ] && return "${TRUE}"
 
-    Runtime::waitFor ${SPRYKER_INTERNAL_PROJECT_NAME}_scheduler
+    Runtime::waitFor scheduler
     Console::start -n "Suspending scheduler..."
 
     # shellcheck disable=SC2016
@@ -55,7 +55,7 @@ Service::Scheduler::unpause() {
 
     [ -n "${SPRYKER_TESTING_ENABLE}" ] && return "${TRUE}"
 
-    Runtime::waitFor ${SPRYKER_INTERNAL_PROJECT_NAME}_scheduler
+    Runtime::waitFor scheduler
     Console::start -n "Resuming scheduler..."
 
     # shellcheck disable=SC2016
@@ -105,7 +105,7 @@ function Service::Scheduler::_run() {
 
     [ -n "${SPRYKER_TESTING_ENABLE}" ] && return "${TRUE}"
 
-    Runtime::waitFor ${SPRYKER_INTERNAL_PROJECT_NAME}_scheduler
+    Runtime::waitFor scheduler
 
     for region in "${SPRYKER_STORES[@]}"; do
         eval "${region}"

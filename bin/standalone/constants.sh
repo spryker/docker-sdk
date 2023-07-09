@@ -12,7 +12,9 @@ SPRYKER_SHARED_SERVICES_LIST=('gateway' 'broker' 'dashboard' 'database' 'key_val
 ENABLED_FILENAME='enabled'
 PROJECT_PATH_FILENAME='project_path'
 
-DOCKER_COMPOSE_FILENAME='docker-compose.yml'
+DOCKER_COMPOSE_GATEWAY_FILENAME='gateway.docker-compose.yml'
+DOCKER_COMPOSE_SHARED_SERVICES_FILENAME='shared-services.docker-compose.yml'
+
 DOCKER_COMPOSE_SHARED_SERVICES_DATA_FILENAME='docker-compose-shared-services-data.json'
 DOCKER_COMPOSE_PROJECTS_DATA_FILENAME='docker-compose-projects-data.json'
 DOCKER_COMPOSE_GATEWAY_DATA_FILENAME='docker-compose-gateway-data.json'

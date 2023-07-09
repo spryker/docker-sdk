@@ -90,15 +90,14 @@ function Mount::Mutagen::beforeRun() {
 }
 
 # This is necessary due to https://github.com/mutagen-io/mutagen/issues/225
+# Issue was fixed. Function is Deprecated
 function Mount::Mutagen::afterCliReady() {
-    Console::verbose "${INFO}Flushing file syncronization${NC}"
-    mutagen sync flush "${SPRYKER_SYNC_SESSION_NAME}"
+    return ${TRUE}
 }
 
+# should be removed. We are using mutagen compose
 function Mount::Mutagen::afterDown() {
-    Console::verbose "${INFO}Pruning file syncronization${NC}"
-    docker volume rm "${SPRYKER_SYNC_VOLUME}" >/dev/null 2>&1 || true
-    mutagen sync terminate "${SPRYKER_SYNC_SESSION_NAME}" >/dev/null 2>&1 || true
+    return ${TRUE}
 }
 
 function Mount::Mutagen::install() {
@@ -257,19 +256,6 @@ function Mount::Mutagen::checkMutagenVersion() {
         exit 1
     fi
 }
-
-function Mount::dropVolumes() {
-  local volumeNames=($(docker volume ls --filter "name=${SPRYKER_PROJECT_NAME}" --format "{{.Name}}"))
-
-  for volumeName in "${volumeNames[@]}" ; do
-    if [ -z "${volumeName##*'_data_sync'*}" ] || [ -z "${volumeName##*'_logs'*}" ] || [ -z "${volumeName##*'_cli_history'*}" ] ;then
-      continue
-    fi
-
-    docker volume rm "${volumeName}"
-  done
-}
-
 DOCKER_COMPOSE_SUBSTITUTE="$(Mount::Mutagen::getDockerComposeSubstitute)"
 
 Registry::Flow::addBeforeUp 'Mount::Mutagen::beforeUp'

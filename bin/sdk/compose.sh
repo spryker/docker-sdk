@@ -7,7 +7,7 @@ require docker tr awk wc sed grep
 Registry::Flow::addBoot "Compose::verboseMode"
 
 function Compose::getComposeFiles() {
-    local composeFiles="-f ${DEPLOYMENT_PATH}/../${SPRYKER_INTERNAL_PROJECT_NAME}/${DOCKER_COMPOSE_FILENAME}"
+    local composeFiles="-f ${DEPLOYMENT_PATH}/../${SPRYKER_INTERNAL_PROJECT_NAME}/${SPRYKER_PROJECT_NAME}.docker-compose.yml"
 
     for composeFile in ${DOCKER_COMPOSE_FILES_EXTRA}; do
         composeFiles+=" -f ${composeFile}"
@@ -19,7 +19,7 @@ function Compose::getComposeFiles() {
 function Compose::ensureTestingMode() {
     SPRYKER_TESTING_ENABLE=1
 #    todo: chould be project namespace
-    local isTestMode=$(docker ps --filter 'status=running' --filter "name=${SPRYKER_INTERNAL_PROJECT_NAME}_webdriver_*" --format "{{.Names}}")
+    local isTestMode=$(docker ps --filter 'status=running' --filter "name=${SPRYKER_PROJECT_NAME}_webdriver_*" --format "{{.Names}}")
     if [ -z "${isTestMode}" ]; then
         Compose::run
     fi
@@ -93,14 +93,29 @@ function Compose::verboseMode() {
 }
 
 function Compose::command() {
-
     local -a composeFiles=()
     IFS=' ' read -r -a composeFiles <<< "$(Compose::getComposeFiles)"
 
     ${DOCKER_COMPOSE_SUBSTITUTE:-'docker-compose'} \
         --project-directory "${PROJECT_DIR}" \
-        --project-name "${SPRYKER_INTERNAL_PROJECT_NAME}" \
+        --project-name "${SPRYKER_PROJECT_NAME}" \
         "${composeFiles[@]}" \
+        "${@}"
+}
+
+function Compose::SharedServices::command() {
+    docker-compose \
+        --project-directory "${PROJECT_DIR}" \
+        --project-name "${SPRYKER_INTERNAL_PROJECT_NAME}_shared_services" \
+        -f "${DEPLOYMENT_PATH}/../${SPRYKER_INTERNAL_PROJECT_NAME}/shared-services.docker-compose.yml" \
+        "${@}"
+}
+
+function Compose::Gateway::command() {
+    docker-compose \
+        --project-directory "${PROJECT_DIR}" \
+        --project-name "${SPRYKER_INTERNAL_PROJECT_NAME}_gateway" \
+        -f "${DEPLOYMENT_PATH}/../${SPRYKER_INTERNAL_PROJECT_NAME}/gateway.docker-compose.yml" \
         "${@}"
 }
 
@@ -147,54 +162,24 @@ function Compose::up() {
     Codebase::build ${noCache} ${doBuild}
     Assets::build ${noCache} ${doAssets}
     Images::buildFrontend ${noCache} ${doBuild}
+    Compose::SharedServices::command up -d
+    Compose::Gateway::command up -d
+
     Compose::run --build
-    Compose::command --profile ${SPRYKER_PROJECT_NAME} --profile ${SPRYKER_INTERNAL_PROJECT_NAME} restart ${SPRYKER_PROJECT_NAME}_frontend ${SPRYKER_INTERNAL_PROJECT_NAME}_gateway
+    Compose::command restart ${SPRYKER_PROJECT_NAME}_frontend
+    Compose::Gateway::command restart ${SPRYKER_INTERNAL_PROJECT_NAME}_gateway
 
     Registry::Flow::runAfterUp
 
     Data::load ${noCache} ${doData}
-    Service::Scheduler::start ${noCache} ${doJobs}
+    Service::Scheduler::start '--force' ${noCache} ${doJobs}
 }
 
 function Compose::run() {
     Registry::Flow::runBeforeRun
     Console::verbose "${INFO}Running Spryker containers${NC}"
+    Compose::command --compatibility up -d --quiet-pull "${@}"
 
-    local args=()
-    local profiles=()
-
-    while (( "$#" )); do
-        case "$1" in
-            --profile)
-                if [ "${2}" == "${SPRYKER_PROJECT_NAME}" ]; then
-                  shift 2
-                  continue
-                fi
-
-                profiles+=( "--profile ${2}" )
-                shift 2
-                ;;
-            *)
-                args+=("$1")
-                shift
-                ;;
-        esac
-    done
-    set -- "${args[@]}"
-
-    if [ ${#profiles[@]} -eq 0 ]; then
-        for projectName in $(Project::getListOfEnabledProjects) ; do
-          if [ "${projectName}" == "${SPRYKER_PROJECT_NAME}" ]; then
-              continue
-          fi
-
-          profiles+=( "--profile ${projectName}" )
-        done
-    fi
-
-    profiles+=( "--profile ${SPRYKER_PROJECT_NAME}" )
-
-    Compose::command --compatibility --profile ${SPRYKER_INTERNAL_PROJECT_NAME} ${profiles[*]} up -d --remove-orphans --quiet-pull "${@}"
 # todo: env variable for each project
 # todo: check
     if [ -n "${SPRYKER_TESTING_ENABLE}" ] && Service::isServiceExist scheduler; then
@@ -202,17 +187,7 @@ function Compose::run() {
     fi
 
     if [ -z "${SPRYKER_TESTING_ENABLE}" ]; then
-      local projectWebdriver=( "${SPRYKER_PROJECT_NAME}_webdriver" )
-
-      for projectName in $(Project::getListOfEnabledProjects) ; do
-        if [ "${projectName}" == "${SPRYKER_PROJECT_NAME}" ]; then
-            continue
-        fi
-
-        projectWebdriver+=( "${projectName}_webdriver" )
-      done
-
-      Compose::command --compatibility ${profiles[*]} stop ${projectWebdriver[*]}
+      Compose::command --compatibility stop "${SPRYKER_PROJECT_NAME}_webdriver"
     fi
 
     # Note: Compose::run can be used for running only one container, e.g. CLI.
@@ -252,39 +227,27 @@ function Compose::stop() {
     Registry::Flow::runAfterStop
 }
 
-function Compose::down() {
-    local enabledProjects=($(Project::getListOfEnabledProjects))
-    local count="${#enabledProjects[@]}"
-
+function Compose::down()
+{
     Console::verbose "${INFO}Stopping and removing all containers${NC}"
-
-    if [ "${count}" -gt 1 ]; then
-      Compose::downProject
-    else
-      Compose::command down
-    fi
-
-    sync stop
+    Service::Scheduler::clean
+    Compose::command down
+    docker volume rm $(docker volume ls --filter "name=${SPRYKER_PROJECT_NAME}" --format="{{.Name}}")
     Registry::Flow::runAfterDown
-}
-
-function Compose::downProject() {
-  Service::Scheduler::stop
-  docker stop $(docker ps --filter "name=${SPRYKER_PROJECT_NAME}" --format="{{.ID}}")
-  docker rm $(docker ps -a --filter "name=${SPRYKER_PROJECT_NAME}" --format="{{.ID}}")
-  Mount::dropVolumes
 }
 
 function Compose::cleanVolumes() {
     Console::verbose "${INFO}Stopping and removing all Spryker containers and volumes${NC}"
-    Mount::dropVolumes
-    Registry::Flow::runAfterDown
+    Compose::down
+}
+
+function Compose::cleanImages() {
+    Compose::command rmi --force $(docker images --filter "reference=${SPRYKER_PROJECT_NAME}*" --format="{{.ID}}")
 }
 
 function Compose::cleanEverything() {
-    Console::verbose "${INFO}Stopping and removing all Spryker containers and volumes${NC}"
-    Compose::downProject
-    Registry::Flow::runAfterDown
+    Compose::cleanVolumes
+    Compose::cleanImages
 }
 
 function Compose::runCliDependencyServices() {
@@ -292,7 +255,7 @@ function Compose::runCliDependencyServices() {
         Compose::run --no-deps tideways
     fi
 }
-# todo: wtf
+# todo: another place
 function Compose::cleanSourceDirectory() {
   local projectPath
   local srcGeneratedPath='src/Generated'

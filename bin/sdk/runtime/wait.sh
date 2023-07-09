@@ -6,13 +6,11 @@ function Runtime::waitFor() {
     local -i interval=${3:-2}     # seconds
 
 #    todo: check
-    local isServiceExist=$(Compose::command config --services | grep "${target}")
-
-    if [ -z "${isServiceExist}" ]; then
+    if ! Service::isServiceExist "${target}"; then
         return;
     fi
 
-    local containers=$(docker ps --filter "name=${SPRYKER_DOCKER_PREFIX}_${target}_*" --format "{{.Names}}")
+    local containers=$(docker ps --filter "name=${target}" --format "{{.Names}}")
 
     [ -z "${containers}" ] && Console::error "${WARN}Service ${INFO}\`${1}\`${WARN} is not running. Please check the name.${NC}" && exit 1
 
