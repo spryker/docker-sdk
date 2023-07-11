@@ -1,7 +1,7 @@
 # syntax = docker/dockerfile:experimental
 ARG SPRYKER_PARENT_IMAGE
 
-FROM spryker/jenkins-boilerplate:2.361.1 as spryker-jenkins-boilerplate
+FROM spryker/jenkins-boilerplate:2.387.1 as spryker-jenkins-boilerplate
 FROM ${SPRYKER_PARENT_IMAGE}  as spryker_jenkins
 EXPOSE 8080
 COPY context/jenkins/export/jenkins.docker.xml.twig ./config/Zed/cronjobs/jenkins.docker.xml.twig
