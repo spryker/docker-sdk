@@ -24,13 +24,13 @@ RUN bash -c 'if [ ! -z "$(which apk)" ]; then apk --no-cache add \
 # Install packages on Debian
 RUN bash -c 'if [ ! -z "$(which apt)" ]; then apt update -y && \
 	apt-get install -y software-properties-common && \
-	apt-add-repository "deb http://security.debian.org/debian-security stretch/updates main" && \
-	apt-add-repository "deb http://ftp.de.debian.org/debian buster main" && \
+	apt-add-repository "deb http://security.debian.org/debian-security bullseye-security main" && \
+	apt-add-repository "deb http://ftp.de.debian.org/debian bullseye main" && \
 	apt update -y && apt install -y \
 	curl \
     bash \
     openjdk-11-jdk \
-    ttf-dejavu \
+    fonts-dejavu \
     gettext \
     jq \
     && \
@@ -40,6 +40,7 @@ RUN bash -c 'if [ ! -z "$(which apt)" ]; then apt update -y && \
 COPY terraform/cli /envs/
 COPY context/jenkins/export/entrypoint.sh /entrypoint.sh
 COPY context/jenkins/export/jenkins.model.JenkinsLocationConfiguration.xml /opt/jenkins.model.JenkinsLocationConfiguration.xml
+COPY context/jenkins/export/nr-credentials.xml /opt/nr-credentials.xml
 RUN chmod +x /entrypoint.sh
 
 ENTRYPOINT ["/entrypoint.sh"]
