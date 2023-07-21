@@ -1,7 +1,7 @@
 # syntax = docker/dockerfile:experimental
 ARG SPRYKER_PARENT_IMAGE
 
-FROM spryker/jenkins-boilerplate:2.387.1 as spryker-jenkins-boilerplate
+FROM spryker/jenkins-boilerplate:latest as spryker-jenkins-boilerplate
 FROM ${SPRYKER_PARENT_IMAGE}  as spryker_jenkins
 EXPOSE 8080
 COPY context/jenkins/export/jenkins.docker.xml.twig ./config/Zed/cronjobs/jenkins.docker.xml.twig
@@ -40,6 +40,7 @@ RUN bash -c 'if [ ! -z "$(which apt)" ]; then apt update -y && \
 COPY terraform/cli /envs/
 COPY context/jenkins/export/entrypoint.sh /entrypoint.sh
 COPY context/jenkins/export/jenkins.model.JenkinsLocationConfiguration.xml /opt/jenkins.model.JenkinsLocationConfiguration.xml
+COPY context/jenkins/export/nr.global.configuration.xml /opt/nr.global.configuration.xml
 COPY context/jenkins/export/nr-credentials.xml /opt/nr-credentials.xml
 RUN chmod +x /entrypoint.sh
 
