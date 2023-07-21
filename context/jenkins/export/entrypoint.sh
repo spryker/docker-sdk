@@ -46,7 +46,7 @@ mkdir -p ~/.jenkins/updates
 rm -rf ~/.jenkins/plugins || echo 'plugins did not exists anyway'
 mkdir -p ~/.jenkins/plugins
 test -f ~/.jenkins/jenkins.model.JenkinsLocationConfiguration.xml || envsubst < /opt/jenkins.model.JenkinsLocationConfiguration.xml > ~/.jenkins/jenkins.model.JenkinsLocationConfiguration.xml
-test -f ~/.jenkins/nr.global.configuration.xml || envsubst < /opt/nr.global.configuration.xml > ~/.jenkins/nr.global.configuration.xml
+test -f ~/.jenkins/com.newrelic.experts.jenkins.extensions.NewRelicGlobalConfiguration.xml || envsubst < /opt/com.newrelic.experts.jenkins.extensions.NewRelicGlobalConfiguration.xml > ~/.jenkins/com.newrelic.experts.jenkins.extensions.NewRelicGlobalConfiguration.xml
 envsubst < /opt/nr-credentials.xml > ~/.jenkins/nr-credentials.xml
 
 trap 'waitForFinishOfActiveJobs; kill ${pid}; exit 0;' SIGTERM
