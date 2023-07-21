@@ -1,0 +1,52 @@
+# syntax = docker/dockerfile:1.5
+
+{% include "images/templates/common/args.Dockerfile" with _context %}
+
+{% include "images/templates/common/node.Dockerfile" with _context %}
+
+# -----------------------------
+
+{% include "images/templates/baked/npm.Dockerfile" with _context %}
+
+# -----------------------------
+
+{% include "images/templates/common/application.Dockerfile" with _context %}
+
+# -----------------------------
+
+{% include "images/templates/common/frontend.Dockerfile" with _context %}
+
+# -----------------------------
+
+{% include "images/templates/baked/application.Dockerfile" with _context %}
+
+# -----------------------------
+
+{% include "images/templates/export/jenkins.Dockerfile" with _context %}
+
+# -----------------------------
+
+{% include "images/templates/common/pipeline.Dockerfile" with _context %}
+
+# -----------------------------
+
+{% include "images/templates/baked/assets.builder.Dockerfile" with _context %}
+
+# -----------------------------
+
+{% include "images/templates/baked/pipeline.Dockerfile" with _context %}
+
+# -----------------------------
+
+{% include "images/templates/baked/frontend.Dockerfile" with _context %}
+
+# -----------------------------
+
+# To build all necessary stages at once this fake stage has dependency to all of them (for `docker build`)
+FROM busybox as target
+LABEL "spryker.image" "none"
+
+COPY --from=application /tmp/.dependency* /tmp/
+COPY --from=pipeline /tmp/.dependency* /tmp/
+COPY --from=jenkins /tmp/.dependency* /tmp/
+COPY --from=frontend /tmp/.dependency* /tmp/

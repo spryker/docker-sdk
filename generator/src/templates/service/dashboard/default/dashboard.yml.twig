@@ -1,7 +1,13 @@
   {{ serviceName }}:
     build:
       context: ./${DEPLOYMENT_PATH}/
-      dockerfile: images/common/dashboard/Dockerfile
+      dockerfile: images/services/dashboard/Dockerfile
+      tags:
+        - "${SPRYKER_DOCKER_PREFIX}_dashboard:${SPRYKER_DOCKER_TAG}"
+      labels:
+        "spryker.image": "none"
+        "spryker.project": "${SPRYKER_DOCKER_PREFIX}"
+        "spryker.sdk.revision": "${SPRYKER_SDK_REVISION}"
     networks:
       - public
       - private

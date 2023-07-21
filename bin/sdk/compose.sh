@@ -141,10 +141,9 @@ function Compose::up() {
       Compose::cleanSourceDirectory
     fi
 
-    Images::buildApplication ${noCache} ${doBuild}
+    Images::build ${noCache} ${doBuild}
     Codebase::build ${noCache} ${doBuild}
     Assets::build ${noCache} ${doAssets}
-    Images::buildFrontend ${noCache} ${doBuild}
     Compose::run --build
     Compose::command restart frontend gateway
 

@@ -13,6 +13,8 @@ Registry::Help::command -s -c "bootstrap | boot" -a "[-v] <project-yml-file>" "P
 Registry::Help::command -s -c "bootstrap | boot" -a "[-v]" "Prepares all the files to run the application based on ${HELP_HIGH}deploy.local.yml${HELP_DESC} or ${HELP_HIGH}deploy.yml${HELP_DESC}."
 
 function Command::bootstrap() {
+    local OPTIND=0
+    local opt
 
     while getopts ":vsx" opt; do
         case ${opt} in
@@ -42,6 +44,7 @@ function Command::bootstrap() {
     shift $((OPTIND - 1))
 
     local gitHash=$(git rev-parse --verify HEAD 2>/dev/null || true)
+    local SPRYKER_SDK_REVISION="$(cd ${SOURCE_DIR} && git rev-parse --short HEAD 2>/dev/null || echo '')"
     local tmpDeploymentDir="${SOURCE_DIR}/deployment/_tmp"
     local defaultProjectYaml=$([ -f "./deploy.local.yml" ] && echo -n "./deploy.local.yml" || echo -n "./deploy.yml")
     local projectYaml=${1:-${defaultProjectYaml}}
@@ -75,11 +78,12 @@ function Command::bootstrap() {
     Console::info "Using ${projectYaml}"
 
     local USER_FULL_ID=$(Environment::getFullUserId)
+    local USER_UID="${USER_FULL_ID%%:*}"
 
     Console::verbose::start "Building generator..."
     docker build -t spryker_docker_sdk \
         -f "${SOURCE_DIR}/generator/Dockerfile" \
-        --build-arg="USER_UID=${USER_FULL_ID%%:*}" \
+        --build-arg="USER_UID=${USER_UID}" \
         -q \
         "${SOURCE_DIR}/generator" >/dev/null
     Console::end "[DONE]"
@@ -103,12 +107,13 @@ function Command::bootstrap() {
 
     # To support root user
     local userToRun=("-u" "${USER_FULL_ID}")
-    if [ "${USER_FULL_ID%%:*}" != '0' ]; then
+    if [ "${USER_UID}" != '0' ]; then
         userToRun=()
     fi
     docker run -i --rm "${userToRun[@]}" \
         -e SPRYKER_PLATFORM_IMAGE="${SPRYKER_PLATFORM_IMAGE:-""}" \
         -e SPRYKER_DOCKER_SDK_PLATFORM="${_PLATFORM}" \
+        -e SPRYKER_SDK_REVISION="${SPRYKER_SDK_REVISION}" \
         -e SPRYKER_DOCKER_SDK_DEPLOYMENT_DIR="${DESTINATION_DIR}" \
         -e VERBOSE="${VERBOSE}" \
         -v "${tmpDeploymentDir}":/data/deployment:rw \

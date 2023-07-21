@@ -1,9 +1,15 @@
   {{ serviceName }}:
     build:
-      context: ./${DEPLOYMENT_PATH}/images/common/services/tideways/
+      context: ./${DEPLOYMENT_PATH}/images/services/tideways/
       dockerfile: Dockerfile
       args:
         TIDEWAYS_ENVIRONMENT_DEFAULT: "{{ serviceData.environment | default('production') }}"
+      tags:
+        - "${SPRYKER_DOCKER_PREFIX}_tideways:${SPRYKER_DOCKER_TAG}"
+      labels:
+        "spryker.image": "none"
+        "spryker.project": "${SPRYKER_DOCKER_PREFIX}"
+        "spryker.sdk.revision": "${SPRYKER_SDK_REVISION}"
     networks:
       - private
     labels:

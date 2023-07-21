@@ -102,12 +102,13 @@ readonly PROJECT_DIR="$(pwd)"
 readonly DEPLOYMENT_DIR="$(cd "${BASH_SOURCE%/*}" >/dev/null 2>&1 && pwd)"
 readonly DEPLOYMENT_PATH="${DEPLOYMENT_DIR/$PROJECT_DIR/.}"
 readonly SECRETS_FILE_PATH="${DEPLOYMENT_DIR}/.secrets"
-readonly PROGRESS_TYPE=${PROGRESS_TYPE:-tty}
+readonly SPRYKER_SDK_REVISION="{{ _sdk_revision | raw }}"
+readonly PROGRESS_TYPE=${PROGRESS_TYPE:-auto}
 VERBOSE=${VERBOSE:-0}
 
 # Predefined constants
 readonly APPLICATION_ENV="{{ environment | default('docker') }}"
-declare -a -r SPRYKER_APPLICATIONS=({{ _applications | join(' ') | raw }})
+# deprecated with Image::export
 declare -a -r SPRYKER_ENTRYPOINTS=({{ _entryPoints | join(' ') | raw }})
 readonly COMPOSE_PROJECT_NAME={{ namespace | default('spryker') }}
 readonly SPRYKER_PIPELINE=${SPRYKER_PIPELINE:-{{ pipeline | default('docker') }}}
@@ -132,10 +133,10 @@ readonly SPRYKER_SYNC_VOLUME="${SPRYKER_DOCKER_PREFIX}_${SPRYKER_DOCKER_TAG}_dat
 readonly DOCKER_COMPOSE_FILES_EXTRA="{{ docker['compose']['yamls'] | default([]) | join(' ') }}"
 readonly SPRYKER_DASHBOARD_ENDPOINT="{{ _dashboardEndpoint }}"
 readonly KNOWN_HOSTS="{{ _knownHosts | default("") }}"
-readonly SPRYKER_BUILD_HASH="${SPRYKER_BUILD_HASH}"
-readonly SPRYKER_BUILD_DATE="${SPRYKER_BUILD_DATE}"
+readonly SPRYKER_BUILD_HASH="${SPRYKER_BUILD_HASH:-current}"
+readonly SPRYKER_BUILD_STAMP="${SPRYKER_BUILD_STAMP:-now}"
 readonly SPRYKER_REPOSITORY_HASH="${SPRYKER_BUILD_HASH:-"$(git rev-parse --verify HEAD 2>/dev/null || echo "head")"}"
-readonly SPRYKER_MAINTENANCE_MODE_ENABLED="{{ docker['maintenance']['enabled'] | default('false') }}"
+readonly SPRYKER_MAINTENANCE_MODE_ENABLED="${SPRYKER_MAINTENANCE_MODE_ENABLED:-{{ docker['maintenance']['enabled'] ? 1 : 0 | default(0) }}}"
 
 # PHP extensions
 {% for phpExtensionName in _phpExtensions %}
@@ -172,6 +173,7 @@ readonly SSH_AUTH_SOCK_IN_CLI="$([ -n "${SSH_AUTH_SOCK}" ] && [ -z "${COMPOSER_A
 
 # Global variables
 readonly USER_FULL_ID=$(Environment::getFullUserId)
+readonly USER_UID="${USER_FULL_ID%%:*}"
 readonly SPRYKER_XDEBUG_HOST_IP=$(Environment::getHostIp)
 readonly SECRETS_ENVIRONMENT=("COMPOSER_AUTH='${COMPOSER_AUTH}'")
 
@@ -208,9 +210,11 @@ shift $((OPTIND - 1))
 
 # Exporting for docker-compose
 export DEPLOYMENT_PATH
+export SPRYKER_SDK_REVISION
 export SPRYKER_XDEBUG_HOST_IP
 export SSH_AUTH_SOCK_ON_HOST
 export COMPOSE_PROJECT_NAME
+export SPRYKER_PROJECT_NAME
 export SPRYKER_DOCKER_PREFIX
 export SPRYKER_DOCKER_TAG
 export SPRYKER_TESTING_ENABLE
@@ -218,7 +222,22 @@ export SPRYKER_XDEBUG_MODE_ENABLE
 export SPRYKER_XDEBUG_ENABLE
 export SPRYKER_LOG_DIRECTORY
 export SPRYKER_BUILD_HASH
-export SPRYKER_BUILD_DATE
+export SPRYKER_BUILD_STAMP
+export SECRETS_FILE_PATH
+export SPRYKER_PLATFORM_IMAGE
+export SPRYKER_FRONTEND_IMAGE
+export SPRYKER_PIPELINE
+export APPLICATION_ENV
+export SPRYKER_COMPOSER_MODE
+export SPRYKER_COMPOSER_AUTOLOAD
+export SPRYKER_ASSETS_MODE
+export SPRYKER_DB_ENGINE
+export KNOWN_HOSTS
+export SPRYKER_NODE_IMAGE_VERSION
+export SPRYKER_NODE_IMAGE_DISTRO
+export SPRYKER_NPM_VERSION
+export SPRYKER_MAINTENANCE_MODE_ENABLED
+export USER_UID
 export BLACKFIRE_SERVER_ID=${BLACKFIRE_SERVER_ID}
 export BLACKFIRE_SERVER_TOKEN=${BLACKFIRE_SERVER_TOKEN}
 export BLACKFIRE_CLIENT_ID=${BLACKFIRE_CLIENT_ID}

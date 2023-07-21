@@ -1,0 +1,77 @@
+# syntax = docker/dockerfile:1.5
+
+{% include "images/templates/common/args.Dockerfile" with _context %}
+
+{% include "images/templates/common/node.Dockerfile" with _context %}
+
+# -----------------------------
+
+{% include "images/templates/baked/npm.Dockerfile" with _context %}
+
+# -----------------------------
+
+{% include "images/templates/common/application.Dockerfile" with _context %}
+
+# -----------------------------
+
+{% include "images/templates/common/frontend.Dockerfile" with _context %}
+
+# -----------------------------
+
+{% include "images/templates/common/gateway.Dockerfile" with _context %}
+
+# -----------------------------
+
+{% include "images/templates/baked/application.Dockerfile" with _context %}
+
+# -----------------------------
+
+{% include "images/templates/common/application.dev.Dockerfile" with _context %}
+{%if _context['docker']['debug']['enabled'] %}
+{% include "images/templates/common/debug/application.Dockerfile" with _context %}
+{%endif%}
+
+# -----------------------------
+
+{% include "images/templates/baked/assets.builder.Dockerfile" with _context %}
+
+# -----------------------------
+
+{% include "images/templates/common/pipeline.Dockerfile" with _context %}
+
+# -----------------------------
+
+{% include "images/templates/baked/pipeline.Dockerfile" with _context %}
+
+# -----------------------------
+
+{% include "images/templates/common/cli.Dockerfile" with _context %}
+
+# -----------------------------
+
+{% include "images/templates/baked/cli.Dockerfile" with _context %}
+{%if _context['docker']['debug']['enabled'] %}
+{% include "images/templates/common/debug/cli.Dockerfile" with _context %}
+{%endif%}
+
+# -----------------------------
+
+{% include "images/templates/baked/frontend.Dockerfile" with _context %}
+
+# -----------------------------
+
+{% include "images/templates/common/frontend.dev.Dockerfile" with _context %}
+{%if _context['docker']['debug']['enabled'] %}
+{% include "images/templates/common/debug/frontend.Dockerfile" with _context %}
+{%endif%}
+
+# -----------------------------
+
+# To build all necessary stages at once this fake stage has dependency to all of them (for `docker build`)
+FROM busybox as target
+LABEL "spryker.image" "none"
+
+COPY --from=application-dev /tmp/.dependency* /tmp/
+COPY --from=cli /tmp/.dependency* /tmp/
+COPY --from=frontend-dev /tmp/.dependency* /tmp/
+COPY --from=gateway /tmp/.dependency* /tmp/

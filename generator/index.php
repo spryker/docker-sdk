@@ -22,6 +22,7 @@ if ($projectYaml == '') {
 
 $defaultDeploymentDir = getenv('SPRYKER_DOCKER_SDK_DEPLOYMENT_DIR') ?: './';
 $platform = getenv('SPRYKER_DOCKER_SDK_PLATFORM') ?: 'linux'; // Possible values: linux windows macos
+$sdkRevision = getenv('SPRYKER_SDK_REVISION') ?: '';
 
 $loaders = new ChainLoader([
     new FilesystemLoader(APPLICATION_SOURCE_DIR . DS . 'templates'),
@@ -80,6 +81,7 @@ $projectData['_knownHosts'] = buildKnownHosts($deploymentDir);
 $projectData['_defaultDeploymentDir'] = $defaultDeploymentDir;
 $projectData['tag'] = $projectData['tag'] ?? uniqid();
 $projectData['_platform'] = $platform;
+$projectData['_sdk_revision'] = $sdkRevision;
 $mountMode = $projectData['_mountMode'] = retrieveMountMode($projectData, $platform);
 $projectData['_syncIgnore'] = buildSyncIgnore($deploymentDir);
 $projectData['_syncSessionName'] = preg_replace('/[^-a-zA-Z0-9]/', '-', $projectData['namespace'] . '-' . $projectData['tag'] . '-codebase');
@@ -575,11 +577,36 @@ file_put_contents(
     json_encode($environment, JSON_PRETTY_PRINT)
 );
 
+@mkdir($deploymentDir . DS . 'images' . DS . 'baked', 0777, true);
 file_put_contents(
-    $deploymentDir . DS . 'images' . DS . 'common' . DS . 'application' . DS . 'Dockerfile',
-    $twig->render('images' . DS . 'common' . DS . 'application' . DS . 'Dockerfile.twig', $projectData)
+    $deploymentDir . DS . 'images' . DS . 'baked' . DS . 'Dockerfile',
+    $twig->render('images' . DS . 'templates' . DS . 'baked' . DS . 'Dockerfile.twig', $projectData)
 );
-unlink($deploymentDir . DS . 'images' . DS . 'common' . DS . 'application' . DS . 'Dockerfile.twig');
+@mkdir($deploymentDir . DS . 'images' . DS . 'export', 0777, true);
+file_put_contents(
+    $deploymentDir . DS . 'images' . DS . 'export' . DS . 'Dockerfile',
+    $twig->render('images' . DS . 'templates' . DS . 'export' . DS . 'Dockerfile.twig', $projectData)
+);
+@mkdir($deploymentDir . DS . 'images' . DS . 'mount', 0777, true);
+file_put_contents(
+    $deploymentDir . DS . 'images' . DS . 'mount' . DS . 'Dockerfile',
+    $twig->render('images' . DS . 'templates' . DS . 'mount' . DS . 'Dockerfile.twig', $projectData)
+);
+
+foreach (['baked' => 'runtime', 'mount' => 'runtime', 'export' => 'export'] as $buildMode => $tagMode) {
+    foreach (['bake' => 'docker-bake.hcl', 'build' => 'sh'] as $buildEngine => $fileExtension) {
+        foreach (['ecr', 'print'] as $buildDestination) {
+            if ($tagMode === 'runtime' && $buildDestination === 'ecr') continue;
+            file_put_contents(
+                $deploymentDir . DS . 'images' . DS . $buildMode . DS . "${buildDestination}.${fileExtension}",
+                $twig->render(
+                    'images' . DS . 'templates' . DS . 'plans' . DS . "${buildMode}.${fileExtension}",
+                    ['_applications' => $projectData['_applications'], 'tagMode' => $tagMode, 'buildDestination' => $buildDestination]
+                )
+            );
+        }
+    }
+}
 
 file_put_contents(
     $deploymentDir . DS . 'docker-compose.yml',

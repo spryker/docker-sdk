@@ -23,11 +23,12 @@ function Command::config() {
     Console::info "Using ${projectYaml}"
 
     local USER_FULL_ID=$(Environment::getFullUserId)
+    local USER_UID="${USER_FULL_ID%%:*}"
 
     Console::verbose::start "Building generator..."
     docker build -t spryker_docker_sdk \
         -f "${SOURCE_DIR}/generator/deploy-file-generator/Dockerfile" \
-        --build-arg="USER_UID=${USER_FULL_ID%%:*}" \
+        --build-arg="USER_UID=${USER_UID}" \
         -q \
         "${SOURCE_DIR}/generator" >/dev/null
 
@@ -42,7 +43,7 @@ function Command::config() {
 
     # To support root user
     local userToRun=("-u" "${USER_FULL_ID}")
-    if [ "${USER_FULL_ID%%:*}" != '0' ]; then
+    if [ "${USER_UID}" != '0' ]; then
         userToRun=()
     fi
     docker run -i --rm "${userToRun[@]}" \

@@ -19,6 +19,7 @@ function Registry::Help::separator() {
 
 function Registry::Help::command() {
     local OPTIND=0
+    local opt
     local OPTARG=''
     local OPTERR=''
     local envs=''

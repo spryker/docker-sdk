@@ -6,10 +6,6 @@ function Assets::export() {
     return "${FALSE}"
 }
 
-function Assets::getImageTag() {
-    echo -n "${SPRYKER_DOCKER_PREFIX}_cli:${SPRYKER_DOCKER_TAG}"
-}
-
 function Assets::areBuilt() {
     Console::start "Checking assets are built..."
 

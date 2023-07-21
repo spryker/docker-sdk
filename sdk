@@ -48,6 +48,7 @@ shift $((OPTIND - 1))
 
 System::Bootstrap
 
+export SPRYKER_PROJECT_NAME
 readonly DESTINATION_DIR="${SOURCE_DIR}/deployment/${SPRYKER_PROJECT_NAME}"
 readonly DEPLOY_SCRIPT=${DESTINATION_DIR}/deploy
 

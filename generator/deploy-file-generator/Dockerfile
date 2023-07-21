@@ -1,4 +1,4 @@
-# syntax = docker/dockerfile:experimental
+# syntax = docker/dockerfile:1.5
 ARG SPRYKER_PHP_VERSION=7.3
 
 FROM spryker/php:${SPRYKER_PHP_VERSION}
@@ -16,7 +16,7 @@ COPY --chown=spryker:spryker deploy-file-generator ${srcRoot}/deploy-file-genera
 USER root
 
 ARG USER_UID
-RUN usermod -u ${USER_UID} spryker && find / -user 1000 -exec chown -h spryker {} \ || true;
+RUN usermod -u ${USER_UID} spryker && find / -user 1000 -exec chown -h spryker {} \; || true;
 
 USER spryker
 
