@@ -15,5 +15,8 @@ locals {
 {% endif %}
 {% endfor %}
 {% endfor %}
+    e2e = {
+{% include  "terraform/e2e/e2e.tf.twig" with _context %}
+    }
   }
 }
