@@ -44,6 +44,7 @@ services:
       BLACKFIRE_SERVER_TOKEN: ${BLACKFIRE_SERVER_TOKEN}
       BLACKFIRE_CLIENT_ID: ${BLACKFIRE_CLIENT_ID}
       BLACKFIRE_CLIENT_TOKEN: ${BLACKFIRE_CLIENT_TOKEN}
+      BLACKFIRE_APM_ENABLED: ${BLACKFIRE_APM_ENABLED}
       TIDEWAYS_APIKEY: ${TIDEWAYS_APIKEY}
       TIDEWAYS_CLI_ENABLED: ${TIDEWAYS_CLI_ENABLED}
       TIDEWAYS_ENVIRONMENT_NAME: ${TIDEWAYS_ENVIRONMENT_NAME}
@@ -71,6 +72,7 @@ services:
       # TODO reconsider to use default in entrypoint
       ALLOWED_IP: "127.0.0.1"
       SPRYKER_TESTING_ENABLE: ${SPRYKER_TESTING_ENABLE}
+      BLACKFIRE_APM_ENABLED: ${BLACKFIRE_APM_ENABLED}
 {% if docker['debug']['xdebug']['enabled'] is not defined or docker['debug']['xdebug']['enabled'] == true %}
       SPRYKER_XDEBUG_ENABLE: ${SPRYKER_XDEBUG_ENABLE}
 {% endif %}
@@ -119,6 +121,7 @@ services:
     environment:
       SPRYKER_TESTING_ENABLE: ${SPRYKER_TESTING_ENABLE}
       SPRYKER_XDEBUG_MODE_ENABLE: ${SPRYKER_XDEBUG_MODE_ENABLE}
+      BLACKFIRE_APM_ENABLED: ${BLACKFIRE_APM_ENABLED}
 {% if docker['debug']['xdebug']['enabled'] is not defined or docker['debug']['xdebug']['enabled'] == true %}
       SPRYKER_XDEBUG_ENABLE: ${SPRYKER_XDEBUG_ENABLE}
 {% endif %}
