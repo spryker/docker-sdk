@@ -22,10 +22,6 @@ function Database::checkConnection() {
 
 
 function Database::haveTables() {
-    if ! Service::isServiceExist database; then
-        return;
-    fi
-
     Database::checkConnection
 
     tableCount=$(
@@ -71,10 +67,6 @@ EOF
 }
 
 function Database::init() {
-      if ! Service::isServiceExist database; then
-          return;
-      fi
-
       Database::checkConnection
 
       Compose::exec <<'EOF'
