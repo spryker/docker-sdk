@@ -7,7 +7,7 @@
       'spryker.app.type': services
       'spryker.project': ${SPRYKER_DOCKER_PREFIX}:${SPRYKER_DOCKER_TAG}
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "--silent"]
+      test: ["CMD", "mysqladmin", "ping", "--silent", "-h", "localhost", "-uroot", "-ppass"]
       interval: 10s
       timeout: 10s
       retries: 5
