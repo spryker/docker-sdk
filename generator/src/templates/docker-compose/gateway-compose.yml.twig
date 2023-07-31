@@ -3,7 +3,7 @@ version: "3.7"
 services:
   {{ internal_project_name }}_gateway:
     container_name: {{ internal_project_name }}_gateway
-    image: ${SPRYKER_DOCKER_PREFIX}_gateway:${SPRYKER_DOCKER_TAG}
+    image: {{ internal_project_name }}_gateway:${SPRYKER_DOCKER_TAG}
     ports:
 {% for port in gatewayData.ports %}
       - "{{ port }}:{{ port }}"

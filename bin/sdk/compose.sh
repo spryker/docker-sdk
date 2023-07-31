@@ -104,7 +104,7 @@ function Compose::command() {
 }
 
 function Compose::SharedServices::command() {
-    docker-compose \
+    ${DOCKER_COMPOSE_SUBSTITUTE:-'docker-compose'} \
         --project-directory "${PROJECT_DIR}" \
         --project-name "${SPRYKER_INTERNAL_PROJECT_NAME}_shared_services" \
         -f "${DEPLOYMENT_PATH}/../${SPRYKER_INTERNAL_PROJECT_NAME}/shared-services.docker-compose.yml" \
@@ -112,7 +112,7 @@ function Compose::SharedServices::command() {
 }
 
 function Compose::Gateway::command() {
-    docker-compose \
+    ${DOCKER_COMPOSE_SUBSTITUTE:-'docker-compose'} \
         --project-directory "${PROJECT_DIR}" \
         --project-name "${SPRYKER_INTERNAL_PROJECT_NAME}_gateway" \
         -f "${DEPLOYMENT_PATH}/../${SPRYKER_INTERNAL_PROJECT_NAME}/gateway.docker-compose.yml" \
@@ -121,7 +121,6 @@ function Compose::Gateway::command() {
 
 # ---------------
 function Compose::up() {
-
     local noCache=""
     local doBuild=""
     local doAssets=""

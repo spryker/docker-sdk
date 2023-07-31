@@ -198,7 +198,7 @@ function Images::_buildFrontend() {
 }
 
 function Images::_buildGateway() {
-    local gatewayImage="${SPRYKER_DOCKER_PREFIX}_gateway:${SPRYKER_DOCKER_TAG}"
+    local gatewayImage="${SPRYKER_INTERNAL_PROJECT_NAME}_gateway:${SPRYKER_DOCKER_TAG}"
 
     Console::verbose "${INFO}Building Gateway image${NC}"
 

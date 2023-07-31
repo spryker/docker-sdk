@@ -17,6 +17,7 @@ function Command::prune() {
       fi
     done
 
+#    todo: for each project
     Compose::command down
     sync clean # TODO deprecated, use Registry::Flow::addAfterDown in mounts
     Console::error "This will delete ALL docker images and volumes on the host."
