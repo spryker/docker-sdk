@@ -15,8 +15,6 @@ ENV SPRYKER_DNS_RESOLVER_FLAGS="valid=10s ipv6=off"
 ENV SPRYKER_DNS_RESOLVER_IP=""
 ENV SPRYKER_MAINTENANCE_MODE_ENABLED="0"
 
-COPY --chown=root:root --link ${DEPLOYMENT_PATH}/context/nginx/build.json /tmp/build.json
-
 ENTRYPOINT [ "/entrypoint.sh" ]
 
 CMD ["nginx", "-g", "daemon off;"]

@@ -14,6 +14,18 @@
 
 # -----------------------------
 
+{% include "images/templates/baked/application.Dockerfile" with _context %}
+
+# -----------------------------
+
+{% include "images/templates/common/pipeline.Dockerfile" with _context %}
+
+# -----------------------------
+
+{% include "images/templates/baked/assets.builder.Dockerfile" with _context %}
+
+# -----------------------------
+
 {% include "images/templates/common/frontend.Dockerfile" with _context %}
 
 # -----------------------------
@@ -22,22 +34,10 @@
 
 # -----------------------------
 
-{% include "images/templates/baked/application.Dockerfile" with _context %}
-
-# -----------------------------
-
 {% include "images/templates/common/application.dev.Dockerfile" with _context %}
 {%if _context['docker']['debug']['enabled'] %}
 {% include "images/templates/common/debug/application.Dockerfile" with _context %}
 {%endif%}
-
-# -----------------------------
-
-{% include "images/templates/baked/assets.builder.Dockerfile" with _context %}
-
-# -----------------------------
-
-{% include "images/templates/common/pipeline.Dockerfile" with _context %}
 
 # -----------------------------
 

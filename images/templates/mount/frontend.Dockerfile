@@ -9,6 +9,6 @@ ENV SPRYKER_BUILD_HASH=${SPRYKER_BUILD_HASH}
 ARG SPRYKER_BUILD_STAMP
 ENV SPRYKER_BUILD_STAMP=${SPRYKER_BUILD_STAMP}
 
-RUN mkdir -p /usr/share/nginx/ \
-  && envsubst '${SPRYKER_BUILD_HASH} ${SPRYKER_BUILD_STAMP}' < /tmp/build.json > /usr/share/nginx/build.json \
-  && rm -f /tmp/build.json
+COPY --link <<-EOT /usr/share/nginx/build.json
+{% include "images/templates/common/build.json" with _context %}
+EOT

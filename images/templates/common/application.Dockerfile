@@ -3,6 +3,7 @@ LABEL "spryker.image" "none"
 
 ENV SPRYKER_IN_DOCKER=1
 ENV COMPOSER_IGNORE_CHROMEDRIVER=1
+ENV SPRYKER_JENKINS_TEMPLATE_PATH=/home/spryker/jenkins.docker.xml.twig
 {% for envName, envValue in _envs %}
 ENV {{ envName }}='{{ envValue }}'
 {% endfor %}
@@ -29,20 +30,25 @@ COPY --link --chown=spryker:spryker ${DEPLOYMENT_PATH}/context/php/build.php /ho
 ARG SPRYKER_LOG_DIRECTORY
 ARG KNOWN_HOSTS
 ENV SPRYKER_LOG_DIRECTORY=${SPRYKER_LOG_DIRECTORY}
-RUN mkdir -p ${SPRYKER_LOG_DIRECTORY} \
-    && chown spryker:spryker ${SPRYKER_LOG_DIRECTORY} \
-    && mkdir -p /home/spryker/.ssh && chmod 0700 /home/spryker/.ssh \
-    && bash -c '[ ! -z "${KNOWN_HOSTS}" ] && ssh-keyscan -t rsa ${KNOWN_HOSTS} >> /home/spryker/.ssh/known_hosts || true' \
-    && chown spryker:spryker -R /home/spryker/.ssh \
-    && rm -f /usr/local/etc/php/conf.d/opcache.ini \
+RUN <<EOT bash -e
+  mkdir -p ${SPRYKER_LOG_DIRECTORY}
+  chown spryker:spryker ${SPRYKER_LOG_DIRECTORY}
+  mkdir -p /home/spryker/.ssh
+  chmod 0700 /home/spryker/.ssh
+  if [ ! -z "${KNOWN_HOSTS}" ]; then
+    ssh-keyscan -t rsa ${KNOWN_HOSTS} >> /home/spryker/.ssh/known_hosts
+  fi
+  chown spryker:spryker -R /home/spryker/.ssh
+  rm -f /usr/local/etc/php/conf.d/opcache.ini
 {% if _phpExtensions is defined and _phpExtensions is not empty %}
 {% for phpExtention in _phpExtensions %}
-    && mv /usr/local/etc/php/disabled/{{phpExtention}}.ini /usr/local/etc/php/conf.d/90-{{phpExtention}}.ini \
+  mv /usr/local/etc/php/disabled/{{phpExtention}}.ini /usr/local/etc/php/conf.d/90-{{phpExtention}}.ini
 {% endfor %}
 {% endif %}
-    && rm -rf /var/run \
-    && /usr/bin/install -d -m 777 /var/run/opcache \
-    && bash -c "php -r 'exit(PHP_VERSION_ID > 70400 ? 1 : 0);' && sed -i '' -e 's/decorate_workers_output/;decorate_workers_output/g' /usr/local/etc/php-fpm.d/worker.conf || true"
+  rm -rf /var/run
+  /usr/bin/install -d -m 777 /var/run/opcache
+  php -r 'exit(PHP_VERSION_ID > 70400 ? 1 : 0);' && sed -i '' -e 's/decorate_workers_output/;decorate_workers_output/g' /usr/local/etc/php-fpm.d/worker.conf || true
+EOT
 
 ARG SPRYKER_PIPELINE
 ENV SPRYKER_PIPELINE=${SPRYKER_PIPELINE}

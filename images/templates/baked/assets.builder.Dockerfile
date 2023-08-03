@@ -1,32 +1,29 @@
-FROM application-basic AS assets-builder
+FROM pipeline-basic AS assets-builder
 LABEL "spryker.image" "none"
 
 USER root
 
-COPY --from=node-distributive /node/usr /usr/
-
-RUN --mount=type=cache,id=aptlib,sharing=locked,target=/var/lib/apt \
-    --mount=type=cache,id=aptcache,sharing=locked,target=/var/cache/apt \
-  bash -c 'if [ ! -z "$(which apt)" ]; then apt update -y && apt install -y \
-     python3 \
-     g++ \
-     make \
-     ; \
-     curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add - && \
-     echo "deb https://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources.list.d/yarn.list && \
-     apt update -y && apt install -y \
-     yarn \
-     ; fi'
-
-RUN --mount=type=cache,id=apk,sharing=locked,target=/var/cache/apk mkdir -p /etc/apk && ln -vsf /var/cache/apk /etc/apk/cache && \
-  bash -c 'if [ ! -z "$(which apk)" ]; then apk update && apk add \
-     coreutils \
-     ncurses \
-     yarn \
-     python3 \
-     g++ \
-     make \
-     ; fi'
+RUN --mount=type=cache,id=apk,sharing=locked,target=/var/cache/apk \
+  --mount=type=cache,id=aptlib,sharing=locked,target=/var/lib/apt \
+  --mount=type=cache,id=aptcache,sharing=locked,target=/var/cache/apt \
+  <<EOT bash -e
+    if which apk; then
+      mkdir -p /etc/apk
+      ln -vsf /var/cache/apk /etc/apk/cache
+      apk update
+      apk add \
+        g++ \
+        make
+    else
+      # Debian has outdated yarn
+      curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add -
+      echo "deb https://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources.list.d/yarn.list
+      apt update -y
+      apt install -y \
+        g++ \
+        make
+    fi
+EOT
 
 USER spryker:spryker
 
@@ -45,7 +42,10 @@ RUN --mount=type=cache,id=npm,sharing=locked,target=/home/spryker/.npm,uid=1000 
   --mount=type=bind,from=application-codebase,source=/data/vendor,target=/vendor \
   --mount=type=bind,from=stash-rsync,source=/rsync,target=/rsync \
   --mount=type=tmpfs,target=/var/run/opcache/ \
-  LD_LIBRARY_PATH=/rsync /rsync/rsync -ap --chown=spryker:spryker /vendor/ ./vendor/ --exclude '.git*/' \
-  && echo "MODE: ${SPRYKER_ASSETS_MODE}" \
-  && vendor/bin/console transfer:generate \
-  && vendor/bin/install -r ${SPRYKER_PIPELINE} -s build-static -s build-static-${SPRYKER_ASSETS_MODE}
+  <<EOT bash -e
+    LD_LIBRARY_PATH=/rsync /rsync/rsync -ap --chown=spryker:spryker /vendor/ ./vendor/ \
+      --exclude '.git*/'
+    echo "MODE: ${SPRYKER_ASSETS_MODE}"
+    vendor/bin/console transfer:generate
+    vendor/bin/install -r ${SPRYKER_PIPELINE} -s build-static -s build-static-${SPRYKER_ASSETS_MODE}
+EOT

@@ -3,6 +3,8 @@ LABEL "spryker.image" "none"
 
 USER spryker:spryker
 
+ENV DEVELOPMENT_CONSOLE_COMMANDS=1
+
 FROM pipeline-before-stamp as pipeline
 LABEL "spryker.image" "pipeline"
 

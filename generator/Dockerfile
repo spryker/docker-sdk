@@ -1,5 +1,5 @@
 # syntax = docker/dockerfile:1.5
-ARG SPRYKER_PHP_VERSION=7.3
+ARG SPRYKER_PHP_VERSION=8.2
 
 FROM spryker/php:${SPRYKER_PHP_VERSION}
 

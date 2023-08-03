@@ -1,5 +1,7 @@
 FROM stash-src AS stash-src-after-app
 
+ENV DEVELOPMENT_CONSOLE_COMMANDS=1
+
 COPY --from=application-before-stamp /data/src /data/src
 
 # -----------------------------
@@ -9,8 +11,10 @@ LABEL "spryker.image" "none"
 
 RUN --mount=type=cache,id=composer,sharing=locked,target=/home/spryker/.composer/cache,uid=1000 \
   --mount=type=ssh,uid=1000 --mount=type=secret,id=secrets-env,uid=1000 \
-  set -o allexport && . /run/secrets/secrets-env && set +o allexport \
-  && composer install --no-scripts --no-interaction
+  <<EOT bash -e
+    set -o allexport && . /run/secrets/secrets-env && set +o allexport
+    composer install --no-scripts --no-interaction
+EOT
 
 # -----------------------------
 
@@ -25,9 +29,14 @@ RUN --mount=type=cache,id=composer,sharing=locked,target=/home/spryker/.composer
   --mount=type=bind,from=application-codebase-dev,source=/data/vendor,target=/vendor \
   --mount=type=bind,from=stash-rsync,source=/rsync,target=/rsync \
   --mount=type=tmpfs,target=/var/run/opcache/ \
-  set -o allexport && . /run/secrets/secrets-env && set +o allexport && \
-  LD_LIBRARY_PATH=/rsync /rsync/rsync -ap --chown=spryker:spryker /vendor/ ./vendor/ --exclude '.git*/' \
-  && bash -c 'if composer run --list | grep post-install-cmd; then composer run post-install-cmd; fi'
+  <<EOT bash -e
+    set -o allexport && . /run/secrets/secrets-env && set +o allexport
+    LD_LIBRARY_PATH=/rsync /rsync/rsync -ap --chown=spryker:spryker /vendor/ ./vendor/ \
+      --exclude '.git*/'
+    if composer run --list | grep 'post-install-cmd'; then
+      composer run post-install-cmd;
+    fi
+EOT
 
 COPY --from=stash-src-after-app --chown=spryker:spryker /data ${srcRoot}
 # Data with import
@@ -39,13 +48,15 @@ ENV DEVELOPMENT_CONSOLE_COMMANDS=1
 
 ARG SPRYKER_COMPOSER_AUTOLOAD
 RUN --mount=type=tmpfs,target=/var/run/opcache/ \
-  bash -c 'chmod 600 ${srcRoot}/config/Zed/*.key 2>/dev/null || true' \
-  && vendor/bin/install -r ${SPRYKER_PIPELINE} -s build -s build-development \
-  && composer dump-autoload ${SPRYKER_COMPOSER_AUTOLOAD}
+  <<EOT bash -e
+    chmod 600 ${srcRoot}/config/Zed/*.key 2>/dev/null || true
+    vendor/bin/install -r ${SPRYKER_PIPELINE} -s build -s build-development
+    composer dump-autoload ${SPRYKER_COMPOSER_AUTOLOAD}
+EOT
 
 COPY --link --chown=spryker:spryker fronten[d] ${srcRoot}/frontend
 COPY --link --chown=spryker:spryker .yar[n] ${srcRoot}/.yarn
-COPY --link --chown=spryker:spryker .* *.* LICENSE ${srcRoot}
+COPY --link --chown=spryker:spryker .* *.* ${srcRoot}
 
 FROM pipeline-before-stamp as pipeline
 LABEL "spryker.image" "pipeline"

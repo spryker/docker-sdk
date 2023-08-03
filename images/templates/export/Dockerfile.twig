@@ -14,15 +14,7 @@
 
 # -----------------------------
 
-{% include "images/templates/common/frontend.Dockerfile" with _context %}
-
-# -----------------------------
-
 {% include "images/templates/baked/application.Dockerfile" with _context %}
-
-# -----------------------------
-
-{% include "images/templates/export/jenkins.Dockerfile" with _context %}
 
 # -----------------------------
 
@@ -31,6 +23,13 @@
 # -----------------------------
 
 {% include "images/templates/baked/assets.builder.Dockerfile" with _context %}
+
+# -----------------------------
+
+{% include "images/templates/common/frontend.Dockerfile" with _context %}
+# -----------------------------
+
+{% include "images/templates/export/jenkins.Dockerfile" with _context %}
 
 # -----------------------------
 

@@ -4,46 +4,49 @@ LABEL "spryker.image" "none"
 FROM application-before-stamp as jenkins
 LABEL "spryker.image" "jenkins"
 
-COPY ${DEPLOYMENT_PATH}/context/jenkins/export/jenkins.docker.xml.twig ./config/Zed/cronjobs/jenkins.docker.xml.twig
+COPY --link --from=jenkins-boilerplate /usr/share/jenkins /usr/share/jenkins
 
-COPY --link --from=jenkins-boilerplate /usr/share/jenkins/ref/plugins /usr/share/jenkins/ref/plugins
-COPY --link --from=jenkins-boilerplate /usr/share/jenkins/jenkins.war /usr/share/jenkins/jenkins.war
-COPY --link --from=jenkins-boilerplate /usr/share/jenkins/jenkins-cli.jar /usr/share/jenkins/jenkins-cli.jar
-
+ARG DEPLOYMENT_PATH
 COPY --link ${DEPLOYMENT_PATH}/terraform/cli /envs/
-COPY --link --chmod=755 ${DEPLOYMENT_PATH}/context/jenkins/export/entrypoint.sh /entrypoint.sh
 COPY --link ${DEPLOYMENT_PATH}/context/jenkins/export/jenkins.model.JenkinsLocationConfiguration.xml /opt/jenkins.model.JenkinsLocationConfiguration.xml
 COPY --link ${DEPLOYMENT_PATH}/context/jenkins/export/nr-credentials.xml /opt/nr-credentials.xml
 
-# Install packages on Alpine
-RUN --mount=type=cache,id=apk,sharing=locked,target=/var/cache/apk mkdir -p /etc/apk && ln -vsf /var/cache/apk /etc/apk/cache && \
-  bash -c 'if [ ! -z "$(which apk)" ]; then apk update && apk add \
-	  curl \
-    bash \
-    openjdk11 \
-    ttf-dejavu \
-    gettext \
-    jq && \
-    mkdir -p /envs \
-    ; fi'
+COPY --link --chmod=755 ${DEPLOYMENT_PATH}/context/jenkins/export/entrypoint.sh /entrypoint.sh
 
-# Install packages on Debian
-RUN --mount=type=cache,id=aptlib,sharing=locked,target=/var/lib/apt \
+COPY --link --chown=spryker:spryker .* *.* ${srcRoot}
+
+ARG SPRYKER_DB_ENGINE
+RUN --mount=type=cache,id=apk,sharing=locked,target=/var/cache/apk \
+  --mount=type=cache,id=aptlib,sharing=locked,target=/var/lib/apt \
   --mount=type=cache,id=aptcache,sharing=locked,target=/var/cache/apt \
-  bash -c 'if [ ! -z "$(which apt)" ]; then apt update -y && \
-    apt-get install -y software-properties-common && \
-	  apt-add-repository "deb http://security.debian.org/debian-security bullseye-security main" && \
-	  apt-add-repository "deb http://ftp.de.debian.org/debian bullseye main" && \
-    apt update -y && apt install -y \
-    curl \
-      bash \
-      openjdk-11-jdk \
-      fonts-dejavu \
-      gettext \
-      jq \
-      && \
-      mkdir -p /envs \
-      ; fi'
+  <<EOT bash -e
+    if which apk; then
+      mkdir -p /etc/apk
+      ln -vsf /var/cache/apk /etc/apk/cache
+      apk update
+      apk add \
+        $(if [ "${SPRYKER_DB_ENGINE}" == 'pgsql' ]; then echo 'postgresql-client'; else echo 'mysql-client'; fi) \
+        openjdk11 \
+        ttf-dejavu \
+        gettext \
+        jq
+    else
+      export DEBIAN_FRONTEND=noninteractive
+      apt install -y software-properties-common
+      VERSION_CODENAME=$(env -i bash -c '. /etc/os-release; echo ${VERSION_CODENAME}')
+	    apt-add-repository "deb http://security.debian.org/debian-security \${VERSION_CODENAME}-security main"
+	    apt-add-repository "deb http://ftp.de.debian.org/debian \${VERSION_CODENAME} main"
+      apt update -y
+      apt install -y \
+        $(if [ "${SPRYKER_DB_ENGINE}" == 'pgsql' ]; then echo 'postgresql-client'; else echo 'default-mysql-client'; fi) \
+        openjdk-11-jdk \
+        fonts-dejavu \
+        gettext \
+        jq
+      apt remove -y software-properties-common
+      apt-get --purge -y autoremove
+    fi
+EOT
 
 EXPOSE 8080
 
