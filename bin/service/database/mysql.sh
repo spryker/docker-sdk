@@ -12,8 +12,13 @@ function Database::checkConnection() {
 
     while :; do
         [ "${counter}" -gt 0 ] && echo -en "\rWaiting for database connection [${counter}/${retriesFor}]..." || echo -en ""
-        local status=$(Compose::exec "mysqladmin ping -h \${SPRYKER_DB_HOST} -u \${SPRYKER_DB_ROOT_USERNAME} -p\${SPRYKER_DB_ROOT_PASSWORD}" | grep -c "mysqld is alive")
+        local status=$(Compose::exec "mysqladmin ping -h \${SPRYKER_DB_HOST} -u \${SPRYKER_DB_ROOT_USERNAME} -p\${SPRYKER_DB_ROOT_PASSWORD} --silent" "${DOCKER_COMPOSE_TTY_DISABLED}" | grep -c "mysqld is alive")
         [ "${status}" -eq 1 ] && echo -en "${CLEAR}\r" && break
+
+        if [ $((counter % 5)) -eq 0 ]; then
+            Compose::command restart database
+        fi
+
         [ "${counter}" -ge "${retriesFor}" ] && echo -e "\r${WARN}Could not wait for database anymore.${NC}" && exit 1
         counter=$((counter + interval))
         sleep "${interval}"
