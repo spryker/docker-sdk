@@ -1,0 +1,15 @@
+project_name: 'spryker_docker_sdk'
+
+modules:
+  ProjectManager:
+    path: 'project_manager'
+  Docker:
+    path: 'docker'
+  Ssl:
+    path: 'ssl'
+
+docker:
+  networks:
+    - spryker_docker_sdk_public
+    - spryker_docker_sdk_private
+
