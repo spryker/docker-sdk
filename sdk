@@ -1,6 +1,7 @@
 #!/bin/bash
 
 set -e
+set -x
 
 export SELF_SCRIPT=$0
 SOURCE_DIR="${BASH_SOURCE%/*}"
