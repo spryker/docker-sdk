@@ -102,7 +102,13 @@ readonly PROJECT_DIR="$(pwd)"
 readonly DEPLOYMENT_DIR="$(cd "${BASH_SOURCE%/*}" >/dev/null 2>&1 && pwd)"
 readonly DEPLOYMENT_PATH="${DEPLOYMENT_DIR/$PROJECT_DIR/.}"
 readonly SECRETS_FILE_PATH="${DEPLOYMENT_DIR}/.secrets"
-readonly PROGRESS_TYPE=${PROGRESS_TYPE:-tty}
+
+PROGRESS_TYPE=${PROGRESS_TYPE:-tty}
+if [ -n "$GITHUB_ACTIONS" ]; then
+    PROGRESS_TYPE=auto
+fi
+readonly PROGRESS_TYPE
+
 VERBOSE=${VERBOSE:-0}
 
 # Predefined constants

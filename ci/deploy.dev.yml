@@ -4,7 +4,8 @@ namespace: spryker
 tag: 'dev'
 
 environment: docker
-image: spryker/php:7.2
+image:
+  tag: spryker/php:8.0
 
 regions:
   EU:
