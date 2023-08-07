@@ -12,14 +12,22 @@
         fastcgi_param SPRYKER_ZED_PORT "{{ project['_defaultPort'] }}";
 
         fastcgi_param SPRYKER_SESSION_BE_NAMESPACE "{{ storeServices['session']['namespace'] | default(endpointData['services']['session']['namespace']) }}";
-        fastcgi_param SPRYKER_BE_HOST "{{ host }}";
-        fastcgi_param SPRYKER_BE_PORT "{{ externalPort }}";
+        fastcgi_param SPRYKER_MP_HOST "{{ host }}";
+        fastcgi_param SPRYKER_MP_PORT "{{ externalPort }}";
 
 {% if storeServices['mail']['sender']['email'] is not empty %}
         fastcgi_param SPRYKER_MAIL_SENDER_EMAIL "{{ storeServices['mail']['sender']['email'] }}";
 {% endif %}
 {% if storeServices['mail']['sender']['name'] is not empty %}
         fastcgi_param SPRYKER_MAIL_SENDER_NAME "{{ storeServices['mail']['sender']['name'] }}";
+{% endif %}
+
+{% if regionEndpointMap['backoffice'] is not empty %}
+        fastcgi_param SPRYKER_BE_HOST "{{ (regionEndpointMap['backoffice'] | split(':'))[0] | default(host) }}";
+        fastcgi_param SPRYKER_BE_PORT "{{ (regionEndpointMap['backoffice'] | split(':'))[1] | default(externalPort) }}";
+{% else %}
+        fastcgi_param SPRYKER_BE_HOST "{{ host }}";
+        fastcgi_param SPRYKER_BE_PORT "{{ externalPort }}";
 {% endif %}
 
 {% if project['_endpointMap'][endpointData['identifier']]['yves'] is not empty %}
