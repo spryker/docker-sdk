@@ -1,4 +1,4 @@
-name: Boot & Syntax check & tTests
+name: Boot & Syntax check & Tests
 
 on:
   - push
