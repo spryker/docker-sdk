@@ -1,0 +1,17 @@
+  {{ serviceName }}:
+    image: localstack/localstack:2.2.0
+    networks:
+      - private
+    labels:
+      'spryker.app.name': localstack
+      'spryker.app.type': services
+      'spryker.project': ${SPRYKER_DOCKER_PREFIX}:${SPRYKER_DOCKER_TAG}
+    environment:
+        - DEBUG={{ serviceData['parameters']['debug'] | default(0) }}
+        - DOCKER_HOST=unix:///var/run/docker.sock
+    ports:
+      - "4566:4566"
+      - "4510-4559:4510-4559"
+    volumes:
+      - {{ serviceName }}-{{ serviceData['engine'] }}-data:/var/lib/localstack
+      - /var/run/docker.sock:/var/run/docker.sock
