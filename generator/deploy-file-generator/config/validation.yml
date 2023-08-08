@@ -73,7 +73,7 @@ groups.*.applications.*.endpoints.*.services:
 
 # Services
 services.*.engine:
-    require:
+    not-empty:
     string-type:
 services.*.endpoints:
     array-type:

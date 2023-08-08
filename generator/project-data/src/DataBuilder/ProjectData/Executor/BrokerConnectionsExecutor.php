@@ -25,7 +25,7 @@ class BrokerConnectionsExecutor implements DataExecutorInterface
         $brokerServiceData = $services[ProjectDataServicesConstants::BROKER_KEY] ?? [];
 
         if (empty($brokerServiceData)) {
-            $projectData[ProjectDataConstants::PROJECT_DATA_BROKER_CONNECTIONS_KEY] = [];
+            $projectData[ProjectDataConstants::PROJECT_DATA_BROKER_CONNECTIONS_KEY] = json_encode([]);
 
             return $projectData;
         }
