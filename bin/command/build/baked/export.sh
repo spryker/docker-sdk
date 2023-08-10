@@ -17,6 +17,7 @@ function Command::export() {
     local tag=${SPRYKER_DOCKER_TAG}
     local destinationPath='./'
     local pushDestination=''
+    local targetArchitectures="linux/$(unmame -m)"
 
     subCommand=${1}
     shift || true
@@ -73,12 +74,9 @@ function Command::export() {
             Console::verbose "${INFO}Build and export images${NC}"
             Images::buildApplication --force
             Images::tagApplications "${tag}"
-
-            if [ ${SPRYKER_EXPORT_APP_ONLY} -eq 0 ]; then
-                Assets::build --force
-                Images::buildFrontend --force
-                Images::tagFrontend "${tag}"
-            fi
+            Assets::build --force
+            Images::buildFrontend --force
+            Images::tagFrontend "${tag}"
 
             if [ -n "${pushDestination}" ]; then
                 Images::push "${tag}"
@@ -86,19 +84,6 @@ function Command::export() {
 
             if [ -z "${pushDestination}" ]; then
                 Images::printAll "${tag}"
-            fi
-            ;;
-        application | applications)
-            Console::verbose "${INFO}Build and export images${NC}"
-            Images::buildApplication --force
-            Images::tagApplications "${tag}"
-
-            if [ -n "${pushDestination}" ]; then
-                Images::push "${tag}"
-            fi
-
-            if [ -z "${pushDestination}" ]; then
-                Images::printApplications "${tag}"
             fi
             ;;
         *)
