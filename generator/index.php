@@ -373,14 +373,14 @@ foreach ($projectData['groups'] ?? [] as $groupName => $groupData) {
 
             if ($isEndpointDataHasStore) {
                 $services = array_replace_recursive(
-                    $projectData['regions'][$groupData['region']]['stores'][$endpointData['store']]['services'],
+                    $projectData['regions'][$groupData['region']]['stores'][$endpointData['store']]['services'] ?? [],
                     $endpointData['services'] ?? []
                 );
             }
 
             if ($isEndpointDataHasRegion) {
                 $services = array_replace_recursive(
-                    $projectData['regions'][$currentRegion]['services'],
+                    $projectData['regions'][$currentRegion]['services'] ?? [],
                     $endpointData['services'] ?? []
                 );
             }
@@ -776,6 +776,9 @@ function getStoreSpecific(array $projectData): array
     $storeSpecific = [];
     foreach ($projectData['regions'] as $regionName => $regionData) {
         foreach ($regionData['stores'] ?? [] as $storeName => $storeData) {
+            if (!isset($storeData['services'])) {
+                continue;
+            }
 
             $services = $storeData['services'];
             $storeSpecific[$storeName] = [
@@ -1567,6 +1570,10 @@ function extendProjectDataWithKeyValueRegionNamespaces(array $projectData): arra
     foreach ($projectData['regions'] as $regionName => $regionData) {
         $keyValueStoreNamespaces = [];
         foreach ($regionData['stores'] ?? [] as $storeName => $storeData) {
+            if (!isset($storeData['services']['key_value_store']['namespace'])) {
+                continue;
+            }
+
             $keyValueStoreNamespaces[$storeName] = $storeData['services']['key_value_store']['namespace'];
         }
         $projectData['regions'][$regionName]['key_value_region_namespaces'] = json_encode($keyValueStoreNamespaces);
