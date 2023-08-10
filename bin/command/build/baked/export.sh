@@ -17,7 +17,6 @@ function Command::export() {
     local tag=${SPRYKER_DOCKER_TAG}
     local destinationPath='./'
     local pushDestination=''
-    local targetArchitectures="linux/$(unmame -m)"
 
     subCommand=${1}
     shift || true
