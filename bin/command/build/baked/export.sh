@@ -85,6 +85,19 @@ function Command::export() {
                 Images::printAll "${tag}"
             fi
             ;;
+        application | applications)
+            Console::verbose "${INFO}Build and export images${NC}"
+            Images::buildApplication --force
+            Images::tagApplications "${tag}"
+
+            if [ -n "${pushDestination}" ]; then
+                Images::push "${tag}"
+            fi
+
+            if [ -z "${pushDestination}" ]; then
+                Images::printApplications "${tag}"
+            fi
+            ;;
         *)
             Console::error "Unknown export '${subCommand}' is occurred. No action. Usage: ${HELP_SCR}${SELF_SCRIPT} export images [-t <tag>]" >&2
             exit 1
