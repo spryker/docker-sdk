@@ -232,11 +232,16 @@ function Images::tagFrontend() {
 function Images::printAll() {
     local tag=${1:-${SPRYKER_DOCKER_TAG}}
 
+    Images::printApplications ${tag}
+    printf "%s %s_frontend:%s\n" "frontend" "${SPRYKER_DOCKER_PREFIX}" "${tag}-frontend"
+    printf "%s %s_pipeline:%s\n" "pipeline" "${SPRYKER_DOCKER_PREFIX}" "${tag}-pipeline"
+}
+
+function Images::printApplications() {
+    local tag=${1:-${SPRYKER_DOCKER_TAG}}
+
     for application in "${SPRYKER_APPLICATIONS[@]}"; do
         local applicationPrefix=$(echo "${application}" | tr '[:upper:]' '[:lower:]')
         printf "%s %s_app:%s\n" "${application}" "${SPRYKER_DOCKER_PREFIX}" "${tag}-${applicationPrefix}"
     done
-
-    printf "%s %s_frontend:%s\n" "frontend" "${SPRYKER_DOCKER_PREFIX}" "${tag}-frontend"
-    printf "%s %s_pipeline:%s\n" "pipeline" "${SPRYKER_DOCKER_PREFIX}" "${tag}-pipeline"
 }
