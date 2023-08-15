@@ -10,6 +10,7 @@ use Twig\Environment;
 use Twig\Loader\ChainLoader;
 use Twig\Loader\FilesystemLoader;
 use Twig\TwigFilter;
+use Twig\TwigFunction;
 
 define('DS', DIRECTORY_SEPARATOR);
 define('APPLICATION_SOURCE_DIR', __DIR__ . DS . 'src');
@@ -71,6 +72,29 @@ $twig->addFilter(new TwigFilter('normalize_endpoint', static function ($string) 
 $twig->addFilter(new TwigFilter('unique', static function ($array) {
     return array_unique($array);
 }, ['is_safe' => ['all']]));
+$twig->addFunction(new TwigFunction('get_sys_arch', function () {
+    $arch = php_uname('m');
+
+    switch ($arch) {
+        case 'i386':
+        case 'i686':
+        case 'x86':
+            $arch = 'i386';
+            break;
+        case 'x86_64':
+        case 'amd64':
+            $arch = 'amd64';
+            break;
+        case 'aarch64':
+        case 'arm64':
+        case 'armv8':
+            $arch = 'arm64';
+            break;
+    }
+
+    return $arch;
+}, ['is_safe' => ['all']]));
+
 $yamlParser = new Parser();
 
 $projectData = $yamlParser->parseFile($projectYaml);
