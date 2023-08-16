@@ -6,8 +6,11 @@ export SELF_SCRIPT=$0
 SOURCE_DIR="${BASH_SOURCE%/*}"
 
 pushd "${BASH_SOURCE%/*}" >/dev/null
+. ./bin/path_config.sh
 . ./bin/framework.sh
 popd >/dev/null
+
+bash "${SOURCE_DIR}/bin/standalone/logo/spryker-sdk.sh" >&2
 
 Registry::Help::section 'Basic usage:'
 Registry::Help::command -s -e "SPRYKER_PROJECT_NAME=<project-name>" -a "<command> [args...]" "Runs the command for the specified ${HELP_HIGH}<project-name>${HELP_DESC}."
@@ -16,10 +19,10 @@ Registry::Help::command -s -c "${HELP_ENV}[-p <project-name>]${NC}" -a "<command
 import environment/cross-platform.sh
 import environment/check-directories.sh
 import command/install/bootstrap.sh
-
 import command/install/config.sh
 
-SPRYKER_PROJECT_NAME=${SPRYKER_PROJECT_NAME:-default}
+Registry::Help::section 'Quick start:'
+Registry::Help::row "${SELF_SCRIPT} bootstrap && ${SELF_SCRIPT} up"
 
 while getopts ":p:" opt; do
     case ${opt} in
@@ -48,26 +51,30 @@ shift $((OPTIND - 1))
 
 System::Bootstrap
 
-readonly DESTINATION_DIR="${SOURCE_DIR}/deployment/${SPRYKER_PROJECT_NAME}"
-readonly DEPLOY_SCRIPT=${DESTINATION_DIR}/deploy
+. "${SOURCE_DIR}/kernel/bin/kernel.sh"
 
-Registry::Help::section 'Quick start:'
-Registry::Help::row "${SELF_SCRIPT} bootstrap && ${SELF_SCRIPT} up"
+SDK::Kernel::bootstrap
+SDK::Docker::Network::create
+SDK::ProjectManager::DB::migration
+SDK::ProjectManager::Project::init "${SPRYKER_PROJECT_NAME}" "$(pwd)"
+
+SPRYKER_PROJECT_PATH=$(pwd)
+SPRYKER_PROJECT_NAME=$(SDK::ProjectManager::Project::get_name "${SPRYKER_PROJECT_NAME}" "${SPRYKER_PROJECT_PATH}" | tr -d '\r')
+DESTINATION_DIR="${DEPLOYMENT_DIR}/${SPRYKER_PROJECT_NAME}"
+readonly DEPLOY_SCRIPT=${DESTINATION_DIR}/deploy
 
 command=$1
 shift || true
 
+SDK::ProjectManager::Project::info "${SPRYKER_PROJECT_NAME}" "${SPRYKER_PROJECT_PATH}"
 case "${command}" in
     config)
-        bash "${FRAMEWORK_CWD}/standalone/logo/spryker-sdk.sh" >&2
         Command::config "${@}"
         ;;
     boot | bootstrap)
-        bash "${FRAMEWORK_CWD}/standalone/logo/spryker-sdk.sh" >&2
         Command::bootstrap "${@}"
         ;;
     help | '')
-        bash "${FRAMEWORK_CWD}/standalone/logo/spryker-sdk.sh" >&2
         Registry::printHelp
         [ -f "${DEPLOY_SCRIPT}" ] && ${DEPLOY_SCRIPT} help "${@}"
         ;;

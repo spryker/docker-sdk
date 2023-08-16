@@ -1,10 +1,16 @@
-  {{ serviceName }}:
+  {{ project_name ~ '_' ~ serviceName }}:
     image: spryker/redis-commander:0.8.0
+    container_name: {{ project_name ~ '_' ~ serviceName }}
     networks:
-      - private
+      - {{ docker_sdk_project_name }}_private
     labels:
-      'spryker.app.name': redis-commander
+      'spryker.app.name': {{ project_name ~ '_' ~ serviceName }}
       'spryker.app.type': hidden
       'spryker.project': ${SPRYKER_DOCKER_PREFIX}:${SPRYKER_DOCKER_TAG}
     environment:
-      REDIS_HOSTS: "{{ project.storageData.hosts | merge(serviceData.data.hosts | default([])) | default("") | join(',') }}"
+      REDIS_HOSTS: "{{ serviceData.data.hosts | join(',') | default('') }}"
+{#{{ dump(serviceData) }}#}
+{#todo: check this part of generation#}
+{#{% for service in serviceData.storageData.services %}#}
+{#      - {{ service }}#}
+{#{% endfor %}#}

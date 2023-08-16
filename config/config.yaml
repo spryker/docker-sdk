@@ -1,15 +1,28 @@
 project_name: 'spryker_docker_sdk'
 
 modules:
+  SharedServices:
+    path: 'shared_services'
   ProjectManager:
     path: 'project_manager'
   Docker:
     path: 'docker'
-  Ssl:
-    path: 'ssl'
+#  Ssl:
+#    path: './modules/ssl'
+
+shared_services:
+    - 'broker'
+    - 'dashboard'
+    - 'database'
+    - 'key_value_store'
+    - 'kibana'
+    - 'mail_catcher'
+    - 'redis-gui'
+    - 'scheduler'
+    - 'search'
+    - 'session'
 
 docker:
   networks:
-    - spryker_docker_sdk_public
-    - spryker_docker_sdk_private
-
+    - ${project_name}_public
+    - ${project_name}_private

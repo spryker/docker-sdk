@@ -1,12 +1,15 @@
-  {{ serviceName }}:
+  {{ project_name ~ '_' ~ serviceName }}:
     build:
-      context: ./${DEPLOYMENT_PATH}/
+{#        todo: fix #}
+{#      context: {{ serviceData.deployment_path }}#}
       dockerfile: images/common/dashboard/Dockerfile
+    image: {{ project_name ~ '_' ~ serviceName }}
+    container_name: {{ project_name ~ '_' ~ serviceName }}
     networks:
-      - public
-      - private
+      - {{ docker_sdk_project_name }}_public
+      - {{ docker_sdk_project_name }}_private
     labels:
-      'spryker.app.name': dashboard
+      'spryker.app.name': {{ project_name ~ '_' ~ serviceName }}
       'spryker.app.type': hidden
       'spryker.project': ${SPRYKER_DOCKER_PREFIX}:${SPRYKER_DOCKER_TAG}
     environment:
@@ -14,6 +17,8 @@
       SPRYKER_LOG_DIRECTORY: ${SPRYKER_LOG_DIRECTORY}
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-      - ./${DEPLOYMENT_PATH}/context/dashboard/environment:/dashboard/environment:consistent,ro
-{% include "application-volumes.yml.twig" with project %}
+      - {{ serviceData.deployment_path }}/context/dashboard/environment:/dashboard/environment:consistent,ro
     privileged: true
+{# SPRYKER_LOG_DIRECTORY should be per project #}
+
+{# todo: need to fix #}

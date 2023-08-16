@@ -1,0 +1,36 @@
+{
+    "name": "spryker/shared-services",
+    "description": "Spryker Docker SDK - Shared services",
+    "license": "MIT",
+    "require": {
+        "symfony/yaml": "^4.3",
+        "twig/twig": "^2.11",
+        "spatie/url": "^1.3",
+        "illuminate/collections": "^8.70",
+        "illuminate/database": "^8.83",
+        "illuminate/events": "^8.83",
+        "illuminate/container": "^8.83",
+        "spryker/docker-sdk": "*"
+    },
+    "autoload": {
+        "psr-4": {
+            "SharedServices\\": "src/"
+        }
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true,
+    "config": {
+        "platform": {
+            "php": "8.1"
+        }
+    },
+    "repositories": [
+        {
+            "type": "path",
+            "url": "./../../../docker_sdk/php/docker-sdk",
+            "options": {
+                "symlink": false
+            }
+        }
+    ]
+}

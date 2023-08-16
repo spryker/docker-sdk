@@ -5,3 +5,7 @@ node_modules
 deployment/*
 !deployment/.gitkeep
 
+data/
+!data/.gitkeep
+*.egg-info
+

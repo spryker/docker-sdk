@@ -1,0 +1,7 @@
+networks:
+{% for network in networks %}
+  {{ network }}:
+    name: {{ network }}
+    external: true
+{% endfor %}
+

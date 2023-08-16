@@ -1,9 +1,10 @@
-  {{ serviceName }}:
+  {{ project_name ~ '_' ~ serviceName }}:
     image: spryker/mailhog:v1.0.0
+    container_name: {{ project_name ~ '_' ~ serviceName }}
     networks:
-      - private
+      - {{ docker_sdk_project_name }}_private
     labels:
-      'spryker.app.name': mailcatcher
+      'spryker.app.name': {{ project_name ~ '_' ~ serviceName }}
       'spryker.app.type': services
       'spryker.project': ${SPRYKER_DOCKER_PREFIX}:${SPRYKER_DOCKER_TAG}
     environment:
@@ -14,4 +15,4 @@
       timeout: 5s
       retries: 5
     volumes:
-      - {{ serviceName }}-{{ serviceData['engine'] }}-data:/maildir
+      - {{project_name}}-{{ serviceName }}-{{ serviceData['engine'] }}-data:/maildir

@@ -1,0 +1,13 @@
+{
+    "name": "spryker/docker-sdk",
+    "autoload": {
+        "psr-4": {
+            "DockerSDK\\": "src/"
+        }
+    },
+    "require": {
+        "illuminate/database": "^8.83",
+        "symfony/yaml": "^4.3",
+        "twig/twig": "^2.11"
+    }
+}

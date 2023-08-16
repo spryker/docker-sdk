@@ -126,6 +126,10 @@ function Command::bootstrap() {
         cp "${SOURCE_DIR}/.dockerignore.default" .dockerignore
     fi
 
+    SDK::ProjectManager::Project::boot "${SPRYKER_PROJECT_NAME}" "${SPRYKER_PROJECT_PATH}"
+    SDK::SharedServices::Test
+    exit 1
+
     Console::info "Deployment is generated into ${LGRAY}${DESTINATION_DIR}"
     Console::log "Use ${OK}docker/sdk$([ "${SPRYKER_PROJECT_NAME}" != 'default' ] && echo -n " -p ${SPRYKER_PROJECT_NAME}") up${NC} to start the application."
     Console::log ''

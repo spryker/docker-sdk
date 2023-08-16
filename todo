@@ -1,0 +1,8 @@
+1. if config was changed? eg. shared services
+2. validation for modules
+3. models between php and python. Generation
+4. Kernel should generate yml config for php because hydra config can use dynamic variables inside
+5. both sdk should be in one Image
+6. add tests
+7. RABBITMQ_DEFAULT_USER RABBITMQ_DEFAULT_PASS always spryker secret.
+

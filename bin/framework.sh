@@ -10,6 +10,8 @@ FRAMEWORK_CWD=$(pwd)
 . ./standalone/console.sh
 
 . ./lib/string.sh
+. ./lib/hash.sh
+. ./lib/image.sh
 
 . ./platform.sh
 

@@ -1,10 +1,11 @@
-  {{ serviceName }}:
+  {{ project_name ~ '_' ~ serviceName }}:
     image: spryker/rabbitmq:3.8
+    container_name: {{ project_name ~ '_' ~ serviceName }}
     hostname: {{ serviceName }} # RabbitMQ determines the cluster by its hostname
     networks:
-      - private
+      - {{ docker_sdk_project_name }}_private
     labels:
-      'spryker.app.name': broker
+      'spryker.app.name': {{ project_name ~ '_' ~ serviceName }}
       'spryker.app.type': services
       'spryker.project': ${SPRYKER_DOCKER_PREFIX}:${SPRYKER_DOCKER_TAG}
     healthcheck:
@@ -13,7 +14,7 @@
       timeout: 5s
       retries: 10
     environment:
-      RABBITMQ_DEFAULT_USER: "{{ serviceData['api']['username'] }}"
-      RABBITMQ_DEFAULT_PASS: "{{ serviceData['api']['password'] }}"
+      RABBITMQ_DEFAULT_USER: "spryker"
+      RABBITMQ_DEFAULT_PASS: "secret"
     volumes:
-      - {{ serviceName }}-{{ serviceData['engine'] }}-data:/var/lib/rabbitmq:rw
+      - {{project_name}}-{{ serviceName }}-{{ serviceData['engine'] }}-data:/var/lib/rabbitmq:rw
