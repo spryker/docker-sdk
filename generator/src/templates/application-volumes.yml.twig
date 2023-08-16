@@ -1,4 +1,5 @@
       - logs:${SPRYKER_LOG_DIRECTORY}:rw
+      - /tmp/data.json:/data/data.json
 {% if _mountMode != 'baked' %}
 {% if _mountMode == 'native' %}
       - ./:/data
