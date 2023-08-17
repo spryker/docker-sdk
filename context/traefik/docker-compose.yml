@@ -14,8 +14,6 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
 #      - ./${DEPLOYMENT_PATH}/spryker_ca.crt:/certs/spryker_ca.crt
 #      - ./${DEPLOYMENT_PATH}/spryker.key:/certs/spryker.key
-    labels:
-      - "traefik.http.middlewares.compress.compress=true"
     command:
       - "--api.insecure=true"
       - "--providers.docker=true"
