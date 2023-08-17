@@ -141,12 +141,18 @@ function Compose::up() {
       Compose::cleanSourceDirectory
     fi
 
+    Traefik::up
     Images::buildApplication ${noCache} ${doBuild}
     Codebase::build ${noCache} ${doBuild}
     Assets::build ${noCache} ${doAssets}
     Images::buildFrontend ${noCache} ${doBuild}
     Compose::run --build
-    Compose::command restart frontend gateway
+
+    if [ "${SPRYKER_TRAEFIK_IS_ENABLED}" == "1" ]; then
+        Compose::command restart frontend
+    else
+        Compose::command restart frontend gateway
+    fi
 
     Registry::Flow::runAfterUp
 

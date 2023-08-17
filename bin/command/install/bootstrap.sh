@@ -116,6 +116,8 @@ function Command::bootstrap() {
 
     chmod +x "${tmpDeploymentDir}/deploy"
 
+    mv "${tmpDeploymentDir}/context/traefik/docker-compose.yml" "${tmpDeploymentDir}/docker-compose.traefik.yml"
+
     "${tmpDeploymentDir}/deploy" install
 
     Command::bootstrap::_deploy

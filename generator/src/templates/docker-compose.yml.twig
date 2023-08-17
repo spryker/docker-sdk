@@ -13,6 +13,9 @@ services:
     command: UNIX-LISTEN:/tmp/ssh-relay/ssh-auth.sock,fork,unlink-early,user=1000,group=1000,mode=666 UNIX-CONNECT:/tmp/ssh-relay/input-ssh-auth.sock
     networks:
       - private
+{% if docker['gateway'] == 'traefik' %}
+      - spryker_docker_sdk
+{% endif %}
     volumes:
       - ssh-relay:/tmp/ssh-relay
 {%  if _platform == 'macos' %}
@@ -26,6 +29,9 @@ services:
     networks:
       - public
       - private
+{% if docker['gateway'] == 'traefik' %}
+      - spryker_docker_sdk
+{% endif %}
     labels:
       'spryker.app.name': cli
       'spryker.app.type': console
@@ -56,10 +62,29 @@ services:
     image: ${SPRYKER_DOCKER_PREFIX}_run_frontend:${SPRYKER_DOCKER_TAG}
     networks:
         - private
+{% if docker['gateway'] == 'traefik' %}
+        - spryker_docker_sdk
+{% endif %}
     labels:
       'spryker.app.name': frontend
       'spryker.app.type': proxy
       'spryker.project': ${SPRYKER_DOCKER_PREFIX}:${SPRYKER_DOCKER_TAG}
+{% if docker['gateway'] == 'traefik' %}
+      'traefik.enable': true
+{% for group in groups %}
+{% for applicationName, applicationData in group['applications'] %}
+{% if applicationData['application'] != 'static' %}
+{% set endpointCount = 1 %}
+{% for endpoint, endpointData in applicationData['endpoints'] %}
+      'traefik.http.routers.{{ applicationName | lower }}-{{ endpointCount }}.rule': Host(`{{ endpoint }}`)
+      'traefik.http.routers.{{ applicationName | lower }}-{{ endpointCount }}.entrypoints': web
+      'traefik.http.routers.your-service.middlewares': compress
+{% set endpointCount = endpointCount + 1 %}
+{% endfor %}
+{% endif %}
+{% endfor %}
+{% endfor %}
+{% endif %}
     depends_on:
 {% for group in groups %}
 {% for applicationName, applicationData in group['applications'] %}
@@ -92,6 +117,7 @@ services:
 {% endif %}
 {% endif %}
 
+{% if docker['gateway'] != 'traefik' %}
   gateway:
     image: ${SPRYKER_DOCKER_PREFIX}_gateway:${SPRYKER_DOCKER_TAG}
     ports:
@@ -129,6 +155,7 @@ services:
       'spryker.app.name': gateway
       'spryker.app.type': proxy
       'spryker.project': ${SPRYKER_DOCKER_PREFIX}:${SPRYKER_DOCKER_TAG}
+{% endif %}
 
 {% for group in groups %}
 {% for applicationName, applicationData in group['applications'] %}
@@ -196,3 +223,8 @@ x-mutagen:
 networks:
   public:
   private:
+{% if docker['gateway'] == 'traefik' %}
+  spryker_docker_sdk:
+    name: spryker_docker_sdk
+    external: true
+{% endif %}

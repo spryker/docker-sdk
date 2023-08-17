@@ -93,6 +93,7 @@ import sdk/mount/{{ _mountMode }}.sh
 import sdk/images/{{ _fileMode }}.sh
 import sdk/assets/{{ _fileMode }}.sh
 import sdk/codebase/{{ _fileMode }}.sh
+import sdk/traefik.sh
 
 # Go!
 System::Bootstrap
@@ -142,6 +143,8 @@ readonly SPRYKER_BUILD_HASH="${SPRYKER_BUILD_HASH}"
 readonly SPRYKER_BUILD_DATE="${SPRYKER_BUILD_DATE}"
 readonly SPRYKER_REPOSITORY_HASH="${SPRYKER_BUILD_HASH:-"$(git rev-parse --verify HEAD 2>/dev/null || echo "head")"}"
 readonly SPRYKER_MAINTENANCE_MODE_ENABLED="{{ docker['maintenance']['enabled'] | default('false') }}"
+
+readonly SPRYKER_TRAEFIK_IS_ENABLED="{{ docker['gateway'] == 'traefik' ? 1 : 0 }}"
 
 # PHP extensions
 {% for phpExtensionName in _phpExtensions %}

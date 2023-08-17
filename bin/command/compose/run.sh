@@ -7,7 +7,11 @@ Registry::Help::command -c "run | start" "Runs Spryker containers."
 
 function Command::run() {
     Compose::run
-    Compose::command restart frontend gateway
+    if [ "${SPRYKER_TRAEFIK_IS_ENABLED}" == "1"]; then
+        Compose::command restart frontend
+    else
+        Compose::command restart frontend gateway
+    fi
 
     Runtime::waitFor database
     Runtime::waitFor search

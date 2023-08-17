@@ -1,0 +1,31 @@
+version: '3'
+
+services:
+  traefik:
+    container_name: spryker_docker_sdk_traefik
+    image: "traefik:v3.0"
+    networks:
+      - spryker_docker_sdk
+    ports:
+      - "80:80"
+      - "8080:8080"
+#      - "443:443"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+#      - ./${DEPLOYMENT_PATH}/spryker_ca.crt:/certs/spryker_ca.crt
+#      - ./${DEPLOYMENT_PATH}/spryker.key:/certs/spryker.key
+    labels:
+      - "traefik.http.middlewares.compress.compress=true"
+    command:
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+#      - "--entrypoints.websecure.address=:443"
+#      - "--entrypoints.websecure.http.tls.certfile=/certs/spryker_ca.crt"
+#      - "--entrypoints.websecure.http.tls.keyfile=/certs/spryker.key"
+
+networks:
+  spryker_docker_sdk:
+    name: spryker_docker_sdk
+    external: true
