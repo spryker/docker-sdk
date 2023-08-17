@@ -9,7 +9,6 @@ namespace DockerSdk\DataBuilder\ProjectData;
 
 use DockerSdk\DataBuilder\AbstractBuilder;
 use DockerSdk\DockerSdkConstants;
-use DockerSdk\Helpers\ContainerNameBuilder;
 
 class ProjectBuilder extends AbstractBuilder
 {
@@ -145,8 +144,13 @@ class ProjectBuilder extends AbstractBuilder
             $stores = $regionData[DockerSdkConstants::PROJECT_DATA_REGIONS_STORES_KEY];
 
             foreach ($stores as $storeName => $storeData) {
-                $services = $storeData[DockerSdkConstants::SERVICES_KEY];
-                $broker = $services[DockerSdkConstants::PROJECT_DATA_REGIONS_STORES_SERVICES_BROKER_KEY];
+                $services = $storeData[DockerSdkConstants::SERVICES_KEY] ?? [];
+                $broker = $services[DockerSdkConstants::PROJECT_DATA_REGIONS_STORES_SERVICES_BROKER_KEY] ?? [];
+
+                if ($broker === []) {
+                    continue;
+                }
+
                 $namespace = $broker[DockerSdkConstants::NAMESPACE_KEY];
                 $namespace = sprintf(
                     '%s-%s',
@@ -174,6 +178,10 @@ class ProjectBuilder extends AbstractBuilder
             $stores = $regionData[DockerSdkConstants::PROJECT_DATA_REGIONS_STORES_KEY];
 
             foreach ($stores as $storeName => $storeData) {
+                if (empty($storeData)) {
+                    continue;
+                }
+
                 $services = $storeData[DockerSdkConstants::SERVICES_KEY];
                 $search = $services[DockerSdkConstants::PROJECT_DATA_REGIONS_STORES_SERVICES_SEARCH_KEY];
                 $namespace = $search[DockerSdkConstants::NAMESPACE_KEY];
@@ -200,7 +208,7 @@ class ProjectBuilder extends AbstractBuilder
         $regions = $projectData[DockerSdkConstants::PROJECT_DATA_REGIONS_KEY];
 
         foreach ($regions as $regionName => $regionData) {
-            $services = $regionData[DockerSdkConstants::SERVICES_KEY];
+            $services = $regionData[DockerSdkConstants::SERVICES_KEY] ?? [];
 
             if (array_key_exists(DockerSdkConstants::DATABASE_KEY, $services)) {
                 $database = $services[DockerSdkConstants::DATABASE_KEY];
@@ -218,7 +226,7 @@ class ProjectBuilder extends AbstractBuilder
                 continue;
             }
 
-            $databases = $services[DockerSdkConstants::DATABASES_KEY];
+            $databases = $services[DockerSdkConstants::DATABASES_KEY] ?? [];
             $databasesResult = [];
 
             foreach ($databases as $databaseName => $databaseData) {

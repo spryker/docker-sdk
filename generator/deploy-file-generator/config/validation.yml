@@ -21,11 +21,6 @@ regions:
     not-empty:
 regions.*:
     array-type:
-regions.*.services:
-    not-empty:
-    or:
-        - database
-        - databases
 
 # Image:
 image.tag:
@@ -73,7 +68,7 @@ groups.*.applications.*.endpoints.*.services:
 
 # Services
 services.*.engine:
-    require:
+    not-empty:
     string-type:
 services.*.endpoints:
     array-type:

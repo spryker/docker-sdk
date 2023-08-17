@@ -104,6 +104,10 @@ function Compose::command() {
 }
 
 function Compose::SharedServices::command() {
+    if [ ! -f "${DEPLOYMENT_PATH}/../${SPRYKER_INTERNAL_PROJECT_NAME}/shared-services.docker-compose.yml" ]; then
+        return
+    fi
+
     ${DOCKER_COMPOSE_SUBSTITUTE:-'docker-compose'} \
         --project-directory "${PROJECT_DIR}" \
         --project-name "${SPRYKER_INTERNAL_PROJECT_NAME}_shared_services" \

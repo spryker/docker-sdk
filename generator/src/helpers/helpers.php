@@ -83,15 +83,22 @@ function getBrokerHosts(array $projectData, string $currentRegion = ''): string
                 continue;
             }
             $regionStores = array_values($config[PROJECT_DATA_STORE_KEY]);
-            array_walk($regionStores, function(array $store) use (&$hosts) {
-                $namespace = $store[PROJECT_DATA_SERVICES_KEY][PROJECT_DATA_BROKER_KEY][PROJECT_DATA_NAMESPACE_KEY] ?? '';
-                array_push($hosts, $namespace);
-            });
+
+            foreach ($regionStores as $store) {
+                if (!isset($store[PROJECT_DATA_SERVICES_KEY][PROJECT_DATA_BROKER_KEY][PROJECT_DATA_NAMESPACE_KEY])) {
+                    continue;
+                }
+
+                $namespace = $store[PROJECT_DATA_SERVICES_KEY][PROJECT_DATA_BROKER_KEY][PROJECT_DATA_NAMESPACE_KEY];
+                $hosts[] = $namespace;
+            }
         }
         if (!count($hosts)) {
             $hosts = getBrokerHostNamesMap($projectData[PROJECT_DATA_REGIONS_KEY]);
         }
     }
+
+    $hosts = array_unique($hosts);
 
     return implode(' ', array_values($hosts));
 }

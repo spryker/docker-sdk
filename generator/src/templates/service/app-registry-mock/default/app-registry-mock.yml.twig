@@ -1,0 +1,11 @@
+  {{ serviceData.project_name ~ '_' ~ serviceName }}:
+    image: spryker/app-registry-mock:latest-{{ get_sys_arch() }}
+    container_name: {{ serviceData.project_name ~ '_' ~ serviceName }}
+    networks:
+      - {{ internal_project_name }}_private
+    labels:
+      'spryker.app.name': {{ serviceData.project_name ~ '_' ~ serviceName }}
+      'spryker.app.type': services
+      'spryker.project': ${SPRYKER_DOCKER_PREFIX}:${SPRYKER_DOCKER_TAG}
+    volumes:
+      - {{ serviceData.project_name ~ '_' ~ serviceName }}-{{ serviceData['engine'] }}-data:/var/app-registry-mock:rw

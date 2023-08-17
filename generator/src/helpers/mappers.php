@@ -22,7 +22,13 @@ function getRegionEndpointMap(array $projectData, string $region = ''): array
  */
 function getBrokerHostNamesMap(array $servicesDataToMap): array
 {
-    return array_map(function(array $servicesData) {
-        return $servicesData['services']['broker']['namespace'] ?? '';
-    }, $servicesDataToMap);
+    $result = [];
+
+    foreach ($servicesDataToMap as $servicesData) {
+        if (isset($servicesData['services']['broker']['host'])) {
+            $result[] = $servicesData['services']['broker']['host'];
+        }
+    }
+
+    return $result;
 }

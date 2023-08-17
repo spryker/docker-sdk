@@ -1,4 +1,5 @@
       - {{ projectName }}_logs:${SPRYKER_LOG_DIRECTORY}:rw
+      - /tmp/data.json:/data/data.json
 {# todo: SPRYKER_LOG_DIRECTORY should be changed #}
 {% if projectData._mountMode != 'baked' %}
 {% if projectData._mountMode == 'native' %}

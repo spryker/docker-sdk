@@ -12,6 +12,7 @@ use Twig\Environment;
 use Twig\Loader\ChainLoader;
 use Twig\Loader\FilesystemLoader;
 use Twig\TwigFilter;
+use Twig\TwigFunction;
 
 define('DS', DIRECTORY_SEPARATOR);
 define('APPLICATION_SOURCE_DIR', __DIR__ . DS . 'src');
@@ -77,6 +78,29 @@ $twig->addFilter(new TwigFilter('normalize_endpoint', static function ($string) 
 $twig->addFilter(new TwigFilter('unique', static function ($array) {
     return array_unique($array);
 }, ['is_safe' => ['all']]));
+$twig->addFunction(new TwigFunction('get_sys_arch', function () {
+    $arch = php_uname('m');
+
+    switch ($arch) {
+        case 'i386':
+        case 'i686':
+        case 'x86':
+            $arch = 'i386';
+            break;
+        case 'x86_64':
+        case 'amd64':
+            $arch = 'amd64';
+            break;
+        case 'aarch64':
+        case 'arm64':
+        case 'armv8':
+            $arch = 'arm64';
+            break;
+    }
+
+    return $arch;
+}, ['is_safe' => ['all']]));
+
 $yamlParser = new Parser();
 
 $projectData = $yamlParser->parseFile($projectYaml);
@@ -406,13 +430,13 @@ foreach ($projectData['groups'] ?? [] as $groupName => $groupData) {
             $isEndpointDataHasRegion = array_key_exists('region', $endpointData);
             if ($isEndpointDataHasStore) {
                 $services = array_replace_recursive(
-                    $projectData['regions'][$groupData['region']]['stores'][$endpointData['store']]['services'],
+                    $projectData['regions'][$groupData['region']]['stores'][$endpointData['store']]['services'] ?? [],
                     $endpointData['services'] ?? []
                 );
             }
             if ($isEndpointDataHasRegion) {
                 $services = array_replace_recursive(
-                    $projectData['regions'][$groupData['region']]['services'],
+                    $projectData['regions'][$groupData['region']]['services'] ?? [],
                     $endpointData['services'] ?? []
                 );
             }
@@ -635,15 +659,17 @@ file_put_contents(
     ])
 );
 
-file_put_contents(
-    $deploymentDir . DS . 'shared-services.docker-compose.yml',
-    $twig->render('docker-compose' . DS . 'shared-services-compose.yml.twig', [
-        'projectsData' => $projectsData,
-        'sharedServices' => $sharedServices,
-        'gatewayData' => $gatewayData,
-        'internal_project_name' => $config->getInternalProjectName()
-    ])
-);
+if (!empty($sharedServices)) {
+    file_put_contents(
+        $deploymentDir . DS . 'shared-services.docker-compose.yml',
+        $twig->render('docker-compose' . DS . 'shared-services-compose.yml.twig', [
+            'projectsData' => $projectsData,
+            'sharedServices' => $sharedServices,
+            'gatewayData' => $gatewayData,
+            'internal_project_name' => $config->getInternalProjectName()
+        ])
+    );
+}
 
 $sharedServicesList = $config->getSharedServiceList();
 $projectServices = $projectData['services'] ?? [];
@@ -957,6 +983,9 @@ function getStoreSpecific(array $projectData): array
     $storeSpecific = [];
     foreach ($projectData['regions'] as $regionName => $regionData) {
         foreach ($regionData['stores'] ?? [] as $storeName => $storeData) {
+            if (!isset($storeData['services'])) {
+                continue;
+            }
 
             $services = $storeData['services'];
             $storeSpecific[$storeName] = [
@@ -1758,6 +1787,10 @@ function extendProjectDataWithKeyValueRegionNamespaces(array $projectData): arra
     foreach ($projectData['regions'] as $regionName => $regionData) {
         $keyValueStoreNamespaces = [];
         foreach ($regionData['stores'] ?? [] as $storeName => $storeData) {
+            if (!isset($storeData['services']['key_value_store']['namespace'])) {
+                continue;
+            }
+
             $keyValueStoreNamespaces[$storeName] = $storeData['services']['key_value_store']['namespace'];
         }
         $projectData['regions'][$regionName]['key_value_region_namespaces'] = json_encode($keyValueStoreNamespaces);
