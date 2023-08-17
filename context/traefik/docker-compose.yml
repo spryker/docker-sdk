@@ -5,7 +5,7 @@ services:
     container_name: spryker_docker_sdk_traefik
     image: "traefik:v3.0"
     networks:
-      - spryker_docker_sdk
+      - traefik_docker_sdk_spryker
     ports:
       - "80:80"
       - "8080:8080"
@@ -16,6 +16,7 @@ services:
 #      - ./${DEPLOYMENT_PATH}/spryker.key:/certs/spryker.key
     command:
       - "--api.insecure=true"
+      - "--log.level=DEBUG"
       - "--providers.docker=true"
       - "--providers.docker.exposedbydefault=false"
       - "--entrypoints.web.address=:80"
@@ -24,6 +25,6 @@ services:
 #      - "--entrypoints.websecure.http.tls.keyfile=/certs/spryker.key"
 
 networks:
-  spryker_docker_sdk:
-    name: spryker_docker_sdk
+  traefik_docker_sdk_spryker:
+    name: traefik_docker_sdk_spryker
     external: true

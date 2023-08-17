@@ -13,9 +13,6 @@ services:
     command: UNIX-LISTEN:/tmp/ssh-relay/ssh-auth.sock,fork,unlink-early,user=1000,group=1000,mode=666 UNIX-CONNECT:/tmp/ssh-relay/input-ssh-auth.sock
     networks:
       - private
-{% if docker['gateway'] == 'traefik' %}
-      - spryker_docker_sdk
-{% endif %}
     volumes:
       - ssh-relay:/tmp/ssh-relay
 {%  if _platform == 'macos' %}
@@ -29,9 +26,6 @@ services:
     networks:
       - public
       - private
-{% if docker['gateway'] == 'traefik' %}
-      - spryker_docker_sdk
-{% endif %}
     labels:
       'spryker.app.name': cli
       'spryker.app.type': console
@@ -63,7 +57,7 @@ services:
     networks:
         - private
 {% if docker['gateway'] == 'traefik' %}
-        - spryker_docker_sdk
+        - traefik_docker_sdk_spryker
 {% endif %}
     labels:
       'spryker.app.name': frontend
@@ -223,7 +217,7 @@ networks:
   public:
   private:
 {% if docker['gateway'] == 'traefik' %}
-  spryker_docker_sdk:
-    name: spryker_docker_sdk
+  traefik_docker_sdk_spryker:
+    name: traefik_docker_sdk_spryker
     external: true
 {% endif %}

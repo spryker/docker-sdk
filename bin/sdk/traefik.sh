@@ -1,11 +1,11 @@
 #!/bin/bash
 
-DOCKER_SDK_NETWORK_NAME="spryker_docker_sdk"
+TRAEFIK_NETWORK="traefik_docker_sdk_spryker"
 SPRYKER_TRAEFIK_CONTAINER_NAME='spryker_docker_sdk_traefik'
 
 
-if [ ! "$(docker network ls -q -f name="${DOCKER_SDK_NETWORK_NAME}")" ]; then
-    docker network create ${DOCKER_SDK_NETWORK_NAME}
+if [ ! "$(docker network ls -q -f name="${TRAEFIK_NETWORK}")" ]; then
+    docker network create ${TRAEFIK_NETWORK}
 fi
 
 function Traefik::up() {
