@@ -76,8 +76,8 @@ services:
 {% if applicationData['application'] != 'static' %}
 {% set endpointCount = 1 %}
 {% for endpoint, endpointData in applicationData['endpoints'] %}
-      'traefik.http.routers.{{ applicationName | lower }}-{{ endpointCount }}.rule': Host(`{{ endpoint }}`)
-      'traefik.http.routers.{{ applicationName | lower }}-{{ endpointCount }}.entrypoints': web
+      'traefik.http.routers.{{ docker['project_name'] }}-{{ applicationName | lower }}-{{ endpointCount }}.rule': Host(`{{ endpoint }}`)
+      'traefik.http.routers.{{ docker['project_name'] }}-{{ applicationName | lower }}-{{ endpointCount }}.entrypoints': web
 {% set endpointCount = endpointCount + 1 %}
 {% endfor %}
 {% endif %}
