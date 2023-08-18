@@ -21,6 +21,10 @@ import command/install/config.sh
 
 import project/project.sh
 
+if [ ! -f '/tmp/data.json' ]; then
+    echo '{}' > /tmp/data.json
+fi
+
 SPRYKER_PROJECT_PATH=$(pwd)
 SPRYKER_PROJECT_NAME=${SPRYKER_PROJECT_NAME:-$(Project::getNameFromPath "${SPRYKER_PROJECT_PATH}")}
 
