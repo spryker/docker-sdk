@@ -948,8 +948,12 @@ function buildNewrelicDistributedTracing(array $projectData): array
         'NEWRELIC_TRANSACTION_TRACER_ENABLED' => (int) $distributedTracingData['enabled'] ?? 0,
         'NEWRELIC_DISTRIBUTED_TRACING_ENABLED' => (int) $distributedTracingData['enabled'] ?? 0,
         'NEWRELIC_SPAN_EVENTS_ENABLED' => (int) $distributedTracingData['enabled'] ?? 0,
-        'NEWRELIC_TRANSACTION_TRACER_THRESHOLD' => (int) $distributedTracingData['transaction-tracer-threshold'] ?? 0,
-        'NEWRELIC_DISTRIBUTED_TRACING_EXCLUDE_NEWRELIC_HEADER' => (int) $distributedTracingData['exclude-newrelic-header'] ?? 0,
+        'NEWRELIC_TRANSACTION_TRACER_THRESHOLD' => array_key_exists('transaction-tracer-threshold', $distributedTracingData)
+            ? (int) $distributedTracingData['transaction-tracer-threshold']
+            : 0,
+        'NEWRELIC_DISTRIBUTED_TRACING_EXCLUDE_NEWRELIC_HEADER' => array_key_exists('exclude-newrelic-header', $distributedTracingData)
+            ? (int) $distributedTracingData['exclude-newrelic-header']
+            : 0,
     ];
 }
 
