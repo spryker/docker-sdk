@@ -943,13 +943,16 @@ function buildNewrelicEnvVariables(array $projectData): array
 function buildNewrelicDistributedTracing(array $projectData): array
 {
     $distributedTracingData = $projectData['docker']['newrelic']['distributed-tracing'] ?? [];
+    $enabled = $distributedTracingData['enabled'] ?? 0;
+    $transactionTracerThreshold = $distributedTracingData['transaction-tracer-threshold'] ?? 0;
+    $excludeNewrelicHeader = $distributedTracingData['exclude-newrelic-header'] ?? 0;
 
     return [
-        'NEWRELIC_TRANSACTION_TRACER_ENABLED' => (int) $distributedTracingData['enabled'] ?? 0,
-        'NEWRELIC_DISTRIBUTED_TRACING_ENABLED' => (int) $distributedTracingData['enabled'] ?? 0,
-        'NEWRELIC_SPAN_EVENTS_ENABLED' => (int) $distributedTracingData['enabled'] ?? 0,
-        'NEWRELIC_TRANSACTION_TRACER_THRESHOLD' => (int) $distributedTracingData['transaction-tracer-threshold'] ?? 0,
-        'NEWRELIC_DISTRIBUTED_TRACING_EXCLUDE_NEWRELIC_HEADER' => (int) $distributedTracingData['exclude-newrelic-header'] ?? 0,
+        'NEWRELIC_TRANSACTION_TRACER_ENABLED' => (int) $enabled,
+        'NEWRELIC_DISTRIBUTED_TRACING_ENABLED' => (int) $enabled,
+        'NEWRELIC_SPAN_EVENTS_ENABLED' => (int) $enabled,
+        'NEWRELIC_TRANSACTION_TRACER_THRESHOLD' => (int) $transactionTracerThreshold,
+        'NEWRELIC_DISTRIBUTED_TRACING_EXCLUDE_NEWRELIC_HEADER' => (int) $excludeNewrelicHeader,
     ];
 }
 
