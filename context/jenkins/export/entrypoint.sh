@@ -60,8 +60,13 @@ rm -f ${JENKINS_CLI_PATH}
 wget -O ${JENKINS_CLI_PATH} http://${HOST}:${PORT}/jnlpJars/jenkins-cli.jar
 waitForJenkinsCliEndpointToRespondHealthy
 
-#we have to set AWS_REGION, as far as telegram stil has an issue - https://github.com/influxdata/telegraf/issues/11963
-AWS_REGION=${TELEGRAF_OUTPUTS_CLOUDWATCH_LOGS_REGION} telegraf --config /etc/telegraf.conf --input-filter jenkins
+java -jar ${JENKINS_CLI_PATH} -s http://${HOST}:${PORT}/ delete-credentials system::system::jenkins "(global)" newrelic-insight-key
+echo "deleted old newrelic credentials.."
+waitForJenkinsCliEndpointToRespondHealthy
+
+java -jar ${JENKINS_CLI_PATH} -s http://${HOST}:${PORT} create-credentials-by-xml system::system::jenkins "(global)" < ~/.jenkins/nr-credentials.xml
+echo "deployed new newrelic credentials.."
+waitForJenkinsCliEndpointToRespondHealthy
 
 ### uncomment these two lines if datadog agent shall be installed
 # curl -L http://updates.jenkins-ci.org/update-center.json | sed '1d;$d' > /root/.jenkins/updates/default.json
