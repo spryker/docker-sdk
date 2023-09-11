@@ -44,7 +44,7 @@ jobs:
           cd ../demo-shop
           docker-sdk/sdk boot deploy.ci.functional.mariadb.yml -v
           docker-sdk/sdk up -t -v
-          docker-sdk/sdk testing codecept run -c codeception.ci.functional.yml
+          docker-sdk/sdk testing codecept run -c codeception.functional.yml
 
   glue_test:
     runs-on: ubuntu-latest
