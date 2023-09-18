@@ -29,7 +29,7 @@ ARG SPRYKER_PIPELINE
 ENV SPRYKER_PIPELINE=${SPRYKER_PIPELINE}
 
 RUN --mount=type=cache,id=npm-cache,sharing=locked,target=/home/spryker/.npm,uid=1000 --mount=type=cache,id=npm-modules,sharing=locked,target=/data/node_modules,uid=1000 \
-    sh -c 'if [ -f ${srcRoot}/package.json ]; then npm install --prefer-offline || npm ci --prefer-offline; fi'
+    sh -c 'if [ -f ${srcRoot}/package.json ]; then npm install || npm ci --prefer-offline; fi'
 
 RUN --mount=type=cache,id=npm-cache,sharing=locked,target=/home/spryker/.npm,uid=1000 --mount=type=cache,id=npm-modules,sharing=locked,target=/data/node_modules,uid=1000 \
     echo "BUILD HASH: ${SPRYKER_BUILD_HASH}" \
