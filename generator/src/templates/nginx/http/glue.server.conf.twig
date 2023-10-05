@@ -1,4 +1,11 @@
 {% extends "nginx/http/application.server.conf.twig" %}
+{% block fastcgi_upstream %}
+upstream glue_upstream {
+  server {{ upstream }};
+  keepalive 16;
+}
+{% endblock fastcgi_upstream %}
+
 {% block server %}
 {{ parent() }}
 
@@ -6,7 +13,34 @@
 {% include "nginx/vhost.d/timeouts.conf.twig" with { timeout: timeout | default('1m') } %}
 {% endblock server %}
 {% block location %}
-{{ parent() }}
+        fastcgi_keep_conn on;
+        fastcgi_pass glue_upstream;
+{# parent's block content #}
+        include fastcgi.conf;
+        {# Variable is necessary for https://www.nginx.com/blog/dns-service-discovery-nginx-plus/#domain-name-upstream-group #}
+#        set $upstream "{{ upstream }}";
+#        fastcgi_pass "$upstream";
+
+        set $maintenance_mode ${SPRYKER_MAINTENANCE_MODE_ENABLED};
+
+        if ($is_whitelisted_ip = "1") {
+            set $maintenance_mode "0";
+        }
+
+        if ($maintenance_mode = "1") {
+            return 503;
+        }
+
+        {% include "nginx/http/default.location.conf.twig" with _context %}
+        {% set view = endpointData['region'] is defined ? 'region' : 'store'%}
+        {% include "nginx/http/#{view}.params.conf.twig" with _context %}
+
+        fastcgi_param SPRYKER_SSL_ENABLE {{ (project['docker']['ssl']['enabled'] | default(false)) ? 1 : 0 }};
+        fastcgi_param SPRYKER_ZED_SSL_ENABLED {{ (project['docker']['ssl']['enabled'] | default(false)) ? 1 : 0 }};
+        fastcgi_param HTTPS {{ (project['docker']['ssl']['enabled'] | default(false)) ? 'on' : 'off' }};
+        fastcgi_param SPRYKER_JENKINS_CSRF_PROTECTION_ENABLED {{ (services['scheduler']['csrf-protection-enabled'] | default(false)) ? 1 : 0 }};
+{# end #}
+{#{ parent() }#}
         fastcgi_param SPRYKER_ZED_HOST "{{ (zedHost | split(':'))[0] | default('') }}";
         fastcgi_param SPRYKER_ZED_PORT "{{ (zedHost | split(':'))[1] | default(project['_defaultPort']) }}";
 
