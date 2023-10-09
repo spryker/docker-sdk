@@ -14,7 +14,7 @@ function Assets::export() {
 
     local command="true"
     for entrypoint in "${SPRYKER_ENTRYPOINTS[@]}"; do
-        command="${command} && \$([ -d '/data/public/${entrypoint}/assets' ] && tar czf '/data${dockerAssetsTmpDirectory}/assets-${entrypoint}-${tag}.tar' -C '/data/public/${entrypoint}/assets' . || true)"
+        command="${command} && \$([ -d '/data/static/public/${entrypoint}/assets' ] && tar czf '/data${dockerAssetsTmpDirectory}/assets-${entrypoint}-${tag}.tar' -C '/data/public/${entrypoint}/assets' . || true)"
     done
 
     Console::start "Preparing assets archives..."

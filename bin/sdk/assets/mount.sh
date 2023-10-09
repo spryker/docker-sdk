@@ -13,7 +13,7 @@ function Assets::getImageTag() {
 function Assets::areBuilt() {
     Console::start "Checking assets are built..."
 
-    [ -d public/Yves/assets ] && [ -d public/Zed/assets ] && Console::end "[BUILT]" && return "${TRUE}" || return "${FALSE}"
+    [ -d static/public/Yves/assets ] && [ -d static/public/Zed/assets ] && Console::end "[BUILT]" && return "${TRUE}" || return "${FALSE}"
 }
 
 function Assets::build() {

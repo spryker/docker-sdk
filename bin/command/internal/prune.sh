@@ -38,7 +38,7 @@ function Command::_prune_artifacts() {
   Command::_dropDirectory 'vendor/' ${forceArg}
   Command::_dropDirectory 'src/Generated/' ${forceArg}
   Command::_dropDirectory 'node_modules/' ${forceArg}
-  Command::_dropDirectory 'public/*/assets/' ${forceArg}
+  Command::_dropDirectory 'static/public/*/assets/' ${forceArg}
 }
 
 function Command::_dropDirectory() {

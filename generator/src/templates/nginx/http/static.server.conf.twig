@@ -15,6 +15,6 @@
         try_files   $uri $uri/ =404;
     }
 
-    root /data/public/{{ endpointData['entry-point'] }};
+    root /data/static/public/{{ endpointData['entry-point'] }};
 {% endif %}
 {% endblock locations %}

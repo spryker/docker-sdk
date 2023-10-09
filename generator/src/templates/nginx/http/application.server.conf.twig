@@ -4,7 +4,7 @@
 {% include "nginx/http/error.conf.twig" with _context %}
 {% endblock host %}
 {% block locations %}
-    root /data/public/{{ endpointData['entry-point'] }};
+    root /data/static/public/{{ endpointData['entry-point'] }};
     index index.php;
 
     if ($request_uri ~* "^(.*/)index\.php(.*)$") {
