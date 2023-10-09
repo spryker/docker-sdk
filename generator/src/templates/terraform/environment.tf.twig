@@ -3,7 +3,7 @@ locals {
 {% for groupName, groupData in project.groups %}
 {% for applicationName, applicationData in groupData['applications'] %}
 {% if applicationData['application'] != 'static' %}
-    {{ applicationName }} = {
+    {{ applicationName | lower }} = {
 {% include "terraform/application/" ~ (applicationData['application'] | lower) ~ ".tf.twig" with {
     applicationName: applicationName,
     applicationData: applicationData,
