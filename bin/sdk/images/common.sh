@@ -2,6 +2,8 @@
 
 require docker
 
+import lib/bool.sh
+
 function Images::pull() {
     docker pull "${SPRYKER_PLATFORM_IMAGE}" || true
 }
@@ -113,6 +115,7 @@ function Images::_buildApp() {
         -f "${DEPLOYMENT_PATH}/images/common/cli/Dockerfile" \
         --progress="${PROGRESS_TYPE}" \
         --build-arg "SPRYKER_PARENT_IMAGE=${localAppImage}" \
+        --build-arg "BLACKFIRE_EXTENSION_ENABLED=$(Bool::normalizeBashBool ${BLACKFIRE_EXTENSION_ENABLED})" \
         "${DEPLOYMENT_PATH}/context" 1>&2
 
     Console::verbose "$(date) ${INFO}Building cli${NC}"

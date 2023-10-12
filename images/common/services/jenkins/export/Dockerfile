@@ -1,7 +1,7 @@
 # syntax = docker/dockerfile:experimental
 ARG SPRYKER_PARENT_IMAGE
 
-FROM spryker/jenkins-boilerplate:2.361.1 as spryker-jenkins-boilerplate
+FROM spryker/jenkins-boilerplate:latest as spryker-jenkins-boilerplate
 FROM ${SPRYKER_PARENT_IMAGE}  as spryker_jenkins
 EXPOSE 8080
 COPY context/jenkins/export/jenkins.docker.xml.twig ./config/Zed/cronjobs/jenkins.docker.xml.twig
@@ -14,7 +14,7 @@ COPY --from=spryker-jenkins-boilerplate /usr/share/jenkins/jenkins-cli.jar /usr/
 RUN bash -c 'if [ ! -z "$(which apk)" ]; then apk --no-cache add \
 	curl \
     bash \
-    openjdk11 \
+    openjdk17 \
     ttf-dejavu \
     gettext \
     jq && \
@@ -29,7 +29,7 @@ RUN bash -c 'if [ ! -z "$(which apt)" ]; then apt update -y && \
 	apt update -y && apt install -y \
 	curl \
     bash \
-    openjdk-11-jdk \
+    openjdk-17-jdk \
     fonts-dejavu \
     gettext \
     jq \
@@ -40,6 +40,7 @@ RUN bash -c 'if [ ! -z "$(which apt)" ]; then apt update -y && \
 COPY terraform/cli /envs/
 COPY context/jenkins/export/entrypoint.sh /entrypoint.sh
 COPY context/jenkins/export/jenkins.model.JenkinsLocationConfiguration.xml /opt/jenkins.model.JenkinsLocationConfiguration.xml
+COPY context/jenkins/export/com.newrelic.experts.jenkins.extensions.NewRelicGlobalConfiguration.xml /opt/com.newrelic.experts.jenkins.extensions.NewRelicGlobalConfiguration.xml
 COPY context/jenkins/export/nr-credentials.xml /opt/nr-credentials.xml
 RUN chmod +x /entrypoint.sh
 
