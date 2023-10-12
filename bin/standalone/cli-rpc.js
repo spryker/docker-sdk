@@ -102,7 +102,7 @@ class Dispatcher {
     }
 
     _get_glueStorefrontSchema(request, response) {
-        const fileLocation = process.env.SPRYKER_REST_API_SCHEMA_PATH || 'src/Generated/Storefront/Specification/spryker_storefront_api.schema.yml';
+        const fileLocation = process.env.SPRYKER_REST_API_SCHEMA_PATH || 'src/Generated/GlueStorefront/Specification/spryker_storefront_api.schema.yml';
         const baseUrl = request.headers['x-schema-base-url'] || '';
 
         fs.readFile(process.env.PWD + '/' + fileLocation, 'utf8', function (error,schemaContent) {

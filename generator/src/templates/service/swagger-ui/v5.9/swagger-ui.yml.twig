@@ -1,5 +1,5 @@
 {% set protocol = project['docker']['ssl']['enabled'] ? 'https://' : 'http://' %}
-{% set firstGlueEndpointMap = project['_endpointMap'] | first %}
+{% set firstEndpointMap = project['_endpointMap'] | first %}
   {{ serviceName }}:
     image: swaggerapi/swagger-ui:v5.9.0
     networks:
@@ -9,9 +9,15 @@
         'spryker.app.type': hidden
         'spryker.project': ${SPRYKER_DOCKER_PREFIX}:${SPRYKER_DOCKER_TAG}
     environment:
-        URLS: "[{ url: \"{{ protocol ~ firstGlueEndpointMap['glue'] }}/schema.yml\", name: \"(Old) Glue API\" }]"
+        URLS: "[\
+            {% if firstEndpointMap['glue'] is defined  %}{ url: \"{{ protocol ~ firstEndpointMap['glue'] }}/schema.yml\", name: \"(Old) Glue API\" },\{% endif %}
+            {% if firstEndpointMap['glue-storefront'] is defined  %}{ url: \"{{ protocol ~ firstEndpointMap['glue-storefront'] }}/schema.yml\", name: \"Glue Storefront API\" },\{% endif %}
+            {% if firstEndpointMap['glue-backend'] is defined  %}{ url: \"{{ protocol ~ firstEndpointMap['glue-backend'] }}/schema.yml\", name: \"Glue Backend API\" },\{% endif %}
+            ]"
     healthcheck:
         test: [ "CMD", "nc", "-z", "localhost", "8080" ]
         interval: 5s
         timeout: 5s
         retries: 5
+
+
