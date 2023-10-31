@@ -15,7 +15,11 @@ Review the minimum system requirements in the table:
 
 
 ## Installing and configuring required software
-Follow the steps to install and configure the required software:
+Follow the steps to install and configure the required software.
+At this moment we have two docker providers for MacOS - Docker Desktop and OrbStack.
+
+### Docker Desktop
+
 1. Download and install [Docker Desktop (Mac)](https://desktop.docker.com/mac/stable/amd64/Docker.dmg).
 2. Accept the privilege escalation request "Docker Desktop needs privileged access.".
 @(Info)()(Signup for Docker Hub is not required.)
@@ -35,7 +39,15 @@ Follow the steps to install and configure the required software:
 
 @(Warning)()(You can set lower **Memory:** and **Swap:** limit values. However, the default limits won't be sufficient to run the application, so make sure to increase them. )
 
-5. [Development mode](../02-installation-guides/01-choosing-an-installation-mode.md#development-mode): Install Mutagen:
+### OrbStack
+
+1. Download and install [OrbStack](https://orbstack.dev/).
+2. If you need to migrate from Docker to OrbStack, see [Migrate from Docker to OrbStack](https://docs.orbstack.dev/install#docker-migration).
+3. If you need switch to OrbsStack from Docker, see [Switch from Docker to OrbStack](https://docs.orbstack.dev/install#docker-context).
+
+
+## Development mode
+1[Development mode](../02-installation-guides/01-choosing-an-installation-mode.md#development-mode): Install Mutagen:
 ```shell
 brew list | grep mutagen | xargs  brew remove && brew install mutagen-io/mutagen/mutagen mutagen-io/mutagen/mutagen-compose && mutagen daemon stop && mutagen daemon start
 ```
