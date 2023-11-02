@@ -47,7 +47,7 @@ At this moment we have two docker providers for MacOS - Docker Desktop and OrbSt
 
 
 ## Development mode
-5. [Development mode](../02-installation-guides/01-choosing-an-installation-mode.md#development-mode): Install Mutagen:
+[Development mode](../02-installation-guides/01-choosing-an-installation-mode.md#development-mode): Install Mutagen:
 ```shell
 brew list | grep mutagen | xargs  brew remove && brew install mutagen-io/mutagen/mutagen mutagen-io/mutagen/mutagen-compose && mutagen daemon stop && mutagen daemon start
 ```
