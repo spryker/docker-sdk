@@ -771,7 +771,7 @@ groups:
 
 #### Define allowlisted IP addresses
 
-* `docker: maintenance: whitelist: ips:` - defines the allowlisted IP addresses from which the applications in the maintenance mode can be accessed.
+* `docker: maintenance: whitelist: ips:` - defines the allowlisted IP addresses or a CIDR IP from which the applications in the maintenance mode can be accessed.
 
 ```yaml
 version: 1.0
