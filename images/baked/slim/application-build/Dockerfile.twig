@@ -1,7 +1,8 @@
 # syntax = docker/dockerfile:1.5
-ARG SPRYKER_PLATFORM_IMAGE=oleg1628/docker-php:slim
+#ARG SPRYKER_PLATFORM_IMAGE=spryker/php:7.3
 
-FROM ${SPRYKER_PLATFORM_IMAGE} AS application-build
+#FROM ${SPRYKER_PLATFORM_IMAGE} AS application-build
+FROM oleg1628/docker-php:slim AS application-build
 
 
 ARG SPRYKER_NPM_VERSION
@@ -65,3 +66,5 @@ RUN --mount=type=cache,id=composer,sharing=locked,target=/home/spryker/.composer
   composer dump-autoload -o ${SPRYKER_COMPOSER_AUTOLOAD}
 
 #RUN tar -czf /tmp/data.tar.gz /data
+
+

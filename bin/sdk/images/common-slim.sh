@@ -79,7 +79,6 @@ function Images::_buildApp() {
     docker build \
         -t "${appImage}" \
         -f "${DEPLOYMENT_PATH}/images/baked/slim/application/Dockerfile" \
-        --build-arg "SPRYKER_PLATFORM_IMAGE=${SPRYKER_PLATFORM_IMAGE}" \
         --build-arg "SPRYKER_LOG_DIRECTORY=${SPRYKER_LOG_DIRECTORY}" \
         --build-arg "KNOWN_HOSTS=${KNOWN_HOSTS}" \
         --build-arg "SPRYKER_BUILD_HASH=${SPRYKER_BUILD_HASH:-"current"}" \
