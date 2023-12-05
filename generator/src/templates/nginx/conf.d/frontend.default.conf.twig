@@ -3,7 +3,7 @@ server_tokens off;
 
 large_client_header_buffers 4 32k;
 
-map $remote_addr $is_whitelisted_ip {
+geo $is_whitelisted_ip {
      default         "0";
 {% if docker['maintenance']['whitelist']['ips'] is defined %}
 {% for ip in docker['maintenance']['whitelist']['ips'] | default([]) %}
