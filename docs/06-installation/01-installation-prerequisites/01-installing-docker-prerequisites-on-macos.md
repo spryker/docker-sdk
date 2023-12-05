@@ -13,43 +13,52 @@ Review the minimum system requirements in the table:
 | RAM: 4GB | This is a minimum requirement. The value can be higher than 4GB. A lower value is not sufficient for installation purposes. |
 | Swap: 2GB | This is a minimum requirement. The value can be higher than 2GB. A lower value is not sufficient for installation purposes. |
 
+## Install and configure a Docker manager
 
-## Installing and configuring required software
-Follow the steps to install and configure the required software.
-At this moment we have two docker providers for MacOS - Docker Desktop and OrbStack.
+You can run Spryker in Docker using Docker Desktop or OrbStack. Docker Desktop is a free default tool, but OrbStack works faster with intel-based Macs. 
 
-### Docker Desktop
 
-1. Download and install [Docker Desktop (Mac)](https://desktop.docker.com/mac/stable/amd64/Docker.dmg).
+### Install Docker Desktop
+
+1. Download and install [Docker Desktop (Mac)](https://docs.docker.com/desktop/mac/install/).
+
+{% info_block infoBox %}
+
+Signup for Docker Hub is not required.
+
+{% endinfo_block %}
+
 2. Accept the privilege escalation request "Docker Desktop needs privileged access.".
-@(Info)()(Signup for Docker Hub is not required.)
 
-3. Go to ![whale](https://spryker.s3.eu-central-1.amazonaws.com/docs/Developer+Guide/Installation/Spryker+in+Docker/Docker+Install+Prerequisites+-+MacOS/whale-x.png) > **Preferences**  > **Command Line** and **Enable experimental features**.
+3. In the Docker Desktop, go to preferences by selecting the gear in the top right corner.
 
+4. In the **General** section of **Preferences**, click the **Use Docker Compose V2** checkbox.
 
-4. Update Memory and Swap Limits:
+5. Set recommended memory and swap limits:
 
-    1. Go to![whale](https://spryker.s3.eu-central-1.amazonaws.com/docs/Developer+Guide/Installation/Spryker+in+Docker/Docker+Install+Prerequisites+-+MacOS/whale-x.png) > **Preferences**  > **Resources** > **ADVANCED**.
+    1. Go to **Resources** > **ADVANCED**.
     2. Set **CPUs:** to "4" or higher.
     3. Set **Memory:** to "4.00 GB" or higher.
     4. Set **Swap:** to "2.00 GB" or higher.
     5. Set the desired **Disk image size:**.
     6. Select the desired **Disk image location**.
-    7. Click **Apply & Restart**.
+    7. Select **Apply & Restart**.
 
-@(Warning)()(You can set lower **Memory:** and **Swap:** limit values. However, the default limits won't be sufficient to run the application, so make sure to increase them. )
+### Install OrbStack
 
-### OrbStack
-
-1. Download and install [OrbStack](https://orbstack.dev/).
-2. If you need to migrate from Docker to OrbStack, see [Migrate from Docker to OrbStack](https://docs.orbstack.dev/install#docker-migration).
-3. If you need switch to OrbsStack from Docker, see [Switch from Docker to OrbStack](https://docs.orbstack.dev/install#docker-context).
+Download and install [OrbStack](https://orbstack.dev/download).
 
 
-## Development mode
-[Development mode](../02-installation-guides/01-choosing-an-installation-mode.md#development-mode): Install Mutagen:
-```shell
-brew list | grep mutagen | xargs  brew remove && brew install mutagen-io/mutagen/mutagen mutagen-io/mutagen/mutagen-compose && mutagen daemon stop && mutagen daemon start
+To migrate from Docker Desktop to OrbStack, see [Migrate from Docker to OrbStack](https://docs.orbstack.dev/install#docker-migration).
+To run Docker Desktop and OrbStack side-by-side and switch between them, see [Side-by-side
+](https://docs.orbstack.dev/install#docker-context).
+
+## Install Mutagen for development mode
+
+If you are going to run Spryker in [development mode](/docs/scos/dev/set-up-spryker-locally/install-spryker/install/choose-an-installation-mode.html#development-mode), install or update Mutagen and Mutagen Compose to the latest version:
+
+```bash
+brew list | grep mutagen | xargs brew remove && brew install mutagen-io/mutagen/mutagen mutagen-io/mutagen/mutagen-compose && mutagen daemon stop && mutagen daemon start
 ```
 
 ## Next steps
