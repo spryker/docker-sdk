@@ -55,7 +55,7 @@ To run Docker Desktop and OrbStack side-by-side and switch between them, see [Si
 
 ## Install Mutagen for development mode
 
-If you are going to run Spryker in [development mode](/docs/scos/dev/set-up-spryker-locally/install-spryker/install/choose-an-installation-mode.html#development-mode), install or update Mutagen and Mutagen Compose to the latest version:
+If you are going to run Spryker in [development mode](../02-installation-guides/01-choosing-an-installation-mode.md#development-mode), install or update Mutagen and Mutagen Compose to the latest version:
 
 ```bash
 brew list | grep mutagen | xargs brew remove && brew install mutagen-io/mutagen/mutagen mutagen-io/mutagen/mutagen-compose && mutagen daemon stop && mutagen daemon start
