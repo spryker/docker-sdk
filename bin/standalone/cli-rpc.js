@@ -66,12 +66,18 @@ class Dispatcher {
         response.end();
     }
 
-    _get_glueSchema(request, response) {
-        const fileLocation = process.env.SPRYKER_REST_API_SCHEMA_PATH || 'src/Generated/Glue/Specification/spryker_rest_api.schema.yml';
+    _options_glueStorefrontSchema(request, response) {
+        this._options_glueSchema(request, response)
+    }
+
+    _options_glueBackendSchema(request, response) {
+        this._options_glueSchema(request, response)
+    }
+
+    _get_schema(request, response, fileLocation) {
         const baseUrl = request.headers['x-schema-base-url'] || '';
 
         fs.readFile(process.env.PWD + '/' + fileLocation, 'utf8', function (error,schemaContent) {
-
             response.setHeader('Access-Control-Allow-Origin', '*');
             response.setHeader('Access-Control-Allow-Methods', 'GET');
 
@@ -94,74 +100,19 @@ class Dispatcher {
         });
     }
 
-    _options_glueStorefrontSchema(request, response) {
-        response.setHeader('Access-Control-Allow-Origin', '*');
-        response.setHeader('Access-Control-Allow-Methods', 'GET');
-        response.statusCode = 201;
-        response.end();
+    _get_glueSchema(request, response) {
+        const fileLocation = process.env.SPRYKER_REST_API_SCHEMA_PATH || 'src/Generated/Glue/Specification/spryker_rest_api.schema.yml';
+        this._get_schema(request, response, fileLocation);
     }
 
     _get_glueStorefrontSchema(request, response) {
         const fileLocation = process.env.SPRYKER_REST_API_SCHEMA_PATH || 'src/Generated/GlueStorefront/Specification/spryker_storefront_api.schema.yml';
-        const baseUrl = request.headers['x-schema-base-url'] || '';
-
-        fs.readFile(process.env.PWD + '/' + fileLocation, 'utf8', function (error,schemaContent) {
-
-            response.setHeader('Access-Control-Allow-Origin', '*');
-            response.setHeader('Access-Control-Allow-Methods', 'GET');
-
-            if (error) {
-                response.setHeader('Content-Type', 'text/plain');
-                response.statusCode = 500;
-                response.write(error.toString());
-                response.end();
-                return;
-            }
-
-            if (baseUrl !== '') {
-                schemaContent = schemaContent.replace(/(servers:\s*-\s*url:\s*['"])[^'"]*?(['"])/gm, '$1' + baseUrl + '$2');
-            }
-
-            response.setHeader('Content-Type', 'text/yaml');
-            response.statusCode = 200;
-            response.write(schemaContent);
-            response.end();
-        });
-    }
-
-    _options_glueBackendSchema(request, response) {
-        response.setHeader('Access-Control-Allow-Origin', '*');
-        response.setHeader('Access-Control-Allow-Methods', 'GET');
-        response.statusCode = 201;
-        response.end();
+        this._get_schema(request, response, fileLocation);
     }
 
     _get_glueBackendSchema(request, response) {
         const fileLocation = process.env.SPRYKER_REST_API_SCHEMA_PATH || 'src/Generated/GlueBackend/Specification/spryker_backend_api.schema.yml';
-        const baseUrl = request.headers['x-schema-base-url'] || '';
-
-        fs.readFile(process.env.PWD + '/' + fileLocation, 'utf8', function (error,schemaContent) {
-
-            response.setHeader('Access-Control-Allow-Origin', '*');
-            response.setHeader('Access-Control-Allow-Methods', 'GET');
-
-            if (error) {
-                response.setHeader('Content-Type', 'text/plain');
-                response.statusCode = 500;
-                response.write(error.toString());
-                response.end();
-                return;
-            }
-
-            if (baseUrl !== '') {
-                schemaContent = schemaContent.replace(/(servers:\s*-\s*url:\s*['"])[^'"]*?(['"])/gm, '$1' + baseUrl + '$2');
-            }
-
-            response.setHeader('Content-Type', 'text/yaml');
-            response.statusCode = 200;
-            response.write(schemaContent);
-            response.end();
-        });
+        this._get_schema(request, response, fileLocation);
     }
 }
 
