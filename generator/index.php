@@ -502,7 +502,7 @@ file_put_contents(
 );
 file_put_contents(
     $deploymentDir . DS . 'context' . DS . 'nginx' . DS . 'stub.default.conf',
-    $twig->render('nginx/conf.d/stub.default.cong.twig', $projectData)
+    $twig->render('nginx/conf.d/stub.default.conf.twig', $projectData)
 );    
 file_put_contents(
     $deploymentDir . DS . 'context' . DS . 'nginx' . DS . 'entrypoint.sh',
