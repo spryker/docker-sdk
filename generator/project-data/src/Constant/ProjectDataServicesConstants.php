@@ -18,4 +18,5 @@ interface ProjectDataServicesConstants
     const SERVICE_API_KEY = 'api';
     const SERVICE_USERNAME_KEY = 'username';
     const SERVICE_PASSWORD_KEY = 'password';
+    const ENDPOINT_MAP_KEY = '_endpointMap';
 }

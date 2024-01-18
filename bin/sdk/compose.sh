@@ -146,7 +146,7 @@ function Compose::up() {
     Assets::build ${noCache} ${doAssets}
     Images::buildFrontend ${noCache} ${doBuild}
     Compose::run --build
-    Compose::command restart frontend gateway
+    Compose::command restart frontend
 
     Registry::Flow::runAfterUp
 

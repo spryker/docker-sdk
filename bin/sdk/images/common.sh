@@ -192,18 +192,6 @@ function Images::_buildFrontend() {
     fi
 }
 
-function Images::_buildGateway() {
-    local gatewayImage="${SPRYKER_DOCKER_PREFIX}_gateway:${SPRYKER_DOCKER_TAG}"
-
-    Console::verbose "${INFO}Building Gateway image${NC}"
-
-    docker build \
-        -t "${gatewayImage}" \
-        -f "${DEPLOYMENT_PATH}/images/common/gateway/Dockerfile" \
-        --progress="${PROGRESS_TYPE}" \
-        "${DEPLOYMENT_PATH}/context" 1>&2
-}
-
 function Images::_tagByApp() {
     local applicationName=$1
     local imageName=$2

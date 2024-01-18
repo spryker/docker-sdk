@@ -37,6 +37,5 @@ function Images::buildFrontend() {
     done
 
     Images::_buildFrontend mount
-    Images::_buildGateway
     Images::tagFrontend "${SPRYKER_DOCKER_TAG}"
 }

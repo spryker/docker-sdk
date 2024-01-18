@@ -99,7 +99,6 @@ $projectData['_envs'] = array_merge(
 );
 $projectData['storageData'] = retrieveStorageData($projectData);
 $projectData['composer']['autoload'] = buildComposerAutoloadConfig($projectData);
-$isAutoloadCacheEnabled = $projectData['_isAutoloadCacheEnabled'] = isAutoloadCacheEnabled($projectData);
 $projectData['_requirementAnalyzerData'] = buildDataForRequirementAnalyzer($projectData);
 $projectData['secrets'] = buildSecrets($deploymentDir);
 $projectData = buildDefaultCredentials($projectData);
@@ -487,6 +486,10 @@ foreach ($projectData['services'] ?? [] as $serviceName => $serviceData) {
 file_put_contents(
     $deploymentDir . DS . 'context' . DS . 'nginx' . DS . 'conf.d' . DS . 'frontend.default.conf.tmpl',
     $twig->render('nginx/conf.d/frontend.default.conf.twig', $projectData)
+);
+file_put_contents(
+    $deploymentDir . DS . 'context' . DS . 'gateway' . DS . $projectData['namespace'] . '.yml',
+    $twig->render('traefik/dynamic-conf.yml.twig', $projectData)
 );
 file_put_contents(
     $deploymentDir . DS . 'context' . DS . 'nginx' . DS . 'conf.d' . DS . 'gateway.default.conf',
@@ -1120,20 +1123,6 @@ function retrieveGroupsStorageHosts(array $groups, array $storageServices, int $
     }
 
     return $groupsStorageHosts;
-}
-
-/**
- * @param array $projectData
- *
- * @return bool
- */
-function isAutoloadCacheEnabled(array $projectData): bool
-{
-    if ($projectData['composer']['autoload'] !== '') {
-        return false;
-    }
-
-    return $projectData['docker']['cache']['autoload']['enabled'] ?? false;
 }
 
 /**

@@ -2,6 +2,7 @@
     image: ${SPRYKER_DOCKER_PREFIX}_run_app:${SPRYKER_DOCKER_TAG}-{{ applicationName | lower }}
     networks:
       - private
+      - gateway
     labels:
       'spryker.app.name': {{ applicationName }}
       'spryker.app.type': glue-backend

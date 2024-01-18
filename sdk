@@ -6,6 +6,12 @@ export SELF_SCRIPT=$0
 SOURCE_DIR="${BASH_SOURCE%/*}"
 
 pushd "${BASH_SOURCE%/*}" >/dev/null
+absoluteProjectDockerPath="$(pwd)"
+
+readonly SPRYKER_DOCKER_SDK_DIR="${absoluteProjectDockerPath}"
+export SPRYKER_DOCKER_SDK_DIR
+
+. ./bin/standalone/constants.sh
 . ./bin/framework.sh
 popd >/dev/null
 

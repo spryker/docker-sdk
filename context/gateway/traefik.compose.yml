@@ -1,0 +1,36 @@
+version: '3'
+
+services:
+  gateway:
+    container_name: ${GATEWAY_CONTAINER_NAME}
+#    container_name: gateway
+    image: "traefik:v3.0"
+    ports:
+      - "80:80"
+      - "8080:8080"
+      - "443:443"
+    networks:
+      - gateway
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./traefik.yml:/etc/traefik/traefik.yml
+      - ./configs:/etc/traefik/configs
+      - ./certs:/etc/traefik/certs
+    x-develop:
+      watch:
+        - path: configs
+          target: /etc/traefik/configs
+          action: sync
+        - path: certs
+          target: /etc/traefik/certs
+          action: sync
+    command:
+      - "--api.insecure=true"
+      - "--api.dashboard=true"
+      - "--accesslog"
+
+networks:
+  gateway:
+    name: ${SPRYKER_DOCKER_SDK_NETWORK_NAME}
+#    name: spryker_docker_sdk
+    external: true

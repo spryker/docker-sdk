@@ -1,0 +1,37 @@
+http:
+  services:
+{% for serviceName, serviceData in _gateway['services'] %}
+    {{ serviceName }}:
+      loadBalancer:
+        servers:
+{% for url in serviceData['urls'] %}
+          - url: "{{ url }}"
+{% endfor %}
+{% endfor %}
+  routers:
+{% for routerName, routerData in _gateway['routers'] %}
+    {{ routerName }}:
+      rule: {{ routerData['rule'] }}
+      entryPoints:
+{% for entryPoint in routerData['entrypoints'] %}
+        - {{ entryPoint }}
+{% endfor %}
+{% if routerData['service'] %}
+      service: {{ routerData['service'] }}
+{% endif %}
+{% if routerData['tls'] is defined and routerData['tls'] == true %}
+      tls: {}
+{% endif %}
+{% endfor %}
+
+tls:
+  certificates:
+    - certFile: /etc/traefik/certs/{{ namespace }}.crt
+      keyFile: /etc/traefik/certs/{{ namespace }}.key
+      stores:
+        - default
+  stores:
+    default:
+      defaultCertificate:
+        certFile: /etc/traefik/certs/{{ namespace }}.crt
+        keyFile: /etc/traefik/certs/{{ namespace }}.key

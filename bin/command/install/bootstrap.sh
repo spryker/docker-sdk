@@ -5,6 +5,9 @@ require docker
 import environment/docker.sh
 import environment/docker-compose.sh
 
+import environment/shared/data.sh
+import environment/shared/network.sh
+
 Registry::addCommand "boot" "Command::bootstrap"
 Registry::addCommand "bootstrap" "Command::bootstrap"
 
@@ -40,6 +43,9 @@ function Command::bootstrap() {
         esac
     done
     shift $((OPTIND - 1))
+
+    Environment::Shared::Network::bootstrap
+    Environment::Shared::Data::bootstrap
 
     local gitHash=$(git rev-parse --verify HEAD 2>/dev/null || true)
     local tmpDeploymentDir="${SOURCE_DIR}/deployment/_tmp"

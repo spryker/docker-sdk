@@ -1,19 +1,22 @@
   {{ serviceName }}:
     image: swaggerapi/swagger-ui:v5.10.5
     networks:
-        - private
+      - private
+      - gateway
     labels:
-        'spryker.app.name': swagger
-        'spryker.app.type': hidden
-        'spryker.project': ${SPRYKER_DOCKER_PREFIX}:${SPRYKER_DOCKER_TAG}
+      'spryker.app.name': swagger
+      'spryker.app.type': hidden
+      'spryker.project': ${SPRYKER_DOCKER_PREFIX}:${SPRYKER_DOCKER_TAG}
+      'traefik.enable': true
+      'traefik.docker.network': ${SPRYKER_DOCKER_SDK_NETWORK_NAME}
 {% if serviceData['environment'] is defined %}
     environment:
 {% for key, value in serviceData['environment'] %}
-        - {{ key }}={{ value | raw }}
+      - {{ key }}={{ value | raw }}
 {% endfor %}
 {% endif %}
     healthcheck:
-        test: [ "CMD", "nc", "-z", "localhost", "8080" ]
-        interval: 5s
-        timeout: 5s
-        retries: 5
+      test: [ "CMD", "nc", "-z", "localhost", "8080" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5

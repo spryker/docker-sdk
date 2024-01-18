@@ -2,17 +2,20 @@
     image: spryker/jenkins:2.401
     networks:
       - private
+      - gateway
     labels:
       'spryker.app.name': scheduler
       'spryker.app.type': services
       'spryker.project': ${SPRYKER_DOCKER_PREFIX}:${SPRYKER_DOCKER_TAG}
+      'traefik.enable': true
+      'traefik.docker.network': ${SPRYKER_DOCKER_SDK_NETWORK_NAME}
     healthcheck:
       test: [ "CMD", "nc", "-z", "localhost", "8080" ]
       interval: 10s
       timeout: 5s
       retries: 5
     environment:
-        JAVA_OPTS: '-Djenkins.install.runSetupWizard=false -Xms128m -Xmx128m -Dhudson.security.csrf.GlobalCrumbIssuerConfiguration.DISABLE_CSRF_PROTECTION={{ serviceData['csrf-protection-enabled'] ? 'false' : 'true' }}'
+      JAVA_OPTS: '-Djenkins.install.runSetupWizard=false -Xms128m -Xmx128m -Dhudson.security.csrf.GlobalCrumbIssuerConfiguration.DISABLE_CSRF_PROTECTION={{ serviceData['csrf-protection-enabled'] ? 'false' : 'true' }}'
     volumes:
       - {{ serviceName }}-{{ serviceData['engine'] }}-data:/var/jenkins_home:rw
       - ${DEPLOYMENT_PATH}/context/jenkins/spryker.sh:/usr/bin/spryker.sh:rw

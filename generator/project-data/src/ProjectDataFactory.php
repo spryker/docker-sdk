@@ -19,6 +19,7 @@ use ProjectData\DataBuilder\ProjectData\Executor\BrokerConnectionsExecutor;
 use ProjectData\DataBuilder\ProjectData\Executor\BrokerHostsExecutor;
 use ProjectData\DataBuilder\ProjectData\Executor\CloudBrokerConnectionsExecutor;
 use ProjectData\DataBuilder\ProjectData\Executor\EndpointIdentifierExecutor;
+use ProjectData\DataBuilder\ProjectData\Executor\GatewayExecutor;
 use ProjectData\DataBuilder\ProjectData\Executor\KeyValueStoreConnectionsExecutor;
 use ProjectData\DataBuilder\ProjectData\ProjectDataBuilderStrategy;
 use ProjectData\DataBuilder\ProjectDataBuildProcessor;
@@ -83,6 +84,7 @@ class ProjectDataFactory
             new BrokerConnectionsExecutor(),
             new EndpointIdentifierExecutor(),
             new CloudBrokerConnectionsExecutor(),
+            new GatewayExecutor(),
         ];
     }
 }

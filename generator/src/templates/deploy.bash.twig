@@ -72,12 +72,7 @@ import installer/jenkins-template.sh
 {% if _requirementAnalyzerData.hosts is not empty %}
 import installer/hosts.sh "{{ _requirementAnalyzerData.hosts }}"
 {% endif %}
-{% if _mountMode == 'nfs' %}
-import installer/nfs.sh
-{% endif %}
-{% if _isAutoloadCacheEnabled %}
-import installer/autoload-cache.sh
-{% endif %}
+import sdk/gateway/installer.sh
 
 # Services
 import service/service.sh
@@ -93,6 +88,7 @@ import sdk/mount/{{ _mountMode }}.sh
 import sdk/images/{{ _fileMode }}.sh
 import sdk/assets/{{ _fileMode }}.sh
 import sdk/codebase/{{ _fileMode }}.sh
+import sdk/gateway/gateway.sh
 
 # Go!
 System::Bootstrap

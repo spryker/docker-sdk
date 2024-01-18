@@ -12,6 +12,12 @@ COPY --chown=root:root nginx/auth /etc/nginx/auth
 COPY --chown=root:root nginx/entrypoint.sh /
 RUN chmod +x /entrypoint.sh
 
+#COPY --chown=root:root nginx/nginx.with.stream.conf /etc/nginx/nginx.conf
+#COPY --chown=root:root nginx/conf.d/gateway.default.conf /etc/nginx/templates/default.conf.template
+#COPY --chown=root:root nginx/stream.d/gateway.default.conf /etc/nginx/stream.d/default.conf
+#COPY --chown=root:root nginx/vhost.d/ssl.default.conf /etc/nginx/vhost.d/ssl.default.conf
+#COPY --chown=root:root nginx/ssl /etc/nginx/ssl
+
 ENV SPRYKER_DNS_RESOLVER_FLAGS="valid=10s ipv6=off"
 ENV SPRYKER_DNS_RESOLVER_IP=""
 

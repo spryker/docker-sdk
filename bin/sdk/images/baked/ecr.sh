@@ -12,7 +12,6 @@ function Images::buildFrontend() {
     Console::verbose "${INFO}Building Frontend image for AWS ECR${NC}"
 
     Images::_buildFrontend baked
-    Images::_buildGateway
 }
 
 function Images::tagApplications() {
