@@ -10,8 +10,13 @@
         fastcgi_param SPRYKER_ZED_HOST "{{ (zedHost | split(':'))[0] | default('') }}";
         fastcgi_param SPRYKER_ZED_PORT "{{ (zedHost | split(':'))[1] | default(project['_defaultPort']) }}";
 
+        set $spryker_fe_host "{{ host }}";
+        if ($http_x_forwarded_host) {
+            set $spryker_fe_host $http_x_forwarded_host;
+        }
+
         fastcgi_param SPRYKER_SESSION_FE_NAMESPACE "{{ storeServices['session']['namespace'] | default(endpointData['services']['session']['namespace']) }}";
-        fastcgi_param SPRYKER_FE_HOST "{{ host }}";
+        fastcgi_param SPRYKER_FE_HOST $spryker_fe_host;
         fastcgi_param SPRYKER_FE_PORT "{{ externalPort }}";
 
 {% if storeServices['mail']['sender']['email'] is not empty %}

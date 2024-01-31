@@ -19,8 +19,13 @@
         fastcgi_param SPRYKER_ZED_HOST "zed.calls.are.forbidden.from.zed";
         fastcgi_param SPRYKER_ZED_PORT "{{ project['_defaultPort'] }}";
 
+        set $spryker_be_host "{{ host }}";
+        if ($http_x_forwarded_host) {
+            set $spryker_be_host $http_x_forwarded_host;
+        }
+
         fastcgi_param SPRYKER_SESSION_BE_NAMESPACE "{{ storeServices['session']['namespace'] | default(endpointData['services']['session']['namespace']) }}";
-        fastcgi_param SPRYKER_BE_HOST "{{ host }}";
+        fastcgi_param SPRYKER_BE_HOST $spryker_be_host;
         fastcgi_param SPRYKER_BE_PORT "{{ externalPort }}";
 
 {% if storeServices['mail']['sender']['email'] is not empty %}
