@@ -341,13 +341,16 @@ foreach ($projectData['groups'] ?? [] as $groupName => $groupData) {
             ];
         }
 
-        foreach ($applicationData['endpoints'] ?? [] as $endpoint => $endpointData) {
-
+        if (isset($applicationData['endpoints']) && is_array($applicationData['endpoints'])) {
+          foreach ($applicationData['endpoints'] ?? [] as $endpoint => $endpointData) {
+            $internal = isset($endpointData['internal']) && $endpointData['internal'] === true;
             $host = strtok($endpoint, ':');
+            $zone = $internal ? getFrontendZoneByDomainLevel($host, 4) : getFrontendZoneByDomainLevel($host, 2);
+
             $frontend[$host] = [
-                'zone' => getFrontendZoneByDomainLevel($host),
+                'zone' => $zone,
                 'type' => $applicationName,
-                'internal' => (bool)($endpointData['internal'] ?? false),
+                'internal' => $internal,
             ];
 
             $authEngine = $endpointData['auth']['engine'] ?? 'none';
@@ -440,6 +443,7 @@ foreach ($projectData['groups'] ?? [] as $groupName => $groupData) {
             }
 
             $envVarEncoder->setIsActive(false);
+          }
         }
     }
 }
