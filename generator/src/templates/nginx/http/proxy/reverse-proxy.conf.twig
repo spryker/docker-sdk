@@ -6,7 +6,8 @@ location {{ location }} {
         proxy_set_header X-Forwarded-Proto $scheme;
         proxy_set_header Host $http_host;
 
-        proxy_pass {{ proxy_pass }};
+        set $proxy_pass_endpoint {{ proxy_pass }};
+        proxy_pass $proxy_pass_endpoint;
     }
 
     {% endfor %}
