@@ -4,4 +4,4 @@ node_modules
 
 deployment/*
 !deployment/.gitkeep
-
+.DS_Store
