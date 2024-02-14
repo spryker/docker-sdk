@@ -14,8 +14,7 @@
         proxy_set_header X-Forwarded-Proto $scheme;
         proxy_set_header Host $proxy_host;
 
-        set $upstream {{ proxy_pass }};
-        proxy_pass $upstream;
+        proxy_pass {{ proxy_pass }};
     }
 {% endfor %}
 {% else %}
