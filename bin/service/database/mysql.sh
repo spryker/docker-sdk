@@ -50,7 +50,7 @@ EOF
 
 function Database::init() {
       if ! Service::isServiceExist database; then
-        return;
+          return;
       fi
 
       Compose::exec <<'EOF'
