@@ -49,7 +49,9 @@ EOF
 }
 
 function Database::init() {
-      Database::checkConnection
+      if ! Service::isServiceExist database; then
+        return;
+      fi
 
       Compose::exec <<'EOF'
         export MYSQL_PWD="${SPRYKER_DB_ROOT_PASSWORD}";
