@@ -260,6 +260,8 @@ foreach ($primal as $callbacks) {
 
 $endpointMap = $projectData['_endpointMap'] = mapBackendEndpointsWithFallbackZed($projectData['_endpointMap']);
 
+$projectData = buildSwaggerEnvVariables($projectData);
+
 $projectData['_testing'] = [
     'defaultPort' => $defaultPort,
     'projectServices' => $projectData['services'],
@@ -581,6 +583,8 @@ exec(sprintf(
     implode(' ', $hosts)
 ), $output, $returnCode);
 
+
+
 if ($returnCode > 0) {
     exit($returnCode);
 }
@@ -598,6 +602,7 @@ if (count($errorMessages) > 0) {
 
     exit(1);
 }
+
 
 // -------------------------
 /**
@@ -1731,4 +1736,78 @@ function buildProjectData(array $projectData): array
     return $factory
         ->createProjectDataBuildProcessor()
         ->run($projectData);
+}
+
+function buildSwaggerEnvVariables(array $projectData): array
+{
+    $services = $projectData['services'] ?? [];
+    $swaggerService = $services['swagger'] ?? [];
+
+    if (empty($swaggerService)) {
+        return $projectData;
+    }
+
+    $swaggerUrls = buildSwaggerUrls($projectData);
+
+    if (empty($swaggerUrls)) {
+        return $projectData;
+    }
+
+    $swaggerService['environment']['URLS'] = json_encode($swaggerUrls);
+    $projectData['services']['swagger'] = $swaggerService;
+
+    return $projectData;
+}
+
+function isGlueApplication(string $appName): bool
+{
+    $glueApps = [
+        GLUE_APP,
+        GLUE_STOREFRONT,
+        GLUE_BACKEND,
+    ];
+
+    return in_array($appName, $glueApps);
+}
+
+function buildGlueSwaggerUrl(string $appName, string $appHost, string $schema): array
+{
+    $appSuffix = 'Api';
+
+    $appName = explode('-', $appName);
+    $appName[] = $appSuffix;
+
+    $appName = array_map('ucfirst', $appName);
+    $appName = implode(' ', $appName);
+
+    $schemaUrl = sprintf('%s://%s/%s', $schema, $appHost, 'schema.yml');
+
+    return [
+        'name' => $appName,
+        'url' => $schemaUrl,
+    ];
+}
+
+function buildSwaggerUrls(array $projectData): array
+{
+    $schema = getCurrentScheme($projectData);
+    $endpoints = $projectData['_endpointMap'] ?? [];
+
+    if (empty($endpoints)) {
+        return [];
+    }
+
+    $urlsEnvVariable = [];
+
+    $endpoints = $endpoints[array_key_first($endpoints)] ?? [];
+
+    foreach ($endpoints as $applicationName => $applicationHost) {
+        if (!isGlueApplication($applicationName)) {
+            continue;
+        }
+
+        $urlsEnvVariable[] = buildGlueSwaggerUrl($applicationName, $applicationHost, $schema);
+    }
+
+    return $urlsEnvVariable;
 }
