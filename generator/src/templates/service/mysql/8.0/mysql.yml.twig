@@ -1,5 +1,6 @@
   {{ serviceName }}:
-    image: ${SPRYKER_CI_MYSQL_IMAGE:-mysql:5.7.37}
+    image: mysql:8.0
+    command: --default-authentication-plugin=mysql_native_password --sql_mode=''
     networks:
       - private
     labels:
@@ -7,13 +8,15 @@
       'spryker.app.type': services
       'spryker.project': ${SPRYKER_DOCKER_PREFIX}:${SPRYKER_DOCKER_TAG}
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "--silent"]
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
       interval: 10s
-      timeout: 10s
-      retries: 5
+      timeout: 5s
+      retries: 3
+      start_period: 30s
     environment:
+      MYSQL_ROOT_USERNAME: "{{ serviceData['root']['username'] }}"
       MYSQL_ROOT_PASSWORD: "{{ serviceData['root']['password'] }}"
       LANG: C.UTF-8
     volumes:
       - {{ serviceName }}-{{ serviceData['engine'] }}-data:/var/lib/mysql:rw
-      - ./${DEPLOYMENT_PATH}/context/mysql/5.7/my.cnf:/etc/mysql/my.cnf:ro
+      - ./${DEPLOYMENT_PATH}/context/mysql/8.0/my.cnf:/etc/mysql/my.cnf:ro
