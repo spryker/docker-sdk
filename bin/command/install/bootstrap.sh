@@ -84,7 +84,7 @@ function Command::bootstrap() {
         "${SOURCE_DIR}/generator" >/dev/null
     Console::end "[DONE]"
 
-    Console::verbose::start "Copiyng assets..."
+    Console::verbose::start "Copying assets..."
     cp -rf "${SOURCE_DIR}/bin" "${tmpDeploymentDir}/bin"
     cp -rf "${SOURCE_DIR}/context" "${tmpDeploymentDir}/context"
     cp -rf "${SOURCE_DIR}/bin/standalone" "${tmpDeploymentDir}/context/cli"
