@@ -5,6 +5,12 @@
 {% include "nginx/vhost.d/merchant-portal.default.conf.twig" with _context %}
 {% include "nginx/vhost.d/timeouts.conf.twig" with { timeout: timeout | default('1m') } %}
 {% endblock server %}
+{% block locations %}
+{{ parent() }}
+    location = / {
+        return 301 /dashboard-merchant-portal-gui/dashboard;
+    }
+{% endblock locations %}
 {% block location %}
 {{ parent() }}
 
