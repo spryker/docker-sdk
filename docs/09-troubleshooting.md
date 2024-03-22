@@ -105,7 +105,7 @@ image:
 
 2. Fetch the changes and start the instance:
 ```bash
-docker/sdk boot && docker/sdk up
+docker/sdk bootstrap && docker/sdk up
 ```
 
 ### Demo data was imported incorrectly
@@ -391,7 +391,7 @@ $config[SchedulerJenkinsConstants::JENKINS_CONFIGURATION] = [
 ```
 
 **when**
-Assets install error 
+Assets install error
 ```bash
 line 1: run-s: not found
 ```
@@ -399,4 +399,4 @@ line 1: run-s: not found
 **then**
 1. ensure you are using latest docker-sdk and spryker/php image.
 2. run `docker/sdk pull`
-3. run `docker/sdk boot {{your deploy file}} && docker/sdk up --build`
+3. run `docker/sdk bootstrap {{your deploy file}} && docker/sdk up --build`

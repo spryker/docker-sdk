@@ -71,7 +71,7 @@ services:
 
 2. Bootstrap the docker setup, regenerate demo data, and rebuild the application:
 ```bash
-docker/sdk boot deploy.*.yml
+docker/sdk bootstrap deploy.*.yml
 docker/sdk clean-data
 docker/sdk up --build --data
 ```
@@ -97,7 +97,7 @@ services:
 ```
 2. Bootstrap the docker setup, regenerate demo data, and rebuild the application:
 ```bash
-docker/sdk boot deploy.*.yml
+docker/sdk bootstrap deploy.*.yml
 docker/sdk clean-data
 docker/sdk up --build --data
 ```
@@ -123,7 +123,7 @@ services:
 ```
 2. Bootstrap the docker setup, regenerate demo data, and rebuild the application:
 ```bash
-docker/sdk boot deploy.*.yml
+docker/sdk bootstrap deploy.*.yml
 docker/sdk clean-data
 docker/sdk up --build --data
 ```
@@ -150,7 +150,7 @@ services:
 
 2. Bootstrap the docker setup and rebuild the application:
 ```bash
-docker/sdk boot deploy.*.yml &&\
+docker/sdk bootstrap deploy.*.yml &&\
 docker/sdk up
 
 ## OpenSearch
@@ -171,7 +171,7 @@ services:
 
 2. Bootstrap the docker setup and rebuild the application:
 ```bash
-docker/sdk boot deploy.*.yml &&\
+docker/sdk bootstrap deploy.*.yml &&\
 docker/sdk up
 ```
 
@@ -201,7 +201,7 @@ echo "127.0.0.1 {custom_endpoint}" | sudo tee -a /etc/hosts
 
 3. 2. Bootstrap the docker setup and rebuild the application:
 ```bash
-docker/sdk boot deploy.*.yml &&\
+docker/sdk bootstrap deploy.*.yml &&\
 docker/sdk up
 ```
 
@@ -225,7 +225,7 @@ services:
 
 2. Bootstrap the docker setup and rebuild the application:
 ```bash
-docker/sdk boot deploy.*.yml &&\
+docker/sdk bootstrap deploy.*.yml &&\
 docker/sdk up
 ```
 
@@ -260,7 +260,7 @@ echo "127.0.0.1 {custom_endpoint}" | sudo tee -a /etc/hosts
 
 3. Bootstrap the docker setup and rebuild the application:
 ```bash
-docker/sdk boot deploy.*.yml &&\
+docker/sdk bootstrap deploy.*.yml &&\
 docker/sdk up
 ```
 ## Redis
@@ -283,7 +283,7 @@ services:
 
 2. Bootstrap the docker setup and rebuild the application:
 ```bash
-docker/sdk boot deploy.*.yml &&\
+docker/sdk bootstrap deploy.*.yml &&\
 docker/sdk up
 ```
 
@@ -312,7 +312,7 @@ echo "127.0.0.1 {custom_endpoint}" | sudo tee -a /etc/hosts
 
 3. Bootstrap the docker setup and rebuild the application:
 ```bash
-docker/sdk boot deploy.*.yml &&\
+docker/sdk bootstrap deploy.*.yml &&\
 docker/sdk up
 ```
 
@@ -343,7 +343,7 @@ services:
 ```
 2. Bootstrap the docker setup and rebuild the application:
 ```bash
-docker/sdk boot deploy.*.yml &&\
+docker/sdk bootstrap deploy.*.yml &&\
 docker/sdk up
 ```
 
@@ -380,7 +380,7 @@ services:
 
 3. Bootstrap the docker setup and rebuild the application:
 ```bash
-docker/sdk boot deploy.*.yml &&\
+docker/sdk bootstrap deploy.*.yml &&\
 docker/sdk up
 ```
 
@@ -428,7 +428,7 @@ You can pass the server details only with the `docker/sdk up` command.
 
 5. Bootstrap the docker setup and rebuild the application:
 ```bash
-docker/sdk boot deploy.*.yml &&\
+docker/sdk bootstrap deploy.*.yml &&\
 docker/sdk up
 ```
 
@@ -519,7 +519,7 @@ image:
 
 3. Bootstrap the docker setup and rebuild the application:
 ```bash
-docker/sdk boot deploy.*.yml &&\
+docker/sdk bootstrap deploy.*.yml &&\
 docker/sdk up
 ```
 
@@ -528,7 +528,7 @@ docker/sdk up
 
 By default, in the New Relic dashboard, the APM is displayed as `company-staging-newrelic-app`. To improve visibility, you may want to configure each application as a separate APM. For example, `YVES-DE (docker.dev)`.
 
-To do it, adjust the Monitoring service in `src/Pyz/Service/Monitoring/MonitoringDependencyProvider.php`:  
+To do it, adjust the Monitoring service in `src/Pyz/Service/Monitoring/MonitoringDependencyProvider.php`:
 
 ```php
 <?php declare(strict_types = 1);
@@ -574,7 +574,7 @@ With `new \SprykerEco\Service\NewRelic\Plugin\NewRelicMonitoringExtensionPlugin(
 
 4. Bootstrap the docker setup and rebuild the application:
 ```bash
-docker/sdk boot deploy.*.yml &&\
+docker/sdk bootstrap deploy.*.yml &&\
 docker/sdk up
 ```
 
@@ -630,7 +630,7 @@ dashboard:
 
 2. Bootstrap the docker setup and rebuild the application:
 ```bash
-docker/sdk boot deploy.*.yml &&\
+docker/sdk bootstrap deploy.*.yml &&\
 docker/sdk up
 ```
 
@@ -652,6 +652,6 @@ tideways:
 
 2. Bootstrap the docker setup and rebuild the application:
 ```bash
-docker/sdk boot deploy.*.yml &&\
+docker/sdk bootstrap deploy.*.yml &&\
 docker/sdk up
 ```

@@ -37,7 +37,7 @@ To set up a developer environment:
 1. Bootstrap docker setup, build and start the instance:
 
 ```bash
-docker/sdk boot deploy.dev.yml
+docker/sdk bootstrap deploy.dev.yml
 docker/sdk up
 ```
 
@@ -45,7 +45,7 @@ docker/sdk up
 
 ```bash
 git checkout {your_branch}
-docker/sdk boot deploy.dev.yml
+docker/sdk bootstrap deploy.dev.yml
 docker/sdk up --build --assets --data
 ```
 
@@ -62,7 +62,7 @@ To set up a production-like environment:
 1. Bootstrap docker setup, build and start the instance:
 
 ```bash
-docker/sdk boot deploy.*.yml
+docker/sdk bootstrap deploy.*.yml
 docker/sdk up
 ```
 
