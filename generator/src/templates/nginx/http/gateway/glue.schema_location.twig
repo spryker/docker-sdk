@@ -1,0 +1,13 @@
+{% block location_schema %}
+    location /schema.yml {
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection $connection_upgrade;
+        proxy_set_header X-SCHEMA-BASE-URL $scheme://$host;
+
+        resolver 127.0.0.11 valid=10s;
+        set $cli_proxy_pass http://cli:9000/{{ cli_proxy_pass }}/;
+        proxy_pass $cli_proxy_pass;
+    }
+{% endblock location_schema %}

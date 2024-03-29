@@ -82,6 +82,7 @@ For contribution guidelines, see [Code contribution guide](https://docs.spryker.
 |                 |              | 2.305        | &check;     |                                    |
 |                 |              | 2.324        | &check;     |                                    |
 |                 |              | 2.401        | &check;     |                                    |
+|                 |              | 2.442        | &check;     |                                    |
 | webdriver       | phantomjs    | latest*      |             |                                    |
 |                 | chromedriver | latest       | &check;     |                                    |
 | mail_catcher    | mailhog      | 1.0          | &check;     |                                    |
