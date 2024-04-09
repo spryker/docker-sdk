@@ -1,2 +1,6 @@
-      SPRYKER_MAIL_SENDER_EMAIL = "{{ serviceData['sender']['email'] | default('') }}"
-      SPRYKER_MAIL_SENDER_NAME = "{{ serviceData['sender']['name'] | default('') }}"
+{% if serviceData['sender']['email'] is defined %}
+      SPRYKER_MAIL_SENDER_EMAIL = "{{ serviceData['sender']['email'] }}"
+{% endif %}
+{% if serviceData['sender']['name'] is defined %}
+      SPRYKER_MAIL_SENDER_NAME = "{{ serviceData['sender']['name'] }}"
+{% endif %}
