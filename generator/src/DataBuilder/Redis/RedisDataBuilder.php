@@ -61,6 +61,10 @@ class RedisDataBuilder extends AbstractBuilder
 
     private function validate(array $projectRedisData, array $redisData): void
     {
+        $projectRedisData = array_filter($projectRedisData, function ($value) {
+            return $value !== null;
+        });
+
         $errorTemplate = 'Redis db should be unique.'
             . PHP_EOL
             .'Please change next indexes: %s'
