@@ -8,7 +8,8 @@ function Command::install() {
     local output=''
 
     if ! output=$(Registry::runInstallers); then
-        Console::info 'Everything is properly installed. Nothing to do at the momemnt.'
+
+        Console::info 'Everything is properly installed. Nothing to do at the moment.'
         return "${TRUE}"
     fi
 

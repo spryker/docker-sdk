@@ -13,8 +13,10 @@ services:
                 protocol: tcp
     session:
         engine: redis
+        version: '6.2'
     key_value_store:
         engine: redis
+        version: '6.2'
         endpoints:
             localhost:16379:
                 protocol: tcp

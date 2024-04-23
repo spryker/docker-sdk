@@ -1,8 +1,5 @@
   {{ applicationName | lower }}:
     image: ${SPRYKER_DOCKER_PREFIX}_run_app:${SPRYKER_DOCKER_TAG}-{{ applicationName | lower }}
-    depends_on:
-      - key_value_store
-      - search
     networks:
       - private
     labels:
@@ -17,4 +14,5 @@
       TIDEWAYS_APIKEY: ${TIDEWAYS_APIKEY}
       TIDEWAYS_CLI_ENABLED: ${TIDEWAYS_CLI_ENABLED}
       TIDEWAYS_ENVIRONMENT_NAME: ${TIDEWAYS_ENVIRONMENT_NAME}
+      BLACKFIRE_APM_ENABLED: ${BLACKFIRE_APM_ENABLED}
     <<: *app-volumes

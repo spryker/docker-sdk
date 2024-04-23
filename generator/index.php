@@ -2,6 +2,8 @@
 
 use DeployFileGenerator\DeployFileGeneratorFactory;
 use DeployFileGenerator\Transfer\DeployFileTransfer;
+use ProjectData\Constant\ProjectDataConstants;
+use ProjectData\ProjectDataFactory;
 use Spatie\Url\Url;
 use Symfony\Component\Yaml\Parser;
 use Twig\Environment;
@@ -73,6 +75,10 @@ $yamlParser = new Parser();
 
 $projectData = $yamlParser->parseFile($projectYaml);
 
+if (!array_key_exists('services', $projectData)) {
+    $projectData['services'] = [];
+}
+
 $projectData['_knownHosts'] = buildKnownHosts($deploymentDir);
 $projectData['_defaultDeploymentDir'] = $defaultDeploymentDir;
 $projectData['tag'] = $projectData['tag'] ?? uniqid();
@@ -100,6 +106,7 @@ $projectData = buildDefaultCredentials($projectData);
 
 // TODO Make it optional in next major
 // Making webdriver as required service for BC reasons
+// todo: waitFor refactoring dependency + document + testing mode
 if (empty($projectData['services']['webdriver'])) {
     $projectData['services']['webdriver'] = [
         'engine' => 'phantomjs',
@@ -180,6 +187,8 @@ foreach ($projectData['groups'] ?? [] as $groupName => $groupData) {
 
             $application = $applicationData['application'];
             $store = $endpointData['store'] ?? null;
+            $region = $endpointData['region'] ?? null;
+            $projectData['groups'][$groupName]['applications'][$applicationName]['endpoints'][$endpoint]['identifier'] = $store ? $store : $region;
             $projectData['groups'][$groupName]['applications'][$applicationName]['endpoints'][$endpoint]['primal'] = false;
             while (!empty($projectData['_ports'][$debugPortIndex])) {
                 $debugPortIndex++;
@@ -221,6 +230,24 @@ foreach ($projectData['groups'] ?? [] as $groupName => $groupData) {
                 $projectData['groups'][$groupName]['applications'][$applicationName]['endpoints'][$endpoint]['redirect']['url']
                     = ensureUrlScheme($redirect['url'], $projectData);
             }
+
+            if (!$store && $region && !array_key_exists('redirect', $endpointData)) {
+                # primal is true, or the first one
+                $isPrimal = !empty($endpointData['primal']) || empty($primal[$store][$application]);
+                if ($isPrimal) {
+                    $regionName = $groupData['region'];
+                    $primal[$regionName][$application] = function (&$projectData) use (
+                        $groupName,
+                        $applicationName,
+                        $application,
+                        $endpoint,
+                        $regionName
+                    ) {
+                        $projectData['_endpointMap'][$regionName][$application] = $endpoint;
+                        $projectData['groups'][$groupName]['applications'][$applicationName]['endpoints'][$endpoint]['primal'] = true;
+                    };
+                }
+            }
         }
     }
 }
@@ -232,6 +259,8 @@ foreach ($primal as $callbacks) {
 }
 
 $endpointMap = $projectData['_endpointMap'] = mapBackendEndpointsWithFallbackZed($projectData['_endpointMap']);
+
+$projectData = buildSwaggerEnvVariables($projectData);
 
 $projectData['_testing'] = [
     'defaultPort' => $defaultPort,
@@ -245,6 +274,7 @@ $environment = [
     'project' => $projectData['namespace'],
 ];
 
+$projectData = buildProjectData($projectData);
 /**
  * @param array $endpointMap
  *
@@ -338,48 +368,73 @@ foreach ($projectData['groups'] ?? [] as $groupName => $groupData) {
 
             $services = [];
             $isEndpointDataHasStore = array_key_exists('store', $endpointData);
+            $isEndpointDataHasRegion = array_key_exists('region', $endpointData);
+            $currentRegion = array_key_exists('region', $endpointData)
+                ? $endpointData['region']
+                : $groupData['region'];
+
             if ($isEndpointDataHasStore) {
                 $services = array_replace_recursive(
-                    $projectData['regions'][$groupData['region']]['stores'][$endpointData['store']]['services'],
+                    $projectData['regions'][$groupData['region']]['stores'][$endpointData['store']]['services'] ?? [],
                     $endpointData['services'] ?? []
                 );
             }
+
+            if ($isEndpointDataHasRegion) {
+                $services = array_replace_recursive(
+                    $projectData['regions'][$currentRegion]['services'] ?? [],
+                    $endpointData['services'] ?? []
+                );
+            }
+
+            $projectData['_testing']['dynamicStoreMode'] = $projectData['dynamicStoreMode'] ?? false;
+
             if ($isEndpointDataHasStore && $endpointData['store'] === ($projectData['docker']['testing']['store'] ?? '')) {
                 $projectData['_testing']['storeName'] = $endpointData['store'];
+                $projectData['_testing']['identifier'] = $endpointData['identifier'];
                 $projectData['_testing']['regionServices'] = array_merge($projectData['_testing']['services'] ?? [], $services);
                 $projectData['_testing']['services'][$endpointData['store']][$applicationData['application']] = $services;
             }
 
+            if ($isEndpointDataHasRegion && $groupData['region'] === ($projectData['docker']['testing']['region'] ?? '')) {
+                $projectData['_testing']['regionName'] = $groupData['region'];
+                $projectData['_testing']['identifier'] = $endpointData['identifier'];
+                $projectData['_testing']['regionServices'] = array_merge($projectData['_testing']['services'] ?? [], $services);
+                $projectData['_testing']['services'][$currentRegion][$applicationData['application']] = $services;
+            }
+
             $envVarEncoder->setIsActive(true);
 
-            if (array_key_exists('store', $endpointData)) {
+            if ($isEndpointDataHasStore || $isEndpointDataHasRegion) {
                 file_put_contents(
-                    $deploymentDir . DS . 'env' . DS . 'cli' . DS . strtolower($endpointData['store']) . '.env',
+                    $deploymentDir . DS . 'env' . DS . 'cli' . DS . strtolower($endpointData['identifier']) . '.env',
                     $twig->render('env/cli/store.env.twig', [
                         'applicationName' => $applicationName,
                         'applicationData' => $applicationData,
                         'project' => $projectData,
-                        'regionName' => $groupData['region'],
-                        'regionData' => $projectData['regions'][$groupData['region']],
+                        'regionName' => $currentRegion,
+                        'regionData' => $projectData['regions'][$currentRegion],
                         'brokerConnections' => getBrokerConnections($projectData),
-                        'storeName' => $endpointData['store'],
+                        'storeName' => $endpointData['store'] ?? '',
                         'services' => $services,
                         'endpointMap' => $endpointMap,
+                        'identifier' => $endpointData['identifier'],
                     ])
                 );
 
                 file_put_contents(
-                    $deploymentDir . DS . 'terraform' . DS . 'cli' . DS . strtolower($endpointData['store']) . '.env',
+                    $deploymentDir . DS . 'terraform' . DS . 'cli' . DS . strtolower($endpointData['identifier']) . '.env',
                     $twig->render('terraform/store.env.twig', [
                         'applicationName' => $applicationName,
                         'applicationData' => $applicationData,
                         'project' => $projectData,
-                        'regionName' => $groupData['region'],
-                        'regionData' => $projectData['regions'][$groupData['region']],
+                        'regionName' => $currentRegion,
+                        'regionData' => $projectData['regions'][$currentRegion],
                         'brokerConnections' => getBrokerConnections($projectData),
-                        'storeName' => $endpointData['store'],
+                        'storeName' => $endpointData['store'] ?? '',
                         'services' => $services,
                         'endpointMap' => $endpointMap,
+                        'identifier' => $endpointData['identifier'],
                     ])
                 );
             }
@@ -528,6 +583,8 @@ exec(sprintf(
     implode(' ', $hosts)
 ), $output, $returnCode);
 
+
+
 if ($returnCode > 0) {
     exit($returnCode);
 }
@@ -545,6 +602,7 @@ if (count($errorMessages) > 0) {
 
     exit(1);
 }
+
 
 // -------------------------
 /**
@@ -700,25 +758,7 @@ function getSSLRedirectPort(array $projectData): int
  */
 function getBrokerConnections(array $projectData): string
 {
-    $brokerServiceData = $projectData['services']['broker'];
-
-    $connections = [];
-    foreach ($projectData['regions'] as $regionName => $regionData) {
-        foreach ($regionData['stores'] ?? [] as $storeName => $storeData) {
-            $localServiceData = array_replace($brokerServiceData, $storeData['services']['broker']);
-            $connections[$storeName] = [
-                'RABBITMQ_CONNECTION_NAME' => $storeName . '-connection',
-                'RABBITMQ_HOST' => 'broker',
-                'RABBITMQ_PORT' => $localServiceData['port'] ?? 5672,
-                'RABBITMQ_USERNAME' => $localServiceData['api']['username'],
-                'RABBITMQ_PASSWORD' => $localServiceData['api']['password'],
-                'RABBITMQ_VIRTUAL_HOST' => $localServiceData['namespace'],
-                'RABBITMQ_STORE_NAMES' => [$storeName], // check if connection is shared
-            ];
-        }
-    }
-
-    return json_encode($connections);
+    return $projectData[ProjectDataConstants::PROJECT_DATA_BROKER_CONNECTIONS_KEY];
 }
 
 /**
@@ -728,19 +768,7 @@ function getBrokerConnections(array $projectData): string
  */
 function getCloudBrokerConnections(array $projectData): string
 {
-    $brokerServiceData = $projectData['services']['broker'];
-
-    $connections = [];
-    foreach ($projectData['regions'] as $regionName => $regionData) {
-        foreach ($regionData['stores'] ?? [] as $storeName => $storeData) {
-            $localServiceData = array_replace($brokerServiceData, $storeData['services']['broker']);
-            $connections[$storeName] = [
-                'RABBITMQ_VIRTUAL_HOST' => $localServiceData['namespace'],
-            ];
-        }
-    }
-
-    return json_encode($connections);
+    return $projectData[ProjectDataConstants::PROJECT_DATA_CLOUD_BROKER_CONNECTIONS_KEY] ?? '';
 }
 
 /**
@@ -753,6 +781,9 @@ function getStoreSpecific(array $projectData): array
     $storeSpecific = [];
     foreach ($projectData['regions'] as $regionName => $regionData) {
         foreach ($regionData['stores'] ?? [] as $storeName => $storeData) {
+            if (!isset($storeData['services'])) {
+                continue;
+            }
 
             $services = $storeData['services'];
             $storeSpecific[$storeName] = [
@@ -917,13 +948,16 @@ function buildNewrelicEnvVariables(array $projectData): array
 function buildNewrelicDistributedTracing(array $projectData): array
 {
     $distributedTracingData = $projectData['docker']['newrelic']['distributed-tracing'] ?? [];
+    $enabled = $distributedTracingData['enabled'] ?? 0;
+    $transactionTracerThreshold = $distributedTracingData['transaction-tracer-threshold'] ?? 0;
+    $excludeNewrelicHeader = $distributedTracingData['exclude-newrelic-header'] ?? 0;
 
     return [
-        'NEWRELIC_TRANSACTION_TRACER_ENABLED' => (int) $distributedTracingData['enabled'] ?? 0,
-        'NEWRELIC_DISTRIBUTED_TRACING_ENABLED' => (int) $distributedTracingData['enabled'] ?? 0,
-        'NEWRELIC_SPAN_EVENTS_ENABLED' => (int) $distributedTracingData['enabled'] ?? 0,
-        'NEWRELIC_TRANSACTION_TRACER_THRESHOLD' => (int) $distributedTracingData['transaction-tracer-threshold'] ?? 0,
-        'NEWRELIC_DISTRIBUTED_TRACING_EXCLUDE_NEWRELIC_HEADER' => (int) $distributedTracingData['exclude-newrelic-header'] ?? 0,
+        'NEWRELIC_TRANSACTION_TRACER_ENABLED' => (int) $enabled,
+        'NEWRELIC_DISTRIBUTED_TRACING_ENABLED' => (int) $enabled,
+        'NEWRELIC_SPAN_EVENTS_ENABLED' => (int) $enabled,
+        'NEWRELIC_TRANSACTION_TRACER_THRESHOLD' => (int) $transactionTracerThreshold,
+        'NEWRELIC_DISTRIBUTED_TRACING_EXCLUDE_NEWRELIC_HEADER' => (int) $excludeNewrelicHeader,
     ];
 }
 
@@ -1045,6 +1079,10 @@ function retrieveRegionsStorageHosts(array $regions, array $storageServices, int
 {
     $regionsStorageHosts = [];
     foreach ($regions ?? [] as $regionName => $regionData) {
+        if (!array_key_exists('stores', $regionData)) {
+            continue;
+        }
+
         foreach ($regionData['stores'] as $storeData) {
             foreach ($storeData['services'] ?? [] as $serviceName => $serviceNamespace) {
                 if (in_array($serviceName, $storageServices, true)) {
@@ -1251,6 +1289,14 @@ function buildSecrets(string $deploymentDir): array
     $data['SPRYKER_OAUTH_ENCRYPTION_KEY'] = generateToken(48);
     $data['SPRYKER_OAUTH_CLIENT_IDENTIFIER'] = 'frontend';
     $data['SPRYKER_OAUTH_CLIENT_SECRET'] = generateToken(48);
+    $data['SPRYKER_OAUTH_CLIENT_CONFIGURATION'] = json_encode([[
+        "identifier" => "frontend",
+        "secret" => generateToken(48),
+        "isConfidential" => true,
+        "name" => "Customer client",
+        "redirectUri" => null,
+        "isDefault" => true
+    ]]);
     $data['SPRYKER_ZED_REQUEST_TOKEN'] = generateToken(80);
     $data['SPRYKER_URI_SIGNER_SECRET_KEY'] = generateToken(80);
     $data['SPRYKER_PRODUCT_CONFIGURATOR_ENCRYPTION_KEY'] = generateToken(10);
@@ -1432,7 +1478,8 @@ function buildDefaultRegionCredentialsForDatabase(array $projectData): array
         'password' => 'secret',
     ];
 
-    $databaseServiceData = $projectData['services']['database'];
+    $databaseServiceData = $projectData['services']['database'] ?? [];
+
     foreach ($projectData['regions'] as $regionName => $regionConfig) {
         $databases = [
             'version' => '1.0',
@@ -1447,35 +1494,52 @@ function buildDefaultRegionCredentialsForDatabase(array $projectData): array
             $regionDbConfig = array_merge($defaultDbRegionCredentials, $regionDbConfig);
             $projectData['regions'][$regionName]['services']['database'] = $regionDbConfig;
         }
-
         if (array_key_exists('databases', $regionConfig['services'])) {
-            $regionDbConfigs = $regionConfig['services']['databases'];
-
-            foreach ($regionConfig['stores'] as $storeName => $storeConfig) {
-                $storeDbConfig = $storeConfig['services']['database'];
-
-                foreach ($regionDbConfigs as $dbName => $regionDbConfig) {
-                    if (isset($storeDbConfig['name']) && $storeDbConfig['name'] === $dbName) {
-                        $regionDbConfig = array_merge($defaultDbRegionCredentials, $regionDbConfig ?? []);
-                        $databases['databases'][$storeName] = [
-                            'host' => 'database',
-                            'port' => $databaseServiceData['port'] ?? $databaseServiceData['engine'] === 'mysql' ? 3306 : 5432,
-                            'database' => $dbName,
-                            'username' => $regionDbConfig['username'],
-                            'password' => $regionDbConfig['password'],
-                            'characterSet' => $regionDbConfig['character-set'] ?? 'utf8',
-                            'collate' => $regionDbConfig['collate'] ?? 'utf8_general_ci',
-                        ];
+            $processedDbs = [];
+            foreach ($regionConfig['services']['databases'] as $dbName => $regionDbConfig) {
+                foreach ($regionConfig['stores'] as $storeName => $storeConfig) {
+                    $regionDbConfig = array_merge($defaultDbRegionCredentials, $regionDbConfig ?? []);
+                    if (isset($storeConfig['services']['database']['name']) && $storeConfig['services']['database']['name'] == $dbName) {
+                        $databases = getDatabaseData($storeName, $dbName, $databaseServiceData, $regionDbConfig, $databases);
+                        $processedDbs[$dbName] = [];
+                        $processedDbs[$storeName] = [];
                     }
                 }
-            }
 
+                if (isset($processedDbs[$dbName])) {
+                    continue;
+                }
+
+                $databases = getDatabaseData($dbName, $dbName, $databaseServiceData, $regionDbConfig, $databases);
+            }
             $projectData['regions'][$regionName]['services']['databases'] = json_encode($databases);
         }
-
     }
 
     return $projectData;
+}
+
+/**
+ * @param string $dbKey
+ * @param string $dbName
+ * @param array $databaseServiceData
+ * @param array $regionDbConfig
+ * @param array $databases
+ *
+ * @return array
+ */
+function getDatabaseData(string $dbKey, string $dbName, array $databaseServiceData, array $regionDbConfig, array $databases): array {
+    $databases['databases'][strtoupper($dbKey)] = [
+        'host' => 'database',
+        'port' => $databaseServiceData['port'] ?? $databaseServiceData['engine'] === 'mysql' ? 3306 : 5432,
+        'database' => strtolower($dbName),
+        'username' => $regionDbConfig['username'],
+        'password' => $regionDbConfig['password'],
+        'characterSet' => $regionDbConfig['character-set'] ?? 'utf8',
+        'collate' => $regionDbConfig['collate'] ?? 'utf8_general_ci',
+    ];
+
+    return $databases;
 }
 
 /**
@@ -1514,6 +1578,10 @@ function extendProjectDataWithKeyValueRegionNamespaces(array $projectData): arra
     foreach ($projectData['regions'] as $regionName => $regionData) {
         $keyValueStoreNamespaces = [];
         foreach ($regionData['stores'] ?? [] as $storeName => $storeData) {
+            if (!isset($storeData['services']['key_value_store']['namespace'])) {
+                continue;
+            }
+
             $keyValueStoreNamespaces[$storeName] = $storeData['services']['key_value_store']['namespace'];
         }
         $projectData['regions'][$regionName]['key_value_region_namespaces'] = json_encode($keyValueStoreNamespaces);
@@ -1659,4 +1727,87 @@ function getNodeDistroName(array $nodejsConfig, string $imageName): string
     }
 
     return ALPINE_DISTRO_NAME;
+}
+
+function buildProjectData(array $projectData): array
+{
+    $factory = new ProjectDataFactory();
+
+    return $factory
+        ->createProjectDataBuildProcessor()
+        ->run($projectData);
+}
+
+function buildSwaggerEnvVariables(array $projectData): array
+{
+    $services = $projectData['services'] ?? [];
+    $swaggerService = $services['swagger'] ?? [];
+
+    if (empty($swaggerService)) {
+        return $projectData;
+    }
+
+    $swaggerUrls = buildSwaggerUrls($projectData);
+
+    if (empty($swaggerUrls)) {
+        return $projectData;
+    }
+
+    $swaggerService['environment']['URLS'] = json_encode($swaggerUrls);
+    $projectData['services']['swagger'] = $swaggerService;
+
+    return $projectData;
+}
+
+function isGlueApplication(string $appName): bool
+{
+    $glueApps = [
+        GLUE_APP,
+        GLUE_STOREFRONT,
+        GLUE_BACKEND,
+    ];
+
+    return in_array($appName, $glueApps);
+}
+
+function buildGlueSwaggerUrl(string $appName, string $appHost, string $schema): array
+{
+    $appSuffix = 'Api';
+
+    $appName = explode('-', $appName);
+    $appName[] = $appSuffix;
+
+    $appName = array_map('ucfirst', $appName);
+    $appName = implode(' ', $appName);
+
+    $schemaUrl = sprintf('%s://%s/%s', $schema, $appHost, 'schema.yml');
+
+    return [
+        'name' => $appName,
+        'url' => $schemaUrl,
+    ];
+}
+
+function buildSwaggerUrls(array $projectData): array
+{
+    $schema = getCurrentScheme($projectData);
+    $endpoints = $projectData['_endpointMap'] ?? [];
+
+    if (empty($endpoints)) {
+        return [];
+    }
+
+    $urlsEnvVariable = [];
+
+    $endpoints = $endpoints[array_key_first($endpoints)] ?? [];
+
+    foreach ($endpoints as $applicationName => $applicationHost) {
+        if (!isGlueApplication($applicationName)) {
+            continue;
+        }
+
+        $urlsEnvVariable[] = buildGlueSwaggerUrl($applicationName, $applicationHost, $schema);
+    }
+
+    return $urlsEnvVariable;
 }

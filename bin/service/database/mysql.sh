@@ -1,6 +1,34 @@
 #!/bin/bash
 
+
+function Database::checkConnection() {
+    if ! Service::isServiceExist database; then
+        return;
+    fi
+
+    local -i retriesFor=180
+    local -i interval=2
+    local counter=1
+
+    while :; do
+        [ "${counter}" -gt 0 ] && echo -en "\rWaiting for database connection [${counter}/${retriesFor}]..." || echo -en ""
+        local status=$(Compose::exec "mysqladmin ping -h \${SPRYKER_DB_HOST} -u \${SPRYKER_DB_ROOT_USERNAME} -p\${SPRYKER_DB_ROOT_PASSWORD} --silent" "${DOCKER_COMPOSE_TTY_DISABLED}" | grep -c "mysqld is alive")
+        [ "${status}" -eq 1 ] && echo -en "${CLEAR}\r" && break
+
+        if [ $((counter % 5)) -eq 0 ]; then
+            Compose::command restart database
+        fi
+
+        [ "${counter}" -ge "${retriesFor}" ] && echo -e "\r${WARN}Could not wait for database anymore.${NC}" && exit 1
+        counter=$((counter + interval))
+        sleep "${interval}"
+    done
+}
+
+
 function Database::haveTables() {
+    Database::checkConnection
+
     tableCount=$(
         Compose::exec <<'EOF'
         export VERBOSE=0
@@ -40,10 +68,12 @@ function Database::haveTables() {
 EOF
     )
 
-    [ "$tableCount" -gt 0 ] && return "${TRUE}" || return "${FALSE}"
+    ( [ ! -z "${tableCount}" ] &&  [ "${tableCount}" -gt 0 ]) && return "${TRUE}" || return "${FALSE}"
 }
 
 function Database::init() {
+      Database::checkConnection
+
       Compose::exec <<'EOF'
         export MYSQL_PWD="${SPRYKER_DB_ROOT_PASSWORD}";
         databases="$(echo ${SPRYKER_PAAS_SERVICES} | jq  '.databases')";

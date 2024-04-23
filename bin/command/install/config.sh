@@ -2,7 +2,7 @@
 
 Registry::addCommand "config" "Command::config"
 
-Registry::Help::command -c "config" "Prebuild deploy.yml file."
+Registry::Help::command -s -c "config" "Outputs deploy file into the cli."
 
 function Command::config() {
     shift $((OPTIND - 1))
@@ -27,7 +27,6 @@ function Command::config() {
     Console::verbose::start "Building generator..."
     docker build -t spryker_docker_sdk \
         -f "${SOURCE_DIR}/generator/deploy-file-generator/Dockerfile" \
-        --progress="${PROGRESS_TYPE:-auto}" \
         --build-arg="USER_UID=${USER_FULL_ID%%:*}" \
         -q \
         "${SOURCE_DIR}/generator" >/dev/null

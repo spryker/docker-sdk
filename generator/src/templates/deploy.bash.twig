@@ -38,6 +38,7 @@ Registry::Help::row ''
 import command/cli/cli.sh
 import command/cli/console.sh
 import command/cli/testing.sh
+import command/compose/exec.sh
 
 # Runtime
 Registry::Help::row ''
@@ -79,9 +80,10 @@ import installer/autoload-cache.sh
 {% endif %}
 
 # Services
-import service/database/{{ services['database']['engine'] }}.sh
-import service/broker/{{ services['broker']['engine'] }}.sh
-import service/scheduler/{{ services['scheduler']['engine'] }}.sh
+import service/service.sh
+import service/database/{{ services['database']['engine'] | default('mysql') }}.sh
+import service/broker/{{ services['broker']['engine'] | default('rabbitmq') }}.sh
+import service/scheduler/{{ services['scheduler']['engine'] | default('jenkins') }}.sh
 
 # Implementation
 import sdk/compose.sh
@@ -100,7 +102,13 @@ readonly PROJECT_DIR="$(pwd)"
 readonly DEPLOYMENT_DIR="$(cd "${BASH_SOURCE%/*}" >/dev/null 2>&1 && pwd)"
 readonly DEPLOYMENT_PATH="${DEPLOYMENT_DIR/$PROJECT_DIR/.}"
 readonly SECRETS_FILE_PATH="${DEPLOYMENT_DIR}/.secrets"
-readonly PROGRESS_TYPE=${PROGRESS_TYPE:-tty}
+
+PROGRESS_TYPE=${PROGRESS_TYPE:-tty}
+if [ -n "$GITHUB_ACTIONS" ]; then
+    PROGRESS_TYPE=auto
+fi
+readonly PROGRESS_TYPE
+
 VERBOSE=${VERBOSE:-0}
 
 # Predefined constants
@@ -120,6 +128,9 @@ readonly SPRYKER_ASSETS_MODE="{{ assets['mode'] | default('development') }}"
 readonly SPRYKER_DB_ENGINE="{{ services['database']['engine'] == 'mysql' ? 'mysql' : 'pgsql' }}"
 readonly SPRYKER_STORES=({{ regions | map((regionData, region) => "'local REGION=" ~ '"' ~ region ~ '"' ~ "; local STORES=(" ~ (regionData['stores'] | keys | join(' ')) ~ ")'") | join(' ') | raw }})
 readonly SPRYKER_DEFAULT_STORE="{{ (regions | first)['stores'] | keys | first }}"
+{% if dynamicStoreMode == true %}
+readonly SPRYKER_DEFAULT_REGION="{{ regions | keys | first }}"
+{% endif %}
 readonly SPRYKER_FILE_MODE="{{ _fileMode }}"
 readonly SPRYKER_XDEBUG_MODE_ENABLE="{{ docker['debug']['xdebug']['enabled'] is not defined or docker['debug']['xdebug']['enabled'] == true ? '1' : '' }}"
 readonly SPRYKER_SYNC_SESSION_NAME="{{ _syncSessionName }}"
@@ -130,6 +141,12 @@ readonly KNOWN_HOSTS="{{ _knownHosts | default("") }}"
 readonly SPRYKER_BUILD_HASH="${SPRYKER_BUILD_HASH}"
 readonly SPRYKER_BUILD_DATE="${SPRYKER_BUILD_DATE}"
 readonly SPRYKER_REPOSITORY_HASH="${SPRYKER_BUILD_HASH:-"$(git rev-parse --verify HEAD 2>/dev/null || echo "head")"}"
+readonly SPRYKER_MAINTENANCE_MODE_ENABLED="{{ docker['maintenance']['enabled'] | default('false') }}"
+
+# PHP extensions
+{% for phpExtensionName in _phpExtensions %}
+readonly {{ phpExtensionName | upper }}_EXTENSION_ENABLED="${TRUE}"
+{% endfor %}
 
 # Specific variables
 {% for serviceName, serviceData in services %}
@@ -148,6 +165,9 @@ SPRYKER_XDEBUG_ENABLE_FOR_CLI=''
 SPRYKER_TESTING_ENABLE="$([ "${SPRYKER_TESTING_ENABLE}" == '1' ] && echo '1' || echo '')"
 SPRYKER_TESTING_ENABLE_FOR_CLI=''
 SPRYKER_CURRENT_STORE=${SPRYKER_STORE:-${APPLICATION_STORE:-${SPRYKER_DEFAULT_STORE}}}
+{% if dynamicStoreMode == true %}
+SPRYKER_CURRENT_REGION=${SPRYKER_REGION:-${SPRYKER_CURRENT_REGION:-${SPRYKER_DEFAULT_REGION}}}
+{% endif %}
 readonly GITHUB_TOKEN=${GITHUB_TOKEN:-''}
 if [ -n "${GITHUB_TOKEN}" ]; then
     readonly TOKEN_BASED_COMPOSER_AUTH="{\"github-oauth\":{\"github.com\":\"${GITHUB_TOKEN}\"}}"
@@ -209,6 +229,7 @@ export BLACKFIRE_SERVER_ID=${BLACKFIRE_SERVER_ID}
 export BLACKFIRE_SERVER_TOKEN=${BLACKFIRE_SERVER_TOKEN}
 export BLACKFIRE_CLIENT_ID=${BLACKFIRE_CLIENT_ID}
 export BLACKFIRE_CLIENT_TOKEN=${BLACKFIRE_CLIENT_TOKEN}
+export BLACKFIRE_APM_ENABLED=${BLACKFIRE_APM_ENABLED:-{{ image['environment']['BLACKFIRE_APM_ENABLED'] is defined ? image['environment']['BLACKFIRE_APM_ENABLED'] : services['blackfire'] is defined ? 1 : 0 }}}
 export TIDEWAYS_APIKEY=${TIDEWAYS_APIKEY}
 export TIDEWAYS_CLI_ENABLED=${TIDEWAYS_CLI_ENABLED}
 export TIDEWAYS_ENVIRONMENT_NAME=${TIDEWAYS_ENVIRONMENT_NAME}

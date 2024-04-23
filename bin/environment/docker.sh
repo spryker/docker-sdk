@@ -31,7 +31,22 @@ function Environment::checkDockerVersion() {
         exit 1
     fi
 
+    Environment::checkDependenciesByVersion "${installedVersion}"
     Console::end "[OK]"
+}
+
+function Environment::checkDependenciesByVersion() {
+    local installedVersion=${1}
+    local requiredMinimalVersionWithBuildx='23.0.0'
+
+    if [ "$(Version::parse "${installedVersion}")" -ge "$(Version::parse "${requiredMinimalVersionWithBuildx}")" ]; then
+        local isBuildxExist=$(docker --help | grep buildx)
+
+        if [ -z "${isBuildxExist}" ]; then
+            Console::error "Docker Buildx plugin is not installed. Please, make sure Docker Buildx plugin is installed. How to install Docker Buildx(https://docs.docker.com/build/install-buildx/)"
+            exit 1
+        fi
+    fi
 }
 
 # ------------------
@@ -55,13 +70,25 @@ function Environment::getDockerIp() {
 }
 
 # ------------------
+function Environment::isWSL() {
+    # See https://github.com/microsoft/WSL/issues/423#issuecomment-221627364
+    if grep -sqi microsoft /proc/sys/kernel/osrelease; then
+        return "${TRUE}"
+    fi
+
+    return "${FALSE}"
+}
+
+# ------------------
 function Environment::getHostIp() {
 
     local myIp='host.docker.internal'
 
     case ${_PLATFORM} in
         linux)
-            myIp=$(ip route get 1 | sed 's/^.*src \([^ ]*\).*$/\1/;q')
+            if ! Environment::isWSL; then
+                myIp=$(ip route get 1 | sed 's/^.*src \([^ ]*\).*$/\1/;q')
+            fi
             ;;
         macos)
             if Environment::isDockerMachineActive; then
