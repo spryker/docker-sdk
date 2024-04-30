@@ -260,6 +260,8 @@ foreach ($primal as $callbacks) {
 
 $endpointMap = $projectData['_endpointMap'] = mapBackendEndpointsWithFallbackZed($projectData['_endpointMap']);
 
+$projectData = buildSwaggerEnvVariables($projectData);
+
 $projectData['_testing'] = [
     'defaultPort' => $defaultPort,
     'projectServices' => $projectData['services'],
@@ -373,14 +375,14 @@ foreach ($projectData['groups'] ?? [] as $groupName => $groupData) {
 
             if ($isEndpointDataHasStore) {
                 $services = array_replace_recursive(
-                    $projectData['regions'][$groupData['region']]['stores'][$endpointData['store']]['services'],
+                    $projectData['regions'][$groupData['region']]['stores'][$endpointData['store']]['services'] ?? [],
                     $endpointData['services'] ?? []
                 );
             }
 
             if ($isEndpointDataHasRegion) {
                 $services = array_replace_recursive(
-                    $projectData['regions'][$currentRegion]['services'],
+                    $projectData['regions'][$currentRegion]['services'] ?? [],
                     $endpointData['services'] ?? []
                 );
             }
@@ -581,6 +583,8 @@ exec(sprintf(
     implode(' ', $hosts)
 ), $output, $returnCode);
 
+
+
 if ($returnCode > 0) {
     exit($returnCode);
 }
@@ -598,6 +602,7 @@ if (count($errorMessages) > 0) {
 
     exit(1);
 }
+
 
 // -------------------------
 /**
@@ -776,6 +781,9 @@ function getStoreSpecific(array $projectData): array
     $storeSpecific = [];
     foreach ($projectData['regions'] as $regionName => $regionData) {
         foreach ($regionData['stores'] ?? [] as $storeName => $storeData) {
+            if (!isset($storeData['services'])) {
+                continue;
+            }
 
             $services = $storeData['services'];
             $storeSpecific[$storeName] = [
@@ -940,13 +948,16 @@ function buildNewrelicEnvVariables(array $projectData): array
 function buildNewrelicDistributedTracing(array $projectData): array
 {
     $distributedTracingData = $projectData['docker']['newrelic']['distributed-tracing'] ?? [];
+    $enabled = $distributedTracingData['enabled'] ?? 0;
+    $transactionTracerThreshold = $distributedTracingData['transaction-tracer-threshold'] ?? 0;
+    $excludeNewrelicHeader = $distributedTracingData['exclude-newrelic-header'] ?? 0;
 
     return [
-        'NEWRELIC_TRANSACTION_TRACER_ENABLED' => (int) $distributedTracingData['enabled'] ?? 0,
-        'NEWRELIC_DISTRIBUTED_TRACING_ENABLED' => (int) $distributedTracingData['enabled'] ?? 0,
-        'NEWRELIC_SPAN_EVENTS_ENABLED' => (int) $distributedTracingData['enabled'] ?? 0,
-        'NEWRELIC_TRANSACTION_TRACER_THRESHOLD' => (int) $distributedTracingData['transaction-tracer-threshold'] ?? 0,
-        'NEWRELIC_DISTRIBUTED_TRACING_EXCLUDE_NEWRELIC_HEADER' => (int) $distributedTracingData['exclude-newrelic-header'] ?? 0,
+        'NEWRELIC_TRANSACTION_TRACER_ENABLED' => (int) $enabled,
+        'NEWRELIC_DISTRIBUTED_TRACING_ENABLED' => (int) $enabled,
+        'NEWRELIC_SPAN_EVENTS_ENABLED' => (int) $enabled,
+        'NEWRELIC_TRANSACTION_TRACER_THRESHOLD' => (int) $transactionTracerThreshold,
+        'NEWRELIC_DISTRIBUTED_TRACING_EXCLUDE_NEWRELIC_HEADER' => (int) $excludeNewrelicHeader,
     ];
 }
 
@@ -1567,6 +1578,10 @@ function extendProjectDataWithKeyValueRegionNamespaces(array $projectData): arra
     foreach ($projectData['regions'] as $regionName => $regionData) {
         $keyValueStoreNamespaces = [];
         foreach ($regionData['stores'] ?? [] as $storeName => $storeData) {
+            if (!isset($storeData['services']['key_value_store']['namespace'])) {
+                continue;
+            }
+
             $keyValueStoreNamespaces[$storeName] = $storeData['services']['key_value_store']['namespace'];
         }
         $projectData['regions'][$regionName]['key_value_region_namespaces'] = json_encode($keyValueStoreNamespaces);
@@ -1721,4 +1736,78 @@ function buildProjectData(array $projectData): array
     return $factory
         ->createProjectDataBuildProcessor()
         ->run($projectData);
+}
+
+function buildSwaggerEnvVariables(array $projectData): array
+{
+    $services = $projectData['services'] ?? [];
+    $swaggerService = $services['swagger'] ?? [];
+
+    if (empty($swaggerService)) {
+        return $projectData;
+    }
+
+    $swaggerUrls = buildSwaggerUrls($projectData);
+
+    if (empty($swaggerUrls)) {
+        return $projectData;
+    }
+
+    $swaggerService['environment']['URLS'] = json_encode($swaggerUrls);
+    $projectData['services']['swagger'] = $swaggerService;
+
+    return $projectData;
+}
+
+function isGlueApplication(string $appName): bool
+{
+    $glueApps = [
+        GLUE_APP,
+        GLUE_STOREFRONT,
+        GLUE_BACKEND,
+    ];
+
+    return in_array($appName, $glueApps);
+}
+
+function buildGlueSwaggerUrl(string $appName, string $appHost, string $schema): array
+{
+    $appSuffix = 'Api';
+
+    $appName = explode('-', $appName);
+    $appName[] = $appSuffix;
+
+    $appName = array_map('ucfirst', $appName);
+    $appName = implode(' ', $appName);
+
+    $schemaUrl = sprintf('%s://%s/%s', $schema, $appHost, 'schema.yml');
+
+    return [
+        'name' => $appName,
+        'url' => $schemaUrl,
+    ];
+}
+
+function buildSwaggerUrls(array $projectData): array
+{
+    $schema = getCurrentScheme($projectData);
+    $endpoints = $projectData['_endpointMap'] ?? [];
+
+    if (empty($endpoints)) {
+        return [];
+    }
+
+    $urlsEnvVariable = [];
+
+    $endpoints = $endpoints[array_key_first($endpoints)] ?? [];
+
+    foreach ($endpoints as $applicationName => $applicationHost) {
+        if (!isGlueApplication($applicationName)) {
+            continue;
+        }
+
+        $urlsEnvVariable[] = buildGlueSwaggerUrl($applicationName, $applicationHost, $schema);
+    }
+
+    return $urlsEnvVariable;
 }

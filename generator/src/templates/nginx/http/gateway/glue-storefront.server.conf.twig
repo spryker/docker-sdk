@@ -1,1 +1,6 @@
-{% include 'nginx/http/gateway/glue.server.conf.twig' with _context %}
+{% extends "nginx/http/gateway/server.conf.twig" %}
+{% set cli_proxy_pass_value = 'glueStorefrontSchema' %}
+{% block locations %}
+    {{ parent() }}
+{{ include('nginx/http/gateway/glue.schema_location.twig', {cli_proxy_pass: cli_proxy_pass_value}) }}
+{% endblock locations %}

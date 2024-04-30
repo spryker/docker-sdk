@@ -23,6 +23,10 @@ class KeyValueStoreConnectionsExecutor implements DataExecutorInterface
     {
         $connections = [];
 
+        if (!isset($projectData[ProjectDataServicesConstants::SERVICES_KEY][ProjectDataServicesConstants::KEY_VALUE_STORE_KEY])) {
+            return $projectData;
+        }
+
         $keyValueStoreData = $projectData[ProjectDataServicesConstants::SERVICES_KEY][ProjectDataServicesConstants::KEY_VALUE_STORE_KEY];
 
         foreach ($projectData[ProjectDataRegionsConstants::REGIONS_KEY] as $regionName => $regionData) {

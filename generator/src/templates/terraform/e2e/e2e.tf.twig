@@ -1,5 +1,5 @@
 {% set ssl = (project['docker']['ssl']['enabled'] | default(false)) ? 'https://' : 'http://' %}
-{% set endpointMapFirstKey = project['regionEndpointMap'] | keys | first %}
+{% set endpointMapFirstKey = project['_endpointMap'] | keys | first %}
 {% set projectGroup = project.groups | first %}
 {% for applicationName, applicationData in projectGroup['applications'] %}
 {% for endpoint, endpointData in applicationData['endpoints'] %}
