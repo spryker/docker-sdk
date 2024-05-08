@@ -54,41 +54,42 @@ For contribution guidelines, see [Code contribution guide](https://docs.spryker.
 
 ## Supported services
 
-| Service         | Engine       | Version(s)   | ARM support | Note                               |
-|-----------------|--------------|--------------|-------------|------------------------------------|
-| database        | postgres     | 9.6*         | &check;     |                                    |
-|                 |              | 10           | &check;     |                                    |
-|                 |              | 11           | &check;     |                                    |
-|                 |              | 12           | &check;     |                                    |
-|                 | mysql        | 5.7          |             |                                    |
-|                 |              | mariadb-10.2 | &check;     | https://endoflife.date/mariadb     |
-|                 |              | mariadb-10.3 | &check;     | https://endoflife.date/mariadb     |
-|                 |              | mariadb-10.4 | &check;     |                                    |
-|                 |              | mariadb-10.5 | &check;     |                                    |
-|                 |              | mariadb-10.6 | &check;     |                                    |
-| broker          | rabbitmq     | 3.7          |             |                                    |
-|                 |              | 3.8          | &check;     |                                    |
-|                 |              | 3.9          | &check;     |                                    |
-| session         | redis        | 5.0*         | &check;     |                                    |
-|                 | redis        | 6.2          | &check;     |                                    |
-| key_value_store | redis        | 5.0*         | &check;     |                                    |
-|                 | redis        | 6.2          | &check;     |                                    |
-| search          | elastic      | 5.6*         | &check;     | https://www.elastic.co/support/eol |
-|                 |              | 6.8          | &check;     | https://www.elastic.co/support/eol |
-|                 |              | 7.6          | &check;     |                                    |
-|                 |              | 7.10         | &check;     |                                    |
-|                 | opensearch   | 1.3          | &check;     |                                    |
-| scheduler       | jenkins      | 2.176        |             |                                    |
-|                 |              | 2.305        | &check;     |                                    |
-|                 |              | 2.324        | &check;     |                                    |
-|                 |              | 2.401        | &check;     |                                    |
-|                 |              | 2.442        | &check;     |                                    |
-| webdriver       | phantomjs    | latest*      |             |                                    |
-|                 | chromedriver | latest       | &check;     |                                    |
-| mail_catcher    | mailhog      | 1.0          | &check;     |                                    |
-| swagger         | swagger-ui   | v3.24        | &check;     |                                    |
-| kibana          | kibana       | 5.6*         | &check;     | https://www.elastic.co/support/eol |
-|                 |              | 6.8          | &check;     | https://www.elastic.co/support/eol |
-|                 |              | 7.6          | &check;     |                                    |
-|                 |              | 7.10         | &check;     |                                    |
-| blackfire       | blackfire    | latest       | &check;     |                                    |
+| Service         | Engine       | Version(s)    | ARM support | Note                               |
+|-----------------|--------------|---------------|-------------|------------------------------------|
+| database        | postgres     | 9.6*          | &check;     |                                    |
+|                 |              | 10            | &check;     |                                    |
+|                 |              | 11            | &check;     |                                    |
+|                 |              | 12            | &check;     |                                    |
+|                 | mysql        | 5.7           |             |                                    |
+|                 |              | mariadb-10.2  | &check;     | https://endoflife.date/mariadb     |
+|                 |              | mariadb-10.3  | &check;     | https://endoflife.date/mariadb     |
+|                 |              | mariadb-10.4  | &check;     |                                    |
+|                 |              | mariadb-10.5  | &check;     |                                    |
+|                 |              | mariadb-10.6  | &check;     |                                    |
+|                 |              | mariadb-10.11 | &check;     |                                    |
+| broker          | rabbitmq     | 3.7           |             |                                    |
+|                 |              | 3.8           | &check;     |                                    |
+|                 |              | 3.9           | &check;     |                                    |
+| session         | redis        | 5.0*          | &check;     |                                    |
+|                 | redis        | 6.2           | &check;     |                                    |
+| key_value_store | redis        | 5.0*          | &check;     |                                    |
+|                 | redis        | 6.2           | &check;     |                                    |
+| search          | elastic      | 5.6*          | &check;     | https://www.elastic.co/support/eol |
+|                 |              | 6.8           | &check;     | https://www.elastic.co/support/eol |
+|                 |              | 7.6           | &check;     |                                    |
+|                 |              | 7.10          | &check;     |                                    |
+|                 | opensearch   | 1.3           | &check;     |                                    |
+| scheduler       | jenkins      | 2.176         |              |                                    |
+|                 |              | 2.305         | &check;     |                                    |
+|                 |              | 2.324         | &check;     |                                    |
+|                 |              | 2.401         | &check;     |                                    |
+|                 |              | 2.442         | &check;     |                                    |
+| webdriver       | phantomjs    | latest*       |             |                                    |
+|                 | chromedriver | latest        | &check;     |                                    |
+| mail_catcher    | mailhog      | 1.0           | &check;     |                                    |
+| swagger         | swagger-ui   | v3.24         | &check;     |                                    |
+| kibana          | kibana       | 5.6*          | &check;     | https://www.elastic.co/support/eol |
+|                 |              | 6.8           | &check;     | https://www.elastic.co/support/eol |
+|                 |              | 7.6           | &check;     |                                    |
+|                 |              | 7.10          | &check;     |                                    |
+| blackfire       | blackfire    | latest        | &check;     |                                    |

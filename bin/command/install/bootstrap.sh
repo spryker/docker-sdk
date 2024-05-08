@@ -106,11 +106,15 @@ function Command::bootstrap() {
     if [ "${USER_FULL_ID%%:*}" != '0' ]; then
         userToRun=()
     fi
+
+    local dockerVersion=`docker version --format json`
+
     docker run -i --rm "${userToRun[@]}" \
         -e SPRYKER_PLATFORM_IMAGE="${SPRYKER_PLATFORM_IMAGE:-""}" \
         -e SPRYKER_DOCKER_SDK_PLATFORM="${_PLATFORM}" \
         -e SPRYKER_DOCKER_SDK_DEPLOYMENT_DIR="${DESTINATION_DIR}" \
         -e VERBOSE="${VERBOSE}" \
+        -e DOCKER_VERSION="${dockerVersion}" \
         -v "${tmpDeploymentDir}":/data/deployment:rw \
         spryker_docker_sdk
 
