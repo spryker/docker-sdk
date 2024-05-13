@@ -62,7 +62,7 @@ Follow the steps below to switch the database service to MariaDB:
 services:
     database:
         engine: mysql
-        version: mariadb-10.4
+        version: mariadb-10.11
         ...
         endpoints:
             localhost:3306:
