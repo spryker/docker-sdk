@@ -26,7 +26,7 @@ class StoreSpecificSessionExecutor implements DataExecutorInterface
         foreach ($projectData[ProjectDataRegionsConstants::REGIONS_KEY] as $regionName => $regionData) {
             $regionServices = $regionData[ProjectDataServicesConstants::SERVICES_KEY] ?? [];
 
-            if (!isset($services[ProjectDataServicesConstants::SESSION_KEY][ProjectDataServicesConstants::SERVICES_NAMESPACE_KEY])) {
+            if (!isset($regionServices[ProjectDataServicesConstants::SESSION_KEY][ProjectDataServicesConstants::SERVICES_NAMESPACE_KEY])) {
                 continue;
             }
 
