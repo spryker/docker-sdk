@@ -153,6 +153,27 @@ services:
     docker/sdk up
 ```
 
+## OpenSearch
+
+[OpenSearch](https://opensearch.org/docs/1.3/) is a search engine based on the Lucene library. It provides a distributed, multitenant-capable full-text search engine with an HTTP web interface and schema-free JSON documents.
+
+### Configuration
+
+1. Adjust `deploy.*.yml` in the `services:` section to open the port used for accessing OpenSearch:
+```yaml
+services:
+    search:
+        engine: opensearch
+        endpoints:
+            localhost:9200
+            protocol: tcp
+
+2. Bootstrap the docker setup and rebuild the application:
+```bash
+docker/sdk boot deploy.*.yml &&\
+docker/sdk up
+```
+
 ## Kibana UI
 
 [Kibana](https://www.elastic.co/kibana) is an open source analytics and visualization platform designed to work with Elasticsearch. You use Kibana to search, view, and interact with data stored in Elasticsearch indices. You can easily perform advanced data analysis and visualize your data in a variety of charts, tables, and maps.

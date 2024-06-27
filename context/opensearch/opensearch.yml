@@ -1,0 +1,18 @@
+# Cluster ################################
+cluster.name: "docker-cluster"
+
+bootstrap.memory_lock: "true" # along with the memlock settings below, disables swapping
+
+# Threshold ################################
+cluster.routing.allocation.disk.threshold_enabled: true
+cluster.routing.allocation.disk.watermark.low: 90%
+cluster.routing.allocation.disk.watermark.high: 95%
+
+# Security #################################
+plugins.security.disabled: true
+
+# Network ###################################
+http.host: 0.0.0.0
+
+# Http ###################################
+http.max_content_length: 10mb
