@@ -70,6 +70,7 @@ For contribution guidelines, see [Code contribution guide](https://docs.spryker.
 | broker          | rabbitmq     | 3.7           |             |                                    |
 |                 |              | 3.8           | &check;     |                                    |
 |                 |              | 3.9           | &check;     |                                    |
+|                 |              | 3.13          | &check;     |                                    |
 | session         | redis        | 5.0*          | &check;     |                                    |
 |                 | redis        | 6.2           | &check;     |                                    |
 | key_value_store | redis        | 5.0*          | &check;     |                                    |
