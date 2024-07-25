@@ -63,6 +63,7 @@ function Images::_buildApp() {
         --build-arg "SPRYKER_NODE_IMAGE_VERSION=${SPRYKER_NODE_IMAGE_VERSION}" \
         --build-arg "SPRYKER_NODE_IMAGE_DISTRO=${SPRYKER_NODE_IMAGE_DISTRO}" \
         --build-arg "SPRYKER_NPM_VERSION=${SPRYKER_NPM_VERSION}" \
+        --build-arg "SPRYKER_NODE_IMAGE=${SPRYKER_NODE_IMAGE}" \
         "${DEPLOYMENT_PATH}/context" 1>&2
 
     docker build \

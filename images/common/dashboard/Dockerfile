@@ -1,4 +1,6 @@
-FROM node:alpine AS dashboard
+ARG SPRYKER_DASHBOARD_IMAGE=node:alpine
+
+FROM ${SPRYKER_DASHBOARD_IMAGE} AS dashboard
 
 RUN mkdir -p /dashboard
 WORKDIR /dashboard

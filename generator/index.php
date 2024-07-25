@@ -165,6 +165,7 @@ const ALPINE_DISTRO_NAME = 'alpine';
 
 const SPRYKER_NODE_IMAGE_DISTRO_ENV_NAME = 'SPRYKER_NODE_IMAGE_DISTRO';
 const SPRYKER_NODE_IMAGE_VERSION_ENV_NAME = 'SPRYKER_NODE_IMAGE_VERSION';
+const SPRYKER_NODE_IMAGE_ENV_NAME = 'SPRYKER_NODE_IMAGE';
 const SPRYKER_NPM_VERSION_ENV_NAME = 'SPRYKER_NPM_VERSION';
 
 const DEFAULT_NODE_VERSION = 12;
@@ -1619,7 +1620,7 @@ function buildNodeJsNpmBuildConfig(array $projectData): array
     $imageName = $projectData['image']['tag'];
     $nodejsConfig = $projectData['image']['node'] ?? [];
 
-    return [
+    $nodeJsNpmBuildConfig = [
         SPRYKER_NODE_IMAGE_DISTRO_ENV_NAME => getNodeDistroName($nodejsConfig, $imageName),
         SPRYKER_NODE_IMAGE_VERSION_ENV_NAME => array_key_exists('version', $nodejsConfig)
             ? (int)$nodejsConfig['version']
@@ -1628,6 +1629,10 @@ function buildNodeJsNpmBuildConfig(array $projectData): array
             ? (int)$nodejsConfig['npm']
             : DEFAULT_NPM_VERSION,
     ];
+
+    $nodeJsNpmBuildConfig[SPRYKER_NODE_IMAGE_ENV_NAME] = 'node:' . $nodeJsNpmBuildConfig[SPRYKER_NODE_IMAGE_VERSION_ENV_NAME] . '-' . $nodeJsNpmBuildConfig[SPRYKER_NODE_IMAGE_DISTRO_ENV_NAME];
+
+    return $nodeJsNpmBuildConfig;
 }
 
 /**

@@ -4,7 +4,7 @@ namespace: spryker
 tag: 'dev'
 
 environment: docker
-image: spryker/php:7.2
+image: ${SPRYKER_CI_PHP_IMAGE:-spryker/php:7.2}
 
 regions:
   EU:
