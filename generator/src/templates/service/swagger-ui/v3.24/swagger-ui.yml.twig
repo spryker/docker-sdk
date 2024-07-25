@@ -1,7 +1,7 @@
 {% set protocol = project['docker']['ssl']['enabled'] ? 'https://' : 'http://' %}
 {% set firstGlueEndpointMap = project['_endpointMap'] | first %}
   {{ serviceName }}:
-    image: spryker/swagger-ui:v3.24.3
+    image: ${SPRYKER_CI_SWAGGER_IMAGE:-spryker/swagger-ui:v3.24.3}
     networks:
         - private
     labels:

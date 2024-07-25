@@ -1,7 +1,8 @@
 # syntax = docker/dockerfile:experimental
 ARG SPRYKER_PHP_VERSION=7.3
+ARG SPRYKER_PHP_IMAGE=spryker/php:${SPRYKER_PHP_VERSION}
 
-FROM spryker/php:${SPRYKER_PHP_VERSION}
+FROM ${SPRYKER_PHP_IMAGE}
 
 RUN apk add --no-cache openssl
 
