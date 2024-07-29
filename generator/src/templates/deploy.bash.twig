@@ -132,6 +132,7 @@ readonly SPRYKER_BUILD_HASH="${SPRYKER_BUILD_HASH}"
 readonly SPRYKER_BUILD_DATE="${SPRYKER_BUILD_DATE}"
 readonly SPRYKER_REPOSITORY_HASH="${SPRYKER_BUILD_HASH:-"$(git rev-parse --verify HEAD 2>/dev/null || echo "head")"}"
 readonly SPRYKER_ENDPOINT_LIST='{{ _endpointList | json_encode | raw }}'
+readonly SPRYKER_ACTIVE_STORES='{{ regions | map((regionData) => regionData.stores | keys | join(',')) | join(',') }}'
 
 # Specific variables
 {% for serviceName, serviceData in services %}
