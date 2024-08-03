@@ -9,6 +9,14 @@ COPY --chown=spryker:spryker package.json package-lock.json ${srcRoot}/
 COPY --chown=spryker:spryker frontend* ${srcRoot}/frontend
 COPY --chown=spryker:spryker tsconfig*.json ${srcRoot}/
 COPY --chown=spryker:spryker config/Yves ${srcRoot}/config/Yves
+COPY --chown=spryker:spryker .npmrc ${srcRoot}/
+
+ARG SPRYKER_NPM_TOKEN
+ENV SPRYKER_NPM_TOKEN=${SPRYKER_NPM_TOKEN}
+
+RUN if [ -n "$SPRYKER_NPM_TOKEN" ]; then \
+    sed -i "s|\${SPRYKER_NPM_TOKEN}|${SPRYKER_NPM_TOKEN}|" .npmrc; \
+    fi
 
 ARG SPRYKER_ASSETS_MODE='development'
 ENV SPRYKER_ASSETS_MODE=${SPRYKER_ASSETS_MODE}
