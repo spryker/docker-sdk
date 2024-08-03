@@ -61,9 +61,14 @@ import command/install/clean.sh
 import command/install/reset.sh
 
 # Commands for internal use
+Registry::Help::row ''
 import command/internal/trouble.sh
 import command/internal/sync.sh
 import command/internal/prune.sh
+
+# PAAS Cloud
+Registry::Help::row ''
+import command/paas/commands.sh
 
 # Installers
 {% if services['scheduler']['engine'] is defined and services['scheduler']['engine'] == 'jenkins' %}
@@ -87,6 +92,7 @@ import service/scheduler/{{ services['scheduler']['engine'] | default('jenkins')
 
 # Implementation
 import sdk/compose.sh
+import sdk/paas.sh
 import sdk/data/demo.sh
 import sdk/runtime/wait.sh
 import sdk/mount/{{ _mountMode }}.sh
