@@ -85,6 +85,11 @@ import service/database/{{ services['database']['engine'] | default('mysql') }}.
 import service/broker/{{ services['broker']['engine'] | default('rabbitmq') }}.sh
 import service/scheduler/{{ services['scheduler']['engine'] | default('jenkins') }}.sh
 
+{% if _isAcpLocalDevelopmentEnabled %}
+# ACP
+[[ -f "{{ image['environment']['ACP_DOCKER_SDK_FILE'] }}" ]] && source "{{ image['environment']['ACP_DOCKER_SDK_FILE'] }}"
+{% endif %}
+
 # Implementation
 import sdk/compose.sh
 import sdk/data/demo.sh
@@ -236,6 +241,14 @@ export TIDEWAYS_ENVIRONMENT_NAME=${TIDEWAYS_ENVIRONMENT_NAME}
 
 {# For avoid https://github.com/docker/compose/issues/9104 #}
 export DOCKER_COMPOSE_TTY_DISABLED="$(Environment::getDockerComposeTTY)"
+
+{% if _isAcpLocalDevelopmentEnabled %}
+# ACP
+export ACP_AWS_ENDPOINT={{ image['environment']['AWS_ENDPOINT'] | default('http://localhost:4566') }}
+export ACP_AWS_REGION={{ image['environment']['AWS_DEFAULT_REGION'] | default('eu-central-1') }}
+export ACP_AWS_ACCESS_KEY_ID={{ image['environment']['AWS_ACCESS_KEY_ID'] | default('test') }}
+export ACP_AWS_SECRET_ACCESS_KEY={{ image['environment']['AWS_SECRET_ACCESS_KEY'] | default('test') }}
+{% endif %}
 
 Registry::Flow::runBoot
 
