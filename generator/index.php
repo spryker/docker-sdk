@@ -105,6 +105,10 @@ $projectData['secrets'] = buildSecrets($deploymentDir);
 $projectData = buildDefaultCredentials($projectData);
 $projectData['_isAcpLocalDevelopmentEnabled'] = isAcpLocalDevelopmentEnabled($projectData);
 
+$dockerVersionObject = json_decode(getenv('DOCKER_VERSION', '{}'));
+$skipVersionHeader = version_compare($dockerVersionObject?->Client?->Version, '26.0.0', '>=');
+$projectData['_skipVersionHeader'] = $skipVersionHeader;
+
 // TODO Make it optional in next major
 // Making webdriver as required service for BC reasons
 // todo: waitFor refactoring dependency + document + testing mode
