@@ -53,6 +53,7 @@ function Images::_buildApp() {
         -f "${DEPLOYMENT_PATH}/images/common/application/Dockerfile" \
         --progress="${PROGRESS_TYPE}" \
         --build-arg "SPRYKER_PLATFORM_IMAGE=${SPRYKER_PLATFORM_IMAGE}" \
+        --build-arg "SPRYKER_PHP_IMAGE=${SPRYKER_PHP_IMAGE:-spryker/php:80}" \
         --build-arg "SPRYKER_LOG_DIRECTORY=${SPRYKER_LOG_DIRECTORY}" \
         --build-arg "SPRYKER_PIPELINE=${SPRYKER_PIPELINE}" \
         --build-arg "APPLICATION_ENV=${APPLICATION_ENV}" \
