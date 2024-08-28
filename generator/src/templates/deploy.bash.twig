@@ -113,7 +113,7 @@ readonly SPRYKER_PIPELINE=${SPRYKER_PIPELINE:-{{ pipeline | default('docker') }}
 readonly SPRYKER_PLATFORM_IMAGE=${SPRYKER_PLATFORM_IMAGE:-{{ image is iterable ? image['tag'] : image | default('spryker/php:7.2') }}}
 readonly SPRYKER_DOCKER_PREFIX=${COMPOSE_PROJECT_NAME}
 readonly SPRYKER_DOCKER_TAG="{{ tag | default('1.0') }}"
-readonly SPRYKER_FRONTEND_IMAGE="{{ assets['image'] | default('nginx:alpine') }}"
+readonly SPRYKER_FRONTEND_IMAGE=${SPRYKER_FRONTEND_IMAGE:-{{ assets['image'] | default('nginx:alpine') }}}
 readonly SPRYKER_COMPOSER_MODE="{{ composer.mode | default('') }}"
 readonly SPRYKER_COMPOSER_AUTOLOAD="{{ composer.autoload | default('') }}"
 readonly SPRYKER_LOG_DIRECTORY="{{ docker['logs']['path'] | default('/var/log/spryker') }}"
@@ -121,7 +121,6 @@ readonly SPRYKER_ASSETS_MODE="{{ assets['mode'] | default('development') }}"
 readonly SPRYKER_DB_ENGINE="{{ services['database']['engine'] == 'mysql' ? 'mysql' : 'pgsql' }}"
 readonly SPRYKER_STORES=({{ regions | map((regionData, region) => "'local REGION=" ~ '"' ~ region ~ '"' ~ "; local STORES=(" ~ (regionData['stores'] | keys | join(' ')) ~ ")'") | join(' ') | raw }})
 readonly SPRYKER_DEFAULT_STORE="{{ (regions | first)['stores'] | keys | first }}"
-readonly SPRYKER_ACTIVE_STORES={{ (regionData['stores'] | keys | join(',')) | upper }}
 readonly SPRYKER_FILE_MODE="{{ _fileMode }}"
 readonly SPRYKER_XDEBUG_MODE_ENABLE="{{ docker['debug']['xdebug']['enabled'] is not defined or docker['debug']['xdebug']['enabled'] == true ? '1' : '' }}"
 readonly SPRYKER_SYNC_SESSION_NAME="{{ _syncSessionName }}"

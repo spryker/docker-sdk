@@ -74,6 +74,7 @@ function Images::_buildApp() {
         --secret "id=secrets-env,src=$SECRETS_FILE_PATH" \
         --progress="${PROGRESS_TYPE}" \
         --build-arg "SPRYKER_PARENT_IMAGE=${baseAppImage}" \
+        --build-arg "SPRYKER_PHP_IMAGE=${SPRYKER_PHP_IMAGE:-spryker/php:80}" \
         --build-arg "SPRYKER_DOCKER_PREFIX=${SPRYKER_DOCKER_PREFIX}" \
         --build-arg "SPRYKER_DOCKER_TAG=${SPRYKER_DOCKER_TAG}" \
         --build-arg "USER_UID=${USER_FULL_ID%%:*}" \
@@ -201,6 +202,7 @@ function Images::_buildGateway() {
         -t "${gatewayImage}" \
         -f "${DEPLOYMENT_PATH}/images/common/gateway/Dockerfile" \
         --progress="${PROGRESS_TYPE}" \
+        --build-arg "SPRYKER_GATEWAY_IMAGE=${SPRYKER_GATEWAY_IMAGE}" \
         "${DEPLOYMENT_PATH}/context" 1>&2
 }
 
