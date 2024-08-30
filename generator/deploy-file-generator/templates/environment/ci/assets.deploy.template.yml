@@ -1,5 +1,5 @@
 assets:
-    image: fholzer/nginx-brotli:v1.18.0
+    image: ${SPRYKER_CI_FRONTEND_IMAGE:-fholzer/nginx-brotli:v1.18.0}
     mode: production
     compression:
         brotli:

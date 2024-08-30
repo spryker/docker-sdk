@@ -1,5 +1,5 @@
   {{ serviceName }}:
-    image: spryker/jenkins:2.305
+    image: ${SPRYKER_CI_JENKINS_IMAGE:-spryker/jenkins:2.305}
     networks:
       - private
     labels:

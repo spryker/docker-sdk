@@ -97,6 +97,7 @@ function Assets::build() {
         -f "${DEPLOYMENT_PATH}/images/baked/assets/Dockerfile" \
         --progress="${PROGRESS_TYPE}" \
         --build-arg "SPRYKER_PARENT_IMAGE=${cliImage}" \
+        --build-arg "SPRYKER_PHP_IMAGE=${SPRYKER_PHP_IMAGE:-spryker/php:8.2}" \
         --build-arg "SPRYKER_ASSETS_MODE=${mode}" \
         --build-arg "SPRYKER_PIPELINE=${SPRYKER_PIPELINE}" \
         --build-arg "SPRYKER_BUILD_HASH=${SPRYKER_BUILD_HASH:-"current"}" \

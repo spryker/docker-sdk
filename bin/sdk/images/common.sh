@@ -53,6 +53,7 @@ function Images::_buildApp() {
         -f "${DEPLOYMENT_PATH}/images/common/application/Dockerfile" \
         --progress="${PROGRESS_TYPE}" \
         --build-arg "SPRYKER_PLATFORM_IMAGE=${SPRYKER_PLATFORM_IMAGE}" \
+        --build-arg "SPRYKER_PHP_IMAGE=${SPRYKER_PHP_IMAGE:-spryker/php:8.2}" \
         --build-arg "SPRYKER_LOG_DIRECTORY=${SPRYKER_LOG_DIRECTORY}" \
         --build-arg "SPRYKER_PIPELINE=${SPRYKER_PIPELINE}" \
         --build-arg "APPLICATION_ENV=${APPLICATION_ENV}" \
@@ -63,6 +64,7 @@ function Images::_buildApp() {
         --build-arg "SPRYKER_NODE_IMAGE_VERSION=${SPRYKER_NODE_IMAGE_VERSION}" \
         --build-arg "SPRYKER_NODE_IMAGE_DISTRO=${SPRYKER_NODE_IMAGE_DISTRO}" \
         --build-arg "SPRYKER_NPM_VERSION=${SPRYKER_NPM_VERSION}" \
+        --build-arg "SPRYKER_NODE_IMAGE=${SPRYKER_NODE_IMAGE}" \
         "${DEPLOYMENT_PATH}/context" 1>&2
 
     docker build \
@@ -72,6 +74,7 @@ function Images::_buildApp() {
         --secret "id=secrets-env,src=$SECRETS_FILE_PATH" \
         --progress="${PROGRESS_TYPE}" \
         --build-arg "SPRYKER_PARENT_IMAGE=${baseAppImage}" \
+        --build-arg "SPRYKER_PHP_IMAGE=${SPRYKER_PHP_IMAGE:-spryker/php:8.2}" \
         --build-arg "SPRYKER_DOCKER_PREFIX=${SPRYKER_DOCKER_PREFIX}" \
         --build-arg "SPRYKER_DOCKER_TAG=${SPRYKER_DOCKER_TAG}" \
         --build-arg "USER_UID=${USER_FULL_ID%%:*}" \
@@ -199,6 +202,7 @@ function Images::_buildGateway() {
         -t "${gatewayImage}" \
         -f "${DEPLOYMENT_PATH}/images/common/gateway/Dockerfile" \
         --progress="${PROGRESS_TYPE}" \
+        --build-arg "SPRYKER_GATEWAY_IMAGE=${SPRYKER_GATEWAY_IMAGE:-nginx:stable-bullseye}" \
         "${DEPLOYMENT_PATH}/context" 1>&2
 }
 
