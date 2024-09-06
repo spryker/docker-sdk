@@ -53,7 +53,6 @@ function Images::_buildApp() {
         -f "${DEPLOYMENT_PATH}/images/common/application/Dockerfile" \
         --progress="${PROGRESS_TYPE}" \
         --build-arg "SPRYKER_PLATFORM_IMAGE=${SPRYKER_PLATFORM_IMAGE}" \
-        --build-arg "SPRYKER_PHP_IMAGE=${SPRYKER_PHP_IMAGE}" \
         --build-arg "SPRYKER_LOG_DIRECTORY=${SPRYKER_LOG_DIRECTORY}" \
         --build-arg "SPRYKER_PIPELINE=${SPRYKER_PIPELINE}" \
         --build-arg "APPLICATION_ENV=${APPLICATION_ENV}" \
@@ -74,7 +73,6 @@ function Images::_buildApp() {
         --secret "id=secrets-env,src=$SECRETS_FILE_PATH" \
         --progress="${PROGRESS_TYPE}" \
         --build-arg "SPRYKER_PARENT_IMAGE=${baseAppImage}" \
-        --build-arg "SPRYKER_PHP_IMAGE=${SPRYKER_PHP_IMAGE}" \
         --build-arg "SPRYKER_DOCKER_PREFIX=${SPRYKER_DOCKER_PREFIX}" \
         --build-arg "SPRYKER_DOCKER_TAG=${SPRYKER_DOCKER_TAG}" \
         --build-arg "USER_UID=${USER_FULL_ID%%:*}" \

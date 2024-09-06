@@ -81,7 +81,6 @@ function Command::bootstrap() {
         -f "${SOURCE_DIR}/generator/Dockerfile" \
         --progress="${PROGRESS_TYPE:-auto}" \
         --build-arg="USER_UID=${USER_FULL_ID%%:*}" \
-        --build-arg="SPRYKER_PHP_IMAGE=${SPRYKER_PHP_IMAGE}" \
         -q \
         "${SOURCE_DIR}/generator" >/dev/null
     Console::end "[DONE]"
