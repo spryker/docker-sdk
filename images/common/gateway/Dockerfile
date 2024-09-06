@@ -1,5 +1,5 @@
 # syntax = docker/dockerfile:experimental
-ARG SPRYKER_GATEWAY_IMAGE=nginx:stable-bullseye
+ARG SPRYKER_GATEWAY_IMAGE
 
 FROM ${SPRYKER_GATEWAY_IMAGE} as gateway
 
