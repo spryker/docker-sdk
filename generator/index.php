@@ -103,6 +103,7 @@ $isAutoloadCacheEnabled = $projectData['_isAutoloadCacheEnabled'] = isAutoloadCa
 $projectData['_requirementAnalyzerData'] = buildDataForRequirementAnalyzer($projectData);
 $projectData['secrets'] = buildSecrets($deploymentDir);
 $projectData = buildDefaultCredentials($projectData);
+$projectData['_isAcpLocalDevelopmentEnabled'] = isAcpLocalDevelopmentEnabled($projectData);
 
 $dockerVersionObject = json_decode(getenv('DOCKER_VERSION', '{}'));
 $skipVersionHeader = version_compare($dockerVersionObject?->Client?->Version, '26.0.0', '>=');
@@ -1138,6 +1139,20 @@ function isAutoloadCacheEnabled(array $projectData): bool
     }
 
     return $projectData['docker']['cache']['autoload']['enabled'] ?? false;
+}
+
+/**
+ * @param array $projectData
+ *
+ * @return bool
+ */
+function isAcpLocalDevelopmentEnabled(array $projectData): bool
+{
+    if (empty($projectData['image']['environment']['ACP_DOCKER_SDK_FILE'])) {
+        return false;
+    }
+
+    return true;
 }
 
 /**
