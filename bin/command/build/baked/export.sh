@@ -76,7 +76,6 @@ function Command::export() {
             Images::assetsCopy --force
             Images::buildFrontend --force
             Images::tagFrontend "${tag}"
-            Images::tagApplications "${tag}"
 
             if [ -n "${pushDestination}" ]; then
                 Images::push "${tag}"
