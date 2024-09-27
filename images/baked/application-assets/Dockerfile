@@ -8,5 +8,5 @@ RUN ls -R /data/public/Yves
 
 FROM ${SPRYKER_PARENT_IMAGE} AS application-assets
 
-RUN rm -rf /data/public
+RUN rm -rf /data/public && mkdir -p /data/public && chmod 0777 /data/public
 COPY --from=assets-builder --chown=root:root /data/public /data/public
