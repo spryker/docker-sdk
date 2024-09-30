@@ -342,8 +342,9 @@ foreach ($projectData['groups'] ?? [] as $groupName => $groupData) {
             $services = [];
             $isEndpointDataHasStore = array_key_exists('store', $endpointData);
             if ($isEndpointDataHasStore) {
+                $endpointStore = str_replace('#tmp', '', $endpointData['store']);
                 $services = array_replace_recursive(
-                    $projectData['regions'][$groupData['region']]['stores'][$endpointData['store']]['services'],
+                    $projectData['regions'][$groupData['region']]['stores'][$endpointStore]['services'],
                     $endpointData['services'] ?? []
                 );
             }
