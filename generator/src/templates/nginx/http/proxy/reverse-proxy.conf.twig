@@ -6,6 +6,7 @@ location {{ location }} {
         proxy_set_header X-Forwarded-Proto $scheme;
         proxy_set_header Host $http_host;
 
+        proxy_bind $remote_addr transparent;
         set $proxy_pass_endpoint {{ proxy_pass }};
         proxy_pass $proxy_pass_endpoint;
     }
