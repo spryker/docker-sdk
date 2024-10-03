@@ -29,7 +29,6 @@ function Command::config() {
         -f "${SOURCE_DIR}/generator/deploy-file-generator/Dockerfile" \
         --progress="${PROGRESS_TYPE:-auto}" \
         --build-arg="USER_UID=${USER_FULL_ID%%:*}" \
-        --build-arg="SPRYKER_PHP_IMAGE=${SPRYKER_PHP_IMAGE:-spryker/php:8.2}"
         -q \
         "${SOURCE_DIR}/generator" >/dev/null
 
