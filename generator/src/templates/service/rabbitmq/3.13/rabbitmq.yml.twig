@@ -1,5 +1,5 @@
   {{ serviceName }}:
-    image: spryker/rabbitmq:3.13
+    image: rabbitmq:3.13-management-alpine
     hostname: {{ serviceName }} # RabbitMQ determines the cluster by its hostname
     networks:
       - private
@@ -17,4 +17,3 @@
       RABBITMQ_DEFAULT_PASS: "{{ serviceData['api']['password'] }}"
     volumes:
       - {{ serviceName }}-{{ serviceData['engine'] }}-data:/var/lib/rabbitmq:rw
-      - /${DEPLOYMENT_PATH}/context/rabbitmq/3.13/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf:ro
