@@ -14,7 +14,6 @@
         fastcgi_param SPRYKER_SESSION_BE_NAMESPACE "{{ storeServices['session']['namespace'] | default(endpointData['services']['session']['namespace']) }}";
         fastcgi_param SPRYKER_MP_HOST "{{ host }}";
         fastcgi_param SPRYKER_MP_PORT "{{ externalPort }}";
-        add_header  Strict-Transport-Security "max-age=31536000; includeSubDomains; preload";
 
 {% if storeServices['mail']['sender']['email'] is not empty %}
         fastcgi_param SPRYKER_MAIL_SENDER_EMAIL "{{ storeServices['mail']['sender']['email'] }}";
