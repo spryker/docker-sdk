@@ -11,6 +11,7 @@
         expires     7d;
         add_header  Pragma public;
         add_header  Cache-Control "public, must-revalidate, proxy-revalidate";
+        add_header  Strict-Transport-Security "max-age=31536000; includeSubDomains; preload";
         etag on;
         try_files   $uri $uri/ =404;
     }
