@@ -1,0 +1,19 @@
+  {{ serviceName }}:
+    image: swaggerapi/swagger-ui:v5.10.5
+    networks:
+        - private
+    labels:
+        'spryker.app.name': swagger
+        'spryker.app.type': hidden
+        'spryker.project': ${SPRYKER_DOCKER_PREFIX}:${SPRYKER_DOCKER_TAG}
+{% if serviceData['environment'] is defined %}
+    environment:
+{% for key, value in serviceData['environment'] %}
+        - {{ key }}={{ value | raw }}
+{% endfor %}
+{% endif %}
+    healthcheck:
+        test: [ "CMD", "nc", "-z", "localhost", "8080" ]
+        interval: 5s
+        timeout: 5s
+        retries: 5

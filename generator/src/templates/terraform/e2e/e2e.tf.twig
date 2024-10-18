@@ -1,0 +1,15 @@
+{% set ssl = (project['docker']['ssl']['enabled'] | default(false)) ? 'https://' : 'http://' %}
+{% set endpointMapFirstKey = project['_endpointMap'] | keys | first %}
+{% set projectGroup = project.groups | first %}
+{% for applicationName, applicationData in projectGroup['applications'] %}
+{% for endpoint, endpointData in applicationData['endpoints'] %}
+{% if endpointData['store'] == endpointMapFirstKey %}
+{% set authCredentials = '' %}
+{% if endpointData['auth'] is defined and endpointData['auth']['engine'] == 'basic' %}
+{% set authKey = endpointData['auth']['users'][0] %}
+{% set authCredentials = authKey['username'] ~ ':' ~ authKey['password'] ~ '@' %}
+{% endif  %}
+      {{ 'SPRYKER_E2E_' ~ applicationData['application'] | replace ({'-': '_'})| upper ~ '_URL' }} = "{{ ssl ~ authCredentials ~ endpoint }}"
+{% endif %}
+{% endfor %}
+{% endfor %}

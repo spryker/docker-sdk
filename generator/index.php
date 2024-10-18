@@ -2,6 +2,8 @@
 
 use DeployFileGenerator\DeployFileGeneratorFactory;
 use DeployFileGenerator\Transfer\DeployFileTransfer;
+use ProjectData\Constant\ProjectDataConstants;
+use ProjectData\ProjectDataFactory;
 use Spatie\Url\Url;
 use Symfony\Component\Yaml\Parser;
 use Twig\Environment;
@@ -76,6 +78,7 @@ $projectData = $yamlParser->parseFile($projectYaml);
 if (!array_key_exists('services', $projectData)) {
     $projectData['services'] = [];
 }
+
 $projectData['_knownHosts'] = buildKnownHosts($deploymentDir);
 $projectData['_defaultDeploymentDir'] = $defaultDeploymentDir;
 $projectData['tag'] = $projectData['tag'] ?? uniqid();
@@ -94,14 +97,17 @@ $projectData['_envs'] = array_merge(
     getAdditionalEnvVariables($projectData),
     buildNewrelicEnvVariables($projectData)
 );
-$dynamicStoreMode = $projectData['_envs']['SPRYKER_DYNAMIC_STORE_MODE'] ?? false;
-$projectData['dynamicStoreMode'] = $dynamicStoreMode;
 $projectData['storageData'] = retrieveStorageData($projectData);
 $projectData['composer']['autoload'] = buildComposerAutoloadConfig($projectData);
 $isAutoloadCacheEnabled = $projectData['_isAutoloadCacheEnabled'] = isAutoloadCacheEnabled($projectData);
 $projectData['_requirementAnalyzerData'] = buildDataForRequirementAnalyzer($projectData);
 $projectData['secrets'] = buildSecrets($deploymentDir);
 $projectData = buildDefaultCredentials($projectData);
+$projectData['_isAcpLocalDevelopmentEnabled'] = isAcpLocalDevelopmentEnabled($projectData);
+
+$dockerVersionObject = json_decode(getenv('DOCKER_VERSION', '{}'));
+$skipVersionHeader = version_compare($dockerVersionObject?->Client?->Version, '26.0.0', '>=');
+$projectData['_skipVersionHeader'] = $skipVersionHeader;
 
 // TODO Make it optional in next major
 // Making webdriver as required service for BC reasons
@@ -136,7 +142,6 @@ $projectData['_entryPoints'] = [];
 $projectData['_endpointMap'] = [];
 $projectData = extendProjectDataWithKeyValueRegionNamespaces($projectData);
 $projectData['_storeSpecific'] = getStoreSpecific($projectData);
-$projectData['_regionSpecific'] = getRegionSpecific($projectData);
 $debugPortIndex = 10000;
 $projectData['_endpointDebugMap'] = [];
 
@@ -260,6 +265,8 @@ foreach ($primal as $callbacks) {
 
 $endpointMap = $projectData['_endpointMap'] = mapBackendEndpointsWithFallbackZed($projectData['_endpointMap']);
 
+$projectData = buildSwaggerEnvVariables($projectData);
+
 $projectData['_testing'] = [
     'defaultPort' => $defaultPort,
     'projectServices' => $projectData['services'],
@@ -272,6 +279,7 @@ $environment = [
     'project' => $projectData['namespace'],
 ];
 
+$projectData = buildProjectData($projectData);
 /**
  * @param array $endpointMap
  *
@@ -301,14 +309,8 @@ function mapBackendEndpointsWithFallbackZed(array $endpointMap): array
     return $endpointMap;
 }
 
-$keyValueStoreConnections = $dynamicStoreMode ? getKeyValueStores($projectData) : false;
-$brokerConnections = getBrokerConnections($projectData);
-
 foreach ($projectData['groups'] ?? [] as $groupName => $groupData) {
     foreach ($groupData['applications'] ?? [] as $applicationName => $applicationData) {
-        $currentRegionName = $groupData['region'];
-        $brokerHosts = getBrokerHosts($projectData, $currentRegionName);
-
         if ($applicationData['application'] !== 'static') {
             $projectData['_applications'][] = $applicationName;
 
@@ -318,12 +320,9 @@ foreach ($projectData['groups'] ?? [] as $groupName => $groupData) {
                     'applicationName' => $applicationName,
                     'applicationData' => $applicationData,
                     'project' => $projectData,
-                    'regionName' => $currentRegionName,
-                    'regionData' => $projectData['regions'][$currentRegionName],
-                    'brokerConnections' => $brokerConnections,
-                    'keyValueStoreConnections' => $keyValueStoreConnections,
-                    'brokerHosts' => $brokerHosts,
-                    'regionEndpointMap' => getRegionEndpointMap($projectData, $currentRegionName),
+                    'regionName' => $groupData['region'],
+                    'regionData' => $projectData['regions'][$groupData['region']],
+                    'brokerConnections' => getBrokerConnections($projectData),
                 ])
             );
         }
@@ -375,97 +374,72 @@ foreach ($projectData['groups'] ?? [] as $groupName => $groupData) {
             $services = [];
             $isEndpointDataHasStore = array_key_exists('store', $endpointData);
             $isEndpointDataHasRegion = array_key_exists('region', $endpointData);
+            $currentRegion = array_key_exists('region', $endpointData)
+                ? $endpointData['region']
+                : $groupData['region'];
+
             if ($isEndpointDataHasStore) {
                 $services = array_replace_recursive(
-                    $projectData['regions'][$groupData['region']]['stores'][$endpointData['store']]['services'],
-                    $endpointData['services'] ?? []
-                );
-            }
-            if ($isEndpointDataHasRegion) {
-                $services = array_replace_recursive(
-                    $projectData['regions'][$groupData['region']]['services'],
+                    $projectData['regions'][$groupData['region']]['stores'][$endpointData['store']]['services'] ?? [],
                     $endpointData['services'] ?? []
                 );
             }
 
+            if ($isEndpointDataHasRegion) {
+                $services = array_replace_recursive(
+                    $projectData['regions'][$currentRegion]['services'] ?? [],
+                    $endpointData['services'] ?? []
+                );
+            }
+
+            $projectData['_testing']['dynamicStoreMode'] = $projectData['dynamicStoreMode'] ?? false;
+
             if ($isEndpointDataHasStore && $endpointData['store'] === ($projectData['docker']['testing']['store'] ?? '')) {
                 $projectData['_testing']['storeName'] = $endpointData['store'];
+                $projectData['_testing']['identifier'] = $endpointData['identifier'];
                 $projectData['_testing']['regionServices'] = array_merge($projectData['_testing']['services'] ?? [], $services);
                 $projectData['_testing']['services'][$endpointData['store']][$applicationData['application']] = $services;
             }
 
             if ($isEndpointDataHasRegion && $groupData['region'] === ($projectData['docker']['testing']['region'] ?? '')) {
                 $projectData['_testing']['regionName'] = $groupData['region'];
+                $projectData['_testing']['identifier'] = $endpointData['identifier'];
                 $projectData['_testing']['regionServices'] = array_merge($projectData['_testing']['services'] ?? [], $services);
-                $projectData['_testing']['services'][$groupData['region']][$applicationData['application']] = $services;
+                $projectData['_testing']['services'][$currentRegion][$applicationData['application']] = $services;
             }
 
             $envVarEncoder->setIsActive(true);
 
-            if ($isEndpointDataHasStore) {
+            if ($isEndpointDataHasStore || $isEndpointDataHasRegion) {
                 file_put_contents(
-                    $deploymentDir . DS . 'env' . DS . 'cli' . DS . strtolower($endpointData['store']) . '.env',
+                    $deploymentDir . DS . 'env' . DS . 'cli' . DS . strtolower($endpointData['identifier']) . '.env',
                     $twig->render('env/cli/store.env.twig', [
                         'applicationName' => $applicationName,
                         'applicationData' => $applicationData,
                         'project' => $projectData,
-                        'regionName' => $currentRegionName,
-                        'regionData' => $projectData['regions'][$currentRegionName],
-                        'brokerConnections' => $brokerConnections,
-                        'keyValueStoreConnections' => $keyValueStoreConnections,
-                        'storeName' => $endpointData['store'],
+                        'regionName' => $currentRegion,
+                        'regionData' => $projectData['regions'][$currentRegion],
+                        'brokerConnections' => getBrokerConnections($projectData),
+                        'storeName' => $endpointData['store'] ?? '',
                         'services' => $services,
                         'endpointMap' => $endpointMap,
+                        'identifier' => $endpointData['identifier'],
                     ])
                 );
 
                 file_put_contents(
-                    $deploymentDir . DS . 'terraform' . DS . 'cli' . DS . strtolower($endpointData['store']) . '.env',
+                    $deploymentDir . DS . 'terraform' . DS . 'cli' . DS . strtolower($endpointData['identifier']) . '.env',
                     $twig->render('terraform/store.env.twig', [
                         'applicationName' => $applicationName,
                         'applicationData' => $applicationData,
                         'project' => $projectData,
-                        'regionName' => $currentRegionName,
-                        'regionData' => $projectData['regions'][$currentRegionName],
-                        'brokerConnections' => $brokerConnections,
-                        'keyValueStoreConnections' => $keyValueStoreConnections,
-                        'storeName' => $endpointData['store'],
+                        'regionName' => $currentRegion,
+                        'regionData' => $projectData['regions'][$currentRegion],
+                        'brokerConnections' => getBrokerConnections($projectData),
+                        'storeName' => $endpointData['store'] ?? '',
                         'services' => $services,
                         'endpointMap' => $endpointMap,
-                    ])
-                );
-            }
-
-            if ($isEndpointDataHasRegion) {
-                file_put_contents(
-                    $deploymentDir . DS . 'env' . DS . 'cli' . DS . strtolower($groupData['region']) . '.env',
-                    $twig->render('env/cli/region.env.twig', [
-                        'applicationName' => $applicationName,
-                        'applicationData' => $applicationData,
-                        'project' => $projectData,
-                        'regionName' => $currentRegionName,
-                        'regionData' => $projectData['regions'][$currentRegionName],
-                        'brokerConnections' => $brokerConnections,
-                        'keyValueStoreConnections' => $keyValueStoreConnections,
-                        'services' => $services,
-                        'endpointMap' => $endpointMap,
-                        'regionEndpointMap' => getRegionEndpointMap($projectData, $currentRegionName),
-                    ])
-                );
-
-                file_put_contents(
-                    $deploymentDir . DS . 'terraform' . DS . 'cli' . DS . strtolower($groupData['region']) . '.env',
-                    $twig->render('terraform/region.env.twig', [
-                        'applicationName' => $applicationName,
-                        'applicationData' => $applicationData,
-                        'project' => $projectData,
-                        'regionName' => $currentRegionName,
-                        'regionData' => $projectData['regions'][$currentRegionName],
-                        'brokerConnections' => $brokerConnections,
-                        'keyValueStoreConnections' => $keyValueStoreConnections,
-                        'services' => $services,
-                        'endpointMap' => $endpointMap,
-                        'regionEndpointMap' => getRegionEndpointMap($projectData, $currentRegionName),
+                        'identifier' => $endpointData['identifier'],
                     ])
                 );
             }
@@ -515,10 +489,6 @@ foreach ($projectData['services'] ?? [] as $serviceName => $serviceData) {
     }
 }
 
-$projectData['brokerHosts'] = getBrokerHosts($projectData);
-$projectData['regionEndpointMap'] = getRegionEndpointMap($projectData);
-$projectData['regionData'] = $projectData['regions'] ?? [];
-
 file_put_contents(
     $deploymentDir . DS . 'context' . DS . 'nginx' . DS . 'conf.d' . DS . 'frontend.default.conf.tmpl',
     $twig->render('nginx/conf.d/frontend.default.conf.twig', $projectData)
@@ -555,7 +525,6 @@ file_put_contents(
     $deploymentDir . DS . 'terraform/environment.tf',
     $twig->render('terraform/environment.tf.twig', [
         'brokerConnections' => getCloudBrokerConnections($projectData),
-        'keyValueStoreConnections' => $dynamicStoreMode ? getKeyValueStores($projectData) : false,
         'project' => $projectData,
     ])
 );
@@ -587,10 +556,9 @@ file_put_contents(
 );
 
 $envVarEncoder->setIsActive(true);
-$testingEnvTemplate = isset($projectData['_testing']['regionName']) ? 'env/cli/region.testing.env.twig' : 'env/cli/testing.env.twig';
 file_put_contents(
     $deploymentDir . DS . 'env' . DS . 'cli' . DS . 'testing.env',
-    $twig->render($testingEnvTemplate, $projectData['_testing'])
+    $twig->render('env/cli/testing.env.twig', $projectData['_testing'])
 );
 
 verbose('Generating scripts... [DONE]');
@@ -620,6 +588,8 @@ exec(sprintf(
     implode(' ', $hosts)
 ), $output, $returnCode);
 
+
+
 if ($returnCode > 0) {
     exit($returnCode);
 }
@@ -637,6 +607,7 @@ if (count($errorMessages) > 0) {
 
     exit(1);
 }
+
 
 // -------------------------
 /**
@@ -792,47 +763,7 @@ function getSSLRedirectPort(array $projectData): int
  */
 function getBrokerConnections(array $projectData): string
 {
-    $connections = [];
-    $brokerServiceData = $projectData['services']['broker'] ?? [];
-
-    if ($brokerServiceData == []) {
-        return json_encode($connections);
-    }
-
-    foreach ($projectData['regions'] as $regionName => $regionData) {
-        $regionServiceData = $brokerServiceData;
-        if (isset($regionData['services']['broker'])) {
-            $regionServiceData = array_replace($regionServiceData, $regionData['services']['broker']);
-            $connections[$regionName] = [
-                'RABBITMQ_CONNECTION_NAME' => $regionName . '-connection',
-                'RABBITMQ_HOST' => 'broker',
-                'RABBITMQ_PORT' => $regionServiceData['port'] ?? 5672,
-                'RABBITMQ_USERNAME' => $regionServiceData['api']['username'] ?? '',
-                'RABBITMQ_PASSWORD' => $regionServiceData['api']['password'] ?? '',
-                'RABBITMQ_VIRTUAL_HOST' => $regionServiceData['namespace']?? '',
-                'RABBITMQ_STORE_NAMES' => [],
-            ];
-        }
-        foreach ($regionData['stores'] ?? [] as $storeName => $storeData) {
-            if (!isset($storeData['services']['broker'])) {
-                continue;
-            }
-
-            $localServiceData = array_replace($brokerServiceData, $storeData['services']['broker']);
-
-            $connections[$storeName] = [
-                'RABBITMQ_CONNECTION_NAME' => $storeName . '-connection',
-                'RABBITMQ_HOST' => 'broker',
-                'RABBITMQ_PORT' => $localServiceData['port'] ?? 5672,
-                'RABBITMQ_USERNAME' => $localServiceData['api']['username'] ?? '',
-                'RABBITMQ_PASSWORD' => $localServiceData['api']['password'] ?? '',
-                'RABBITMQ_VIRTUAL_HOST' => $localServiceData['namespace'] ?? '',
-                'RABBITMQ_STORE_NAMES' => [$storeName], // check if connection is shared
-            ];
-        }
-    }
-
-    return json_encode($connections);
+    return $projectData[ProjectDataConstants::PROJECT_DATA_BROKER_CONNECTIONS_KEY];
 }
 
 /**
@@ -842,29 +773,7 @@ function getBrokerConnections(array $projectData): string
  */
 function getCloudBrokerConnections(array $projectData): string
 {
-    $connections = [];
-    $brokerServiceData = $projectData['services']['broker'] ?? [];
-
-    foreach ($projectData['regions'] as $regionName => $regionData) {
-        $regionServiceData = $brokerServiceData;
-        if (isset($regionData['services']['broker'])) {
-            $regionServiceData = array_replace($regionServiceData, $regionData['services']['broker']);
-            $connections[$regionName] = [
-                'RABBITMQ_VIRTUAL_HOST' => $regionServiceData['namespace'],
-            ];
-        }
-        foreach ($regionData['stores'] ?? [] as $storeName => $storeData) {
-            if (!isset($storeData['services']['broker'])) {
-                continue;
-            }
-            $localServiceData = array_replace($brokerServiceData, $storeData['services']['broker']);
-            $connections[$storeName] = [
-                'RABBITMQ_VIRTUAL_HOST' => $localServiceData['namespace'],
-            ];
-        }
-    }
-
-    return json_encode($connections);
+    return $projectData[ProjectDataConstants::PROJECT_DATA_CLOUD_BROKER_CONNECTIONS_KEY] ?? '';
 }
 
 /**
@@ -877,6 +786,9 @@ function getStoreSpecific(array $projectData): array
     $storeSpecific = [];
     foreach ($projectData['regions'] as $regionName => $regionData) {
         foreach ($regionData['stores'] ?? [] as $storeName => $storeData) {
+            if (!isset($storeData['services'])) {
+                continue;
+            }
 
             $services = $storeData['services'];
             $storeSpecific[$storeName] = [
@@ -887,13 +799,6 @@ function getStoreSpecific(array $projectData): array
                 'SPRYKER_SESSION_BE_NAMESPACE' => $services['session']['namespace'] ?? 1,
                 # TODO SESSION should not be used in CLI
             ];
-
-            if (isset($services['key_value_store']['namespace'])) {
-                $storeSpecific[$storeName]['SPRYKER_KEY_VALUE_STORE_NAMESPACE'] = $services['key_value_store']['namespace'];
-            }
-            if (isset($services['broker']['namespace'])) {
-                $storeSpecific[$storeName]['SPRYKER_BROKER_NAMESPACE'] = $services['broker']['namespace'];
-            }
         }
         $storeSpecific[$regionName]['SPRYKER_KEY_VALUE_REGION_NAMESPACES'] = $projectData['regions'][$regionName]['key_value_region_namespaces'];
     }
@@ -1048,13 +953,16 @@ function buildNewrelicEnvVariables(array $projectData): array
 function buildNewrelicDistributedTracing(array $projectData): array
 {
     $distributedTracingData = $projectData['docker']['newrelic']['distributed-tracing'] ?? [];
+    $enabled = $distributedTracingData['enabled'] ?? 0;
+    $transactionTracerThreshold = $distributedTracingData['transaction-tracer-threshold'] ?? 0;
+    $excludeNewrelicHeader = $distributedTracingData['exclude-newrelic-header'] ?? 0;
 
     return [
-        'NEWRELIC_TRANSACTION_TRACER_ENABLED' => (int) $distributedTracingData['enabled'] ?? 0,
-        'NEWRELIC_DISTRIBUTED_TRACING_ENABLED' => (int) $distributedTracingData['enabled'] ?? 0,
-        'NEWRELIC_SPAN_EVENTS_ENABLED' => (int) $distributedTracingData['enabled'] ?? 0,
-        'NEWRELIC_TRANSACTION_TRACER_THRESHOLD' => (int) $distributedTracingData['transaction-tracer-threshold'] ?? 0,
-        'NEWRELIC_DISTRIBUTED_TRACING_EXCLUDE_NEWRELIC_HEADER' => (int) $distributedTracingData['exclude-newrelic-header'] ?? 0,
+        'NEWRELIC_TRANSACTION_TRACER_ENABLED' => (int) $enabled,
+        'NEWRELIC_DISTRIBUTED_TRACING_ENABLED' => (int) $enabled,
+        'NEWRELIC_SPAN_EVENTS_ENABLED' => (int) $enabled,
+        'NEWRELIC_TRANSACTION_TRACER_THRESHOLD' => (int) $transactionTracerThreshold,
+        'NEWRELIC_DISTRIBUTED_TRACING_EXCLUDE_NEWRELIC_HEADER' => (int) $excludeNewrelicHeader,
     ];
 }
 
@@ -1176,13 +1084,11 @@ function retrieveRegionsStorageHosts(array $regions, array $storageServices, int
 {
     $regionsStorageHosts = [];
     foreach ($regions ?? [] as $regionName => $regionData) {
-        foreach ($regionData['services'] ?? [] as $serviceName => $serviceNamespace) {
-            if (in_array($serviceName, $storageServices, true)) {
-                $regionsStorageHosts[] = sprintf('%s:%s:%s:%s', $serviceName, $serviceName, $defaultPort,
-                    $serviceNamespace['namespace']);
-            }
+        if (!array_key_exists('stores', $regionData)) {
+            continue;
         }
-        foreach ($regionData['stores'] ?? [] as $storeData) {
+
+        foreach ($regionData['stores'] as $storeData) {
             foreach ($storeData['services'] ?? [] as $serviceName => $serviceNamespace) {
                 if (in_array($serviceName, $storageServices, true)) {
                     $regionsStorageHosts[] = sprintf('%s:%s:%s:%s', $serviceName, $serviceName, $defaultPort,
@@ -1233,6 +1139,20 @@ function isAutoloadCacheEnabled(array $projectData): bool
     }
 
     return $projectData['docker']['cache']['autoload']['enabled'] ?? false;
+}
+
+/**
+ * @param array $projectData
+ *
+ * @return bool
+ */
+function isAcpLocalDevelopmentEnabled(array $projectData): bool
+{
+    if (empty($projectData['image']['environment']['ACP_DOCKER_SDK_FILE'])) {
+        return false;
+    }
+
+    return true;
 }
 
 /**
@@ -1677,6 +1597,10 @@ function extendProjectDataWithKeyValueRegionNamespaces(array $projectData): arra
     foreach ($projectData['regions'] as $regionName => $regionData) {
         $keyValueStoreNamespaces = [];
         foreach ($regionData['stores'] ?? [] as $storeName => $storeData) {
+            if (!isset($storeData['services']['key_value_store']['namespace'])) {
+                continue;
+            }
+
             $keyValueStoreNamespaces[$storeName] = $storeData['services']['key_value_store']['namespace'];
         }
         $projectData['regions'][$regionName]['key_value_region_namespaces'] = json_encode($keyValueStoreNamespaces);
@@ -1822,4 +1746,87 @@ function getNodeDistroName(array $nodejsConfig, string $imageName): string
     }
 
     return ALPINE_DISTRO_NAME;
+}
+
+function buildProjectData(array $projectData): array
+{
+    $factory = new ProjectDataFactory();
+
+    return $factory
+        ->createProjectDataBuildProcessor()
+        ->run($projectData);
+}
+
+function buildSwaggerEnvVariables(array $projectData): array
+{
+    $services = $projectData['services'] ?? [];
+    $swaggerService = $services['swagger'] ?? [];
+
+    if (empty($swaggerService)) {
+        return $projectData;
+    }
+
+    $swaggerUrls = buildSwaggerUrls($projectData);
+
+    if (empty($swaggerUrls)) {
+        return $projectData;
+    }
+
+    $swaggerService['environment']['URLS'] = json_encode($swaggerUrls);
+    $projectData['services']['swagger'] = $swaggerService;
+
+    return $projectData;
+}
+
+function isGlueApplication(string $appName): bool
+{
+    $glueApps = [
+        GLUE_APP,
+        GLUE_STOREFRONT,
+        GLUE_BACKEND,
+    ];
+
+    return in_array($appName, $glueApps);
+}
+
+function buildGlueSwaggerUrl(string $appName, string $appHost, string $schema): array
+{
+    $appSuffix = 'Api';
+
+    $appName = explode('-', $appName);
+    $appName[] = $appSuffix;
+
+    $appName = array_map('ucfirst', $appName);
+    $appName = implode(' ', $appName);
+
+    $schemaUrl = sprintf('%s://%s/%s', $schema, $appHost, 'schema.yml');
+
+    return [
+        'name' => $appName,
+        'url' => $schemaUrl,
+    ];
+}
+
+function buildSwaggerUrls(array $projectData): array
+{
+    $schema = getCurrentScheme($projectData);
+    $endpoints = $projectData['_endpointMap'] ?? [];
+
+    if (empty($endpoints)) {
+        return [];
+    }
+
+    $urlsEnvVariable = [];
+
+    $endpoints = $endpoints[array_key_first($endpoints)] ?? [];
+
+    foreach ($endpoints as $applicationName => $applicationHost) {
+        if (!isGlueApplication($applicationName)) {
+            continue;
+        }
+
+        $urlsEnvVariable[] = buildGlueSwaggerUrl($applicationName, $applicationHost, $schema);
+    }
+
+    return $urlsEnvVariable;
 }

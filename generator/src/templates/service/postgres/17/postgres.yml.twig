@@ -1,0 +1,18 @@
+  {{ serviceName }}:
+    image: postgres:17-alpine
+    networks:
+      - private
+    labels:
+      'spryker.app.name': database
+      'spryker.app.type': services
+      'spryker.project': ${SPRYKER_DOCKER_PREFIX}:${SPRYKER_DOCKER_TAG}
+    healthcheck:
+      test: [ "CMD", "pg_isready" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    environment:
+      POSTGRES_USER: "{{ serviceData['root']['username'] }}"
+      POSTGRES_PASSWORD: "{{ serviceData['root']['password'] }}"
+    volumes:
+      - {{ serviceName }}-{{ serviceData['engine'] }}-data:/var/lib/postgresql/data:rw

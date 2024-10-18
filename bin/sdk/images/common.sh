@@ -2,6 +2,8 @@
 
 require docker
 
+import lib/bool.sh
+
 function Images::pull() {
     docker pull "${SPRYKER_PLATFORM_IMAGE}" || true
 }
@@ -103,13 +105,13 @@ function Images::_buildApp() {
     fi
 
     Console::verbose "${INFO}Building CLI images${NC}"
-
     docker build \
         -t "${baseCliImage}" \
         -t "${pipelineImage}" \
         -f "${DEPLOYMENT_PATH}/images/common/cli/Dockerfile" \
         --progress="${PROGRESS_TYPE}" \
         --build-arg "SPRYKER_PARENT_IMAGE=${localAppImage}" \
+        --build-arg "BLACKFIRE_EXTENSION_ENABLED=$(Bool::normalizeBashBool ${BLACKFIRE_EXTENSION_ENABLED})" \
         "${DEPLOYMENT_PATH}/context" 1>&2
 
     docker build \
@@ -124,6 +126,7 @@ function Images::_buildApp() {
         --build-arg "SPRYKER_PIPELINE=${SPRYKER_PIPELINE}" \
         --build-arg "SPRYKER_BUILD_HASH=${SPRYKER_BUILD_HASH:-"current"}" \
         --build-arg "SPRYKER_BUILD_STAMP=${SPRYKER_BUILD_STAMP:-""}" \
+        --build-arg "SPRYKER_NPM_TOKEN=${SPRYKER_NPM_TOKEN:-""}" \
         .  1>&2
 
     if [ -n "${SPRYKER_XDEBUG_MODE_ENABLE}" ]; then
