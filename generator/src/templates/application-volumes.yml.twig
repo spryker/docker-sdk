@@ -1,4 +1,6 @@
-      - logs:${SPRYKER_LOG_DIRECTORY}:rw
+      - type: tmpfs
+        target: ${SPRYKER_LOG_DIRECTORY}
+{#      - logs:${SPRYKER_LOG_DIRECTORY}:rw#}
 {% if _mountMode != 'baked' %}
 {% if _mountMode == 'native' %}
       - ./:/data

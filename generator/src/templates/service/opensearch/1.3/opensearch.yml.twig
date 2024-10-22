@@ -21,5 +21,7 @@
     environment:
         ES_JAVA_OPTS: "-Xms512m -Xmx512m"
     volumes:
-        - {{ serviceName }}-{{ serviceData['engine'] }}-data:/usr/share/opensearch/data:rw
+        - type: tmpfs
+          target: /usr/share/opensearch/data:rw
+{#        - {{ serviceName }}-{{ serviceData['engine'] }}-data:/usr/share/opensearch/data:rw#}
         - ./${DEPLOYMENT_PATH}/context/opensearch/opensearch.yml:/usr/share/opensearch/config/opensearch.yml:ro

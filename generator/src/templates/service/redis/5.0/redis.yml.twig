@@ -13,7 +13,9 @@
         timeout: 5s
         retries: 5
     volumes:
-      - {{ serviceName }}-{{ serviceData['engine'] }}-data:/data
+      - type: tmpfs
+        target: /var/jenkins_home:rw
+{#      - {{ serviceName }}-{{ serviceData['engine'] }}-data:/data#}
       - ./${DEPLOYMENT_PATH}/context/redis/redis.conf:/usr/local/etc/redis/redis.conf:ro
 
 {% if serviceData['replica-services'] is defined %}
@@ -35,7 +37,9 @@
           timeout: 5s
           retries: 5
       volumes:
-          - {{ serviceName }}-{{ serviceData['engine'] }}-data:/data
+          - type: tmpfs
+            target: /var/jenkins_home:rw
+{#          - {{ serviceName }}-{{ serviceData['engine'] }}-data:/data#}
           - ./${DEPLOYMENT_PATH}/context/redis/redis.conf:/usr/local/etc/redis/redis.conf:ro
 
 {% endfor %}

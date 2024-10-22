@@ -14,4 +14,6 @@
       timeout: 5s
       retries: 5
     volumes:
-      - {{ serviceName }}-{{ serviceData['engine'] }}-data:/maildir
+        - type: tmpfs
+          target: /maildir
+{#      - {{ serviceName }}-{{ serviceData['engine'] }}-data:/maildir#}

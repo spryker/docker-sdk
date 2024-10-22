@@ -14,5 +14,7 @@
     environment:
         JAVA_OPTS: '-Djenkins.install.runSetupWizard=false -Xms128m -Xmx128m -Dhudson.security.csrf.GlobalCrumbIssuerConfiguration.DISABLE_CSRF_PROTECTION={{ serviceData['csrf-protection-enabled'] ? 'false' : 'true' }}'
     volumes:
-      - {{ serviceName }}-{{ serviceData['engine'] }}-data:/var/jenkins_home:rw
+      - type: tmpfs
+        target: /var/jenkins_home:rw
+{#      - {{ serviceName }}-{{ serviceData['engine'] }}-data:/var/jenkins_home:rw#}
       - ${DEPLOYMENT_PATH}/context/jenkins/spryker.sh:/usr/bin/spryker.sh:rw

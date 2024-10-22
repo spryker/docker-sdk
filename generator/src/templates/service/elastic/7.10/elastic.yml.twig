@@ -18,5 +18,7 @@
     environment:
         ES_JAVA_OPTS: "-Xms512m -Xmx512m"
     volumes:
-        - {{ serviceName }}-{{ serviceData['engine'] }}-data:/usr/share/elasticsearch/data:rw
+        - type: tmpfs
+          target: /usr/share/elasticsearch/data:rw
+{#        - {{ serviceName }}-{{ serviceData['engine'] }}-data:/usr/share/elasticsearch/data:rw#}
         - ./${DEPLOYMENT_PATH}/context/elasticsearch/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml:ro
