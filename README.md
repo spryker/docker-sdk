@@ -1,5 +1,4 @@
 # Spryker Commerce OS — Docker SDK
-[![Build Status](https://travis-ci.com/spryker/docker-sdk.svg?branch=master)](https://travis-ci.com/spryker/docker-sdk)
 
 ## Description
 
@@ -60,6 +59,7 @@ For contribution guidelines, see [Code contribution guide](https://docs.spryker.
 |                 |              | 10            | &check;     |                                    |
 |                 |              | 11            | &check;     |                                    |
 |                 |              | 12            | &check;     |                                    |
+|                 |              | 17            | &check;     |                                    |
 |                 | mysql        | 5.7           |             |                                    |
 |                 |              | mariadb-10.2  | &check;     | https://endoflife.date/mariadb     |
 |                 |              | mariadb-10.3  | &check;     | https://endoflife.date/mariadb     |
