@@ -49,8 +49,10 @@ RUN --mount=type=cache,id=apk,sharing=locked,target=/var/cache/apk mkdir -p /etc
      yarn \
      jq \
      python3 \
+     python3-distutils \
      g++ \
      make \
+     build-base \
      ; fi'
 
 # TODO Not-available feature: autoload-cache. Should be switchable
