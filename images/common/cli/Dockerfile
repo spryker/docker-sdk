@@ -67,8 +67,8 @@ RUN --mount=type=cache,id=apk,sharing=locked,target=/var/cache/apk mkdir -p /etc
 #RUN --mount=type=cache,id=npm,sharing=locked,target=/root/.npm \
 #    npm install autoload-cache@0.3.4 -g
 
-        test -f "./.git.docker" && cat .git.docker && cd ./docker && git checkout $(cat ../.git.docker | tr -d "/n/r ") && cd - \
-    echo "💡 DOCKER_SDK_VERSION=$(cat ./.git.docker)"
+#        test -f "./.git.docker" && cat .git.docker && cd ./docker && git checkout $(cat ../.git.docker | tr -d "/n/r ") && cd - \
+#    echo "💡 DOCKER_SDK_VERSION=$(cat ./.git.docker)"
 
 
 USER spryker
