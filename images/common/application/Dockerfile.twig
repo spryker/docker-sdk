@@ -1,5 +1,5 @@
 # syntax = docker/dockerfile:experimental
-ARG SPRYKER_PLATFORM_IMAGE=spryker/php:7.3
+ARG SPRYKER_PLATFORM_IMAGE=spryker/php:8.1
 ARG SPRYKER_NODE_IMAGE_VERSION
 ARG SPRYKER_NODE_IMAGE_DISTRO
 
@@ -8,6 +8,9 @@ FROM node:${SPRYKER_NODE_IMAGE_VERSION}-${SPRYKER_NODE_IMAGE_DISTRO} AS node
 ARG SPRYKER_NPM_VERSION
 
 RUN npm install -g npm@${SPRYKER_NPM_VERSION}
+RUN npm config set fetch-retries 5 && \
+    npm config set fetch-retry-mintimeout 5000 && \
+    npm config set fetch-retry-maxtimeout 5000
 
 FROM ${SPRYKER_PLATFORM_IMAGE} AS application-basic
 
