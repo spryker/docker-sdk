@@ -1,0 +1,4 @@
+secrets:
+  - id: private-key # Paste ID of the secret - https://github.com/aquasecurity/trivy/blob/main/pkg/fanal/secret/builtin-rules.go
+    paths:
+      - "generator/openssl/default.key" # Path to the file in repo that needs to ignored

@@ -1,0 +1,19 @@
+name: Trufflehog Security Scan
+on:
+  push:
+    branches:
+      - '*'  # Triggers on pushes to all branches
+jobs:
+  trufflehog-vulnerability-detection:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Secret Scanning
+        id: trufflehog_scan
+        uses: trufflesecurity/trufflehog@v3.82.13
+        with:
+          path: ./
+          base: ""                                                                              # No specific base commit for comparison, scans the entire branch
+          head: ${{ github.ref_name }}                                                          # Current branch name
+          extra_args: --exclude-detectors uri --exclude-paths .trufflehog/.trufflehogignore.txt # Exclude the URI detector and specific files from scanning
