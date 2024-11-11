@@ -3,7 +3,7 @@
 function Environment::checkMutagenVersion() {
     local mutagenInstalledVersion="$(Mutagen::getInstalledVersion)"
 
-    if [[ "$mutagenInstalledVersion" == 0.18.* || "$mutagenInstalledVersion" > "0.18" ]]; then
+    if [[ "${_PLATFORM}" == "macos" && ( "$mutagenInstalledVersion" == 0.18.* || "$mutagenInstalledVersion" > "0.18" ) ]]; then
         Console::error "Error: Mutagen version 0.18.* is not supported yet. Please, run the command to install the latest supported version.
 brew unlink mutagen && brew unlink mutagen-compose && brew install mutagen-io/mutagen/mutagen@0.17 mutagen-io/mutagen/mutagen-compose@0.17"
         exit 1
