@@ -6,7 +6,7 @@ FROM ${SPRYKER_PARENT_IMAGE} AS application-production-dependencies
 USER spryker
 
 # Install composer modules for Spryker
-COPY --chown=spryker:spryker composer.json composer.lock ${srcRoot}/
+COPY --chown=spryker:spryker opcache.php composer.json composer.lock ${srcRoot}/
 ARG SPRYKER_COMPOSER_MODE
 RUN --mount=type=cache,id=composer,sharing=locked,target=/home/spryker/.composer/cache,uid=1000 \
   --mount=type=ssh,uid=1000 --mount=type=secret,id=secrets-env,uid=1000 \
