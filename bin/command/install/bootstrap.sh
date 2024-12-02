@@ -4,6 +4,7 @@ require docker
 
 import environment/docker.sh
 import environment/docker-compose.sh
+import environment/mutagen-version-check.sh
 
 Registry::addCommand "boot" "Command::bootstrap"
 Registry::addCommand "bootstrap" "Command::bootstrap"

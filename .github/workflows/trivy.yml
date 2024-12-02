@@ -1,0 +1,18 @@
+name: Trivy Security Scan
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+
+jobs:
+  trivy-secrets-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - name: Scan for secrets in the repository
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          scan-type: 'fs'                  # File system scan
+          trivy-config: .trivy/trivy.yaml  # Path to the Trivy config file

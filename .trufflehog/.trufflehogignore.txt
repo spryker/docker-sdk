@@ -1,0 +1,2 @@
+# Newline separated regexes for files or a path to specific file to exclude in scan
+generator/openssl/default.key

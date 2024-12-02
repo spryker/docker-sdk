@@ -59,6 +59,7 @@ For contribution guidelines, see [Code contribution guide](https://docs.spryker.
 |                 |              | 10            | &check;     |                                    |
 |                 |              | 11            | &check;     |                                    |
 |                 |              | 12            | &check;     |                                    |
+|                 |              | 17            | &check;     |                                    |
 |                 | mysql        | 5.7           |             |                                    |
 |                 |              | mariadb-10.2  | &check;     | https://endoflife.date/mariadb     |
 |                 |              | mariadb-10.3  | &check;     | https://endoflife.date/mariadb     |
@@ -69,6 +70,10 @@ For contribution guidelines, see [Code contribution guide](https://docs.spryker.
 | broker          | rabbitmq     | 3.7           |             |                                    |
 |                 |              | 3.8           | &check;     |                                    |
 |                 |              | 3.9           | &check;     |                                    |
+|                 |              | 3.10          | &check;     |                                    |
+|                 |              | 3.11          | &check;     |                                    |
+|                 |              | 3.12          | &check;     |                                    |
+|                 |              | 3.13          | &check;     |                                    |
 | session         | redis        | 5.0*          | &check;     |                                    |
 |                 | redis        | 6.2           | &check;     |                                    |
 | key_value_store | redis        | 5.0*          | &check;     |                                    |

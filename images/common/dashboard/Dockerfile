@@ -1,4 +1,4 @@
-FROM node:alpine AS dashboard
+FROM node:22-alpine3.20 AS dashboard
 
 RUN mkdir -p /dashboard
 WORKDIR /dashboard

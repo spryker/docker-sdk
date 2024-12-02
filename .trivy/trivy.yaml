@@ -1,0 +1,12 @@
+scan:
+  scanners:
+   - secret
+severity:
+  - UNKNOWN
+  - LOW
+  - MEDIUM
+  - HIGH
+  - CRITICAL
+exit-code: 1
+ignorefile: .trivy/.trivyignore.yaml
+debug: false
