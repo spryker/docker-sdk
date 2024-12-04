@@ -1,6 +1,6 @@
 # Passing Vulnerable Secrets for Local Development
 
-This document explains how to use a **.env** file for the local environment.
+This document explains how to use a **.env** file **for the local environment**.
 
 ## Configuring .env
 
