@@ -97,6 +97,8 @@ function Command::bootstrap() {
     if [ -d "${projectDeployTemplatesDirectory}" ]; then
         cp -rf "${projectDeployTemplatesDirectory}" "${tmpDeploymentDir}/project-deploy-templates"
     fi
+    [ -f "./.env" ] && { mkdir -p "${tmpDeploymentDir}/env" && cp "./.env" "${tmpDeploymentDir}/env/.env"; } || { mkdir -p "${tmpDeploymentDir}/env" && touch "${tmpDeploymentDir}/env/.env"; }
+
     Console::end "[DONE]"
 
     Console::info "${INFO}Running generator${NC}"

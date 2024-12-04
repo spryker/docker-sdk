@@ -8,6 +8,7 @@
       'spryker.project': ${SPRYKER_DOCKER_PREFIX}:${SPRYKER_DOCKER_TAG}
     env_file:
       - ${DEPLOYMENT_PATH}/env/{{ applicationName }}.env
+      - ${DEPLOYMENT_PATH}/env/.env
     environment:
       SPRYKER_TESTING_ENABLED: ${SPRYKER_TESTING_ENABLE}
       SPRYKER_XDEBUG_HOST_IP: ${SPRYKER_XDEBUG_HOST_IP}
