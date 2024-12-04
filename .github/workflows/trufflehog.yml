@@ -2,7 +2,9 @@ name: Trufflehog Security Scan
 on:
   push:
     branches:
-      - '*'  # Triggers on pushes to all branches
+      - master
+  pull_request:
+
 jobs:
   trufflehog-vulnerability-detection:
     runs-on: ubuntu-latest
