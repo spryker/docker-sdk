@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 import environment/docker.sh
 import environment/get-real-project-path.sh

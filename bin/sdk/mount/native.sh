@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 function Mount::logs() {
     Console::error "This mount mode does not support logging."
