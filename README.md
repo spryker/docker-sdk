@@ -83,11 +83,12 @@ For contribution guidelines, see [Code contribution guide](https://docs.spryker.
 |                 |              | 7.6           | &check;     |                                    |
 |                 |              | 7.10          | &check;     |                                    |
 |                 | opensearch   | 1.3           | &check;     |                                    |
-| scheduler       | jenkins      | 2.176         |              |                                    |
+| scheduler       | jenkins      | 2.176         |             |                                    |
 |                 |              | 2.305         | &check;     |                                    |
 |                 |              | 2.324         | &check;     |                                    |
 |                 |              | 2.401         | &check;     |                                    |
 |                 |              | 2.442         | &check;     |                                    |
+|                 |              | 2.488         | &check;     |                                    |
 | webdriver       | phantomjs    | latest*       |             |                                    |
 |                 | chromedriver | latest        | &check;     |                                    |
 | mail_catcher    | mailhog      | 1.0           | &check;     |                                    |
