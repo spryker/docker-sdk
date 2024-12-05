@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 Registry::addCommand "stop" "Command::stop"
 

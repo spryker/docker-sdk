@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 function Service::Broker::install() {
     if ! Service::isServiceExist broker; then

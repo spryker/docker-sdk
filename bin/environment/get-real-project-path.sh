@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 function Environment::getRealProjectPath() {
     local projectPath=${PROJECT_DIR:-$(pwd)}
