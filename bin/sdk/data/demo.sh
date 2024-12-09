@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 function Data::isLoaded() {
     Console::start "Checking is demo data loaded for ${SPRYKER_CURRENT_REGION}... "

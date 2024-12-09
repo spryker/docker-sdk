@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 function Sentinel::Autoload::install() {
     echo 1

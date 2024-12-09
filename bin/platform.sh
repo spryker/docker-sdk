@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 function Platform::getPlatform() {
     local uname=$(uname)

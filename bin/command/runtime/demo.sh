@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 Registry::addCommand "demo" "Command::demo"
 Registry::addCommand "demo-data" "Command::demo"
