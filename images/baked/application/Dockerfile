@@ -8,10 +8,11 @@ USER spryker
 # Install composer modules for Spryker
 COPY --chown=spryker:spryker composer.json composer.lock ${srcRoot}/
 ARG SPRYKER_COMPOSER_MODE
+ARG SPRYKER_COMPOSER_VERBOSE
 RUN --mount=type=cache,id=composer,sharing=locked,target=/home/spryker/.composer/cache,uid=1000 \
   --mount=type=ssh,uid=1000 --mount=type=secret,id=secrets-env,uid=1000 \
   set -o allexport && . /run/secrets/secrets-env && set +o allexport \
-  && composer install --no-scripts --no-interaction ${SPRYKER_COMPOSER_MODE} -vvv
+  && composer install --no-scripts --no-interaction ${SPRYKER_COMPOSER_MODE} ${SPRYKER_COMPOSER_VERBOSE}
 
 FROM application-production-dependencies AS application-production-codebase
 
