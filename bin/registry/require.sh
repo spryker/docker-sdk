@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 declare -a REQUIRE_CHECKERS
 declare -a REQUIRE_BINARIES

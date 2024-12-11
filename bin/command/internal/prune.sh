@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 Registry::addCommand "prune" "Command::prune"
 Registry::Help::command -c "prune [--f] [--a]" "Remove all docker data(images, volume, system and builder) and project artifacts."

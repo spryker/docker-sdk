@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 function Database::haveTables() {
     if ! Service::isServiceExist database; then

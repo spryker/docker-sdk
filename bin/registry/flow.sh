@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 declare -a FLOW_BOOT
 declare -a FLOW_BEFORE_UP

@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 Registry::addCommand "run" "Command::run"
 Registry::addCommand "start" "Command::run"
