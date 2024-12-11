@@ -843,7 +843,7 @@ Defines the composer settings to be used during deployment.
 	* Development mode: `autoload: --optimize`
 	* Demo mode: `autoload: --classmap-authoritative`
 3. `verbose:` - defines composer verbose mode. The default values is `-vvv`. Possible values are:
-    * "" (an empty string) for no verbose output.
+    * `-q` (Do not output any message).
     * `-v`, `-vv` and `-vvv`
 ***
 
