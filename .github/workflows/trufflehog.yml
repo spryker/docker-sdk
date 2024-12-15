@@ -18,4 +18,4 @@ jobs:
           path: ./
           base: ""                                                                              # No specific base commit for comparison, scans the entire branch
           head: ${{ github.ref_name }}                                                          # Current branch name
-          extra_args: --exclude-detectors uri --exclude-paths .trufflehog/.trufflehogignore.txt # Exclude the URI detector and specific files from scanning
+          extra_args: --exclude-detectors uri --exclude-paths .trufflehog/.trufflehogignore.txt --no-verification # Exclude the URI detector and specific files from scanning
