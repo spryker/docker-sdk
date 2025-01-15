@@ -675,7 +675,7 @@ This stack integrates the following containers into your local environment:
     grafana:
         engine: otel-stack
         endpoints:
-            grafana.spryker.local:
+            grafana:
 ```
 
 2. Bootstrap the docker setup and rebuild the application:

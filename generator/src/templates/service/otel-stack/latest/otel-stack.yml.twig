@@ -19,7 +19,7 @@
           - {{ serviceName }}-{{ serviceData['engine'] }}-data:/var/tempo:rw
       networks:
           - private
-      expose:
+      ports:
           - "14268"  # jaeger ingest
           - "3200"   # tempo
           - "4317"  # otlp grpc
@@ -27,6 +27,12 @@
           - "9411"   # zipkin
       depends_on:
           - tempo-init
+      healthcheck:
+          test: [ "CMD", "curl", "-f", "http://localhost:3200/metrics" ]
+          interval: 30s
+          timeout: 10s
+          retries: 3
+          start_period: 10s
 
   collector:
       image: otel/opentelemetry-collector:0.86.0
@@ -35,7 +41,15 @@
           - ./${DEPLOYMENT_PATH}/context/otel-stack/otel-collector.yaml:/etc/otel-collector.yaml
       networks:
           - private
-
+      healthcheck:
+          test: [ "CMD", "curl", "-f", "http://localhost:13133/health" ]
+          interval: 30s
+          timeout: 10s
+          retries: 3
+          start_period: 10s
+      ports:
+          - "4318:4318"
+          - "4317:4317"
   prometheus:
       image: prom/prometheus:latest
       command:
@@ -46,8 +60,14 @@
           - private
       volumes:
           - ./${DEPLOYMENT_PATH}/context/otel-stack/prometheus.yaml:/etc/prometheus.yaml
-      expose:
-          - "9090"
+      ports:
+          - "9090:9090"
+      healthcheck:
+          test: [ "CMD", "curl", "-f", "http://localhost:9090/-/healthy" ]
+          interval: 30s
+          timeout: 10s
+          retries: 3
+          start_period: 10s
 
   grafana:
       image: grafana/grafana:11.0.0
@@ -61,7 +81,15 @@
           - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
           - GF_AUTH_DISABLE_LOGIN_FORM=true
           - GF_FEATURE_TOGGLES_ENABLE=traceqlEditor
-
-      expose:
-          - "3000"
-
+      labels:
+          'spryker.app.name': grafana
+          'spryker.app.type': hidden
+          'spryker.project': ${SPRYKER_DOCKER_PREFIX}:${SPRYKER_DOCKER_TAG}
+      ports:
+          - "3000:3000"
+      healthcheck:
+          test: [ "CMD", "curl", "-f", "http://localhost:3000/" ]
+          interval: 30s
+          timeout: 10s
+          retries: 3
+          start_period: 10s
