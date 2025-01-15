@@ -52,7 +52,7 @@
   grafana:
       image: grafana/grafana:11.0.0
       volumes:
-          - ./${DEPLOYMENT_PATH}/context/grafana-datasources.yaml:/etc/grafana/provisioning/datasources/datasources.yaml
+          - ./${DEPLOYMENT_PATH}/context/otel-stack/grafana-datasources.yaml:/etc/grafana/provisioning/datasources/datasources.yaml
       networks:
           - public
           - private
