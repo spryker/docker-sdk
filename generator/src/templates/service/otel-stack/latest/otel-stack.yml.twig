@@ -1,0 +1,67 @@
+
+  # Tempo runs as user 10001, and docker compose creates the volume as root.
+  # As such, we need to chown the volume in order for Tempo to start correctly.
+  tempo-init:
+      image: &tempoImage grafana/tempo:main-1a21818
+      user: root
+      entrypoint:
+          - "chown"
+          - "10001:10001"
+          - "/var/tempo"
+      volumes:
+          - {{ serviceName }}-{{ serviceData['engine'] }}-data:/var/tempo:rw
+
+  tempo:
+      image: *tempoImage
+      command: [ "-config.file=/etc/tempo.yaml" ]
+      volumes:
+          - ./${DEPLOYMENT_PATH}/context/otel-stack/tempo.yaml:/etc/tempo.yaml
+          - {{ serviceName }}-{{ serviceData['engine'] }}-data:/var/tempo:rw
+      networks:
+          - private
+      expose:
+          - "14268"  # jaeger ingest
+          - "3200"   # tempo
+          - "4317"  # otlp grpc
+          - "4318"  # otlp http
+          - "9411"   # zipkin
+      depends_on:
+          - tempo-init
+
+  collector:
+      image: otel/opentelemetry-collector:0.86.0
+      command: [ "--config=/etc/otel-collector.yaml" ]
+      volumes:
+          - ./${DEPLOYMENT_PATH}/context/otel-stack/otel-collector.yaml:/etc/otel-collector.yaml
+      networks:
+          - private
+
+  prometheus:
+      image: prom/prometheus:latest
+      command:
+          - --config.file=/etc/prometheus.yaml
+          - --web.enable-remote-write-receiver
+          - --enable-feature=exemplar-storage
+      networks:
+          - private
+      volumes:
+          - ./${DEPLOYMENT_PATH}/context/otel-stack/prometheus.yaml:/etc/prometheus.yaml
+      expose:
+          - "9090"
+
+  grafana:
+      image: grafana/grafana:11.0.0
+      volumes:
+          - ./${DEPLOYMENT_PATH}/context/grafana-datasources.yaml:/etc/grafana/provisioning/datasources/datasources.yaml
+      networks:
+          - public
+          - private
+      environment:
+          - GF_AUTH_ANONYMOUS_ENABLED=true
+          - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
+          - GF_AUTH_DISABLE_LOGIN_FORM=true
+          - GF_FEATURE_TOGGLES_ENABLE=traceqlEditor
+
+      expose:
+          - "3000"
+
