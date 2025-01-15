@@ -16,6 +16,7 @@ This document describes configuration options of the services shipped with Spryk
 *     [WebDriver](#webdriver)
 *     [Dashboard](#dashboard)
 *     [Tideways](#tideways)
+*     [Local OpenTelemetry Stack](#grafana)
 
 
 ## Prerequisites
