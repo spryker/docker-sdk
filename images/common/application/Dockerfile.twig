@@ -14,7 +14,7 @@ FROM ${SPRYKER_PLATFORM_IMAGE} AS application-basic
 ENV SPRYKER_IN_DOCKER=1
 ENV COMPOSER_IGNORE_CHROMEDRIVER=1
 {% for envName, envValue in _envs %}
-ENV {{ envName }}='{{ envValue }}'
+ENV {{ envName }}='{{ envValue | raw }}'
 {% endfor %}
 
 WORKDIR /data
@@ -50,6 +50,14 @@ RUN rm -f /usr/local/etc/php/conf.d/opcache.ini
 
 {% if _phpExtensions is defined and _phpExtensions is not empty %}
 {% for phpExtention in _phpExtensions %}
+{% if phpExtention == 'otel' %}
+RUN echo "https://dl-cdn.alpinelinux.org/alpine/v$(cut -d'.' -f1,2 /etc/alpine-release)/community" >> /etc/apk/repositories
+RUN PHP_VERSION=$(php -r "echo PHP_MAJOR_VERSION.PHP_MINOR_VERSION;") \
+    && apk add --no-cache php${PHP_VERSION}-pecl-grpc php${PHP_VERSION}-pecl-protobuf php${PHP_VERSION}-pecl-opentelemetry
+RUN ln -s /usr/lib/php83/modules/grpc.so /usr/local/lib/php/extensions/no-debug-non-zts-20230831/grpc.so && \
+    ln -s /usr/lib/php83/modules/protobuf.so /usr/local/lib/php/extensions/no-debug-non-zts-20230831/protobuf.so && \
+    ln -s /usr/lib/php83/modules/opentelemetry.so /usr/local/lib/php/extensions/no-debug-non-zts-20230831/opentelemetry.so
+{% endif %}
 RUN mv /usr/local/etc/php/disabled/{{phpExtention}}.ini /usr/local/etc/php/conf.d/90-{{phpExtention}}.ini
 {% endfor %}
 {% endif %}
