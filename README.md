@@ -93,6 +93,7 @@ For contribution guidelines, see [Code contribution guide](https://docs.spryker.
 |                 | chromedriver | latest        | &check;     |                                    |
 | mail_catcher    | mailhog      | 1.0           | &check;     |                                    |
 |                 | mailpit      | 1.22          | &check;     |                                    |
+|                 |              | latest        | &check;     |                                    |
 | swagger         | swagger-ui   | v3.24         | &check;     |                                    |
 | kibana          | kibana       | 5.6*          | &check;     | https://www.elastic.co/support/eol |
 |                 |              | 6.8           | &check;     | https://www.elastic.co/support/eol |
