@@ -584,7 +584,7 @@ services:
       scheduler.spryker.local:
 
   mail_catcher:
-    engine: mailhog
+    engine: mailpit
     endpoints:
       mail.spryker.local:
  ```
@@ -842,6 +842,9 @@ Defines the composer settings to be used during deployment.
 2. `autoload:` - defines composer autoload options. Possible values are `--optimize` and `--classmap-authoritative`. This variable is optional. If not specified, the default values apply:
 	* Development mode: `autoload: --optimize`
 	* Demo mode: `autoload: --classmap-authoritative`
+3. `verbose:` - defines composer verbose mode. The default values is `-vvv`. Possible values are:
+    * `-q` (Do not output any message).
+    * `-v`, `-vv` and `-vvv`
 ***
 
 ## Services
@@ -976,7 +979,7 @@ A mail catcher *Service* used to catch all outgoing emails for development or te
 
 * Project-wide
 
-     - `mail_catcher: engine:` - possible value is `mailhog`.
+     - `mail_catcher: engine:` - possible values are `mailpit` or `mailhog`.
      - `mail_catcher: endpoints:`- defines the service's port and web interface that can be accessed via given endpoints.
 
 
