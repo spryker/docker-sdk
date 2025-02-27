@@ -73,6 +73,8 @@
       image: grafana/grafana:11.0.0
       volumes:
           - ./${DEPLOYMENT_PATH}/context/otel-stack/grafana-datasources.yaml:/etc/grafana/provisioning/datasources/datasources.yaml
+          - ./${DEPLOYMENT_PATH}/context/otel-stack/grafana-dashboards.yaml:/etc/grafana/provisioning/dashboards/dashboards.yaml
+          - ./${DEPLOYMENT_PATH}/context/otel-stack/dashboards/:/var/lib/grafana/dashboards/
       networks:
           - public
           - private
