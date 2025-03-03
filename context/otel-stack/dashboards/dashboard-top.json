@@ -129,6 +129,39 @@
         },
         {
             "datasource": {
+                "type": "tempo",
+                "uid": "tempo"
+            },
+            "gridPos": {
+                "h": 12,
+                "w": 12,
+                "x": 12,
+                "y": 9
+            },
+            "id": 9,
+            "options": {
+                "edges": {},
+                "nodes": {}
+            },
+            "targets": [
+                {
+                    "datasource": {
+                        "type": "tempo",
+                        "uid": "tempo"
+                    },
+                    "limit": 20,
+                    "query": "",
+                    "queryType": "serviceMap",
+                    "refId": "A",
+                    "serviceMapQuery": "{}",
+                    "tableType": "traces"
+                }
+            ],
+            "title": "Service Mesh",
+            "type": "nodeGraph"
+        },
+        {
+            "datasource": {
                 "type": "prometheus",
                 "uid": "prometheus"
             },
