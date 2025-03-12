@@ -1,6 +1,6 @@
 # Tempo runs as user 10001, and docker compose creates the volume as root.
 # As such, we need to chown the volume in order for Tempo to start correctly.
-tempo-init:
+  tempo-init:
     image: &tempoImage grafana/tempo:main-1a21818
     user: root
     entrypoint:
@@ -10,7 +10,7 @@ tempo-init:
     volumes:
         - {{ serviceName }}-{{ serviceData['engine'] }}-data:/var/tempo:rw
 
-tempo:
+  tempo:
     image: *tempoImage
     command: [ "-config.file=/etc/tempo.yaml" ]
     volumes:
@@ -33,7 +33,7 @@ tempo:
         retries: 3
         start_period: 10s
 
-collector:
+  collector:
     image: otel/opentelemetry-collector:0.86.0
     command: [ "--config=/etc/otel-collector.yaml" ]
     volumes:
@@ -49,7 +49,7 @@ collector:
     ports:
         - "4318:4318"
         - "4317:4317"
-prometheus:
+  prometheus:
     image: prom/prometheus:latest
     command:
         - --config.file=/etc/prometheus.yaml
@@ -60,7 +60,7 @@ prometheus:
     volumes:
         - ./${DEPLOYMENT_PATH}/context/otel-stack/prometheus.yaml:/etc/prometheus.yaml
     ports:
-        - "9090:9090"
+      - "9090:9090"
     healthcheck:
         test: [ "CMD", "curl", "-f", "http://localhost:9090/-/healthy" ]
         interval: 30s
@@ -68,7 +68,7 @@ prometheus:
         retries: 3
         start_period: 10s
 
-grafana:
+  grafana:
     image: grafana/grafana:11.0.0
     volumes:
         - ./${DEPLOYMENT_PATH}/context/otel-stack/grafana-datasources.yaml:/etc/grafana/provisioning/datasources/datasources.yaml
