@@ -7,7 +7,7 @@
     "bl": "^5.0.0",
     "chokidar": "^3.4.2",
     "docker-loghose": "^1.6.5",
-    "dockerode": "^3.3.1",
+    "dockerode": "^4.0.5",
     "eol": "^0.9.1",
     "express": "^4.21.2",
     "http-proxy-middleware": "^2.0.7",
