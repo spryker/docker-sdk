@@ -1,4 +1,10 @@
 {% extends "nginx/http/application.server.conf.twig" %}
+{% block host %}
+    {{ parent() }}
+    allow ${BACKEND_GW_ALLOWED_IP};
+    deny all;
+
+{% endblock host %}
 {% block server %}
     {{ parent() }}
 

@@ -1,5 +1,5 @@
 #!/bin/sh
-{% set envVariables = ["\$ALLOWED_IP", "\$SPRYKER_BUILD_HASH", "\$SPRYKER_MAINTENANCE_MODE_ENABLED"] %}
+{% set envVariables = ["\$ALLOWED_IP", "\$SPRYKER_BUILD_HASH", "\$SPRYKER_MAINTENANCE_MODE_ENABLED", "\$BACKEND_GW_ALLOWED_IP"] %}
 {% for groupData in groups %}
 {% for applicationName, applicationData in groupData['applications'] %}
 {% if applicationData['application'] != 'static' %}
@@ -8,6 +8,10 @@ export SPRYKER_NGINX_CGI_{{ applicationName | upper}}=${SPRYKER_NGINX_CGI_{{ (ap
 {% endif %}
 {% endfor %}
 {% endfor %}
+
+if [ -z "${BACKEND_GW_ALLOWED_IP}" ]; then
+    export BACKEND_GW_ALLOWED_IP=127.0.0.1
+fi
 
 envsubst '{{ envVariables | join(' ') }}' < /etc/nginx/template/default.conf.tmpl > /etc/nginx/conf.d/default.conf
 
