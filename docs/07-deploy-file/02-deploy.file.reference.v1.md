@@ -288,6 +288,7 @@ Defines PHP settings for Spryker applications.
   * `pcov`
   * `tideways`
   * `xhprof`
+  * `otel`
 
 ```yaml
 image:
@@ -300,6 +301,7 @@ image:
             - newrelic
             - tideways
             - xhprof
+            - otel
 ```
 ***
 
