@@ -9,6 +9,10 @@ export SPRYKER_NGINX_CGI_{{ applicationName | upper}}=${SPRYKER_NGINX_CGI_{{ (ap
 {% endfor %}
 {% endfor %}
 
+if [ -z "${ALLOWED_IP}" ]; then
+    export ALLOWED_IP=127.0.0.1
+fi
+
 envsubst '{{ envVariables | join(' ') }}' < /etc/nginx/template/default.conf.tmpl > /etc/nginx/conf.d/default.conf
 
 if [ -z "${SPRYKER_DNS_RESOLVER_IP}" ]; then
