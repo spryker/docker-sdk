@@ -11,6 +11,7 @@
         } %}
     {% endif %}
 
+    allow 10.105.0.0/16;
     allow ${ALLOWED_IP};
     deny all;
 {% endblock host %}
