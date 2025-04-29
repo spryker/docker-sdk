@@ -10,7 +10,7 @@
     "dockerode": "^4.0.5",
     "eol": "^0.9.1",
     "express": "^4.21.2",
-    "http-proxy-middleware": "^2.0.7",
+    "http-proxy-middleware": "^2.0.9",
     "path-parse": ">=1.0.7",
     "pug": "^3.0.3",
     "serve-favicon": "^2.5.0",
