@@ -105,7 +105,7 @@ function Paas::discoverRandomEc2JumpInstance() {
 
     Console::log "${INFO}Selecting random EC2 instance jump host within the environment${NC} ${GREEN}${ENVIRONMENT}${NC}"
 
-    EC2_INSTANCE_ID=$(aws ec2 describe-instances --region ${ENVIRONMENT_REGION} --filters "Name=tag:Name,Values=*${ENVIRONMENT}-ecs-autoscaled*" 'Name=instance-state-name,Values=running' --output text --no-cli-pager --query "Reservations[*].Instances[*].[InstanceId]" | shuf -n 1 || true)
+    EC2_INSTANCE_ID=$(aws ec2 describe-instances --region ${ENVIRONMENT_REGION} --filters "Name=tag:Name,Values=*${ENVIRONMENT}-*" 'Name=instance-state-name,Values=running' --output text --no-cli-pager --query "Reservations[*].Instances[*].[InstanceId]" | shuf -n 1 || true)
 
     if [ "${EC2_INSTANCE_ID}" == "None" ] || [ "${EC2_INSTANCE_ID}" == "" ]; then
         Console::error "${WARN}Could not find EC2 instance${NC}"
