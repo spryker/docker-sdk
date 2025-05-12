@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 Registry::addCommand "restart" "Command::restart"
 

@@ -1,0 +1,7 @@
+{% block redirects %}
+    {% for location, redirect in endpointData['redirects'] -%}
+location {{ location }} {
+        return {{ redirect['code'] | default(302) }} "{% if redirect['preserve-host'] | default(false) %}$scheme://$host{% endif %}{{ redirect['url'] }}{% if redirect['request-uri'] | default(false) %}$request_uri{% endif %}";
+    }
+    {% endfor %}
+{% endblock redirects %}

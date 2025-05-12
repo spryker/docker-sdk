@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 require docker grep awk
 

@@ -103,6 +103,7 @@ $isAutoloadCacheEnabled = $projectData['_isAutoloadCacheEnabled'] = isAutoloadCa
 $projectData['_requirementAnalyzerData'] = buildDataForRequirementAnalyzer($projectData);
 $projectData['secrets'] = buildSecrets($deploymentDir);
 $projectData = buildDefaultCredentials($projectData);
+$projectData['_isAcpLocalDevelopmentEnabled'] = isAcpLocalDevelopmentEnabled($projectData);
 
 $dockerVersionObject = json_decode(getenv('DOCKER_VERSION', '{}'));
 $skipVersionHeader = version_compare($dockerVersionObject?->Client?->Version, '26.0.0', '>=');
@@ -1143,6 +1144,20 @@ function isAutoloadCacheEnabled(array $projectData): bool
 /**
  * @param array $projectData
  *
+ * @return bool
+ */
+function isAcpLocalDevelopmentEnabled(array $projectData): bool
+{
+    if (empty($projectData['image']['environment']['ACP_DOCKER_SDK_FILE'])) {
+        return false;
+    }
+
+    return true;
+}
+
+/**
+ * @param array $projectData
+ *
  * @return string
  */
 function buildComposerAutoloadConfig(array $projectData): string
@@ -1305,6 +1320,7 @@ function buildSecrets(string $deploymentDir): array
     $data['SPRYKER_URI_SIGNER_SECRET_KEY'] = generateToken(80);
     $data['SPRYKER_PRODUCT_CONFIGURATOR_ENCRYPTION_KEY'] = generateToken(10);
     $data['SPRYKER_PRODUCT_CONFIGURATOR_HEX_INITIALIZATION_VECTOR'] = generateRandomHex(16);
+    $data['SPRYKER_CUSTOMER_REMEMBER_ME_SECRET'] = generateToken(10);
 
     return $data;
 }

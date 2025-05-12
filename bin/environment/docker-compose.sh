@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 export COMPOSE_HTTP_TIMEOUT=400
 export COMPOSE_CONVERT_WINDOWS_PATHS=1

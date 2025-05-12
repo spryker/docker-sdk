@@ -1,9 +1,10 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 require docker
 
 import environment/docker.sh
 import environment/docker-compose.sh
+import environment/mutagen-version-check.sh
 
 Registry::addCommand "boot" "Command::bootstrap"
 Registry::addCommand "bootstrap" "Command::bootstrap"
@@ -97,6 +98,8 @@ function Command::bootstrap() {
     if [ -d "${projectDeployTemplatesDirectory}" ]; then
         cp -rf "${projectDeployTemplatesDirectory}" "${tmpDeploymentDir}/project-deploy-templates"
     fi
+    [ -f "./.env" ] && { mkdir -p "${tmpDeploymentDir}/env" && cp "./.env" "${tmpDeploymentDir}/env/.env"; } || { mkdir -p "${tmpDeploymentDir}/env" && touch "${tmpDeploymentDir}/env/.env"; }
+
     Console::end "[DONE]"
 
     Console::info "${INFO}Running generator${NC}"

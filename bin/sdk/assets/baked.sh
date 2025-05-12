@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 function Assets::export() {
     # deprecated
@@ -101,6 +101,7 @@ function Assets::build() {
         --build-arg "SPRYKER_PIPELINE=${SPRYKER_PIPELINE}" \
         --build-arg "SPRYKER_BUILD_HASH=${SPRYKER_BUILD_HASH:-"current"}" \
         --build-arg "SPRYKER_BUILD_STAMP=${SPRYKER_BUILD_STAMP:-""}" \
+        --build-arg "SPRYKER_NPM_TOKEN=${SPRYKER_NPM_TOKEN:-""}" \
         . 1>&2
 
     Console::end "[DONE]"
