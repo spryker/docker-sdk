@@ -1,6 +1,6 @@
 # syntax = docker/dockerfile:experimental
 ARG SPRYKER_PARENT_IMAGE
-ARG SPRYKER_JENKINS_IMAGE=spryker/jenkins-boilerplate:2.471
+ARG SPRYKER_JENKINS_IMAGE=spryker/jenkins-boilerplate:2.504.1
 
 FROM ${SPRYKER_JENKINS_IMAGE} as spryker-jenkins-boilerplate
 FROM ${SPRYKER_PARENT_IMAGE}  as spryker_jenkins
