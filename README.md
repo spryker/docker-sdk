@@ -70,6 +70,10 @@ For contribution guidelines, see [Code contribution guide](https://docs.spryker.
 | broker          | rabbitmq     | 3.7           |             |                                    |
 |                 |              | 3.8           | &check;     |                                    |
 |                 |              | 3.9           | &check;     |                                    |
+|                 |              | 3.10          | &check;     |                                    |
+|                 |              | 3.11          | &check;     |                                    |
+|                 |              | 3.12          | &check;     |                                    |
+|                 |              | 3.13          | &check;     |                                    |
 | session         | redis        | 5.0           | &check;     |                                    |
 | key_value_store | redis        | 5.0           | &check;     |                                    |
 | search          | elastic      | 5.6*          | &check;     | https://www.elastic.co/support/eol |
@@ -80,6 +84,11 @@ For contribution guidelines, see [Code contribution guide](https://docs.spryker.
 | scheduler       | jenkins      | 2.176         |             |                                    |
 |                 |              | 2.305         | &check;     |                                    |
 |                 |              | 2.324         | &check;     |                                    |
+|                 |              | 2.324         | &check;     |                                    |
+|                 |              | 2.442         | &check;     |                                    |
+|                 |              | 2.488         | &check;     |                                    |
+|                 |              | 2.492.3       | &check;     |                                    |
+|                 |              | 2.504.1       | &check;     |                                    |
 | webdriver       | phantomjs    | latest*       |             |                                    |
 |                 | chromedriver | latest        | &check;     |                                    |
 | mail_catcher    | mailhog      | 1.0           | &check;     |                                    |
