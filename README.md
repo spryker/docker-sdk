@@ -76,8 +76,10 @@ For contribution guidelines, see [Code contribution guide](https://docs.spryker.
 |                 |              | 3.13          | &check;     |                                    |
 | session         | redis        | 5.0*          | &check;     |                                    |
 |                 | redis        | 6.2           | &check;     |                                    |
+|                 | valkey       | 7.2           | &check;     |                                    |
 | key_value_store | redis        | 5.0*          | &check;     |                                    |
 |                 | redis        | 6.2           | &check;     |                                    |
+|                 | valkey       | 7.2           | &check;     |                                    |
 | search          | elastic      | 5.6*          | &check;     | https://www.elastic.co/support/eol |
 |                 |              | 6.8           | &check;     | https://www.elastic.co/support/eol |
 |                 |              | 7.6           | &check;     |                                    |
@@ -89,6 +91,7 @@ For contribution guidelines, see [Code contribution guide](https://docs.spryker.
 |                 |              | 2.401         | &check;     |                                    |
 |                 |              | 2.442         | &check;     |                                    |
 |                 |              | 2.488         | &check;     |                                    |
+|                 |              | 2.492.3       | &check;     |                                    |
 | webdriver       | phantomjs    | latest*       |             |                                    |
 |                 | chromedriver | latest        | &check;     |                                    |
 | mail_catcher    | mailhog      | 1.0           | &check;     |                                    |

@@ -499,6 +499,47 @@ Optional parameters for `application:`:
         ...
 ```
 
+* `groups: applications: application: http: buffer` - defines how the server handles buffering of responses from FastCGI processes. The following parameters are configurable: `fastcgi_buffer_size`, `fastcgi_buffers` and `fastcgi_busy_buffers_size`. If these values are not explicitly defined, Nginx uses its default settings.
+
+```yaml
+...
+yves_eu:
+    application: yves
+    endpoints:
+        yves.eu.spryker.local:
+            region: EU
+            http:
+                buffer:
+                    buffer_size: 8k
+                    buffers: 128 128k
+                    busy_buffers_size: 256k
+...
+```
+
+* `groups: applications: application: endpoints: redirects:` - defines http redirects for the specific configuration.
+* `groups: applications: application: endpoints: redirects: redirect: code` - defines an HTTP code for a redirect. Allowed values are `301` and `302`. The default values is `302`.
+* `groups: applications: application: endpoints: redirects: redirect: url` - defines a URL to redirect to.
+* `groups: applications: application: endpoints: redirects: redirect: request-uri` - preserves or ignores request-uri due to redirect. Allowed values are `true` or `false`. The default value is `false`.
+* `groups: applications: application: endpoints: redirects: redirect: preserve-host` - preserves or ignores schema and host due to redirect. Allowed values are `true` or `false`. The default value is `false`.
+
+```yaml
+...
+yves_eu:
+    application: yves
+    endpoints:
+        yves.eu.spryker.local:
+            region: EU
+            redirects:
+                ~* /product-comparison:
+                    url: "/login"
+                    code: 302
+                    preserve-host: true
+                ~* /computer:
+                    url: "https://www.google.com/"
+                    code: 301
+...
+```
+
 * `groups: applications: application: limits: workers` - defines the maximum number of concurrent child processes a process manager can serve simultaneously.
 
 ```yaml
@@ -508,7 +549,7 @@ Optional parameters for `application:`:
         application: backoffice
         limits:
             workers: 4
-        ...
+...
 ```
 
 :::(Info) ()
@@ -951,7 +992,7 @@ A key-value store *Service* for storing business data.
 
 * Project-wide
 
-  * `key_value_store: engine:` - possible value is: `redis`.
+  * `key_value_store: engine:` - possible value are: `redis` and `valkey`.
   * `key_value_store: replicas: number:` - defines the number of replicas. The default value is `0`.
   * `session: endpoints:` - defines the service's port that can be accessed via given endpoints.
 
@@ -1025,7 +1066,7 @@ A key-value store *Service* for storing session data.
 
 * Project-wide
 
-  - `session: engine:` - possible values is `redis`.
+  - `session: engine:` - possible values are: `redis` and `valkey`.
   - `session: endpoints:` - defines the service's port that can be accessed via given endpoints.
 
 * Endpoint-specific
