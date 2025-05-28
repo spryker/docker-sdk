@@ -65,7 +65,7 @@ $ docker-compose --version
 :::
 
 7. Bootstrap local docker setup:
-   
+
 ```bash
 docker/sdk bootstrap deploy.dev.yml
 ```
@@ -80,7 +80,7 @@ To double-check if there are any instructions, run `docker/sdk install`.
 :::
 
 9. Build and start the instance:
-    
+
 ```bash
 docker/sdk up
 ```
@@ -92,7 +92,7 @@ docker/sdk up
 To ensure that the installation is successful, make sure you can access the configured endpoints from the Deploy file. See [Deploy file reference - 1.0](../../99-deploy.file.reference.v1.md) to learn about the Deploy file.
 
 :::(Info) (RabbitMQ UI credentials)
-To access RabbitMQ UI, use `spryker` as a username and `secret` as a password. You can adjust the credentials in `deploy.yml`. 
+To access RabbitMQ UI, use `spryker` as a username and `secret` as a password. You can adjust the credentials in `deploy.yml`.
 :::
 
 ## Getting the list of useful commands
@@ -105,5 +105,5 @@ To get the full and up-to-date list of commands, run `docker/sdk help`.
 * [Configuring debugging](../../02-development-usage/05-configuring-debugging.md)
 * [Deploy file reference - 1.0](../../99-deploy.file.reference.v1.md)
 * [Configuring services](../../06-configuring-services.md)
-* [Setting up a self-signed SSL certificate](https://documentation.spryker.com/docs/setting-up-a-self-signed-ssl-certificate)
+* [Setting up a self-signed SSL certificate](https://docs.spryker.com/docs/dg/dev/set-up-spryker-locally/configure-after-installing/set-up-a-self-signed-ssl-certificate.html)
 * [Additional DevOPS guidelines](https://documentation.spryker.com/docs/additional-devops-guidelines)
