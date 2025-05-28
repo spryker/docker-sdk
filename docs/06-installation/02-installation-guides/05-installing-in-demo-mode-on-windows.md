@@ -118,5 +118,5 @@ To get the full and up-to-date list of commands, run `docker/sdk help`.
 * [Configuring debugging](../../02-development-usage/05-configuring-debugging.md)
 * [Deploy file reference - 1.0](../../99-deploy.file.reference.v1.md)
 * [Configuring services](../../06-configuring-services.md)
-* [Setting up a self-signed SSL certificate](https://documentation.spryker.com/docs/setting-up-a-self-signed-ssl-certificate)
+* [Setting up a self-signed SSL certificate](https://docs.spryker.com/docs/dg/dev/set-up-spryker-locally/configure-after-installing/set-up-a-self-signed-ssl-certificate.html)
 * [Additional DevOPS guidelines](https://documentation.spryker.com/docs/additional-devops-guidelines)
