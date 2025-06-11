@@ -1,5 +1,5 @@
 # syntax = docker/dockerfile:experimental
-ARG SPRYKER_PHP_IMAGE
+ARG SPRYKER_PHP_IMAGE=spryker/php:8.2
 
 FROM ${SPRYKER_PHP_IMAGE}
 
