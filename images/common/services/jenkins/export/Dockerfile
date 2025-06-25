@@ -1,4 +1,4 @@
-# syntax = docker/dockerfile:experimental
+# syntax = registry.aldidevops.com/aci/spryker/spryker-b2c/docker/dockerfile:experimental
 ARG SPRYKER_PARENT_IMAGE
 ARG SPRYKER_JENKINS_IMAGE=spryker/jenkins-boilerplate:2.504.1
 

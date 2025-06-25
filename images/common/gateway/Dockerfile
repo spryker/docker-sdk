@@ -1,4 +1,4 @@
-# syntax = docker/dockerfile:experimental
+# syntax = registry.aldidevops.com/aci/spryker/spryker-b2c/docker/dockerfile:experimental
 ARG SPRYKER_GATEWAY_IMAGE
 
 FROM ${SPRYKER_GATEWAY_IMAGE} as gateway

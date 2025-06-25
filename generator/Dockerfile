@@ -1,4 +1,4 @@
-# syntax = docker/dockerfile:experimental
+# syntax = registry.aldidevops.com/aci/spryker/spryker-b2c/docker/dockerfile:experimental
 ARG SPRYKER_PHP_IMAGE=spryker/php:8.2
 
 FROM ${SPRYKER_PHP_IMAGE}
