@@ -75,6 +75,17 @@ function Command::bootstrap() {
     Console::info "Using ${projectYaml}"
 
     local USER_FULL_ID=$(Environment::getFullUserId)
+    # pipeline aus YAML mit grep/sed robust auslesen (ohne yq/PHP), nutzt $projectYaml
+    copy_cert_from_mac=$(grep -E '^[[:space:]]*copy_cert_from_mac:' "$projectYaml" | sed -E 's/^[[:space:]]*copy_cert_from_mac:[[:space:]]*//')
+    Console::info "Copy Cert From Mac: ${copy_cert_from_mac}"
+
+    if [ "${copy_cert_from_mac}" = "true" ]; then
+        Console::info "Export System Certificates to ${SOURCE_DIR}/generator/certs-system.crt"
+        security find-certificate -a -p /Library/Keychains/System.keychain > "${SOURCE_DIR}/generator/certs-system.crt"
+    else
+        Console::info "Create empty certs-system.crt at ${SOURCE_DIR}/generator/certs-system.crt"
+        > "${SOURCE_DIR}/generator/certs-system.crt"
+    fi
 
     local CERT_DIR="${HOME}/.spryker/certs"
     mkdir -p "${CERT_DIR}"
@@ -101,6 +112,8 @@ function Command::bootstrap() {
     cp -rf "${SOURCE_DIR}/context" "${tmpDeploymentDir}/context"
     cp -rf "${SOURCE_DIR}/bin/standalone" "${tmpDeploymentDir}/context/cli"
     cp -rf "${SOURCE_DIR}/images" "${tmpDeploymentDir}/images"
+    cp -rf  "${SOURCE_DIR}/generator/certs-system.crt" "${tmpDeploymentDir}/certs-system.crt"
+    cp -rf  "${SOURCE_DIR}/generator/certs-system.crt" "${tmpDeploymentDir}/context/certs-system.crt"
     cp "${projectYaml}" "${tmpDeploymentDir}/project.yml"
     cp "$([ -f "./.dockersyncignore" ] && echo './.dockersyncignore' || echo "${SOURCE_DIR}/.dockersyncignore.default")" "${tmpDeploymentDir}/.dockersyncignore"
     if [ -f ".known_hosts" ]; then

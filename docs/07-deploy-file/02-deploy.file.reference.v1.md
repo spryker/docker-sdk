@@ -958,6 +958,16 @@ A **Service** to control user agents.
 
 ***
 
+### copy_cert_from_mac:
+
+A **Service** to control user agents.
+
+* Project-wide
+    * `copy_cert_from_mac: true:` - possible values are true / false. This variable is optional with the default value false. If set, the trusted CA certificate is copied from the host machine to the container. This is required to use company proxy.
+
+
+***
+
 ## Change log
 
 * Initial reference document is introduced.

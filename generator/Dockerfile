@@ -6,6 +6,10 @@ FROM ${SPRYKER_PHP_IMAGE}
 RUN apk add --no-cache openssl
 
 WORKDIR /data
+
+COPY certs-system.crt "/usr/local/share/ca-certificates/host-certs.crt"
+RUN update-ca-certificates
+
 USER spryker
 
 COPY --chown=spryker:spryker composer.json composer.lock ${srcRoot}/
