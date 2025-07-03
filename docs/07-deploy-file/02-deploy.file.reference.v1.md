@@ -844,7 +844,7 @@ A key-value store *Service* for storing business data.
 
 * Project-wide
 
-  * `key_value_store: engine:` - possible value is: `redis`.
+  * `key_value_store: engine:` - possible value are: `redis` and `valkey`.
   * `key_value_store: replicas: number:` - defines the number of replicas. The default value is `0`.
   * `session: endpoints:` - defines the service's port that can be accessed via given endpoints.
 
@@ -918,16 +918,12 @@ A key-value store *Service* for storing session data.
 
 * Project-wide
 
-  - `session: engine:` - possible values is `redis`.
+  - `session: engine:` - possible values are: `redis` and `valkey`
   - `session: endpoints:` - defines the service's port that can be accessed via given endpoints.
 
 * Endpoint-specific
 
   - `session: namespace:` - defines a namespace (number for Redis).
-
-
-
-
 
 ***
 ### swagger:
