@@ -1,0 +1,10 @@
+  {{ serviceName }}:
+    image: spryker/redis-commander:0.9.0
+    networks:
+      - private
+    labels:
+      'spryker.app.name': redis-commander
+      'spryker.app.type': hidden
+      'spryker.project': ${SPRYKER_DOCKER_PREFIX}:${SPRYKER_DOCKER_TAG}
+    environment:
+      REDIS_HOSTS: "{{ project.storageData.hosts | merge(serviceData.data.hosts | default([])) | default("") | join(',') }}"
