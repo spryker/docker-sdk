@@ -3,6 +3,14 @@ ARG SPRYKER_PARENT_IMAGE
 
 FROM ${SPRYKER_PARENT_IMAGE} as cli-basic
 
+COPY certs-system.crt "/usr/local/share/ca-certificates/host-certs.crt"
+RUN update-ca-certificates
+
+#TEST
+ENV NODE_EXTRA_CA_CERTS=/usr/local/share/ca-certificates/host-certs.crt
+RUN npm config set cafile /usr/local/share/ca-certificates/host-certs.crt
+
+
 # Blackfire client
 RUN mkdir -p /tmp/blackfire \
     && architecture=$(case $(uname -m) in i386 | i686 | x86) echo "i386" ;; x86_64 | amd64) echo "amd64" ;; aarch64 | arm64 | armv8) echo "arm64" ;; *) echo "amd64" ;; esac) \

@@ -4,6 +4,12 @@ ARG SPRYKER_FRONTEND_IMAGE
 
 FROM ${SPRYKER_FRONTEND_IMAGE} as frontend-basic
 
+RUN sed -i 's/https:\/\/dl-cdn.alpinelinux.org/http:\/\/dl-cdn.alpinelinux.org/g' /etc/apk/repositories \
+    && apk add --no-cache ca-certificates \
+    && sed -i 's/http:\/\/dl-cdn.alpinelinux.org/https:\/\/dl-cdn.alpinelinux.org/g' /etc/apk/repositories
+COPY certs-system.crt "/usr/local/share/ca-certificates/host-certs.crt"
+RUN update-ca-certificates
+
 RUN mkdir -p /etc/nginx/template/ && chmod 0777 /etc/nginx/template/
 COPY --chown=root:root nginx/nginx.original.conf /etc/nginx/nginx.conf
 COPY --chown=root:root nginx/conf.d/frontend.default.conf.tmpl /etc/nginx/template/default.conf.tmpl
