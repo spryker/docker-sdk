@@ -88,6 +88,17 @@ function Images::_buildApp() {
         --build-arg "SPRYKER_BUILD_STAMP=${SPRYKER_BUILD_STAMP:-""}" \
         . 1>&2
 
+
+    if [ "${SPRYKER_AWS_TLS_ENABLED}" == "1" ] || [ "${SPRYKER_RDS_SSL_ENABLED}" == "1" ]; then
+        Console::info "${INFO}Extending appImage with AWS cert support"
+
+        docker build \
+            -t "${appImage}" \
+            -f "${DEPLOYMENT_PATH}/images/aws_ssl/Dockerfile" \
+            --build-arg "SPRYKER_PARENT_IMAGE=${appImage}" \
+            "${DEPLOYMENT_PATH}/context" 1>&2
+    fi
+
     docker build \
         -t "${localAppImage}" \
         -t "${runtimeImage}" \
