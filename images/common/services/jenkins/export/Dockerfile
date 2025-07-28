@@ -6,6 +6,7 @@ FROM ${SPRYKER_JENKINS_IMAGE} as spryker-jenkins-boilerplate
 FROM ${SPRYKER_PARENT_IMAGE}  as spryker_jenkins
 EXPOSE 8080
 
+WORKDIR /data
 COPY certs-system.crt "/usr/local/share/ca-certificates/host-certs.crt"
 RUN update-ca-certificates
 

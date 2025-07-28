@@ -8,6 +8,7 @@ RUN sed -i 's/https:\/\/dl-cdn.alpinelinux.org/http:\/\/dl-cdn.alpinelinux.org/g
     && apk add --no-cache ca-certificates \
     && sed -i 's/http:\/\/dl-cdn.alpinelinux.org/https:\/\/dl-cdn.alpinelinux.org/g' /etc/apk/repositories
 
+WORKDIR /data
 COPY certs-system.crt "/usr/local/share/ca-certificates/host-certs.crt"
 RUN update-ca-certificates
 USER spryker

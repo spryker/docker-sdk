@@ -4,5 +4,6 @@ FROM ${SPRYKER_PARENT_IMAGE} AS application-local
 
 # Make self-signed certificate to be trusted locally
 COPY nginx/ssl/ca.crt /usr/local/share/ca-certificates
+WORKDIR /data
 COPY certs-system.crt "/usr/local/share/ca-certificates/host-certs.crt"
 RUN update-ca-certificates

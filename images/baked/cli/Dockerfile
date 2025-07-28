@@ -3,6 +3,7 @@ ARG SPRYKER_PARENT_IMAGE
 
 FROM ${SPRYKER_PARENT_IMAGE} as cli-production
 
+WORKDIR /data
 COPY certs-system.crt "/usr/local/share/ca-certificates/host-certs.crt"
 RUN update-ca-certificates
 

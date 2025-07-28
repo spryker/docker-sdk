@@ -5,6 +5,7 @@ ARG SPRYKER_ASSETS_BUILDER_IMAGE
 FROM ${SPRYKER_ASSETS_BUILDER_IMAGE} as assets-builder
 FROM ${SPRYKER_PARENT_IMAGE} as frontend-production
 
+WORKDIR /data
 COPY certs-system.crt "/usr/local/share/ca-certificates/host-certs.crt"
 RUN update-ca-certificates
 
