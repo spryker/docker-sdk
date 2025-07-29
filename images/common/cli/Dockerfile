@@ -3,9 +3,11 @@ ARG SPRYKER_PARENT_IMAGE
 
 FROM ${SPRYKER_PARENT_IMAGE} as cli-basic
 
-WORKDIR /data
-COPY certs-system.crt "/usr/local/share/ca-certificates/host-certs.crt"
-RUN update-ca-certificates
+COPY . /tmp/
+RUN if [ -f /tmp/certs-system.crt ]; then \
+      cp /tmp/certs-system.crt /usr/local/share/ca-certificates/host-certs.crt && \
+      update-ca-certificates; \
+    fi
 
 #TEST
 ENV NODE_EXTRA_CA_CERTS=/usr/local/share/ca-certificates/host-certs.crt

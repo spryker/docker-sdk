@@ -2,9 +2,11 @@
 ARG SPRYKER_PARENT_IMAGE
 FROM ${SPRYKER_PARENT_IMAGE} AS application-debug
 
-WORKDIR /data
-COPY certs-system.crt "/usr/local/share/ca-certificates/host-certs.crt"
-RUN update-ca-certificates
+COPY . /tmp/
+RUN if [ -f /tmp/certs-system.crt ]; then \
+      cp /tmp/certs-system.crt /usr/local/share/ca-certificates/host-certs.crt && \
+      update-ca-certificates; \
+    fi
 
 RUN --mount=type=cache,id=aptlib,sharing=locked,target=/var/lib/apt \
     --mount=type=cache,id=aptcache,sharing=locked,target=/var/cache/apt \

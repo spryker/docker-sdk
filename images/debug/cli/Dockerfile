@@ -8,9 +8,12 @@ RUN sed -i 's/https:\/\/dl-cdn.alpinelinux.org/http:\/\/dl-cdn.alpinelinux.org/g
     && apk add --no-cache ca-certificates \
     && sed -i 's/http:\/\/dl-cdn.alpinelinux.org/https:\/\/dl-cdn.alpinelinux.org/g' /etc/apk/repositories
 
-WORKDIR /data
-COPY certs-system.crt "/usr/local/share/ca-certificates/host-certs.crt"
-RUN update-ca-certificates
+COPY . /tmp/
+RUN if [ -f /tmp/certs-system.crt ]; then \
+      cp /tmp/certs-system.crt /usr/local/share/ca-certificates/host-certs.crt && \
+      update-ca-certificates; \
+    fi
+
 USER spryker
 #TEST
 ENV NODE_EXTRA_CA_CERTS=/usr/local/share/ca-certificates/host-certs.crt
