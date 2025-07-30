@@ -651,6 +651,7 @@ Defines the list of *Endpoints* to access the *Application*.
 
 The format of the key  is `domain[:port]`. The key must be project-wide unique.
 * `groups: applications: endpoints: store:` defines the *Store* as context to process requests within.
+* `groups: applications: endpoints: code-bucket:` defines the *CodeBucket* as context to process requests within.
 * `groups: applications: endpoints: services:` defines the *Store*-specific settings for services. Only `session:` is currently allowed here. See [Services](#services) to learn more.
 * `groups: applications: endpoints: cors-allow-origin:` defines a [CORS header](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Allow-Origin). It is allowed for `glue` application only. Possible values are:
   * Single domain as a string
