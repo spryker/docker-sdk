@@ -1,13 +1,58 @@
   {{ serviceName }}:
     image: spryker/opensearch:1.3
+{#    entrypoint:#}
+{#      - bash#}
+{#      - -c#}
+{#      - |#}
+{#        echo "🔐 Installing custom CA into system trust store…"#}
+{#        cp /usr/share/opensearch/config/certs/spryker_ca.crt /etc/pki/ca-trust/source/anchors/#}
+{#        update-ca-trust extract#}
+{#        # Start OpenSearch in background#}
+{#        /usr/share/opensearch/bin/opensearch &#}
+{#        OPID=$!#}
+
+{#        echo "⏳ Waiting for HTTPS on 9200…"#}
+{#        until curl -ks https://localhost:9200 >/dev/null 2>&1; do sleep 1; done#}
+
+{#        echo "⏳ Waiting for transport TLS on 9300…"#}
+{#        until bash -c 'cat </dev/tcp/localhost/9300' >/dev/null 2>&1; do sleep 1; done#}
+
+{#        echo "🚀 Seeding anonymous-superuser…"#}
+{#        # NOTE: only one of -icl or -cn, here we ignore the clustername#}
+{#        /usr/share/opensearch/plugins/opensearch-security/tools/securityadmin.sh \#}
+{#          -h localhost \#}
+{#          -p 9300 \#}
+{#          -cacert config/certs/spryker_ca.crt \#}
+{#          -cert  config/certs/ssl.crt \#}
+{#          -key   config/certs/ssl.key \#}
+{#          -cd   /usr/share/opensearch/plugins/opensearch-security/securityconfig \#}
+{#          -icl \#}
+{#          -nhnv#}
+
+{#        echo "✅ Security bootstrap complete"#}
+{#        wait $OPID#}
     networks:
         - private
+{% if project['docker']['ssl']['strict'] | default(false) %}
+    ports:
+        - 9300:9300
+{% endif %}
     labels:
         'spryker.app.name': search
         'spryker.app.type': services
         'spryker.project': ${SPRYKER_DOCKER_PREFIX}:${SPRYKER_DOCKER_TAG}
     healthcheck:
-        test: ["CMD", "curl", "-f", "localhost:9200/_cat/health"]
+        test: >
+{% if project['docker']['ssl']['strict'] | default(false) %}
+            curl -f \
+                  --cacert /usr/share/opensearch/config/certs/spryker_ca.crt \
+                  --cert  /usr/share/opensearch/config/certs/ssl.crt \
+                  --key   /usr/share/opensearch/config/certs/ssl.key \
+                  https://localhost:9200/_cat/health
+{% else %}
+            curl -f localhost:9200/_cat/health
+{% endif %}
+
         interval: 10s
         timeout: 5s
         retries: 5
@@ -19,7 +64,14 @@
             soft: 65536
             hard: 65536
     environment:
-        ES_JAVA_OPTS: "-Xms512m -Xmx512m"
+        - OPENSEARCH_JAVA_OPTS=-Xms512m -Xmx512m
     volumes:
         - {{ serviceName }}-{{ serviceData['engine'] }}-data:/usr/share/opensearch/data:rw
+{% if project['docker']['ssl']['strict'] | default(false) %}
+        - ./${DEPLOYMENT_PATH}/context/opensearch/opensearch-ssl.yml:/usr/share/opensearch/config/opensearch.yml:ro
+        - ./${DEPLOYMENT_PATH}/spryker_ca.crt:/usr/share/opensearch/config/certs/spryker_ca.crt:ro
+        - ./${DEPLOYMENT_PATH}/ssl.crt:/usr/share/opensearch/config/certs/ssl.crt:ro
+        - ./${DEPLOYMENT_PATH}/ssl.key:/usr/share/opensearch/config/certs/ssl.key:ro
+{% else %}
         - ./${DEPLOYMENT_PATH}/context/opensearch/opensearch.yml:/usr/share/opensearch/config/opensearch.yml:ro
+{% endif %}

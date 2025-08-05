@@ -89,7 +89,7 @@ function Images::_buildApp() {
         . 1>&2
 
 
-    if [ "${SPRYKER_AWS_TLS_ENABLED}" == "1" ] || [ "${SPRYKER_RDS_SSL_ENABLED}" == "1" ]; then
+    if [ "${SPRYKER_DB_SSL_ENABLED}" == "1" ]; then
         Console::info "${INFO}Extending appImage with AWS cert support"
 
         docker build \

@@ -16,3 +16,11 @@
       POSTGRES_PASSWORD: "{{ serviceData['root']['password'] }}"
     volumes:
       - {{ serviceName }}-{{ serviceData['engine'] }}-data:/var/lib/postgresql/data:rw
+      - ./${DEPLOYMENT_PATH}/spryker_ca.crt:/certs/spryker_ca.crt:ro
+      - ./${DEPLOYMENT_PATH}/ssl.crt:/certs/ssl.crt:ro
+      - ./${DEPLOYMENT_PATH}/ssl.key:/certs/ssl.key:ro
+    command: >
+        --ssl
+        --ssl-ca=/certs/spryker_ca.crt
+        --ssl-cert=/certs/ssl.crt
+        --ssl-key=/certs/ssl.key

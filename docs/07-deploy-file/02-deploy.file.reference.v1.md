@@ -731,6 +731,27 @@ To enable secure connection in your browser, register the self-signed CA certifi
 :::
 
 
+***
+
+### docker: ssl: strict
+
+Defines configuration for SSL for the Spryker Docker SDK services: ElasticSearch, Database and KeyValue storage.
+
+If `docker: ssl: strict:` is set to `true`, all services will use the secured (TLS) communication.
+
+This variable is optional. If not specified, the default value applies: `false`.
+
+```yaml
+version: 1.0
+
+docker:
+  ssl:
+    strict: true
+
+ ```
+:::(Info) ()
+To enable secure connection in your browser, `docker:ssl:enabled: true` **MUST** be enable in your system.
+:::
 
 
 ***

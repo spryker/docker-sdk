@@ -458,11 +458,13 @@ if (!empty($projectData['services']['key_value_store']['replicas'])) {
         'replication' => 'predis',
     ], JSON_UNESCAPED_SLASHES);
 
+    $connection_type = $projectData['docker']['ssl']['strict'] ? 'tls' : 'tcp';
     $sources = [
-        'tcp://key_value_store?role=master', 'tcp://key_value_store'
+        $connection_type . '://key_value_store?role=master',
+        $connection_type . '://key_value_store',
     ];
     foreach ($projectData['services']['key_value_store']['replica-services'] as $replica) {
-        $sources[] = 'tcp://key_value_store_' . $replica;
+        $sources[] = $connection_type . '://key_value_store_' . $replica;
     }
 
     $projectData['services']['key_value_store']['sources'] = json_encode($sources, JSON_UNESCAPED_SLASHES);
