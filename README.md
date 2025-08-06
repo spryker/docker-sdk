@@ -51,56 +51,61 @@ To start working with Spryker in Docker, see [Quick start guide](docs/01-quick-s
 
 For contribution guidelines, see [Code contribution guide](https://docs.spryker.com/docs/scos/dev/code-contribution-guide.html)
 
-## Supported services
+# Supported Services
 
-| Service         | Engine          | Version(s)    | ARM support | Note                               |
-|-----------------|-----------------|---------------|-------------|------------------------------------|
-| database        | postgres        | 9.6*          | &check;     |                                    |
-|                 |                 | 10            | &check;     |                                    |
-|                 |                 | 11            | &check;     |                                    |
-|                 |                 | 12            | &check;     |                                    |
-|                 |                 | 17            | &check;     |                                    |
-|                 | mysql           | 5.7           |             |                                    |
-|                 |                 | mariadb-10.2  | &check;     | https://endoflife.date/mariadb     |
-|                 |                 | mariadb-10.3  | &check;     | https://endoflife.date/mariadb     |
-|                 |                 | mariadb-10.4  | &check;     |                                    |
-|                 |                 | mariadb-10.5  | &check;     |                                    |
-|                 |                 | mariadb-10.6  | &check;     |                                    |
-|                 |                 | mariadb-10.11 | &check;     |                                    |
-| broker          | rabbitmq        | 3.7           |             |                                    |
-|                 |                 | 3.8           | &check;     |                                    |
-|                 |                 | 3.9           | &check;     |                                    |
-|                 |                 | 3.10          | &check;     |                                    |
-|                 |                 | 3.11          | &check;     |                                    |
-|                 |                 | 3.12          | &check;     |                                    |
-|                 |                 | 3.13          | &check;     |                                    |
-| session         | redis           | 5.0*          | &check;     |                                    |
-|                 | redis           | 6.2           | &check;     |                                    |
-|                 | valkey          | 7.2           | &check;     |                                    |
-| key_value_store | redis           | 5.0*          | &check;     |                                    |
-|                 | redis           | 6.2           | &check;     |                                    |
-|                 | valkey          | 7.2           | &check;     |                                    |
-| search          | elastic         | 5.6*          | &check;     | https://www.elastic.co/support/eol |
-|                 |                 | 6.8           | &check;     | https://www.elastic.co/support/eol |
-|                 |                 | 7.6           | &check;     |                                    |
-|                 |                 | 7.10          | &check;     |                                    |
-|                 | opensearch      | 1.3           | &check;     |                                    |
-| scheduler       | jenkins         | 2.176         |             |                                    |
-|                 |                 | 2.305         | &check;     |                                    |
-|                 |                 | 2.324         | &check;     |                                    |
-|                 |                 | 2.401         | &check;     |                                    |
-|                 |                 | 2.442         | &check;     |                                    |
-|                 |                 | 2.488         | &check;     |                                    |
-|                 |                 | 2.492.3       | &check;     |                                    |
-| webdriver       | phantomjs       | latest*       |             |                                    |
-|                 | chromedriver    | latest        | &check;     |                                    |
-| mail_catcher    | mailhog         | 1.0           | &check;     |                                    |
-|                 | mailpit         | 1.22          | &check;     |                                    |
-|                 |                 | latest        | &check;     |                                    |
-| swagger         | swagger-ui      | v3.24         | &check;     |                                    |
-| kibana          | kibana          | 5.6*          | &check;     | https://www.elastic.co/support/eol |
-|                 |                 | 6.8           | &check;     | https://www.elastic.co/support/eol |
-|                 |                 | 7.6           | &check;     |                                    |
-| redis-gui       | redis-commander | 0.8.0*        | &check;     |                                    |
-|                 |                 | 0.9.0         | &check;     |                                    |
-| blackfire       | blackfire       | latest        | &check;     |                                    |
+This document outlines the services supported by our platform, including engine, version, ARM architecture support, and SSL/TLS support.
+
+## Services Table
+
+| Service               | Engine          | Version(s) | ARM support | SSL | Note                                                                     |
+| --------------------- | --------------- | ---------- | ----------- |     | ------------------------------------------------------------------------ |
+| **database**          | postgres        | 9.6\*      | ✔           |     |                                                                          |
+|                       |                 | 10         | ✔           |     |                                                                          |
+|                       |                 | 11         | ✔           |     |                                                                          |
+|                       |                 | 12         | ✔           |     |                                                                          |
+|                       |                 | 17         | ✔           |     |                                                                          |
+|                       | mysql           | 5.7        |             |     |                                                                          |
+|                       | mariadb         | 10.2       | ✔           | ✔   | [https://endoflife.date/mariadb](https://endoflife.date/mariadb)         |
+|                       |                 | 10.3       | ✔           | ✔   | [https://endoflife.date/mariadb](https://endoflife.date/mariadb)         |
+|                       |                 | 10.4       | ✔           | ✔   |                                                                          |
+|                       |                 | 10.5       | ✔           | ✔   |                                                                          |
+|                       |                 | 10.6       | ✔           | ✔   |                                                                          |
+|                       |                 | 10.11      | ✔           | ✔   |                                                                          |
+| **broker**            | rabbitmq        | 3.7        |             |     |                                                                          |
+|                       |                 | 3.8        | ✔           |     |                                                                          |
+|                       |                 | 3.9        | ✔           |     |                                                                          |
+|                       |                 | 3.10       | ✔           |     |                                                                          |
+|                       |                 | 3.11       | ✔           |     |                                                                          |
+|                       |                 | 3.12       | ✔           |     |                                                                          |
+|                       |                 | 3.13       | ✔           |     |                                                                          |
+| **session**           | redis           | 5.0\*      | ✔           |     |                                                                          |
+|                       | redis           | 6.2        | ✔           | ✔   |                                                                          |
+|                       | valkey          | 7.2        | ✔           | ✔   |                                                                          |
+| **key\_value\_store** | redis           | 5.0\*      | ✔           |     |                                                                          |
+|                       | redis           | 6.2        | ✔           | ✔   |                                                                          |
+|                       | valkey          | 7.2        | ✔           | ✔   |                                                                          |
+| **search**            | elastic         | 5.6\*      | ✔           |     | [https://www.elastic.co/support/eol](https://www.elastic.co/support/eol) |
+|                       |                 | 6.8        | ✔           |     | [https://www.elastic.co/support/eol](https://www.elastic.co/support/eol) |
+|                       |                 | 7.6        | ✔           |     |                                                                          |
+|                       |                 | 7.10       | ✔           | ✔   |                                                                          |
+|                       | opensearch      | 1.3        | ✔           | ✔   |                                                                          |
+| **scheduler**         | jenkins         | 2.176      |             |     |                                                                          |
+|                       |                 | 2.305      | ✔           |     |                                                                          |
+|                       |                 | 2.324      | ✔           |     |                                                                          |
+|                       |                 | 2.401      | ✔           |     |                                                                          |
+|                       |                 | 2.442      | ✔           |     |                                                                          |
+|                       |                 | 2.488      | ✔           |     |                                                                          |
+|                       |                 | 2.492.3    | ✔           |     |                                                                          |
+| **webdriver**         | phantomjs       | latest\*   |             |     |                                                                          |
+|                       | chromedriver    | latest     | ✔           |     |                                                                          |
+| **mail\_catcher**     | mailhog         | 1.0        | ✔           |     |                                                                          |
+|                       | mailpit         | 1.22       | ✔           |     |                                                                          |
+|                       |                 | latest     | ✔           |     |                                                                          |
+| **swagger**           | swagger-ui      | v3.24      | ✔           |     |                                                                          |
+| **kibana**            | kibana          | 5.6\*      | ✔           |     | [https://www.elastic.co/support/eol](https://www.elastic.co/support/eol) |
+|                       |                 | 6.8        | ✔           |     | [https://www.elastic.co/support/eol](https://www.elastic.co/support/eol) |
+|                       |                 | 7.6        | ✔           |     |                                                                          |
+| **redis-gui**         | redis-commander | 0.8.0\*    | ✔           |     |                                                                          |
+|                       |                 | 0.9.0      | ✔           |     |                                                                          |
+| **blackfire**         | blackfire       | latest     | ✔           |     |                                                                          |
+
