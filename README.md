@@ -57,8 +57,14 @@ This document outlines the services supported by our platform, including engine,
 
 ## Services Table
 
-| Service               | Engine          | Version(s) | ARM support | SSL | Note                                                                     |
-| --------------------- | --------------- | ---------- | ----------- |     | ------------------------------------------------------------------------ |
+# Supported Services
+
+This document outlines the services supported by our platform, including the engine, version, ARM architecture support, and TLS support.
+
+## Services Table
+
+| Service               | Engine          | Version(s) | ARM support | TLS | Note                                                                     |
+| --------------------- | --------------- | ---------- | ----------- |-----| ------------------------------------------------------------------------ |
 | **database**          | postgres        | 9.6\*      | ✔           |     |                                                                          |
 |                       |                 | 10         | ✔           |     |                                                                          |
 |                       |                 | 11         | ✔           |     |                                                                          |
@@ -108,4 +114,5 @@ This document outlines the services supported by our platform, including engine,
 | **redis-gui**         | redis-commander | 0.8.0\*    | ✔           |     |                                                                          |
 |                       |                 | 0.9.0      | ✔           |     |                                                                          |
 | **blackfire**         | blackfire       | latest     | ✔           |     |                                                                          |
+
 
