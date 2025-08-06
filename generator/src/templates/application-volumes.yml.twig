@@ -1,6 +1,6 @@
       - logs:${SPRYKER_LOG_DIRECTORY}:rw
 {% if docker.ssl.strict | default(false) %}
-      - ./${DEPLOYMENT_PATH}/spryker_ca.crt:/certs/ca.crt:ro
+      - ./${DEPLOYMENT_PATH}/spryker_ca.crt:/certs/spryker_ca.crt:ro
       - ./${DEPLOYMENT_PATH}/ssl.crt:/certs/ssl.crt:ro
       - ./${DEPLOYMENT_PATH}/ssl.key:/certs/ssl.key:ro
 {% endif %}
