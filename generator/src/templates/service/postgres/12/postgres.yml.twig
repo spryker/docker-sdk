@@ -14,20 +14,5 @@
     environment:
       POSTGRES_USER: "{{ serviceData['root']['username'] }}"
       POSTGRES_PASSWORD: "{{ serviceData['root']['password'] }}"
-{% if project['docker']['ssl']['strict'] | default(false) %}
-      PGSSLMODE:         "verify-ca"
-      SSLROOTCERT:     "/etc/postgresql/certs/ca.crt"
-{% endif %}
     volumes:
       - {{ serviceName }}-{{ serviceData['engine'] }}-data:/var/lib/postgresql/data:rw
-{% if project['docker']['ssl']['strict'] | default(false) %}
-          - ./${DEPLOYMENT_PATH}/spryker_ca.crt:/etc/postgresql/certs/spryker_ca.crt:ro
-          - ./${DEPLOYMENT_PATH}/ssl.crt:/etc/postgresql/certs/ssl.crt:ro
-          - ./${DEPLOYMENT_PATH}/ssl.key:/etc/postgresql/certs/ssl.key:ro
-    command:
-      - postgres
-      - -c ssl=on
-      - -c ssl_cert_file=/etc/postgresql/certs/server.crt
-      - -c ssl_key_file=/etc/postgresql/certs/server.key
-      - -c ssl_ca_file=/etc/postgresql/certs/ca.crt
-{% endif %}
