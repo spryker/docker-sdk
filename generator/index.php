@@ -193,8 +193,10 @@ foreach ($projectData['groups'] ?? [] as $groupName => $groupData) {
             $application = $applicationData['application'];
             $store = $endpointData['store'] ?? null;
             $region = $endpointData['region'] ?? null;
+            $codeBucket = $endpointData['code-bucket'] ?? null;
             $projectData['groups'][$groupName]['applications'][$applicationName]['endpoints'][$endpoint]['identifier'] = $store ? $store : $region;
             $projectData['groups'][$groupName]['applications'][$applicationName]['endpoints'][$endpoint]['primal'] = false;
+            $projectData['groups'][$groupName]['applications'][$applicationName]['endpoints'][$endpoint]['code-bucket'] = $codeBucket;
             while (!empty($projectData['_ports'][$debugPortIndex])) {
                 $debugPortIndex++;
             }
@@ -1056,16 +1058,17 @@ function warn($output)
 }
 
 /**
- * @param array $services
- * @param string $engine
+ * Retrieve the names of services that use one of the given storage engines.
  *
- * @return string[]
+ * @param array<string, array{engine: string}> $services
+ * @param list<string>                        $engines  Allowed engine names
+ * @return list<string>                                 Service names matching any engine
  */
-function retrieveStorageServices(array $services, string $engine = 'redis'): array
+function retrieveStorageServices(array $services, array $engines = ['redis', 'valkey']): array
 {
     $storageServices = [];
     foreach ($services as $serviceName => $serviceData) {
-        if ($serviceData['engine'] === $engine) {
+        if (in_array($serviceData['engine'], $engines)) {
             $storageServices[] = $serviceName;
         }
     }

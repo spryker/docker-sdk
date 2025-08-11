@@ -77,6 +77,17 @@ function Command::bootstrap() {
 
     local USER_FULL_ID=$(Environment::getFullUserId)
 
+    local CERT_DIR="${HOME}/.spryker/certs"
+    mkdir -p "${CERT_DIR}"
+
+    KEY_FILE="${CERT_DIR}/${SPR_CUSTOM_KEY:-default.key}"
+    CRT_FILE="${CERT_DIR}/${SPR_CUSTOM_CERT:-default.crt}"
+
+    if [[ -f "${KEY_FILE}" && -f "${CRT_FILE}" ]]; then
+        cp "${CERT_DIR}/default.key" "${SOURCE_DIR}/generator/openssl/default.key"
+        cp "${CERT_DIR}/default.crt" "${SOURCE_DIR}/generator/openssl/default.crt"
+    fi
+
     Console::verbose::start "Building generator..."
     docker build -t spryker_docker_sdk \
         -f "${SOURCE_DIR}/generator/Dockerfile" \
@@ -132,6 +143,14 @@ function Command::bootstrap() {
     if [ ! -f ".dockerignore" ]; then
         cp "${SOURCE_DIR}/.dockerignore.default" .dockerignore
     fi
+
+    Console::info "${DESTINATION_DIR}"
+
+    if [[ ! -f "${KEY_FILE}" || ! -f "${CRT_FILE}" ]]; then
+        cp "${DESTINATION_DIR}/context/nginx/ssl/ca.key" "${CERT_DIR}/default.key"
+        cp "${DESTINATION_DIR}/context/nginx/ssl/ca.crt" "${CERT_DIR}/default.crt"
+    fi
+
 
     Console::info "Deployment is generated into ${LGRAY}${DESTINATION_DIR}"
     Console::log "Use ${OK}docker/sdk$([ "${SPRYKER_PROJECT_NAME}" != 'default' ] && echo -n " -p ${SPRYKER_PROJECT_NAME}") up${NC} to start the application."
