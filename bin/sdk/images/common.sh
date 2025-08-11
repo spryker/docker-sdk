@@ -89,15 +89,16 @@ function Images::_buildApp() {
         . 1>&2
 
 
-    if [ "${SPRYKER_DB_SSL_ENABLED}" == "1" ]; then
-        Console::info "${INFO}Extending appImage with AWS cert support"
+    # if [ "${SPRYKER_DB_SSL_ENABLED}" == "1" ]; then
+    Console::info "${INFO}Extending appImage with AWS cert support"
+    Console::info "${INFO}${SPRYKER_DB_SSL_ENABLED}"
 
-        docker build \
-            -t "${appImage}" \
-            -f "${DEPLOYMENT_PATH}/images/aws_ssl/Dockerfile" \
-            --build-arg "SPRYKER_PARENT_IMAGE=${appImage}" \
-            "${DEPLOYMENT_PATH}/context" 1>&2
-    fi
+    docker build \
+        -t "${appImage}" \
+        -f "${DEPLOYMENT_PATH}/images/aws_ssl/Dockerfile" \
+        --build-arg "SPRYKER_PARENT_IMAGE=${appImage}" \
+        "${DEPLOYMENT_PATH}/context" 1>&2
+    # fi
 
     docker build \
         -t "${localAppImage}" \
