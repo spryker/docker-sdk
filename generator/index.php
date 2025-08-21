@@ -1607,7 +1607,9 @@ function extendProjectDataWithKeyValueRegionNamespaces(array $projectData): arra
 
             $keyValueStoreNamespaces[$storeName] = $storeData['services']['key_value_store']['namespace'];
         }
-        $projectData['regions'][$regionName]['key_value_region_namespaces'] = json_encode($keyValueStoreNamespaces);
+
+        $keyValueStoreNamespacesFallback[$regionName] = $projectData['regions'][$regionName]['services']['key_value_store']['namespace'] ?? 1;
+        $projectData['regions'][$regionName]['key_value_region_namespaces'] = $keyValueStoreNamespaces === [] ? json_encode($keyValueStoreNamespacesFallback) : json_encode($keyValueStoreNamespaces);
     }
 
     return $projectData;
