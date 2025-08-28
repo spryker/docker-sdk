@@ -1,0 +1,34 @@
+unclassified:
+  location:
+    url: "${JENKINS_URL}"
+
+jenkins:
+  securityRealm:
+    saml:
+      idpMetadataConfiguration:
+        url: "${IDP_METADATA_URL}"
+      binding: "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect"
+      maximumAuthenticationLifetime: 86400
+      usernameAttributeName: "email"
+      emailAttributeName: "email"
+      displayNameAttributeName: "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name"
+      groupsAttributeName: "http://schemas.xmlsoap.org/claims/Group"
+      advancedConfiguration:
+          spEntityId: "${JENKINS_URL}"
+
+  authorizationStrategy:
+    roleBased:
+      roles:
+        global:
+          - name: viewer
+            permissions: ["Overall/Read","View/Read","Job/Discover","Job/Read"]
+            entries:
+              - group: "c334d892-c071-70f6-7b7e-92cfdbb46b68"
+          - name: developer
+            permissions: ["Overall/Read","View/Read","Job/Discover","Job/Read","Job/Build","Job/Cancel"]
+            entries:
+              - group: "a39438f2-6031-70e2-1342-be2da21c8325"
+          - name: admin
+            permissions: ["Overall/Administer"]
+            entries:
+              - group: "33b40882-f041-7016-0664-b110cd2a8880"

@@ -1,5 +1,5 @@
   {{ serviceName }}:
-    image: spryker/jenkins:2.442
+    image: spryker/jenkins:2.516.1-rc
     networks:
       - private
     labels:
@@ -12,7 +12,15 @@
       timeout: 5s
       retries: 5
     environment:
-        JAVA_OPTS: '-Djenkins.install.runSetupWizard=false -Xms128m -Xmx128m -Dhudson.security.csrf.GlobalCrumbIssuerConfiguration.DISABLE_CSRF_PROTECTION={{ serviceData['csrf-protection-enabled'] ? 'false' : 'true' }}'
+      JAVA_OPTS: '-Djenkins.install.runSetupWizard=false -Xms128m -Xmx128m -Dhudson.security.csrf.GlobalCrumbIssuerConfiguration.DISABLE_CSRF_PROTECTION={{ serviceData['csrf-protection-enabled'] ? 'false' : 'true' }}'
+      JENKINS_URL: "http://scheduler.spryker.local/"
+      IDP_METADATA_URL: "https://portal.sso.eu-central-1.amazonaws.com/saml/metadata/MjM3ODI1NDgzNjU0X2lucy0xNzEyYjlmMGMxZWNlYzJm"
+      CUSTOMER_ENV: "my_jenkins"
+      CASC_JENKINS_CONFIG: "/usr/share/jenkins/ref/casc.yaml"
     volumes:
       - {{ serviceName }}-{{ serviceData['engine'] }}-data:/var/jenkins_home:rw
-      - ${DEPLOYMENT_PATH}/context/jenkins/spryker.sh:/usr/bin/spryker.sh:rw
+      - ${DEPLOYMENT_PATH}/context/jenkins/spryker.sh:/usr/bin/spryker.sh:ro
+      - ${DEPLOYMENT_PATH}/context/jenkins/config.yaml:/usr/share/jenkins/ref/casc.yaml:ro
+
+
+
