@@ -15,5 +15,6 @@
     environment:
       RABBITMQ_DEFAULT_USER: "{{ serviceData['api']['username'] }}"
       RABBITMQ_DEFAULT_PASS: "{{ serviceData['api']['password'] }}"
+      RABBITMQ_ERLANG_COOKIE: "spryker-rabbitmq-cookie"
     volumes:
       - {{ serviceName }}-{{ serviceData['engine'] }}-data:/var/lib/rabbitmq:rw
