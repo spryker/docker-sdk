@@ -9,8 +9,8 @@
       'spryker.project': ${SPRYKER_DOCKER_PREFIX}:${SPRYKER_DOCKER_TAG}
     healthcheck:
       test: [ "CMD", "nc", "-z", "localhost", "5672" ]
-      interval: 10s
-      timeout: 5s
+      interval: 30s
+      timeout: 30s
       retries: 10
     environment:
       RABBITMQ_DEFAULT_USER: "{{ serviceData['api']['username'] }}"
