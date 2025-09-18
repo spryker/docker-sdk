@@ -8,7 +8,7 @@
       'spryker.app.type': services
       'spryker.project': ${SPRYKER_DOCKER_PREFIX}:${SPRYKER_DOCKER_TAG}
     healthcheck:
-      test: [ "CMD-SHELL", "rabbitmq-diagnostics -q ping && rabbitmq-diagnostics -q check_running && curl -f http://localhost:15672/api/overview || exit 1" ]
+      test: [ "CMD", "nc", "-z", "localhost", "5672" ]
       interval: 15s
       timeout: 10s
       retries: 30
@@ -16,8 +16,9 @@
     environment:
       RABBITMQ_DEFAULT_USER: "{{ serviceData['api']['username'] }}"
       RABBITMQ_DEFAULT_PASS: "{{ serviceData['api']['password'] }}"
-      RABBITMQ_ERLANG_COOKIE: "spryker-rabbitmq-cookie"
       RABBITMQ_MANAGEMENT_LOAD_DEFINITIONS: "false"
-      RABBITMQ_SERVER_ADDITIONAL_ERL_ARGS: "-rabbit tcp_listeners [5672] -rabbitmq_management listener [{port,15672}]"
+      RABBITMQ_MANAGEMENT_HTTP_TIMEOUT: "30000"
+      RABBITMQ_MANAGEMENT_REQUEST_TIMEOUT: "30000"
+      RABBITMQ_SERVER_ADDITIONAL_ERL_ARGS: "-rabbit tcp_listeners [5672] -rabbitmq_management listener [{port,15672},{request_timeout,30000}]"
     volumes:
       - {{ serviceName }}-{{ serviceData['engine'] }}-data:/var/lib/rabbitmq:rw
