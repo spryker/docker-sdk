@@ -11,8 +11,21 @@ then
     cp "${SOURCE}/default.crt" "${DESTINATION}/ca.crt"
 else
     echo -e "Generating CA cert and private key"
-    openssl req -nodes -newkey rsa:2048 -out "${DESTINATION}/ca.csr" -keyout "${DESTINATION}/ca.key" -subj "/C=DE/ST=Berlin/L=Berlin/O=Spryker/CN=Spryker"
-    openssl x509 -req -days 9999 -in "${DESTINATION}/ca.csr" -signkey "${DESTINATION}/ca.key" -out "${DESTINATION}/ca.crt"
+    openssl req \
+        -nodes \
+        -newkey rsa:2048 \
+        -out "${DESTINATION}/ca.csr" \
+        -keyout "${DESTINATION}/ca.key" \
+        -subj "/C=DE/ST=Berlin/L=Berlin/O=Spryker/CN=Spryker"
+
+    openssl x509 \
+        -req \
+        -days 9999 \
+        -in "${DESTINATION}/ca.csr" \
+        -signkey "${DESTINATION}/ca.key" \
+        -out "${DESTINATION}/ca.crt" \
+        -extensions v3_ca \
+        -extfile "${SOURCE}/v3_ca.ext"
 fi
 
 echo -e "Generating PFX file for CA to import on client side"
