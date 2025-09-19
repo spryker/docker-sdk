@@ -2,6 +2,27 @@
 set -e
 id
 export ALT_NAMES=$(printf "DNS:%s" "${@/%/,}" | sed -r "s/,$//g")
+if ! echo "$ALT_NAMES" | grep -q 'DNS:search'; then
+  ALT_NAMES="${ALT_NAMES:+${ALT_NAMES},}DNS:search"
+fi
+
+if ! echo "$ALT_NAMES" | grep -q 'DNS:key_value_store'; then
+  ALT_NAMES="${ALT_NAMES:+${ALT_NAMES},}DNS:key_value_store"
+fi
+
+if ! echo "$ALT_NAMES" | grep -q 'DNS:session'; then
+  ALT_NAMES="${ALT_NAMES:+${ALT_NAMES},}DNS:session"
+fi
+
+if ! echo "$ALT_NAMES" | grep -q 'DNS:localhost'; then
+  ALT_NAMES="${ALT_NAMES:+${ALT_NAMES},}DNS:localhost"
+fi
+
+# add IP:127.0.0.1 if missing
+if ! echo "$ALT_NAMES" | grep -q 'IP:127.0.0.1'; then
+  ALT_NAMES="${ALT_NAMES:+${ALT_NAMES},}IP:127.0.0.1"
+fi
+
 SOURCE="${BASH_SOURCE%/*}"
 
 if [ -f "${SOURCE}/default.key" ] && [ -f "${SOURCE}/default.crt" ];
@@ -54,3 +75,5 @@ openssl verify \
 
 cp "${DESTINATION}/ca.crt" "${DEPLOYMENT_DIR}/spryker_ca.crt"
 cp "${DESTINATION}/ca.pfx" "${DEPLOYMENT_DIR}/spryker.pfx"
+cp "${DESTINATION}/ssl.key" "${DEPLOYMENT_DIR}/ssl.key"
+cp "${DESTINATION}/ssl.crt" "${DEPLOYMENT_DIR}/ssl.crt"

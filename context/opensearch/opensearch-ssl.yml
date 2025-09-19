@@ -1,0 +1,57 @@
+# Cluster ################################
+cluster.name: "docker-cluster"
+
+bootstrap.memory_lock: "true" # along with the memlock settings below, disables swapping
+
+# Threshold ################################
+cluster.routing.allocation.disk.threshold_enabled: true
+cluster.routing.allocation.disk.watermark.low: 90%
+cluster.routing.allocation.disk.watermark.high: 95%
+
+
+# Network ###################################
+http.host: 0.0.0.0
+
+# Http ###################################
+http.max_content_length: 10mb
+
+
+# ------------------------
+# OpenSearch Security plugin
+# ------------------------
+plugins.security.disabled: false
+
+# Transport TLS (node-to-node communication)
+plugins.security.ssl.transport.enabled: true
+plugins.security.ssl.transport.pemcert_filepath: certs/ssl.crt
+plugins.security.ssl.transport.pemkey_filepath: certs/ssl.key
+plugins.security.ssl.transport.pemtrustedcas_filepath: certs/spryker_ca.crt
+plugins.security.ssl.transport.enforce_hostname_verification: false
+
+# HTTP TLS (REST API) - HTTPS enabled
+plugins.security.ssl.http.enabled: true
+plugins.security.ssl.http.pemcert_filepath: certs/ssl.crt
+plugins.security.ssl.http.pemkey_filepath: certs/ssl.key
+plugins.security.ssl.http.pemtrustedcas_filepath: certs/spryker_ca.crt
+plugins.security.ssl.http.clientauth_mode: OPTIONAL
+
+# Security index initialization
+plugins.security.allow_default_init_securityindex: true
+plugins.security.allow_unsafe_democertificates: false
+
+# Admin distinguished names (for securityadmin tool)
+plugins.security.authcz.admin_dn:
+    - "CN=Spryker,O=Spryker,OU=Spryker,L=Berlin,ST=Berlin,C=DE"
+
+# — Which certificates your nodes present for transport TLS —
+plugins.security.nodes_dn:
+    - "CN=Spryker,O=Spryker,OU=Spryker,L=Berlin,ST=Berlin,C=DE"
+
+#
+# Allow REST API access
+plugins.security.restapi.roles_enabled: ["all_access","security_rest_api_access"]
+
+#
+## System indices
+#plugins.security.system_indices.enabled: true
+#plugins.security.system_indices.indices: [".opendistro-alerting-config", ".opendistro-alerting-alert*", ".opendistro-anomaly-results*", ".opendistro-anomaly-detector*", ".opendistro-anomaly-checkpoints", ".opendistro-anomaly-detection-state", ".opendistro-reports-*", ".opendistro-notifications-*", ".opendistro-notebooks", ".opensearch-observability", ".opendistro-asynchronous-search-response*"]

@@ -1,6 +1,17 @@
   {{ serviceName }}:
     image: redis:6.2-alpine
-    command: 'redis-server /usr/local/etc/redis/redis.conf --appendonly yes --save \"\"'
+    command: >
+        redis-server /usr/local/etc/redis/redis.conf
+{% if project['docker']['ssl']['strict'] | default(false) %}
+        --tls-port 6379
+        --port 0
+        --tls-cert-file /usr/local/etc/redis/ssl.crt
+        --tls-key-file /usr/local/etc/redis/ssl.key
+        --tls-ca-cert-file /usr/local/etc/redis/spryker_ca.crt
+        --tls-auth-clients no
+{% else %}
+        --port 6379
+{% endif %}
     networks:
       - private
     labels:
@@ -8,19 +19,43 @@
       'spryker.app.type': services
       'spryker.project': ${SPRYKER_DOCKER_PREFIX}:${SPRYKER_DOCKER_TAG}
     healthcheck:
-        test: [ "CMD", "redis-cli", "ping" ]
+        test: >
+{% if project['docker']['ssl']['strict'] | default(false) %}
+            redis-cli --tls --cacert /usr/local/etc/redis/spryker_ca.crt -p 6379 ping | grep -q PONG
+{% else %}
+            redis-cli -p 6379 ping | grep -q PONG
+{% endif %}
         interval: 10s
         timeout: 5s
         retries: 5
     volumes:
       - {{ serviceName }}-{{ serviceData['engine'] }}-data:/data
       - ./${DEPLOYMENT_PATH}/context/redis/redis.conf:/usr/local/etc/redis/redis.conf:ro
+{% if project['docker']['ssl']['strict'] | default(false) %}
+      - ./${DEPLOYMENT_PATH}/spryker_ca.crt:/usr/local/etc/redis/spryker_ca.crt:ro
+      - ./${DEPLOYMENT_PATH}/ssl.crt:/usr/local/etc/redis/ssl.crt:ro
+      - ./${DEPLOYMENT_PATH}/ssl.key:/usr/local/etc/redis/ssl.key:ro
+{% endif %}
 
 {% if serviceData['replica-services'] is defined %}
 {% for replica in serviceData['replica-services'] %}
   {{ serviceName }}_{{ replica }}:
       image: redis:6.2-alpine
-      command: "redis-server /usr/local/etc/redis/redis.conf --slaveof {{ serviceName }} 6379"
+      command: >
+          redis-server /usr/local/etc/redis/redis.conf
+{% if project['docker']['ssl']['strict'] | default(false) %}
+          --tls-port 6379
+          --port 0
+          --tls-cert-file /usr/local/etc/redis/ssl.crt
+          --tls-key-file /usr/local/etc/redis/ssl.key
+          --tls-ca-cert-file /usr/local/etc/redis/spryker_ca.crt
+          --tls-auth-clients no
+          --appendonly yes --save ""
+          --replicaof {{ serviceName }} 6379
+{% else %}
+          --port 6379
+          --replicaof {{ serviceName }} 6379
+{% endif %}
       depends_on:
         - {{ serviceName }}
       networks:
@@ -30,13 +65,22 @@
           'spryker.app.type': services
           'spryker.project': ${SPRYKER_DOCKER_PREFIX}:${SPRYKER_DOCKER_TAG}
       healthcheck:
-          test: [ "CMD", "redis-cli", "--raw", "incr", "ping" ]
+          test: >
+{% if project['docker']['ssl']['strict'] | default(false) %}
+              redis-cli --tls --cacert /usr/local/etc/redis/spryker_ca.crt -p 6379 ping | grep -q PONG
+{% else %}
+              redis-cli -p 6379 ping | grep -q PONG
+{% endif %}
           interval: 10s
           timeout: 5s
           retries: 5
       volumes:
           - {{ serviceName }}-{{ serviceData['engine'] }}-data:/data
           - ./${DEPLOYMENT_PATH}/context/redis/redis.conf:/usr/local/etc/redis/redis.conf:ro
-
+{% if project['docker']['ssl']['strict'] | default(false) %}
+          - ./${DEPLOYMENT_PATH}/spryker_ca.crt:/usr/local/etc/redis/spryker_ca.crt:ro
+          - ./${DEPLOYMENT_PATH}/ssl.crt:/usr/local/etc/redis/ssl.crt:ro
+          - ./${DEPLOYMENT_PATH}/ssl.key:/usr/local/etc/redis/ssl.key:ro
+{% endif %}
 {% endfor %}
 {% endif %}

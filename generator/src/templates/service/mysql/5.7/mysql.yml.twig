@@ -17,3 +17,13 @@
     volumes:
       - {{ serviceName }}-{{ serviceData['engine'] }}-data:/var/lib/mysql:rw
       - ./${DEPLOYMENT_PATH}/context/mysql/my.cnf:/etc/mysql/my.cnf:ro
+{% if project['docker']['ssl']['strict'] | default(false) %}
+      - ./${DEPLOYMENT_PATH}/spryker_ca.crt:/certs/spryker_ca.crt:ro
+      - ./${DEPLOYMENT_PATH}/ssl.crt:/certs/ssl.crt:ro
+      - ./${DEPLOYMENT_PATH}/ssl.key:/certs/ssl.key:ro
+    command: >
+        --ssl
+        --ssl-ca=/certs/spryker_ca.crt
+        --ssl-cert=/certs/ssl.crt
+        --ssl-key=/certs/ssl.key
+{% endif %}
