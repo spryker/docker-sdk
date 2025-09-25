@@ -2,10 +2,10 @@
 
 function Database::checkConnection() {
     if ! Service::isServiceExist database; then
-        return
+        return;
     fi
 
-    local -i retriesFor=30
+    local -i retriesFor=180
     local -i interval=2
     local counter=1
 
