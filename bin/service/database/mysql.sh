@@ -1,18 +1,24 @@
 #!/usr/bin/env bash
 
-
 function Database::checkConnection() {
     if ! Service::isServiceExist database; then
-        return;
+        return
     fi
 
-    local -i retriesFor=180
+    local -i retriesFor=30
     local -i interval=2
     local counter=1
 
+    local admin_cmd="mysqladmin"
+    local ssl_options="--skip-ssl"
+
+    if Compose::exec "command -v mariadb-admin" "${DOCKER_COMPOSE_TTY_DISABLED}" >/dev/null 2>&1; then
+        admin_cmd="mariadb-admin"
+    fi
+
     while :; do
         [ "${counter}" -gt 0 ] && echo -en "\rWaiting for database connection [${counter}/${retriesFor}]..." || echo -en ""
-        local status=$(Compose::exec "mysqladmin ping -h \${SPRYKER_DB_HOST} -u \${SPRYKER_DB_ROOT_USERNAME} -p\${SPRYKER_DB_ROOT_PASSWORD} --silent" "${DOCKER_COMPOSE_TTY_DISABLED}" | grep -c "mysqld is alive")
+        local status=$(Compose::exec "${admin_cmd} ping -h \${SPRYKER_DB_HOST} -u \${SPRYKER_DB_ROOT_USERNAME} -p\${SPRYKER_DB_ROOT_PASSWORD} --silent ${ssl_options}" "${DOCKER_COMPOSE_TTY_DISABLED}" | grep -c "mysqld is alive")
         [ "${status}" -eq 1 ] && echo -en "${CLEAR}\r" && break
 
         if [ $((counter % 5)) -eq 0 ]; then
@@ -25,7 +31,6 @@ function Database::checkConnection() {
     done
 }
 
-
 function Database::haveTables() {
     Database::checkConnection
 
@@ -34,8 +39,15 @@ function Database::haveTables() {
         export VERBOSE=0
         export MYSQL_PWD="${SPRYKER_DB_ROOT_PASSWORD}"
         databases="$(echo ${SPRYKER_PAAS_SERVICES} | jq  '.databases')";
+
+        if command -v mariadb >/dev/null 2>&1; then
+          DB_CLIENT="mariadb"
+        else
+          DB_CLIENT="mysql"
+        fi
+
         if [ -z "${databases}" ] || [ "${databases}" == "[]" ]; then
-            mysql \
+            ${DB_CLIENT} \
                 -h "${SPRYKER_DB_HOST}" \
                 -u "${SPRYKER_DB_ROOT_USERNAME}" \
                 -e "SELECT TABLE_NAME FROM information_schema.tables WHERE table_schema = \"${SPRYKER_DB_DATABASE}\"" \
@@ -47,7 +59,7 @@ function Database::haveTables() {
             echo ${databases} | jq -c '.[]' | while read line; do
                 SPRYKER_DB_HOST=$(echo $line | jq -r .host);
                 SPRYKER_DB_DATABASE=$(echo $line | jq -r .database);
-                tablesCountPerDb=$(mysql \
+                tablesCountPerDb=$(${DB_CLIENT} \
                     -h "${SPRYKER_DB_HOST}" \
                     -u "${SPRYKER_DB_ROOT_USERNAME}" \
                     -e "SELECT TABLE_NAME FROM information_schema.tables WHERE table_schema = \"${SPRYKER_DB_DATABASE}\"" \
@@ -78,9 +90,15 @@ function Database::init() {
         export MYSQL_PWD="${SPRYKER_DB_ROOT_PASSWORD}";
         databases="$(echo ${SPRYKER_PAAS_SERVICES} | jq  '.databases')";
 
+        if command -v mariadb >/dev/null 2>&1; then
+          DB_CLIENT="mariadb"
+        else
+          DB_CLIENT="mysql"
+        fi
+
         if [ -z "${databases}" ] || [ "${databases}" == "[]" ]; then
-            mysql \
-                -h "${SPRYKER_DB_HOST}" \
+            ${DB_CLIENT} \
+                -h "${SPRYKER_DB_HOST}" --skip-ssl \
                 -u root \
                 -e "CREATE DATABASE IF NOT EXISTS \`${SPRYKER_DB_DATABASE}\` CHARACTER SET \"${SPRYKER_DB_CHARACTER_SET}\" COLLATE \"${SPRYKER_DB_COLLATE}\"; GRANT ALL PRIVILEGES ON \`${SPRYKER_DB_DATABASE}\`.* TO \"${SPRYKER_DB_USERNAME}\"@\"%\" IDENTIFIED BY \"${SPRYKER_DB_PASSWORD}\" WITH GRANT OPTION;"
         else
@@ -92,8 +110,8 @@ function Database::init() {
               SPRYKER_DB_CHARACTER_SET=$(echo $line | jq -r .characterSet);
               SPRYKER_DB_COLLATE=$(echo $line | jq -r .collate);
               export MYSQL_PWD="${SPRYKER_DB_ROOT_PASSWORD}";
-              mysql \
-                -h "${SPRYKER_DB_HOST}" \
+              ${DB_CLIENT} \
+                -h "${SPRYKER_DB_HOST}" --skip-ssl \
                 -u root \
                 -e "CREATE DATABASE IF NOT EXISTS \`${SPRYKER_DB_DATABASE}\` CHARACTER SET \"${SPRYKER_DB_CHARACTER_SET}\" COLLATE \"${SPRYKER_DB_COLLATE}\"; GRANT ALL PRIVILEGES ON \`${SPRYKER_DB_DATABASE}\`.* TO \"${SPRYKER_DB_USERNAME}\"@\"%\" IDENTIFIED BY \"${SPRYKER_DB_PASSWORD}\" WITH GRANT OPTION;"
             done
