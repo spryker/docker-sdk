@@ -18,6 +18,11 @@
     serviceData: project['services']['session'],
     serviceName: 'session'
 } %}
+{% include "terraform/database/#{project['services']['database']['engine']}.tf.twig" ignore missing with {
+    serviceData: project['services']['database'],
+    regionData: regionData['services']['database'],
+    serviceName: 'database'
+} %}
 {% include "terraform/mail/mail.tf.twig" with {
     serviceData: regionData['services']['mail']
 } %}
