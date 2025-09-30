@@ -1,0 +1,21 @@
+_meta:
+    type: "rolesmapping"
+    config_version: 2
+
+admin:
+    reserved: false
+    backend_roles: []
+    and_backend_roles: []
+    hosts: []
+    users:
+        - admin
+    description: "Allow HTTP-basic admin full access"
+
+superuser:
+    reserved: false
+    backend_roles: []
+    and_backend_roles: []
+    hosts: []
+    users:
+        - anonymous_all
+    description: "Grant full access to anonymous_all"

@@ -1,0 +1,10 @@
+config:
+    dynamic:
+        http:
+            anonymous_auth_enabled: true
+        authc:
+            anonymous_auth_domain:
+                http_enabled: true
+                order: 0
+                http_authenticator:
+                    type: anonymous

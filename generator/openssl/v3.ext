@@ -14,5 +14,5 @@ CN = Spryker
 [ v3_req ]
 basicConstraints = CA:FALSE
 keyUsage = nonRepudiation, digitalSignature, keyEncipherment
-extendedKeyUsage = serverAuth
+extendedKeyUsage = serverAuth, clientAuth
 subjectAltName = ${ENV::ALT_NAMES}

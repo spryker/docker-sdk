@@ -7,7 +7,12 @@
       'spryker.app.type': services
       'spryker.project': ${SPRYKER_DOCKER_PREFIX}:${SPRYKER_DOCKER_TAG}
     healthcheck:
-        test: ["CMD", "curl", "-f", "localhost:9200/_cat/health"]
+        test: >
+{% if project['docker']['ssl']['strict'] | default(false) %}
+            curl -f --cacert /usr/share/elasticsearch/config/certs/spryker_ca.crt https://localhost:9200/_cat/health
+{% else %}
+            curl -f localhost:9200/_cat/health
+{% endif %}
         interval: 10s
         timeout: 5s
         retries: 5
@@ -16,7 +21,35 @@
             soft: -1
             hard: -1
     environment:
-        ES_JAVA_OPTS: "-Xms512m -Xmx512m"
+        # Basic Elasticsearch settings
+        - ES_JAVA_OPTS=-Xms512m -Xmx512m
+
+{% if project['docker']['ssl']['strict'] | default(false) %}
+        # Enable X-Pack Security
+        - xpack.security.enabled=true
+
+        # Enable HTTPS/TLS
+        - xpack.security.http.ssl.enabled=true
+        - xpack.security.http.ssl.certificate=/usr/share/elasticsearch/config/certs/ssl.crt
+        - xpack.security.http.ssl.key=/usr/share/elasticsearch/config/certs/ssl.key
+        - xpack.security.http.ssl.certificate_authorities=/usr/share/elasticsearch/config/certs/spryker_ca.crt
+
+        # Transport layer SSL (for cluster communication)
+        - xpack.security.transport.ssl.enabled=true
+        - xpack.security.transport.ssl.certificate=/usr/share/elasticsearch/config/certs/ssl.crt
+        - xpack.security.transport.ssl.key=/usr/share/elasticsearch/config/certs/ssl.key
+        - xpack.security.transport.ssl.certificate_authorities=/usr/share/elasticsearch/config/certs/spryker_ca.crt
+
+        # Anonymous access (optional - for testing)
+        - xpack.security.authc.anonymous.username=anonymous_user
+        - xpack.security.authc.anonymous.roles=superuser
+        - xpack.security.authc.anonymous.authz_exception=false
+{% endif %}
     volumes:
         - {{ serviceName }}-{{ serviceData['engine'] }}-data:/usr/share/elasticsearch/data:rw
         - ./${DEPLOYMENT_PATH}/context/elasticsearch/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml:ro
+{% if project['docker']['ssl']['strict'] | default(false) %}
+        - ./${DEPLOYMENT_PATH}/spryker_ca.crt:/usr/share/elasticsearch/config/certs/spryker_ca.crt:ro
+        - ./${DEPLOYMENT_PATH}/ssl.crt:/usr/share/elasticsearch/config/certs/ssl.crt:ro
+        - ./${DEPLOYMENT_PATH}/ssl.key:/usr/share/elasticsearch/config/certs/ssl.key:ro
+{% endif %}

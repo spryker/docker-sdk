@@ -6,13 +6,15 @@ function Database::checkConnection() {
         return;
     fi
 
-    local -i retriesFor=180
+    local -i retriesFor=30
     local -i interval=2
     local counter=1
+    local TLS_OPTS
+    TLS_OPTS=$(Database::_getTLSOptions)
 
     while :; do
         [ "${counter}" -gt 0 ] && echo -en "\rWaiting for database connection [${counter}/${retriesFor}]..." || echo -en ""
-        local status=$(Compose::exec "mysqladmin ping -h \${SPRYKER_DB_HOST} -u \${SPRYKER_DB_ROOT_USERNAME} -p\${SPRYKER_DB_ROOT_PASSWORD} --silent" "${DOCKER_COMPOSE_TTY_DISABLED}" | grep -c "mysqld is alive")
+        local status=$(Compose::exec "mysqladmin ping -h \${SPRYKER_DB_HOST} -u \${SPRYKER_DB_ROOT_USERNAME} -p\${SPRYKER_DB_ROOT_PASSWORD} \${TLS_OPTS} --silent" "${DOCKER_COMPOSE_TTY_DISABLED}" | grep -c "mysqld is alive")
         [ "${status}" -eq 1 ] && echo -en "${CLEAR}\r" && break
 
         if [ $((counter % 5)) -eq 0 ]; then
@@ -25,17 +27,21 @@ function Database::checkConnection() {
     done
 }
 
-
 function Database::haveTables() {
     Database::checkConnection
+
+    local TLS_OPTS
+    TLS_OPTS=$(Database::_getTLSOptions)
 
     tableCount=$(
         Compose::exec <<'EOF'
         export VERBOSE=0
         export MYSQL_PWD="${SPRYKER_DB_ROOT_PASSWORD}"
+        export TLS_OPTS="${TLS_OPTS}"
         databases="$(echo ${SPRYKER_PAAS_SERVICES} | jq  '.databases')";
         if [ -z "${databases}" ] || [ "${databases}" == "[]" ]; then
             mysql \
+                ${TLS_OPTS} \
                 -h "${SPRYKER_DB_HOST}" \
                 -u "${SPRYKER_DB_ROOT_USERNAME}" \
                 -e "SELECT TABLE_NAME FROM information_schema.tables WHERE table_schema = \"${SPRYKER_DB_DATABASE}\"" \
@@ -48,6 +54,7 @@ function Database::haveTables() {
                 SPRYKER_DB_HOST=$(echo $line | jq -r .host);
                 SPRYKER_DB_DATABASE=$(echo $line | jq -r .database);
                 tablesCountPerDb=$(mysql \
+                    ${TLS_OPTS} \ \
                     -h "${SPRYKER_DB_HOST}" \
                     -u "${SPRYKER_DB_ROOT_USERNAME}" \
                     -e "SELECT TABLE_NAME FROM information_schema.tables WHERE table_schema = \"${SPRYKER_DB_DATABASE}\"" \
@@ -73,13 +80,17 @@ EOF
 
 function Database::init() {
       Database::checkConnection
+      local TLS_OPTS
+      TLS_OPTS=$(Database::_getTLSOptions)
 
       Compose::exec <<'EOF'
         export MYSQL_PWD="${SPRYKER_DB_ROOT_PASSWORD}";
+        export TLS_OPTS="${TLS_OPTS}"
         databases="$(echo ${SPRYKER_PAAS_SERVICES} | jq  '.databases')";
 
         if [ -z "${databases}" ] || [ "${databases}" == "[]" ]; then
             mysql \
+                ${TLS_OPTS} \
                 -h "${SPRYKER_DB_HOST}" \
                 -u root \
                 -e "CREATE DATABASE IF NOT EXISTS \`${SPRYKER_DB_DATABASE}\` CHARACTER SET \"${SPRYKER_DB_CHARACTER_SET}\" COLLATE \"${SPRYKER_DB_COLLATE}\"; GRANT ALL PRIVILEGES ON \`${SPRYKER_DB_DATABASE}\`.* TO \"${SPRYKER_DB_USERNAME}\"@\"%\" IDENTIFIED BY \"${SPRYKER_DB_PASSWORD}\" WITH GRANT OPTION;"
@@ -93,10 +104,17 @@ function Database::init() {
               SPRYKER_DB_COLLATE=$(echo $line | jq -r .collate);
               export MYSQL_PWD="${SPRYKER_DB_ROOT_PASSWORD}";
               mysql \
+                 ${TLS_OPTS} \
                 -h "${SPRYKER_DB_HOST}" \
                 -u root \
                 -e "CREATE DATABASE IF NOT EXISTS \`${SPRYKER_DB_DATABASE}\` CHARACTER SET \"${SPRYKER_DB_CHARACTER_SET}\" COLLATE \"${SPRYKER_DB_COLLATE}\"; GRANT ALL PRIVILEGES ON \`${SPRYKER_DB_DATABASE}\`.* TO \"${SPRYKER_DB_USERNAME}\"@\"%\" IDENTIFIED BY \"${SPRYKER_DB_PASSWORD}\" WITH GRANT OPTION;"
             done
         fi
 EOF
+}
+
+function Database::_getTLSOptions() {
+    if [ -n "${SPRYKER_DB_SSL_CA:-}" ]; then
+        printf '%s' "--ssl --ssl-ca=${SPRYKER_DB_SSL_CA}"
+    fi
 }
