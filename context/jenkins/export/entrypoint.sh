@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+: "${NEWRELIC_ENABLED:=false}"
+
 HOST=localhost
 PORT=8080
 JENKINS_CLI_PATH="/usr/share/jenkins/jenkins-cli.jar"
@@ -43,14 +45,27 @@ function waitForJenkinsCliEndpointToRespondHealthy(){
 }
 
 mkdir -p ~/.jenkins/updates
-rm -rf ~/.jenkins/plugins || echo 'plugins did not exists anyway'
+rm -rf ~/.jenkins/plugins || echo 'plugins did not exist anyway'
 mkdir -p ~/.jenkins/plugins
 test -f ~/.jenkins/jenkins.model.JenkinsLocationConfiguration.xml || envsubst < /opt/jenkins.model.JenkinsLocationConfiguration.xml > ~/.jenkins/jenkins.model.JenkinsLocationConfiguration.xml
-test -f ~/.jenkins/com.newrelic.experts.jenkins.extensions.NewRelicGlobalConfiguration.xml || envsubst < /opt/com.newrelic.experts.jenkins.extensions.NewRelicGlobalConfiguration.xml > ~/.jenkins/com.newrelic.experts.jenkins.extensions.NewRelicGlobalConfiguration.xml
-envsubst < /opt/nr-credentials.xml > ~/.jenkins/nr-credentials.xml
+
+if [ "${NEWRELIC_ENABLED}" = "true" ]; then
+  test -f ~/.jenkins/com.newrelic.experts.jenkins.extensions.NewRelicGlobalConfiguration.xml || \
+    envsubst < /opt/com.newrelic.experts.jenkins.extensions.NewRelicGlobalConfiguration.xml > ~/.jenkins/com.newrelic.experts.jenkins.extensions.NewRelicGlobalConfiguration.xml
+  envsubst < /opt/nr-credentials.xml > ~/.jenkins/nr-credentials.xml
+fi
 
 trap 'waitForFinishOfActiveJobs; kill ${pid}; exit 0;' SIGTERM
 cp -r /usr/share/jenkins/ref/plugins/* /root/.jenkins/plugins/
+
+if [ "${NEWRELIC_ENABLED}" != "true" ]; then
+  rm -f ~/.jenkins/plugins/new-relic.hpi
+fi
+
+if [ "${NEWRELIC_ENABLED}" != "true" ]; then
+  JAVA_OPTS="$(echo "$JAVA_OPTS" | sed -E 's/-javaagent:[^ ]*newrelic[^ ]*//g')"
+fi
+
 java ${JAVA_OPTS} -Djenkins.install.runSetupWizard=false -jar /usr/share/jenkins/jenkins.war ${JENKINS_OPTS} & pid=$!
 
 waitForJenkinsToStart
@@ -60,16 +75,17 @@ rm -f ${JENKINS_CLI_PATH}
 wget -O ${JENKINS_CLI_PATH} http://${HOST}:${PORT}/jnlpJars/jenkins-cli.jar
 waitForJenkinsCliEndpointToRespondHealthy
 
-java -jar ${JENKINS_CLI_PATH} -s http://${HOST}:${PORT}/ delete-credentials system::system::jenkins "(global)" newrelic-insight-key
-echo "deleted old newrelic credentials.."
-waitForJenkinsCliEndpointToRespondHealthy
+if [ "${NEWRELIC_ENABLED}" = "true" ]; then
+  java -jar ${JENKINS_CLI_PATH} -s http://${HOST}:${PORT}/ delete-credentials system::system::jenkins "(global)" newrelic-insight-key
+  echo "deleted old newrelic credentials.."
+  waitForJenkinsCliEndpointToRespondHealthy
 
-java -jar ${JENKINS_CLI_PATH} -s http://${HOST}:${PORT} create-credentials-by-xml system::system::jenkins "(global)" < ~/.jenkins/nr-credentials.xml
-echo "deployed new newrelic credentials.."
-waitForJenkinsCliEndpointToRespondHealthy
+  java -jar ${JENKINS_CLI_PATH} -s http://${HOST}:${PORT} create-credentials-by-xml system::system::jenkins "(global)" < ~/.jenkins/nr-credentials.xml
+  echo "deployed new newrelic credentials.."
+  waitForJenkinsCliEndpointToRespondHealthy
+fi
 
-### uncomment these two lines if datadog agent shall be installed
+### Uncomment these two lines if datadog agent shall be installed
 # curl -L http://updates.jenkins-ci.org/update-center.json | sed '1d;$d' > /root/.jenkins/updates/default.json
 # java -jar jenkins-cli.jar -s http://${HOST}:${PORT} install-plugin datadog -restart
-
 wait ${pid}
