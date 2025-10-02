@@ -16,9 +16,5 @@
     environment:
       RABBITMQ_DEFAULT_USER: "{{ serviceData['api']['username'] }}"
       RABBITMQ_DEFAULT_PASS: "{{ serviceData['api']['password'] }}"
-      RABBITMQ_MANAGEMENT_LOAD_DEFINITIONS: "false"
-      RABBITMQ_MANAGEMENT_HTTP_TIMEOUT: "30000"
-      RABBITMQ_MANAGEMENT_REQUEST_TIMEOUT: "30000"
-      RABBITMQ_SERVER_ADDITIONAL_ERL_ARGS: "-rabbit tcp_listeners [5672] -rabbitmq_management listener [{port,15672},{request_timeout,30000}]"
     volumes:
       - {{ serviceName }}-{{ serviceData['engine'] }}-data:/var/lib/rabbitmq:rw
