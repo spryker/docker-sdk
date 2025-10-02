@@ -244,7 +244,7 @@ RabbitMQ 3.13 is the last version before 4.1. Make sure you are running version 
 
 2. **Stop Jenkins**: Before proceeding with the migration, stop all Jenkins jobs and the Jenkins service to prevent any message processing during the upgrade:
 
-3. **Apply infrastructure changes**: Apply the necessary infrastructure configuration changes to update the RabbitMQ service to the new version.
+3. **Apply changes**: Apply the necessary configuration changes to update the RabbitMQ service to the new version.
 
 4. **Restart Jenkins**: Once the migration is complete and verified, restart the Jenkins service.
 
