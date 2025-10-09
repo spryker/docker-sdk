@@ -9,6 +9,8 @@ COPY context/jenkins/export/jenkins.docker.xml.twig ./config/Zed/cronjobs/jenkin
 COPY --from=spryker-jenkins-boilerplate /usr/share/jenkins/ref/plugins /usr/share/jenkins/ref/plugins
 COPY --from=spryker-jenkins-boilerplate /usr/share/jenkins/jenkins.war /usr/share/jenkins/jenkins.war
 COPY --from=spryker-jenkins-boilerplate /usr/share/jenkins/jenkins-cli.jar /usr/share/jenkins/jenkins-cli.jar
+COPY --from=spryker-jenkins-boilerplate /usr/share/jenkins/ref/casc.yaml /usr/share/jenkins/ref/casc.yaml
+COPY --from=spryker-jenkins-boilerplate /usr/share/jenkins/ref/init.groovy.d/00-bootstrap-token.groovy /usr/share/jenkins/ref/init.groovy.d/00-bootstrap-token.groovy
 
 # Install packages on Alpine
 RUN bash -c 'if [ ! -z "$(which apk)" ]; then apk --no-cache add \
