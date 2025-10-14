@@ -11,7 +11,7 @@ COPY --from=spryker-jenkins-boilerplate /usr/share/jenkins/jenkins.war /usr/shar
 COPY --from=spryker-jenkins-boilerplate /usr/share/jenkins/jenkins-cli.jar /usr/share/jenkins/jenkins-cli.jar
 COPY --from=spryker-jenkins-boilerplate /usr/share/jenkins/ref/casc.yaml /usr/share/jenkins/ref/casc.yaml
 RUN mkdir -p /usr/share/jenkins/ref/init.groovy.d
-COPY --from=spryker-jenkins-boilerplate /usr/share/jenkins/ref/init.groovy.d/a00-bootstrap-token.groovy /usr/share/jenkins/ref/init.groovy.d/a00-bootstrap-token.groovy
+COPY --from=spryker-jenkins-boilerplate /usr/share/jenkins/ref/init.groovy.d/aa00-bootstrap-token.groovy /usr/share/jenkins/ref/init.groovy.d/aa00-bootstrap-token.groovy
 ENV JAVA_OPTS="-Djenkins.install.runSetupWizard=false"
 ENV CASC_JENKINS_CONFIG=/usr/share/jenkins/ref/casc.yaml
 
