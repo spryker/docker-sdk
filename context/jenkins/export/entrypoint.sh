@@ -132,6 +132,9 @@ envsubst < /opt/nr-credentials.xml > ~/.jenkins/nr-credentials.xml
 # On shutdown: drain queue then stop Jenkins
 trap 'waitForFinishOfActiveJobs; kill ${pid}; exit 0;' SIGTERM
 
+# Seed plugins from ref
+cp -r /usr/share/jenkins/ref/plugins/* /root/.jenkins/plugins/ || true
+
 # Init bootstrap script
 HOME_DIR="${JENKINS_HOME:-/root/.jenkins}"
 INIT_REF="/usr/share/jenkins/ref/init.groovy.d"
@@ -146,9 +149,6 @@ if [ -d "${INIT_REF}" ]; then
 fi
 echo "Init scripts in HOME (${INIT_HOME}):"
 ls -l "${INIT_HOME}" || true
-
-# Seed plugins from ref
-cp -r /usr/share/jenkins/ref/plugins/* /root/.jenkins/plugins/ || true
 
 # Start Jenkins (Groovy init runs now and creates the token)
 java ${JAVA_OPTS:-} -Djenkins.install.runSetupWizard=false -jar /usr/share/jenkins/jenkins.war ${JENKINS_OPTS:-} & pid=$!
