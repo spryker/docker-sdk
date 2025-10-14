@@ -48,4 +48,4 @@ COPY context/jenkins/export/com.newrelic.experts.jenkins.extensions.NewRelicGlob
 COPY context/jenkins/export/nr-credentials.xml /opt/nr-credentials.xml
 RUN chmod +x /entrypoint.sh
 
-# ENTRYPOINT ["/entrypoint.sh"]
+ENTRYPOINT ["/entrypoint.sh"]
