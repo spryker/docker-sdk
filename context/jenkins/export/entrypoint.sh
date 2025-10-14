@@ -132,6 +132,21 @@ envsubst < /opt/nr-credentials.xml > ~/.jenkins/nr-credentials.xml
 # On shutdown: drain queue then stop Jenkins
 trap 'waitForFinishOfActiveJobs; kill ${pid}; exit 0;' SIGTERM
 
+# Init bootstrap script
+HOME_DIR="${JENKINS_HOME:-/root/.jenkins}"
+INIT_REF="/usr/share/jenkins/ref/init.groovy.d"
+INIT_HOME="${HOME_DIR}/init.groovy.d"
+
+mkdir -p "${INIT_HOME}"
+if [ -d "${INIT_REF}" ]; then
+  # copy only if there are .groovy files; avoid failing when none exist
+  if find "${INIT_REF}" -maxdepth 1 -type f -name '*.groovy' | read _; then
+    find "${INIT_REF}" -maxdepth 1 -type f -name '*.groovy' -print -exec cp -f {} "${INIT_HOME}/" \;
+  fi
+fi
+echo "Init scripts in HOME (${INIT_HOME}):"
+ls -l "${INIT_HOME}" || true
+
 # Seed plugins from ref
 cp -r /usr/share/jenkins/ref/plugins/* /root/.jenkins/plugins/ || true
 
