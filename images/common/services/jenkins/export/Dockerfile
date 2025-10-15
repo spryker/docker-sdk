@@ -22,8 +22,8 @@ RUN bash -c 'if [ ! -z "$(which apk)" ]; then apk --no-cache add \
     openjdk17 \
     ttf-dejavu \
     gettext \
-    jq && \
-    ca-certificates && \ 
+    jq \
+    ca-certificates \
     aws-cli && \
     mkdir -p /envs \
     ; fi'
@@ -40,9 +40,12 @@ RUN bash -c 'if [ ! -z "$(which apt)" ]; then apt update -y && \
     fonts-dejavu \
     gettext \
     jq \
-    ca-certificates && \ 
-    aws-cli && \
-    && \
+    ca-certificates \
+    unzip && \
+    curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip" && \
+    unzip awscliv2.zip && \
+    ./aws/install && \
+    rm -rf awscliv2.zip aws && \
     mkdir -p /envs \
     ; fi'
 
