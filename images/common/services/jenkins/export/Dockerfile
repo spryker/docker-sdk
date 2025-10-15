@@ -23,6 +23,8 @@ RUN bash -c 'if [ ! -z "$(which apk)" ]; then apk --no-cache add \
     ttf-dejavu \
     gettext \
     jq && \
+    ca-certificates && \ 
+    aws-cli && \
     mkdir -p /envs \
     ; fi'
 
@@ -38,6 +40,8 @@ RUN bash -c 'if [ ! -z "$(which apt)" ]; then apt update -y && \
     fonts-dejavu \
     gettext \
     jq \
+    ca-certificates && \ 
+    aws-cli && \
     && \
     mkdir -p /envs \
     ; fi'
