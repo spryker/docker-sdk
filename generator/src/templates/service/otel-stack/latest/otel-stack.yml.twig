@@ -2,54 +2,45 @@
   # Tempo runs as user 10001, and docker compose creates the volume as root.
   # As such, we need to chown the volume in order for Tempo to start correctly.
   tempo-init:
-      image: &tempoImage grafana/tempo:main-1a21818
-      user: root
-      entrypoint:
-          - "chown"
-          - "10001:10001"
-          - "/var/tempo"
-      volumes:
-          - {{ serviceName }}-{{ serviceData['engine'] }}-data:/var/tempo:rw
-
+    image: &tempoImage grafana/tempo:2.9.0
+    user: root
+    entrypoint: [ "chown", "10001:10001", "/var/tempo" ]
+    volumes:
+      - {{ serviceName }}-{{ serviceData['engine'] }}-data:/var/tempo:rw
   tempo:
-      image: *tempoImage
-      command: [ "-config.file=/etc/tempo.yaml" ]
-      volumes:
-          - ./${DEPLOYMENT_PATH}/context/otel-stack/tempo.yaml:/etc/tempo.yaml
-          - {{ serviceName }}-{{ serviceData['engine'] }}-data:/var/tempo:rw
-      networks:
-          - private
-      ports:
-          - "14268"  # jaeger ingest
-          - "3200:3200"   # tempo
-          - "4317"  # otlp grpc
-          - "4318"  # otlp http
-          - "9411"   # zipkin
-      depends_on:
-          - tempo-init
-      healthcheck:
-          test: [ "CMD", "curl", "-f", "http://localhost:3200/metrics" ]
-          interval: 30s
-          timeout: 10s
-          retries: 3
-          start_period: 10s
-
+    image: *tempoImage
+    command: [ "-config.file=/etc/tempo.yaml" ]
+    volumes:
+      - ./${DEPLOYMENT_PATH}/context/otel-stack/tempo.yaml:/etc/tempo.yaml
+      - {{ serviceName }}-{{ serviceData['engine'] }}-data:/var/tempo:rw
+    networks: [ private ]
+    ports:
+      - "14268"        # jaeger ingest
+      - "3200:3200"    # tempo HTTP API/Grafana datasource
+      - "9411"         # zipkin
+    depends_on: [ tempo-init ]
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:3200/metrics" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
   collector:
-      image: otel/opentelemetry-collector:0.86.0
-      command: [ "--config=/etc/otel-collector.yaml" ]
-      volumes:
-          - ./${DEPLOYMENT_PATH}/context/otel-stack/otel-collector.yaml:/etc/otel-collector.yaml
-      networks:
-          - private
-      healthcheck:
-          test: [ "CMD", "curl", "-f", "http://localhost:13133/health" ]
-          interval: 30s
-          timeout: 10s
-          retries: 3
-          start_period: 10s
-      ports:
-          - "4318:4318"
-          - "4317:4317"
+    image: otel/opentelemetry-collector:0.137.0
+    command: [ "--config=/etc/otel-collector.yaml" ]
+    volumes:
+      - ./${DEPLOYMENT_PATH}/context/otel-stack/otel-collector.yaml:/etc/otel-collector.yaml
+    networks: [ private ]
+    depends_on: [ tempo ]
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:13133/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    ports:
+      - "4318:4318"
+      - "4317:4317"
   prometheus:
       image: prom/prometheus:latest
       command:
@@ -68,9 +59,8 @@
           timeout: 10s
           retries: 3
           start_period: 10s
-
   grafana:
-      image: grafana/grafana:11.0.0
+      image: grafana/grafana:12.2
       volumes:
           - ./${DEPLOYMENT_PATH}/context/otel-stack/grafana-datasources.yaml:/etc/grafana/provisioning/datasources/datasources.yaml
           - ./${DEPLOYMENT_PATH}/context/otel-stack/grafana-dashboards.yaml:/etc/grafana/provisioning/dashboards/dashboards.yaml

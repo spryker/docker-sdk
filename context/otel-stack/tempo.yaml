@@ -1,7 +1,7 @@
 stream_over_http_enabled: true
 server:
     http_listen_port: 3200
-#    grpc_listen_port: 4317
+    # grpc_listen_port: 9095   # Tempo gRPC (not OTLP)
     log_level: info
 
 query_frontend:
@@ -13,22 +13,24 @@ query_frontend:
 
 distributor:
     receivers:
-        jaeger:
-            protocols:
-                thrift_http:
-                thrift_binary:
-                thrift_compact:
-                grpc:
-        zipkin:
         otlp:
             protocols:
-                http:
                 grpc:
-        opencensus:
+                    endpoint: 0.0.0.0:4317
+                http:
+                    endpoint: 0.0.0.0:4318
+        jaeger:
+            protocols:
+                thrift_http: {}
+                thrift_binary: {}
+                thrift_compact: {}
+                grpc: {}
+        zipkin: {}
+        opencensus: {}
 
 ingester:
     max_block_duration: 5m
-#    max_block_bytes: 100000000
+    # max_block_bytes: 100000000
 
 compactor:
     compaction:
