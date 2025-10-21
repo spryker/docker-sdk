@@ -5,6 +5,7 @@ FROM ${SPRYKER_PARENT_IMAGE} AS application-production-dependencies
 
 USER spryker
 
+COPY --chown=spryker:spryker src ${srcRoot}/src
 # Install composer modules for Spryker
 COPY --chown=spryker:spryker composer.json composer.lock ${srcRoot}/
 ARG SPRYKER_COMPOSER_MODE
@@ -16,7 +17,6 @@ RUN --mount=type=cache,id=composer,sharing=locked,target=/home/spryker/.composer
 
 FROM application-production-dependencies AS application-production-codebase
 
-COPY --chown=spryker:spryker src ${srcRoot}/src
 COPY --chown=spryker:spryker config ${srcRoot}/config
 COPY --chown=spryker:spryker *.php ${srcRoot}/
 # TODO: Move codebase related stuff from data folder to src. In ideal: translations in /data are needed for build below
