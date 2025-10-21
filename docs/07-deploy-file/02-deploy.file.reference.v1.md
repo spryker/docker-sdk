@@ -543,7 +543,7 @@ yves_eu:
 ```
 
 * `groups: applications: application: limits: workers` - defines the maximum number of concurrent child processes a process manager can serve simultaneously.
-Note: This option isn’t available in Spryker Cloud because we automatically detect and apply the optimal PHP-FPM configuration for each application.
+> Note: This option isn’t available in Spryker Cloud because we automatically detect and apply the optimal PHP-FPM configuration for each application.
 
 ```yaml
 ...
