@@ -30,15 +30,18 @@ mkdir -p "${TEMP_CONTEXT}/cache"
 cp -a "${COMPOSER_CACHE_DIR}/." "${TEMP_CONTEXT}/cache/" 2>/dev/null || true
 
 # Create a temporary Dockerfile to copy cache into Docker's cache mount
+# Using the same cache id and target path as the main Dockerfile
 cat > "${TEMP_CONTEXT}/Dockerfile" <<'EOF'
 FROM alpine:latest
-COPY cache /cache-source
-RUN --mount=type=cache,id=composer,sharing=locked,target=/cache \
+RUN adduser -u 1000 -D spryker
+USER spryker
+COPY --chown=spryker:spryker cache /cache-source
+RUN --mount=type=cache,id=composer,sharing=locked,target=/home/spryker/.composer/cache,uid=1000 \
     if [ -n "$(ls -A /cache-source 2>/dev/null)" ]; then \
         echo "Copying composer cache to Docker cache mount..."; \
-        cp -a /cache-source/. /cache/ 2>/dev/null || true; \
+        cp -a /cache-source/. /home/spryker/.composer/cache/ 2>/dev/null || true; \
         echo "Cache pre-population complete. Cache directory size:"; \
-        du -sh /cache 2>/dev/null || echo "Cache populated"; \
+        du -sh /home/spryker/.composer/cache 2>/dev/null || echo "Cache populated"; \
     else \
         echo "No files to copy from source cache"; \
     fi
