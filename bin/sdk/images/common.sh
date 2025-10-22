@@ -47,7 +47,7 @@ function Images::_buildApp() {
 
     # Pre-populate Docker BuildKit composer cache from host
     Console::verbose "${INFO}Pre-populating composer cache...${NC}"
-    bash "${BASH_SOURCE%/*}/prepopulate-composer-cache.sh" || Console::verbose "${WARN}Cache pre-population skipped${NC}"
+    bash "${BASH_SOURCE%/*}/prepopulate-composer-cache.sh"
 
     Images::_prepareSecrets
     Registry::Trap::addExitHook 'removeBuildSecrets' "rm -f ${SECRETS_FILE_PATH}"
