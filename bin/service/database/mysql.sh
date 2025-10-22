@@ -25,7 +25,6 @@ function Database::checkConnection() {
     done
 }
 
-
 function Database::haveTables() {
     Database::checkConnection
 

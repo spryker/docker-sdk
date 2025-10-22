@@ -1,5 +1,8 @@
   {{ serviceName }}:
-    image: spryker/jenkins:2.516.1-rc
+{#    image: spryker/jenkins:2.516.1-rc#}
+{#    image: spryker/jenkins:2.516.1-rc2#}
+{#    image: platform-dale-jenkins2:latest#}
+    image: platform-dale-jenkins2:latest
     networks:
       - private
     labels:
@@ -12,15 +15,19 @@
       timeout: 5s
       retries: 5
     environment:
-      JAVA_OPTS: '-Djenkins.install.runSetupWizard=false -Xms128m -Xmx128m -Dhudson.security.csrf.GlobalCrumbIssuerConfiguration.DISABLE_CSRF_PROTECTION={{ serviceData['csrf-protection-enabled'] ? 'false' : 'true' }}'
-      JENKINS_URL: "http://scheduler.spryker.local/"
-      IDP_METADATA_URL: "https://portal.sso.eu-central-1.amazonaws.com/saml/metadata/MjM3ODI1NDgzNjU0X2lucy0xNzEyYjlmMGMxZWNlYzJm"
-      CUSTOMER_ENV: "my_jenkins"
+      JENKINS_URL: "http://localhost:777"
+      OIDC_WELL_KNOWN: "https://keycloak-poc.poc.cloud.spryker.toys/realms/jenkins/.well-known/openid-configuration"
+      OIDC_CLIENT_ID: "jenkins_local"
+      OIDC_CLIENT_SECRET: "JpmZtIsFPTinzX877m0VoBJK0EFwCDIB"
+{#      COGNITO_IDP_NAME: "AWSJenkinsIDP"#}
       CASC_JENKINS_CONFIG: "/usr/share/jenkins/ref/casc.yaml"
+      AWS_REGION: "eu-central-1"
+      SPRYKER_PROJECT_NAME: "platform_dale"
     volumes:
       - {{ serviceName }}-{{ serviceData['engine'] }}-data:/var/jenkins_home:rw
       - ${DEPLOYMENT_PATH}/context/jenkins/spryker.sh:/usr/bin/spryker.sh:ro
       - ${DEPLOYMENT_PATH}/context/jenkins/config.yaml:/usr/share/jenkins/ref/casc.yaml:ro
+{#      - ${DEPLOYMENT_PATH}/context/jenkins/bootstrap_token.groovy:/root/.jenkins/init.groovy.d/bootstrap_token.groovy#}
 
 
 

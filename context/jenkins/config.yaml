@@ -1,34 +1,72 @@
 unclassified:
-  location:
-    url: "${JENKINS_URL}"
+    location:
+        url: "${JENKINS_URL}"
 
 jenkins:
-  securityRealm:
-    saml:
-      idpMetadataConfiguration:
-        url: "${IDP_METADATA_URL}"
-      binding: "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect"
-      maximumAuthenticationLifetime: 86400
-      usernameAttributeName: "email"
-      emailAttributeName: "email"
-      displayNameAttributeName: "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name"
-      groupsAttributeName: "http://schemas.xmlsoap.org/claims/Group"
-      advancedConfiguration:
-          spEntityId: "${JENKINS_URL}"
+    projectNamingStrategy:
+        roleBasedProjectNamingStrategy:
+            forceExistingJobs: false
 
-  authorizationStrategy:
-    roleBased:
-      roles:
-        global:
-          - name: viewer
-            permissions: ["Overall/Read","View/Read","Job/Discover","Job/Read"]
-            entries:
-              - group: "c334d892-c071-70f6-7b7e-92cfdbb46b68"
-          - name: developer
-            permissions: ["Overall/Read","View/Read","Job/Discover","Job/Read","Job/Build","Job/Cancel"]
-            entries:
-              - group: "a39438f2-6031-70e2-1342-be2da21c8325"
-          - name: admin
-            permissions: ["Overall/Administer"]
-            entries:
-              - group: "33b40882-f041-7016-0664-b110cd2a8880"
+    securityRealm:
+        oic:
+            clientId: "${OIDC_CLIENT_ID}"
+            clientSecret: "${OIDC_CLIENT_SECRET}"
+            userNameField: "email"
+            emailFieldName: "email"
+            fullNameFieldName: "name"
+            groupsFieldName: "groups"
+            pkceEnabled: true
+            sendScopesInTokenRequest: true
+            serverConfiguration:
+                wellKnown:
+                    wellKnownOpenIDConfigurationUrl: "${OIDC_WELL_KNOWN}"
+                    scopesOverride: "openid profile email"
+
+    authorizationStrategy:
+        roleBased:
+            roles:
+                global:
+                    - name: "admin"
+                      description: "Full administrative access"
+                      permissions:
+                          - "Overall/Read"
+                          - "Overall/Administer"
+                      entries:
+                          - group: "jenkins-admins"
+
+                    - name: "viewer"
+                      description: "Read-only access to view jobs and builds"
+                      permissions:
+                          - "Overall/Read"
+                          - "Job/Read"
+                          - "Job/ExtendedRead"
+                          - "Job/Discover"
+                          - "Run/Read"
+                      entries:
+                          - group: "jenkins-viewer"
+
+                    - name: "developer"
+                      description: "Can build, view, and cancel jobs"
+                      permissions:
+                          - "Overall/Read"
+                          - "Job/Read"
+                          - "Job/Build"
+                          - "Job/Cancel"
+                          - "Run/Read"
+                          - "Run/Replay"
+                      entries:
+                          - group: "jenkins-developer"
+
+                    - name: "bootstrap-config-runner"
+                      description: "Service role for CI/CD pipelines to configure jobs-as-code"
+                      permissions:
+                          - "Overall/Read"
+                          - "Job/Read"
+                          - "Job/ExtendedRead"
+                          - "Job/Discover"
+                          - "Job/Create"
+                          - "Job/Configure"
+                          - "Job/Delete"
+                          - "Job/Build"
+                      entries:
+                          - group: "jenkins-bootstrap-config-runner"
