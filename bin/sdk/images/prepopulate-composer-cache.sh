@@ -13,12 +13,12 @@ fi
 
 COMPOSER_CACHE_DIR=$(composer config cache-dir)
 
-echo "Pre-populating Docker BuildKit cache from ${COMPOSER_CACHE_DIR}"
-
-if [ ! -d "${COMPOSER_CACHE_DIR}" ]; then
-    echo "Warning: Composer cache directory ${COMPOSER_CACHE_DIR} does not exist. Skipping pre-population."
+if [ -z "$(ls -A "${COMPOSER_CACHE_DIR}" 2>/dev/null | grep -v '^\.htaccess$')" ]; then
+    echo "Warning: Composer cache directory ${COMPOSER_CACHE_DIR} is empty (excluding .htaccess). Skipping pre-population."
     exit 0
 fi
+
+echo "Pre-populating Docker BuildKit cache from ${COMPOSER_CACHE_DIR}"
 
 # Create a temporary directory for the build context
 TEMP_CONTEXT=$(mktemp -d)
