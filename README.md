@@ -74,6 +74,7 @@ For contribution guidelines, see [Code contribution guide](https://docs.spryker.
 |                 |                 | 3.11          | &check;     |                                    |
 |                 |                 | 3.12          | &check;     |                                    |
 |                 |                 | 3.13          | &check;     |                                    |
+|                 |                 | 4.1           | &check;     |                                    |
 | session         | redis           | 5.0*          | &check;     |                                    |
 |                 | redis           | 6.2           | &check;     |                                    |
 |                 | valkey          | 7.2           | &check;     |                                    |
@@ -92,6 +93,7 @@ For contribution guidelines, see [Code contribution guide](https://docs.spryker.
 |                 |                 | 2.442         | &check;     |                                    |
 |                 |                 | 2.488         | &check;     |                                    |
 |                 |                 | 2.492.3       | &check;     |                                    |
+|                 |                 | 2.516.3       | &check;     |                                    |
 | webdriver       | phantomjs       | latest*       |             |                                    |
 |                 | chromedriver    | latest        | &check;     |                                    |
 | mail_catcher    | mailhog         | 1.0           | &check;     |                                    |
