@@ -11,11 +11,13 @@ This document describes configuration options of the services shipped with Spryk
 *     [Redis](#redis)
 *     [Redis GUI](#redis-gui)
 *     [MailHog](#mailhog)
+*     [Mailpit](#mailpit)
 *     [Blackfire](#blackfire)
 *     [New Relic](#new-relic)
 *     [WebDriver](#webdriver)
 *     [Dashboard](#dashboard)
 *     [Tideways](#tideways)
+*     [Local OpenTelemetry Stack](#grafana)
 
 
 ## Prerequisites
@@ -229,6 +231,24 @@ docker/sdk boot deploy.*.yml &&\
 docker/sdk up
 ```
 
+### Migrating to RabbitMQ 4.1 in Production
+
+When upgrading to RabbitMQ 4.1 in production environments, follow these steps to ensure a safe migration:
+
+{% info_block infoBox %}
+RabbitMQ 3.13 is the last version before 4.1. Make sure you are running version 3.13 before upgrading to 4.1.
+{% endinfo_block %}
+
+#### Migration Steps
+
+1. **Ensure you are on RabbitMQ 3.13**: Verify that your current RabbitMQ version is 3.13, which is the last version before 4.1.
+
+2. **Stop Jenkins**: Before proceeding with the migration, stop all Jenkins jobs and the Jenkins service to prevent any message processing during the upgrade:
+
+3. **Apply changes**: Apply the necessary configuration changes to update the RabbitMQ service to the new version.
+
+4. **Restart Jenkins**: Once the migration is complete and verified, restart the Jenkins service.
+
 ## Swagger UI
 
 [Swagger UI](https://swagger.io/tools/swagger-ui/) allows anyone — be it your development team or your end consumers — to visualize and interact with the API’s resources without having any of the implementation logic in place. It’s automatically generated from your OpenAPI (formerly known as Swagger) Specification, with the visual documentation making it easy for back end implementation and client-side consumption.
@@ -327,7 +347,7 @@ With the MailHog service, developers can:
 
 :::(Info) ()
 By default the following applies:
-*  `http://mail.demo-spryker.com/` is used to see incoming emails.
+*  `http://mail.spryker.local/` is used to see incoming emails.
 * Login is not required
 :::
 ### Configuration
@@ -338,6 +358,37 @@ services:
         ...
         mail_catcher:
                 engine: mailhog
+                endpoints:
+                          {custom_endpoint}:
+```
+2. Bootstrap the docker setup and rebuild the application:
+```bash
+docker/sdk boot deploy.*.yml &&\
+docker/sdk up
+```
+
+## Mailpit
+
+[Mailpit](https://github.com/axllent/mailpit) is a mail catcher service that is used with Spryker in Docker for Demo and Development environments. Developers use this email testing tool to catch and show emails locally without an SMTP (Simple Mail Transfer Protocol) server.
+
+With the Mailpit service, developers can:
+
+* configure an application to use Mailpit for SMTP delivery;
+* view messages in the web UI or retrieve them via JSON API.
+
+:::(Info) ()
+By default the following applies:
+*  `http://mail.spryker.local/` is used to see incoming emails.
+* Login is not required
+  :::
+### Configuration
+
+1. Adjust `deploy.*.yml` in the `services:` section to specify a custom endpoint:
+```yaml
+services:
+        ...
+        mail_catcher:
+                engine: mailpit
                 endpoints:
                           {custom_endpoint}:
 ```
@@ -528,7 +579,7 @@ docker/sdk up
 
 By default, in the New Relic dashboard, the APM is displayed as `company-staging-newrelic-app`. To improve visibility, you may want to configure each application as a separate APM. For example, `YVES-DE (docker.dev)`.
 
-To do it, adjust the Monitoring service in `src/Pyz/Service/Monitoring/MonitoringDependencyProvider.php`:  
+To do it, adjust the Monitoring service in `src/Pyz/Service/Monitoring/MonitoringDependencyProvider.php`:
 
 ```php
 <?php declare(strict_types = 1);
@@ -648,6 +699,34 @@ tideways:
     apikey: {tideways_api_key}
     environment-name: {tideways_environment_name}
     cli-enabled: {true|false}
+```
+
+2. Bootstrap the docker setup and rebuild the application:
+```bash
+docker/sdk boot deploy.*.yml &&\
+docker/sdk up
+```
+
+## Local OpenTelemetry Stack
+
+The Local OpenTelemetry Stack is a powerful tool designed for real-time monitoring of Application Performance Monitoring (APM) locally. It allows you to track APM traces across all containers or specific ones running PHP applications.
+
+This stack integrates the following containers into your local environment:
+* tempo-init
+* tempo
+* collector
+* prometheus
+* grafana
+
+### Configuration
+
+1. Adjust your `deploy.*.yml` as follows:
+
+```yaml
+    grafana:
+        engine: otel-stack
+        endpoints:
+            grafana:
 ```
 
 2. Bootstrap the docker setup and rebuild the application:

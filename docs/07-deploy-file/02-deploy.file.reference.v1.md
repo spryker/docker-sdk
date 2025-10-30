@@ -288,6 +288,7 @@ Defines PHP settings for Spryker applications.
   * `pcov`
   * `tideways`
   * `xhprof`
+  * `otel`
 
 ```yaml
 image:
@@ -300,6 +301,7 @@ image:
             - newrelic
             - tideways
             - xhprof
+            - otel
 ```
 ***
 
@@ -499,7 +501,49 @@ Optional parameters for `application:`:
         ...
 ```
 
+* `groups: applications: application: http: buffer` - defines how the server handles buffering of responses from FastCGI processes. The following parameters are configurable: `fastcgi_buffer_size`, `fastcgi_buffers` and `fastcgi_busy_buffers_size`. If these values are not explicitly defined, Nginx uses its default settings.
+
+```yaml
+...
+yves_eu:
+    application: yves
+    endpoints:
+        yves.eu.spryker.local:
+            region: EU
+            http:
+                buffer:
+                    buffer_size: 8k
+                    buffers: 128 128k
+                    busy_buffers_size: 256k
+...
+```
+
+* `groups: applications: application: endpoints: redirects:` - defines http redirects for the specific configuration.
+* `groups: applications: application: endpoints: redirects: redirect: code` - defines an HTTP code for a redirect. Allowed values are `301` and `302`. The default values is `302`.
+* `groups: applications: application: endpoints: redirects: redirect: url` - defines a URL to redirect to.
+* `groups: applications: application: endpoints: redirects: redirect: request-uri` - preserves or ignores request-uri due to redirect. Allowed values are `true` or `false`. The default value is `false`.
+* `groups: applications: application: endpoints: redirects: redirect: preserve-host` - preserves or ignores schema and host due to redirect. Allowed values are `true` or `false`. The default value is `false`.
+
+```yaml
+...
+yves_eu:
+    application: yves
+    endpoints:
+        yves.eu.spryker.local:
+            region: EU
+            redirects:
+                ~* /product-comparison:
+                    url: "/login"
+                    code: 302
+                    preserve-host: true
+                ~* /computer:
+                    url: "https://www.google.com/"
+                    code: 301
+...
+```
+
 * `groups: applications: application: limits: workers` - defines the maximum number of concurrent child processes a process manager can serve simultaneously.
+> Note: This option isn’t available in Spryker Cloud because we automatically detect and apply the optimal PHP-FPM configuration for each application.
 
 ```yaml
 ...
@@ -508,7 +552,7 @@ Optional parameters for `application:`:
         application: backoffice
         limits:
             workers: 4
-        ...
+...
 ```
 
 :::(Info) ()
@@ -553,7 +597,7 @@ This variable is optional. If not specified, the [default version](https://githu
 services:
     database:
         engine: postgres
-        version: 9.6
+        version: 17
         root:
             username: "root"
             password: "secret"
@@ -584,7 +628,7 @@ services:
       scheduler.spryker.local:
 
   mail_catcher:
-    engine: mailhog
+    engine: mailpit
     endpoints:
       mail.spryker.local:
  ```
@@ -610,6 +654,7 @@ Defines the list of *Endpoints* to access the *Application*.
 
 The format of the key  is `domain[:port]`. The key must be project-wide unique.
 * `groups: applications: endpoints: store:` defines the *Store* as context to process requests within.
+* `groups: applications: endpoints: code-bucket:` defines the *CodeBucket* as context to process requests within.
 * `groups: applications: endpoints: services:` defines the *Store*-specific settings for services. Only `session:` is currently allowed here. See [Services](#services) to learn more.
 * `groups: applications: endpoints: cors-allow-origin:` defines a [CORS header](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Allow-Origin). It is allowed for `glue` application only. Possible values are:
   * Single domain as a string
@@ -843,6 +888,9 @@ Defines the composer settings to be used during deployment.
 2. `autoload:` - defines composer autoload options. Possible values are `--optimize` and `--classmap-authoritative`. This variable is optional. If not specified, the default values apply:
 	* Development mode: `autoload: --optimize`
 	* Demo mode: `autoload: --classmap-authoritative`
+3. `verbose:` - defines composer verbose mode. The default values is `-vvv`. Possible values are:
+    * `-q` (Do not output any message).
+    * `-v`, `-vv` and `-vvv`
 ***
 
 ## Services
@@ -949,7 +997,7 @@ A key-value store *Service* for storing business data.
 
 * Project-wide
 
-  * `key_value_store: engine:` - possible value is: `redis`.
+  * `key_value_store: engine:` - possible value are: `redis` and `valkey`.
   * `key_value_store: replicas: number:` - defines the number of replicas. The default value is `0`.
   * `session: endpoints:` - defines the service's port that can be accessed via given endpoints.
 
@@ -977,7 +1025,7 @@ A mail catcher *Service* used to catch all outgoing emails for development or te
 
 * Project-wide
 
-     - `mail_catcher: engine:` - possible value is `mailhog`.
+     - `mail_catcher: engine:` - possible values are `mailpit` or `mailhog`.
      - `mail_catcher: endpoints:`- defines the service's port and web interface that can be accessed via given endpoints.
 
 
@@ -1023,7 +1071,7 @@ A key-value store *Service* for storing session data.
 
 * Project-wide
 
-  - `session: engine:` - possible values is `redis`.
+  - `session: engine:` - possible values are: `redis` and `valkey`.
   - `session: endpoints:` - defines the service's port that can be accessed via given endpoints.
 
 * Endpoint-specific

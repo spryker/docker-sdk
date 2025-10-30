@@ -7,6 +7,8 @@
     root /data/public/{{ endpointData['entry-point'] }};
     index index.php;
 
+{% include "nginx/http/buffer.server.conf.twig" with _context %}
+
     if ($request_uri ~* "^(.*/)index\.php(.*)$") {
         return 301 $1;
     }
@@ -24,7 +26,8 @@
         try_files $fastcgi_script_name @proxy;
     }
 
-{% include "nginx/http/proxy/reverse-proxy.conf.twig" with _context %}
+{% include "nginx/http/proxy/reverse-proxy.conf.twig" with _context -%}
+{% include "nginx/http/redirects/redirects.conf.twig" with _context %}
 
     location @proxy {
 {% block location %}

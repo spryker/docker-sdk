@@ -1,0 +1,5 @@
+{% block buffer %}
+    {% for key, value in applicationData['http']['buffer'] %}
+fastcgi_{{ key }} {{ value }};
+    {% endfor %}
+{% endblock buffer %}

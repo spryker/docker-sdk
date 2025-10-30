@@ -103,6 +103,7 @@ $isAutoloadCacheEnabled = $projectData['_isAutoloadCacheEnabled'] = isAutoloadCa
 $projectData['_requirementAnalyzerData'] = buildDataForRequirementAnalyzer($projectData);
 $projectData['secrets'] = buildSecrets($deploymentDir);
 $projectData = buildDefaultCredentials($projectData);
+$projectData['_isAcpLocalDevelopmentEnabled'] = isAcpLocalDevelopmentEnabled($projectData);
 
 $dockerVersionObject = json_decode(getenv('DOCKER_VERSION', '{}'));
 $skipVersionHeader = version_compare($dockerVersionObject?->Client?->Version, '26.0.0', '>=');
@@ -192,8 +193,10 @@ foreach ($projectData['groups'] ?? [] as $groupName => $groupData) {
             $application = $applicationData['application'];
             $store = $endpointData['store'] ?? null;
             $region = $endpointData['region'] ?? null;
+            $codeBucket = $endpointData['code-bucket'] ?? null;
             $projectData['groups'][$groupName]['applications'][$applicationName]['endpoints'][$endpoint]['identifier'] = $store ? $store : $region;
             $projectData['groups'][$groupName]['applications'][$applicationName]['endpoints'][$endpoint]['primal'] = false;
+            $projectData['groups'][$groupName]['applications'][$applicationName]['endpoints'][$endpoint]['code-bucket'] = $codeBucket;
             while (!empty($projectData['_ports'][$debugPortIndex])) {
                 $debugPortIndex++;
             }
@@ -1055,16 +1058,17 @@ function warn($output)
 }
 
 /**
- * @param array $services
- * @param string $engine
+ * Retrieve the names of services that use one of the given storage engines.
  *
- * @return string[]
+ * @param array<string, array{engine: string}> $services
+ * @param list<string>                        $engines  Allowed engine names
+ * @return list<string>                                 Service names matching any engine
  */
-function retrieveStorageServices(array $services, string $engine = 'redis'): array
+function retrieveStorageServices(array $services, array $engines = ['redis', 'valkey']): array
 {
     $storageServices = [];
     foreach ($services as $serviceName => $serviceData) {
-        if ($serviceData['engine'] === $engine) {
+        if (in_array($serviceData['engine'], $engines)) {
             $storageServices[] = $serviceName;
         }
     }
@@ -1138,6 +1142,20 @@ function isAutoloadCacheEnabled(array $projectData): bool
     }
 
     return $projectData['docker']['cache']['autoload']['enabled'] ?? false;
+}
+
+/**
+ * @param array $projectData
+ *
+ * @return bool
+ */
+function isAcpLocalDevelopmentEnabled(array $projectData): bool
+{
+    if (empty($projectData['image']['environment']['ACP_DOCKER_SDK_FILE'])) {
+        return false;
+    }
+
+    return true;
 }
 
 /**
@@ -1305,6 +1323,7 @@ function buildSecrets(string $deploymentDir): array
     $data['SPRYKER_URI_SIGNER_SECRET_KEY'] = generateToken(80);
     $data['SPRYKER_PRODUCT_CONFIGURATOR_ENCRYPTION_KEY'] = generateToken(10);
     $data['SPRYKER_PRODUCT_CONFIGURATOR_HEX_INITIALIZATION_VECTOR'] = generateRandomHex(16);
+    $data['SPRYKER_CUSTOMER_REMEMBER_ME_SECRET'] = generateToken(10);
 
     return $data;
 }

@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 Registry::Help::section "Usage in runtime:"
 Registry::Help::command -s -a "<command> [-vxt]"

@@ -402,7 +402,7 @@ $config[SchedulerJenkinsConstants::JENKINS_CONFIGURATION] = [
 ```
 
 **when**
-Assets install error 
+Assets install error
 ```bash
 line 1: run-s: not found
 ```
@@ -411,3 +411,13 @@ line 1: run-s: not found
 1. ensure you are using latest docker-sdk and spryker/php image.
 2. run `docker/sdk pull`
 3. run `docker/sdk boot {{your deploy file}} && docker/sdk up --build`
+
+
+**when**
+Installation error with Mutagen v0.18.*
+```bash
+unable to bring up Mutagen Compose sidecar service: Error response from daemon: network  is ambiguous (5 matches found based on ID prefix)
+```
+
+**then**
+brew unlink mutagen && brew unlink mutagen-compose && brew install mutagen-io/mutagen/mutagen@0.17 mutagen-io/mutagen/mutagen-compose@0.17

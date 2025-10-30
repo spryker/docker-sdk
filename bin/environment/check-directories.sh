@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 function Environment::checkDirectories() {
     local projectDirectoryPath="${1:-$(pwd)}"

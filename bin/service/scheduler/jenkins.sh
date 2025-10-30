@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 function Service::Scheduler::isInstalled() {
     if ! Service::isServiceExist scheduler; then

@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 Registry::addCommand "help" "Command::help"
 Registry::addCommand "" "Command::help"

@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 function String::trimWhitespaces() {
     echo -n "${*}" | tr -d " /n/r"

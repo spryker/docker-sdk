@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 set -e
 id
 export ALT_NAMES=$(printf "DNS:%s" "${@/%/,}" | sed -r "s/,$//g")

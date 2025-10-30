@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 require docker
 
@@ -83,6 +83,7 @@ function Images::_buildApp() {
         --build-arg "SPRYKER_DB_ENGINE=${SPRYKER_DB_ENGINE}" \
         --build-arg "SPRYKER_COMPOSER_MODE=${SPRYKER_COMPOSER_MODE}" \
         --build-arg "SPRYKER_COMPOSER_AUTOLOAD=${SPRYKER_COMPOSER_AUTOLOAD}" \
+        --build-arg "SPRYKER_COMPOSER_VERBOSE=${SPRYKER_COMPOSER_VERBOSE}" \
         --build-arg "SPRYKER_BUILD_HASH=${SPRYKER_BUILD_HASH:-"current"}" \
         --build-arg "SPRYKER_BUILD_STAMP=${SPRYKER_BUILD_STAMP:-""}" \
         . 1>&2
@@ -126,6 +127,7 @@ function Images::_buildApp() {
         --build-arg "SPRYKER_PIPELINE=${SPRYKER_PIPELINE}" \
         --build-arg "SPRYKER_BUILD_HASH=${SPRYKER_BUILD_HASH:-"current"}" \
         --build-arg "SPRYKER_BUILD_STAMP=${SPRYKER_BUILD_STAMP:-""}" \
+        --build-arg "SPRYKER_NPM_TOKEN=${SPRYKER_NPM_TOKEN:-""}" \
         .  1>&2
 
     if [ -n "${SPRYKER_XDEBUG_MODE_ENABLE}" ]; then
