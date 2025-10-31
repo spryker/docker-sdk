@@ -233,13 +233,13 @@ Defines the Docker image configuraion to run Spryker applications in.
 Defines the image tag according to the `spryker/php` images located at [Docker Hub](https://hub.docker.com/r/spryker/php/tags).
 
 
-This variable is optional. If not specified, the default value applies: `image: spryker/php:7.3`.
+This variable is optional. If not specified, the default value applies: `image: spryker/php:8.3`.
 
 ```yaml
 version: 1.0
 
 image:
-    tag: spryker/php:7.3
+    tag: spryker/php:8.3
 ```
 
 
