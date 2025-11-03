@@ -5,7 +5,7 @@ function Database::checkConnection() {
         return;
     fi
 
-    local -i retriesFor=25
+    local -i retriesFor=180
     local -i interval=2
     local counter=1
 
@@ -98,7 +98,7 @@ function Database::init() {
 
         # Detect MySQL/MariaDB version to use correct syntax
         DB_VERSION=$(${DB_CLIENT} -h "${SPRYKER_DB_HOST}" --skip-ssl -u root -e "SELECT VERSION()" -sN)
-        
+
         if [ -z "${databases}" ] || [ "${databases}" == "[]" ]; then
             # MySQL 8.0+ requires separate CREATE USER and GRANT
             if echo "${DB_VERSION}" | grep -qE "^8\.[0-9]|^9\.[0-9]"; then
