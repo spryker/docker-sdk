@@ -289,6 +289,7 @@ Defines PHP settings for Spryker applications.
   * `tideways`
   * `xhprof`
   * `otel`
+  * `excimer`
 
 ```yaml
 image:
@@ -302,6 +303,7 @@ image:
             - tideways
             - xhprof
             - otel
+            - excimer
 ```
 ***
 
