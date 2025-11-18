@@ -879,6 +879,25 @@ docker:
  ```
  ***
 
+### docker: compose:
+
+#### docker: compose: yamls:
+
+Defines additional Docker Compose YAML files.
+
+If you define `docker: compose: yamls:`, the listed files are passed to `docker compose` as extra arguments in the order specified. This lets you plug in project-specific or CI-specific services (for example, Robot tests) without changing the generated file.
+
+**Example**
+
+```yaml
+version: 1.0
+
+docker:
+    compose:
+        yamls:
+            - .robot/docker-compose.robot.yml
+```
+
 ### composer:
 
 Defines the composer settings to be used during deployment.
