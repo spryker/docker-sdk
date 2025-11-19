@@ -290,6 +290,7 @@ Defines PHP settings for Spryker applications.
   * `xhprof`
   * `otel`
   * `excimer`
+  * `imagick`
 
 ```yaml
 image:
@@ -304,6 +305,7 @@ image:
             - xhprof
             - otel
             - excimer
+            - imagick
 ```
 ***
 
