@@ -757,6 +757,7 @@ docker:
 
  ```
 * `docker: debug: xdebug: enabled:` - defines if Xdebug is enabled.
+* `docker: debug: xdebug: custom_host_ip:` - defines the custom host IP. It can be set as `host.docker.internal` when working in Windows environment with WSL2.
 
 
 ### docker: maintenance:
