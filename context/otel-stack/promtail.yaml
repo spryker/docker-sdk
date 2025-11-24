@@ -1,0 +1,52 @@
+server:
+    http_listen_port: 9080
+    grpc_listen_port: 0
+
+positions:
+    filename: /run/promtail/positions.yaml
+
+clients:
+    - url: http://loki:3100/loki/api/v1/push
+
+scrape_configs:
+    - job_name: docker
+      static_configs:
+          - targets: [localhost]
+            labels:
+                job: docker
+                __path__: /var/lib/docker/containers/*/*-json.log
+
+      pipeline_stages:
+          # 1) Extract docker JSON-wrapper
+          - docker: {}
+
+          # 2) Drop logs from service containers
+          - match:
+                selector: '{container_label_com_docker_compose_service=~"(promtail|loki|grafana|prometheus|tempo|collector)"}'
+                action: drop
+          # 3) Check JSON log and get required information
+          - json:
+                expressions:
+                    extra_environment_application: extra.environment.application
+                    extra_environment_codeBucket: extra.environment.codeBucket
+                    extra_environment_environment: extra.environment.environment
+                    extra_server_hostname: extra.environment.hostname
+                    service_namespace: context.service_namespace
+                    trace_id: context.trace_id
+                    span_id: context.span_id
+
+          # 4) Build service_name according to the used pattern "ZED-US (docker.dev)"
+          - template:
+                source: service_name
+                template: '{{ .extra_environment_application }}-{{ .extra_environment_codeBucket }} ({{ .extra_environment_environment }})'
+
+          # 5) Add required labels in Loki
+          - labels:
+                service_namespace:
+                service_name:
+                trace_id:
+                span_id:
+                extra_environment_application:
+                extra_environment_codeBucket:
+                extra_environment_environment:
+                extra_server_hostname:
