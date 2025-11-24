@@ -17,7 +17,7 @@ ARG SPRYKER_COMPOSER_MODE
 RUN --mount=type=cache,id=composer,sharing=locked,target=/home/spryker/.composer/cache,uid=1000 \
   --mount=type=ssh,uid=1000 --mount=type=secret,id=secrets-env,uid=1000 \
   set -o allexport && . /run/secrets/secrets-env && set +o allexport \
-  && composer install --no-scripts --no-interaction ${SPRYKER_COMPOSER_MODE} -vvv
+  && composer install --no-interaction ${SPRYKER_COMPOSER_MODE} -vvv
 
 FROM application-production-dependencies AS application-production-codebase
 
