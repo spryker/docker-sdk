@@ -82,7 +82,7 @@ function Compose::verboseMode() {
     if [ -n "${SPRYKER_XDEBUG_ENABLE}" ] && [ -n "${SPRYKER_XDEBUG_MODE_ENABLE}" ]; then
         output+="  DEBUGGING MODE  "
     fi
-    if [ -n "${output}" ]; then
+    if [[ "${QUIET_MODE_ENABLED}" != "1" ]] && [ -n "${output}" ]; then
         Console::warn "-->${output}"
     fi
     if [ -n "${SPRYKER_XDEBUG_ENABLE}" ] && [ -z "${SPRYKER_XDEBUG_MODE_ENABLE}" ]; then

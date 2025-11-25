@@ -218,6 +218,14 @@ while getopts ":xvt" opt; do
 done
 shift $((OPTIND - 1))
 
+for arg in "$@"; do
+  case "$arg" in
+    -q|--quiet|--quiet-meta)
+      readonly QUIET_MODE_ENABLED="1"
+      ;;
+  esac
+done
+
 # Exporting for docker-compose
 export DEPLOYMENT_PATH
 export SPRYKER_XDEBUG_HOST_IP
