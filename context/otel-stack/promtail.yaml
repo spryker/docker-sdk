@@ -17,30 +17,27 @@ scrape_configs:
                 __path__: /var/lib/docker/containers/*/*-json.log
 
       pipeline_stages:
-          # 1) Extract docker JSON-wrapper
+          # Parse Docker JSON log structure and extract base fields
           - docker: {}
 
-          # 2) Drop logs from service containers
-          - match:
-                selector: '{container_label_com_docker_compose_service=~"(promtail|loki|grafana|prometheus|tempo|collector)"}'
-                action: drop
-          # 3) Check JSON log and get required information
+          # Parse inner JSON from the "log" field (Monolog structured log)
           - json:
                 expressions:
                     extra_environment_application: extra.environment.application
                     extra_environment_codeBucket: extra.environment.codeBucket
                     extra_environment_environment: extra.environment.environment
-                    extra_server_hostname: extra.environment.hostname
+                    extra_server_hostname: extra.server.hostname
                     service_namespace: context.service_namespace
+                    service_name: context.service_name
                     trace_id: context.trace_id
                     span_id: context.span_id
 
-          # 4) Build service_name according to the used pattern "ZED-US (docker.dev)"
-          - template:
-                source: service_name
-                template: '{{ .extra_environment_application }}-{{ .extra_environment_codeBucket }} ({{ .extra_environment_environment }})'
+          # Build service_name according to the used pattern "ZED-US (docker.dev)"
+#          - template:
+#                source: service_name
+#                template: '{{ .extra_environment_application }}-{{ .extra_environment_codeBucket }} ({{ .extra_environment_environment }})'
 
-          # 5) Add required labels in Loki
+          # Promote fields as Loki labels (required for filtering and matching)
           - labels:
                 service_namespace:
                 service_name:
@@ -50,3 +47,9 @@ scrape_configs:
                 extra_environment_codeBucket:
                 extra_environment_environment:
                 extra_server_hostname:
+                container_label_com_docker_compose_service:
+
+          # Drop internal infrastructure logs based on docker-compose service name
+          - match:
+                selector: '{container_label_com_docker_compose_service=~"(promtail|loki|grafana|prometheus|tempo|collector)"}'
+                action: drop
