@@ -36,8 +36,6 @@ datasources:
               spanStartTimeShift: "-1m"
               spanEndTimeShift: "1m"
               lokiSearch: true
-#              query: '{service_name="${__span.tags.service.name}"} |= "${__span.traceId}"'
-#              query: '{service_name=~".*"} |= "${__span.traceId}"'
     - name: Loki
       type: loki
       uid: loki

@@ -32,11 +32,6 @@ scrape_configs:
                     trace_id: context.trace_id
                     span_id: context.span_id
 
-          # Build service_name according to the used pattern "ZED-US (docker.dev)"
-#          - template:
-#                source: service_name
-#                template: '{{ .extra_environment_application }}-{{ .extra_environment_codeBucket }} ({{ .extra_environment_environment }})'
-
           # Promote fields as Loki labels (required for filtering and matching)
           - labels:
                 service_namespace:
