@@ -221,7 +221,7 @@ shift $((OPTIND - 1))
 for arg in "$@"; do
   case "$arg" in
     -q|--quiet|--quiet-meta)
-      readonly QUIET_MODE_ENABLED="1"
+      SPRYKER_QUIET_MODE=1
       ;;
   esac
 done
@@ -236,6 +236,7 @@ export SPRYKER_DOCKER_TAG
 export SPRYKER_TESTING_ENABLE
 export SPRYKER_XDEBUG_MODE_ENABLE
 export SPRYKER_XDEBUG_ENABLE
+export SPRYKER_QUIET_MODE
 export SPRYKER_LOG_DIRECTORY
 export SPRYKER_BUILD_HASH
 export SPRYKER_BUILD_DATE

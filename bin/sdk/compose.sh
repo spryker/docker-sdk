@@ -73,6 +73,9 @@ function Compose::exec() {
 
 function Compose::verboseMode() {
     local output=''
+    if [ -n "${SPRYKER_QUIET_MODE}" ]; then
+        return
+    fi
     if [ "${SPRYKER_FILE_MODE}" == 'mount' ]; then
         output+="  DEVELOPMENT MODE  "
     fi
@@ -82,7 +85,7 @@ function Compose::verboseMode() {
     if [ -n "${SPRYKER_XDEBUG_ENABLE}" ] && [ -n "${SPRYKER_XDEBUG_MODE_ENABLE}" ]; then
         output+="  DEBUGGING MODE  "
     fi
-    if [[ "${QUIET_MODE_ENABLED}" != "1" ]] && [ -n "${output}" ]; then
+    if [ -n "${output}" ]; then
         Console::warn "-->${output}"
     fi
     if [ -n "${SPRYKER_XDEBUG_ENABLE}" ] && [ -z "${SPRYKER_XDEBUG_MODE_ENABLE}" ]; then
