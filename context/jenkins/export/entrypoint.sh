@@ -129,6 +129,14 @@ test -f ~/.jenkins/jenkins.model.JenkinsLocationConfiguration.xml || envsubst < 
 test -f ~/.jenkins/com.newrelic.experts.jenkins.extensions.NewRelicGlobalConfiguration.xml || envsubst < /opt/com.newrelic.experts.jenkins.extensions.NewRelicGlobalConfiguration.xml > ~/.jenkins/com.newrelic.experts.jenkins.extensions.NewRelicGlobalConfiguration.xml
 envsubst < /opt/nr-credentials.xml > ~/.jenkins/nr-credentials.xml
 
+if [ "${SPRYKER_SCHEDULER_SSO_ENABLED:-false}" = "true" ]; then
+  export CASC_JENKINS_CONFIG=/usr/share/jenkins/ref/casc.yaml
+  echo "SSO is enabled: CASC configuration will be loaded from ${CASC_JENKINS_CONFIG}"
+else
+  unset CASC_JENKINS_CONFIG
+  echo "SSO is disabled: CASC configuration will not be loaded"
+fi
+
 # On shutdown: drain queue then stop Jenkins
 trap 'waitForFinishOfActiveJobs; kill ${pid}; exit 0;' SIGTERM
 
