@@ -13,7 +13,7 @@ COPY --from=spryker-jenkins-boilerplate /usr/share/jenkins/ref/casc.yaml /usr/sh
 RUN mkdir -p /usr/share/jenkins/ref/init.groovy.d
 COPY --from=spryker-jenkins-boilerplate /usr/share/jenkins/ref/init.groovy.d/bootstrap_token.groovy /usr/share/jenkins/ref/init.groovy.d/bootstrap_token.groovy
 ENV JAVA_OPTS="-Djenkins.install.runSetupWizard=false"
-ENV CASC_JENKINS_CONFIG=/usr/share/jenkins/ref/casc.yaml
+# ENV CASC_JENKINS_CONFIG=/usr/share/jenkins/ref/casc.yaml
 
 # Install packages on Alpine
 RUN bash -c 'if [ ! -z "$(which apk)" ]; then apk --no-cache add \
