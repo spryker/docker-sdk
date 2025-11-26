@@ -101,6 +101,12 @@ function Mount::Mutagen::afterDown() {
     mutagen sync terminate "${SPRYKER_SYNC_SESSION_NAME}" >/dev/null 2>&1 || true
 }
 
+function Mount::Mutagen::afterStop() {
+    Console::verbose "${INFO}Pausing sync and stopping mutagen daemon container${NC}"
+    mutagen sync pause "${SPRYKER_SYNC_SESSION_NAME}" >/dev/null 2>&1 || true
+    mutagen daemon stop >/dev/null 2>&1 || true
+}
+
 function Mount::Mutagen::install() {
 	local isMutagenInstalled=$(Mount::Mutagen::isMutagenInstalled)
 
@@ -264,5 +270,6 @@ Registry::Flow::addBeforeUp 'Mount::Mutagen::beforeUp'
 Registry::Flow::addBeforeRun 'Mount::Mutagen::beforeRun'
 Registry::Flow::addAfterCliReady 'Mount::Mutagen::afterCliReady'
 Registry::Flow::addAfterDown 'Mount::Mutagen::afterDown'
+Registry::Flow::addAfterStop 'Mount::Mutagen::afterStop'
 Registry::addInstaller 'Mount::Mutagen::install'
 Registry::addChecker 'Mount::Mutagen::checkMutagenVersion'
