@@ -135,6 +135,10 @@ if [ "${SPRYKER_SCHEDULER_SSO_ENABLED:-false}" = "true" ]; then
 else
   unset CASC_JENKINS_CONFIG
   echo "SSO is disabled: CASC configuration will not be loaded"
+  if [ -f /usr/share/jenkins/ref/casc.yaml ]; then
+    rm -f /usr/share/jenkins/ref/casc.yaml
+    echo "Removed CASC configuration file"
+  fi
 fi
 
 # On shutdown: drain queue then stop Jenkins
