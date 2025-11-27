@@ -9,6 +9,11 @@ COPY context/jenkins/export/jenkins.docker.xml.twig ./config/Zed/cronjobs/jenkin
 COPY --from=spryker-jenkins-boilerplate /usr/share/jenkins/ref/plugins /usr/share/jenkins/ref/plugins
 COPY --from=spryker-jenkins-boilerplate /usr/share/jenkins/jenkins.war /usr/share/jenkins/jenkins.war
 COPY --from=spryker-jenkins-boilerplate /usr/share/jenkins/jenkins-cli.jar /usr/share/jenkins/jenkins-cli.jar
+COPY --from=spryker-jenkins-boilerplate /usr/share/jenkins/ref/casc.yaml /usr/share/jenkins/ref/casc.yaml
+RUN mkdir -p /usr/share/jenkins/ref/init.groovy.d
+COPY --from=spryker-jenkins-boilerplate /usr/share/jenkins/ref/init.groovy.d/bootstrap_token.groovy /usr/share/jenkins/ref/init.groovy.d/bootstrap_token.groovy
+ENV JAVA_OPTS="-Djenkins.install.runSetupWizard=false"
+ENV CASC_JENKINS_CONFIG=/usr/share/jenkins/ref/casc.yaml
 
 # Install packages on Alpine
 RUN bash -c 'if [ ! -z "$(which apk)" ]; then apk --no-cache add \
@@ -17,7 +22,9 @@ RUN bash -c 'if [ ! -z "$(which apk)" ]; then apk --no-cache add \
     openjdk17 \
     ttf-dejavu \
     gettext \
-    jq && \
+    jq \
+    ca-certificates \
+    aws-cli && \
     mkdir -p /envs \
     ; fi'
 
@@ -33,12 +40,17 @@ RUN bash -c 'if [ ! -z "$(which apt)" ]; then apt update -y && \
     fonts-dejavu \
     gettext \
     jq \
-    && \
+    ca-certificates \
+    unzip && \
+    curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip" && \
+    unzip awscliv2.zip && \
+    ./aws/install && \
+    rm -rf awscliv2.zip aws && \
     mkdir -p /envs \
     ; fi'
 
 COPY terraform/cli /envs/
-COPY context/jenkins/export/entrypoint.sh /entrypoint.sh
+COPY context/jenkins/export/entrypoint-sso.sh /entrypoint.sh
 COPY context/jenkins/export/jenkins.model.JenkinsLocationConfiguration.xml /opt/jenkins.model.JenkinsLocationConfiguration.xml
 COPY context/jenkins/export/com.newrelic.experts.jenkins.extensions.NewRelicGlobalConfiguration.xml /opt/com.newrelic.experts.jenkins.extensions.NewRelicGlobalConfiguration.xml
 COPY context/jenkins/export/nr-credentials.xml /opt/nr-credentials.xml
