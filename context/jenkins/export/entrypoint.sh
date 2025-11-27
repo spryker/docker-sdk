@@ -49,6 +49,22 @@ test -f ~/.jenkins/jenkins.model.JenkinsLocationConfiguration.xml || envsubst < 
 test -f ~/.jenkins/com.newrelic.experts.jenkins.extensions.NewRelicGlobalConfiguration.xml || envsubst < /opt/com.newrelic.experts.jenkins.extensions.NewRelicGlobalConfiguration.xml > ~/.jenkins/com.newrelic.experts.jenkins.extensions.NewRelicGlobalConfiguration.xml
 envsubst < /opt/nr-credentials.xml > ~/.jenkins/nr-credentials.xml
 
+<<<<<<< HEAD
+=======
+if [ "${SPRYKER_SCHEDULER_SSO_ENABLED:-false}" = "true" ]; then
+  export CASC_JENKINS_CONFIG=/usr/share/jenkins/ref/casc.yaml
+  echo "SSO is enabled: CASC configuration will be loaded from ${CASC_JENKINS_CONFIG}"
+else
+  unset CASC_JENKINS_CONFIG
+  echo "SSO is disabled: CASC configuration will not be loaded"
+  if [ -f /usr/share/jenkins/ref/casc.yaml ]; then
+    rm -f /usr/share/jenkins/ref/casc.yaml
+    echo "Removed CASC configuration file"
+  fi
+fi
+
+# On shutdown: drain queue then stop Jenkins
+>>>>>>> e131cad91ac9715c933b9e86a321380dcef663f2
 trap 'waitForFinishOfActiveJobs; kill ${pid}; exit 0;' SIGTERM
 cp -r /usr/share/jenkins/ref/plugins/* /root/.jenkins/plugins/
 java ${JAVA_OPTS} -Djenkins.install.runSetupWizard=false -jar /usr/share/jenkins/jenkins.war ${JENKINS_OPTS} & pid=$!
