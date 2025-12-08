@@ -218,6 +218,14 @@ while getopts ":xvt" opt; do
 done
 shift $((OPTIND - 1))
 
+for arg in "$@"; do
+  case "$arg" in
+    -q|--quiet|--quiet-meta)
+      SPRYKER_QUIET_MODE=1
+      ;;
+  esac
+done
+
 # Exporting for docker-compose
 export DEPLOYMENT_PATH
 export SPRYKER_XDEBUG_HOST_IP
@@ -228,6 +236,7 @@ export SPRYKER_DOCKER_TAG
 export SPRYKER_TESTING_ENABLE
 export SPRYKER_XDEBUG_MODE_ENABLE
 export SPRYKER_XDEBUG_ENABLE
+export SPRYKER_QUIET_MODE
 export SPRYKER_LOG_DIRECTORY
 export SPRYKER_BUILD_HASH
 export SPRYKER_BUILD_DATE

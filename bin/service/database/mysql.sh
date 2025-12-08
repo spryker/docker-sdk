@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
 
-
 function Database::checkConnection() {
     if ! Service::isServiceExist database; then
         return;
@@ -10,9 +9,16 @@ function Database::checkConnection() {
     local -i interval=2
     local counter=1
 
+    local admin_cmd="mysqladmin"
+    local ssl_options="--skip-ssl"
+
+    if Compose::exec "command -v mariadb-admin" "${DOCKER_COMPOSE_TTY_DISABLED}" >/dev/null 2>&1; then
+        admin_cmd="mariadb-admin"
+    fi
+
     while :; do
         [ "${counter}" -gt 0 ] && echo -en "\rWaiting for database connection [${counter}/${retriesFor}]..." || echo -en ""
-        local status=$(Compose::exec "mysqladmin ping -h \${SPRYKER_DB_HOST} -u \${SPRYKER_DB_ROOT_USERNAME} -p\${SPRYKER_DB_ROOT_PASSWORD} --silent" "${DOCKER_COMPOSE_TTY_DISABLED}" | grep -c "mysqld is alive")
+        local status=$(Compose::exec "${admin_cmd} ping -h \${SPRYKER_DB_HOST} -u \${SPRYKER_DB_ROOT_USERNAME} -p\${SPRYKER_DB_ROOT_PASSWORD} --silent ${ssl_options}" "${DOCKER_COMPOSE_TTY_DISABLED}" | grep -c "mysqld is alive")
         [ "${status}" -eq 1 ] && echo -en "${CLEAR}\r" && break
 
         if [ $((counter % 5)) -eq 0 ]; then
@@ -25,7 +31,6 @@ function Database::checkConnection() {
     done
 }
 
-
 function Database::haveTables() {
     Database::checkConnection
 
@@ -34,8 +39,15 @@ function Database::haveTables() {
         export VERBOSE=0
         export MYSQL_PWD="${SPRYKER_DB_ROOT_PASSWORD}"
         databases="$(echo ${SPRYKER_PAAS_SERVICES} | jq  '.databases')";
+
+        if command -v mariadb >/dev/null 2>&1; then
+          DB_CLIENT="mariadb"
+        else
+          DB_CLIENT="mysql"
+        fi
+
         if [ -z "${databases}" ] || [ "${databases}" == "[]" ]; then
-            mysql \
+            ${DB_CLIENT} \
                 -h "${SPRYKER_DB_HOST}" \
                 -u "${SPRYKER_DB_ROOT_USERNAME}" \
                 -e "SELECT TABLE_NAME FROM information_schema.tables WHERE table_schema = \"${SPRYKER_DB_DATABASE}\"" \
@@ -47,7 +59,7 @@ function Database::haveTables() {
             echo ${databases} | jq -c '.[]' | while read line; do
                 SPRYKER_DB_HOST=$(echo $line | jq -r .host);
                 SPRYKER_DB_DATABASE=$(echo $line | jq -r .database);
-                tablesCountPerDb=$(mysql \
+                tablesCountPerDb=$(${DB_CLIENT} \
                     -h "${SPRYKER_DB_HOST}" \
                     -u "${SPRYKER_DB_ROOT_USERNAME}" \
                     -e "SELECT TABLE_NAME FROM information_schema.tables WHERE table_schema = \"${SPRYKER_DB_DATABASE}\"" \
@@ -78,11 +90,29 @@ function Database::init() {
         export MYSQL_PWD="${SPRYKER_DB_ROOT_PASSWORD}";
         databases="$(echo ${SPRYKER_PAAS_SERVICES} | jq  '.databases')";
 
+        if command -v mariadb >/dev/null 2>&1; then
+          DB_CLIENT="mariadb"
+        else
+          DB_CLIENT="mysql"
+        fi
+
+        # Detect MySQL/MariaDB version to use correct syntax
+        DB_VERSION=$(${DB_CLIENT} -h "${SPRYKER_DB_HOST}" --skip-ssl -u root -e "SELECT VERSION()" -sN)
+
         if [ -z "${databases}" ] || [ "${databases}" == "[]" ]; then
-            mysql \
-                -h "${SPRYKER_DB_HOST}" \
-                -u root \
-                -e "CREATE DATABASE IF NOT EXISTS \`${SPRYKER_DB_DATABASE}\` CHARACTER SET \"${SPRYKER_DB_CHARACTER_SET}\" COLLATE \"${SPRYKER_DB_COLLATE}\"; GRANT ALL PRIVILEGES ON \`${SPRYKER_DB_DATABASE}\`.* TO \"${SPRYKER_DB_USERNAME}\"@\"%\" IDENTIFIED BY \"${SPRYKER_DB_PASSWORD}\" WITH GRANT OPTION;"
+            # MySQL 8.0+ requires separate CREATE USER and GRANT
+            if echo "${DB_VERSION}" | grep -qE "^8\.[0-9]|^9\.[0-9]"; then
+                ${DB_CLIENT} \
+                    -h "${SPRYKER_DB_HOST}" --skip-ssl \
+                    -u root \
+                    -e "CREATE DATABASE IF NOT EXISTS \`${SPRYKER_DB_DATABASE}\` CHARACTER SET \"${SPRYKER_DB_CHARACTER_SET}\" COLLATE \"${SPRYKER_DB_COLLATE}\"; CREATE USER IF NOT EXISTS \"${SPRYKER_DB_USERNAME}\"@\"%\" IDENTIFIED WITH mysql_native_password BY \"${SPRYKER_DB_PASSWORD}\"; GRANT ALL PRIVILEGES ON \`${SPRYKER_DB_DATABASE}\`.* TO \"${SPRYKER_DB_USERNAME}\"@\"%\" WITH GRANT OPTION;"
+            else
+                # MySQL 5.7 and MariaDB use old syntax
+                ${DB_CLIENT} \
+                    -h "${SPRYKER_DB_HOST}" --skip-ssl \
+                    -u root \
+                    -e "CREATE DATABASE IF NOT EXISTS \`${SPRYKER_DB_DATABASE}\` CHARACTER SET \"${SPRYKER_DB_CHARACTER_SET}\" COLLATE \"${SPRYKER_DB_COLLATE}\"; GRANT ALL PRIVILEGES ON \`${SPRYKER_DB_DATABASE}\`.* TO \"${SPRYKER_DB_USERNAME}\"@\"%\" IDENTIFIED BY \"${SPRYKER_DB_PASSWORD}\" WITH GRANT OPTION;"
+            fi
         else
             echo ${databases} | jq -c '.[]' | while read line; do
               SPRYKER_DB_HOST=$(echo $line | jq -r .host);
@@ -92,10 +122,19 @@ function Database::init() {
               SPRYKER_DB_CHARACTER_SET=$(echo $line | jq -r .characterSet);
               SPRYKER_DB_COLLATE=$(echo $line | jq -r .collate);
               export MYSQL_PWD="${SPRYKER_DB_ROOT_PASSWORD}";
-              mysql \
-                -h "${SPRYKER_DB_HOST}" \
-                -u root \
-                -e "CREATE DATABASE IF NOT EXISTS \`${SPRYKER_DB_DATABASE}\` CHARACTER SET \"${SPRYKER_DB_CHARACTER_SET}\" COLLATE \"${SPRYKER_DB_COLLATE}\"; GRANT ALL PRIVILEGES ON \`${SPRYKER_DB_DATABASE}\`.* TO \"${SPRYKER_DB_USERNAME}\"@\"%\" IDENTIFIED BY \"${SPRYKER_DB_PASSWORD}\" WITH GRANT OPTION;"
+              # MySQL 8.0+ requires separate CREATE USER and GRANT
+              if echo "${DB_VERSION}" | grep -qE "^8\.[0-9]|^9\.[0-9]"; then
+                  ${DB_CLIENT} \
+                    -h "${SPRYKER_DB_HOST}" --skip-ssl \
+                    -u root \
+                    -e "CREATE DATABASE IF NOT EXISTS \`${SPRYKER_DB_DATABASE}\` CHARACTER SET \"${SPRYKER_DB_CHARACTER_SET}\" COLLATE \"${SPRYKER_DB_COLLATE}\"; CREATE USER IF NOT EXISTS \"${SPRYKER_DB_USERNAME}\"@\"%\" IDENTIFIED WITH mysql_native_password BY \"${SPRYKER_DB_PASSWORD}\"; GRANT ALL PRIVILEGES ON \`${SPRYKER_DB_DATABASE}\`.* TO \"${SPRYKER_DB_USERNAME}\"@\"%\" WITH GRANT OPTION;"
+              else
+                  # MySQL 5.7 and MariaDB use old syntax
+                  ${DB_CLIENT} \
+                    -h "${SPRYKER_DB_HOST}" --skip-ssl \
+                    -u root \
+                    -e "CREATE DATABASE IF NOT EXISTS \`${SPRYKER_DB_DATABASE}\` CHARACTER SET \"${SPRYKER_DB_CHARACTER_SET}\" COLLATE \"${SPRYKER_DB_COLLATE}\"; GRANT ALL PRIVILEGES ON \`${SPRYKER_DB_DATABASE}\`.* TO \"${SPRYKER_DB_USERNAME}\"@\"%\" IDENTIFIED BY \"${SPRYKER_DB_PASSWORD}\" WITH GRANT OPTION;"
+              fi
             done
         fi
 EOF

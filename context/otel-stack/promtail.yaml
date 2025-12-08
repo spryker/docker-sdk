@@ -1,0 +1,50 @@
+server:
+    http_listen_port: 9080
+    grpc_listen_port: 0
+
+positions:
+    filename: /run/promtail/positions.yaml
+
+clients:
+    - url: http://loki:3100/loki/api/v1/push
+
+scrape_configs:
+    - job_name: docker
+      static_configs:
+          - targets: [localhost]
+            labels:
+                job: docker
+                __path__: /var/lib/docker/containers/*/*-json.log
+
+      pipeline_stages:
+          # Parse Docker JSON log structure and extract base fields
+          - docker: {}
+
+          # Parse inner JSON from the "log" field (Monolog structured log)
+          - json:
+                expressions:
+                    extra_environment_application: extra.environment.application
+                    extra_environment_codeBucket: extra.environment.codeBucket
+                    extra_environment_environment: extra.environment.environment
+                    extra_server_hostname: extra.server.hostname
+                    service_namespace: context.service_namespace
+                    service_name: context.service_name
+                    trace_id: context.trace_id
+                    span_id: context.span_id
+
+          # Promote fields as Loki labels (required for filtering and matching)
+          - labels:
+                service_namespace:
+                service_name:
+                trace_id:
+                span_id:
+                extra_environment_application:
+                extra_environment_codeBucket:
+                extra_environment_environment:
+                extra_server_hostname:
+                container_label_com_docker_compose_service:
+
+          # Drop internal infrastructure logs based on docker-compose service name
+          - match:
+                selector: '{container_label_com_docker_compose_service=~"(promtail|loki|grafana|prometheus|tempo|collector)"}'
+                action: drop
