@@ -28,9 +28,56 @@ function Mount::logs() {
 }
 
 function sync() {
-    # @deprecated
+    local command="${1:-start}"
+    local syncVolume="${SPRYKER_SYNC_VOLUME}"
 
-    return "${TRUE}"
+    case "${command}" in
+        create)
+            Console::verbose "${INFO}Creating 'data-sync' volume${NC}"
+            docker volume create --name="${syncVolume}" >/dev/null 2>&1 || true
+            ;;
+        recreate)
+            sync clean
+            sync create
+            ;;
+        clean)
+            if Mount::Mutagen::sessionExists; then
+                mutagen sync terminate "${SPRYKER_SYNC_SESSION_NAME}" >/dev/null 2>&1 || true
+            fi
+            docker volume rm "${syncVolume}" >/dev/null 2>&1 || true
+            ;;
+        stop)
+            if Mount::Mutagen::sessionExists; then
+                Console::verbose "${INFO}Pausing sync session${NC}"
+                mutagen sync pause "${SPRYKER_SYNC_SESSION_NAME}" >/dev/null 2>&1 || true
+            fi
+            ;;
+        start|'')
+            Mount::Mutagen::ensureDaemonRunning
+            
+            if Mount::Mutagen::findAndResumePausedSession; then
+                return 0
+            fi
+            
+            if [ -n "${SPRYKER_SYNC_SESSION_NAME}" ] && Mount::Mutagen::sessionExists "${SPRYKER_SYNC_SESSION_NAME}"; then
+                return 0
+            fi
+            
+            local targetContainer=$(Mount::Mutagen::findTargetContainer)
+            if [ -n "${targetContainer}" ]; then
+                Mount::Mutagen::createSyncSession || true
+            else
+                Console::verbose "${INFO}Containers not running yet, sync session will be created/resumed when containers start${NC}"
+            fi
+            ;;
+        logs|log)
+            Mount::logs "${@}"
+            ;;
+        *)
+            Console::error "Unknown sync command: ${command}"
+            return 1
+            ;;
+    esac
 }
 
 function Mount::Mutagen::beforeUp() {
@@ -222,6 +269,65 @@ function Mount::Mutagen::afterCliReady() {
     fi
 }
 
+function Mount::Mutagen::resumeSessionIfPaused() {
+    local sessionName="${1:-${SPRYKER_SYNC_SESSION_NAME}}"
+    
+    if [ -z "${sessionName}" ]; then
+        return 1
+    fi
+    
+    local sessionInfo=$(mutagen sync list "${sessionName}" 2>/dev/null || echo '')
+    if [ -z "${sessionInfo}" ]; then
+        return 1
+    fi
+    
+    local sessionStatus=$(echo "${sessionInfo}" | grep 'Status:' | awk '{print $2}' | tr -d '[]' || echo '')
+    if [ "${sessionStatus}" = 'Paused' ]; then
+        Console::verbose "${INFO}Resuming paused sync session: ${sessionName}${NC}"
+        mutagen sync resume "${sessionName}" >/dev/null 2>&1 || true
+        return 0
+    fi
+    
+    return 1
+}
+
+function Mount::Mutagen::findAndResumePausedSession() {
+    if [ -n "${SPRYKER_SYNC_SESSION_NAME}" ]; then
+        if Mount::Mutagen::resumeSessionIfPaused "${SPRYKER_SYNC_SESSION_NAME}"; then
+            return 0
+        fi
+    fi
+    
+    local projectPrefix="${SPRYKER_DOCKER_PREFIX:-spryker}"
+    local pausedSessions=$(mutagen sync list 2>/dev/null | grep -B 1 'Status:.*\[Paused\]' | grep 'Name:' | awk '{print $2}' || echo '')
+    
+    for sessionName in ${pausedSessions}; do
+        if echo "${sessionName}" | grep -q "${projectPrefix}.*codebase"; then
+            Console::verbose "${INFO}Found paused session matching project: ${sessionName}${NC}"
+            if Mount::Mutagen::resumeSessionIfPaused "${sessionName}"; then
+                return 0
+            fi
+        fi
+    done
+    
+    return 1
+}
+
+function Mount::Mutagen::afterRun() {
+    sleep 2
+    
+    Mount::Mutagen::ensureDaemonRunning
+    
+    if Mount::Mutagen::findAndResumePausedSession; then
+        Console::verbose "${INFO}Sync session resumed successfully${NC}"
+    elif [ -n "${SPRYKER_SYNC_SESSION_NAME}" ] && ! Mount::Mutagen::sessionExists; then
+        local targetContainer=$(Mount::Mutagen::findTargetContainer)
+        if [ -n "${targetContainer}" ]; then
+            Mount::Mutagen::createSyncSession || true
+        fi
+    fi
+}
+
 function Mount::Mutagen::afterDown() {
     Console::verbose "${INFO}Pruning file syncronization${NC}"
     docker volume rm "${SPRYKER_SYNC_VOLUME}" >/dev/null 2>&1 || true
@@ -391,6 +497,7 @@ DOCKER_COMPOSE_SUBSTITUTE="$(Mount::Mutagen::getDockerComposeSubstitute)"
 
 Registry::Flow::addBeforeUp 'Mount::Mutagen::beforeUp'
 Registry::Flow::addBeforeRun 'Mount::Mutagen::beforeRun'
+Registry::Flow::addAfterRun 'Mount::Mutagen::afterRun'
 Registry::Flow::addAfterCliReady 'Mount::Mutagen::afterCliReady'
 Registry::Flow::addAfterDown 'Mount::Mutagen::afterDown'
 Registry::Flow::addAfterStop 'Mount::Mutagen::afterStop'
