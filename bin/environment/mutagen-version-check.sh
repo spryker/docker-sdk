@@ -9,8 +9,6 @@ function Mutagen::getInstalledVersion() {
 }
 
 function Environment::checkMutagenVersion() {
-    # Version restriction removed - allowing newer Mutagen versions (0.18+)
-    # The SDK now handles version compatibility automatically
     if [[ "${_PLATFORM}" != "macos" ]]; then
         return 0
     fi
