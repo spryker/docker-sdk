@@ -240,12 +240,15 @@ function Mount::Mutagen::createSyncSession() {
     else
         Console::end "[FAILED]"
         if echo "${createOutput}" | grep -q "server magic number incorrect\|unable to handshake"; then
-            Console::error "Mutagen daemon version mismatch detected."
-            Console::error "Please restart the Mutagen daemon:"
-            Console::error "  mutagen daemon stop && mutagen daemon start"
-            Console::error ""
-            Console::error "Or reinstall Mutagen:"
-            Console::error "  brew list | grep mutagen | xargs brew remove && brew install mutagen-io/mutagen/mutagen && mutagen daemon stop && mutagen daemon start"
+            if [ -z "${_MUTAGEN_VERSION_MISMATCH_SHOWN:-}" ]; then
+                export _MUTAGEN_VERSION_MISMATCH_SHOWN=1
+                Console::error "Mutagen daemon version mismatch detected."
+                Console::error "Please restart the Mutagen daemon:"
+                Console::error "  mutagen daemon stop && mutagen daemon start"
+                Console::error ""
+                Console::error "Or reinstall Mutagen:"
+                Console::error "  brew list | grep mutagen | xargs brew remove && brew install mutagen-io/mutagen/mutagen && mutagen daemon stop && mutagen daemon start"
+            fi
         else
             Console::error "Failed to create Mutagen sync session:"
             echo "${createOutput}" | sed 's/^/  /'
