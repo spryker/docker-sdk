@@ -153,7 +153,6 @@ function Mount::Mutagen::ensureDaemonRunning() {
     fi
     
     if ! Mount::Mutagen::runWithTimeout 2 mutagen sync list >/dev/null 2>&1; then
-        Console::verbose "Mutagen daemon version mismatch detected. Restarting daemon..."
         mutagen daemon stop >/dev/null 2>&1 || true
         sleep 1
         mutagen daemon start >/dev/null 2>&1 || true
