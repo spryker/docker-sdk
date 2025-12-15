@@ -1,22 +1,28 @@
 #!/bin/bash
 
-function Environment::checkMutagenVersion() {
-    if [[ "${_PLATFORM}" == "macos" ]]; then
-        local mutagenInstalledVersion="$(Mutagen::getInstalledVersion)"
-
-        if [[ "$mutagenInstalledVersion" == 0.18.* || "$mutagenInstalledVersion" > "0.18" ]]; then
-            Console::error "Error: Mutagen version 0.18.* is not supported yet. Please, run the command to install the latest supported version.
-    brew unlink mutagen && brew unlink mutagen-compose && brew install mutagen-io/mutagen/mutagen@0.17 mutagen-io/mutagen/mutagen-compose@0.17"
-            exit 1
-        fi
+function Mutagen::getInstalledVersion() {
+    if ! command -v mutagen >/dev/null 2>&1; then
+        return 1
     fi
+    
+    String::trimWhitespaces "$(mutagen version 2>/dev/null || echo '')"
 }
 
-function Mutagen::getInstalledVersion() {
-	echo $(String::trimWhitespaces "$(
-         command -v mutagen >/dev/null 2>&1
-         test $? -eq 0 && mutagen version
-     )")
+function Environment::checkMutagenVersion() {
+    if [[ "${_PLATFORM}" != "macos" ]]; then
+        return 0
+    fi
+    
+    local mutagenInstalledVersion
+    mutagenInstalledVersion=$(Mutagen::getInstalledVersion)
+    
+    if [ -z "${mutagenInstalledVersion}" ]; then
+        Console::error "Mutagen is not installed. Please install it:"
+        Console::error "  brew install mutagen-io/mutagen/mutagen"
+        exit 1
+    fi
+    
+    Console::verbose "Mutagen version ${mutagenInstalledVersion} detected"
 }
 
 Registry::addChecker "Environment::checkMutagenVersion"

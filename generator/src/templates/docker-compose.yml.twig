@@ -170,31 +170,6 @@ volumes:
     external: true
 {% endif %}
 
-{% if  _mountMode == 'mutagen' %}
-x-mutagen:
-  sync:
-    defaults:
-      symlink:
-        mode: posix-raw
-      ignore:
-        paths:
-{% for rule in _syncIgnore %}
-          - '{{ rule | raw }}'
-{% endfor %}
-      permissions:
-        defaultFileMode: 0666
-        defaultDirectoryMode: 0777
-
-    {{ _syncSessionName }}:
-      alpha: ./
-      beta: volume://{{ namespace }}_{{ tag }}_data_sync
-      mode: two-way-resolved
-      configurationBeta:
-        permissions:
-          defaultOwner: id:1000
-          defaultGroup: id:1000
-
-{% endif %}
 networks:
   public:
   private:
