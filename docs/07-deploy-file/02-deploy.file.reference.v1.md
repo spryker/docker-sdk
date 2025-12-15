@@ -233,13 +233,13 @@ Defines the Docker image configuraion to run Spryker applications in.
 Defines the image tag according to the `spryker/php` images located at [Docker Hub](https://hub.docker.com/r/spryker/php/tags).
 
 
-This variable is optional. If not specified, the default value applies: `image: spryker/php:7.3`.
+This variable is optional. If not specified, the default value applies: `image: spryker/php:8.3`.
 
 ```yaml
 version: 1.0
 
 image:
-    tag: spryker/php:7.3
+    tag: spryker/php:8.3
 ```
 
 
@@ -289,6 +289,8 @@ Defines PHP settings for Spryker applications.
   * `tideways`
   * `xhprof`
   * `otel`
+  * `excimer`
+  * `imagick`
 
 ```yaml
 image:
@@ -302,6 +304,8 @@ image:
             - tideways
             - xhprof
             - otel
+            - excimer
+            - imagick
 ```
 ***
 
@@ -543,6 +547,7 @@ yves_eu:
 ```
 
 * `groups: applications: application: limits: workers` - defines the maximum number of concurrent child processes a process manager can serve simultaneously.
+> Note: This option isn’t available in Spryker Cloud because we automatically detect and apply the optimal PHP-FPM configuration for each application.
 
 ```yaml
 ...
@@ -875,6 +880,25 @@ docker:
 
  ```
  ***
+
+### docker: compose:
+
+#### docker: compose: yamls:
+
+Defines additional Docker Compose YAML files.
+
+If you define `docker: compose: yamls:`, the listed files are passed to `docker compose` as extra arguments in the order specified. This lets you plug in project-specific or CI-specific services (for example, Robot tests) without changing the generated file.
+
+**Example**
+
+```yaml
+version: 1.0
+
+docker:
+    compose:
+        yamls:
+            - .robot/docker-compose.robot.yml
+```
 
 ### composer:
 

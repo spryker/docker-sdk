@@ -13,8 +13,8 @@ jobs:
       fail-fast: false
       matrix:
         platform-image: [
-          'spryker/php:8.1-alpine3.16',
-          'spryker/php:8.1-debian'
+          'spryker/php:8.3',
+          'spryker/php:8.3'
         ]
         application-store: [ 'DE' ]
         env: [
@@ -52,8 +52,8 @@ jobs:
       fail-fast: false
       matrix:
         platform-image: [
-          'spryker/php:8.1-alpine3.16',
-          'spryker/php:8.1-debian'
+          'spryker/php:8.3',
+          'spryker/php:8.3'
         ]
         application-store: [ 'DE' ]
         env: [

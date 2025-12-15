@@ -100,7 +100,7 @@ gyp ERR!
 1. In `deploy.*.yaml`, change the base PHP image:
 ```yaml
 image:
-    tag: spryker/php:7.3-alpine3.10
+    tag: spryker/php:8.3
 ```
 
 2. Fetch the changes and start the instance:
