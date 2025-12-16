@@ -203,6 +203,30 @@ function Mount::Mutagen::findTargetContainer() {
     echo "${targetContainer}"
 }
 
+function Mount::Mutagen::waitForContainerReady() {
+    local targetContainer="${1}"
+    local -i retries=30
+    local -i interval=2
+    local counter=1
+    
+    if [ -z "${targetContainer}" ]; then
+        return 1
+    fi
+    
+    while [ ${counter} -le ${retries} ]; do
+        if docker exec "${targetContainer}" test -d /data >/dev/null 2>&1; then
+            if docker exec "${targetContainer}" echo >/dev/null 2>&1; then
+                return 0
+            fi
+        fi
+        
+        sleep ${interval}
+        counter=$((counter + 1))
+    done
+    
+    return 1
+}
+
 function Mount::Mutagen::createSyncSession() {
     Mount::Mutagen::ensureDaemonRunning
     
@@ -222,6 +246,13 @@ function Mount::Mutagen::createSyncSession() {
         return 1
     fi
     
+    Console::verbose "Waiting for container ${targetContainer} to be ready..."
+    if ! Mount::Mutagen::waitForContainerReady "${targetContainer}"; then
+        Console::error "Container ${targetContainer} did not become ready in time."
+        Console::end "[FAILED]"
+        return 1
+    fi
+    
     local containerPath="/data"
     local ignoreArgsStr=$(Mount::Mutagen::buildIgnoreArgs)
     local timeoutCmd=$(Mount::Mutagen::getTimeoutCmd)
@@ -236,10 +267,19 @@ function Mount::Mutagen::createSyncSession() {
     local createExitCode=$?
     
     if [ ${createExitCode} -eq 0 ]; then
-        Console::end "[OK]"
+        sleep 1
+        
+        local sessionStatus=$(mutagen sync list "${SPRYKER_SYNC_SESSION_NAME}" 2>/dev/null | grep 'Status:' | awk '{print $2}' | tr -d '[]' || echo '')
+        if [ -z "${sessionStatus}" ] || [ "${sessionStatus}" = 'Halted' ]; then
+            Console::end "[WARNING]"
+            Console::warn "Sync session created but status is '${sessionStatus:-unknown}'."
+            Console::warn "Session may need a moment to initialize. Check with: mutagen sync list"
+        else
+            Console::end "[OK]"
+        fi
     else
         Console::end "[FAILED]"
-        if echo "${createOutput}" | grep -q "server magic number incorrect\|unable to handshake"; then
+        if echo "${createOutput}" | grep -q "server magic number incorrect\|unable to handshake\|client/daemon version mismatch"; then
             if [ -z "${_MUTAGEN_VERSION_MISMATCH_SHOWN:-}" ]; then
                 export _MUTAGEN_VERSION_MISMATCH_SHOWN=1
                 Console::error "Mutagen daemon version mismatch detected."
@@ -316,7 +356,7 @@ function Mount::Mutagen::findAndResumePausedSession() {
 }
 
 function Mount::Mutagen::afterRun() {
-    sleep 2
+    sleep 3
     
     Mount::Mutagen::ensureDaemonRunning
     
