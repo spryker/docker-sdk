@@ -272,8 +272,7 @@ function Mount::Mutagen::createSyncSession() {
         local sessionStatus=$(mutagen sync list "${SPRYKER_SYNC_SESSION_NAME}" 2>/dev/null | grep 'Status:' | awk '{print $2}' | tr -d '[]' || echo '')
         if [ -z "${sessionStatus}" ] || [ "${sessionStatus}" = 'Halted' ]; then
             Console::end "[WARNING]"
-            Console::warn "Sync session created but status is '${sessionStatus:-unknown}'."
-            Console::warn "Session may need a moment to initialize. Check with: mutagen sync list"
+            Console::warn "Sync session created and status is '${sessionStatus:-unknown}'."
         else
             Console::end "[OK]"
         fi
