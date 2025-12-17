@@ -83,20 +83,25 @@ function sync() {
 function Mount::Mutagen::beforeUp() {
     local sessionStatus
 
-    # Let's clean volume on cold start when containers are not running to avoid offline conflicts
-    # The volume will not be deleted if any app container is running.
-    docker volume rm "${SPRYKER_SYNC_VOLUME}" >/dev/null 2>&1 || true
-
     updateComposeCovertWindowsPaths
     terminateMutagenSessionsWithObsoleteDockerId
 
-    # Clean content of the sync volume if the sync session is terminated or halted.
-    sessionStatus=$(mutagen sync list "${SPRYKER_SYNC_SESSION_NAME}" 2>/dev/null | grep 'Status:' | awk '{print $2}' || echo '')
-    if [ -z "${sessionStatus}" ] || [ "${sessionStatus}" == 'Halted' ]; then
-        Console::verbose::start "${INFO}Cleaning previous synced files${NC}"
-        mutagen sync terminate "${SPRYKER_SYNC_SESSION_NAME}" >/dev/null 2>&1 || true
-        docker run -i --rm -v "${SPRYKER_SYNC_VOLUME}:/data" busybox find /data/ ! -path /data/ -delete >/dev/null 2>&1 || true
-        Console::end "[OK]"
+    if Mount::Mutagen::isVolumeInUse; then
+        Console::verbose "${INFO}Volume ${SPRYKER_SYNC_VOLUME} is in use by containers, skipping volume cleanup${NC}"
+    else
+        docker volume rm "${SPRYKER_SYNC_VOLUME}" >/dev/null 2>&1 || true
+
+        sessionStatus=$(mutagen sync list "${SPRYKER_SYNC_SESSION_NAME}" 2>/dev/null | grep 'Status:' | awk '{print $2}' || echo '')
+        if [ -z "${sessionStatus}" ] || [ "${sessionStatus}" == 'Halted' ]; then
+            Console::verbose::start "${INFO}Cleaning previous synced files${NC}"
+            mutagen sync terminate "${SPRYKER_SYNC_SESSION_NAME}" >/dev/null 2>&1 || true
+            if docker volume inspect "${SPRYKER_SYNC_VOLUME}" >/dev/null 2>&1; then
+                if ! Mount::Mutagen::isVolumeInUse; then
+                    docker run -i --rm -v "${SPRYKER_SYNC_VOLUME}:/data" busybox find /data/ ! -path /data/ -delete >/dev/null 2>&1 || true
+                fi
+            fi
+            Console::end "[OK]"
+        fi
     fi
 }
 
@@ -190,6 +195,34 @@ function Mount::Mutagen::buildIgnoreArgs() {
     ignoreArgs="${ignoreArgs} --ignore-vcs"
     
     echo "${ignoreArgs}"
+}
+
+function Mount::Mutagen::isVolumeInUse() {
+    local volumeName="${1:-${SPRYKER_SYNC_VOLUME}}"
+    local projectPrefix="${SPRYKER_DOCKER_PREFIX:-spryker}"
+    
+    if ! docker volume inspect "${volumeName}" >/dev/null 2>&1; then
+        return 1
+    fi
+    
+    if [ -n "${SPRYKER_SYNC_SESSION_NAME}" ] && Mount::Mutagen::sessionExists "${SPRYKER_SYNC_SESSION_NAME}"; then
+        local sessionStatus=$(mutagen sync list "${SPRYKER_SYNC_SESSION_NAME}" 2>/dev/null | grep 'Status:' | awk '{print $2}' | tr -d '[]' || echo '')
+        if [ -n "${sessionStatus}" ] && [ "${sessionStatus}" != 'Halted' ] && [ "${sessionStatus}" != 'Terminated' ]; then
+            return 0
+        fi
+    fi
+    
+    local projectContainersUsingVolume=$(docker ps -a --filter "volume=${volumeName}" --filter "name=${projectPrefix}_" --format "{{.Names}}" 2>/dev/null | grep -v '^$' | wc -l | tr -d '[:space:]')
+    if [ "${projectContainersUsingVolume}" -gt 0 ]; then
+        return 0
+    fi
+    
+    local allContainersUsingVolume=$(docker ps -a --filter "volume=${volumeName}" --format "{{.Names}}" 2>/dev/null | grep -v '^$' | wc -l | tr -d '[:space:]')
+    if [ "${allContainersUsingVolume}" -gt 0 ]; then
+        return 0
+    fi
+    
+    return 1
 }
 
 function Mount::Mutagen::findTargetContainer() {
