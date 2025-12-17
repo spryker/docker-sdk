@@ -83,20 +83,25 @@ function sync() {
 function Mount::Mutagen::beforeUp() {
     local sessionStatus
 
-    # Let's clean volume on cold start when containers are not running to avoid offline conflicts
-    # The volume will not be deleted if any app container is running.
-    docker volume rm "${SPRYKER_SYNC_VOLUME}" >/dev/null 2>&1 || true
-
     updateComposeCovertWindowsPaths
     terminateMutagenSessionsWithObsoleteDockerId
 
-    # Clean content of the sync volume if the sync session is terminated or halted.
-    sessionStatus=$(mutagen sync list "${SPRYKER_SYNC_SESSION_NAME}" 2>/dev/null | grep 'Status:' | awk '{print $2}' || echo '')
-    if [ -z "${sessionStatus}" ] || [ "${sessionStatus}" == 'Halted' ]; then
-        Console::verbose::start "${INFO}Cleaning previous synced files${NC}"
-        mutagen sync terminate "${SPRYKER_SYNC_SESSION_NAME}" >/dev/null 2>&1 || true
-        docker run -i --rm -v "${SPRYKER_SYNC_VOLUME}:/data" busybox find /data/ ! -path /data/ -delete >/dev/null 2>&1 || true
-        Console::end "[OK]"
+    if Mount::Mutagen::isVolumeInUse; then
+        Console::verbose "${INFO}Volume ${SPRYKER_SYNC_VOLUME} is in use by containers, skipping volume cleanup${NC}"
+    else
+        docker volume rm "${SPRYKER_SYNC_VOLUME}" >/dev/null 2>&1 || true
+
+        sessionStatus=$(mutagen sync list "${SPRYKER_SYNC_SESSION_NAME}" 2>/dev/null | grep 'Status:' | awk '{print $2}' || echo '')
+        if [ -z "${sessionStatus}" ] || [ "${sessionStatus}" == 'Halted' ]; then
+            Console::verbose::start "${INFO}Cleaning previous synced files${NC}"
+            mutagen sync terminate "${SPRYKER_SYNC_SESSION_NAME}" >/dev/null 2>&1 || true
+            if docker volume inspect "${SPRYKER_SYNC_VOLUME}" >/dev/null 2>&1; then
+                if ! Mount::Mutagen::isVolumeInUse; then
+                    docker run -i --rm -v "${SPRYKER_SYNC_VOLUME}:/data" busybox find /data/ ! -path /data/ -delete >/dev/null 2>&1 || true
+                fi
+            fi
+            Console::end "[OK]"
+        fi
     fi
 }
 
@@ -192,6 +197,34 @@ function Mount::Mutagen::buildIgnoreArgs() {
     echo "${ignoreArgs}"
 }
 
+function Mount::Mutagen::isVolumeInUse() {
+    local volumeName="${1:-${SPRYKER_SYNC_VOLUME}}"
+    local projectPrefix="${SPRYKER_DOCKER_PREFIX:-spryker}"
+    
+    if ! docker volume inspect "${volumeName}" >/dev/null 2>&1; then
+        return 1
+    fi
+    
+    if [ -n "${SPRYKER_SYNC_SESSION_NAME}" ] && Mount::Mutagen::sessionExists "${SPRYKER_SYNC_SESSION_NAME}"; then
+        local sessionStatus=$(mutagen sync list "${SPRYKER_SYNC_SESSION_NAME}" 2>/dev/null | grep 'Status:' | awk '{print $2}' | tr -d '[]' || echo '')
+        if [ -n "${sessionStatus}" ] && [ "${sessionStatus}" != 'Halted' ] && [ "${sessionStatus}" != 'Terminated' ]; then
+            return 0
+        fi
+    fi
+    
+    local projectContainersUsingVolume=$(docker ps -a --filter "volume=${volumeName}" --filter "name=${projectPrefix}_" --format "{{.Names}}" 2>/dev/null | grep -v '^$' | wc -l | tr -d '[:space:]')
+    if [ "${projectContainersUsingVolume}" -gt 0 ]; then
+        return 0
+    fi
+    
+    local allContainersUsingVolume=$(docker ps -a --filter "volume=${volumeName}" --format "{{.Names}}" 2>/dev/null | grep -v '^$' | wc -l | tr -d '[:space:]')
+    if [ "${allContainersUsingVolume}" -gt 0 ]; then
+        return 0
+    fi
+    
+    return 1
+}
+
 function Mount::Mutagen::findTargetContainer() {
     local volumeName="${SPRYKER_SYNC_VOLUME}"
     local targetContainer=$(docker ps --filter "name=${SPRYKER_DOCKER_PREFIX}_cli_" --filter "status=running" --format "{{.Names}}" | head -n1)
@@ -201,6 +234,30 @@ function Mount::Mutagen::findTargetContainer() {
     fi
     
     echo "${targetContainer}"
+}
+
+function Mount::Mutagen::waitForContainerReady() {
+    local targetContainer="${1}"
+    local -i retries=30
+    local -i interval=2
+    local counter=1
+    
+    if [ -z "${targetContainer}" ]; then
+        return 1
+    fi
+    
+    while [ ${counter} -le ${retries} ]; do
+        if docker exec "${targetContainer}" test -d /data >/dev/null 2>&1; then
+            if docker exec "${targetContainer}" echo >/dev/null 2>&1; then
+                return 0
+            fi
+        fi
+        
+        sleep ${interval}
+        counter=$((counter + 1))
+    done
+    
+    return 1
 }
 
 function Mount::Mutagen::createSyncSession() {
@@ -222,6 +279,13 @@ function Mount::Mutagen::createSyncSession() {
         return 1
     fi
     
+    Console::verbose "Waiting for container ${targetContainer} to be ready..."
+    if ! Mount::Mutagen::waitForContainerReady "${targetContainer}"; then
+        Console::error "Container ${targetContainer} did not become ready in time."
+        Console::end "[FAILED]"
+        return 1
+    fi
+    
     local containerPath="/data"
     local ignoreArgsStr=$(Mount::Mutagen::buildIgnoreArgs)
     local timeoutCmd=$(Mount::Mutagen::getTimeoutCmd)
@@ -236,10 +300,18 @@ function Mount::Mutagen::createSyncSession() {
     local createExitCode=$?
     
     if [ ${createExitCode} -eq 0 ]; then
-        Console::end "[OK]"
+        sleep 1
+        
+        local sessionStatus=$(mutagen sync list "${SPRYKER_SYNC_SESSION_NAME}" 2>/dev/null | grep 'Status:' | awk '{print $2}' | tr -d '[]' || echo '')
+        if [ -z "${sessionStatus}" ] || [ "${sessionStatus}" = 'Halted' ]; then
+            Console::end "[WARNING]"
+            Console::warn "Sync session created and status is '${sessionStatus:-unknown}'."
+        else
+            Console::end "[OK]"
+        fi
     else
         Console::end "[FAILED]"
-        if echo "${createOutput}" | grep -q "server magic number incorrect\|unable to handshake"; then
+        if echo "${createOutput}" | grep -q "server magic number incorrect\|unable to handshake\|client/daemon version mismatch"; then
             if [ -z "${_MUTAGEN_VERSION_MISMATCH_SHOWN:-}" ]; then
                 export _MUTAGEN_VERSION_MISMATCH_SHOWN=1
                 Console::error "Mutagen daemon version mismatch detected."
@@ -316,7 +388,7 @@ function Mount::Mutagen::findAndResumePausedSession() {
 }
 
 function Mount::Mutagen::afterRun() {
-    sleep 2
+    sleep 3
     
     Mount::Mutagen::ensureDaemonRunning
     
