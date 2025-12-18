@@ -12,7 +12,7 @@ function Database::haveTables() {
         export MYSQL_PWD="${SPRYKER_DB_ROOT_PASSWORD}"
         databases="$(echo ${SPRYKER_PAAS_SERVICES} | jq  '.databases')";
         if [ -z "${databases}" ] || [ "${databases}" == "[]" ]; then
-            mysql \
+            mysql --skip-ssl \
                 -h "${SPRYKER_DB_HOST}" \
                 -u "${SPRYKER_DB_ROOT_USERNAME}" \
                 -e "SELECT TABLE_NAME FROM information_schema.tables WHERE table_schema = \"${SPRYKER_DB_DATABASE}\"" \
@@ -24,7 +24,7 @@ function Database::haveTables() {
             echo ${databases} | jq -c '.[]' | while read line; do
                 SPRYKER_DB_HOST=$(echo $line | jq -r .host);
                 SPRYKER_DB_DATABASE=$(echo $line | jq -r .database);
-                tablesCountPerDb=$(mysql \
+                tablesCountPerDb=$(mysql --skip-ssl \
                     -h "${SPRYKER_DB_HOST}" \
                     -u "${SPRYKER_DB_ROOT_USERNAME}" \
                     -e "SELECT TABLE_NAME FROM information_schema.tables WHERE table_schema = \"${SPRYKER_DB_DATABASE}\"" \
@@ -58,7 +58,7 @@ function Database::init() {
         databases="$(echo ${SPRYKER_PAAS_SERVICES} | jq  '.databases')";
 
         if [ -z "${databases}" ] || [ "${databases}" == "[]" ]; then
-            mysql \
+            mysql --skip-ssl \
                 -h "${SPRYKER_DB_HOST}" \
                 -u root \
                 -e "CREATE DATABASE IF NOT EXISTS \`${SPRYKER_DB_DATABASE}\` CHARACTER SET \"${SPRYKER_DB_CHARACTER_SET}\" COLLATE \"${SPRYKER_DB_COLLATE}\"; CREATE USER IF NOT EXISTS '${SPRYKER_DB_USERNAME}'@'%' IDENTIFIED BY '${SPRYKER_DB_PASSWORD}'; GRANT ALL PRIVILEGES ON \`${SPRYKER_DB_DATABASE}\`.* TO '${SPRYKER_DB_USERNAME}'@'%'; FLUSH PRIVILEGES;"
@@ -71,7 +71,7 @@ function Database::init() {
               SPRYKER_DB_CHARACTER_SET=$(echo $line | jq -r .characterSet);
               SPRYKER_DB_COLLATE=$(echo $line | jq -r .collate);
               export MYSQL_PWD="${SPRYKER_DB_ROOT_PASSWORD}";
-            mysql \
+            mysql --skip-ssl \
                 -h "${SPRYKER_DB_HOST}" \
                 -u root \
                 -e "CREATE DATABASE IF NOT EXISTS \`${SPRYKER_DB_DATABASE}\` CHARACTER SET \"${SPRYKER_DB_CHARACTER_SET}\" COLLATE \"${SPRYKER_DB_COLLATE}\";CREATE USER IF NOT EXISTS '${SPRYKER_DB_USERNAME}'@'%' IDENTIFIED BY '${SPRYKER_DB_PASSWORD}';GRANT ALL PRIVILEGES ON \`${SPRYKER_DB_DATABASE}\`.* TO '${SPRYKER_DB_USERNAME}'@'%';FLUSH PRIVILEGES;"
