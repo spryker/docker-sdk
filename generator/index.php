@@ -326,11 +326,6 @@ foreach ($projectData['groups'] ?? [] as $groupName => $groupData) {
     
     foreach ($groupData['applications'] ?? [] as $applicationName => $applicationData) {
         if ($applicationData['application'] !== 'static') {
-            // Still add to _applications for backward compatibility (image building, etc.)
-            if (!in_array($applicationName, $projectData['_applications'], true)) {
-                $projectData['_applications'][] = $applicationName;
-            }
-            
             $appType = $applicationData['application'];
             
             // Check if user explicitly defined application-group in deploy file
@@ -347,6 +342,12 @@ foreach ($projectData['groups'] ?? [] as $groupName => $groupData) {
                 } elseif ($groupType === BACKEND_GROUP) {
                     $projectData['_applicationGroups'][$backendGroupKey]['applications'][$applicationName] = $applicationData;
                     $projectData['_groupedApplications'][$applicationName] = true;
+                }
+            } else {
+                // If application-group is not set, add to _applications for individual containers
+                // These will be exported/tagged separately
+                if (!in_array($applicationName, $projectData['_applications'], true)) {
+                    $projectData['_applications'][] = $applicationName;
                 }
             }
             // If application-group is not set, application will not be grouped and will get individual container
@@ -419,6 +420,12 @@ foreach ($projectData['_applicationGroups'] ?? [] as $groupName => $groupData) {
     if ($mainApplicationName !== null && $mainApplicationData !== null) {
         $projectData['_applicationGroups'][$groupName]['mainApplicationName'] = $mainApplicationName;
         
+        // Add main application to _applications for image export/tagging
+        // This ensures only main applications are exported when grouping is enabled
+        if (!in_array($mainApplicationName, $projectData['_applications'], true)) {
+            $projectData['_applications'][] = $mainApplicationName;
+        }
+        
         // Generate group .env file using main application as base
         $groupEnvFile = $deploymentDir . DS . 'env' . DS . $groupName . '.env';
         file_put_contents(
@@ -466,7 +473,13 @@ function mapBackendEndpointsWithFallbackZed(array $endpointMap): array
 foreach ($projectData['groups'] ?? [] as $groupName => $groupData) {
     foreach ($groupData['applications'] ?? [] as $applicationName => $applicationData) {
         if ($applicationData['application'] !== 'static') {
-            $projectData['_applications'][] = $applicationName;
+            // Only add to _applications if not grouped (grouped apps use main application for export)
+            // Grouped applications are already handled above with main applications added
+            if (!isset($projectData['_groupedApplications'][$applicationName])) {
+                if (!in_array($applicationName, $projectData['_applications'], true)) {
+                    $projectData['_applications'][] = $applicationName;
+                }
+            }
 
             file_put_contents(
                 $deploymentDir . DS . 'env' . DS . $applicationName . '.env',
