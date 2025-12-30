@@ -415,8 +415,11 @@ foreach ($projectData['_applicationGroups'] ?? [] as $groupName => $groupData) {
         }
     }
     
-    // Generate group .env file using main application as base
+    // Store main application name for the group (used in terraform generation)
     if ($mainApplicationName !== null && $mainApplicationData !== null) {
+        $projectData['_applicationGroups'][$groupName]['mainApplicationName'] = $mainApplicationName;
+        
+        // Generate group .env file using main application as base
         $groupEnvFile = $deploymentDir . DS . 'env' . DS . $groupName . '.env';
         file_put_contents(
             $groupEnvFile,
@@ -501,15 +504,17 @@ foreach ($projectData['groups'] ?? [] as $groupName => $groupData) {
 
             $host = strtok($endpoint, ':');
             
-            // Determine the grouped application name for Cloud deployments
-            // If application is grouped, use the group name; otherwise use individual application name
+            // For frontend.json: use main application name from group if application is grouped,
+            // otherwise use individual application name
             // For Terraform, use underscores instead of hyphens and ensure lowercase
             $typeForFrontend = strtolower($applicationName);
+            
+            // Check if this application is in a group, and if so, use the group's main application name
             if (isset($projectData['_applicationGroups'])) {
                 foreach ($projectData['_applicationGroups'] as $groupName => $groupData) {
-                    if (isset($groupData['applications'][$applicationName])) {
-                        // Replace hyphens with underscores and convert to lowercase for Terraform compatibility
-                        $typeForFrontend = strtolower(str_replace('-', '_', $groupName));
+                    if (isset($groupData['applications'][$applicationName]) && isset($groupData['mainApplicationName'])) {
+                        // Use the main application name from the group (e.g., yves_eu for frontend-group)
+                        $typeForFrontend = strtolower($groupData['mainApplicationName']);
                         break;
                     }
                 }
