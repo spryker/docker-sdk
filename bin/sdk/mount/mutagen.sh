@@ -56,18 +56,27 @@ function sync() {
             Mount::Mutagen::ensureDaemonRunning
             
             if Mount::Mutagen::findAndResumePausedSession; then
+                Console::verbose "${INFO}Mutagen sync session resumed${NC}"
                 return 0
             fi
             
             if [ -n "${SPRYKER_SYNC_SESSION_NAME}" ] && Mount::Mutagen::sessionExists "${SPRYKER_SYNC_SESSION_NAME}"; then
+                Console::verbose "${INFO}Mutagen sync session already exists${NC}"
                 return 0
             fi
             
             local targetContainer=$(Mount::Mutagen::findTargetContainer)
             if [ -n "${targetContainer}" ]; then
-                Mount::Mutagen::createSyncSession || true
+                if Mount::Mutagen::createSyncSession; then
+                    if Mount::Mutagen::sessionExists; then
+                        Console::verbose "${INFO}Mutagen sync session created successfully${NC}"
+                        return 0
+                    fi
+                fi
+                # If creation failed, it will be retried in afterRun
+                Console::verbose "${INFO}Sync session creation will be retried after containers are fully started${NC}"
             else
-                Console::verbose "${INFO}Containers not running yet, sync session will be created/resumed when containers start${NC}"
+                Console::verbose "${INFO}Containers not running yet, sync session will be created when containers are ready${NC}"
             fi
             ;;
         logs|log)
@@ -82,20 +91,40 @@ function sync() {
 
 function Mount::Mutagen::beforeUp() {
     local sessionStatus
+    local containersRunning
+    local targetContainer
 
-    # Let's clean volume on cold start when containers are not running to avoid offline conflicts
-    # The volume will not be deleted if any app container is running.
-    docker volume rm "${SPRYKER_SYNC_VOLUME}" >/dev/null 2>&1 || true
+    targetContainer=$(Mount::Mutagen::findTargetContainer)
+    containersRunning=$([ -n "${targetContainer}" ] && echo "1" || echo "0")
+
+    if [ "${containersRunning}" == "0" ]; then
+        docker volume rm "${SPRYKER_SYNC_VOLUME}" >/dev/null 2>&1 || true
+    fi
 
     updateComposeCovertWindowsPaths
-    terminateMutagenSessionsWithObsoleteDockerId
 
-    # Clean content of the sync volume if the sync session is terminated or halted.
-    sessionStatus=$(mutagen sync list "${SPRYKER_SYNC_SESSION_NAME}" 2>/dev/null | grep 'Status:' | awk '{print $2}' || echo '')
+    if [ "${containersRunning}" == "0" ]; then
+        terminateMutagenSessionsWithObsoleteDockerId
+    else
+        if Mount::Mutagen::sessionExists; then
+            sessionStatus=$(mutagen sync list "${SPRYKER_SYNC_SESSION_NAME}" 2>/dev/null | grep 'Status:' | awk '{print $2}' | tr -d '[]' || echo '')
+            if [ "${sessionStatus}" == 'Halted' ] || [ "${sessionStatus}" == 'Disconnected' ]; then
+                Console::verbose "${INFO}Terminating unhealthy sync session (status: ${sessionStatus})${NC}"
+                terminateMutagenSessionsWithObsoleteDockerId
+            else
+                Console::verbose "${INFO}Keeping existing sync session (status: ${sessionStatus})${NC}"
+                return 0
+            fi
+        fi
+    fi
+
+    sessionStatus=$(mutagen sync list "${SPRYKER_SYNC_SESSION_NAME}" 2>/dev/null | grep 'Status:' | awk '{print $2}' | tr -d '[]' || echo '')
     if [ -z "${sessionStatus}" ] || [ "${sessionStatus}" == 'Halted' ]; then
         Console::verbose::start "${INFO}Cleaning previous synced files${NC}"
         mutagen sync terminate "${SPRYKER_SYNC_SESSION_NAME}" >/dev/null 2>&1 || true
-        docker run -i --rm -v "${SPRYKER_SYNC_VOLUME}:/data" busybox find /data/ ! -path /data/ -delete >/dev/null 2>&1 || true
+        if [ "${containersRunning}" == "0" ]; then
+            docker run -i --rm -v "${SPRYKER_SYNC_VOLUME}:/data" busybox find /data/ ! -path /data/ -delete >/dev/null 2>&1 || true
+        fi
         Console::end "[OK]"
     fi
 }
@@ -194,10 +223,10 @@ function Mount::Mutagen::buildIgnoreArgs() {
 
 function Mount::Mutagen::findTargetContainer() {
     local volumeName="${SPRYKER_SYNC_VOLUME}"
-    local targetContainer=$(docker ps --filter "name=${SPRYKER_DOCKER_PREFIX}_cli_" --filter "status=running" --format "{{.Names}}" | head -n1)
+    local targetContainer=$(docker ps --filter "name=${SPRYKER_DOCKER_PREFIX}_cli_" --filter "status=running" --format "{{.Names}}" | grep -v "ssh_relay" | head -n1)
     
     if [ -z "${targetContainer}" ]; then
-        targetContainer=$(docker ps --filter "volume=${volumeName}" --filter "status=running" --format "{{.Names}}" | head -n1)
+        targetContainer=$(docker ps --filter "volume=${volumeName}" --filter "status=running" --format "{{.Names}}" | grep -v "ssh_relay" | head -n1)
     fi
     
     echo "${targetContainer}"
@@ -316,18 +345,61 @@ function Mount::Mutagen::findAndResumePausedSession() {
 }
 
 function Mount::Mutagen::afterRun() {
+    if [ -z "${SPRYKER_SYNC_SESSION_NAME}" ]; then
+        return 0
+    fi
+    
     sleep 2
     
     Mount::Mutagen::ensureDaemonRunning
     
     if Mount::Mutagen::findAndResumePausedSession; then
         Console::verbose "${INFO}Sync session resumed successfully${NC}"
-    elif [ -n "${SPRYKER_SYNC_SESSION_NAME}" ] && ! Mount::Mutagen::sessionExists; then
-        local targetContainer=$(Mount::Mutagen::findTargetContainer)
-        if [ -n "${targetContainer}" ]; then
-            Mount::Mutagen::createSyncSession || true
-        fi
+        return 0
     fi
+    
+    if Mount::Mutagen::sessionExists; then
+        Console::verbose "${INFO}Sync session already exists${NC}"
+        return 0
+    fi
+    
+    local maxRetries=10
+    local retryDelay=2
+    local attempt=1
+    local targetContainer=""
+    
+    Console::verbose "${INFO}Attempting to create mutagen sync session...${NC}"
+    
+    while [ ${attempt} -le ${maxRetries} ]; do
+        targetContainer=$(Mount::Mutagen::findTargetContainer)
+        
+        if [ -n "${targetContainer}" ]; then
+            Console::verbose "${INFO}Found container: ${targetContainer}, creating sync session (attempt ${attempt}/${maxRetries})...${NC}"
+            if Mount::Mutagen::createSyncSession; then
+                sleep 1
+                if Mount::Mutagen::sessionExists; then
+                    Console::verbose "${INFO}Mutagen sync session created successfully${NC}"
+                    return 0
+                else
+                    Console::verbose "${INFO}Session creation reported success but session not found, retrying...${NC}"
+                fi
+            else
+                Console::verbose "${INFO}Session creation failed, will retry...${NC}"
+            fi
+        else
+            Console::verbose "${INFO}Container not ready yet, waiting... (attempt ${attempt}/${maxRetries})${NC}"
+        fi
+        
+        if [ ${attempt} -lt ${maxRetries} ]; then
+            sleep ${retryDelay}
+        fi
+        
+        attempt=$((attempt + 1))
+    done
+    
+    Console::error "Mutagen sync session could not be created automatically after ${maxRetries} attempts."
+    Console::error "This means files won't be synced to the container. Please run: docker/sdk sync start"
+    return 1
 }
 
 function Mount::Mutagen::afterDown() {
