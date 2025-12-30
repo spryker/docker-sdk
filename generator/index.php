@@ -156,6 +156,22 @@ const MERCHANT_PORTAL = 'merchant-portal';
 const GLUE_STOREFRONT = 'glue-storefront';
 const GLUE_BACKEND = 'glue-backend';
 
+// Application grouping constants
+const FRONTEND_GROUP = 'frontend-group';
+const BACKEND_GROUP = 'backend-group';
+
+// Map applications to their groups
+const APPLICATION_GROUP_MAP = [
+    YVES_APP => FRONTEND_GROUP,
+    GLUE_APP => FRONTEND_GROUP,
+    GLUE_STOREFRONT => FRONTEND_GROUP,
+    ZED_APP => BACKEND_GROUP,
+    BACKEND_GATEWAY_APP => BACKEND_GROUP,
+    MERCHANT_PORTAL => BACKEND_GROUP,
+    BACKOFFICE_APP => BACKEND_GROUP,
+    GLUE_BACKEND => BACKEND_GROUP,
+];
+
 const ENTRY_POINTS = [
     BACKOFFICE_APP => 'Backoffice',
     BACKEND_GATEWAY_APP => 'BackendGateway',
@@ -276,12 +292,145 @@ $projectData['_testing'] = [
 ];
 
 $projectData['_applications'] = [];
+$projectData['_applicationGroups'] = [];
+$projectData['_groupedApplications'] = []; // Track which applications are in groups
 $frontend = [];
 $environment = [
     'project' => $projectData['namespace'],
 ];
 
+// Group applications by region and application group type
+// This creates grouped containers while maintaining backward compatibility
+// Users can optionally define 'application-group' in deploy file to assign to groups
+// If application-group is not set, applications will get individual containers
+foreach ($projectData['groups'] ?? [] as $groupName => $groupData) {
+    $regionName = $groupData['region'];
+    $frontendGroupKey = FRONTEND_GROUP . '_' . $regionName;
+    $backendGroupKey = BACKEND_GROUP . '_' . $regionName;
+    
+    if (!isset($projectData['_applicationGroups'][$frontendGroupKey])) {
+        $projectData['_applicationGroups'][$frontendGroupKey] = [
+            'groupType' => FRONTEND_GROUP,
+            'region' => $regionName,
+            'applications' => [],
+        ];
+    }
+    
+    if (!isset($projectData['_applicationGroups'][$backendGroupKey])) {
+        $projectData['_applicationGroups'][$backendGroupKey] = [
+            'groupType' => BACKEND_GROUP,
+            'region' => $regionName,
+            'applications' => [],
+        ];
+    }
+    
+    foreach ($groupData['applications'] ?? [] as $applicationName => $applicationData) {
+        if ($applicationData['application'] !== 'static') {
+            // Still add to _applications for backward compatibility (image building, etc.)
+            if (!in_array($applicationName, $projectData['_applications'], true)) {
+                $projectData['_applications'][] = $applicationName;
+            }
+            
+            $appType = $applicationData['application'];
+            
+            // Check if user explicitly defined application-group in deploy file
+            // Only assign to groups if explicitly set (make it optional)
+            $explicitGroup = $applicationData['application-group'] ?? null;
+            
+            if ($explicitGroup === FRONTEND_GROUP || $explicitGroup === BACKEND_GROUP) {
+                // Use explicit group from deploy file
+                $groupType = $explicitGroup;
+                
+                if ($groupType === FRONTEND_GROUP) {
+                    $projectData['_applicationGroups'][$frontendGroupKey]['applications'][$applicationName] = $applicationData;
+                    $projectData['_groupedApplications'][$applicationName] = true;
+                } elseif ($groupType === BACKEND_GROUP) {
+                    $projectData['_applicationGroups'][$backendGroupKey]['applications'][$applicationName] = $applicationData;
+                    $projectData['_groupedApplications'][$applicationName] = true;
+                }
+            }
+            // If application-group is not set, application will not be grouped and will get individual container
+        }
+    }
+}
+
 $projectData = buildProjectData($projectData);
+
+// Generate group .env files using main applications as base
+// Frontend group uses yves as main, backend group uses backoffice as main
+// Must be done after buildProjectData() so brokerConnections is available
+foreach ($projectData['_applicationGroups'] ?? [] as $groupName => $groupData) {
+    $groupType = $groupData['groupType'];
+    $regionName = $groupData['region'];
+    $mainApplicationName = null;
+    $mainApplicationData = null;
+    
+    // Find main application for the group
+    if ($groupType === FRONTEND_GROUP) {
+        // Use yves as main for frontend group
+        foreach ($groupData['applications'] as $appName => $appData) {
+            if ($appData['application'] === YVES_APP) {
+                $mainApplicationName = $appName;
+                $mainApplicationData = $appData;
+                break;
+            }
+        }
+        // If no yves found, use first application
+        if ($mainApplicationName === null && !empty($groupData['applications'])) {
+            $mainApplicationName = array_key_first($groupData['applications']);
+            $mainApplicationData = $groupData['applications'][$mainApplicationName];
+        }
+    } elseif ($groupType === BACKEND_GROUP) {
+        // Use backoffice as main for backend group
+        foreach ($groupData['applications'] as $appName => $appData) {
+            if ($appData['application'] === BACKOFFICE_APP) {
+                $mainApplicationName = $appName;
+                $mainApplicationData = $appData;
+                break;
+            }
+        }
+        // If no backoffice found, try backend-gateway, then zed, then first
+        if ($mainApplicationName === null) {
+            foreach ($groupData['applications'] as $appName => $appData) {
+                if ($appData['application'] === BACKEND_GATEWAY_APP) {
+                    $mainApplicationName = $appName;
+                    $mainApplicationData = $appData;
+                    break;
+                }
+            }
+        }
+        if ($mainApplicationName === null) {
+            foreach ($groupData['applications'] as $appName => $appData) {
+                if ($appData['application'] === ZED_APP) {
+                    $mainApplicationName = $appName;
+                    $mainApplicationData = $appData;
+                    break;
+                }
+            }
+        }
+        // If still no main found, use first application
+        if ($mainApplicationName === null && !empty($groupData['applications'])) {
+            $mainApplicationName = array_key_first($groupData['applications']);
+            $mainApplicationData = $groupData['applications'][$mainApplicationName];
+        }
+    }
+    
+    // Generate group .env file using main application as base
+    if ($mainApplicationName !== null && $mainApplicationData !== null) {
+        $groupEnvFile = $deploymentDir . DS . 'env' . DS . $groupName . '.env';
+        file_put_contents(
+            $groupEnvFile,
+            $twig->render(sprintf('env/application/%s.env.twig', $mainApplicationData['application']), [
+                'applicationName' => $mainApplicationName,
+                'applicationData' => $mainApplicationData,
+                'project' => $projectData,
+                'regionName' => $regionName,
+                'regionData' => $projectData['regions'][$regionName],
+                'brokerConnections' => getBrokerConnections($projectData),
+            ])
+        );
+    }
+}
 /**
  * @param array $endpointMap
  *
@@ -351,9 +500,24 @@ foreach ($projectData['groups'] ?? [] as $groupName => $groupData) {
         foreach ($applicationData['endpoints'] ?? [] as $endpoint => $endpointData) {
 
             $host = strtok($endpoint, ':');
+            
+            // Determine the grouped application name for Cloud deployments
+            // If application is grouped, use the group name; otherwise use individual application name
+            // For Terraform, use underscores instead of hyphens and ensure lowercase
+            $typeForFrontend = strtolower($applicationName);
+            if (isset($projectData['_applicationGroups'])) {
+                foreach ($projectData['_applicationGroups'] as $groupName => $groupData) {
+                    if (isset($groupData['applications'][$applicationName])) {
+                        // Replace hyphens with underscores and convert to lowercase for Terraform compatibility
+                        $typeForFrontend = strtolower(str_replace('-', '_', $groupName));
+                        break;
+                    }
+                }
+            }
+            
             $frontend[$host] = [
                 'zone' => getFrontendZoneByDomainLevel($host),
-                'type' => $applicationName,
+                'type' => $typeForFrontend,
                 'internal' => (bool)($endpointData['internal'] ?? false),
             ];
 
@@ -765,7 +929,7 @@ function getSSLRedirectPort(array $projectData): int
  */
 function getBrokerConnections(array $projectData): string
 {
-    return $projectData[ProjectDataConstants::PROJECT_DATA_BROKER_CONNECTIONS_KEY];
+    return $projectData[ProjectDataConstants::PROJECT_DATA_BROKER_CONNECTIONS_KEY] ?? json_encode([]);
 }
 
 /**

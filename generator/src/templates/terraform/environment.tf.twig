@@ -1,5 +1,40 @@
 locals {
   spryker_environment = {
+{% if project['_applicationGroups'] is defined %}
+{# Generate grouped applications for Cloud (frontend_group, backend_group) #}
+{% for groupName, groupData in project['_applicationGroups'] %}
+    {{ groupName | lower | replace({'-': '_'}) }} = {
+{% set mainApplicationKey = groupData['applications'] | keys | first %}
+{% set mainApplicationData = groupData['applications'][mainApplicationKey] %}
+{% include "terraform/application/" ~ (groupData['groupType'] | lower) ~ ".tf.twig" with {
+    applicationName: (groupName | lower | replace({'-': '_'})),
+    applicationData: mainApplicationData,
+    regionName: groupData['region'],
+    regionData: project.regions[groupData['region']],
+    project: project,
+    groupData: groupData,
+    brokerConnections: brokerConnections
+} %}
+    }
+{% endfor %}
+{# Also generate individual applications that are not in any group #}
+{% for groupName, groupData in project.groups %}
+{% for applicationName, applicationData in groupData['applications'] %}
+{% if applicationData['application'] != 'static' and (project['_groupedApplications'][applicationName] is not defined) %}
+    {{ applicationName | lower | replace({'-': '_'}) }} = {
+{% include "terraform/application/" ~ (applicationData['application'] | lower) ~ ".tf.twig" with {
+    applicationName: applicationName,
+    applicationData: applicationData,
+    regionName: groupData['region'],
+    regionData: project.regions[groupData['region']],
+    project: project
+} %}
+    }
+{% endif %}
+{% endfor %}
+{% endfor %}
+{% else %}
+{# Fallback: Generate individual applications (backward compatibility) #}
 {% for groupName, groupData in project.groups %}
 {% for applicationName, applicationData in groupData['applications'] %}
 {% if applicationData['application'] != 'static' %}
@@ -15,6 +50,7 @@ locals {
 {% endif %}
 {% endfor %}
 {% endfor %}
+{% endif %}
     e2e = {
 {% include  "terraform/e2e/e2e.tf.twig" with _context %}
     }

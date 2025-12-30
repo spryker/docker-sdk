@@ -63,6 +63,21 @@ services:
       'spryker.app.type': proxy
       'spryker.project': ${SPRYKER_DOCKER_PREFIX}:${SPRYKER_DOCKER_TAG}
     depends_on:
+{% if _applicationGroups is defined %}
+{# Use grouped applications #}
+{% for groupName, groupData in _applicationGroups %}
+      - {{ groupName | lower }}
+{% endfor %}
+{# Also include individual applications that are not in any group #}
+{% for group in groups %}
+{% for applicationName, applicationData in group['applications'] %}
+{% if applicationData['application'] != 'static' and (_groupedApplications[applicationName] is not defined) %}
+      - {{ applicationName | lower }}
+{% endif %}
+{% endfor %}
+{% endfor %}
+{% else %}
+{# Fallback to individual applications for backward compatibility #}
 {% for group in groups %}
 {% for applicationName, applicationData in group['applications'] %}
 {% if applicationData['application'] != 'static' %}
@@ -70,6 +85,7 @@ services:
 {% endif %}
 {% endfor %}
 {% endfor %}
+{% endif %}
     environment:
       # TODO reconsider to use default in entrypoint
       ALLOWED_IP: "127.0.0.1"
@@ -78,6 +94,23 @@ services:
 {% if docker['debug']['xdebug']['enabled'] is not defined or docker['debug']['xdebug']['enabled'] == true %}
       SPRYKER_XDEBUG_ENABLE: ${SPRYKER_XDEBUG_ENABLE}
 {% endif %}
+{% if _applicationGroups is defined %}
+{# Map individual application names to their grouped containers #}
+{% for groupName, groupData in _applicationGroups %}
+{% for applicationName, applicationData in groupData['applications'] %}
+      SPRYKER_NGINX_CGI_HOST_{{ applicationName | upper }}: {{ groupName | lower }}
+{% endfor %}
+{% endfor %}
+{# Also include individual applications that are not in any group #}
+{% for group in groups %}
+{% for applicationName, applicationData in group['applications'] %}
+{% if applicationData['application'] != 'static' and (_groupedApplications[applicationName] is not defined) %}
+      SPRYKER_NGINX_CGI_HOST_{{ applicationName | upper }}: {{ applicationName | lower }}
+{% endif %}
+{% endfor %}
+{% endfor %}
+{% else %}
+{# Fallback to individual applications for backward compatibility #}
 {% for group in groups %}
 {% for applicationName, applicationData in group['applications'] %}
 {% if applicationData['application'] != 'static' %}
@@ -85,6 +118,7 @@ services:
 {% endif %}
 {% endfor %}
 {% endfor %}
+{% endif %}
 {% if _mountMode != 'baked' %}
     volumes:
 {% if _mountMode == 'native' %}
@@ -132,6 +166,33 @@ services:
       'spryker.app.type': proxy
       'spryker.project': ${SPRYKER_DOCKER_PREFIX}:${SPRYKER_DOCKER_TAG}
 
+{% if _applicationGroups is defined %}
+{# Generate grouped application containers #}
+{% for groupName, groupData in _applicationGroups %}
+{% include "application/" ~ (groupData['groupType'] | lower) ~ ".yml.twig" with {
+    groupName: groupName,
+    groupData: groupData,
+    regionName: groupData['region'],
+    project: _context
+} %}
+{% endfor %}
+{# Also include individual applications for backward compatibility if they exist #}
+{# Include applications that are not in any group (application-group not set) #}
+{% for group in groups %}
+{% for applicationName, applicationData in group['applications'] %}
+{% if applicationData['application'] != 'static' and (_groupedApplications[applicationName] is not defined) %}
+
+{% include "application/" ~ (applicationData['application'] | lower) ~ ".yml.twig" with {
+    applicationName: applicationName,
+    applicationData: applicationData,
+    regionName: group['region'],
+    project: _context
+} %}
+{% endif %}
+{% endfor %}
+{% endfor %}
+{% else %}
+{# Fallback to individual applications for backward compatibility #}
 {% for group in groups %}
 {% for applicationName, applicationData in group['applications'] %}
 {% if applicationData['application'] != 'static' %}
@@ -145,6 +206,7 @@ services:
 {% endif %}
 {% endfor %}
 {% endfor %}
+{% endif %}
 {% for serviceName, serviceData in services %}
 {% set engine = serviceData['engine'] | lower %}
 {% set version = serviceData['version'] | default('default') %}

@@ -1,5 +1,24 @@
 #!/bin/sh
 {% set envVariables = ["\$ALLOWED_IP", "\$SPRYKER_BUILD_HASH", "\$SPRYKER_MAINTENANCE_MODE_ENABLED"] %}
+{% if _applicationGroups is defined %}
+{# Map individual applications to their grouped containers #}
+{% for groupName, groupData in _applicationGroups %}
+{% for applicationName, applicationData in groupData['applications'] %}
+{% set envVariables = envVariables | merge(["\$SPRYKER_NGINX_CGI_" ~ (applicationName | upper)]) %}
+export SPRYKER_NGINX_CGI_{{ applicationName | upper}}=${SPRYKER_NGINX_CGI_{{ (applicationName | upper) }}:-"${SPRYKER_NGINX_CGI_HOST_{{ (applicationName | upper) }}}:9000"}
+{% endfor %}
+{% endfor %}
+{# Also include individual applications that are not in any group #}
+{% for groupData in groups %}
+{% for applicationName, applicationData in groupData['applications'] %}
+{% if applicationData['application'] != 'static' and (_groupedApplications[applicationName] is not defined) %}
+{% set envVariables = envVariables | merge(["\$SPRYKER_NGINX_CGI_" ~ (applicationName | upper)]) %}
+export SPRYKER_NGINX_CGI_{{ applicationName | upper}}=${SPRYKER_NGINX_CGI_{{ (applicationName | upper) }}:-"${SPRYKER_NGINX_CGI_HOST_{{ (applicationName | upper) }}}:9000"}
+{% endif %}
+{% endfor %}
+{% endfor %}
+{% else %}
+{# Fallback to individual applications for backward compatibility #}
 {% for groupData in groups %}
 {% for applicationName, applicationData in groupData['applications'] %}
 {% if applicationData['application'] != 'static' %}
@@ -8,6 +27,7 @@ export SPRYKER_NGINX_CGI_{{ applicationName | upper}}=${SPRYKER_NGINX_CGI_{{ (ap
 {% endif %}
 {% endfor %}
 {% endfor %}
+{% endif %}
 
 envsubst '{{ envVariables | join(' ') }}' < /etc/nginx/template/default.conf.tmpl > /etc/nginx/conf.d/default.conf
 

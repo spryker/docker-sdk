@@ -1,0 +1,22 @@
+  {{ groupName | lower }}:
+    image: ${SPRYKER_DOCKER_PREFIX}_run_app:${SPRYKER_DOCKER_TAG}
+    networks:
+      - private
+    labels:
+      'spryker.app.name': {{ groupName }}
+      'spryker.app.type': frontend-group
+      'spryker.project': ${SPRYKER_DOCKER_PREFIX}:${SPRYKER_DOCKER_TAG}
+    env_file:
+      - ${DEPLOYMENT_PATH}/env/{{ groupName }}.env
+      - ${DEPLOYMENT_PATH}/env/.env
+    environment:
+      SPRYKER_TESTING_ENABLED: ${SPRYKER_TESTING_ENABLE}
+      SPRYKER_XDEBUG_HOST_IP: ${SPRYKER_XDEBUG_HOST_IP}
+      TIDEWAYS_APIKEY: ${TIDEWAYS_APIKEY}
+      TIDEWAYS_CLI_ENABLED: ${TIDEWAYS_CLI_ENABLED}
+      TIDEWAYS_ENVIRONMENT_NAME: ${TIDEWAYS_ENVIRONMENT_NAME}
+      BLACKFIRE_APM_ENABLED: ${BLACKFIRE_APM_ENABLED}
+      SPRYKER_APPLICATION_GROUP: frontend-group
+      SPRYKER_APPLICATION_NAMES: {{ groupData['applications'] | keys | join(',') }}
+    <<: *app-volumes
+

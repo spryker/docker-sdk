@@ -1,0 +1,34 @@
+{% include "terraform/environment.common.tf.twig" with _context %}
+{% include "terraform/pm/php-fpm.tf.twig" with {
+    applicationData: applicationData,
+    project: project
+} %}
+{% include "terraform/key_value_store/#{project['services']['key_value_store']['engine']}.tf.twig" ignore missing with {
+    serviceData: project['services']['key_value_store'],
+    serviceName: 'key_value_store',
+    keyValueStoreConnections: project['keyValueStoreConnections'],
+    keyValueRegionNamespaces: regionData['key_value_region_namespaces']
+} %}
+{% include "terraform/search/#{project['services']['search']['engine']}.tf.twig" ignore missing with {
+    serviceData: project['services']['search'],
+    serviceName: 'search',
+    searchIndexPrefix: project['namespace']
+} %}
+{% include "terraform/session-be/#{project['services']['session']['engine']}.tf.twig" ignore missing with {
+    serviceData: project['services']['session'],
+    serviceName: 'session'
+} %}
+{% include "terraform/database/#{project['services']['database']['engine']}.tf.twig" ignore missing with {
+    serviceData: project['services']['database'],
+    regionData: regionData['services']['database'],
+    serviceName: 'database'
+} %}
+{% include "terraform/broker/#{project['services']['broker']['engine']}.tf.twig" ignore missing with {
+    serviceData: project['services']['broker'],
+    serviceName: 'broker',
+    brokerConnections: brokerConnections
+} %}
+{% include "terraform/mail/mail.tf.twig" with {
+    serviceData: regionData['services']['mail']
+} %}
+
