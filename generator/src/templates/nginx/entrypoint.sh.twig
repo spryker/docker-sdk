@@ -1,10 +1,18 @@
 #!/bin/sh
 {% set envVariables = ["\$ALLOWED_IP", "\$SPRYKER_BUILD_HASH", "\$SPRYKER_MAINTENANCE_MODE_ENABLED"] %}
+{% set exportedVars = [] %}
 {% for groupData in groups %}
 {% for applicationName, applicationData in groupData['applications'] %}
 {% if applicationData['application'] != 'static' %}
-{% set envVariables = envVariables | merge(["\$SPRYKER_NGINX_CGI_" ~ (applicationName | upper)]) %}
-export SPRYKER_NGINX_CGI_{{ applicationName | upper}}=${SPRYKER_NGINX_CGI_{{ (applicationName | upper) }}:-"${SPRYKER_NGINX_CGI_HOST_{{ (applicationName | upper) }}}:9000"}
+{% for endpoint, endpointData in applicationData['endpoints'] %}
+{% set identifier = endpointData['identifier'] | default(endpointData['store'] | default(endpointData['region'] | default(''))) | upper %}
+{% set cgiVarName = "SPRYKER_NGINX_CGI_" ~ (applicationName | upper) ~ (identifier ? "_" ~ identifier : "") %}
+{% if cgiVarName not in exportedVars %}
+{% set exportedVars = exportedVars | merge([cgiVarName]) %}
+{% set envVariables = envVariables | merge(["\$" ~ cgiVarName]) %}
+export {{ cgiVarName }}=${{ '{' }}{{ cgiVarName }}:-${{ '{' }}SPRYKER_NGINX_CGI_HOST_{{ applicationName | upper }}{{ identifier ? "_" ~ identifier : "" }}{{ '}' }}{{ '}' }}
+{% endif %}
+{% endfor %}
 {% endif %}
 {% endfor %}
 {% endfor %}
@@ -21,4 +29,5 @@ if [ -n "${SPRYKER_XDEBUG_MODE_ENABLE}" ]; then
 envsubst '{{ envVariables | join(' ') }}' < /etc/nginx/template/debug.default.conf > /etc/nginx/conf.d/debug.default.conf
 fi
 
+# Execute the CMD (nginx -g "daemon off;")
 exec "$@"

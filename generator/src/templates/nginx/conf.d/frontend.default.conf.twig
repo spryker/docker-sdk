@@ -33,19 +33,26 @@ server {
 {% for groupData in groups %}
 {% for applicationName, applicationData in groupData['applications'] %}
 {% for endpoint, endpointData in applicationData['endpoints'] %}
-{% set zedHost = _endpointMap[endpointData['identifier']]['backend-gateway'] | default('') %}
+{% if applicationData['application'] != 'static' %}
+{% set identifier = endpointData['identifier'] | default(endpointData['store'] | default(endpointData['region'] | default(''))) | upper %}
+{% set zedHost = _endpointMap[endpointData['identifier'] | default(endpointData['store'] | default(endpointData['region'] | default('')))] ['backend-gateway'] | default('') %}
+
 {% include "nginx/http/#{applicationData['application']}.server.conf.twig" with {
+    portToListen: 80,
     endpoint: endpoint,
     endpointData: endpointData,
     applicationData: applicationData,
     auth: endpointData['auth'] | default([]),
     storeServices: regions[groupData['region']]['stores'][endpointData['store']]['services'] ?? regions[groupData['region']]['services'] | default([]),
-    upstream: "${SPRYKER_NGINX_CGI_" ~ (applicationName | upper) ~ "}",
+    upstream: "${SPRYKER_NGINX_CGI_" ~ (applicationName | upper) ~ (identifier ? "_" ~ identifier : "") ~ "}",
     zedHost: zedHost,
     timeout: applicationData['http']['timeout'] | default('1m'),
     project: _context,
-    regionEndpointMap: _context['regionEndpointMap'][endpointData['identifier']]
+    regionEndpointMap: _context['regionEndpointMap'][endpointData['identifier'] | default(endpointData['store'] | default(endpointData['region'] | default('')))] | default([]),
+    host: endpoint | split(':') | first,
+    externalPort: (endpoint | split(':'))[1] | default(_context['_defaultPort'])
 } %}
+{% endif %}
 {% endfor %}
 {% endfor %}
 {% endfor %}

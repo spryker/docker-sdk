@@ -78,10 +78,18 @@ services:
 {% if docker['debug']['xdebug']['enabled'] is not defined or docker['debug']['xdebug']['enabled'] == true %}
       SPRYKER_XDEBUG_ENABLE: ${SPRYKER_XDEBUG_ENABLE}
 {% endif %}
+{% set definedCgiVars = [] %}
 {% for group in groups %}
 {% for applicationName, applicationData in group['applications'] %}
 {% if applicationData['application'] != 'static' %}
-      SPRYKER_NGINX_CGI_HOST_{{ applicationName | upper }}: {{ applicationName | lower }}
+{% for endpoint, endpointData in applicationData['endpoints'] %}
+{% set identifier = endpointData['identifier'] | default(endpointData['store'] | default(endpointData['region'] | default(''))) | upper %}
+{% set cgiVarName = "SPRYKER_NGINX_CGI_HOST_" ~ (applicationName | upper) ~ (identifier ? "_" ~ identifier : "") %}
+{% if cgiVarName not in definedCgiVars %}
+{% set definedCgiVars = definedCgiVars | merge([cgiVarName]) %}
+      {{ cgiVarName }}: {{ applicationName | lower }}:9000
+{% endif %}
+{% endfor %}
 {% endif %}
 {% endfor %}
 {% endfor %}
