@@ -7,10 +7,13 @@
 {% for endpoint, endpointData in applicationData['endpoints'] %}
 {% set identifier = endpointData['identifier'] | default(endpointData['store'] | default(endpointData['region'] | default(''))) | upper %}
 {% set cgiVarName = "SPRYKER_NGINX_CGI_" ~ (applicationName | upper) ~ (identifier ? "_" ~ identifier : "") %}
+{% set hostVarName = "SPRYKER_NGINX_CGI_HOST_" ~ (applicationName | upper) ~ (identifier ? "_" ~ identifier : "") %}
+{% set defaultUpstream = applicationName | lower ~ ":9000" %}
 {% if cgiVarName not in exportedVars %}
 {% set exportedVars = exportedVars | merge([cgiVarName]) %}
 {% set envVariables = envVariables | merge(["\$" ~ cgiVarName]) %}
-export {{ cgiVarName }}=${{ '{' }}{{ cgiVarName }}:-${{ '{' }}SPRYKER_NGINX_CGI_HOST_{{ applicationName | upper }}{{ identifier ? "_" ~ identifier : "" }}{{ '}' }}{{ '}' }}
+# Fallback chain: explicit var -> HOST var -> application name:9000
+export {{ cgiVarName }}={{ '${' }}{{ cgiVarName }}:-{{ '${' }}{{ hostVarName }}:-{{ defaultUpstream }}{{ '}' }}{{ '}' }}
 {% endif %}
 {% endfor %}
 {% endif %}
