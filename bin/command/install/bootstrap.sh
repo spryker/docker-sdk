@@ -166,7 +166,6 @@ function Command::bootstrap::_deploy() {
 
     [ -d "${DESTINATION_DIR}" ] && rm -rf "${DESTINATION_DIR:?}/*"
     [ ! -d "${DESTINATION_DIR}" ] && mkdir "${DESTINATION_DIR}"
-    # Remove symlink if it exists (from previous -x boot) before copying
     [ -L "${DESTINATION_DIR}/bin" ] && rm -f "${DESTINATION_DIR}/bin"
     cp -R "${tmpDeploymentDir}/." "${DESTINATION_DIR}"
     rm -rf "${tmpDeploymentDir}"
