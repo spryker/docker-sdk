@@ -63,11 +63,11 @@ function Images::push() {
     local tag=${1:-${SPRYKER_DOCKER_TAG}}
     local ecr_base="${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com"
 
-    local all_images=()
+    local all_images=(boffice)
 
-    for application in "${SPRYKER_APPLICATIONS[@]}"; do
-        all_images+=("$(echo "$application" | tr '[:upper:]' '[:lower:]')")
-    done
+    # for application in "${SPRYKER_APPLICATIONS[@]}"; do
+        # all_images+=("$(echo "$application" | tr '[:upper:]' '[:lower:]')")
+    # done
 
     all_images+=(frontend jenkins)
 
