@@ -33,7 +33,7 @@ server {
 {% for groupData in groups %}
 {% for applicationName, applicationData in groupData['applications'] %}
 {% for endpoint, endpointData in applicationData['endpoints'] %}
-{% set zedHost = _endpointMap[endpointData['identifier']]['backend-gateway'] | default('') %}
+{% set zedHost = _endpointMap[endpointData['identifier']]['backend-gateway'] | default('backend-gateway.eu.eugene-dev2.cloud.spryker.toys') %}
 {% include "nginx/http/#{applicationData['application']}.server.conf.twig" with {
     endpoint: endpoint,
     endpointData: endpointData,

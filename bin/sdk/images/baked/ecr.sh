@@ -40,22 +40,54 @@ function Images::tagFrontend() {
 }
 
 function Images::push() {
+    # Console::verbose "${INFO}Pushing images to AWS ECR${NC}"
+    # local tag=${1:-${SPRYKER_DOCKER_TAG}}
+
+    # docker images | grep ecr
+    # for application in "${SPRYKER_APPLICATIONS[@]}"; do
+    #     local application="$(echo "$application" | tr '[:upper:]' '[:lower:]')"
+    #     echo "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${SPRYKER_PROJECT_NAME}-${application}:${tag}"
+    #     docker push "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${SPRYKER_PROJECT_NAME}-${application}:${tag}" &
+    #     docker push "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${SPRYKER_PROJECT_NAME}-${application}:latest" &
+    # done
+    #     echo "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${SPRYKER_PROJECT_NAME}-frontend:${tag}"
+    #     docker push "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${SPRYKER_PROJECT_NAME}-frontend:${tag}" &
+    #     docker push "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${SPRYKER_PROJECT_NAME}-frontend:latest" &
+    #     echo "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${SPRYKER_PROJECT_NAME}-jenkins:${tag}"
+    #     docker push "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${SPRYKER_PROJECT_NAME}-jenkins:${tag}" &
+    #     docker push "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${SPRYKER_PROJECT_NAME}-jenkins:latest" &
+
+    # wait
+
     Console::verbose "${INFO}Pushing images to AWS ECR${NC}"
     local tag=${1:-${SPRYKER_DOCKER_TAG}}
+    local ecr_base="${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com"
 
-    docker images | grep ecr
+    local all_images=()
+
     for application in "${SPRYKER_APPLICATIONS[@]}"; do
-        local application="$(echo "$application" | tr '[:upper:]' '[:lower:]')"
-        echo "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${SPRYKER_PROJECT_NAME}-${application}:${tag}"
-        docker push "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${SPRYKER_PROJECT_NAME}-${application}:${tag}" &
-        docker push "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${SPRYKER_PROJECT_NAME}-${application}:latest" &
+        all_images+=("$(echo "$application" | tr '[:upper:]' '[:lower:]')")
     done
-        echo "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${SPRYKER_PROJECT_NAME}-frontend:${tag}"
-        docker push "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${SPRYKER_PROJECT_NAME}-frontend:${tag}" &
-        docker push "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${SPRYKER_PROJECT_NAME}-frontend:latest" &
-        echo "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${SPRYKER_PROJECT_NAME}-jenkins:${tag}"
-        docker push "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${SPRYKER_PROJECT_NAME}-jenkins:${tag}" &
-        docker push "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${SPRYKER_PROJECT_NAME}-jenkins:latest" &
 
+    all_images+=(frontend jenkins)
+
+    for app in "${all_images[@]}"; do
+        echo "${ecr_base}/${SPRYKER_PROJECT_NAME}-${app}:${tag}"
+        docker push "${ecr_base}/${SPRYKER_PROJECT_NAME}-${app}:${tag}" &
+    done
     wait
+
+    for app in "${all_images[@]}"; do
+        local repo="${SPRYKER_PROJECT_NAME}-${app}"
+        MANIFEST=$(aws ecr batch-get-image \
+            --repository-name "${repo}" \
+            --image-ids imageTag="${tag}" \
+            --query 'images[].imageManifest' \
+            --output text)
+        aws ecr put-image \
+            --repository-name "${repo}" \
+            --image-tag latest \
+            --image-manifest "$MANIFEST" \
+            --no-cli-pager 2>/dev/null || true
+    done
 }
