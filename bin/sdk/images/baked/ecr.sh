@@ -74,20 +74,8 @@ function Images::push() {
     for app in "${all_images[@]}"; do
         echo "${ecr_base}/${SPRYKER_PROJECT_NAME}-${app}:${tag}"
         docker push "${ecr_base}/${SPRYKER_PROJECT_NAME}-${app}:${tag}" &
+        docker push "${ecr_base}/${SPRYKER_PROJECT_NAME}-${app}:latest" &
     done
-    wait
 
-    for app in "${all_images[@]}"; do
-        local repo="${SPRYKER_PROJECT_NAME}-${app}"
-        MANIFEST=$(aws ecr batch-get-image \
-            --repository-name "${repo}" \
-            --image-ids imageTag="${tag}" \
-            --query 'images[].imageManifest' \
-            --output text)
-        aws ecr put-image \
-            --repository-name "${repo}" \
-            --image-tag latest \
-            --image-manifest "$MANIFEST" \
-            --no-cli-pager 2>/dev/null || true
-    done
+    wait
 }
