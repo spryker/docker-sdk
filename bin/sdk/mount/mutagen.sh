@@ -73,7 +73,6 @@ function sync() {
                         return 0
                     fi
                 fi
-                # If creation failed, it will be retried in afterRun
                 Console::verbose "${INFO}Sync session creation will be retried after containers are fully started${NC}"
             else
                 Console::verbose "${INFO}Containers not running yet, sync session will be created when containers are ready${NC}"
