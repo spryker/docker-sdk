@@ -112,7 +112,7 @@ function Images::_buildApp() {
         -f "${DEPLOYMENT_PATH}/images/common/cli/Dockerfile" \
         --progress="${PROGRESS_TYPE}" \
         --build-arg "SPRYKER_PARENT_IMAGE=${localAppImage}" \
-        --build-arg "BLACKFIRE_EXTENSION_ENABLED=$(Bool::normalizeBashBool ${BLACKFIRE_EXTENSION_ENABLED})" \
+        --build-arg "BLACKFIRE_EXTENSION_ENABLED=$(Bool::normalizeBashBool ${BLACKFIRE_EXTENSION_ENABLED:-${FALSE}})" \
         "${DEPLOYMENT_PATH}/context" 1>&2
 
     docker build \

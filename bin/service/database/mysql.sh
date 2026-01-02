@@ -49,6 +49,7 @@ function Database::haveTables() {
         if [ -z "${databases}" ] || [ "${databases}" == "[]" ]; then
             ${DB_CLIENT} \
                 -h "${SPRYKER_DB_HOST}" \
+                --skip-ssl \
                 -u "${SPRYKER_DB_ROOT_USERNAME}" \
                 -e "SELECT TABLE_NAME FROM information_schema.tables WHERE table_schema = \"${SPRYKER_DB_DATABASE}\"" \
                 | wc -l \
@@ -62,6 +63,7 @@ function Database::haveTables() {
                 tablesCountPerDb=$(${DB_CLIENT} \
                     -h "${SPRYKER_DB_HOST}" \
                     -u "${SPRYKER_DB_ROOT_USERNAME}" \
+                    --skip-ssl \
                     -e "SELECT TABLE_NAME FROM information_schema.tables WHERE table_schema = \"${SPRYKER_DB_DATABASE}\"" \
                     | wc -l \
                     |  sed "s/^ *//" \

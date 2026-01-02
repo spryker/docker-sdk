@@ -166,6 +166,7 @@ function Command::bootstrap::_deploy() {
 
     [ -d "${DESTINATION_DIR}" ] && rm -rf "${DESTINATION_DIR:?}/*"
     [ ! -d "${DESTINATION_DIR}" ] && mkdir "${DESTINATION_DIR}"
+    [ -L "${DESTINATION_DIR}/bin" ] && rm -f "${DESTINATION_DIR}/bin"
     cp -R "${tmpDeploymentDir}/." "${DESTINATION_DIR}"
     rm -rf "${tmpDeploymentDir}"
 }
