@@ -40,9 +40,10 @@ function Images::tagFrontend() {
     
     local builder_assets_image="${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${SPRYKER_PROJECT_NAME}-builder_assets:latest"
     local repository_name="${SPRYKER_PROJECT_NAME}-builder_assets"
+    local source_builder_assets_image="$(Assets::getImageTag)"
     
     if ! aws ecr describe-images --repository-name "${repository_name}" --image-ids imageTag=latest --region "${AWS_REGION}" &>/dev/null; then
-        docker tag "${SPRYKER_DOCKER_PREFIX}_builder_assets:${SPRYKER_DOCKER_TAG}" "${builder_assets_image}"
+        docker tag "${source_builder_assets_image}" "${builder_assets_image}"
     fi
 }
 
