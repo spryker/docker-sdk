@@ -58,8 +58,9 @@ function Assets::areBuilt() {
     Console::start "Checking assets are built..."
 
     local builderAssetsImage=$(Assets::getImageTag)
+    local builderAssetsMasterImage="${SPRYKER_DOCKER_PREFIX}_builder_assets:master"
 
-    if docker image inspect "${builderAssetsImage}" >/dev/null 2>&1; then
+    if docker image inspect "${builderAssetsImage}" >/dev/null 2>&1 || docker image inspect "${builderAssetsMasterImage}" >/dev/null 2>&1; then
         Console::end "[BUILT]"
         return "${TRUE}"
     fi
