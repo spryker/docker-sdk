@@ -69,6 +69,7 @@ function Assets::areBuilt() {
         Console::end "${builderAssetsEcrLatestImage}"
         
         if docker image inspect "${builderAssetsEcrLatestImage}" >/dev/null 2>&1; then
+            docker tag "${builderAssetsEcrLatestImage}" "${builderAssetsImage}"
             Console::end "[BUILT]"
             return "${TRUE}"
         fi
