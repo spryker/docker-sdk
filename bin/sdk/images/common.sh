@@ -96,6 +96,7 @@ function Images::_buildApp() {
             --progress="${PROGRESS_TYPE}" \
             --build-arg "SPRYKER_PARENT_IMAGE=${appImage}" \
             "${DEPLOYMENT_PATH}/context" 1>&2
+    fi
     
 
     if [ -n "${SPRYKER_XDEBUG_MODE_ENABLE}" ]; then
