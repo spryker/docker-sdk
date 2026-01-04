@@ -58,19 +58,20 @@ function Assets::areBuilt() {
     Console::start "Checking assets are built..."
 
     local builderAssetsImage=$(Assets::getImageTag)
-    local builderAssetsMasterImage="${SPRYKER_DOCKER_PREFIX}_builder_assets:master"
 
-    if docker image inspect "${builderAssetsImage}" >/dev/null 2>&1 || docker image inspect "${builderAssetsMasterImage}" >/dev/null 2>&1; then
+    if docker image inspect "${builderAssetsImage}" >/dev/null 2>&1; then
         Console::end "[BUILT]"
         return "${TRUE}"
     fi
     
     if [ -n "${AWS_ACCOUNT_ID}" ] && [ -n "${AWS_REGION}" ] && [ -n "${SPRYKER_PROJECT_NAME}" ]; then
-        local builderAssetsEcrMasterImage="${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${SPRYKER_PROJECT_NAME}-builder_assets:master"
-        if docker image inspect "${builderAssetsEcrMasterImage}" >/dev/null 2>&1; then
+        local builderAssetsEcrLatestImage="${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${SPRYKER_PROJECT_NAME}-builder_assets:latest"
+        if docker image inspect "${builderAssetsEcrLatestImage}" >/dev/null 2>&1; then
             Console::end "[BUILT]"
             return "${TRUE}"
         fi
+    else
+        echo "AWS variables not set - AWS_ACCOUNT_ID: '${AWS_ACCOUNT_ID}', AWS_REGION: '${AWS_REGION}', SPRYKER_PROJECT_NAME: '${SPRYKER_PROJECT_NAME}'"
     fi
 
     return "${FALSE}"
