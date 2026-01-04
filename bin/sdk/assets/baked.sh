@@ -70,22 +70,10 @@ function Assets::areBuilt() {
         
         if docker image inspect "${builderAssetsEcrLatestImage}" >/dev/null 2>&1; then
             local currentHash="${SPRYKER_BUILD_HASH:-current}"
-            local containerName="${SPRYKER_DOCKER_PREFIX}_assets_rename_$$"
             
-            docker run -d --name "${containerName}" --entrypoint="" "${builderAssetsEcrLatestImage}" sleep 3600 >/dev/null 2>&1
-            
-            docker exec "${containerName}" sh -c "
-                cd /data/public/Yves/assets 2>/dev/null && \
-                for dir in */; do
-                    if [ -d \"\${dir}\" ] && [ \"\${dir%/}\" != '${currentHash}' ]; then
-                        mv \"\${dir%/}\" '${currentHash}' 2>/dev/null || true
-                        break
-                    fi
-                done
-            " 2>/dev/null || true
-            
-            docker commit "${containerName}" "${builderAssetsImage}" >/dev/null 2>&1
-            docker rm -f "${containerName}" >/dev/null 2>&1
+            echo "FROM ${builderAssetsEcrLatestImage}
+RUN cd /data/public/Yves/assets 2>/dev/null && for dir in */; do if [ -d \"\${dir}\" ] && [ \"\${dir%/}\" != '${currentHash}' ]; then mv \"\${dir%/}\" '${currentHash}'; break; fi; done || true" | \
+            docker build -t "${builderAssetsImage}" -f - . >/dev/null 2>&1
             
             Console::end "[BUILT]"
             return "${TRUE}"
