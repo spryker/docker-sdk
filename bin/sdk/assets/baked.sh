@@ -66,6 +66,8 @@ function Assets::areBuilt() {
     
     if [ -n "${AWS_ACCOUNT_ID}" ] && [ -n "${AWS_REGION}" ] && [ -n "${SPRYKER_PROJECT_NAME}" ]; then
         local builderAssetsEcrLatestImage="${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${SPRYKER_PROJECT_NAME}-builder_assets:latest"
+        Console::end "${builderAssetsEcrLatestImage}"
+        
         if docker image inspect "${builderAssetsEcrLatestImage}" >/dev/null 2>&1; then
             Console::end "[BUILT]"
             return "${TRUE}"
