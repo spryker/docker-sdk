@@ -68,6 +68,7 @@ function sync() {
             local targetContainer=$(Mount::Mutagen::findTargetContainer)
             if [ -n "${targetContainer}" ]; then
                 if Mount::Mutagen::createSyncSession; then
+                    sleep 1
                     if Mount::Mutagen::sessionExists; then
                         Console::verbose "${INFO}Mutagen sync session created successfully${NC}"
                         return 0
