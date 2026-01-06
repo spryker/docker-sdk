@@ -33,17 +33,26 @@ function Images::tagFrontend() {
     Console::verbose "${INFO}Tagging Frontend for AWS ECR${NC}"
 
     local tag=${1:-${SPRYKER_DOCKER_TAG}}
+    local ecr_base="${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com"
 
-    docker tag "${SPRYKER_DOCKER_PREFIX}_frontend:${SPRYKER_DOCKER_TAG}" "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${SPRYKER_PROJECT_NAME}-frontend:${tag}"
-    docker tag "${SPRYKER_DOCKER_PREFIX}_frontend:${SPRYKER_DOCKER_TAG}" "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${SPRYKER_PROJECT_NAME}-frontend:latest"
+    docker tag "${SPRYKER_DOCKER_PREFIX}_frontend:${SPRYKER_DOCKER_TAG}" "${ecr_base}/${SPRYKER_PROJECT_NAME}-frontend:${tag}"
+    docker tag "${SPRYKER_DOCKER_PREFIX}_frontend:${SPRYKER_DOCKER_TAG}" "${ecr_base}/${SPRYKER_PROJECT_NAME}-frontend:latest"
     
-    
-    local builder_assets_image="${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${SPRYKER_PROJECT_NAME}-builder_assets:latest"
-    local repository_name="${SPRYKER_PROJECT_NAME}-builder_assets"
     local source_builder_assets_image="$(Assets::getImageTag)"
+    local builder_assets_image="${ecr_base}/${SPRYKER_PROJECT_NAME}-builder_assets:${tag}"
+    local builder_assets_latest="${ecr_base}/${SPRYKER_PROJECT_NAME}-builder_assets:latest"
+    local repository_name="${SPRYKER_PROJECT_NAME}-builder_assets"
+    local minimal_assets_image="${SPRYKER_DOCKER_PREFIX}_builder_assets_minimal:${SPRYKER_DOCKER_TAG}"
+    
+    if ! docker image inspect "${minimal_assets_image}" >/dev/null 2>&1; then
+        Console::verbose "${INFO}Creating minimal builder_assets image (only /data/public)${NC}"
+        echo "FROM scratch
+COPY --from=${source_builder_assets_image} /data/public /data/public" | \
+            docker build -t "${minimal_assets_image}" -f - . >/dev/null 2>&1
+    fi
     
     if ! aws ecr describe-images --repository-name "${repository_name}" --image-ids imageTag=latest --region "${AWS_REGION}" &>/dev/null; then
-        docker tag "${source_builder_assets_image}" "${builder_assets_image}"
+        docker tag "${minimal_assets_image}" "${builder_assets_latest}"
     fi
 }
 
