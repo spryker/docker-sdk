@@ -75,6 +75,7 @@ function Assets::areBuilt() {
 RUN cd /data/public/Yves/assets 2>/dev/null && for dir in */; do if [ -d \"\${dir}\" ] && [ \"\${dir%/}\" != '${currentHash}' ]; then mv \"\${dir%/}\" '${currentHash}'; break; fi; done || true" | \
             docker build -t "${builderAssetsImage}" -f - . >/dev/null 2>&1
             
+            docker images
             Console::start "[BUILT]"
             return "${TRUE}"
         else
