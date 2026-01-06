@@ -77,6 +77,8 @@ RUN cd /data/public/Yves/assets 2>/dev/null && for dir in */; do if [ -d \"\${di
             
             Console::end "[BUILT]"
             return "${TRUE}"
+        else
+             Console::end "[NOT FOUND] ${builderAssetsEcrLatestImage}"
         fi
     else
         echo "AWS variables not set - AWS_ACCOUNT_ID: '${AWS_ACCOUNT_ID}', AWS_REGION: '${AWS_REGION}', SPRYKER_PROJECT_NAME: '${SPRYKER_PROJECT_NAME}'"
