@@ -71,13 +71,20 @@ function Assets::areBuilt() {
         if docker image inspect "${builderAssetsEcrLatestImage}" >/dev/null 2>&1; then
             local currentHash="${SPRYKER_BUILD_HASH:-current}"
             
-            Console::start "FROM ${builderAssetsEcrLatestImage}
-RUN cd /data/public/Yves/assets 2>/dev/null && for dir in */; do if [ -d \"\${dir}\" ] && [ \"\${dir%/}\" != '${currentHash}' ]; then mv \"\${dir%/}\" '${currentHash}'; break; fi; done || true" | \
-            docker build -t "${builderAssetsImage}" -f - . >/dev/null 2>&1
-            
-            docker images
-            Console::start "[BUILT]"
-            return "${TRUE}"
+            Console::start "Building from ECR image..."
+            if echo "FROM busybox
+COPY --from=${builderAssetsEcrLatestImage} /data/public /data/public
+RUN cd /data/public/Yves/assets && \
+    for dir in */; do \
+        [ -d \"\${dir}\" ] && [ \"\${dir%/}\" != '${currentHash}' ] && mv \"\${dir%/}\" '${currentHash}' && break; \
+    done; true" | \
+            docker build -t "${builderAssetsImage}" -f - /dev/null; then
+                Console::end "[BUILT]"
+                return "${TRUE}"
+            else
+                Console::error "Failed to build image from ECR"
+                return "${FALSE}"
+            fi
         else
              Console::start "[NOT FOUND] ${builderAssetsEcrLatestImage}"
         fi
