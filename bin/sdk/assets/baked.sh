@@ -66,19 +66,19 @@ function Assets::areBuilt() {
     
     if [ -n "${AWS_ACCOUNT_ID}" ] && [ -n "${AWS_REGION}" ] && [ -n "${SPRYKER_PROJECT_NAME}" ]; then
         local builderAssetsEcrLatestImage="${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${SPRYKER_PROJECT_NAME}-builder_assets:latest"
-        Console::end "${builderAssetsEcrLatestImage}"
+        Console::start "${builderAssetsEcrLatestImage}"
         
         if docker image inspect "${builderAssetsEcrLatestImage}" >/dev/null 2>&1; then
             local currentHash="${SPRYKER_BUILD_HASH:-current}"
             
-            echo "FROM ${builderAssetsEcrLatestImage}
+            Console::start "FROM ${builderAssetsEcrLatestImage}
 RUN cd /data/public/Yves/assets 2>/dev/null && for dir in */; do if [ -d \"\${dir}\" ] && [ \"\${dir%/}\" != '${currentHash}' ]; then mv \"\${dir%/}\" '${currentHash}'; break; fi; done || true" | \
             docker build -t "${builderAssetsImage}" -f - . >/dev/null 2>&1
             
-            Console::end "[BUILT]"
+            Console::start "[BUILT]"
             return "${TRUE}"
         else
-             Console::end "[NOT FOUND] ${builderAssetsEcrLatestImage}"
+             Console::start "[NOT FOUND] ${builderAssetsEcrLatestImage}"
         fi
     else
         echo "AWS variables not set - AWS_ACCOUNT_ID: '${AWS_ACCOUNT_ID}', AWS_REGION: '${AWS_REGION}', SPRYKER_PROJECT_NAME: '${SPRYKER_PROJECT_NAME}'"
