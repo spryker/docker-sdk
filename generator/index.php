@@ -273,6 +273,7 @@ $projectData['_testing'] = [
     'defaultPort' => $defaultPort,
     'projectServices' => $projectData['services'],
     'endpointMap' => $endpointMap,
+    'storesForTesting' => [],
 ];
 
 $projectData['_applications'] = [];
@@ -396,11 +397,34 @@ foreach ($projectData['groups'] ?? [] as $groupName => $groupData) {
 
             $projectData['_testing']['dynamicStoreMode'] = $projectData['dynamicStoreMode'] ?? false;
 
-            if ($isEndpointDataHasStore && $endpointData['store'] === ($projectData['docker']['testing']['store'] ?? '')) {
-                $projectData['_testing']['storeName'] = $endpointData['store'];
-                $projectData['_testing']['identifier'] = $endpointData['identifier'];
-                $projectData['_testing']['regionServices'] = array_merge($projectData['_testing']['services'] ?? [], $services);
-                $projectData['_testing']['services'][$endpointData['store']][$applicationData['application']] = $services;
+            $testingStore = $projectData['docker']['testing']['store'] ?? '';
+            $testingStores = $projectData['docker']['testing']['stores'] ?? '';
+            $allowedStores = !empty($testingStores) ? array_map('trim', explode(',', $testingStores)) : [];
+
+            $shouldCollectStore = false;
+            if ($isEndpointDataHasStore) {
+                if (!empty($testingStore) && $endpointData['store'] === $testingStore) {
+                    $projectData['_testing']['storeName'] = $endpointData['store'];
+                    $projectData['_testing']['identifier'] = $endpointData['identifier'];
+                    $projectData['_testing']['regionServices'] = array_merge($projectData['_testing']['services'] ?? [], $services);
+                    $shouldCollectStore = true;
+                } elseif (!empty($allowedStores) && in_array($endpointData['store'], $allowedStores, true)) {
+                    $shouldCollectStore = true;
+                }
+
+                if ($shouldCollectStore) {
+                    $projectData['_testing']['services'][$endpointData['store']][$applicationData['application']] = $services;
+                    if (!isset($projectData['_testing']['storesForTesting'][$endpointData['store']])) {
+                        $projectData['_testing']['storesForTesting'][$endpointData['store']] = [
+                            'identifier' => $endpointData['identifier'],
+                            'regionServices' => [],
+                        ];
+                    }
+                    $projectData['_testing']['storesForTesting'][$endpointData['store']]['regionServices'] = array_merge(
+                        $projectData['_testing']['storesForTesting'][$endpointData['store']]['regionServices'],
+                        $services
+                    );
+                }
             }
 
             if ($isEndpointDataHasRegion && $groupData['region'] === ($projectData['docker']['testing']['region'] ?? '')) {
@@ -558,10 +582,37 @@ file_put_contents(
 );
 
 $envVarEncoder->setIsActive(true);
-file_put_contents(
-    $deploymentDir . DS . 'env' . DS . 'cli' . DS . 'testing.env',
-    $twig->render('env/cli/testing.env.twig', $projectData['_testing'])
-);
+
+$testingStores = $projectData['docker']['testing']['stores'] ?? '';
+$storesForTesting = $projectData['_testing']['storesForTesting'] ?? [];
+
+if (!empty($testingStores) && !empty($storesForTesting)) {
+    foreach ($storesForTesting as $store => $storeData) {
+        $servicesStructure = [];
+        if (isset($projectData['_testing']['services'][$store])) {
+            foreach ($projectData['_testing']['services'][$store] as $appName => $appServices) {
+                $servicesStructure[$storeData['identifier']][$appName] = $appServices;
+            }
+        }
+
+        $storeTestingData = array_merge($projectData['_testing'], [
+            'storeName' => $store,
+            'identifier' => $storeData['identifier'],
+            'regionServices' => $storeData['regionServices'],
+            'services' => $servicesStructure,
+        ]);
+
+        file_put_contents(
+            $deploymentDir . DS . 'env' . DS . 'cli' . DS . strtolower($store) . '.testing.env',
+            $twig->render('env/cli/testing.env.twig', $storeTestingData)
+        );
+    }
+} else {
+    file_put_contents(
+        $deploymentDir . DS . 'env' . DS . 'cli' . DS . 'testing.env',
+        $twig->render('env/cli/testing.env.twig', $projectData['_testing'])
+    );
+}
 
 verbose('Generating scripts... [DONE]');
 

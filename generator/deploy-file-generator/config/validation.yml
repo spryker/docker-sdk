@@ -84,6 +84,8 @@ docker.ssl.redirect:
         - false
 docker.testing.store:
     string-type:
+docker.testing.stores:
+    string-type:
 docker.debug.enabled:
     only-value:
         - true
