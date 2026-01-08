@@ -738,10 +738,10 @@ docker/sdk up
 
 ## Custom Services
 
-Custom services allow you to integrate any Docker-based service into your Spryker environment. This is useful for adding third-party services like AWS LocalStack, MinIO, Kafka, or your own custom applications.
+Custom services allow you to integrate any Docker-based service into your Spryker environment. This is useful for adding third-party services like AWS LocalStack, MinIO, Kafka, etc.
 
 :::(Warning) (Local Development Only)
-**Important:** Custom services are **only available in local development environments**. They will **NOT** be automatically propagated or available in Cloud environments (staging, production). Custom services are designed for local development, testing, and mocking purposes only. If you need similar services in Cloud environments, you must configure them separately through your Cloud infrastructure.
+**Important:** Custom services are **only available in local development environments**. They will **NOT** be automatically propagated or available in Cloud environments (staging, production). Custom services are designed for local development, testing, and mocking purposes only.
 :::
 
 ### Use Cases
@@ -792,46 +792,6 @@ services:
             DEBUG: "1"
         volumes:
             - localstack-data:/var/lib/localstack
-```
-
-#### Example: MinIO (S3-compatible storage)
-
-```yaml
-services:
-    minio:
-        engine: custom
-        image: minio/minio:latest
-        endpoints:
-            minio.spryker.local:
-        port: 9000
-        command: server /data --console-address ":9001"
-        environment:
-            MINIO_ROOT_USER: minioadmin
-            MINIO_ROOT_PASSWORD: minioadmin
-        volumes:
-            - minio-data:/data
-```
-
-#### Example: Kafka (TCP-only service)
-
-```yaml
-services:
-    kafka:
-        engine: custom
-        image: apache/kafka:latest
-        endpoints:
-            localhost:9092:
-                protocol: tcp
-        environment:
-            KAFKA_NODE_ID: 1
-            KAFKA_PROCESS_ROLES: broker,controller
-            KAFKA_LISTENERS: PLAINTEXT://:9092,CONTROLLER://:9093
-            KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
-            KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
-            KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
-            KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
-        volumes:
-            - kafka-data:/var/lib/kafka/data
 ```
 
 ### Use Case 2: Custom Dockerfile Build
