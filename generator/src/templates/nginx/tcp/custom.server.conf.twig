@@ -1,0 +1,5 @@
+{% set port = (endpoint | split(':'))[1] | default(serviceData['port'] | default(80)) %}
+{% extends "nginx/tcp/server.conf.twig" %}
+{% block port %}{{ port }}{% endblock port %}
+{% block upstream %}{{ upstream }}{% if port %}:{{ port }}{% elseif serviceData['port'] %}:{{ serviceData['port'] }}{% endif %}{% endblock upstream %}
+
