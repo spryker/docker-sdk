@@ -68,7 +68,6 @@ $yamlVarEncoder = new class() {
         if (is_array($value)) {
             return json_encode($value, JSON_UNESCAPED_SLASHES);
         }
-        // For strings, use json_encode with UNESCAPED_SLASHES to avoid \/ in YAML
         return json_encode((string)$value, JSON_UNESCAPED_SLASHES);
     }
 };
@@ -497,8 +496,6 @@ foreach ($projectData['services'] ?? [] as $serviceName => $serviceData) {
         }
     }
     
-    // Check if service template exists, if not mark as custom service
-    // Services without engine or with engine='custom' are always custom
     if (empty($serviceData['engine']) || $engine === 'custom') {
         $projectData['services'][$serviceName]['_isCustom'] = true;
         $projectData['services'][$serviceName]['_customEngine'] = 'custom';
@@ -510,18 +507,13 @@ foreach ($projectData['services'] ?? [] as $serviceName => $serviceData) {
         }
     }
     
-    // Process build context for custom services - auto-resolve paths
-    if (!empty($serviceData['build'])) {
+    if (!empty($serviceData['build']) && !empty($projectData['services'][$serviceName]['_isCustom'])) {
         $context = $serviceData['build']['context'] ?? $serviceName;
-        // If context is a simple string without path separators, auto-resolve to context/{name}/
         if (!preg_match('/[\/\\\\]/', $context) && !preg_match('/^\${/', $context)) {
-            // Simple service name - auto-resolve to standard context path
             $projectData['services'][$serviceName]['build']['context'] = './${DEPLOYMENT_PATH}/context/' . $context . '/';
         } elseif (preg_match('/^context\//', $context)) {
-            // Relative path starting with context/ - prepend DEPLOYMENT_PATH
             $projectData['services'][$serviceName]['build']['context'] = './${DEPLOYMENT_PATH}/' . $context;
         }
-        // Otherwise use context as-is (absolute paths or paths with ${DEPLOYMENT_PATH} already)
     }
     
     $httpEndpoints = array_filter(
@@ -532,7 +524,6 @@ foreach ($projectData['services'] ?? [] as $serviceName => $serviceData) {
     );
 
     if (!empty($httpEndpoints)) {
-        // Set flag for template to add public network
         $projectData['services'][$serviceName]['_hasHttpEndpoints'] = true;
         $environment['services'][] = [
             'name' => $serviceName,
