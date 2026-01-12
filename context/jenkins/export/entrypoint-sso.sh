@@ -3,7 +3,6 @@ set -euo pipefail
 
 HOST="${HOST:-localhost}"
 PORT="${PORT:-8080}"
-JENKINS_CLI_PATH="${JENKINS_CLI_PATH:-/usr/share/jenkins/jenkins-cli.jar}"
 
 # === marker & token produced by Groovy ===
 BOOTSTRAP_DIR="/root/.jenkins/secrets/bootstrap"
@@ -13,7 +12,6 @@ TOKEN_FILE="${BOOTSTRAP_DIR}/${SPRYKER_SCHEDULER_USER:-}.token"
 
 # Will be filled after reading token
 AUTH_CURL=()
-AUTH_CLI=()
 TOKEN_VALUE=""
 
 # --- helpers (auth-aware once AUTH_CURL is set) ---
@@ -66,16 +64,6 @@ waitForJenkinsToStart() {
   echo "Jenkins responded with HTTP ${code} — proceeding."
 }
 
-waitForJenkinsCliEndpointToRespondHealthy() {
-  local status=0
-  until [ "${status}" -eq 200 ]; do
-    echo "Waiting for Jenkins CLI endpoint (200).."
-    status="$(curl -s -f "http://${HOST}:${PORT}/cli/" \
-      "${AUTH_CURL[@]}" -o /dev/null -w "%{http_code}" || echo 0)"
-    sleep 1
-  done
-}
-
 waitForGroovyBootstrap() {
   echo "Waiting for Groovy bootstrap marker: ${MARKER_FILE}"
   local waited=0
@@ -114,11 +102,10 @@ readToken() {
   fi
   echo "Token for user ${SPRYKER_SCHEDULER_USER} loaded from ${TOKEN_FILE}"
 
-  # Prepare auth arrays for curl & CLI
+  # Prepare auth array for curl
   local auth_b64
   auth_b64="$(printf '%s' "${SPRYKER_SCHEDULER_USER}:${TOKEN_VALUE}" | base64)"
   AUTH_CURL=(-H "Authorization: Basic ${auth_b64}")
-  AUTH_CLI=(-auth "${SPRYKER_SCHEDULER_USER}:${TOKEN_VALUE}")
 }
 
 # === main bootstrap ===
@@ -126,8 +113,6 @@ mkdir -p ~/.jenkins/updates
 rm -rf ~/.jenkins/plugins || echo 'plugins did not exist anyway'
 mkdir -p ~/.jenkins/plugins
 test -f ~/.jenkins/jenkins.model.JenkinsLocationConfiguration.xml || envsubst < /opt/jenkins.model.JenkinsLocationConfiguration.xml > ~/.jenkins/jenkins.model.JenkinsLocationConfiguration.xml
-test -f ~/.jenkins/com.newrelic.experts.jenkins.extensions.NewRelicGlobalConfiguration.xml || envsubst < /opt/com.newrelic.experts.jenkins.extensions.NewRelicGlobalConfiguration.xml > ~/.jenkins/com.newrelic.experts.jenkins.extensions.NewRelicGlobalConfiguration.xml
-envsubst < /opt/nr-credentials.xml > ~/.jenkins/nr-credentials.xml
 
 # On shutdown: drain queue then stop Jenkins
 trap 'waitForFinishOfActiveJobs; kill ${pid}; exit 0;' SIGTERM
@@ -160,26 +145,6 @@ echo "HTTP port ${PORT} on ${HOST} all started up.."
 # Wait for Groovy to finish and write the marker + token
 waitForGroovyBootstrap
 readToken
-
-## Fetch CLI jar
-#rm -f "${JENKINS_CLI_PATH}"
-#wget -q -O "${JENKINS_CLI_PATH}" "http://${HOST}:${PORT}/jnlpJars/jenkins-cli.jar"
-#waitForJenkinsCliEndpointToRespondHealthy
-#
-## === Your CLI ops with auth ===
-#java -jar "${JENKINS_CLI_PATH}" -s "http://${HOST}:${PORT}/" \
-#  "${AUTH_CLI[@]}" delete-credentials system::system::jenkins "(global)" newrelic-insight-key || true
-#echo "deleted old newrelic credentials.."
-#waitForJenkinsCliEndpointToRespondHealthy
-#
-#java -jar "${JENKINS_CLI_PATH}" -s "http://${HOST}:${PORT}" \
-#  "${AUTH_CLI[@]}" create-credentials-by-xml system::system::jenkins "(global)" < ~/.jenkins/nr-credentials.xml
-#echo "deployed new newrelic credentials.."
-#waitForJenkinsCliEndpointToRespondHealthy
-
-# Optional: install plugin example (kept commented)
-# curl -L http://updates.jenkins-ci.org/update-center.json | sed '1d;$d' > ~/.jenkins/updates/default.json
-# java -jar "${JENKINS_CLI_PATH}" -s "http://${HOST}:${PORT}" "${AUTH_CLI[@]}" install-plugin datadog -restart
 
 # Keep PID 1 alive
 wait "${pid}"
