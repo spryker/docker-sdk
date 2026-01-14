@@ -45,6 +45,12 @@ function Images::_buildApp() {
         sshArgument=('--ssh' 'default')
     fi
 
+    # Pre-populate Docker BuildKit composer cache from host
+    if [ "${folder}" == "baked" ]; then
+        Console::verbose "${INFO}Pre-populating composer cache...${NC}"
+        bash "${BASH_SOURCE%/*}/prepopulate-composer-cache.sh"
+    fi
+
     Images::_prepareSecrets
     Registry::Trap::addExitHook 'removeBuildSecrets' "rm -f ${SECRETS_FILE_PATH}"
 
