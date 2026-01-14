@@ -146,7 +146,7 @@ services:
 {% endfor %}
 {% endfor %}
 {% for serviceName, serviceData in services %}
-{% set engine = serviceData['engine'] | lower %}
+{% set engine = serviceData['_isCustom'] is defined and serviceData['_isCustom'] ? (serviceData['_customEngine'] | default('custom')) : (serviceData['engine'] | lower) %}
 {% set version = serviceData['version'] | default('default') %}
 {% include "service/" ~ engine ~ "/" ~ version ~ "/" ~  engine ~ ".yml.twig" with { project: _context, serviceName: serviceName, serviceData: serviceData, engine: engine, version: version } only %}
 {% endfor %}
@@ -158,6 +158,12 @@ volumes:
   {{ service }}-{{ serviceData['engine'] }}-data:
     external: false
 {% endfor %}
+{% if _customVolumes is defined %}
+{% for volumeName in _customVolumes %}
+  {{ volumeName }}:
+    external: false
+{% endfor %}
+{% endif %}
 
   ssh-relay:
       external: false
