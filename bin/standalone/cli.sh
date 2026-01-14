@@ -43,19 +43,7 @@ function printLogo() {
 }
 
 function getEnvFile() {
-    local store="${APPLICATION_STORE:-$SPRYKER_CURRENT_REGION}"
-    if [ -n "${store}" ]; then
-        echo "${HOME}/env/$(echo "${store}" | tr '[:upper:]' '[:lower:]').env"
-        return
-    fi
-    for f in "${HOME}/env/"*.env; do
-        if [ -f "$f" ] && [[ ! "$f" =~ \.testing\.env$ ]]; then
-            echo "$f"
-            return
-        fi
-    done
-
-    echo "${HOME}/env/testing.env"
+    echo "${HOME}/env/$(echo "${APPLICATION_STORE:-$SPRYKER_CURRENT_REGION}" | tr '[:upper:]' '[:lower:]').env"
 }
 
 function setPrompt() {
