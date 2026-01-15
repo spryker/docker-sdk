@@ -32,17 +32,13 @@ image.php:
 image.php.enabled-extensions:
     array-type:
 image.node.version:
-    integer-type:
-    range-value:
-        - 12
+    version-format:
 image.node.distro:
     only-value:
         - alpine
         - debian
 image.node.npm:
-    integer-type:
-    range-value:
-        - 6
+    version-format:
 
 # Assets
 assets.image:
