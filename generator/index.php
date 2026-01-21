@@ -1713,11 +1713,11 @@ function buildNodeJsNpmBuildConfig(array $projectData): array
     return [
         SPRYKER_NODE_IMAGE_DISTRO_ENV_NAME => getNodeDistroName($nodejsConfig, $imageName),
         SPRYKER_NODE_IMAGE_VERSION_ENV_NAME => array_key_exists('version', $nodejsConfig)
-            ? (int)$nodejsConfig['version']
-            : DEFAULT_NODE_VERSION,
+            ? (string)$nodejsConfig['version']
+            : (string)DEFAULT_NODE_VERSION,
         SPRYKER_NPM_VERSION_ENV_NAME => array_key_exists('npm', $nodejsConfig)
-            ? (int)$nodejsConfig['npm']
-            : DEFAULT_NPM_VERSION,
+            ? (string)$nodejsConfig['npm']
+            : (string)DEFAULT_NPM_VERSION,
     ];
 }
 
