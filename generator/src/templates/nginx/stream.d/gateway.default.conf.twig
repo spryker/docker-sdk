@@ -2,10 +2,13 @@
 {% for endpoint, endpointData in serviceData['endpoints'] %}
 {% set protocol = endpointData['protocol'] | default('http') %}
 {% if protocol is same as ('tcp') %}
-{% include "nginx/#{protocol}/#{serviceData['engine']}.server.conf.twig" with {
+{% set tcpEngine = serviceData['_isCustom'] is defined and serviceData['_isCustom'] ? 'custom' : (serviceData['engine'] | lower) %}
+{% include "nginx/#{protocol}/#{tcpEngine}.server.conf.twig" with {
     endpoint: endpoint,
     endpointData: endpointData,
     upstream: serviceName,
+    serviceName: serviceName,
+    serviceData: serviceData,
     project: _context
 } %}
 {% endif %}

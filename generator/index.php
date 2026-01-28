@@ -62,9 +62,19 @@ $envVarEncoder = new class() {
         $this->isActive = $isActive;
     }
 };
+$yamlVarEncoder = new class() {
+    public function encode($value)
+    {
+        if (is_array($value)) {
+            return json_encode($value, JSON_UNESCAPED_SLASHES);
+        }
+        return json_encode((string)$value, JSON_UNESCAPED_SLASHES);
+    }
+};
 $twig->addFilter(new TwigFilter('tf_var', [$tfVarEncoder, 'encode'], ['is_safe' => ['all']]));
 $twig->addFilter(new TwigFilter('env_var', [$envVarEncoder, 'encode'], ['is_safe' => ['all']]));
 $twig->addFilter(new TwigFilter('nginx_var', [$nginxVarEncoder, 'encode'], ['is_safe' => ['all']]));
+$twig->addFilter(new TwigFilter('yaml_var', [$yamlVarEncoder, 'encode'], ['is_safe' => ['all']]));
 $twig->addFilter(new TwigFilter('normalize_endpoint', static function ($string) {
     return str_replace(['.', ':'], ['dot', '_'], $string);
 }, ['is_safe' => ['all']]));
@@ -494,7 +504,42 @@ if (!empty($projectData['services']['key_value_store']['replicas'])) {
     $projectData['services']['key_value_store']['sources'] = json_encode($sources, JSON_UNESCAPED_SLASHES);
 }
 
+$customVolumes = [];
 foreach ($projectData['services'] ?? [] as $serviceName => $serviceData) {
+    $engine = strtolower($serviceData['engine'] ?? 'custom');
+    $version = $serviceData['version'] ?? 'default';
+    
+    if (!empty($serviceData['volumes']) && is_array($serviceData['volumes'])) {
+        foreach ($serviceData['volumes'] as $volume) {
+            if (preg_match('/^([^:]+):/', $volume, $matches)) {
+                $volumeName = trim($matches[1]);
+                if (!preg_match('/^\.\/|^\//', $volumeName)) {
+                    $customVolumes[$volumeName] = true;
+                }
+            }
+        }
+    }
+    
+    if (empty($serviceData['engine']) || $engine === 'custom') {
+        $projectData['services'][$serviceName]['_isCustom'] = true;
+        $projectData['services'][$serviceName]['_customEngine'] = 'custom';
+    } else {
+        $serviceTemplatePath = APPLICATION_SOURCE_DIR . DS . 'templates' . DS . 'service' . DS . $engine . DS . $version . DS . $engine . '.yml.twig';
+        if (!file_exists($serviceTemplatePath)) {
+            $projectData['services'][$serviceName]['_isCustom'] = true;
+            $projectData['services'][$serviceName]['_customEngine'] = 'custom';
+        }
+    }
+    
+    if (!empty($serviceData['build']) && !empty($projectData['services'][$serviceName]['_isCustom'])) {
+        $context = $serviceData['build']['context'] ?? $serviceName;
+        if (!preg_match('/[\/\\\\]/', $context) && !preg_match('/^\${/', $context)) {
+            $projectData['services'][$serviceName]['build']['context'] = './${DEPLOYMENT_PATH}/context/' . $context . '/';
+        } elseif (preg_match('/^context\//', $context)) {
+            $projectData['services'][$serviceName]['build']['context'] = './${DEPLOYMENT_PATH}/' . $context;
+        }
+    }
+    
     $httpEndpoints = array_filter(
         $serviceData['endpoints'] ?? [],
         static function ($endpointData) {
@@ -503,6 +548,7 @@ foreach ($projectData['services'] ?? [] as $serviceName => $serviceData) {
     );
 
     if (!empty($httpEndpoints)) {
+        $projectData['services'][$serviceName]['_hasHttpEndpoints'] = true;
         $environment['services'][] = [
             'name' => $serviceName,
             'endpoints' => array_map(
@@ -514,6 +560,7 @@ foreach ($projectData['services'] ?? [] as $serviceName => $serviceData) {
         ];
     }
 }
+$projectData['_customVolumes'] = array_keys($customVolumes);
 
 file_put_contents(
     $deploymentDir . DS . 'context' . DS . 'nginx' . DS . 'conf.d' . DS . 'frontend.default.conf.tmpl',

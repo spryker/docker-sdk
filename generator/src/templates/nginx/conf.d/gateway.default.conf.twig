@@ -93,11 +93,13 @@ upstream {{ upstream }}_xdebug {
 {% for endpoint, endpointData in serviceData['endpoints'] %}
 {% set protocol = endpointData['protocol'] | default('http') %}
 {% if protocol is same as ('http') %}
-{% include "nginx/http/gateway/#{serviceData['engine']}.server.conf.twig" with {
+{% set gatewayEngine = serviceData['_isCustom'] is defined and serviceData['_isCustom'] ? 'custom' : (serviceData['engine'] | lower) %}
+{% include "nginx/http/gateway/#{gatewayEngine}.server.conf.twig" with {
     ssl: ssl,
     endpoint: endpoint,
     endpointData: endpointData,
-    upstream: serviceName ~ (serviceData['web-port'] ? ':' ~ serviceData['proxy-port'] : ''),
+    upstream: serviceName,
+    serviceData: serviceData,
     project: _context
 } %}
 {% endif %}
