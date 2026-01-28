@@ -102,6 +102,7 @@ $projectData['_ports'] = retrieveUniquePorts($projectData);
 $defaultPort = $projectData['_defaultPort'] = getDefaultPort($projectData);
 $hosts = $projectData['_hosts'] = retrieveHostNames($projectData);
 $projectData['_phpExtensions'] = buildPhpExtensionList($projectData);
+$projectData['_phpSpx'] = buildPhpSpx($projectData);
 $projectData['_phpIni'] = buildPhpIniAdditionalConfig($projectData);
 $projectData['_envs'] = array_merge(
     getAdditionalEnvVariables($projectData),
@@ -1100,6 +1101,22 @@ function buildPhpIniAdditionalConfig(array $projectData): array
 function buildPhpExtensionList(array $projectData): array
 {
     return $projectData['image']['php']['enabled-extensions'] ?? [];
+}
+
+/**
+ * @param array $projectData
+ *
+ * @return array
+ */
+function buildPhpSpx(array $projectData): array
+{
+    $configs = $projectData['image']['php']['php-spx'] ?? [];
+
+    if (count($configs) === 0) {
+        return [];
+    }
+
+    return array_merge(...$configs);
 }
 
 /**
