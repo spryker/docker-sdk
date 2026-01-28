@@ -848,6 +848,15 @@ Defines the configuration for testing.
 
 * `docker: testing: store:` defines a *Store* as the context for running tests using specific console commands, like `docker/sdk console code:test`. This variable is optional. If not specified, the default value applies: `store: DE`.
 
+* `docker: testing: stores:` defines a comma-separated list of *Stores* for running tests across multiple stores. When specified, you can select which store to use for testing by setting the `APPLICATION_STORE` environment variable. This variable is optional. If both `store:` and `stores:` are specified, `store:` takes precedence for backward compatibility.
+
+Example:
+```yaml
+docker:
+    testing:
+        stores: DE,AT
+```
+
 :::
 ***
 
