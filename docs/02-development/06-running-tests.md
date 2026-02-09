@@ -18,6 +18,37 @@ You can activate the testing mode in one of the following ways:
 * Switch a running environment into the testing mode without rebuilding containers.
 * Rebuild containers and run or restart an environment with the testing mode activated.
 
+## Testing with multiple stores
+
+When working with a multistore setup, you can configure the Docker SDK to support testing across multiple stores. This allows you to run tests for each store without creating separate deployment files.
+
+### Configuring multiple stores for testing
+
+In your `deploy.yml` file, specify the stores you want to test:
+
+```yaml
+docker:
+    testing:
+        stores: DE,AT
+```
+
+### Running tests for a specific store
+
+When multiple stores are configured, specify which store to use by setting the `APPLICATION_STORE` environment variable:
+
+```bash
+# Run tests for DE store
+APPLICATION_STORE=DE docker/sdk testing
+
+# Run tests for AT store
+APPLICATION_STORE=AT docker/sdk testing
+
+# Run a specific test command for a store
+APPLICATION_STORE=DE docker/sdk testing codecept run
+```
+
+If `APPLICATION_STORE` is not specified, the system will use the first store from the configured list.
+
 ### Activating the testing mode in a running environment
 
 1. Activate the testing mode in a running environment and enter the CLI container:
