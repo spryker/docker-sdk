@@ -628,6 +628,7 @@ services:
   scheduler:
     engine: jenkins
     version: 2.176
+    number-of-executors: 4
     endpoints:
       scheduler.spryker.local:
 
@@ -1083,6 +1084,7 @@ A scheduler *Service* used to run application-specific jobs periodically in the 
 
 * Project-wide
   * `scheduler: engine:` - possible value is `jenkins`.
+  * `scheduler: number-of-executors:` - defines the number of executors for the Jenkins instance. This property is relevant only for local development and does not affect the Cloud setup.
   * `scheduler: endpoints:` - defines the service's port and web interface that can be accessed via given endpoints.
 
 
