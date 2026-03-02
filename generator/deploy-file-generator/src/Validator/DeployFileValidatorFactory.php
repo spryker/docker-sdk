@@ -17,6 +17,7 @@ use DeployFileGenerator\Validator\Rule\OnlyValueRule;
 use DeployFileGenerator\Validator\Rule\OrRule;
 use DeployFileGenerator\Validator\Rule\RangeValueRule;
 use DeployFileGenerator\Validator\Rule\RequireRule;
+use DeployFileGenerator\Validator\Rule\VersionFormatRule;
 use DeployFileGenerator\Validator\Rule\Type\ArrayTypeRule;
 use DeployFileGenerator\Validator\Rule\Type\IntegerTypeRule;
 use DeployFileGenerator\Validator\Rule\Type\StringTypeRule;
@@ -55,6 +56,7 @@ class DeployFileValidatorFactory
             RequireRule::RULE_NAME => RequireRule::class,
             NotEmptyRule::RULE_NAME => NotEmptyRule::class,
             StringTypeRule::RULE_NAME => StringTypeRule::class,
+            VersionFormatRule::RULE_NAME => VersionFormatRule::class,
             OnlyKeyRule::RULE_NAME => OnlyKeyRule::class,
             OnlyValueRule::RULE_NAME => OnlyValueRule::class,
             ArrayTypeRule::RULE_NAME => ArrayTypeRule::class,

@@ -1,0 +1,73 @@
+  {{ serviceName }}:
+{% if serviceData['build'] is defined %}
+    build:
+      context: {{ serviceData['build']['context'] | raw }}
+{% if serviceData['build']['dockerfile'] is defined %}
+      dockerfile: {{ serviceData['build']['dockerfile'] }}
+{% else %}
+      dockerfile: Dockerfile
+{% endif %}
+{% if serviceData['build']['args'] is defined %}
+      args:
+{% for key, value in serviceData['build']['args'] %}
+        {{ key }}: {{ value | yaml_var | raw }}
+{% endfor %}
+{% endif %}
+{% else %}
+    image: {{ serviceData['image'] | default('nginx:alpine') }}
+{% endif %}
+{% if serviceData['command'] is defined %}
+    command: {{ serviceData['command'] | yaml_var | raw }}
+{% endif %}
+    networks:
+      - private
+{% if serviceData['_hasHttpEndpoints'] is defined and serviceData['_hasHttpEndpoints'] %}
+      - public
+{% endif %}
+    labels:
+      'spryker.app.name': {{ serviceName }}
+      'spryker.app.type': service
+      'spryker.project': ${SPRYKER_DOCKER_PREFIX}:${SPRYKER_DOCKER_TAG}
+{% if serviceData['ports'] is defined %}
+    ports:
+{% for port in serviceData['ports'] %}
+      - "{{ port }}"
+{% endfor %}
+{% endif %}
+{% if serviceData['environment'] is defined %}
+    environment:
+{% for key, value in serviceData['environment'] %}
+      {{ key }}: {{ value | yaml_var | raw }}
+{% endfor %}
+{% endif %}
+{% if serviceData['volumes'] is defined %}
+    volumes:
+{% for volume in serviceData['volumes'] %}
+      - {{ volume }}
+{% endfor %}
+{% elseif serviceData['persistent'] is not defined or serviceData['persistent'] == true %}
+    volumes:
+      - {{ serviceName }}-{{ serviceData['engine'] | default('custom') }}-data:/data
+{% endif %}
+{% if serviceData['healthcheck'] is defined %}
+    healthcheck:
+{% if serviceData['healthcheck']['test'] is defined %}
+      test: {{ serviceData['healthcheck']['test'] | yaml_var | raw }}
+{% endif %}
+{% if serviceData['healthcheck']['interval'] is defined %}
+      interval: {{ serviceData['healthcheck']['interval'] }}
+{% endif %}
+{% if serviceData['healthcheck']['timeout'] is defined %}
+      timeout: {{ serviceData['healthcheck']['timeout'] }}
+{% endif %}
+{% if serviceData['healthcheck']['retries'] is defined %}
+      retries: {{ serviceData['healthcheck']['retries'] }}
+{% endif %}
+{% endif %}
+{% if serviceData['depends_on'] is defined %}
+    depends_on:
+{% for dependency in serviceData['depends_on'] %}
+      - {{ dependency }}
+{% endfor %}
+{% endif %}
+
