@@ -1084,7 +1084,7 @@ A scheduler *Service* used to run application-specific jobs periodically in the 
 
 * Project-wide
   * `scheduler: engine:` - possible value is `jenkins`.
-  * `scheduler: number-of-executors:` - defines the number of executors for the Jenkins instance. This property is relevant only for local development and does not affect the Cloud setup.
+  * `scheduler: number-of-executors:` - defines the number of executors for the Jenkins instance.  The minumal Jenkins version is 2.516.3. This property is relevant only for local development and does not affect the Cloud setup.
   * `scheduler: endpoints:` - defines the service's port and web interface that can be accessed via given endpoints.
 
 
