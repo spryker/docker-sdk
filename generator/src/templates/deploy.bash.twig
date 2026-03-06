@@ -149,6 +149,12 @@ readonly SPRYKER_BUILD_DATE="${SPRYKER_BUILD_DATE}"
 readonly SPRYKER_REPOSITORY_HASH="${SPRYKER_BUILD_HASH:-"$(git rev-parse --verify HEAD 2>/dev/null || echo "head")"}"
 readonly SPRYKER_MAINTENANCE_MODE_ENABLED="{{ docker['maintenance']['enabled'] | default('false') }}"
 
+# Universal dev base image
+{% if _useUniversalBaseImage is defined and _useUniversalBaseImage %}
+readonly SPRYKER_USE_UNIVERSAL_BASE_IMAGE="${TRUE}"
+readonly SPRYKER_UNIVERSAL_BASE_IMAGE="{{ _universalBaseImage }}"
+{% endif %}
+
 # PHP extensions
 {% for phpExtensionName in _phpExtensions %}
 readonly {{ phpExtensionName | upper }}_EXTENSION_ENABLED="${TRUE}"
@@ -248,6 +254,9 @@ export BLACKFIRE_APM_ENABLED=${BLACKFIRE_APM_ENABLED:-{{ image['environment']['B
 export TIDEWAYS_APIKEY=${TIDEWAYS_APIKEY}
 export TIDEWAYS_CLI_ENABLED=${TIDEWAYS_CLI_ENABLED}
 export TIDEWAYS_ENVIRONMENT_NAME=${TIDEWAYS_ENVIRONMENT_NAME}
+{% if _useUniversalBaseImage is defined and _useUniversalBaseImage %}
+export USER_UID=${USER_FULL_ID%%:*}
+{% endif %}
 
 {# For avoid https://github.com/docker/compose/issues/9104 #}
 export DOCKER_COMPOSE_TTY_DISABLED="$(Environment::getDockerComposeTTY)"

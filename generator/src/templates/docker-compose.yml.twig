@@ -6,6 +6,10 @@ x-volumes:
   &app-volumes
   volumes:
 {% include "application-volumes.yml.twig" with _context %}
+{% if _useUniversalBaseImage is defined and _useUniversalBaseImage %}
+      - ./${DEPLOYMENT_PATH}/context/php/conf.d/99-from-deploy-yaml-php.ini:/usr/local/etc/php/conf.d/99-from-deploy-yaml-php.ini:ro
+      - ./${DEPLOYMENT_PATH}/context/nginx/ssl/ca.crt:/usr/local/share/ca-certificates/spryker-ca.crt:ro
+{% endif %}
 
 services:
 
@@ -24,7 +28,11 @@ services:
 {% endif %}
 
   cli:
+{% if _useUniversalBaseImage is defined and _useUniversalBaseImage %}
+    image: {{ _universalBaseImage }}
+{% else %}
     image: ${SPRYKER_DOCKER_PREFIX}_run_cli:${SPRYKER_DOCKER_TAG}
+{% endif %}
     networks:
       - public
       - private
@@ -36,6 +44,12 @@ services:
       - ssh-relay:/home/spryker/ssh-relay
       - cli_history:/home/spryker/history:rw
       - ./${DEPLOYMENT_PATH}/env/cli:/home/spryker/env:ro
+{% if _useUniversalBaseImage is defined and _useUniversalBaseImage %}
+      - ./${DEPLOYMENT_PATH}/context/cli:/home/spryker/bin:ro
+      - ./${DEPLOYMENT_PATH}/context/php/conf.d/99-from-deploy-yaml-php.ini:/usr/local/etc/php/conf.d/99-from-deploy-yaml-php.ini:ro
+      - ./${DEPLOYMENT_PATH}/context/nginx/ssl/ca.crt:/usr/local/share/ca-certificates/spryker-ca.crt:ro
+      - ./${DEPLOYMENT_PATH}/context/jenkins/jenkins.docker.xml.twig:/home/spryker/jenkins.docker.xml.twig:ro
+{% endif %}
 {% include "application-volumes.yml.twig" with _context %}
     tty: true
     environment:
@@ -50,6 +64,13 @@ services:
       TIDEWAYS_APIKEY: ${TIDEWAYS_APIKEY}
       TIDEWAYS_CLI_ENABLED: ${TIDEWAYS_CLI_ENABLED}
       TIDEWAYS_ENVIRONMENT_NAME: ${TIDEWAYS_ENVIRONMENT_NAME}
+{% if _useUniversalBaseImage is defined and _useUniversalBaseImage %}
+      SPRYKER_PHP_EXTENSIONS: "{{ _phpExtensionsString }}"
+      SPRYKER_USER_UID: "${USER_UID}"
+      APPLICATION_ENV: "${APPLICATION_ENV}"
+      SPRYKER_DB_ENGINE: "${SPRYKER_DB_ENGINE}"
+      SPRYKER_PIPELINE: "${SPRYKER_PIPELINE}"
+{% endif %}
     command:
       - "node"
       - "/home/spryker/bin/cli-rpc.js"
