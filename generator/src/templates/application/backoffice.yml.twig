@@ -1,5 +1,9 @@
   {{ applicationName | lower }}:
+{% if project._useUniversalBaseImage is defined and project._useUniversalBaseImage %}
+    image: {{ project._universalBaseImage }}
+{% else %}
     image: ${SPRYKER_DOCKER_PREFIX}_run_app:${SPRYKER_DOCKER_TAG}-{{ applicationName | lower }}
+{% endif %}
     networks:
       - private
     labels:
@@ -16,4 +20,10 @@
       TIDEWAYS_CLI_ENABLED: ${TIDEWAYS_CLI_ENABLED}
       TIDEWAYS_ENVIRONMENT_NAME: ${TIDEWAYS_ENVIRONMENT_NAME}
       BLACKFIRE_APM_ENABLED: ${BLACKFIRE_APM_ENABLED}
+{% if project._useUniversalBaseImage is defined and project._useUniversalBaseImage %}
+      SPRYKER_PHP_EXTENSIONS: "{{ project._phpExtensionsString }}"
+      SPRYKER_USER_UID: "${USER_UID}"
+      APPLICATION_ENV: "${APPLICATION_ENV}"
+      SPRYKER_DB_ENGINE: "${SPRYKER_DB_ENGINE}"
+{% endif %}
     <<: *app-volumes
