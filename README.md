@@ -78,6 +78,7 @@ For contribution guidelines, see [Code contribution guide](https://docs.spryker.
 |                 |                 | 3.12          | &check;     |                                    |
 |                 |                 | 3.13          | &check;     |                                    |
 |                 |                 | 4.1           | &check;     |                                    |
+|                 |                 | 4.2           | &check;     |                                    |
 | session         | redis           | 5.0*          | &check;     |                                    |
 |                 | redis           | 6.2           | &check;     |                                    |
 |                 | valkey          | 7.2           | &check;     |                                    |
