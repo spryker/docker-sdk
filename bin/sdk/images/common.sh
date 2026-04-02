@@ -8,6 +8,11 @@ function Images::pull() {
     docker pull "${SPRYKER_PLATFORM_IMAGE}" || true
 }
 
+function Images::pullUniversalBase() {
+    Console::verbose "${INFO}Pulling universal base image ${SPRYKER_UNIVERSAL_BASE_IMAGE}${NC}"
+    docker pull "${SPRYKER_UNIVERSAL_BASE_IMAGE}" 1>&2
+}
+
 function Images::destroy() {
     Console::verbose "Removing all Spryker images"
 

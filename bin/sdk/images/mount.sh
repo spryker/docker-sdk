@@ -17,6 +17,11 @@ function Images::buildApplication() {
         esac
     done
 
+    if [ "${SPRYKER_USE_UNIVERSAL_BASE_IMAGE}" = "${TRUE}" ]; then
+        Images::pullUniversalBase
+        return
+    fi
+
     Images::_buildApp mount
     Images::tagApplications "${SPRYKER_DOCKER_TAG}"
 }
