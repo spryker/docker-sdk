@@ -67,6 +67,11 @@ function Images::_buildApp() {
         --build-arg "SPRYKER_NPM_VERSION=${SPRYKER_NPM_VERSION}" \
         "${DEPLOYMENT_PATH}/context" 1>&2
 
+    local -a composerCacheArg=()
+    if [ -n "${SPRYKER_COMPOSER_CACHE_IMAGE}" ]; then
+        composerCacheArg=(--build-arg "SPRYKER_COMPOSER_CACHE_IMAGE=${SPRYKER_COMPOSER_CACHE_IMAGE}")
+    fi
+
     docker build \
         -t "${appImage}" \
         -f "${DEPLOYMENT_PATH}/images/${folder}/application/Dockerfile" \
@@ -86,6 +91,7 @@ function Images::_buildApp() {
         --build-arg "SPRYKER_COMPOSER_VERBOSE=${SPRYKER_COMPOSER_VERBOSE}" \
         --build-arg "SPRYKER_BUILD_HASH=${SPRYKER_BUILD_HASH:-"current"}" \
         --build-arg "SPRYKER_BUILD_STAMP=${SPRYKER_BUILD_STAMP:-""}" \
+        "${composerCacheArg[@]}" \
         . 1>&2
 
     if [ "${withPushImages}" == "${FALSE}" ]; then

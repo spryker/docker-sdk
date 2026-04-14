@@ -54,6 +54,16 @@ COPY --from=${source_builder_assets_image} /data/public /data/public" | \
     if ! aws ecr describe-images --repository-name "${repository_name}" --image-ids imageTag=latest --region "${AWS_REGION}" &>/dev/null; then
         docker tag "${minimal_assets_image}" "${builder_assets_latest}"
     fi
+
+    # Tag composer cache image for ECR
+    local appImage="${SPRYKER_DOCKER_PREFIX}_app:${SPRYKER_DOCKER_TAG}"
+    local composerCacheImage="${ecr_base}/${SPRYKER_PROJECT_NAME}-composer_cache:latest"
+
+    Console::start "Creating composer cache image..."
+    echo "FROM scratch
+COPY --from=${appImage} /home/spryker/.composer/cache /cache" | \
+        docker build -t "${composerCacheImage}" -f - . >/dev/null 2>&1
+    Console::end "[DONE]"
 }
 
 function Images::push() {
@@ -80,6 +90,9 @@ function Images::push() {
         echo "${ecr_base}/${SPRYKER_PROJECT_NAME}-builder_assets:${tag}"
         docker push "${ecr_base}/${SPRYKER_PROJECT_NAME}-builder_assets:latest" &
     fi
+
+    echo "${ecr_base}/${SPRYKER_PROJECT_NAME}-composer_cache:latest"
+    docker push "${ecr_base}/${SPRYKER_PROJECT_NAME}-composer_cache:latest" &
 
     wait
 }
