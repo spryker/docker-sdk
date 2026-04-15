@@ -86,7 +86,7 @@ RUN --mount=type=cache,id=composer,sharing=locked,target=/composer-cache,uid=100
 
 FROM scratch
 COPY --from=export /export /
-" | docker build -t "${composerCacheImage}" -f - /dev/null 2>&1; then
+" | docker build -t "${composerCacheImage}" -f - . 2>&1; then
         Console::end "[DONE]"
     else
         Console::end "[SKIPPED] No composer cache found"

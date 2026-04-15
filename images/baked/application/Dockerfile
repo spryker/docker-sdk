@@ -10,8 +10,16 @@ COPY --chown=spryker:spryker composer.json composer.lock ${srcRoot}/
 ARG SPRYKER_COMPOSER_MODE
 ARG SPRYKER_COMPOSER_VERBOSE
 RUN --mount=type=cache,id=composer,sharing=locked,target=/home/spryker/.composer/cache,uid=1000 \
+  --mount=type=bind,from=composer-cache,source=/,target=/tmp/composer-cache \
   --mount=type=ssh,uid=1000 --mount=type=secret,id=secrets-env,uid=1000 \
-  set -o allexport && . /run/secrets/secrets-env && set +o allexport \
+  echo "=== ECR cache contents ===" \
+  && ls -la /tmp/composer-cache/ 2>/dev/null || echo "[empty]" \
+  && ls -la /tmp/composer-cache/cache/ 2>/dev/null || echo "[no cache dir]" \
+  && cp -a /tmp/composer-cache/cache/. /home/spryker/.composer/cache/ 2>/dev/null || true \
+  && echo "=== Composer cache after import ===" \
+  && ls -la /home/spryker/.composer/cache/ \
+  && du -sh /home/spryker/.composer/cache/ \
+  && set -o allexport && . /run/secrets/secrets-env && set +o allexport \
   && composer install --no-scripts --no-interaction ${SPRYKER_COMPOSER_MODE} ${SPRYKER_COMPOSER_VERBOSE}
 
 FROM application-production-dependencies AS application-production-codebase
