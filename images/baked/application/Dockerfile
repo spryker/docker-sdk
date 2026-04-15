@@ -1,6 +1,6 @@
 # syntax = docker/dockerfile:experimental
 ARG SPRYKER_PARENT_IMAGE
-ARG SPRYKER_COMPOSER_CACHE_IMAGE=""
+ARG SPRYKER_COMPOSER_CACHE_IMAGE=scratch
 
 FROM ${SPRYKER_COMPOSER_CACHE_IMAGE} AS composer-cache
 FROM ${SPRYKER_PARENT_IMAGE} AS application-production-dependencies
