@@ -115,34 +115,34 @@ function Images::_buildApp() {
 
     Console::verbose "${INFO}Building CLI images${NC}"
 
-    local cliParentImage="${localAppImage}"
-    if [ "${withPushImages}" == "${TRUE}" ]; then
-        cliParentImage="${appImage}"
-    fi
+    # local cliParentImage="${localAppImage}"
+    # if [ "${withPushImages}" == "${TRUE}" ]; then
+    #     cliParentImage="${appImage}"
+    # fi
 
-    docker build \
-        -t "${baseCliImage}" \
-        -t "${pipelineImage}" \
-        -f "${DEPLOYMENT_PATH}/images/common/cli/Dockerfile" \
-        --progress="${PROGRESS_TYPE}" \
-        --build-arg "SPRYKER_PARENT_IMAGE=${cliParentImage}" \
-        --build-arg "BLACKFIRE_EXTENSION_ENABLED=$(Bool::normalizeBashBool ${BLACKFIRE_EXTENSION_ENABLED:-${FALSE}})" \
-        "${DEPLOYMENT_PATH}/context" 1>&2
+    # docker build \
+    #     -t "${baseCliImage}" \
+    #     -t "${pipelineImage}" \
+    #     -f "${DEPLOYMENT_PATH}/images/common/cli/Dockerfile" \
+    #     --progress="${PROGRESS_TYPE}" \
+    #     --build-arg "SPRYKER_PARENT_IMAGE=${cliParentImage}" \
+    #     --build-arg "BLACKFIRE_EXTENSION_ENABLED=$(Bool::normalizeBashBool ${BLACKFIRE_EXTENSION_ENABLED:-${FALSE}})" \
+    #     "${DEPLOYMENT_PATH}/context" 1>&2
 
-    docker build \
-        -t "${cliImage}" \
-        -t "${runtimeCliImage}" \
-        -f "${DEPLOYMENT_PATH}/images/${folder}/cli/Dockerfile" \
-        "${sshArgument[@]}" \
-        --secret "id=secrets-env,src=$SECRETS_FILE_PATH" \
-        --progress="${PROGRESS_TYPE}" \
-        --build-arg "SPRYKER_PARENT_IMAGE=${baseCliImage}" \
-        --build-arg "DEPLOYMENT_PATH=${DEPLOYMENT_PATH}" \
-        --build-arg "SPRYKER_PIPELINE=${SPRYKER_PIPELINE}" \
-        --build-arg "SPRYKER_BUILD_HASH=${SPRYKER_BUILD_HASH:-"current"}" \
-        --build-arg "SPRYKER_BUILD_STAMP=${SPRYKER_BUILD_STAMP:-""}" \
-        --build-arg "SPRYKER_NPM_TOKEN=${SPRYKER_NPM_TOKEN:-""}" \
-        .  1>&2
+    # docker build \
+    #     -t "${cliImage}" \
+    #     -t "${runtimeCliImage}" \
+    #     -f "${DEPLOYMENT_PATH}/images/${folder}/cli/Dockerfile" \
+    #     "${sshArgument[@]}" \
+    #     --secret "id=secrets-env,src=$SECRETS_FILE_PATH" \
+    #     --progress="${PROGRESS_TYPE}" \
+    #     --build-arg "SPRYKER_PARENT_IMAGE=${baseCliImage}" \
+    #     --build-arg "DEPLOYMENT_PATH=${DEPLOYMENT_PATH}" \
+    #     --build-arg "SPRYKER_PIPELINE=${SPRYKER_PIPELINE}" \
+    #     --build-arg "SPRYKER_BUILD_HASH=${SPRYKER_BUILD_HASH:-"current"}" \
+    #     --build-arg "SPRYKER_BUILD_STAMP=${SPRYKER_BUILD_STAMP:-""}" \
+    #     --build-arg "SPRYKER_NPM_TOKEN=${SPRYKER_NPM_TOKEN:-""}" \
+    #     .  1>&2
 
     if [ -n "${SPRYKER_XDEBUG_MODE_ENABLE}" ]; then
         docker build \
