@@ -2,9 +2,29 @@
 
 import sdk/images/baked.sh
 
+function Images::pullComposerCache() {
+    local ecr_base="${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com"
+    local repository_name="${SPRYKER_PROJECT_NAME}-composer_cache"
+    local composerCacheImage="${ecr_base}/${repository_name}:latest"
+
+    Console::start "Pulling composer cache from ECR..."
+
+    if aws ecr describe-images --repository-name "${repository_name}" --image-ids imageTag=latest --region "${AWS_REGION}" &>/dev/null; then
+        if docker pull "${composerCacheImage}" >/dev/null 2>&1; then
+            export SPRYKER_COMPOSER_CACHE_IMAGE="${composerCacheImage}"
+            Console::end "[DONE]"
+            return "${TRUE}"
+        fi
+    fi
+
+    Console::end "[NOT FOUND]"
+    return "${FALSE}"
+}
+
 function Images::buildApplication() {
     Console::verbose "${INFO}Building application images for AWS ECR${NC}"
 
+    Images::pullComposerCache || true
     Images::_buildApp baked "${TRUE}"
 }
 
