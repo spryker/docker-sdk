@@ -81,7 +81,7 @@ COPY --from=${source_builder_assets_image} /data/public /data/public" | \
 
     Console::start "Creating composer cache image..."
     echo "FROM scratch
-COPY --from=${appImage} /home/spryker/.composer/cache /cache" | \
+COPY --from=${appImage} /home/spryker/.composer/cache-export /cache" | \
         docker build -t "${composerCacheImage}" -f - . >/dev/null 2>&1
     Console::end "[DONE]"
 }
