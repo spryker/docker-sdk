@@ -80,12 +80,16 @@ COPY --from=${source_builder_assets_image} /data/public /data/public" | \
     local composerCacheImage="${ecr_base}/${SPRYKER_PROJECT_NAME}-composer_cache:latest"
 
     Console::start "Creating composer cache image..."
-    if echo "FROM scratch
-COPY --from=${appImage} /home/spryker/.composer/cache-export /cache" | \
-        docker build -t "${composerCacheImage}" -f - . >/dev/null 2>&1; then
+    if echo "FROM ${SPRYKER_PLATFORM_IMAGE} AS export
+RUN --mount=type=cache,id=composer,sharing=locked,target=/composer-cache,uid=1000 \
+    mkdir -p /export/cache && cp -a /composer-cache/. /export/cache/ 2>/dev/null || true
+
+FROM scratch
+COPY --from=export /export /
+" | docker build -t "${composerCacheImage}" -f - /dev/null 2>&1; then
         Console::end "[DONE]"
     else
-        Console::end "[SKIPPED] No composer cache found in app image"
+        Console::end "[SKIPPED] No composer cache found"
     fi
 }
 
