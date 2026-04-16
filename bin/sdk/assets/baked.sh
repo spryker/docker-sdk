@@ -54,6 +54,35 @@ function Assets::getImageTag() {
     echo -n "${SPRYKER_DOCKER_PREFIX}_builder_assets:${SPRYKER_DOCKER_TAG}-${SPRYKER_REPOSITORY_HASH}"
 }
 
+function Assets::_packageLockHash() {
+    md5sum package-lock.json 2>/dev/null | cut -d' ' -f1 || md5 -q package-lock.json 2>/dev/null
+}
+
+function Assets::_buildFromEcrImage() {
+    local ecrImage=${1}
+    local builderAssetsImage=${2}
+    local currentHash="${SPRYKER_BUILD_HASH:-current}"
+
+    if docker image inspect "${ecrImage}" >/dev/null 2>&1; then
+        Console::start "Building from ECR image ${ecrImage}..."
+        if echo "FROM busybox
+COPY --from=${ecrImage} /data/public /data/public
+RUN cd /data/public/Yves/assets && \
+    for dir in */; do \
+        [ -d \"\${dir}\" ] && [ \"\${dir%/}\" != '${currentHash}' ] && mv \"\${dir%/}\" '${currentHash}' && break; \
+    done; true" | \
+            docker build -t "${builderAssetsImage}" -f - .; then
+            Console::end "[BUILT]"
+            return "${TRUE}"
+        else
+            Console::error "Failed to build image from ECR"
+            return "${FALSE}"
+        fi
+    fi
+
+    return "${FALSE}"
+}
+
 function Assets::areBuilt() {
     Console::start "Checking assets are built..."
 
@@ -63,30 +92,18 @@ function Assets::areBuilt() {
         Console::end "[BUILT]"
         return "${TRUE}"
     fi
-    
+
     if [ -n "${AWS_ACCOUNT_ID}" ] && [ -n "${AWS_REGION}" ] && [ -n "${SPRYKER_PROJECT_NAME}" ]; then
-        local builderAssetsEcrLatestImage="${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${SPRYKER_PROJECT_NAME}-builder_assets:latest"
-        Console::start "${builderAssetsEcrLatestImage}"
-        
-        if docker image inspect "${builderAssetsEcrLatestImage}" >/dev/null 2>&1; then
-            local currentHash="${SPRYKER_BUILD_HASH:-current}"
-            
-            Console::start "Building from ECR image..."
-            if echo "FROM busybox
-COPY --from=${builderAssetsEcrLatestImage} /data/public /data/public
-RUN cd /data/public/Yves/assets && \
-    for dir in */; do \
-        [ -d \"\${dir}\" ] && [ \"\${dir%/}\" != '${currentHash}' ] && mv \"\${dir%/}\" '${currentHash}' && break; \
-    done; true" | \
-            docker build -t "${builderAssetsImage}" -f - /dev/null; then
-                Console::end "[BUILT]"
+        local ecr_base="${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com"
+        local lockHash=$(Assets::_packageLockHash)
+
+        if [ -n "${lockHash}" ]; then
+            local hashImage="${ecr_base}/${SPRYKER_PROJECT_NAME}-builder_assets:${lockHash}"
+            Console::start "Trying builder_assets:${lockHash}..."
+            if Assets::_buildFromEcrImage "${hashImage}" "${builderAssetsImage}"; then
                 return "${TRUE}"
-            else
-                Console::error "Failed to build image from ECR"
-                return "${FALSE}"
             fi
-        else
-             Console::start "[NOT FOUND] ${builderAssetsEcrLatestImage}"
+            Console::start "[NOT FOUND] ${hashImage}"
         fi
     else
         echo "AWS variables not set - AWS_ACCOUNT_ID: '${AWS_ACCOUNT_ID}', AWS_REGION: '${AWS_REGION}', SPRYKER_PROJECT_NAME: '${SPRYKER_PROJECT_NAME}'"

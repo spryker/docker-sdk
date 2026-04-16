@@ -2,17 +2,22 @@
 
 import sdk/images/baked.sh
 
+function Images::_composerLockHash() {
+    md5sum composer.lock 2>/dev/null | cut -d' ' -f1 || md5 -q composer.lock 2>/dev/null
+}
+
 function Images::pullComposerCache() {
     local ecr_base="${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com"
     local repository_name="${SPRYKER_PROJECT_NAME}-composer_cache"
-    local composerCacheImage="${ecr_base}/${repository_name}:latest"
+    local lockHash=$(Images::_composerLockHash)
 
     Console::start "Pulling composer cache from ECR..."
 
-    if aws ecr describe-images --repository-name "${repository_name}" --image-ids imageTag=latest --region "${AWS_REGION}" &>/dev/null; then
-        if docker pull "${composerCacheImage}" >/dev/null 2>&1; then
-            export SPRYKER_COMPOSER_CACHE_IMAGE="${composerCacheImage}"
-            Console::end "[DONE]"
+    if [ -n "${lockHash}" ]; then
+        local hashImage="${ecr_base}/${repository_name}:${lockHash}"
+        if docker pull "${hashImage}" >/dev/null 2>&1; then
+            export SPRYKER_COMPOSER_CACHE_IMAGE="${hashImage}"
+            Console::end "[FOUND] ${lockHash}"
             return "${TRUE}"
         fi
     fi
@@ -71,25 +76,40 @@ COPY --from=${source_builder_assets_image} /data/public /data/public" | \
             docker build -t "${minimal_assets_image}" -f - . >/dev/null 2>&1
     fi
     
-    if ! aws ecr describe-images --repository-name "${repository_name}" --image-ids imageTag=latest --region "${AWS_REGION}" &>/dev/null; then
-        docker tag "${minimal_assets_image}" "${builder_assets_latest}"
+    # Tag assets only if this hash doesn't exist in ECR
+    local assetsLockHash=$(Assets::_packageLockHash)
+    local assetsRepository="${SPRYKER_PROJECT_NAME}-builder_assets"
+
+    if [ -n "${assetsLockHash}" ] && ! aws ecr describe-images --repository-name "${assetsRepository}" --image-ids imageTag="${assetsLockHash}" --region "${AWS_REGION}" &>/dev/null; then
+        docker tag "${minimal_assets_image}" "${ecr_base}/${assetsRepository}:${assetsLockHash}"
+        export SPRYKER_PUSH_ASSETS_CACHE="${TRUE}"
+        Console::verbose "${INFO}Assets cache tagged: ${assetsLockHash} [NEW]${NC}"
+    else
+        Console::verbose "${INFO}Assets cache already exists for ${assetsLockHash} [SKIP]${NC}"
     fi
 
-    # Tag composer cache image for ECR
-    local appImage="${SPRYKER_DOCKER_PREFIX}_app:${SPRYKER_DOCKER_TAG}"
-    local composerCacheImage="${ecr_base}/${SPRYKER_PROJECT_NAME}-composer_cache:latest"
+    # Tag composer cache only if this hash doesn't exist in ECR
+    local composerLockHash=$(Images::_composerLockHash)
+    local composerRepository="${SPRYKER_PROJECT_NAME}-composer_cache"
 
-    Console::start "Creating composer cache image..."
-    if echo "FROM ${SPRYKER_PLATFORM_IMAGE} AS export
+    if [ -n "${composerLockHash}" ] && ! aws ecr describe-images --repository-name "${composerRepository}" --image-ids imageTag="${composerLockHash}" --region "${AWS_REGION}" &>/dev/null; then
+        local composerCacheHash="${ecr_base}/${composerRepository}:${composerLockHash}"
+
+        Console::start "Creating composer cache image..."
+        if echo "FROM ${SPRYKER_PLATFORM_IMAGE} AS export
 RUN --mount=type=cache,id=composer,sharing=locked,target=/composer-cache,uid=1000 \
     mkdir -p /export/cache && cp -a /composer-cache/. /export/cache/ 2>/dev/null || true
 
 FROM scratch
 COPY --from=export /export /
-" | docker build -t "${composerCacheImage}" -f - . 2>&1; then
-        Console::end "[DONE]"
+" | docker build -t "${composerCacheHash}" -f - . 2>&1; then
+            export SPRYKER_PUSH_COMPOSER_CACHE="${TRUE}"
+            Console::end "[DONE] ${composerLockHash} [NEW]"
+        else
+            Console::end "[SKIPPED] No composer cache found"
+        fi
     else
-        Console::end "[SKIPPED] No composer cache found"
+        Console::verbose "${INFO}Composer cache already exists for ${composerLockHash} [SKIP]${NC}"
     fi
 }
 
@@ -112,16 +132,18 @@ function Images::push() {
         docker push "${ecr_base}/${SPRYKER_PROJECT_NAME}-${app}:latest" &
     done
 
-    local repository_name="${SPRYKER_PROJECT_NAME}-builder_assets"
-    if ! aws ecr describe-images --repository-name "${repository_name}" --image-ids imageTag=latest --region "${AWS_REGION}" &>/dev/null; then
-        echo "${ecr_base}/${SPRYKER_PROJECT_NAME}-builder_assets:${tag}"
-        docker push "${ecr_base}/${SPRYKER_PROJECT_NAME}-builder_assets:latest" &
+    if [ "${SPRYKER_PUSH_ASSETS_CACHE}" == "${TRUE}" ]; then
+        local assetsLockHash=$(Assets::_packageLockHash)
+        local builderAssetsHash="${ecr_base}/${SPRYKER_PROJECT_NAME}-builder_assets:${assetsLockHash}"
+        echo "${builderAssetsHash}"
+        docker push "${builderAssetsHash}" &
     fi
 
-    local composerCacheImage="${ecr_base}/${SPRYKER_PROJECT_NAME}-composer_cache:latest"
-    if docker image inspect "${composerCacheImage}" >/dev/null 2>&1; then
-        echo "${composerCacheImage}"
-        docker push "${composerCacheImage}" &
+    if [ "${SPRYKER_PUSH_COMPOSER_CACHE}" == "${TRUE}" ]; then
+        local composerLockHash=$(Images::_composerLockHash)
+        local composerCacheHash="${ecr_base}/${SPRYKER_PROJECT_NAME}-composer_cache:${composerLockHash}"
+        echo "${composerCacheHash}"
+        docker push "${composerCacheHash}" &
     fi
 
     wait
