@@ -63,6 +63,11 @@ function Assets::_buildFromEcrImage() {
     local builderAssetsImage=${2}
     local currentHash="${SPRYKER_BUILD_HASH:-current}"
 
+    # Pull if not available locally
+    if ! docker image inspect "${ecrImage}" >/dev/null 2>&1; then
+        docker pull "${ecrImage}" >/dev/null 2>&1 || true
+    fi
+
     if docker image inspect "${ecrImage}" >/dev/null 2>&1; then
         Console::start "Building from ECR image ${ecrImage}..."
         if echo "FROM busybox
