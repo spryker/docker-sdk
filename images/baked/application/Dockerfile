@@ -11,13 +11,13 @@ USER spryker
 COPY --chown=spryker:spryker composer.json composer.lock ${srcRoot}/
 ARG SPRYKER_COMPOSER_MODE
 ARG SPRYKER_COMPOSER_VERBOSE
-RUN --mount=type=cache,id=composer,sharing=locked,target=/home/spryker/.composer/cache,uid=1000 \
-  --mount=type=bind,from=composer-cache,source=/,target=/tmp/composer-cache \
-  --mount=type=ssh,uid=1000 \
-  --mount=type=secret,id=secrets-env,uid=1000 \
-  cp -a /tmp/composer-cache/cache/. /home/spryker/.composer/cache/ 2>/dev/null || true \
-  && set -o allexport && . /run/secrets/secrets-env && set +o allexport \
-  && composer install --no-scripts --no-interaction ${SPRYKER_COMPOSER_MODE} ${SPRYKER_COMPOSER_VERBOSE}
+# RUN --mount=type=cache,id=composer,sharing=locked,target=/home/spryker/.composer/cache,uid=1000 \
+  # --mount=type=bind,from=composer-cache,source=/,target=/tmp/composer-cache \
+  # --mount=type=ssh,uid=1000 \
+  # --mount=type=secret,id=secrets-env,uid=1000 \
+  # cp -a /tmp/composer-cache/cache/. /home/spryker/.composer/cache/ 2>/dev/null || true \
+  # && set -o allexport && . /run/secrets/secrets-env && set +o allexport \
+  # && composer install --no-scripts --no-interaction ${SPRYKER_COMPOSER_MODE} ${SPRYKER_COMPOSER_VERBOSE}
 
 FROM application-production-dependencies AS application-production-codebase
 
@@ -39,7 +39,7 @@ ENV APPLICATION_ENV=${APPLICATION_ENV}
 ENV SPRYKER_DB_ENGINE=${SPRYKER_DB_ENGINE}
 
 COPY --chown=spryker:spryker data ${srcRoot}/data
-RUN vendor/bin/install -r ${SPRYKER_PIPELINE} -s build -s build-production -vvv
+# RUN vendor/bin/install -r ${SPRYKER_PIPELINE} -s build -s build-production -vvv
 
 ARG SPRYKER_COMPOSER_AUTOLOAD
 RUN --mount=type=cache,id=composer,sharing=locked,target=/home/spryker/.composer/cache,uid=1000 \
