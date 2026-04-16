@@ -15,7 +15,9 @@ RUN --mount=type=cache,id=composer,sharing=locked,target=/home/spryker/.composer
   --mount=type=bind,from=composer-cache,source=/,target=/tmp/composer-cache \
   --mount=type=ssh,uid=1000 \
   --mount=type=secret,id=secrets-env,uid=1000 \
-  cp -a /tmp/composer-cache/cache/. /home/spryker/.composer/cache/ 2>/dev/null || true \
+  echo "=== ECR bind mount ===" && ls /tmp/composer-cache/ 2>/dev/null && ls /tmp/composer-cache/cache/ 2>/dev/null | head -5 || echo "[empty or no cache dir]" \
+  && cp -a /tmp/composer-cache/cache/. /home/spryker/.composer/cache/ 2>/dev/null || true \
+  && echo "=== Cache after import ===" && du -sh /home/spryker/.composer/cache/ && ls /home/spryker/.composer/cache/ \
   && set -o allexport && . /run/secrets/secrets-env && set +o allexport \
   && composer install --no-scripts --no-interaction ${SPRYKER_COMPOSER_MODE} ${SPRYKER_COMPOSER_VERBOSE}
 
