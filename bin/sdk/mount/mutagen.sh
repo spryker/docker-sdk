@@ -68,12 +68,12 @@ function sync() {
             local targetContainer=$(Mount::Mutagen::findTargetContainer)
             if [ -n "${targetContainer}" ]; then
                 if Mount::Mutagen::createSyncSession; then
+                    sleep 1
                     if Mount::Mutagen::sessionExists; then
                         Console::verbose "${INFO}Mutagen sync session created successfully${NC}"
                         return 0
                     fi
                 fi
-                # If creation failed, it will be retried in afterRun
                 Console::verbose "${INFO}Sync session creation will be retried after containers are fully started${NC}"
             else
                 Console::verbose "${INFO}Containers not running yet, sync session will be created when containers are ready${NC}"
