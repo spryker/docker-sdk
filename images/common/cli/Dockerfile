@@ -19,13 +19,8 @@ RUN --mount=type=cache,id=aptlib,sharing=locked,target=/var/lib/apt \
     --mount=type=cache,id=aptcache,sharing=locked,target=/var/cache/apt \
   bash -c 'if [ ! -z "$(which apt)" ]; then apt update -y && apt install -y \
      inotify-tools \
-     # netcat-openbsd \
-     # git \
      redis-tools \
      jq \
-     # python3 \
-     # g++ \
-     # make \
      ; fi'
 
 # Debian contains outdated Yarn package
@@ -41,17 +36,11 @@ RUN --mount=type=cache,id=aptlib,sharing=locked,target=/var/lib/apt \
 RUN --mount=type=cache,id=apk,sharing=locked,target=/var/cache/apk mkdir -p /etc/apk && ln -vsf /var/cache/apk /etc/apk/cache && \
   bash -c 'if [ ! -z "$(which apk)" ]; then apk update && apk add \
      inotify-tools \
-     # netcat-openbsd \
      coreutils \
      ncurses \
-     # git \
      redis \
      yarn \
      jq \
-     # python3 \
-     # py3-setuptools \
-     # g++ \
-     # make \
      build-base \
      ; fi'
 
