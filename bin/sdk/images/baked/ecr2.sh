@@ -76,7 +76,6 @@ COPY --from=${source_builder_assets_image} /data/public /data/public" | \
             docker build -t "${minimal_assets_image}" -f - . >/dev/null 2>&1
     fi
     
-    # Tag assets only if this hash doesn't exist in ECR
     local assetsLockHash=$(Assets::_packageLockHash)
     local assetsRepository="${SPRYKER_PROJECT_NAME}-builder_assets"
 
@@ -88,7 +87,6 @@ COPY --from=${source_builder_assets_image} /data/public /data/public" | \
         Console::verbose "${INFO}Assets cache already exists for ${assetsLockHash} [SKIP]${NC}"
     fi
 
-    # Tag composer cache only if this hash doesn't exist in ECR
     local composerLockHash=$(Images::_composerLockHash)
     local composerRepository="${SPRYKER_PROJECT_NAME}-composer_cache"
 
@@ -119,11 +117,6 @@ function Images::push() {
     local ecr_base="${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com"
 
     local all_images=(boffice)
-
-    # for application in "${SPRYKER_APPLICATIONS[@]}"; do
-        # all_images+=("$(echo "$application" | tr '[:upper:]' '[:lower:]')")
-    # done
-
     all_images+=(frontend jenkins)
 
     for app in "${all_images[@]}"; do
