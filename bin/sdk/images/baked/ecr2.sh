@@ -30,7 +30,7 @@ function Images::buildApplication() {
     Console::verbose "${INFO}Building application images for AWS ECR${NC}"
 
     Images::pullComposerCache || true
-    Images::_buildApp baked "${TRUE}"
+    Images::_buildApp baked "${TRUE}" "${TRUE}"
 }
 
 function Images::buildFrontend() {

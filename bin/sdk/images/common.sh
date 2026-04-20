@@ -32,6 +32,7 @@ function Images::_buildApp() {
     local -a sshArgument=()
     local folder=${1}
     local withPushImages=${2:-${FALSE}}
+    local withCache=${3:-${FALSE}}
     local baseAppImage="${SPRYKER_DOCKER_PREFIX}_base_app:${SPRYKER_DOCKER_TAG}"
     local appImage="${SPRYKER_DOCKER_PREFIX}_app:${SPRYKER_DOCKER_TAG}"
     local localAppImage="${SPRYKER_DOCKER_PREFIX}_local_app:${SPRYKER_DOCKER_TAG}"
@@ -113,7 +114,7 @@ function Images::_buildApp() {
             "${DEPLOYMENT_PATH}/context" 1>&2
     fi
 
-    if [ "${withPushImages}" == "${FALSE}" ] || ! Assets::areBuilt; then
+    if ([ "${withCache}" == "${TRUE}" ] && ! Assets::areBuilt) || [ "${withCache}" == "${FALSE}" ]; then
         Console::verbose "${INFO}Building CLI images${NC}"
 
         local cliParentImage="${localAppImage}"
