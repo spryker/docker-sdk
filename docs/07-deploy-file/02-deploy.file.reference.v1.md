@@ -628,6 +628,7 @@ services:
   scheduler:
     engine: jenkins
     version: 2.176
+    number-of-executors: 4
     endpoints:
       scheduler.spryker.local:
 
@@ -847,6 +848,15 @@ Now you can access the applications from the `{ IP address 1 }` and `{ IP addres
 Defines the configuration for testing.
 
 * `docker: testing: store:` defines a *Store* as the context for running tests using specific console commands, like `docker/sdk console code:test`. This variable is optional. If not specified, the default value applies: `store: DE`.
+
+* `docker: testing: stores:` defines a comma-separated list of *Stores* for running tests across multiple stores. When specified, you can select which store to use for testing by setting the `APPLICATION_STORE` environment variable. This variable is optional. If both `store:` and `stores:` are specified, `store:` takes precedence for backward compatibility.
+
+Example:
+```yaml
+docker:
+    testing:
+        stores: DE,AT
+```
 
 :::
 ***
@@ -1074,6 +1084,7 @@ A scheduler *Service* used to run application-specific jobs periodically in the 
 
 * Project-wide
   * `scheduler: engine:` - possible value is `jenkins`.
+  * `scheduler: number-of-executors:` - defines the number of executors for the Jenkins instance. The minimum supported Jenkins version is 2.516.3. This property is relevant only for local development and does not affect the Cloud setup.
   * `scheduler: endpoints:` - defines the service's port and web interface that can be accessed via given endpoints.
 
 

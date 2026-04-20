@@ -62,9 +62,19 @@ $envVarEncoder = new class() {
         $this->isActive = $isActive;
     }
 };
+$yamlVarEncoder = new class() {
+    public function encode($value)
+    {
+        if (is_array($value)) {
+            return json_encode($value, JSON_UNESCAPED_SLASHES);
+        }
+        return json_encode((string)$value, JSON_UNESCAPED_SLASHES);
+    }
+};
 $twig->addFilter(new TwigFilter('tf_var', [$tfVarEncoder, 'encode'], ['is_safe' => ['all']]));
 $twig->addFilter(new TwigFilter('env_var', [$envVarEncoder, 'encode'], ['is_safe' => ['all']]));
 $twig->addFilter(new TwigFilter('nginx_var', [$nginxVarEncoder, 'encode'], ['is_safe' => ['all']]));
+$twig->addFilter(new TwigFilter('yaml_var', [$yamlVarEncoder, 'encode'], ['is_safe' => ['all']]));
 $twig->addFilter(new TwigFilter('normalize_endpoint', static function ($string) {
     return str_replace(['.', ':'], ['dot', '_'], $string);
 }, ['is_safe' => ['all']]));
@@ -273,6 +283,7 @@ $projectData['_testing'] = [
     'defaultPort' => $defaultPort,
     'projectServices' => $projectData['services'],
     'endpointMap' => $endpointMap,
+    'storesForTesting' => [],
 ];
 
 $projectData['_applications'] = [];
@@ -396,11 +407,34 @@ foreach ($projectData['groups'] ?? [] as $groupName => $groupData) {
 
             $projectData['_testing']['dynamicStoreMode'] = $projectData['dynamicStoreMode'] ?? false;
 
-            if ($isEndpointDataHasStore && $endpointData['store'] === ($projectData['docker']['testing']['store'] ?? '')) {
-                $projectData['_testing']['storeName'] = $endpointData['store'];
-                $projectData['_testing']['identifier'] = $endpointData['identifier'];
-                $projectData['_testing']['regionServices'] = array_merge($projectData['_testing']['services'] ?? [], $services);
-                $projectData['_testing']['services'][$endpointData['store']][$applicationData['application']] = $services;
+            $testingStore = $projectData['docker']['testing']['store'] ?? '';
+            $testingStores = $projectData['docker']['testing']['stores'] ?? '';
+            $allowedStores = !empty($testingStores) ? array_map('trim', explode(',', $testingStores)) : [];
+
+            $shouldCollectStore = false;
+            if ($isEndpointDataHasStore) {
+                if (!empty($testingStore) && $endpointData['store'] === $testingStore) {
+                    $projectData['_testing']['storeName'] = $endpointData['store'];
+                    $projectData['_testing']['identifier'] = $endpointData['identifier'];
+                    $projectData['_testing']['regionServices'] = array_merge($projectData['_testing']['services'] ?? [], $services);
+                    $shouldCollectStore = true;
+                } elseif (!empty($allowedStores) && in_array($endpointData['store'], $allowedStores, true)) {
+                    $shouldCollectStore = true;
+                }
+
+                if ($shouldCollectStore) {
+                    $projectData['_testing']['services'][$endpointData['store']][$applicationData['application']] = $services;
+                    if (!isset($projectData['_testing']['storesForTesting'][$endpointData['store']])) {
+                        $projectData['_testing']['storesForTesting'][$endpointData['store']] = [
+                            'identifier' => $endpointData['identifier'],
+                            'regionServices' => [],
+                        ];
+                    }
+                    $projectData['_testing']['storesForTesting'][$endpointData['store']]['regionServices'] = array_merge(
+                        $projectData['_testing']['storesForTesting'][$endpointData['store']]['regionServices'],
+                        $services
+                    );
+                }
             }
 
             if ($isEndpointDataHasRegion && $groupData['region'] === ($projectData['docker']['testing']['region'] ?? '')) {
@@ -470,7 +504,42 @@ if (!empty($projectData['services']['key_value_store']['replicas'])) {
     $projectData['services']['key_value_store']['sources'] = json_encode($sources, JSON_UNESCAPED_SLASHES);
 }
 
+$customVolumes = [];
 foreach ($projectData['services'] ?? [] as $serviceName => $serviceData) {
+    $engine = strtolower($serviceData['engine'] ?? 'custom');
+    $version = $serviceData['version'] ?? 'default';
+    
+    if (!empty($serviceData['volumes']) && is_array($serviceData['volumes'])) {
+        foreach ($serviceData['volumes'] as $volume) {
+            if (preg_match('/^([^:]+):/', $volume, $matches)) {
+                $volumeName = trim($matches[1]);
+                if (!preg_match('/^\.\/|^\//', $volumeName)) {
+                    $customVolumes[$volumeName] = true;
+                }
+            }
+        }
+    }
+    
+    if (empty($serviceData['engine']) || $engine === 'custom') {
+        $projectData['services'][$serviceName]['_isCustom'] = true;
+        $projectData['services'][$serviceName]['_customEngine'] = 'custom';
+    } else {
+        $serviceTemplatePath = APPLICATION_SOURCE_DIR . DS . 'templates' . DS . 'service' . DS . $engine . DS . $version . DS . $engine . '.yml.twig';
+        if (!file_exists($serviceTemplatePath)) {
+            $projectData['services'][$serviceName]['_isCustom'] = true;
+            $projectData['services'][$serviceName]['_customEngine'] = 'custom';
+        }
+    }
+    
+    if (!empty($serviceData['build']) && !empty($projectData['services'][$serviceName]['_isCustom'])) {
+        $context = $serviceData['build']['context'] ?? $serviceName;
+        if (!preg_match('/[\/\\\\]/', $context) && !preg_match('/^\${/', $context)) {
+            $projectData['services'][$serviceName]['build']['context'] = './${DEPLOYMENT_PATH}/context/' . $context . '/';
+        } elseif (preg_match('/^context\//', $context)) {
+            $projectData['services'][$serviceName]['build']['context'] = './${DEPLOYMENT_PATH}/' . $context;
+        }
+    }
+    
     $httpEndpoints = array_filter(
         $serviceData['endpoints'] ?? [],
         static function ($endpointData) {
@@ -479,6 +548,7 @@ foreach ($projectData['services'] ?? [] as $serviceName => $serviceData) {
     );
 
     if (!empty($httpEndpoints)) {
+        $projectData['services'][$serviceName]['_hasHttpEndpoints'] = true;
         $environment['services'][] = [
             'name' => $serviceName,
             'endpoints' => array_map(
@@ -490,6 +560,7 @@ foreach ($projectData['services'] ?? [] as $serviceName => $serviceData) {
         ];
     }
 }
+$projectData['_customVolumes'] = array_keys($customVolumes);
 
 file_put_contents(
     $deploymentDir . DS . 'context' . DS . 'nginx' . DS . 'conf.d' . DS . 'frontend.default.conf.tmpl',
@@ -558,10 +629,37 @@ file_put_contents(
 );
 
 $envVarEncoder->setIsActive(true);
-file_put_contents(
-    $deploymentDir . DS . 'env' . DS . 'cli' . DS . 'testing.env',
-    $twig->render('env/cli/testing.env.twig', $projectData['_testing'])
-);
+
+$testingStores = $projectData['docker']['testing']['stores'] ?? '';
+$storesForTesting = $projectData['_testing']['storesForTesting'] ?? [];
+
+if (!empty($testingStores) && !empty($storesForTesting)) {
+    foreach ($storesForTesting as $store => $storeData) {
+        $servicesStructure = [];
+        if (isset($projectData['_testing']['services'][$store])) {
+            foreach ($projectData['_testing']['services'][$store] as $appName => $appServices) {
+                $servicesStructure[$storeData['identifier']][$appName] = $appServices;
+            }
+        }
+
+        $storeTestingData = array_merge($projectData['_testing'], [
+            'storeName' => $store,
+            'identifier' => $storeData['identifier'],
+            'regionServices' => $storeData['regionServices'],
+            'services' => $servicesStructure,
+        ]);
+
+        file_put_contents(
+            $deploymentDir . DS . 'env' . DS . 'cli' . DS . strtolower($store) . '.testing.env',
+            $twig->render('env/cli/testing.env.twig', $storeTestingData)
+        );
+    }
+} else {
+    file_put_contents(
+        $deploymentDir . DS . 'env' . DS . 'cli' . DS . 'testing.env',
+        $twig->render('env/cli/testing.env.twig', $projectData['_testing'])
+    );
+}
 
 verbose('Generating scripts... [DONE]');
 
@@ -1713,11 +1811,11 @@ function buildNodeJsNpmBuildConfig(array $projectData): array
     return [
         SPRYKER_NODE_IMAGE_DISTRO_ENV_NAME => getNodeDistroName($nodejsConfig, $imageName),
         SPRYKER_NODE_IMAGE_VERSION_ENV_NAME => array_key_exists('version', $nodejsConfig)
-            ? (int)$nodejsConfig['version']
-            : DEFAULT_NODE_VERSION,
+            ? (string)$nodejsConfig['version']
+            : (string)DEFAULT_NODE_VERSION,
         SPRYKER_NPM_VERSION_ENV_NAME => array_key_exists('npm', $nodejsConfig)
-            ? (int)$nodejsConfig['npm']
-            : DEFAULT_NPM_VERSION,
+            ? (string)$nodejsConfig['npm']
+            : (string)DEFAULT_NPM_VERSION,
     ];
 }
 
