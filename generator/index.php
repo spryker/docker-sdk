@@ -190,6 +190,16 @@ const DEFAULT_NPM_VERSION = 6;
 
 $projectData['_node_npm_config'] = buildNodeJsNpmBuildConfig($projectData);
 
+// Universal dev base image support
+$projectData['_useUniversalBaseImage'] = !empty($projectData['docker']['dev-base-image']['enabled']) && $mountMode !== 'baked';
+if ($projectData['_useUniversalBaseImage']) {
+    $phpVersion = str_replace('spryker/php:', '', $projectData['image']['tag'] ?? 'spryker/php:8.4');
+    $nodeVersion = $projectData['image']['node']['version'] ?? DEFAULT_NODE_VERSION;
+    $projectData['_universalBaseImage'] = $projectData['docker']['dev-base-image']['image']
+        ?? sprintf('spryker/dev-base:php%s-node%s', $phpVersion, $nodeVersion);
+    $projectData['_phpExtensionsString'] = implode(',', $projectData['_phpExtensions']);
+}
+
 foreach ($projectData['groups'] ?? [] as $groupName => $groupData) {
     foreach ($groupData['applications'] ?? [] as $applicationName => $applicationData) {
         foreach ($applicationData['endpoints'] ?? [] as $endpoint => $endpointData) {
