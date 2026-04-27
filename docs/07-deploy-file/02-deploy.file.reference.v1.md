@@ -837,6 +837,67 @@ docker:
 Now you can access the applications from the `{ IP address 1 }` and `{ IP address 2 }` IP addresses.
 
 
+### Per-store and per-region maintenance pages
+
+By default, all endpoints of an application share the same maintenance page located at `public/{application}/maintenance/index.html` (e.g., `public/Yves/maintenance/index.html`).
+
+You can customize the maintenance page per store or per region by placing an `index.html` file in a subdirectory named after the store or region code:
+
+```
+public/Yves/maintenance/
+├── index.html          # Default maintenance page (fallback)
+├── EU/
+│   └── index.html      # Maintenance page for EU region
+├── US/
+│   └── index.html      # Maintenance page for US region
+├── DE/
+│   └── index.html      # Maintenance page for DE store (legacy store mode)
+└── AT/
+    └── index.html      # Maintenance page for AT store (legacy store mode)
+```
+
+The same structure applies to all applications (`Backoffice`, `MerchantPortal`, `Zed`, etc.).
+
+Nginx resolves the maintenance page using the following fallback order:
+
+**Dynamic store mode** (region-based endpoints):
+1. `maintenance/{region}/index.html` — region-specific page
+2. `maintenance/index.html` — default page
+
+**Legacy store mode** (store-based endpoints):
+1. `maintenance/{store}/index.html` — store-specific page
+2. `maintenance/{region}/index.html` — region-specific page
+3. `maintenance/index.html` — default page
+
+If no store-specific or region-specific page exists, the default `maintenance/index.html` is served. The default maintenance page is required and must always be present.
+
+#### Testing maintenance pages locally
+
+To verify a maintenance page locally without changing the deploy file, follow these steps:
+
+1. Boot the environment with your deploy file:
+```bash
+docker/sdk boot {deploy file name}
+```
+
+2. Open the generated `docker/deployment/default/docker-compose.yml` and add the `SPRYKER_MAINTENANCE_MODE_ENABLED` environment variable to the `frontend` service:
+```yaml
+services:
+  frontend:
+    image: ...
+    environment:
+      SPRYKER_MAINTENANCE_MODE_ENABLED: 1
+```
+
+3. Start the environment:
+```bash
+docker/sdk up
+```
+
+4. Open Yves in a browser — the maintenance page should be displayed.
+
+> **Note:** `docker/deployment/default/docker-compose.yml` is a generated file and will be overwritten the next time `docker/sdk boot` is run. This approach is intended for temporary local testing only. Do not commit this change.
+
 
 ### docker: logs:
 * `docker: logs: path:` defines the path to the directory with Docker logs. This variable is optional. If not specified, the default value applies: `path: '/var/log/spryker`.
