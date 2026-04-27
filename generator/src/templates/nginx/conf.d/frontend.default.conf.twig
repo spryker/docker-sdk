@@ -44,7 +44,8 @@ server {
     zedHost: zedHost,
     timeout: applicationData['http']['timeout'] | default('1m'),
     project: _context,
-    regionEndpointMap: _context['regionEndpointMap'][endpointData['identifier']]
+    regionEndpointMap: _context['regionEndpointMap'][endpointData['identifier']],
+    groupRegion: groupData['region'],
 } %}
 {% endfor %}
 {% endfor %}

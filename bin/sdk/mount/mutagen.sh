@@ -287,16 +287,43 @@ function Mount::Mutagen::createSyncSession() {
 }
 
 # This is necessary due to https://github.com/mutagen-io/mutagen/issues/225
+function Mount::Mutagen::waitForSessionReady() {
+    local sessionName="${1:-${SPRYKER_SYNC_SESSION_NAME}}"
+    local maxWaitSeconds="${2:-300}"
+    local intervalSeconds=3
+    local elapsed=0
+    local status
+
+    Console::verbose "${INFO}Waiting for mutagen sync session to finish initial scan...${NC}"
+
+    while [ "${elapsed}" -lt "${maxWaitSeconds}" ]; do
+        status=$(mutagen sync list "${sessionName}" 2>/dev/null | grep 'Status:' | sed 's/.*Status: //' || echo '')
+
+        if echo "${status}" | grep -qi "Watching for changes\|Synchronized"; then
+            Console::verbose "${INFO}Mutagen sync session ready (${status})${NC}"
+            return 0
+        fi
+
+        Console::verbose "${INFO}Mutagen status: ${status} (${elapsed}s elapsed)${NC}"
+        sleep "${intervalSeconds}"
+        elapsed=$((elapsed + intervalSeconds))
+    done
+
+    Console::warn "Mutagen session did not reach ready state within ${maxWaitSeconds}s (last status: ${status}). Proceeding anyway."
+    return 0
+}
+
 function Mount::Mutagen::afterCliReady() {
     if ! Mount::Mutagen::createSyncSession; then
         Console::warn "Mutagen sync session creation failed or timed out. Boot will continue."
         Console::warn "You can manually create the session later or retry after fixing Mutagen issues."
         return 0
     fi
-    
+
     if Mount::Mutagen::sessionExists; then
+        Mount::Mutagen::waitForSessionReady
         Console::verbose "${INFO}Flushing file syncronization${NC}"
-        Mount::Mutagen::runWithTimeout 10 mutagen sync flush "${SPRYKER_SYNC_SESSION_NAME}" 2>/dev/null || true
+        Mount::Mutagen::runWithTimeout 60 mutagen sync flush "${SPRYKER_SYNC_SESSION_NAME}" 2>/dev/null || true
     fi
 }
 
