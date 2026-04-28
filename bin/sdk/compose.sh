@@ -195,7 +195,9 @@ function Compose::restart() {
 function Compose::stop() {
     Console::verbose "${INFO}Stopping all containers${NC}"
     Compose::command stop
-    Compose::command stop mutagen
+    if Service::isServiceExist mutagen; then
+        Compose::command stop mutagen
+    fi
     Registry::Flow::runAfterStop
 }
 
