@@ -1,6 +1,8 @@
 # syntax = docker/dockerfile:experimental
 ARG SPRYKER_PARENT_IMAGE
+ARG SPRYKER_COMPOSER_CACHE_IMAGE=scratch
 
+FROM ${SPRYKER_COMPOSER_CACHE_IMAGE} AS composer-cache
 FROM ${SPRYKER_PARENT_IMAGE} AS application-production-dependencies
 
 USER spryker
@@ -10,8 +12,13 @@ COPY --chown=spryker:spryker composer.json composer.lock ${srcRoot}/
 ARG SPRYKER_COMPOSER_MODE
 ARG SPRYKER_COMPOSER_VERBOSE
 RUN --mount=type=cache,id=composer,sharing=locked,target=/home/spryker/.composer/cache,uid=1000 \
-  --mount=type=ssh,uid=1000 --mount=type=secret,id=secrets-env,uid=1000 \
-  set -o allexport && . /run/secrets/secrets-env && set +o allexport \
+  --mount=type=bind,from=composer-cache,source=/,target=/tmp/composer-cache \
+  --mount=type=ssh,uid=1000 \
+  --mount=type=secret,id=secrets-env,uid=1000 \
+  echo "=== ECR bind mount ===" && ls /tmp/composer-cache/ 2>/dev/null && ls /tmp/composer-cache/cache/ 2>/dev/null | head -5 || echo "[empty or no cache dir]" \
+  && cp -a /tmp/composer-cache/cache/. /home/spryker/.composer/cache/ 2>/dev/null || true \
+  && echo "=== Cache after import ===" && du -sh /home/spryker/.composer/cache/ && ls /home/spryker/.composer/cache/ \
+  && set -o allexport && . /run/secrets/secrets-env && set +o allexport \
   && composer install --no-scripts --no-interaction ${SPRYKER_COMPOSER_MODE} ${SPRYKER_COMPOSER_VERBOSE}
 
 FROM application-production-dependencies AS application-production-codebase

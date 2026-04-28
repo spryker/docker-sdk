@@ -32,6 +32,7 @@ function Images::_buildApp() {
     local -a sshArgument=()
     local folder=${1}
     local withPushImages=${2:-${FALSE}}
+    local withCache=${3:-${FALSE}}
     local baseAppImage="${SPRYKER_DOCKER_PREFIX}_base_app:${SPRYKER_DOCKER_TAG}"
     local appImage="${SPRYKER_DOCKER_PREFIX}_app:${SPRYKER_DOCKER_TAG}"
     local localAppImage="${SPRYKER_DOCKER_PREFIX}_local_app:${SPRYKER_DOCKER_TAG}"
@@ -67,6 +68,11 @@ function Images::_buildApp() {
         --build-arg "SPRYKER_NPM_VERSION=${SPRYKER_NPM_VERSION}" \
         "${DEPLOYMENT_PATH}/context" 1>&2
 
+    local -a composerCacheArg=()
+    if [ -n "${SPRYKER_COMPOSER_CACHE_IMAGE}" ]; then
+        composerCacheArg=(--build-arg "SPRYKER_COMPOSER_CACHE_IMAGE=${SPRYKER_COMPOSER_CACHE_IMAGE}")
+    fi
+
     docker build \
         -t "${appImage}" \
         -f "${DEPLOYMENT_PATH}/images/${folder}/application/Dockerfile" \
@@ -86,15 +92,18 @@ function Images::_buildApp() {
         --build-arg "SPRYKER_COMPOSER_VERBOSE=${SPRYKER_COMPOSER_VERBOSE}" \
         --build-arg "SPRYKER_BUILD_HASH=${SPRYKER_BUILD_HASH:-"current"}" \
         --build-arg "SPRYKER_BUILD_STAMP=${SPRYKER_BUILD_STAMP:-""}" \
+        "${composerCacheArg[@]}" \
         . 1>&2
 
-    docker build \
-        -t "${localAppImage}" \
-        -t "${runtimeImage}" \
-        -f "${DEPLOYMENT_PATH}/images/common/application-local/Dockerfile" \
-        --progress="${PROGRESS_TYPE}" \
-        --build-arg "SPRYKER_PARENT_IMAGE=${appImage}" \
-        "${DEPLOYMENT_PATH}/context" 1>&2
+    if [ "${withPushImages}" == "${FALSE}" ]; then
+        docker build \
+            -t "${localAppImage}" \
+            -t "${runtimeImage}" \
+            -f "${DEPLOYMENT_PATH}/images/common/application-local/Dockerfile" \
+            --progress="${PROGRESS_TYPE}" \
+            --build-arg "SPRYKER_PARENT_IMAGE=${appImage}" \
+            "${DEPLOYMENT_PATH}/context" 1>&2
+    fi
 
     if [ -n "${SPRYKER_XDEBUG_MODE_ENABLE}" ]; then
         docker build \
@@ -105,38 +114,46 @@ function Images::_buildApp() {
             "${DEPLOYMENT_PATH}/context" 1>&2
     fi
 
-    Console::verbose "${INFO}Building CLI images${NC}"
-    docker build \
-        -t "${baseCliImage}" \
-        -t "${pipelineImage}" \
-        -f "${DEPLOYMENT_PATH}/images/common/cli/Dockerfile" \
-        --progress="${PROGRESS_TYPE}" \
-        --build-arg "SPRYKER_PARENT_IMAGE=${localAppImage}" \
-        --build-arg "BLACKFIRE_EXTENSION_ENABLED=$(Bool::normalizeBashBool ${BLACKFIRE_EXTENSION_ENABLED:-${FALSE}})" \
-        "${DEPLOYMENT_PATH}/context" 1>&2
+    if ([ "${withCache}" == "${TRUE}" ] && ! Assets::areBuilt) || [ "${withCache}" == "${FALSE}" ]; then
+        Console::verbose "${INFO}Building CLI images${NC}"
 
-    docker build \
-        -t "${cliImage}" \
-        -t "${runtimeCliImage}" \
-        -f "${DEPLOYMENT_PATH}/images/${folder}/cli/Dockerfile" \
-        "${sshArgument[@]}" \
-        --secret "id=secrets-env,src=$SECRETS_FILE_PATH" \
-        --progress="${PROGRESS_TYPE}" \
-        --build-arg "SPRYKER_PARENT_IMAGE=${baseCliImage}" \
-        --build-arg "DEPLOYMENT_PATH=${DEPLOYMENT_PATH}" \
-        --build-arg "SPRYKER_PIPELINE=${SPRYKER_PIPELINE}" \
-        --build-arg "SPRYKER_BUILD_HASH=${SPRYKER_BUILD_HASH:-"current"}" \
-        --build-arg "SPRYKER_BUILD_STAMP=${SPRYKER_BUILD_STAMP:-""}" \
-        --build-arg "SPRYKER_NPM_TOKEN=${SPRYKER_NPM_TOKEN:-""}" \
-        .  1>&2
+        local cliParentImage="${localAppImage}"
+        if [ "${withPushImages}" == "${TRUE}" ]; then
+            cliParentImage="${appImage}"
+        fi
 
-    if [ -n "${SPRYKER_XDEBUG_MODE_ENABLE}" ]; then
         docker build \
-            -t "${runtimeCliImage}" \
-            -f "${DEPLOYMENT_PATH}/images/debug/cli/Dockerfile" \
+            -t "${baseCliImage}" \
+            -t "${pipelineImage}" \
+            -f "${DEPLOYMENT_PATH}/images/common/cli/Dockerfile" \
             --progress="${PROGRESS_TYPE}" \
-            --build-arg "SPRYKER_PARENT_IMAGE=${cliImage}" \
+            --build-arg "SPRYKER_PARENT_IMAGE=${cliParentImage}" \
+            --build-arg "BLACKFIRE_EXTENSION_ENABLED=$(Bool::normalizeBashBool ${BLACKFIRE_EXTENSION_ENABLED:-${FALSE}})" \
             "${DEPLOYMENT_PATH}/context" 1>&2
+
+        docker build \
+            -t "${cliImage}" \
+            -t "${runtimeCliImage}" \
+            -f "${DEPLOYMENT_PATH}/images/${folder}/cli/Dockerfile" \
+            "${sshArgument[@]}" \
+            --secret "id=secrets-env,src=$SECRETS_FILE_PATH" \
+            --progress="${PROGRESS_TYPE}" \
+            --build-arg "SPRYKER_PARENT_IMAGE=${baseCliImage}" \
+            --build-arg "DEPLOYMENT_PATH=${DEPLOYMENT_PATH}" \
+            --build-arg "SPRYKER_PIPELINE=${SPRYKER_PIPELINE}" \
+            --build-arg "SPRYKER_BUILD_HASH=${SPRYKER_BUILD_HASH:-"current"}" \
+            --build-arg "SPRYKER_BUILD_STAMP=${SPRYKER_BUILD_STAMP:-""}" \
+            --build-arg "SPRYKER_NPM_TOKEN=${SPRYKER_NPM_TOKEN:-""}" \
+            .  1>&2
+
+        if [ -n "${SPRYKER_XDEBUG_MODE_ENABLE}" ]; then
+            docker build \
+                -t "${runtimeCliImage}" \
+                -f "${DEPLOYMENT_PATH}/images/debug/cli/Dockerfile" \
+                --progress="${PROGRESS_TYPE}" \
+                --build-arg "SPRYKER_PARENT_IMAGE=${cliImage}" \
+                "${DEPLOYMENT_PATH}/context" 1>&2
+        fi
     fi
 
     if [ "${withPushImages}" == "${TRUE}" ]; then
@@ -242,5 +259,4 @@ function Images::printAll() {
     done
 
     printf "%s %s_frontend:%s\n" "frontend" "${SPRYKER_DOCKER_PREFIX}" "${tag}-frontend"
-    printf "%s %s_pipeline:%s\n" "pipeline" "${SPRYKER_DOCKER_PREFIX}" "${tag}-pipeline"
 }
