@@ -28,14 +28,16 @@ RUN --mount=type=cache,id=aptlib,sharing=locked,target=/var/lib/apt \
      make \
      ; fi'
 
-# Debian contains outdated Yarn package
-RUN --mount=type=cache,id=aptlib,sharing=locked,target=/var/lib/apt \
-    --mount=type=cache,id=aptcache,sharing=locked,target=/var/cache/apt \
-  bash -c 'if [ ! -z "$(which apt)" ]; then \
-     curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add - && \
-     echo "deb https://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources.list.d/yarn.list && \
-     apt update -y && apt install -y \
-     yarn \
+# Yarn installed via Node.js + npm. Replaces the deprecated apt-key path and
+# the dl.yarnpkg.com repo whose GPG key periodically expires (issue #603).
+ARG NODE_VERSION=20.18.1
+ARG YARN_VERSION=1.22.22
+RUN bash -c 'if [ ! -z "$(which apt)" ]; then \
+     architecture=$(case $(uname -m) in x86_64|amd64) echo "x64" ;; aarch64|arm64) echo "arm64" ;; *) echo "x64" ;; esac) && \
+     curl -fsSLO "https://nodejs.org/dist/v${NODE_VERSION}/node-v${NODE_VERSION}-linux-${architecture}.tar.gz" && \
+     tar -xzf "node-v${NODE_VERSION}-linux-${architecture}.tar.gz" -C /usr/local --strip-components=1 --no-same-owner && \
+     rm "node-v${NODE_VERSION}-linux-${architecture}.tar.gz" && \
+     npm install --global --no-fund --no-audit "yarn@${YARN_VERSION}" \
      ; fi'
 
 RUN --mount=type=cache,id=apk,sharing=locked,target=/var/cache/apk mkdir -p /etc/apk && ln -vsf /var/cache/apk /etc/apk/cache && \
