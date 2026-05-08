@@ -14,7 +14,7 @@ COPY --from=spryker-jenkins-boilerplate /usr/share/jenkins/jenkins-cli.jar /usr/
 RUN bash -c 'if [ ! -z "$(which apk)" ]; then apk --no-cache add \
 	curl \
     bash \
-    openjdk17 \
+    openjdk21 \
     ttf-dejavu \
     gettext \
     jq && \
@@ -29,7 +29,7 @@ RUN bash -c 'if [ ! -z "$(which apt)" ]; then apt update -y && \
 	apt update -y && apt install -y \
 	curl \
     bash \
-    openjdk-17-jdk \
+    openjdk-21-jdk \
     fonts-dejavu \
     gettext \
     jq \
