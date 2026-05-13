@@ -105,7 +105,7 @@ function Images::_buildApp() {
             "${DEPLOYMENT_PATH}/context" 1>&2
     fi
 
-    if [ -n "${SPRYKER_XDEBUG_MODE_ENABLE}" ]; then
+    if [ "${withPushImages}" == "${FALSE}" ] && [ -n "${SPRYKER_XDEBUG_MODE_ENABLE}" ]; then
         docker build \
             -t "${runtimeImage}" \
             -f "${DEPLOYMENT_PATH}/images/debug/application/Dockerfile" \
