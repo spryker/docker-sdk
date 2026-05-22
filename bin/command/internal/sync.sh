@@ -16,6 +16,9 @@ function Command::sync() {
             sync logs # TODO deprecated, use Mount::logs instead
             Mount::logs "${@}"
             ;;
+        resync)
+            sync resync
+            ;;
         *)
             Console::error "Unknown command ${INFO}${command}${WARN} is occurred."
             exit 1

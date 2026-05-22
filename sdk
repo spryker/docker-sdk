@@ -12,6 +12,7 @@ popd >/dev/null
 Registry::Help::section 'Basic usage:'
 Registry::Help::command -s -e "SPRYKER_PROJECT_NAME=<project-name>" -a "<command> [args...]" "Runs the command for the specified ${HELP_HIGH}<project-name>${HELP_DESC}."
 Registry::Help::command -s -c "${HELP_ENV}[-p <project-name>]${NC}" -a "<command> [args...]" "Runs the command for the specified ${HELP_HIGH}<project-name>${HELP_DESC}."
+Registry::Help::command -s -c "${HELP_ENV}[-w <path>]${NC}" -a "[<command> [args...]]" "Mounts ${HELP_HIGH}<path>${HELP_DESC} as the source tree (defaults to PWD). Without a command, re-points the running stack at ${HELP_HIGH}<path>${HELP_DESC} and exits. Docker Desktop must allow that path."
 
 import environment/cross-platform.sh
 import environment/check-directories.sh
@@ -21,7 +22,9 @@ import command/install/config.sh
 
 SPRYKER_PROJECT_NAME=${SPRYKER_PROJECT_NAME:-default}
 
-while getopts ":p:" opt; do
+SPRYKER_PROJECT_DIR_OVERRIDE=""
+
+while getopts ":p:w:" opt; do
     case ${opt} in
         p)
             SPRYKER_PROJECT_NAME=$OPTARG
@@ -29,6 +32,14 @@ while getopts ":p:" opt; do
                 Console::error "${WARN}The project name cannot contain spaces.${NC}"
                 exit 1
             fi
+            ;;
+        w)
+            if [ ! -d "${OPTARG}" ]; then
+                Console::error "${WARN}-w expects an existing directory; got ${INFO}${OPTARG}${WARN}.${NC}"
+                exit 1
+            fi
+            SPRYKER_PROJECT_DIR_OVERRIDE="$(cd "${OPTARG}" && pwd -P)"
+            export SPRYKER_PROJECT_DIR="${SPRYKER_PROJECT_DIR_OVERRIDE}"
             ;;
         # Unknown option specified
         \?)
@@ -45,6 +56,11 @@ while getopts ":p:" opt; do
     esac
 done
 shift $((OPTIND - 1))
+
+# Bare form: `docker/sdk -w <path>` with no command re-points the running stack.
+if [ -n "${SPRYKER_PROJECT_DIR_OVERRIDE}" ] && [ "$#" -eq 0 ]; then
+    set -- sync resync
+fi
 
 System::Bootstrap
 

@@ -82,6 +82,9 @@ function sync() {
         logs|log)
             Mount::logs "${@}"
             ;;
+        resync)
+            Mount::Mutagen::resyncSource
+            ;;
         *)
             Console::error "Unknown sync command: ${command}"
             return 1
@@ -111,6 +114,10 @@ function Mount::Mutagen::beforeUp() {
             if [ "${sessionStatus}" == 'Halted' ] || [ "${sessionStatus}" == 'Disconnected' ]; then
                 Console::verbose "${INFO}Terminating unhealthy sync session (status: ${sessionStatus})${NC}"
                 terminateMutagenSessionsWithObsoleteDockerId
+            elif ! Mount::Mutagen::sessionAlphaMatches "${SPRYKER_SYNC_SESSION_NAME}"; then
+                Console::verbose "${INFO}Terminating sync session - alpha path differs from requested source${NC}"
+                terminateMutagenSessionsWithObsoleteDockerId
+                docker run -i --rm -v "${SPRYKER_SYNC_VOLUME}:/data" busybox find /data/ ! -path /data/ -delete >/dev/null 2>&1 || true
             else
                 Console::verbose "${INFO}Keeping existing sync session (status: ${sessionStatus})${NC}"
                 return 0
@@ -241,8 +248,8 @@ function Mount::Mutagen::createSyncSession() {
     fi
     
     Console::verbose::start "${INFO}Creating mutagen sync session${NC}"
-    
-    local projectPath="$(pwd)"
+
+    local projectPath="${SPRYKER_PROJECT_DIR:-$(pwd)}"
     local targetContainer=$(Mount::Mutagen::findTargetContainer)
     
     if [ -z "${targetContainer}" ]; then
@@ -351,24 +358,114 @@ function Mount::Mutagen::resumeSessionIfPaused() {
 
 function Mount::Mutagen::findAndResumePausedSession() {
     if [ -n "${SPRYKER_SYNC_SESSION_NAME}" ]; then
-        if Mount::Mutagen::resumeSessionIfPaused "${SPRYKER_SYNC_SESSION_NAME}"; then
-            return 0
+        if Mount::Mutagen::sessionAlphaMatches "${SPRYKER_SYNC_SESSION_NAME}"; then
+            if Mount::Mutagen::resumeSessionIfPaused "${SPRYKER_SYNC_SESSION_NAME}"; then
+                return 0
+            fi
+        elif Mount::Mutagen::sessionExists "${SPRYKER_SYNC_SESSION_NAME}"; then
+            Console::verbose "${INFO}Paused session '${SPRYKER_SYNC_SESSION_NAME}' has stale alpha path; terminating${NC}"
+            mutagen sync terminate "${SPRYKER_SYNC_SESSION_NAME}" >/dev/null 2>&1 || true
         fi
     fi
-    
+
     local projectPrefix="${SPRYKER_DOCKER_PREFIX:-spryker}"
     local pausedSessions=$(mutagen sync list 2>/dev/null | grep -B 1 'Status:.*\[Paused\]' | grep 'Name:' | awk '{print $2}' || echo '')
-    
+
     for sessionName in ${pausedSessions}; do
         if echo "${sessionName}" | grep -q "${projectPrefix}.*codebase"; then
-            Console::verbose "${INFO}Found paused session matching project: ${sessionName}${NC}"
-            if Mount::Mutagen::resumeSessionIfPaused "${sessionName}"; then
-                return 0
+            if Mount::Mutagen::sessionAlphaMatches "${sessionName}"; then
+                Console::verbose "${INFO}Found paused session matching project and alpha: ${sessionName}${NC}"
+                if Mount::Mutagen::resumeSessionIfPaused "${sessionName}"; then
+                    return 0
+                fi
+            else
+                Console::verbose "${INFO}Paused session ${sessionName} has stale alpha path; terminating${NC}"
+                mutagen sync terminate "${sessionName}" >/dev/null 2>&1 || true
             fi
         fi
     done
-    
+
     return 1
+}
+
+function Mount::Mutagen::resolveAlphaPath() {
+    local p="${1}"
+    if [ -d "${p}" ]; then
+        (cd "${p}" && pwd -P)
+    else
+        echo "${p}"
+    fi
+}
+
+function Mount::Mutagen::getSessionAlpha() {
+    local sessionName="${1}"
+    [ -z "${sessionName}" ] && return 0
+
+    mutagen sync list "${sessionName}" 2>/dev/null | awk '
+        /^Alpha:$/ { in_alpha=1; next }
+        /^Beta:/   { in_alpha=0 }
+        in_alpha && /URL:/ {
+            sub(/^[[:space:]]+/, "")
+            sub(/^URL:[[:space:]]*/, "")
+            print
+            exit
+        }
+    '
+}
+
+function Mount::Mutagen::sessionAlphaMatches() {
+    local sessionName="${1}"
+    [ -z "${sessionName}" ] && return 0
+
+    local currentAlpha
+    currentAlpha=$(Mount::Mutagen::getSessionAlpha "${sessionName}")
+
+    if [ -z "${currentAlpha}" ]; then
+        # Session not found or alpha unparsable: treat as match (backward compatible).
+        return 0
+    fi
+
+    local requestedPath="${SPRYKER_PROJECT_DIR:-$(pwd)}"
+    local resolvedAlpha
+    local resolvedRequested
+    resolvedAlpha="$(Mount::Mutagen::resolveAlphaPath "${currentAlpha}")"
+    resolvedRequested="$(Mount::Mutagen::resolveAlphaPath "${requestedPath}")"
+
+    [ "${resolvedAlpha%/}" = "${resolvedRequested%/}" ]
+}
+
+function Mount::Mutagen::resyncSource() {
+    Mount::Mutagen::ensureDaemonRunning
+
+    local targetContainer
+    targetContainer=$(Mount::Mutagen::findTargetContainer)
+    if [ -z "${targetContainer}" ]; then
+        Console::error "No running containers found. Start the stack first: docker/sdk up"
+        return 1
+    fi
+
+    local requestedPath="${SPRYKER_PROJECT_DIR:-$(pwd)}"
+
+    if Mount::Mutagen::sessionExists; then
+        if Mount::Mutagen::sessionAlphaMatches "${SPRYKER_SYNC_SESSION_NAME}"; then
+            Console::info "Mutagen alpha already points at ${requestedPath} - nothing to do."
+            return 0
+        fi
+        Console::verbose "${INFO}Terminating existing sync session before re-pointing alpha${NC}"
+        mutagen sync terminate "${SPRYKER_SYNC_SESSION_NAME}" >/dev/null 2>&1 || true
+        docker run -i --rm -v "${SPRYKER_SYNC_VOLUME}:/data" busybox find /data/ ! -path /data/ -delete >/dev/null 2>&1 || true
+    fi
+
+    if ! Mount::Mutagen::createSyncSession; then
+        Console::error "Failed to create sync session against ${requestedPath}."
+        return 1
+    fi
+
+    Mount::Mutagen::waitForSessionReady
+    Mount::Mutagen::runWithTimeout 60 mutagen sync flush "${SPRYKER_SYNC_SESSION_NAME}" >/dev/null 2>&1 || true
+
+    Console::info "Switched stack to ${requestedPath}. nginx/php-fpm are the same containers - browser will reflect the new code once mutagen finishes the initial reconcile."
+    return 0
 }
 
 function Mount::Mutagen::afterRun() {
