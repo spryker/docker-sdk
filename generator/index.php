@@ -1422,6 +1422,8 @@ function buildSecrets(string $deploymentDir): array
     $data['SPRYKER_PRODUCT_CONFIGURATOR_ENCRYPTION_KEY'] = generateToken(10);
     $data['SPRYKER_PRODUCT_CONFIGURATOR_HEX_INITIALIZATION_VECTOR'] = generateRandomHex(16);
     $data['SPRYKER_CUSTOMER_REMEMBER_ME_SECRET'] = generateToken(10);
+    $data['SPRYKER_CONFIGURATION_ENCRYPTION_KEY'] = generateRandomHex(32);
+    $data['SPRYKER_CONFIGURATION_ENCRYPTION_INIT_VECTOR'] = generateRandomHex(16);
 
     return $data;
 }
