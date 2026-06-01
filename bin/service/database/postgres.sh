@@ -123,5 +123,21 @@ function Database::init() {
 
             done
         fi
+
+        if [ -n "${SPRYKER_DB_NAME_STORAGE}" ]; then
+            psql -lqt \
+                -h "${SPRYKER_DB_HOST_STORAGE}" \
+                -U "${SPRYKER_DB_ROOT_USERNAME}" |
+                grep "${SPRYKER_DB_NAME_STORAGE}" >/dev/null 2>&1 ||
+                psql \
+                    -h "${SPRYKER_DB_HOST_STORAGE}" \
+                    -U "${SPRYKER_DB_ROOT_USERNAME}" \
+                    -tc "CREATE DATABASE \"${SPRYKER_DB_NAME_STORAGE}\" OWNER = \"${SPRYKER_DB_USERNAME_STORAGE}\" ENCODING = 'UTF-8' LC_COLLATE='en_US.UTF-8' LC_CTYPE='en_US.UTF-8' CONNECTION LIMIT=-1 TEMPLATE=\"template0\";"
+
+            psql \
+                -h "${SPRYKER_DB_HOST_STORAGE}" \
+                -U "${SPRYKER_DB_ROOT_USERNAME}" \
+                -tc "GRANT ALL PRIVILEGES ON DATABASE \"${SPRYKER_DB_NAME_STORAGE}\" TO \"${SPRYKER_DB_ROOT_USERNAME}\""
+        fi
 EOF
 }

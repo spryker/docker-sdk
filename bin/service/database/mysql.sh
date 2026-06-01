@@ -139,5 +139,19 @@ function Database::init() {
               fi
             done
         fi
+
+        if [ -n "${SPRYKER_DB_NAME_STORAGE}" ]; then
+            if echo "${DB_VERSION}" | grep -qE "^8\.[0-9]|^9\.[0-9]"; then
+                ${DB_CLIENT} \
+                    -h "${SPRYKER_DB_HOST_STORAGE}" --skip-ssl \
+                    -u root \
+                    -e "CREATE DATABASE IF NOT EXISTS \`${SPRYKER_DB_NAME_STORAGE}\` CHARACTER SET \"${SPRYKER_DB_CHARACTER_SET}\" COLLATE \"${SPRYKER_DB_COLLATE}\"; CREATE USER IF NOT EXISTS \"${SPRYKER_DB_USERNAME_STORAGE}\"@\"%\" IDENTIFIED WITH mysql_native_password BY \"${SPRYKER_DB_PASSWORD_STORAGE}\"; GRANT ALL PRIVILEGES ON \`${SPRYKER_DB_NAME_STORAGE}\`.* TO \"${SPRYKER_DB_USERNAME_STORAGE}\"@\"%\" WITH GRANT OPTION;"
+            else
+                ${DB_CLIENT} \
+                    -h "${SPRYKER_DB_HOST_STORAGE}" --skip-ssl \
+                    -u root \
+                    -e "CREATE DATABASE IF NOT EXISTS \`${SPRYKER_DB_NAME_STORAGE}\` CHARACTER SET \"${SPRYKER_DB_CHARACTER_SET}\" COLLATE \"${SPRYKER_DB_COLLATE}\"; GRANT ALL PRIVILEGES ON \`${SPRYKER_DB_NAME_STORAGE}\`.* TO \"${SPRYKER_DB_USERNAME_STORAGE}\"@\"%\" IDENTIFIED BY \"${SPRYKER_DB_PASSWORD_STORAGE}\" WITH GRANT OPTION;"
+            fi
+        fi
 EOF
 }
