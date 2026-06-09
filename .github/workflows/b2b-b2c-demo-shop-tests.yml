@@ -79,8 +79,8 @@ jobs:
       - name: Run script
         run: |
           cd ../demo-shop
-          docker-sdk/sdk boot .github/deploy/deploy.ci.acceptance.mariadb.yml -v
-          docker-sdk/sdk up -t -v
+          docker/sdk boot .github/deploy/deploy.ci.acceptance.mariadb.yml
+          docker/sdk up -t
 
       - name: Run Acceptance Tests
         run: |
