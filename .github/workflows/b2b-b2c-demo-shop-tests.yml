@@ -30,7 +30,7 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Clone demo shop
-        run: cd ../ && git clone --depth=3 --branch=master ${{ matrix.repo }} demo-shop && cp -R docker-sdk demo-shop
+        run: cd ../ && git clone --depth=1 --branch=master ${{ matrix.repo }} demo-shop && cp -R docker-sdk demo-shop
 
       - name: Provide env variables
         run: |
@@ -67,7 +67,7 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Clone demo shop
-        run: cd ../ && git clone --depth=3 --branch=master ${{ matrix.repo }} demo-shop && cp -R docker-sdk demo-shop
+        run: cd ../ && git clone --depth=1 --branch=master ${{ matrix.repo }} demo-shop && cp -R docker-sdk demo-shop
 
       - name: Provide env variables
         run: |
