@@ -76,9 +76,16 @@ jobs:
           export SPRYKER_CURRENT_REGION=EU
           export DYNAMIC_STORE_MODE=true
 
-      - name: Run script
+      - name: Prepare
         run: |
           cd ../demo-shop
+
+      - uses: ramsey/composer-install@v3
+        with:
+          composer-options: "-q --ignore-platform-reqs --optimize-autoloader --no-interaction --prefer-install=auto"
+
+      - name: Run
+        run: |
           docker-sdk/sdk boot .github/deploy/deploy.ci.acceptance.mariadb.yml
           docker-sdk/sdk up -t
 
