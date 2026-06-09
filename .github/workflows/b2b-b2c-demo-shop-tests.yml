@@ -35,9 +35,9 @@ jobs:
       - name: Provide env variables
         run: |
           export SPRYKER_PLATFORM_IMAGE=${{ matrix.platform-image}}
-          export PROGRESS_TYPE: plain
-          export SPRYKER_CURRENT_REGION: EU
-          export DYNAMIC_STORE_MODE: true
+          export PROGRESS_TYPE=plain
+          export SPRYKER_CURRENT_REGION=EU
+          export DYNAMIC_STORE_MODE=true
 
       - name: Run script
         run: |
@@ -72,9 +72,9 @@ jobs:
       - name: Provide env variables
         run: |
           export SPRYKER_PLATFORM_IMAGE=${{ matrix.platform-image}}
-          export PROGRESS_TYPE: plain
-          export SPRYKER_CURRENT_REGION: EU
-          export DYNAMIC_STORE_MODE: true
+          export PROGRESS_TYPE=plain
+          export SPRYKER_CURRENT_REGION=EU
+          export DYNAMIC_STORE_MODE=true
 
       - name: Run script
         run: |
