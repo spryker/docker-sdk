@@ -79,15 +79,15 @@ jobs:
       - name: Run script
         run: |
           cd ../demo-shop
-          docker/sdk boot .github/deploy/deploy.ci.acceptance.mariadb.yml
-          docker/sdk up -t
+          docker-sdk/sdk boot .github/deploy/deploy.ci.acceptance.mariadb.yml
+          docker-sdk/sdk up -t
 
       - name: Run Acceptance Tests
         run: |
-            docker/sdk testing codecept fixtures
-            docker/sdk testing composer dump-autoload -o -a --apcu -q
+            docker-sdk/sdk testing codecept fixtures
+            docker-sdk/sdk testing composer dump-autoload -o -a --apcu -q
             echo "console queue:worker:start --stop-when-empty"
-            docker/sdk testing console queue:worker:start --stop-when-empty
+            docker-sdk/sdk testing console queue:worker:start --stop-when-empty
 
       - name: Run API Tests
         run: |
