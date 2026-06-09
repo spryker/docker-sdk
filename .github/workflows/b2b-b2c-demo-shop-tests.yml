@@ -35,8 +35,9 @@ jobs:
       - name: Provide env variables
         run: |
           export SPRYKER_PLATFORM_IMAGE=${{ matrix.platform-image}}
-          export APPLICATION_ENV=${{ matrix.env }}
-          export APPLICATION_STORE=${{ matrix.application-store }}
+          export PROGRESS_TYPE: plain
+          export SPRYKER_CURRENT_REGION: EU
+          export DYNAMIC_STORE_MODE: true
 
       - name: Run script
         run: |
@@ -51,7 +52,6 @@ jobs:
       fail-fast: false
       matrix:
         platform-image: [
-          'spryker/php:8.3',
           'spryker/php:8.3',
           'spryker/php:8.4'
         ]
@@ -72,6 +72,9 @@ jobs:
       - name: Provide env variables
         run: |
           export SPRYKER_PLATFORM_IMAGE=${{ matrix.platform-image}}
+          export PROGRESS_TYPE: plain
+          export SPRYKER_CURRENT_REGION: EU
+          export DYNAMIC_STORE_MODE: true
 
       - name: Run script
         run: |
