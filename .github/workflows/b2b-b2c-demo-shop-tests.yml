@@ -1,10 +1,10 @@
-name: B2B + B2C Demoshop tests
+name: Spryker B2B Marketplace Demo Shop
 on:
   - push
 
 env:
   SPRYKER_TESTING_ENABLED: 1
-  PROJECT: suite
+  PROJECT: b2b-demo-marketplace
 
 jobs:
   functional_test:
@@ -14,16 +14,15 @@ jobs:
       matrix:
         platform-image: [
           'spryker/php:8.3',
-          'spryker/php:8.3'
+          'spryker/php:8.4'
+
         ]
         application-store: [ 'DE' ]
         env: [
           'ci.mysql',
-          'ci.pgsql'
         ]
         repo: [
-          'https://github.com/spryker-shop/b2b-demo-shop.git',
-          'https://github.com/spryker-shop/b2c-demo-shop.git'
+          'https://github.com/spryker-shop/b2b-demo-marketplace.git'
         ]
     name: "Function Tests(Image: ${{ matrix.platform-image }}, Environment: ${{ matrix.env }}, Repo: ${{ matrix.repo }})"
     steps:
@@ -42,29 +41,27 @@ jobs:
       - name: Run script
         run: |
           cd ../demo-shop
-          docker-sdk/sdk boot deploy.ci.functional.mariadb.yml -v
+          docker-sdk/sdk boot .github/deploy/deploy.ci.functional.mariadb.yml -v
           docker-sdk/sdk up -t -v
-          docker-sdk/sdk testing codecept run -c codeception.functional.yml
+          docker-sdk/sdk testing codecept run -c tests/codeception.ci.functional.yml
 
-  glue_test:
+  acceptance_test:
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
         platform-image: [
           'spryker/php:8.3',
-          'spryker/php:8.3'
+          'spryker/php:8.3',
+          'spryker/php:8.4'
         ]
-        application-store: [ 'DE' ]
         env: [
-          'ci.mysql',
-          'ci.pgsql'
+          'ci.mysql'
         ]
         repo: [
-          'https://github.com/spryker-shop/b2b-demo-shop.git',
-          'https://github.com/spryker-shop/b2c-demo-shop.git'
+          'https://github.com/spryker-shop/b2b-demo-marketplace.git'
         ]
-    name: "Glue Tests(Image: ${{ matrix.platform-image }}, Environment: ${{ matrix.env }}, Repo: ${{ matrix.repo }})"
+    name: "Acceptance Tests(Image: ${{ matrix.platform-image }}, Environment: ${{ matrix.env }}, Repo: ${{ matrix.repo }})"
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -75,14 +72,20 @@ jobs:
       - name: Provide env variables
         run: |
           export SPRYKER_PLATFORM_IMAGE=${{ matrix.platform-image}}
-          export APPLICATION_ENV=${{ matrix.env }}
-          export APPLICATION_STORE=${{ matrix.application-store }}
 
       - name: Run script
         run: |
           cd ../demo-shop
-          docker-sdk/sdk boot deploy.ci.api.yml -v
+          docker-sdk/sdk boot .github/deploy/deploy.ci.acceptance.mariadb.yml -v
           docker-sdk/sdk up -t -v
-          docker-sdk/sdk testing codecept fixtures
-          docker-sdk/sdk testing console queue:worker:start --stop-when-empty
-          docker-sdk/sdk testing codecept run -c codeception.api.yml
+
+      - name: Run Acceptance Tests
+        run: |
+            docker/sdk testing codecept fixtures
+            docker/sdk testing composer dump-autoload -o -a --apcu -q
+            echo "console queue:worker:start --stop-when-empty"
+            docker/sdk testing console queue:worker:start --stop-when-empty
+
+      - name: Run API Tests
+        run: |
+          docker/sdk testing codecept run -c tests/codeception.api.yml
