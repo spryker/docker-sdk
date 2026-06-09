@@ -102,4 +102,4 @@ jobs:
       - name: Run API Tests
         working-directory: ../demo-shop
         run: |
-          docker/sdk testing codecept run -c tests/codeception.api.yml
+          docker-sdk/sdk testing codecept run -c tests/codeception.api.yml
