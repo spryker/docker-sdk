@@ -82,14 +82,17 @@ jobs:
 
       - uses: ramsey/composer-install@v3
         with:
+          working-directory: ../demo-shop
           composer-options: "-q --ignore-platform-reqs --optimize-autoloader --no-interaction --prefer-install=auto"
 
       - name: Run
+        working-directory: ../demo-shop
         run: |
           docker-sdk/sdk boot .github/deploy/deploy.ci.acceptance.mariadb.yml
           docker-sdk/sdk up -t
 
       - name: Run Acceptance Tests
+        working-directory: ../demo-shop
         run: |
             docker-sdk/sdk testing codecept fixtures
             docker-sdk/sdk testing composer dump-autoload -o -a --apcu -q
@@ -97,5 +100,6 @@ jobs:
             docker-sdk/sdk testing console queue:worker:start --stop-when-empty
 
       - name: Run API Tests
+        working-directory: ../demo-shop
         run: |
           docker/sdk testing codecept run -c tests/codeception.api.yml
