@@ -23,7 +23,7 @@ function Mount::logs() {
         Console::error "Try running: docker/sdk boot"
         return 1
     fi
-    
+
     mutagen sync monitor "${SPRYKER_SYNC_SESSION_NAME}"
 }
 
@@ -54,17 +54,17 @@ function sync() {
             ;;
         start|'')
             Mount::Mutagen::ensureDaemonRunning
-            
+
             if Mount::Mutagen::findAndResumePausedSession; then
                 Console::verbose "${INFO}Mutagen sync session resumed${NC}"
                 return 0
             fi
-            
+
             if [ -n "${SPRYKER_SYNC_SESSION_NAME}" ] && Mount::Mutagen::sessionExists "${SPRYKER_SYNC_SESSION_NAME}"; then
                 Console::verbose "${INFO}Mutagen sync session already exists${NC}"
                 return 0
             fi
-            
+
             local targetContainer=$(Mount::Mutagen::findTargetContainer)
             if [ -n "${targetContainer}" ]; then
                 if Mount::Mutagen::createSyncSession; then
@@ -166,7 +166,7 @@ function Mount::Mutagen::runWithTimeout() {
     local timeoutSeconds="${1}"
     shift
     local timeoutCmd=$(Mount::Mutagen::getTimeoutCmd)
-    
+
     if [ -n "${timeoutCmd}" ]; then
         ${timeoutCmd} "${timeoutSeconds}" "$@"
     else
@@ -180,7 +180,7 @@ function Mount::Mutagen::ensureDaemonRunning() {
         mutagen daemon start >/dev/null 2>&1 || true
         sleep 1
     fi
-    
+
     if ! Mount::Mutagen::runWithTimeout 2 mutagen sync list >/dev/null 2>&1; then
         mutagen daemon stop >/dev/null 2>&1 || true
         sleep 1
@@ -193,15 +193,15 @@ function Mount::Mutagen::ensureDaemonRunning() {
 function Mount::Mutagen::buildIgnoreArgs() {
     local deploymentDir="${DEPLOYMENT_PATH:-docker/deployment/default}"
     local ignoreFile="${deploymentDir}/.dockersyncignore"
-    
+
     if [ ! -f "${ignoreFile}" ]; then
         ignoreFile=".dockersyncignore"
     fi
-    
+
     local defaultIgnores=".git docker data/*/cache .docker-sync .idea .project *.log node_modules .composer .npm vendor .DS_Store"
-    
+
     local ignorePatterns=""
-    
+
     if [ -f "${ignoreFile}" ]; then
         while IFS= read -r line || [ -n "${line}" ]; do
             line=$(echo "${line}" | sed 's/#.*$//' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
@@ -211,51 +211,71 @@ function Mount::Mutagen::buildIgnoreArgs() {
     else
         ignorePatterns="${defaultIgnores}"
     fi
-    
+
     local ignoreArgs=""
     for pattern in ${ignorePatterns}; do
         ignoreArgs="${ignoreArgs} --ignore=\"${pattern}\""
     done
     ignoreArgs="${ignoreArgs} --ignore-vcs"
-    
+
     echo "${ignoreArgs}"
 }
 
 function Mount::Mutagen::findTargetContainer() {
-    local volumeName="${SPRYKER_SYNC_VOLUME}"
     local targetContainer=$(docker ps --filter "name=${SPRYKER_DOCKER_PREFIX}_cli_" --filter "status=running" --format "{{.Names}}" | grep -v "ssh_relay" | head -n1)
-    
-    if [ -z "${targetContainer}" ]; then
-        targetContainer=$(docker ps --filter "volume=${volumeName}" --filter "status=running" --format "{{.Names}}" | grep -v "ssh_relay" | head -n1)
-    fi
-    
+
     echo "${targetContainer}"
+}
+
+function Mount::Mutagen::waitForCliContainer() {
+    local maxRetries="${1:-10}"
+    local retryDelay="${2:-2}"
+    local attempt=1
+    local cliContainer=""
+
+    while [ "${attempt}" -le "${maxRetries}" ]; do
+        cliContainer=$(Mount::Mutagen::findTargetContainer)
+
+        if [ -n "${cliContainer}" ]; then
+            echo "${cliContainer}"
+            return 0
+        fi
+
+        if [ "${attempt}" -lt "${maxRetries}" ]; then
+            Console::verbose "${INFO}CLI container not ready yet, waiting... (attempt ${attempt}/${maxRetries})${NC}"
+            sleep "${retryDelay}"
+        fi
+
+        attempt=$((attempt + 1))
+    done
+
+    return 1
 }
 
 function Mount::Mutagen::createSyncSession() {
     Mount::Mutagen::ensureDaemonRunning
-    
+
     if Mount::Mutagen::sessionExists; then
         Console::verbose "Mutagen sync session '${SPRYKER_SYNC_SESSION_NAME}' already exists."
         return 0
     fi
-    
+
     Console::verbose::start "${INFO}Creating mutagen sync session${NC}"
-    
+
     local projectPath="$(pwd)"
     local targetContainer=$(Mount::Mutagen::findTargetContainer)
-    
+
     if [ -z "${targetContainer}" ]; then
-        Console::error "No running container found with volume ${SPRYKER_SYNC_VOLUME}. Please ensure containers are running."
+        Console::error "No running CLI container found. Please ensure the CLI container is running."
         Console::end "[FAILED]"
         return 1
     fi
-    
+
     local containerPath="/data"
     local ignoreArgsStr=$(Mount::Mutagen::buildIgnoreArgs)
     local timeoutCmd=$(Mount::Mutagen::getTimeoutCmd)
     local createOutput
-    
+
     if [ -n "${timeoutCmd}" ]; then
         createOutput=$(eval "${timeoutCmd} 30 mutagen sync create --name=\"${SPRYKER_SYNC_SESSION_NAME}\" --default-file-mode=0666 --default-directory-mode=0777 --symlink-mode=posix-raw ${ignoreArgsStr} \"${projectPath}\" \"docker://${targetContainer}${containerPath}\"" 2>&1)
     else
@@ -263,7 +283,7 @@ function Mount::Mutagen::createSyncSession() {
         createOutput=$(eval "mutagen sync create --name=\"${SPRYKER_SYNC_SESSION_NAME}\" --default-file-mode=0666 --default-directory-mode=0777 --symlink-mode=posix-raw ${ignoreArgsStr} \"${projectPath}\" \"docker://${targetContainer}${containerPath}\"" 2>&1)
     fi
     local createExitCode=$?
-    
+
     if [ ${createExitCode} -eq 0 ]; then
         Console::end "[OK]"
     else
@@ -314,6 +334,12 @@ function Mount::Mutagen::waitForSessionReady() {
 }
 
 function Mount::Mutagen::afterCliReady() {
+    if ! Mount::Mutagen::waitForCliContainer 15 2 >/dev/null; then
+        Console::warn "CLI container did not become ready in time. Skipping mutagen sync session creation for now."
+        Console::warn "You can retry later with: docker/sdk sync start"
+        return 0
+    fi
+
     if ! Mount::Mutagen::createSyncSession; then
         Console::warn "Mutagen sync session creation failed or timed out. Boot will continue."
         Console::warn "You can manually create the session later or retry after fixing Mutagen issues."
@@ -329,23 +355,23 @@ function Mount::Mutagen::afterCliReady() {
 
 function Mount::Mutagen::resumeSessionIfPaused() {
     local sessionName="${1:-${SPRYKER_SYNC_SESSION_NAME}}"
-    
+
     if [ -z "${sessionName}" ]; then
         return 1
     fi
-    
+
     local sessionInfo=$(mutagen sync list "${sessionName}" 2>/dev/null || echo '')
     if [ -z "${sessionInfo}" ]; then
         return 1
     fi
-    
+
     local sessionStatus=$(echo "${sessionInfo}" | grep 'Status:' | awk '{print $2}' | tr -d '[]' || echo '')
     if [ "${sessionStatus}" = 'Paused' ]; then
         Console::verbose "${INFO}Resuming paused sync session: ${sessionName}${NC}"
         mutagen sync resume "${sessionName}" >/dev/null 2>&1 || true
         return 0
     fi
-    
+
     return 1
 }
 
@@ -355,10 +381,10 @@ function Mount::Mutagen::findAndResumePausedSession() {
             return 0
         fi
     fi
-    
+
     local projectPrefix="${SPRYKER_DOCKER_PREFIX:-spryker}"
     local pausedSessions=$(mutagen sync list 2>/dev/null | grep -B 1 'Status:.*\[Paused\]' | grep 'Name:' | awk '{print $2}' || echo '')
-    
+
     for sessionName in ${pausedSessions}; do
         if echo "${sessionName}" | grep -q "${projectPrefix}.*codebase"; then
             Console::verbose "${INFO}Found paused session matching project: ${sessionName}${NC}"
@@ -367,7 +393,7 @@ function Mount::Mutagen::findAndResumePausedSession() {
             fi
         fi
     done
-    
+
     return 1
 }
 
@@ -375,55 +401,53 @@ function Mount::Mutagen::afterRun() {
     if [ -z "${SPRYKER_SYNC_SESSION_NAME}" ]; then
         return 0
     fi
-    
+
     sleep 2
-    
+
     Mount::Mutagen::ensureDaemonRunning
-    
+
     if Mount::Mutagen::findAndResumePausedSession; then
         Console::verbose "${INFO}Sync session resumed successfully${NC}"
         return 0
     fi
-    
+
     if Mount::Mutagen::sessionExists; then
         Console::verbose "${INFO}Sync session already exists${NC}"
         return 0
     fi
-    
+
     local maxRetries=10
     local retryDelay=2
     local attempt=1
-    local targetContainer=""
-    
+
+    if ! Mount::Mutagen::waitForCliContainer "${maxRetries}" "${retryDelay}" >/dev/null; then
+        Console::verbose "${INFO}CLI container is not running yet. Mutagen sync session creation will be retried when CLI is started.${NC}"
+        return 0
+    fi
+
     Console::verbose "${INFO}Attempting to create mutagen sync session...${NC}"
-    
+
     while [ ${attempt} -le ${maxRetries} ]; do
-        targetContainer=$(Mount::Mutagen::findTargetContainer)
-        
-        if [ -n "${targetContainer}" ]; then
-            Console::verbose "${INFO}Found container: ${targetContainer}, creating sync session (attempt ${attempt}/${maxRetries})...${NC}"
-            if Mount::Mutagen::createSyncSession; then
-                sleep 1
-                if Mount::Mutagen::sessionExists; then
-                    Console::verbose "${INFO}Mutagen sync session created successfully${NC}"
-                    return 0
-                else
-                    Console::verbose "${INFO}Session creation reported success but session not found, retrying...${NC}"
-                fi
+        Console::verbose "${INFO}Found CLI container, creating sync session (attempt ${attempt}/${maxRetries})...${NC}"
+        if Mount::Mutagen::createSyncSession; then
+            sleep 1
+            if Mount::Mutagen::sessionExists; then
+                Console::verbose "${INFO}Mutagen sync session created successfully${NC}"
+                return 0
             else
-                Console::verbose "${INFO}Session creation failed, will retry...${NC}"
+                Console::verbose "${INFO}Session creation reported success but session not found, retrying...${NC}"
             fi
         else
-            Console::verbose "${INFO}Container not ready yet, waiting... (attempt ${attempt}/${maxRetries})${NC}"
+            Console::verbose "${INFO}Session creation failed, will retry...${NC}"
         fi
-        
+
         if [ ${attempt} -lt ${maxRetries} ]; then
             sleep ${retryDelay}
         fi
-        
+
         attempt=$((attempt + 1))
     done
-    
+
     Console::error "Mutagen sync session could not be created automatically after ${maxRetries} attempts."
     Console::error "This means files won't be synced to the container. Please run: docker/sdk sync start"
     return 1
@@ -432,7 +456,7 @@ function Mount::Mutagen::afterRun() {
 function Mount::Mutagen::afterDown() {
     Console::verbose "${INFO}Pruning file syncronization${NC}"
     docker volume rm "${SPRYKER_SYNC_VOLUME}" >/dev/null 2>&1 || true
-    
+
     if Mount::Mutagen::sessionExists; then
         mutagen sync terminate "${SPRYKER_SYNC_SESSION_NAME}" >/dev/null 2>&1 || true
     fi
@@ -440,11 +464,11 @@ function Mount::Mutagen::afterDown() {
 
 function Mount::Mutagen::afterStop() {
     Console::verbose "${INFO}Pausing sync and stopping mutagen daemon container${NC}"
-    
+
     if Mount::Mutagen::sessionExists; then
         mutagen sync pause "${SPRYKER_SYNC_SESSION_NAME}" >/dev/null 2>&1 || true
     fi
-    
+
     mutagen daemon stop >/dev/null 2>&1 || true
 }
 
