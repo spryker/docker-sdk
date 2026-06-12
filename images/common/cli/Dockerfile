@@ -23,15 +23,13 @@ RUN --mount=type=cache,id=aptlib,sharing=locked,target=/var/lib/apt \
      jq \
      ; fi'
 
-# Debian contains outdated Yarn package
-RUN --mount=type=cache,id=aptlib,sharing=locked,target=/var/lib/apt \
-    --mount=type=cache,id=aptcache,sharing=locked,target=/var/cache/apt \
-  bash -c 'if [ ! -z "$(which apt)" ]; then \
-     curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add - && \
-     echo "deb https://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources.list.d/yarn.list && \
-     apt update -y && apt install -y \
-     yarn \
-     ; fi'
+# Debian contains outdated Yarn package, so Yarn 1.x (classic) is installed via npm.
+# The parent image copies /usr/local/bin from the node image, which includes yarn
+# symlinks pointing to the never-copied /opt/yarn-* directory; the dangling links
+# must be removed first or npm refuses to create its own.
+RUN bash -c 'if [ ! -z "$(which apt)" ]; then \
+     rm -f /usr/local/bin/yarn /usr/local/bin/yarnpkg && \
+     npm install -g "yarn@1"; fi'
 
 RUN --mount=type=cache,id=apk,sharing=locked,target=/var/cache/apk mkdir -p /etc/apk && ln -vsf /var/cache/apk /etc/apk/cache && \
   bash -c 'if [ ! -z "$(which apk)" ]; then apk update && apk add \
