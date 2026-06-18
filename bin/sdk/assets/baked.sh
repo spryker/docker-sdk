@@ -75,6 +75,13 @@ function Assets::build() {
         shift || true
     fi
 
+    # Reusing prebuilt baked images: assets are already baked into the pulled
+    # frontend image, so there is nothing to build here.
+    if [ -z "${force}" ] && [ -n "${SPRYKER_DOCKER_REUSE_IMAGES}" ]; then
+        Console::verbose "${INFO}Skipping assets build (SPRYKER_DOCKER_REUSE_IMAGES set)${NC}"
+        return "${TRUE}"
+    fi
+
     if [ -z "${force}" ] && Assets::areBuilt; then
         return "${TRUE}"
     fi
