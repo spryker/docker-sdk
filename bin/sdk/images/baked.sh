@@ -14,6 +14,16 @@ function Images::_reuseImages() {
     [ -n "${SPRYKER_DOCKER_REUSE_IMAGES}" ]
 }
 
+# On reuse, only the per-application run_app tags (run_app:<tag>-<app>) that
+# compose references need creating from the pulled base image. The non-runtime
+# app/cli/pipeline/frontend images are not pulled, so the full tagApplications/
+# tagFrontend (which also tag those) must NOT run.
+function Images::_tagRunAppForReuse() {
+    for application in "${SPRYKER_APPLICATIONS[@]}"; do
+        Images::_tagByApp "${application}" "${SPRYKER_DOCKER_PREFIX}_run_app:${SPRYKER_DOCKER_TAG}"
+    done
+}
+
 function Images::buildApplication() {
     for arg in "${@}"; do
         case "${arg}" in
@@ -32,15 +42,14 @@ function Images::buildApplication() {
     if Images::_reuseImages \
         && Images::_imageExists "${SPRYKER_DOCKER_PREFIX}_run_app:${SPRYKER_DOCKER_TAG}" \
         && Images::_imageExists "${SPRYKER_DOCKER_PREFIX}_run_cli:${SPRYKER_DOCKER_TAG}"; then
-        # Skip the (expensive) in-place build, but still create the per-application
-        # tags (`*_run_app:<tag>-<app>`) that compose references — those are just
-        # `docker tag`s off the pulled base image.
+        # Skip the (expensive) in-place build. Only create the per-application
+        # run_app tags compose references — off the pulled base image.
         Console::verbose "${INFO}Reusing prebuilt application images (SPRYKER_DOCKER_REUSE_IMAGES set)${NC}"
+        Images::_tagRunAppForReuse
     else
         Images::_buildApp baked
+        Images::tagApplications "${SPRYKER_DOCKER_TAG}"
     fi
-
-    Images::tagApplications "${SPRYKER_DOCKER_TAG}"
 }
 
 function Images::buildFrontend() {
@@ -61,11 +70,12 @@ function Images::buildFrontend() {
     if Images::_reuseImages \
         && Images::_imageExists "${SPRYKER_DOCKER_PREFIX}_run_frontend:${SPRYKER_DOCKER_TAG}" \
         && Images::_imageExists "${SPRYKER_DOCKER_PREFIX}_gateway:${SPRYKER_DOCKER_TAG}"; then
+        # Nothing to tag: compose uses run_frontend:<tag> + gateway:<tag> directly,
+        # both already pulled.
         Console::verbose "${INFO}Reusing prebuilt frontend/gateway images (SPRYKER_DOCKER_REUSE_IMAGES set)${NC}"
     else
         Images::_buildFrontend baked
         Images::_buildGateway
+        Images::tagFrontend "${SPRYKER_DOCKER_TAG}"
     fi
-
-    Images::tagFrontend "${SPRYKER_DOCKER_TAG}"
 }
