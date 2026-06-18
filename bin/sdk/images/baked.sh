@@ -32,11 +32,14 @@ function Images::buildApplication() {
     if Images::_reuseImages \
         && Images::_imageExists "${SPRYKER_DOCKER_PREFIX}_run_app:${SPRYKER_DOCKER_TAG}" \
         && Images::_imageExists "${SPRYKER_DOCKER_PREFIX}_run_cli:${SPRYKER_DOCKER_TAG}"; then
+        # Skip the (expensive) in-place build, but still create the per-application
+        # tags (`*_run_app:<tag>-<app>`) that compose references — those are just
+        # `docker tag`s off the pulled base image.
         Console::verbose "${INFO}Reusing prebuilt application images (SPRYKER_DOCKER_REUSE_IMAGES set)${NC}"
-        return "${TRUE}"
+    else
+        Images::_buildApp baked
     fi
 
-    Images::_buildApp baked
     Images::tagApplications "${SPRYKER_DOCKER_TAG}"
 }
 
@@ -59,10 +62,10 @@ function Images::buildFrontend() {
         && Images::_imageExists "${SPRYKER_DOCKER_PREFIX}_run_frontend:${SPRYKER_DOCKER_TAG}" \
         && Images::_imageExists "${SPRYKER_DOCKER_PREFIX}_gateway:${SPRYKER_DOCKER_TAG}"; then
         Console::verbose "${INFO}Reusing prebuilt frontend/gateway images (SPRYKER_DOCKER_REUSE_IMAGES set)${NC}"
-        return "${TRUE}"
+    else
+        Images::_buildFrontend baked
+        Images::_buildGateway
     fi
 
-    Images::_buildFrontend baked
-    Images::_buildGateway
     Images::tagFrontend "${SPRYKER_DOCKER_TAG}"
 }
