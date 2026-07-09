@@ -164,6 +164,8 @@ function Images::_buildApp() {
             -f "${DEPLOYMENT_PATH}/images/common/services/jenkins/export/Dockerfile" \
             --progress="${PROGRESS_TYPE}" \
             --build-arg "SPRYKER_PARENT_IMAGE=${appImage}" \
+            --build-arg "SPRYKER_JENKINS_BOILERPLATE_VERSION=${SPRYKER_JENKINS_BOILERPLATE_VERSION:-latest}" \
+            --build-arg "SPRYKER_JENKINS_OPENJDK_VERSION=${SPRYKER_JENKINS_OPENJDK_VERSION:-17}" \
             "${DEPLOYMENT_PATH}/" 1>&2
     fi
 
