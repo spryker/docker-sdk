@@ -20,6 +20,7 @@
     "minimist": ">=1.2.6"
   },
   "overrides": {
-    "micromatch": "4.0.8"
+    "micromatch": "4.0.8",
+    "protobufjs": "^7.6.4"
   }
 }
