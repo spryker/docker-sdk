@@ -90,6 +90,8 @@ For contribution guidelines, see [Code contribution guide](https://docs.spryker.
 |                 |                 | 7.6           | &check;     |                                    |
 |                 |                 | 7.10          | &check;     |                                    |
 |                 | opensearch      | 1.3           | &check;     |                                    |
+|                 |                 | 2.19          | &check;     |                                    |
+|                 |                 | 3.5           | &check;     |                                    |
 | scheduler       | jenkins         | 2.176         |             |                                    |
 |                 |                 | 2.305         | &check;     |                                    |
 |                 |                 | 2.324         | &check;     |                                    |
