@@ -20,13 +20,13 @@ RUN bash -c 'if [ ! -z "$(which apk)" ]; then apk --no-cache add \
     openjdk21 \
     ttf-dejavu \
     gettext \
-    jq && \
+    jq \
+    ca-certificates \
+    java-cacerts && \
+    update-ca-certificates && \
     ln -sfn "/usr/lib/jvm/java-${SPRYKER_JENKINS_OPENJDK_VERSION}-openjdk" /usr/lib/jvm/default-jvm && \
     mkdir -p /envs \
     ; fi'
-
-# Populate the Java CA truststore (empty by default on the Alpine base)
-RUN bash -c 'if [ ! -z "$(which apk)" ]; then apk update && apk add --no-cache ca-certificates java-cacerts && update-ca-certificates; fi'
 
 # Install packages on Debian
 RUN bash -c 'if [ ! -z "$(which apt)" ]; then apt update -y && \
