@@ -32,6 +32,9 @@ RUN bash -c 'if [ ! -z "$(which apk)" ]; then apk --no-cache add \
     mkdir -p /envs \
     ; fi'
 
+# Populate the Java CA truststore (empty by default on the Alpine base)
+RUN bash -c 'if [ ! -z "$(which apk)" ]; then apk update && apk add --no-cache ca-certificates java-cacerts && update-ca-certificates; fi'
+
 # Install packages on Debian
 RUN bash -c 'if [ ! -z "$(which apt)" ]; then apt update -y && \
 	apt-get install -y software-properties-common gnupg curl && \
