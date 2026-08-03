@@ -1,0 +1,20 @@
+  {{ serviceName }}:
+    image: mysql:8.4
+    networks:
+      - private
+    labels:
+      'spryker.app.name': database
+      'spryker.app.type': services
+      'spryker.project': ${SPRYKER_DOCKER_PREFIX}:${SPRYKER_DOCKER_TAG}
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "--silent"]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+    environment:
+      MYSQL_ROOT_PASSWORD: "{{ serviceData['root']['password'] }}"
+      LANG: C.UTF-8
+    volumes:
+      - {{ serviceName }}-{{ serviceData['engine'] }}-data:/var/lib/mysql:rw
+      - ./${DEPLOYMENT_PATH}/context/mysql/8.4/my.cnf:/etc/mysql/my.cnf:ro
+      - ./${DEPLOYMENT_PATH}/context/mysql/8.4/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d:ro

@@ -28,3 +28,29 @@ datasources:
           httpMethod: GET
           serviceMap:
               datasourceUid: prometheus
+          tracesToLogs:
+              datasourceUid: loki          # UID Loki datasource
+              customQuery: false
+              filterByTraceID: true
+              filterBySpanID: false
+              spanStartTimeShift: "-1m"
+              spanEndTimeShift: "1m"
+              lokiSearch: true
+    - name: Loki
+      type: loki
+      uid: loki
+      access: proxy
+      orgId: 1
+      url: http://loki:3100
+      basicAuth: false
+      isDefault: false
+      version: 1
+      editable: false
+      jsonData:
+          httpMethod: GET
+          # Logs → Trace: expected that log contains trace_id=...
+          derivedFields:
+              - name: trace_id
+                matcherRegex: 'trace_id="?([0-9a-fA-F]{32})"?'
+                datasourceUid: tempo
+                url: '$${__value.raw}'

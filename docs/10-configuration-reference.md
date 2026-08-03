@@ -12,7 +12,7 @@ To configure Opcache, adjust `deploy.*.yml` as follows:
 
 ```yaml
 image:
-    tag: spryker/php:7.3
+    tag: spryker/php:8.3
     php:
         ini:
             "opcache.revalidate_freq": 0
@@ -27,7 +27,7 @@ To define a memory limit, adjust `deploy.*.yml` as follows:
 
 ```yaml
 image:
-    tag: spryker/php:7.3
+    tag: spryker/php:8.3
     php:
         ini:
             "memory_limit": 512m
@@ -39,7 +39,7 @@ To provide custom environment variables to Spryker applications, adjust `deploy.
 
 ```yaml
 image:
-    tag: spryker/php:7.3
+    tag: spryker/php:8.3
     environment:
         MY_CUSTOM_ENVIRONMENT_VARIABLE: 1
         ...

@@ -9,16 +9,27 @@ popd >/dev/null
 IS_TERMINAL=$(tty >/dev/null && [ -z "${COMMAND}" ] && echo '1' || echo '')
 
 # shellcheck disable=SC1090
+function getTestingEnvFile() {
+    local store="${APPLICATION_STORE:-$SPRYKER_CURRENT_REGION}"
+    if [ -n "${store}" ]; then
+        local storeTestingEnv="${HOME}/env/$(echo "${store}" | tr '[:upper:]' '[:lower:]').testing.env"
+        if [ -f "${storeTestingEnv}" ]; then
+            echo "${storeTestingEnv}"
+            return
+        fi
+    fi
+    echo "${HOME}/env/testing.env"
+}
+
 function importEnvFiles() {
     set -a
     if [ -n "${SPRYKER_TESTING_ENABLE_FOR_CLI}" ]; then
-        source "${HOME}/env/testing.env"
+        source "$(getTestingEnvFile)"
     fi
     source "$(getEnvFile)"
     if [ -n "${SPRYKER_TESTING_ENABLE_FOR_CLI}" ]; then
-        source "${HOME}/env/testing.env"
+        source "$(getTestingEnvFile)"
     fi
-    # Alternatively we can copy env and source it again
     set +a
 
     export SPRYKER_LOG_STDOUT=/tmp/stdout

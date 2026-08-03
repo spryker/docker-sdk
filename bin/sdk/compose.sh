@@ -73,6 +73,9 @@ function Compose::exec() {
 
 function Compose::verboseMode() {
     local output=''
+    if [ -n "${SPRYKER_QUIET_MODE}" ]; then
+        return
+    fi
     if [ "${SPRYKER_FILE_MODE}" == 'mount' ]; then
         output+="  DEVELOPMENT MODE  "
     fi
@@ -146,6 +149,7 @@ function Compose::up() {
     Assets::build ${noCache} ${doAssets}
     Images::buildFrontend ${noCache} ${doBuild}
     Compose::run --build
+    Compose::ensureCliRunning
     Compose::command restart frontend gateway
 
     Registry::Flow::runAfterUp
@@ -192,6 +196,9 @@ function Compose::restart() {
 function Compose::stop() {
     Console::verbose "${INFO}Stopping all containers${NC}"
     Compose::command stop
+    if Service::isServiceExist mutagen; then
+        Compose::command stop mutagen
+    fi
     Registry::Flow::runAfterStop
 }
 

@@ -1,8 +1,10 @@
 # syntax = docker/dockerfile:experimental
 ARG SPRYKER_PARENT_IMAGE
+ARG SPRYKER_JENKINS_BOILERPLATE_VERSION=latest
 
-FROM spryker/jenkins-boilerplate:latest as spryker-jenkins-boilerplate
+FROM spryker/jenkins-boilerplate:${SPRYKER_JENKINS_BOILERPLATE_VERSION} as spryker-jenkins-boilerplate
 FROM ${SPRYKER_PARENT_IMAGE}  as spryker_jenkins
+ARG SPRYKER_JENKINS_OPENJDK_VERSION=17
 EXPOSE 8080
 COPY context/jenkins/export/jenkins.docker.xml.twig ./config/Zed/cronjobs/jenkins.docker.xml.twig
 
@@ -15,25 +17,34 @@ RUN bash -c 'if [ ! -z "$(which apk)" ]; then apk --no-cache add \
 	curl \
     bash \
     openjdk17 \
+    openjdk21 \
     ttf-dejavu \
     gettext \
-    jq && \
+    jq \
+    ca-certificates \
+    java-cacerts && \
+    update-ca-certificates && \
+    ln -sfn "/usr/lib/jvm/java-${SPRYKER_JENKINS_OPENJDK_VERSION}-openjdk" /usr/lib/jvm/default-jvm && \
     mkdir -p /envs \
     ; fi'
 
 # Install packages on Debian
 RUN bash -c 'if [ ! -z "$(which apt)" ]; then apt update -y && \
-	apt-get install -y software-properties-common && \
+	apt-get install -y software-properties-common gnupg curl && \
 	apt-add-repository "deb http://security.debian.org/debian-security bullseye-security main" && \
 	apt-add-repository "deb http://ftp.de.debian.org/debian bullseye main" && \
+	curl -fsSL https://packages.adoptium.net/artifactory/api/gpg/key/public | gpg --dearmor -o /usr/share/keyrings/adoptium.gpg && \
+	echo "deb [signed-by=/usr/share/keyrings/adoptium.gpg] https://packages.adoptium.net/artifactory/deb bullseye main" > /etc/apt/sources.list.d/adoptium.list && \
 	apt update -y && apt install -y \
 	curl \
     bash \
     openjdk-17-jdk \
+    temurin-21-jdk \
     fonts-dejavu \
     gettext \
     jq \
     && \
+    update-alternatives --set java "$(update-alternatives --list java | grep -m1 -- "-${SPRYKER_JENKINS_OPENJDK_VERSION}-")" && \
     mkdir -p /envs \
     ; fi'
 

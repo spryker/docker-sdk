@@ -1,0 +1,20 @@
+  {{ serviceName }}:
+    image: mariadb:11.8
+    networks:
+      - private
+    labels:
+      'spryker.app.name': database
+      'spryker.app.type': services
+      'spryker.project': ${SPRYKER_DOCKER_PREFIX}:${SPRYKER_DOCKER_TAG}
+    healthcheck:
+      test: ["CMD", "mariadb-admin", "ping", "--silent"]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+    environment:
+      MYSQL_ROOT_PASSWORD: "{{ serviceData['root']['password'] }}"
+      MARIADB_AUTO_UPGRADE: "1"
+      LANG: C.UTF-8
+    volumes:
+      - {{ serviceName }}-{{ serviceData['engine'] }}-data:/var/lib/mysql:rw
+      - ./${DEPLOYMENT_PATH}/context/mysql/mariadb-11.8/my.cnf:/etc/mysql/mariadb.conf.d/my.cnf:ro

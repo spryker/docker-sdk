@@ -1,5 +1,5 @@
 # syntax = docker/dockerfile:experimental
-ARG SPRYKER_PLATFORM_IMAGE=spryker/php:7.3
+ARG SPRYKER_PLATFORM_IMAGE=spryker/php:8.3
 ARG SPRYKER_NODE_IMAGE_VERSION
 ARG SPRYKER_NODE_IMAGE_DISTRO
 
@@ -14,7 +14,7 @@ FROM ${SPRYKER_PLATFORM_IMAGE} AS application-basic
 ENV SPRYKER_IN_DOCKER=1
 ENV COMPOSER_IGNORE_CHROMEDRIVER=1
 {% for envName, envValue in _envs %}
-ENV {{ envName }}='{{ envValue }}'
+ENV {{ envName }}='{{ envValue | replace({"'": "\\'"}) | raw }}'
 {% endfor %}
 
 WORKDIR /data

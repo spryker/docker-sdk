@@ -1,4 +1,3 @@
-
   # Tempo runs as user 10001, and docker compose creates the volume as root.
   # As such, we need to chown the volume in order for Tempo to start correctly.
   tempo-init:
@@ -7,6 +6,9 @@
     entrypoint: [ "chown", "10001:10001", "/var/tempo" ]
     volumes:
       - {{ serviceName }}-{{ serviceData['engine'] }}-data:/var/tempo:rw
+{#        networks:#}
+{#            - private#}
+
   tempo:
     image: *tempoImage
     command: [ "-config.file=/etc/tempo.yaml" ]
@@ -25,13 +27,15 @@
       timeout: 10s
       retries: 3
       start_period: 10s
+
+  # OpenTelemetry Collector (traces/metrics/logs)
   collector:
     image: otel/opentelemetry-collector:0.137.0
     command: [ "--config=/etc/otel-collector.yaml" ]
     volumes:
       - ./${DEPLOYMENT_PATH}/context/otel-stack/otel-collector.yaml:/etc/otel-collector.yaml
     networks: [ private ]
-    depends_on: [ tempo ]
+    depends_on: [tempo, loki]
     healthcheck:
       test: [ "CMD", "curl", "-f", "http://localhost:13133/health" ]
       interval: 30s
@@ -39,16 +43,56 @@
       retries: 3
       start_period: 10s
     ports:
-      - "4318:4318"
-      - "4317:4317"
+      - "4318:4318"    # OTLP HTTP
+      - "4317:4317"    # OTLP gRPC
+
+  # Loki – logs storage
+  loki:
+    image: grafana/loki:3.1.0
+    command: [ "-config.file=/etc/loki/loki.yml" ]
+    volumes:
+      - ./${DEPLOYMENT_PATH}/context/otel-stack/loki.yml:/etc/loki/loki.yml
+      - {{ serviceName }}-{{ serviceData['engine'] }}-data:/loki
+    networks: [ private ]
+    labels:
+        'spryker.app.name': loki
+        'spryker.app.type': hidden
+    ports:
+      - "3100:3100"    # Loki HTTP API
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:3100/ready" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  # Promtail - log shipper, reads Docker logs and sends them to Loki
+  promtail:
+    image: grafana/promtail:3.1.0
+    command: [ "-config.file=/etc/promtail/promtail.yaml" ]
+    volumes:
+        - ./${DEPLOYMENT_PATH}/context/otel-stack/promtail.yaml:/etc/promtail/promtail.yaml
+        - /var/log:/var/log:ro
+        - /var/lib/docker/containers:/var/lib/docker/containers:ro
+        - /run/promtail:/run/promtail
+    networks: [ private ]
+    depends_on: [loki]
+    ports:
+        - "9080:9080"
+    healthcheck:
+        test: [ "CMD", "curl", "-f", "http://localhost:9080/ready" ]
+        interval: 30s
+        timeout: 10s
+        retries: 3
+        start_period: 10s
+
   prometheus:
       image: prom/prometheus:latest
       command:
           - --config.file=/etc/prometheus.yaml
           - --web.enable-remote-write-receiver
           - --enable-feature=exemplar-storage
-      networks:
-          - private
+      networks: [ private ]
       volumes:
           - ./${DEPLOYMENT_PATH}/context/otel-stack/prometheus.yaml:/etc/prometheus.yaml
       ports:
@@ -59,6 +103,7 @@
           timeout: 10s
           retries: 3
           start_period: 10s
+
   grafana:
       image: grafana/grafana:12.2
       volumes:

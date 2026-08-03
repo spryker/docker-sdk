@@ -1,10 +1,10 @@
-name: B2B + B2C Demoshop tests
+name: Spryker B2B Marketplace Demo Shop
 on:
   - push
 
 env:
   SPRYKER_TESTING_ENABLED: 1
-  PROJECT: suite
+  PROJECT: b2b-demo-marketplace
 
 jobs:
   functional_test:
@@ -13,17 +13,16 @@ jobs:
       fail-fast: false
       matrix:
         platform-image: [
-          'spryker/php:8.1-alpine3.16',
-          'spryker/php:8.1-debian'
+          'spryker/php:8.3',
+          'spryker/php:8.4'
+
         ]
         application-store: [ 'DE' ]
         env: [
           'ci.mysql',
-          'ci.pgsql'
         ]
         repo: [
-          'https://github.com/spryker-shop/b2b-demo-shop.git',
-          'https://github.com/spryker-shop/b2c-demo-shop.git'
+          'https://github.com/spryker-shop/b2b-demo-marketplace.git'
         ]
     name: "Function Tests(Image: ${{ matrix.platform-image }}, Environment: ${{ matrix.env }}, Repo: ${{ matrix.repo }})"
     steps:
@@ -31,58 +30,76 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Clone demo shop
-        run: cd ../ && git clone --depth=3 --branch=master ${{ matrix.repo }} demo-shop && cp -R docker-sdk demo-shop
+        run: cd ../ && git clone --depth=1 --branch=master ${{ matrix.repo }} demo-shop && cp -R docker-sdk demo-shop
 
       - name: Provide env variables
         run: |
           export SPRYKER_PLATFORM_IMAGE=${{ matrix.platform-image}}
-          export APPLICATION_ENV=${{ matrix.env }}
-          export APPLICATION_STORE=${{ matrix.application-store }}
+          export PROGRESS_TYPE=plain
+          export SPRYKER_CURRENT_REGION=EU
+          export DYNAMIC_STORE_MODE=true
 
       - name: Run script
         run: |
           cd ../demo-shop
-          docker-sdk/sdk boot deploy.ci.functional.mariadb.yml -v
+          docker-sdk/sdk boot .github/deploy/deploy.ci.functional.mariadb.yml -v
           docker-sdk/sdk up -t -v
-          docker-sdk/sdk testing codecept run -c codeception.functional.yml
+          docker-sdk/sdk testing codecept run -c tests/codeception.ci.functional.yml
 
-  glue_test:
+  acceptance_test:
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
         platform-image: [
-          'spryker/php:8.1-alpine3.16',
-          'spryker/php:8.1-debian'
+          'spryker/php:8.3',
+          'spryker/php:8.4'
         ]
-        application-store: [ 'DE' ]
         env: [
-          'ci.mysql',
-          'ci.pgsql'
+          'ci.mysql'
         ]
         repo: [
-          'https://github.com/spryker-shop/b2b-demo-shop.git',
-          'https://github.com/spryker-shop/b2c-demo-shop.git'
+          'https://github.com/spryker-shop/b2b-demo-marketplace.git'
         ]
-    name: "Glue Tests(Image: ${{ matrix.platform-image }}, Environment: ${{ matrix.env }}, Repo: ${{ matrix.repo }})"
+    name: "Acceptance Tests(Image: ${{ matrix.platform-image }}, Environment: ${{ matrix.env }}, Repo: ${{ matrix.repo }})"
     steps:
       - name: Checkout
         uses: actions/checkout@v2
 
       - name: Clone demo shop
-        run: cd ../ && git clone --depth=3 --branch=master ${{ matrix.repo }} demo-shop && cp -R docker-sdk demo-shop
+        run: cd ../ && git clone --depth=1 --branch=master ${{ matrix.repo }} demo-shop && cp -R docker-sdk demo-shop
 
       - name: Provide env variables
         run: |
           export SPRYKER_PLATFORM_IMAGE=${{ matrix.platform-image}}
-          export APPLICATION_ENV=${{ matrix.env }}
-          export APPLICATION_STORE=${{ matrix.application-store }}
+          export PROGRESS_TYPE=plain
+          export SPRYKER_CURRENT_REGION=EU
+          export DYNAMIC_STORE_MODE=true
 
-      - name: Run script
+      - name: Prepare
         run: |
           cd ../demo-shop
-          docker-sdk/sdk boot deploy.ci.api.yml -v
-          docker-sdk/sdk up -t -v
-          docker-sdk/sdk testing codecept fixtures
-          docker-sdk/sdk testing console queue:worker:start --stop-when-empty
-          docker-sdk/sdk testing codecept run -c codeception.api.yml
+
+      - uses: ramsey/composer-install@v3
+        with:
+          working-directory: ../demo-shop
+          composer-options: "-q --ignore-platform-reqs --optimize-autoloader --no-interaction --prefer-install=auto"
+
+      - name: Run
+        working-directory: ../demo-shop
+        run: |
+          docker-sdk/sdk boot .github/deploy/deploy.ci.acceptance.mariadb.yml
+          docker-sdk/sdk up -t
+
+      - name: Run Acceptance Tests
+        working-directory: ../demo-shop
+        run: |
+            docker-sdk/sdk testing codecept fixtures
+            docker-sdk/sdk testing composer dump-autoload -o -a --apcu -q
+            echo "console queue:worker:start --stop-when-empty"
+            docker-sdk/sdk testing console queue:worker:start --stop-when-empty
+
+      - name: Run API Tests
+        working-directory: ../demo-shop
+        run: |
+          docker-sdk/sdk testing codecept run -c tests/codeception.api.yml

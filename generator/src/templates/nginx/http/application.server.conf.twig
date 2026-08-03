@@ -56,4 +56,12 @@
         fastcgi_param SPRYKER_JENKINS_CSRF_PROTECTION_ENABLED {{ (services['scheduler']['csrf-protection-enabled'] | default(false)) ? 1 : 0 }};
 {% endblock location %}
     }
+
+    location @maintenance {
+{% if endpointData['region'] is defined %}
+        try_files /maintenance/{{ endpointData['identifier'] }}/index.html /maintenance/index.html =503;
+{% else %}
+        try_files /maintenance/{{ endpointData['identifier'] }}/index.html /maintenance/{{ groupRegion }}/index.html /maintenance/index.html =503;
+{% endif %}
+    }
 {% endblock locations %}

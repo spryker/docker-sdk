@@ -13,6 +13,9 @@
       retries: 5
     environment:
         JAVA_OPTS: '-Djenkins.model.Jenkins.debugMode=true -Djenkins.install.runSetupWizard=false -Xms128m -Xmx128m -Dhudson.security.csrf.GlobalCrumbIssuerConfiguration.DISABLE_CSRF_PROTECTION={{ serviceData['csrf-protection-enabled'] ? 'false' : 'true' }}'
+{% if serviceData['number-of-executors'] is defined %}
+        SPRYKER_JENKINS_EXECUTORS: {{ serviceData['number-of-executors'] }}
+{% endif %}
     volumes:
       - {{ serviceName }}-{{ serviceData['engine'] }}-data:/var/jenkins_home:rw
       - ${DEPLOYMENT_PATH}/context/jenkins/spryker.sh:/usr/bin/spryker.sh:rw

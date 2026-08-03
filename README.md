@@ -61,12 +61,15 @@ For contribution guidelines, see [Code contribution guide](https://docs.spryker.
 |                 |                 | 12            | &check;     |                                    |
 |                 |                 | 17            | &check;     |                                    |
 |                 | mysql           | 5.7           |             |                                    |
+|                 |                 | 8.4           |             |                                    |
 |                 |                 | mariadb-10.2  | &check;     | https://endoflife.date/mariadb     |
 |                 |                 | mariadb-10.3  | &check;     | https://endoflife.date/mariadb     |
 |                 |                 | mariadb-10.4  | &check;     |                                    |
 |                 |                 | mariadb-10.5  | &check;     |                                    |
 |                 |                 | mariadb-10.6  | &check;     |                                    |
 |                 |                 | mariadb-10.11 | &check;     |                                    |
+|                 |                 | mariadb-11.4  | &check;     |                                    |
+|                 |                 | mariadb-11.8  | &check;     |                                    |
 | broker          | rabbitmq        | 3.7           |             |                                    |
 |                 |                 | 3.8           | &check;     |                                    |
 |                 |                 | 3.9           | &check;     |                                    |
@@ -75,6 +78,7 @@ For contribution guidelines, see [Code contribution guide](https://docs.spryker.
 |                 |                 | 3.12          | &check;     |                                    |
 |                 |                 | 3.13          | &check;     |                                    |
 |                 |                 | 4.1           | &check;     |                                    |
+|                 |                 | 4.2           | &check;     |                                    |
 | session         | redis           | 5.0*          | &check;     |                                    |
 |                 | redis           | 6.2           | &check;     |                                    |
 |                 | valkey          | 7.2           | &check;     |                                    |
@@ -86,6 +90,8 @@ For contribution guidelines, see [Code contribution guide](https://docs.spryker.
 |                 |                 | 7.6           | &check;     |                                    |
 |                 |                 | 7.10          | &check;     |                                    |
 |                 | opensearch      | 1.3           | &check;     |                                    |
+|                 |                 | 2.19          | &check;     |                                    |
+|                 |                 | 3.5           | &check;     |                                    |
 | scheduler       | jenkins         | 2.176         |             |                                    |
 |                 |                 | 2.305         | &check;     |                                    |
 |                 |                 | 2.324         | &check;     |                                    |
@@ -94,6 +100,7 @@ For contribution guidelines, see [Code contribution guide](https://docs.spryker.
 |                 |                 | 2.488         | &check;     |                                    |
 |                 |                 | 2.492.3       | &check;     |                                    |
 |                 |                 | 2.516.3       | &check;     |                                    |
+|                 |                 | 2.555.1       | &check;     |                                    |
 | webdriver       | phantomjs       | latest*       |             |                                    |
 |                 | chromedriver    | latest        | &check;     |                                    |
 | mail_catcher    | mailhog         | 1.0           | &check;     |                                    |
