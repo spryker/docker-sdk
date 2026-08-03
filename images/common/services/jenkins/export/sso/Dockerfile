@@ -27,7 +27,9 @@ RUN bash -c 'if [ ! -z "$(which apk)" ]; then apk --no-cache add \
     gettext \
     jq \
     ca-certificates \
+    java-cacerts \
     aws-cli && \
+    update-ca-certificates && \
     ln -sfn "/usr/lib/jvm/java-${SPRYKER_JENKINS_OPENJDK_VERSION}-openjdk" /usr/lib/jvm/default-jvm && \
     mkdir -p /envs \
     ; fi'
