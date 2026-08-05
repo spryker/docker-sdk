@@ -2,9 +2,17 @@
         auth_basic  off;
         allow       all;
         access_log  off;
+{% if assets['mode'] | default('') == 'development' %}
+{# Local development: assets are rebuilt in place under a constant build hash, so a
+   long freshness lifetime makes the browser serve stale CSS/JS from its own cache
+   without ever revalidating. Force revalidation so a normal reload picks up a
+   rebuild; the ETag below still yields 304s, so this stays cheap. #}
+        expires     -1;
+{% else %}
         expires     7d;
         add_header  Pragma public;
         add_header  Cache-Control "public, must-revalidate, proxy-revalidate";
+{% endif %}
         add_header  Strict-Transport-Security "max-age=31536000; includeSubDomains; preload";
         etag on;
         try_files   $uri @assets;
@@ -30,9 +38,14 @@
 
     location / {
         access_log  off;
+{% if assets['mode'] | default('') == 'development' %}
+{# See the note in /assets/ above: revalidate instead of caching for a week locally. #}
+        expires     -1;
+{% else %}
         expires     7d;
         add_header  Pragma public;
         add_header  Cache-Control "public, must-revalidate, proxy-revalidate";
+{% endif %}
         etag on;
         try_files   $uri @proxy;
     }
