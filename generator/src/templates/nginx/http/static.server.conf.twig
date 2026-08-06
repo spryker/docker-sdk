@@ -9,8 +9,6 @@
         index index.html;
         access_log  off;
 {% if assets['mode'] | default('') == 'development' %}
-{# Local development: revalidate rather than trusting a week-long lifetime, so a
-   rebuilt asset is picked up by a normal reload instead of a hard one. #}
         expires     -1;
 {% else %}
         expires     7d;
