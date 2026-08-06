@@ -22,15 +22,24 @@ RUN bash -c 'if [ ! -z "$(which apk)" ]; then apk --no-cache add \
 	curl \
     bash \
     openjdk17 \
-    openjdk21 \
     ttf-dejavu \
     gettext \
     jq \
     ca-certificates \
     java-cacerts \
     aws-cli && \
+    if [ -n "$(apk --no-cache search -q -e openjdk21)" ]; then \
+        apk --no-cache add openjdk21; \
+    else \
+        echo "WARNING: openjdk21 is not available in this Alpine release, skipping it."; \
+    fi && \
     update-ca-certificates && \
-    ln -sfn "/usr/lib/jvm/java-${SPRYKER_JENKINS_OPENJDK_VERSION}-openjdk" /usr/lib/jvm/default-jvm && \
+    JVM_HOME="/usr/lib/jvm/java-${SPRYKER_JENKINS_OPENJDK_VERSION}-openjdk"; \
+    if [ ! -d "$JVM_HOME" ]; then \
+        echo "WARNING: ${JVM_HOME} is not installed, falling back to java-17-openjdk."; \
+        JVM_HOME="/usr/lib/jvm/java-17-openjdk"; \
+    fi && \
+    ln -sfn "$JVM_HOME" /usr/lib/jvm/default-jvm && \
     mkdir -p /envs \
     ; fi'
 
@@ -45,13 +54,18 @@ RUN bash -c 'if [ ! -z "$(which apt)" ]; then apt update -y && \
 	curl \
     bash \
     openjdk-17-jdk \
-    temurin-21-jdk \
     fonts-dejavu \
     gettext \
     jq \
     ca-certificates \
     unzip && \
-    update-alternatives --set java "$(update-alternatives --list java | grep -m1 -- "-${SPRYKER_JENKINS_OPENJDK_VERSION}-")" && \
+    (apt install -y temurin-21-jdk || echo "WARNING: temurin-21-jdk is not available, skipping it.") && \
+    JAVA_ALTERNATIVE="$(update-alternatives --list java | grep -m1 -- "-${SPRYKER_JENKINS_OPENJDK_VERSION}-")"; \
+    if [ -z "$JAVA_ALTERNATIVE" ]; then \
+        echo "WARNING: java ${SPRYKER_JENKINS_OPENJDK_VERSION} is not installed, falling back to java 17."; \
+        JAVA_ALTERNATIVE="$(update-alternatives --list java | grep -m1 -- "-17-")"; \
+    fi && \
+    update-alternatives --set java "$JAVA_ALTERNATIVE" && \
     curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip" && \
     unzip awscliv2.zip && \
     ./aws/install && \
