@@ -56,6 +56,29 @@ RUN mv /usr/local/etc/php/disabled/{{phpExtention}}.ini /usr/local/etc/php/conf.
 
 COPY php/conf.d/99-from-deploy-yaml-php.ini /usr/local/etc/php/conf.d/
 
+# PHP-SPX
+{% if _phpSpx is defined and _phpSpx.enabled|default(false) %}
+RUN apk add --no-cache \
+    git \
+    autoconf \
+    build-base \
+    zlib-dev
+
+RUN git clone https://github.com/NoiseByNorthwest/php-spx.git \
+    && cd php-spx \
+    && git checkout release/latest \
+    && phpize \
+    && ./configure \
+    && make \
+    && make install
+
+RUN echo "extension=spx.so" > /usr/local/etc/php/conf.d/spx.ini && \
+    echo "spx.http_enabled={{ _phpSpx.http_enabled|default(0) }}" >> /usr/local/etc/php/conf.d/spx.ini && \
+    echo "spx.http_key=\"{{ _phpSpx.key|default("dev") }}\"" >> /usr/local/etc/php/conf.d/spx.ini && \
+    echo "spx.data_dir=\"{{ _phpSpx.data_dir|default("/data/data/tmp/spx") }}\"" >> /usr/local/etc/php/conf.d/spx.ini && \
+    echo "spx.http_ip_whitelist=\"{{ _phpSpx.http_ip_whitelist|default("*") }}\"" >> /usr/local/etc/php/conf.d/spx.ini
+{% endif %}
+
 # Jenkins
 COPY --chown=spryker:spryker jenkins/jenkins.docker.xml.twig /home/spryker/jenkins.docker.xml.twig
 
