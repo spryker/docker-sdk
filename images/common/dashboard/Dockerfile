@@ -1,5 +1,12 @@
 FROM node:22-alpine3.20 AS dashboard
 
+# Trust the extra root CA certificates staged by the SDK, e.g. a corporate TLS-inspection root
+# such as Zscaler. NodeJS ignores the operating system trust store, so npm needs this bundle. The
+# build argument stays empty unless certificates were staged, and NodeJS ignores an empty value.
+COPY context/ca-certificates/bundle.crt /etc/ssl/spryker-extra-ca-certificates.crt
+ARG SPRYKER_EXTRA_CA_BUNDLE=
+ENV NODE_EXTRA_CA_CERTS=${SPRYKER_EXTRA_CA_BUNDLE}
+
 RUN mkdir -p /dashboard
 WORKDIR /dashboard
 ENV HOME=/dashboard

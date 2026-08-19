@@ -5,6 +5,7 @@ require docker
 import environment/docker.sh
 import environment/docker-compose.sh
 import environment/mutagen-version-check.sh
+import environment/ca-certificates.sh
 
 Registry::addCommand "boot" "Command::bootstrap"
 Registry::addCommand "bootstrap" "Command::bootstrap"
@@ -48,9 +49,13 @@ function Command::bootstrap() {
     local projectYaml=${1:-${defaultProjectYaml}}
     local projectDeployTemplatesDirectory="./config/deploy-templates/"
 
+    # A changed set of trusted root CA certificates has to invalidate a skipped bootstrap too.
+    Environment::CaCertificates::calculate
+
     if [ -n "${SKIP_BOOTSTRAP_IF_DONE}" ] && [ -f "${DESTINATION_DIR}/project.yml" ]; then
         if cmp -s "${DESTINATION_DIR}/project.yml" "${projectYaml}"; then
-            if [ "$(cat "${DESTINATION_DIR}/_git" 2>/dev/null || true)" == "${gitHash}" ]; then
+            if [ "$(cat "${DESTINATION_DIR}/_git" 2>/dev/null || true)" == "${gitHash}" ] &&
+                [ "$(cat "${DESTINATION_DIR}/_ca_certificates" 2>/dev/null || true)" == "${CA_CERTIFICATES_DIGEST}" ]; then
                 Console::log "${CYAN}Bootstrap is skipped as the branch is still the same.${NC}" >&2
                 Console::log "${DGRAY}Do not use ${LGRAY}-s${DGRAY} option to bootstrap anyway.${NC}" >&2
                 exit 0
@@ -80,13 +85,17 @@ function Command::bootstrap() {
     local CERT_DIR="${HOME}/.spryker/certs"
     mkdir -p "${CERT_DIR}"
 
-    KEY_FILE="${CERT_DIR}/${SPR_CUSTOM_KEY:-default.key}"
-    CRT_FILE="${CERT_DIR}/${SPR_CUSTOM_CERT:-default.crt}"
+    local KEY_FILE="${CERT_DIR}/${SPR_CUSTOM_KEY:-default.key}"
+    local CRT_FILE="${CERT_DIR}/${SPR_CUSTOM_CERT:-default.crt}"
 
     if [[ -f "${KEY_FILE}" && -f "${CRT_FILE}" ]]; then
-        cp "${CERT_DIR}/default.key" "${SOURCE_DIR}/generator/openssl/default.key"
-        cp "${CERT_DIR}/default.crt" "${SOURCE_DIR}/generator/openssl/default.crt"
+        cp "${KEY_FILE}" "${SOURCE_DIR}/generator/openssl/default.key"
+        cp "${CRT_FILE}" "${SOURCE_DIR}/generator/openssl/default.crt"
     fi
+
+    # The generator image is built before the deploy file is even read, so the extra root CAs have
+    # to be staged into its build context here.
+    Environment::CaCertificates::stage "${SOURCE_DIR}/generator/${CA_CERTIFICATES_DIR_NAME}"
 
     Console::verbose::start "Building generator..."
     docker build -t spryker_docker_sdk \
@@ -101,6 +110,7 @@ function Command::bootstrap() {
     cp -rf "${SOURCE_DIR}/context" "${tmpDeploymentDir}/context"
     cp -rf "${SOURCE_DIR}/bin/standalone" "${tmpDeploymentDir}/context/cli"
     cp -rf "${SOURCE_DIR}/images" "${tmpDeploymentDir}/images"
+    Environment::CaCertificates::stage "${tmpDeploymentDir}/context/${CA_CERTIFICATES_DIR_NAME}"
     cp "${projectYaml}" "${tmpDeploymentDir}/project.yml"
     cp "$([ -f "./.dockersyncignore" ] && echo './.dockersyncignore' || echo "${SOURCE_DIR}/.dockersyncignore.default")" "${tmpDeploymentDir}/.dockersyncignore"
     if [ -f ".known_hosts" ]; then
@@ -142,6 +152,7 @@ function Command::bootstrap() {
     Command::bootstrap::_deploy
 
     echo -n "${gitHash}" >"${DESTINATION_DIR}/_git"
+    echo -n "${CA_CERTIFICATES_DIGEST}" >"${DESTINATION_DIR}/_ca_certificates"
 
     if [ ! -f ".dockerignore" ]; then
         cp "${SOURCE_DIR}/.dockerignore.default" .dockerignore
@@ -150,8 +161,8 @@ function Command::bootstrap() {
     Console::info "${DESTINATION_DIR}"
 
     if [[ ! -f "${KEY_FILE}" || ! -f "${CRT_FILE}" ]]; then
-        cp "${DESTINATION_DIR}/context/nginx/ssl/ca.key" "${CERT_DIR}/default.key"
-        cp "${DESTINATION_DIR}/context/nginx/ssl/ca.crt" "${CERT_DIR}/default.crt"
+        cp "${DESTINATION_DIR}/context/nginx/ssl/ca.key" "${KEY_FILE}"
+        cp "${DESTINATION_DIR}/context/nginx/ssl/ca.crt" "${CRT_FILE}"
     fi
 
 
@@ -167,6 +178,7 @@ function Command::bootstrap::_deploy() {
         return "${TRUE}"
     fi
 
+    Environment::CaCertificates::purge "${DESTINATION_DIR:?}/context"
     [ -d "${DESTINATION_DIR}" ] && rm -rf "${DESTINATION_DIR:?}/*"
     [ ! -d "${DESTINATION_DIR}" ] && mkdir "${DESTINATION_DIR}"
     [ -L "${DESTINATION_DIR}/bin" ] && rm -f "${DESTINATION_DIR}/bin"
@@ -175,6 +187,7 @@ function Command::bootstrap::_deploy() {
 }
 
 function Command::bootstrap::_injectDeployment() {
+    Environment::CaCertificates::purge "${DESTINATION_DIR:?}/context"
     rm -rf "${DESTINATION_DIR:?}/bin"
     cp -R "${tmpDeploymentDir}/." "${DESTINATION_DIR}" || true
     rm -rf "${DESTINATION_DIR:?}/bin"

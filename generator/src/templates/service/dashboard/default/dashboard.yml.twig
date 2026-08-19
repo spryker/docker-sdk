@@ -2,6 +2,10 @@
     build:
       context: ./${DEPLOYMENT_PATH}/
       dockerfile: images/common/dashboard/Dockerfile
+{% if project['_extraCaCertificates'] is not empty %}
+      args:
+        SPRYKER_EXTRA_CA_BUNDLE: /etc/ssl/spryker-extra-ca-certificates.crt
+{% endif %}
     networks:
       - public
       - private

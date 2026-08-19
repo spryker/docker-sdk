@@ -7,6 +7,72 @@ This section describes common issues related to installation.
 
 
 
+### TLS certificate is not trusted during the build
+
+**when**
+Running `docker/sdk boot` or `docker/sdk up` behind a corporate proxy that inspects TLS traffic
+(Zscaler, Netskope, a company MITM appliance) returns errors similar to the following:
+```bash
+WARNING: updating and opening https://dl-cdn.alpinelinux.org/alpine/v3.23/main/x86_64/APKINDEX.tar.gz: TLS: server certificate not trusted
+```
+```bash
+curl error 60 while downloading https://repo.packagist.org/packages.json: SSL certificate problem: unable to get local issuer certificate
+```
+```bash
+npm ERR! code SELF_SIGNED_CERT_IN_CHAIN
+```
+
+**then**
+The proxy replaces the certificate of every HTTPS connection with one issued by its own root
+certificate authority, which the images do not know. Add that root certificate to the images:
+
+1. Export the root certificate of your proxy in PEM or DER format. Ask your IT department for it,
+or export it from Keychain Access on MacOS.
+2. Put it into `~/.spryker/ca-certificates/`:
+```bash
+mkdir -p ~/.spryker/ca-certificates
+cp ~/Downloads/corporate-root.crt ~/.spryker/ca-certificates/
+```
+Any number of `.crt`, `.pem`, or `.cer` files is picked up, and a file containing several
+certificates is split automatically. To read the certificates from somewhere else, point
+`SPRYKER_EXTRA_CA_CERTS` at a file or a directory:
+```bash
+export SPRYKER_EXTRA_CA_CERTS=/path/to/corporate-root.crt
+```
+3. Run `docker/sdk boot` again. It prints how many certificates it picked up:
+```bash
+Trusting 1 extra CA certificate(s) from /Users/<user>/.spryker/ca-certificates
+```
+4. Run `docker/sdk up`.
+
+The certificates are added to the trust store of the application, CLI, assets, and dashboard
+images, so `apk`, `apt`, `composer`, `git`, `curl`, `npm`, and `yarn` accept the inspected
+connections both during the build and at runtime.
+
+Adding or removing a certificate takes effect only after `docker/sdk boot` runs again.
+
+:::(Warning) ()
+`~/.spryker/ca-certificates/` is not the same as `~/.spryker/certs/`. The latter holds a
+certificate authority *signing pair* - `default.crt` together with its private key `default.key` -
+that is used to sign the certificate of the local website. A root certificate placed there without
+a matching private key is ignored, and the SDK overwrites it with its own generated one on the next
+`docker/sdk boot`.
+:::
+
+**Limitations**
+
+* Pulling images is done by the Docker daemon, not by the SDK, so `~/.spryker/ca-certificates/`
+does not affect it. If a `docker pull` or a `FROM` instruction fails with a certificate error, add
+the root certificate to the trust store of the host - on MacOS, add it to the System keychain, mark
+it as trusted, and restart Docker Desktop. A `docker-container` buildx builder needs the
+certificate configured separately.
+* The Jenkins images use the Java trust store, which is not populated from the certificates above.
+* A custom `assets: image:` is not part of the application image chain and does not receive the
+certificates.
+* If the proxy requires an explicit `HTTP_PROXY`/`HTTPS_PROXY` configuration rather than
+transparently inspecting the traffic, trusting its certificate is not enough on its own.
+
+
 ### Docker daemon is not running
 
 **when**

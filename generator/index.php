@@ -90,6 +90,7 @@ if (!array_key_exists('services', $projectData)) {
 }
 
 $projectData['_knownHosts'] = buildKnownHosts($deploymentDir);
+$projectData['_extraCaCertificates'] = glob($deploymentDir . DS . 'context' . DS . 'ca-certificates' . DS . 'certs' . DS . '*.crt') ?: [];
 $projectData['_defaultDeploymentDir'] = $defaultDeploymentDir;
 $projectData['tag'] = $projectData['tag'] ?? uniqid();
 $projectData['_platform'] = $platform;

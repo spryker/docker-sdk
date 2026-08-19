@@ -7,10 +7,27 @@ FROM node:${SPRYKER_NODE_IMAGE_VERSION}-${SPRYKER_NODE_IMAGE_DISTRO} AS node
 
 ARG SPRYKER_NPM_VERSION
 
+{% if _extraCaCertificates is not empty %}
+# Trust the extra root CA certificates staged by the SDK, e.g. a corporate TLS-inspection root
+# such as Zscaler. NodeJS ignores the operating system trust store, so npm needs this bundle.
+COPY ca-certificates/bundle.crt /etc/ssl/spryker-extra-ca-certificates.crt
+ENV NODE_EXTRA_CA_CERTS=/etc/ssl/spryker-extra-ca-certificates.crt
+
+{% endif %}
 RUN npm install -g npm@${SPRYKER_NPM_VERSION}
 
 FROM ${SPRYKER_PLATFORM_IMAGE} AS application-basic
 
+{% if _extraCaCertificates is not empty %}
+# Trust the extra root CA certificates staged by the SDK, e.g. a corporate TLS-inspection
+# root such as Zscaler. `certs/` feeds the operating system trust store used by apk, apt,
+# composer, git and curl; `bundle.crt` feeds NodeJS, which ignores that store.
+COPY ca-certificates/certs/ /usr/local/share/ca-certificates/
+COPY ca-certificates/bundle.crt /etc/ssl/spryker-extra-ca-certificates.crt
+RUN update-ca-certificates
+ENV NODE_EXTRA_CA_CERTS=/etc/ssl/spryker-extra-ca-certificates.crt
+
+{% endif %}
 ENV SPRYKER_IN_DOCKER=1
 ENV COMPOSER_IGNORE_CHROMEDRIVER=1
 {% for envName, envValue in _envs %}

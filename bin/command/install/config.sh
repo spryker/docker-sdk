@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+import environment/ca-certificates.sh
+
 Registry::addCommand "config" "Command::config"
 
 Registry::Help::command -s -c "config" "Outputs deploy file into the cli."
@@ -23,6 +25,9 @@ function Command::config() {
     Console::info "Using ${projectYaml}"
 
     local USER_FULL_ID=$(Environment::getFullUserId)
+
+    # This image is built from the generator context too, so it needs the extra root CAs as well.
+    Environment::CaCertificates::stage "${SOURCE_DIR}/generator/${CA_CERTIFICATES_DIR_NAME}"
 
     Console::verbose::start "Building generator..."
     docker build -t spryker_docker_sdk \

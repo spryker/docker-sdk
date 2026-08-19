@@ -3,6 +3,11 @@ ARG SPRYKER_PHP_VERSION=7.3
 
 FROM spryker/php:${SPRYKER_PHP_VERSION}
 
+# Trust the extra root CA certificates staged by the SDK, e.g. a corporate TLS-inspection
+# root such as Zscaler. The directory is empty unless the user provided any.
+COPY ca-certificates/certs/ /usr/local/share/ca-certificates/
+RUN update-ca-certificates
+
 WORKDIR /data
 USER spryker
 

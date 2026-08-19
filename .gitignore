@@ -6,3 +6,6 @@ deployment/*
 !deployment/.gitkeep
 generator/openssl/default.crt
 generator/openssl/default.key
+generator/ca-certificates/bundle.crt
+generator/ca-certificates/certs/*
+!generator/ca-certificates/certs/.gitkeep
