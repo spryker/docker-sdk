@@ -9,7 +9,7 @@
     "docker-loghose": "^1.6.5",
     "dockerode": "^5.0.0",
     "eol": "^0.9.1",
-    "express": "^4.22.2",
+    "express": "^5.2.1",
     "http-proxy-middleware": "^2.0.10",
     "path-parse": ">=1.0.7",
     "pug": "^3.0.3",
