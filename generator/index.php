@@ -177,8 +177,9 @@ const ENTRY_POINTS = [
     GLUE_BACKEND => 'GlueBackend',
 ];
 
-const DEBIAN_DISTRO_NAME = 'bullseye';
+const DEBIAN_DISTRO_NAME = 'bookworm';
 const ALPINE_DISTRO_NAME = 'alpine';
+const DEBIAN_MIN_NODE_VERSION = 16;
 
 const SPRYKER_NODE_IMAGE_DISTRO_ENV_NAME = 'SPRYKER_NODE_IMAGE_DISTRO';
 const SPRYKER_NODE_IMAGE_VERSION_ENV_NAME = 'SPRYKER_NODE_IMAGE_VERSION';
@@ -1810,11 +1811,14 @@ function buildNodeJsNpmBuildConfig(array $projectData): array
 
     $nodejsConfig = $projectData['image']['node'] ?? [];
 
+    $distroName = getNodeDistroName($nodejsConfig, $imageName);
+    $nodeVersion = array_key_exists('version', $nodejsConfig)
+        ? (string)$nodejsConfig['version']
+        : (string)DEFAULT_NODE_VERSION;
+
     return [
-        SPRYKER_NODE_IMAGE_DISTRO_ENV_NAME => getNodeDistroName($nodejsConfig, $imageName),
-        SPRYKER_NODE_IMAGE_VERSION_ENV_NAME => array_key_exists('version', $nodejsConfig)
-            ? (string)$nodejsConfig['version']
-            : (string)DEFAULT_NODE_VERSION,
+        SPRYKER_NODE_IMAGE_DISTRO_ENV_NAME => $distroName,
+        SPRYKER_NODE_IMAGE_VERSION_ENV_NAME => getNodeImageVersion($distroName, $nodeVersion),
         SPRYKER_NPM_VERSION_ENV_NAME => array_key_exists('npm', $nodejsConfig)
             ? (string)$nodejsConfig['npm']
             : (string)DEFAULT_NPM_VERSION,
@@ -1850,6 +1854,32 @@ function getNodeDistroName(array $nodejsConfig, string $imageName): string
     }
 
     return ALPINE_DISTRO_NAME;
+}
+
+/**
+ * @param string $distroName
+ * @param string $nodeVersion
+ *
+ * @return string
+ */
+function getNodeImageVersion(string $distroName, string $nodeVersion): string
+{
+    if ($distroName !== DEBIAN_DISTRO_NAME) {
+        return $nodeVersion;
+    }
+
+    if ((int)$nodeVersion >= DEBIAN_MIN_NODE_VERSION) {
+        return $nodeVersion;
+    }
+
+    verbose(sprintf(
+        'Node %s is not published for Debian "%s". Using Node %s instead.',
+        $nodeVersion,
+        DEBIAN_DISTRO_NAME,
+        DEBIAN_MIN_NODE_VERSION,
+    ));
+
+    return (string)DEBIAN_MIN_NODE_VERSION;
 }
 
 function buildProjectData(array $projectData): array

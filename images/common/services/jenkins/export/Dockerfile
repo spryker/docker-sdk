@@ -40,10 +40,10 @@ RUN bash -c 'if [ ! -z "$(which apk)" ]; then apk --no-cache add \
 # Install packages on Debian
 RUN bash -c 'if [ ! -z "$(which apt)" ]; then apt update -y && \
 	apt-get install -y software-properties-common gnupg curl && \
-	apt-add-repository "deb http://security.debian.org/debian-security bullseye-security main" && \
-	apt-add-repository "deb http://ftp.de.debian.org/debian bullseye main" && \
+	apt-add-repository "deb http://security.debian.org/debian-security bookworm-security main" && \
+	apt-add-repository "deb http://ftp.de.debian.org/debian bookworm main" && \
 	curl -fsSL https://packages.adoptium.net/artifactory/api/gpg/key/public | gpg --dearmor -o /usr/share/keyrings/adoptium.gpg && \
-	echo "deb [signed-by=/usr/share/keyrings/adoptium.gpg] https://packages.adoptium.net/artifactory/deb bullseye main" > /etc/apt/sources.list.d/adoptium.list && \
+	echo "deb [signed-by=/usr/share/keyrings/adoptium.gpg] https://packages.adoptium.net/artifactory/deb bookworm main" > /etc/apt/sources.list.d/adoptium.list && \
 	apt update -y && apt install -y \
 	curl \
     bash \
