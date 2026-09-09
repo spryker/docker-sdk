@@ -54,7 +54,8 @@ jobs:
       matrix:
         platform-image: [
           'spryker/php:8.3',
-          'spryker/php:8.4'
+          'spryker/php:8.4',
+          'spryker/php:8.3-debian',
         ]
         env: [
           'ci.mysql'
