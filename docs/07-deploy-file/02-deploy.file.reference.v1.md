@@ -291,6 +291,7 @@ Defines PHP settings for Spryker applications.
   * `otel`
   * `excimer`
   * `imagick`
+  * `xlswriter`
 
 ```yaml
 image:
@@ -306,6 +307,7 @@ image:
             - otel
             - excimer
             - imagick
+            - xlswriter
 ```
 ***
 
