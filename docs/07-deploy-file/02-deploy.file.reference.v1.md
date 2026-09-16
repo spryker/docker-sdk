@@ -292,6 +292,7 @@ Defines PHP settings for Spryker applications.
   * `excimer`
   * `imagick`
   * `xlswriter`
+  * `xsl`
 
 ```yaml
 image:
@@ -308,6 +309,7 @@ image:
             - excimer
             - imagick
             - xlswriter
+           - xsl
 ```
 ***
 
