@@ -76,10 +76,11 @@ const FileWatcher = function (connection, streamName, path, options) {
     const defaults = {
         "depth": 99,
         "cwd": path,
+        "ignored": (filePath, stats) => !!stats && stats.isFile() && !filePath.endsWith('.log'),
     }
 
     const watcher = chokidar.watch(
-        path + '/**/*.log',
+        path,
         {...defaults, ...(options || {})},
     )
 
