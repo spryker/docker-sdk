@@ -12,7 +12,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
       - name: Scan for secrets in the repository
-        uses: aquasecurity/trivy-action@0.28.0
+        uses: aquasecurity/trivy-action@0.35.0
         with:
           scan-type: 'fs'                  # File system scan
           trivy-config: .trivy/trivy.yaml  # Path to the Trivy config file

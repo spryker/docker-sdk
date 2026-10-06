@@ -1,8 +1,10 @@
 # syntax = docker/dockerfile:experimental
 ARG SPRYKER_PARENT_IMAGE
+ARG SPRYKER_JENKINS_BOILERPLATE_VERSION=latest
 
-FROM spryker/jenkins-boilerplate:latest as spryker-jenkins-boilerplate
+FROM spryker/jenkins-boilerplate:${SPRYKER_JENKINS_BOILERPLATE_VERSION} as spryker-jenkins-boilerplate
 FROM ${SPRYKER_PARENT_IMAGE}  as spryker_jenkins
+ARG SPRYKER_JENKINS_OPENJDK_VERSION=17
 EXPOSE 8080
 COPY context/jenkins/export/jenkins.docker.xml.twig ./config/Zed/cronjobs/jenkins.docker.xml.twig
 
@@ -24,15 +26,30 @@ RUN bash -c 'if [ ! -z "$(which apk)" ]; then apk --no-cache add \
     gettext \
     jq \
     ca-certificates \
+    java-cacerts \
     aws-cli && \
+    if [ -n "$(apk --no-cache search -q -e openjdk21)" ]; then \
+        apk --no-cache add openjdk21; \
+    else \
+        echo "WARNING: openjdk21 is not available in this Alpine release, skipping it."; \
+    fi && \
+    update-ca-certificates && \
+    JVM_HOME="/usr/lib/jvm/java-${SPRYKER_JENKINS_OPENJDK_VERSION}-openjdk"; \
+    if [ ! -d "$JVM_HOME" ]; then \
+        echo "WARNING: ${JVM_HOME} is not installed, falling back to java-17-openjdk."; \
+        JVM_HOME="/usr/lib/jvm/java-17-openjdk"; \
+    fi && \
+    ln -sfn "$JVM_HOME" /usr/lib/jvm/default-jvm && \
     mkdir -p /envs \
     ; fi'
 
 # Install packages on Debian
 RUN bash -c 'if [ ! -z "$(which apt)" ]; then apt update -y && \
-	apt-get install -y software-properties-common && \
-	apt-add-repository "deb http://security.debian.org/debian-security bullseye-security main" && \
-	apt-add-repository "deb http://ftp.de.debian.org/debian bullseye main" && \
+	apt-get install -y software-properties-common gnupg curl && \
+	apt-add-repository "deb http://security.debian.org/debian-security bookworm-security main" && \
+	apt-add-repository "deb http://ftp.de.debian.org/debian bookworm main" && \
+	curl -fsSL https://packages.adoptium.net/artifactory/api/gpg/key/public | gpg --dearmor -o /usr/share/keyrings/adoptium.gpg && \
+	echo "deb [signed-by=/usr/share/keyrings/adoptium.gpg] https://packages.adoptium.net/artifactory/deb bookworm main" > /etc/apt/sources.list.d/adoptium.list && \
 	apt update -y && apt install -y \
 	curl \
     bash \
@@ -42,6 +59,13 @@ RUN bash -c 'if [ ! -z "$(which apt)" ]; then apt update -y && \
     jq \
     ca-certificates \
     unzip && \
+    (apt install -y temurin-21-jdk || echo "WARNING: temurin-21-jdk is not available, skipping it.") && \
+    JAVA_ALTERNATIVE="$(update-alternatives --list java | grep -m1 -- "-${SPRYKER_JENKINS_OPENJDK_VERSION}-")"; \
+    if [ -z "$JAVA_ALTERNATIVE" ]; then \
+        echo "WARNING: java ${SPRYKER_JENKINS_OPENJDK_VERSION} is not installed, falling back to java 17."; \
+        JAVA_ALTERNATIVE="$(update-alternatives --list java | grep -m1 -- "-17-")"; \
+    fi && \
+    update-alternatives --set java "$JAVA_ALTERNATIVE" && \
     curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip" && \
     unzip awscliv2.zip && \
     ./aws/install && \
