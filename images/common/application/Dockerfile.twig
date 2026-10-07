@@ -21,7 +21,6 @@ STOPSIGNAL SIGQUIT
 ENV PHP_FPM_PROCESS_CONTROL_TIMEOUT=0
 ENV PHP_FPM_ACCESS_LOG=off
 ENV PHP_FPM_ACCESS_LOG_PATH=/proc/self/fd/2
-ENV PHP_FPM_ACCESS_LOG_MEMORY=off
 {% for envName, envValue in _envs %}
 ENV {{ envName }}='{{ envValue | replace({"'": "\\'"}) | raw }}'
 {% endfor %}

@@ -256,6 +256,52 @@ image:
   environment:
         {env_variable}: {env_variable_value}
 ```
+
+#### PHP-FPM access log and process control
+
+The following environment variables configure the PHP-FPM access log and `process_control_timeout` of Spryker applications. PHP-FPM reads them when it starts:
+* Values defined in `image: environment:` are built into the application images, so a change requires the images to be rebuilt.
+* Values passed to the application containers at runtime take effect after the containers are restarted.
+
+* `PHP_FPM_ACCESS_LOG` - enables the PHP-FPM access log, including the peak memory allocated by PHP for the request. Possible values are `off` and `on`. The default value is `off`, which keeps the access log disabled. Any other value, including `true` and `ON`, also keeps the access log disabled, and PHP-FPM logs a `Nothing matches the include pattern` warning on start.
+* `PHP_FPM_ACCESS_LOG_PATH` - defines where the access log is written when it is enabled. The default value is `/proc/self/fd/2`, which writes to the container's stderr together with the other application logs. If the path is empty or not writable, PHP-FPM does not start. Do not use `/proc/self/fd/1`: PHP-FPM redirects its stdout to `/dev/null`, so the log is discarded.
+* `PHP_FPM_PROCESS_CONTROL_TIMEOUT` - defines `process_control_timeout`: how long PHP-FPM waits for workers to finish their current requests on a graceful stop (`SIGQUIT`, the stop signal of the application images) or a graceful reload (`SIGUSR2`) before terminating them. New requests are not served while PHP-FPM waits. The default value is `0`: in-flight requests are terminated immediately. Keep the value below the container stop timeout. On `SIGTERM`, in-flight requests are terminated regardless of this value. Supported values are integers with an optional `s`, `m`, `h`, or `d` unit; without a unit, seconds are used. If the value is empty or invalid, PHP-FPM does not start.
+
+The access log is written as one JSON line per request with the `"log_type":"fpm_access"` marker, which separates it from the other logs of the container:
+
+```json
+{"log_type":"fpm_access","time":"2026-10-01T13:17:53+0000","pool":"worker","pid":57,"method":"GET","status":200,"duration_ms":187.412,"cpu_pct":42.71,"mem_peak_bytes":18874368,"uri":"/en/cart?page=2"}
+```
+
+| Field | Description |
+|---|---|
+| `time` | The time when the request finished. |
+| `pool` | The PHP-FPM pool. |
+| `pid` | The PHP-FPM worker process ID. |
+| `method` | The HTTP method. |
+| `status` | The HTTP response status code. |
+| `duration_ms` | The request duration in PHP-FPM, in milliseconds. |
+| `cpu_pct` | The CPU usage of the request, in percent. |
+| `mem_peak_bytes` | The peak memory allocated by PHP for the request, in bytes. |
+| `uri` | The request URI, including the query string, as sent by the client. |
+
+:::(Warning) (Lines that are not valid JSON)
+PHP-FPM does not escape the logged values, and on PHP 8.4 and older it cuts each line at 1024 bytes. A line is not valid JSON if the URI contains a raw `"` or `\` character, or if it is longer than about 800 bytes. The `uri` field is the last one, so the other fields of such lines stay intact. To include these lines, search for the marker in the raw message, for example, `filter @message like /"log_type":"fpm_access"/` in CloudWatch Logs Insights, instead of relying on the parsed fields only. Treat `uri` as untrusted client input.
+:::
+
+```yaml
+image:
+  environment:
+    PHP_FPM_ACCESS_LOG: 'on'
+    PHP_FPM_PROCESS_CONTROL_TIMEOUT: 10s
+```
+
+:::(Info) ()
+* The access log adds one line per request, which increases log volume and log ingestion costs.
+* `mem_peak_bytes` reports the peak memory allocated by PHP, not the memory of the operating system process.
+* Requests terminated by `request_terminate_timeout` are not logged. Status requests of monitoring agents are logged with `"uri":"-"`.
+* The access log covers the PHP-FPM pool of the application; the Xdebug pool of the debug mode is not covered.
+:::
 ***
 
 ### image: node:
@@ -550,7 +596,7 @@ yves_eu:
 ...
 ```
 
-* `groups: applications: application: limits: workers` - defines the maximum number of concurrent child processes a process manager can serve simultaneously.
+* `groups: applications: application: limits: workers` - defines the maximum number of concurrent child processes a process manager can serve simultaneously. Setting this option switches the PHP-FPM process manager of the application to `static` mode with the defined number of child processes. If not specified, the process manager stays in `dynamic` mode with up to 4 child processes.
 > Note: This option isn’t available in Spryker Cloud because we automatically detect and apply the optimal PHP-FPM configuration for each application.
 
 ```yaml
@@ -567,7 +613,7 @@ yves_eu:
 To disable the validation of request body size against this parameter, set it to `0`. We do not recommended disabling it.
 :::
 
-* `groups: applications: application: limits: request-terminate-timeout` - define the timeout for serving a single request after which the worker process will be killed. If not specified, the default values apply:
+* `groups: applications: application: limits: request-terminate-timeout` - define the timeout for serving a single request after which the worker process will be killed. This option does not change the process manager mode. If not specified, the default values apply:
     * `backoffice` - `1m`
     * `merchant-portal` - `1m`
     * `glue-storefront` - `1m`
