@@ -101,7 +101,12 @@ jobs:
             echo "console queue:worker:start --stop-when-empty"
             docker-sdk/sdk testing console queue:worker:start --stop-when-empty
 
-      - name: Run API Tests
+      - name: Run Backend API Tests
         working-directory: ../demo-shop
         run: |
-          docker-sdk/sdk testing codecept run -c tests/codeception.api.yml
+          docker-sdk/sdk testing codecept run:filtered '*::BackendApiIntegration'
+
+      - name: Run Storefront API Tests
+        working-directory: ../demo-shop
+        run: |
+          docker-sdk/sdk testing codecept run:filtered -g EndToEnd --include tests/PyzTest/Glue --skip BackendApiIntegration
