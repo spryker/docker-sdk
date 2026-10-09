@@ -4,7 +4,7 @@ ARG SPRYKER_JENKINS_BOILERPLATE_VERSION=latest
 
 FROM spryker/jenkins-boilerplate:${SPRYKER_JENKINS_BOILERPLATE_VERSION} as spryker-jenkins-boilerplate
 FROM ${SPRYKER_PARENT_IMAGE}  as spryker_jenkins
-# the application image stops with SIGQUIT for PHP-FPM; entrypoint.sh drains active jobs on SIGTERM only
+
 STOPSIGNAL SIGTERM
 ARG SPRYKER_JENKINS_OPENJDK_VERSION=17
 EXPOSE 8080
