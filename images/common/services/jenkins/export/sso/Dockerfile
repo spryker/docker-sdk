@@ -4,6 +4,8 @@ ARG SPRYKER_JENKINS_BOILERPLATE_VERSION=latest
 
 FROM spryker/jenkins-boilerplate:${SPRYKER_JENKINS_BOILERPLATE_VERSION} as spryker-jenkins-boilerplate
 FROM ${SPRYKER_PARENT_IMAGE}  as spryker_jenkins
+
+STOPSIGNAL SIGTERM
 ARG SPRYKER_JENKINS_OPENJDK_VERSION=17
 EXPOSE 8080
 COPY context/jenkins/export/jenkins.docker.xml.twig ./config/Zed/cronjobs/jenkins.docker.xml.twig

@@ -1,5 +1,7 @@
-{% if applicationData['limits'] is defined %}
+{% if applicationData['limits']['workers'] is not empty %}
       PHP_FPM_PM = {{ 'static' | tf_var }}
-      PHP_FPM_PM_MAX_CHILDREN = {{ applicationData['limits']['workers'] | default(4) | tf_var }}
-      PHP_FPM_REQUEST_TERMINATE_TIMEOUT = {{ applicationData['limits']['request-terminate-timeout'] | default('1m') | tf_var }}
+      PHP_FPM_PM_MAX_CHILDREN = {{ applicationData['limits']['workers'] | tf_var }}
+{% endif %}
+{% if applicationData['limits']['request-terminate-timeout'] is not empty %}
+      PHP_FPM_REQUEST_TERMINATE_TIMEOUT = {{ applicationData['limits']['request-terminate-timeout'] | tf_var }}
 {% endif %}

@@ -13,6 +13,14 @@ FROM ${SPRYKER_PLATFORM_IMAGE} AS application-basic
 
 ENV SPRYKER_IN_DOCKER=1
 ENV COMPOSER_IGNORE_CHROMEDRIVER=1
+
+# graceful stop of PHP-FPM, required by process_control_timeout; SIGTERM terminates in-flight requests immediately
+STOPSIGNAL SIGQUIT
+
+# PHP-FPM access log and process control defaults, declared before image.environment so they can be overridden
+ENV PHP_FPM_PROCESS_CONTROL_TIMEOUT=0
+ENV PHP_FPM_ACCESS_LOG=off
+ENV PHP_FPM_ACCESS_LOG_PATH=/proc/self/fd/2
 {% for envName, envValue in _envs %}
 ENV {{ envName }}='{{ envValue | replace({"'": "\\'"}) | raw }}'
 {% endfor %}
@@ -42,6 +50,7 @@ ENV PHP_FPM_REQUEST_TERMINATE_TIMEOUT=1m
 
 # PHP configuration
 COPY php/php-fpm.d/worker.conf /usr/local/etc/php-fpm.d/worker.conf
+COPY php/php-fpm.access-log/ /usr/local/etc/php-fpm.access-log/
 RUN bash -c "php -r 'exit(PHP_VERSION_ID > 70400 ? 1 : 0);' && sed -i '' -e 's/decorate_workers_output/;decorate_workers_output/g' /usr/local/etc/php-fpm.d/worker.conf || true"
 COPY php/php.ini /usr/local/etc/php/
 COPY php/conf.d/90-opcache.ini /usr/local/etc/php/conf.d
