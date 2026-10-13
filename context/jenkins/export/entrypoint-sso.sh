@@ -3,6 +3,7 @@ set -euo pipefail
 
 HOST="${HOST:-localhost}"
 PORT="${PORT:-8080}"
+SSO_ENABLED="${SPRYKER_SCHEDULER_SSO_ENABLED:-false}"
 
 # === marker & token produced by Groovy ===
 BOOTSTRAP_DIR="/root/.jenkins/secrets/bootstrap"
@@ -135,6 +136,13 @@ fi
 echo "Init scripts in HOME (${INIT_HOME}):"
 ls -l "${INIT_HOME}" || true
 
+# Without SSO, don't let CasC re-apply the OIDC realm / role-based authorization.
+# The Groovy init script resets any security persisted in JENKINS_HOME from a previous SSO run.
+if [ "${SSO_ENABLED}" != "true" ]; then
+  echo "SSO is disabled (SPRYKER_SCHEDULER_SSO_ENABLED != true); unsetting CASC_JENKINS_CONFIG"
+  unset CASC_JENKINS_CONFIG
+fi
+
 # Start Jenkins (Groovy init runs now and creates the token)
 java ${JAVA_OPTS:-} -Djenkins.install.runSetupWizard=false -jar /usr/share/jenkins/jenkins.war ${JENKINS_OPTS:-} & pid=$!
 
@@ -143,8 +151,12 @@ waitForJenkinsToStart
 echo "HTTP port ${PORT} on ${HOST} all started up.."
 
 # Wait for Groovy to finish and write the marker + token
-waitForGroovyBootstrap
-readToken
+if [ "${SSO_ENABLED}" = "true" ]; then
+  waitForGroovyBootstrap
+  readToken
+else
+  echo "SSO is disabled; skipping token bootstrap"
+fi
 
 # Keep PID 1 alive
 wait "${pid}"
