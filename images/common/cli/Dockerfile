@@ -1,4 +1,3 @@
-# syntax = docker/dockerfile:experimental
 ARG SPRYKER_PARENT_IMAGE
 
 FROM ${SPRYKER_PARENT_IMAGE} as cli-basic
@@ -37,6 +36,7 @@ RUN --mount=type=cache,id=apk,sharing=locked,target=/var/cache/apk mkdir -p /etc
      yarn \
      jq \
      build-base \
+     py3-setuptools \
      ; fi'
 
 USER spryker
