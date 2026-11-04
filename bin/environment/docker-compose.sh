@@ -27,19 +27,18 @@ function Environment::checkDockerComposeVersion() {
 }
 
 function Environment::getDockerComposeVersion() {
-    local composeVersion="$(
-       docker compose version >/dev/null 2>&1
-       test $? -eq 0 && docker compose version --short | tr -d 'v' || echo 0
-    )"
+    if [ -n "${SPRYKER_DOCKER_COMPOSE_VERSION}" ]; then
+        echo "${SPRYKER_DOCKER_COMPOSE_VERSION}"
+        return
+    fi
 
-	if [ "${composeVersion}" == '0' ]; then
-         composeVersion="$(
-             docker-compose version >/dev/null 2>&1
-             test $? -eq 0 && docker-compose version --short | tr -d 'v' || echo 0
-         )"
+    local composeVersion="$(docker compose version --short 2>/dev/null | tr -d 'v')"
+
+	if [ -z "${composeVersion}" ]; then
+         composeVersion="$(docker-compose version --short 2>/dev/null | tr -d 'v')"
 	fi
 
-	echo ${composeVersion};
+	echo ${composeVersion:-0};
 }
 
 # Check `Use Docker compose v2` enabler into Docker Desktop
@@ -88,5 +87,9 @@ function updateComposeCovertWindowsPaths() {
         export COMPOSE_CONVERT_WINDOWS_PATHS=0
     fi
 }
+
+# `docker compose version` takes about 40 ms, and several functions need the version on each command.
+# Detect it once and export it, so the deploy script (a child process of `docker/sdk`) reuses it too.
+export SPRYKER_DOCKER_COMPOSE_VERSION="$(Environment::getDockerComposeVersion)"
 
 Registry::addChecker 'Environment::checkDockerComposeVersion'
