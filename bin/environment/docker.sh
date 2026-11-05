@@ -12,6 +12,11 @@ import lib/string.sh
 
 # ------------------
 function Environment::checkDockerVersion() {
+    # `docker/sdk` checked it already in this run.
+    if [ -n "${SPRYKER_DOCKER_VERSION_CHECKED}" ]; then
+        return "${TRUE}"
+    fi
+
     Console::verbose::start "Checking docker version..."
 
     local requiredMinimalVersion=${1:-'18.09.1'}
@@ -32,6 +37,8 @@ function Environment::checkDockerVersion() {
     fi
 
     Environment::checkDependenciesByVersion "${installedVersion}"
+    # Exported, so the deploy script (a child process of `docker/sdk`) does not check it again.
+    export SPRYKER_DOCKER_VERSION_CHECKED=1
     Console::end "[OK]"
 }
 
