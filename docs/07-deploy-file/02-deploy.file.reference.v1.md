@@ -359,6 +359,21 @@ image:
 ```
 ***
 
+### image: system-packages:
+
+Defines additional Alpine Linux packages that are installed into the application image with `apk add --no-cache`. Use it for command-line tools that the application calls, for example `poppler-utils` for `pdftotext`.
+
+* Each value must be a valid Alpine package name: lowercase letters, digits, `.`, `_`, `+`, and `-`.
+* The packages are installed into every application container: the CLI, the web applications, and the scheduler workers.
+
+```yaml
+image:
+    ...
+    system-packages:
+        - poppler-utils
+```
+***
+
 ### assets:
 
 Defines the setting of *Assets*.

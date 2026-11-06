@@ -31,6 +31,8 @@ image.php:
     array-type:
 image.php.enabled-extensions:
     array-type:
+image.system-packages:
+    array-type:
 image.node.version:
     version-format:
 image.node.distro:
