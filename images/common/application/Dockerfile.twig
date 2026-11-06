@@ -39,6 +39,11 @@ RUN mkdir -p /home/spryker/.ssh && chmod 0700 /home/spryker/.ssh
 RUN bash -c '[ ! -z "${KNOWN_HOSTS}" ] && ssh-keyscan -t rsa ${KNOWN_HOSTS} >> /home/spryker/.ssh/known_hosts || true'
 RUN chown spryker:spryker -R /home/spryker/.ssh
 
+{% if _systemPackages is defined and _systemPackages is not empty %}
+# System packages from the deploy file
+RUN apk add --no-cache {{ _systemPackages|join(' ') }}
+{% endif %}
+
 # PHP-FPM environment variables
 ENV PHP_FPM_PM=dynamic
 ENV PHP_FPM_PM_MAX_CHILDREN=4

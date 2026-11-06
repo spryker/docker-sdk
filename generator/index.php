@@ -102,6 +102,7 @@ $projectData['_ports'] = retrieveUniquePorts($projectData);
 $defaultPort = $projectData['_defaultPort'] = getDefaultPort($projectData);
 $hosts = $projectData['_hosts'] = retrieveHostNames($projectData);
 $projectData['_phpExtensions'] = buildPhpExtensionList($projectData);
+$projectData['_systemPackages'] = buildSystemPackageList($projectData);
 $projectData['_phpIni'] = buildPhpIniAdditionalConfig($projectData);
 $projectData['_envs'] = array_merge(
     getAdditionalEnvVariables($projectData),
@@ -1101,6 +1102,33 @@ function buildPhpIniAdditionalConfig(array $projectData): array
 function buildPhpExtensionList(array $projectData): array
 {
     return $projectData['image']['php']['enabled-extensions'] ?? [];
+}
+
+/**
+ * @param array $projectData
+ *
+ * @throws \Exception
+ *
+ * @return string[]
+ */
+function buildSystemPackageList(array $projectData): array
+{
+    $systemPackages = $projectData['image']['system-packages'] ?? [];
+
+    if (!is_array($systemPackages)) {
+        throw new Exception('`image: system-packages:` must be a list of Alpine package names.');
+    }
+
+    foreach ($systemPackages as $systemPackage) {
+        if (!is_string($systemPackage) || !preg_match('/^[a-z0-9][a-z0-9._+-]*$/', $systemPackage)) {
+            throw new Exception(sprintf(
+                '`image: system-packages:` contains an invalid Alpine package name: %s',
+                json_encode($systemPackage)
+            ));
+        }
+    }
+
+    return array_values(array_unique($systemPackages));
 }
 
 /**
