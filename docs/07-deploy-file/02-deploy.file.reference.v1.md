@@ -507,6 +507,7 @@ Optional parameters for `application:`:
 * `groups: applications: application: endpoints: endpoint: redirect: request-uri` - preserves or ignores request-uri due to redirect. Allowed values are `true` or `false`.
 
 * `groups: applications: application: endpoints: real-ip: from:` - defines gateway IP addresses to fetch the real IP address.
+* `groups: applications: application: endpoints: real-ip: header:` - defines the request header to fetch the real IP address from. The default value is `X-Forwarded-For`. Set a CDN client IP header, like `True-Client-IP` for Akamai, to make the endpoint accept requests only from the `real-ip: from:` addresses. See [[CLOUD] Use a CDN client IP header](#cloud-use-a-cdn-client-ip-header).
 * `groups: applications: application: endpoints: auth:` - defines the basic auth.
 * `groups: applications: application: endpoints: auth: engine:` - defines an engine for the basic auth. Only one of the following is allowed per an endpoint: `basic` or `whitelist`.
   * Basic auth variables:
@@ -868,6 +869,37 @@ groups:
                         <<: *frontend-auth
             ...
 ```
+
+#### [CLOUD] Use a CDN client IP header
+
+When a CDN with several tiers, like Akamai with Site Shield, is in front of an endpoint, `X-Forwarded-For` also contains the addresses of the CDN servers between the tiers. They are not published, so they can't be added to `real-ip: from:`, and the application receives a CDN address instead of the client's. In this case, take the real IP address from the header the CDN sets for the origin, like `True-Client-IP` for Akamai.
+
+Unlike `X-Forwarded-For`, such a header contains only one address, and the load balancer forwards it from any client. To prevent spoofing, an endpoint with `real-ip: header:` accepts requests only if the load balancer received them from a `real-ip: from:` address. Other requests are rejected with `403`. Therefore, `real-ip: from:` must contain both of the following:
+* The AWS VPC network of the load balancer.
+* All addresses the CDN connects to the origin from, like the Akamai Site Shield map.
+
+```yaml
+x-real-ip-akamai: &real-ip-akamai
+    real-ip:
+        header: True-Client-IP
+        from:
+            - 10.0.0.0/8 # AWS VPC network
+            - { Akamai Site Shield map CIDR 1 }
+            - { Akamai Site Shield map CIDR 2 }
+
+groups:
+    EU:
+        region: EU
+        applications:
+            Yves:
+                application: yves
+                endpoints:
+                    www.de.spryker.com:
+                        store: DE
+                        <<: *real-ip-akamai
+```
+
+Apply the header only to the endpoints that are served through the CDN. Other endpoints keep the default `X-Forwarded-For` behavior described in [[CLOUD] Define gateway IP addresses](#cloud-define-gateway-ip-addresses).
 
 #### Define allowlisted IP addresses
 
