@@ -189,7 +189,10 @@ const DEFAULT_NODE_VERSION = 12;
 const DEFAULT_NODE_DISTRO = ALPINE_DISTRO_NAME;
 const DEFAULT_NPM_VERSION = 6;
 
+const REAL_IP_DEFAULT_HEADER = 'X-Forwarded-For';
+
 $projectData['_node_npm_config'] = buildNodeJsNpmBuildConfig($projectData);
+$projectData['_realIpTrusted'] = [];
 
 foreach ($projectData['groups'] ?? [] as $groupName => $groupData) {
     foreach ($groupData['applications'] ?? [] as $applicationName => $applicationData) {
@@ -208,6 +211,16 @@ foreach ($projectData['groups'] ?? [] as $groupName => $groupData) {
             $projectData['groups'][$groupName]['applications'][$applicationName]['endpoints'][$endpoint]['identifier'] = $store ? $store : $region;
             $projectData['groups'][$groupName]['applications'][$applicationName]['endpoints'][$endpoint]['primal'] = false;
             $projectData['groups'][$groupName]['applications'][$applicationName]['endpoints'][$endpoint]['code-bucket'] = $codeBucket;
+
+            if (!empty($endpointData['real-ip']) && is_array($endpointData['real-ip'])) {
+                $realIp = buildRealIpConfig($endpoint, $endpointData['real-ip']);
+                $projectData['groups'][$groupName]['applications'][$applicationName]['endpoints'][$endpoint]['real-ip'] = $realIp;
+
+                if (isset($realIp['_trusted-variable'])) {
+                    $projectData['_realIpTrusted'][] = $realIp;
+                }
+            }
+
             while (!empty($projectData['_ports'][$debugPortIndex])) {
                 $debugPortIndex++;
             }
@@ -1355,6 +1368,75 @@ function generatePasswords(array $users): string
         },
         $users
     ));
+}
+
+/**
+ * Validates the `real-ip` configuration of an endpoint and resolves the header nginx takes the client IP from.
+ *
+ * X-Forwarded-For (default) lists every hop, so nginx resolves the client IP by skipping the trusted `from` hops.
+ * Any other header (e.g. Akamai `True-Client-IP`) holds a single address set by a CDN, and nginx can only check
+ * the load balancer in front of it. Such a header is therefore honoured only for requests the load balancer
+ * received from a `from` address: `_trusted-variable` names the nginx variable that enforces it.
+ * A missing or empty header keeps the default, so existing deploy files generate the same configuration.
+ *
+ * @param string $endpoint
+ * @param array $realIp
+ *
+ * @throws \Exception
+ *
+ * @return array
+ */
+function buildRealIpConfig(string $endpoint, array $realIp): array
+{
+    $header = trim((string)($realIp['header'] ?? ''));
+
+    if ($header === '') {
+        $header = REAL_IP_DEFAULT_HEADER;
+    }
+
+    if (!preg_match('/^[A-Za-z0-9-]+$/', $header)) {
+        throw new Exception(sprintf(
+            '`real-ip: header:` of `%s` endpoint must be an HTTP header name, `%s` given.',
+            $endpoint,
+            $header
+        ));
+    }
+
+    if (strcasecmp($header, REAL_IP_DEFAULT_HEADER) === 0) {
+        $realIp['header'] = REAL_IP_DEFAULT_HEADER;
+
+        return $realIp;
+    }
+
+    $from = $realIp['from'] ?? [];
+
+    if (!is_array($from) || $from === []) {
+        throw new Exception(sprintf(
+            '`real-ip: header: %s` of `%s` endpoint requires `real-ip: from:` to list the load balancer and CDN addresses allowed to set the header.',
+            $header,
+            $endpoint
+        ));
+    }
+
+    foreach ($from as $ip) {
+        $ip = trim((string)$ip);
+
+        if (in_array($ip, ['0.0.0.0/0', '::/0'], true)) {
+            throw new Exception(sprintf(
+                '`real-ip: from:` of `%s` endpoint must not contain `%s` together with `real-ip: header: %s`, as it lets any client set the header.',
+                $endpoint,
+                $ip,
+                $header
+            ));
+        }
+    }
+
+    $realIp['header'] = $header;
+    $realIp['_endpoint'] = $endpoint;
+    // Fixed length: nginx fails to start on variable names longer than the default `variables_hash_bucket_size` allows.
+    $realIp['_trusted-variable'] = 'spryker_realip_trusted_' . substr(md5($endpoint), 0, 12);
+
+    return $realIp;
 }
 
 /**

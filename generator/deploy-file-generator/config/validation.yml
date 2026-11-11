@@ -61,6 +61,8 @@ groups.*.applications.*.endpoints.*.store:
     string-type:
 groups.*.applications.*.endpoints.*.services:
     array-type:
+groups.*.applications.*.endpoints.*.real-ip.header:
+    string-type:
 
 # Services
 services.*.engine:
