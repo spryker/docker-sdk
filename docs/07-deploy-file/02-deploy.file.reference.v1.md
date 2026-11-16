@@ -334,11 +334,12 @@ Defines PHP settings for Spryker applications.
   * `pcov`
   * `tideways`
   * `xhprof`
-  * `otel`
+  * `otel` - enables `opentelemetry`, `grpc`, and `protobuf`.
   * `excimer`
   * `imagick`
   * `xlswriter`
   * `xsl`
+  * `protobuf` - enables only `protobuf`. Use it when the application needs Protocol Buffers without OpenTelemetry.
 
 ```yaml
 image:
@@ -355,8 +356,10 @@ image:
             - excimer
             - imagick
             - xlswriter
-           - xsl
+            - xsl
+            - protobuf
 ```
+
 ***
 
 ### assets:
@@ -369,7 +372,6 @@ Defines the setting of *Assets*.
 * `assets: compression: engine: static:` - defines a comression mode. Allowed values are `only`, `true`, and `false`.
 * `assets: compression: engine: level:` - defines a compression level. Allowed range is from `1` to `9`.
 * `assets: compression: engine: types:` - defines additional MIME types to be compressed.
-
 ***
 
 ### regions:

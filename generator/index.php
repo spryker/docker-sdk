@@ -1100,7 +1100,14 @@ function buildPhpIniAdditionalConfig(array $projectData): array
  */
 function buildPhpExtensionList(array $projectData): array
 {
-    return $projectData['image']['php']['enabled-extensions'] ?? [];
+    $phpExtensions = array_values(array_unique($projectData['image']['php']['enabled-extensions'] ?? []));
+
+    // otel.ini in spryker/php already loads protobuf.so; loading it twice warns on every PHP start.
+    if (in_array('otel', $phpExtensions, true)) {
+        $phpExtensions = array_values(array_diff($phpExtensions, ['protobuf']));
+    }
+
+    return $phpExtensions;
 }
 
 /**
