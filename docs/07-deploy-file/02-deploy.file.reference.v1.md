@@ -357,8 +357,21 @@ image:
             - imagick
             - xlswriter
             - xsl
+            - protobuf
 ```
 
+***
+
+### assets:
+
+Defines the setting of *Assets*.
+* `assets: image:` - defines a docker image for a front-end container. If not specified, the default value applies:
+`assets: image: nginx:alpine`.
+* `assets: mode:` - defines a mode for running a static build section from the install recipe. Possible values are `production` and `development`. This variable is optional with the default value of `development`.
+* `assets: compression:` - defines an engine for static compressions. Possible values are `gzip` and `brotli`.
+* `assets: compression: engine: static:` - defines a comression mode. Allowed values are `only`, `true`, and `false`.
+* `assets: compression: engine: level:` - defines a compression level. Allowed range is from `1` to `9`.
+* `assets: compression: engine: types:` - defines additional MIME types to be compressed.
 ***
 
 ### regions:
