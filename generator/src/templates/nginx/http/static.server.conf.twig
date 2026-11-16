@@ -8,9 +8,13 @@
     location / {
         index index.html;
         access_log  off;
+{% if assets['mode'] | default('') == 'development' %}
+        expires     -1;
+{% else %}
         expires     7d;
         add_header  Pragma public;
         add_header  Cache-Control "public, must-revalidate, proxy-revalidate";
+{% endif %}
         etag on;
         try_files   $uri $uri/ =404;
     }

@@ -2,5 +2,13 @@
 {% for ip in (realIp['from'] | default([])) %}
     set_real_ip_from {{ ip | raw }};
 {% endfor %}
-    real_ip_header   X-Forwarded-For;
+    real_ip_header   {{ realIp['header'] | default('X-Forwarded-For') }};
     real_ip_recursive on;
+{% if realIp['_trusted-variable'] is defined %}
+
+    # {{ realIp['header'] }} is honoured only if the load balancer received the request from a trusted address,
+    # otherwise any client bypassing the CDN could set it.
+    if (${{ realIp['_trusted-variable'] }} = 0) {
+        return 403;
+    }
+{% endif %}

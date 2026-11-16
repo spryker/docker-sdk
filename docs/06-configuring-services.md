@@ -158,7 +158,7 @@ docker/sdk up
 
 ## OpenSearch
 
-[OpenSearch](https://opensearch.org/docs/1.3/) is a search engine based on the Lucene library. It provides a distributed, multitenant-capable full-text search engine with an HTTP web interface and schema-free JSON documents.
+[OpenSearch](https://opensearch.org/docs/latest/) is a search engine based on the Lucene library. It provides a distributed, multitenant-capable full-text search engine with an HTTP web interface and schema-free JSON documents. Supported versions: 1.3, 2.19, 3.5.
 
 ### Configuration
 

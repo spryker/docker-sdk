@@ -90,6 +90,8 @@ For contribution guidelines, see [Code contribution guide](https://docs.spryker.
 |                 |                 | 7.6           | &check;     |                                    |
 |                 |                 | 7.10          | &check;     |                                    |
 |                 | opensearch      | 1.3           | &check;     |                                    |
+|                 |                 | 2.19          | &check;     |                                    |
+|                 |                 | 3.5           | &check;     |                                    |
 | scheduler       | jenkins         | 2.176         |             |                                    |
 |                 |                 | 2.305         | &check;     |                                    |
 |                 |                 | 2.324         | &check;     |                                    |
@@ -99,6 +101,8 @@ For contribution guidelines, see [Code contribution guide](https://docs.spryker.
 |                 |                 | 2.492.3       | &check;     |                                    |
 |                 |                 | 2.516.3       | &check;     |                                    |
 |                 |                 | 2.555.1       | &check;     |                                    |
+|                 |                 | 2.568.1       | &check;     |                                    |
+|                 |                 | 2.580.1       | &check;     |                                    |
 | webdriver       | phantomjs       | latest*       |             |                                    |
 |                 | chromedriver    | latest        | &check;     |                                    |
 | mail_catcher    | mailhog         | 1.0           | &check;     |                                    |

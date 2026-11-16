@@ -27,9 +27,11 @@ class Dispatcher {
 
         let child;
         let responseBuffer = '';
+        let finished = false;
 
         try {
-            child = spawn('bash', ['-c', requestBody]);
+            // `detached: true` makes the child a process-group leader, so the whole command tree  can be terminated together via the negative pid below.
+            child = spawn('bash', ['-c', requestBody], {detached: true});
         } catch (error) {
             console.error(error);
             response.statusCode = 400;
@@ -37,6 +39,30 @@ class Dispatcher {
             response.end();
             return;
         }
+
+        const terminateChildGroup = (signal) => {
+            if (finished || !child.pid) {
+                return;
+            }
+
+            try {
+                process.kill(-child.pid, signal);
+            } catch (error) {
+                // The process group is already gone, nothing to terminate.
+            }
+        };
+
+        // When the HTTP client (e.g. the Jenkins job's curl) is stopped, the request is aborted but the spawned command keeps running until its own time limit.
+        const onClientDisconnect = () => {
+            if (finished) {
+                return;
+            }
+
+            console.info('Client disconnected, terminating command: ' + requestBody);
+            terminateChildGroup('SIGTERM');
+            // Escalate to SIGKILL if the command does not shut down gracefully in time.
+            setTimeout(() => terminateChildGroup('SIGKILL'), 15000).unref();
+        };
 
         console.info(requestBody);
         child.stdout.on('data', (chunk) => {
@@ -46,17 +72,22 @@ class Dispatcher {
             responseBuffer += chunk.toString();
         });
         child.on('close', (code) => {
+            finished = true;
             response.statusCode = code === 0 ? 200 : 400;
             response.write(responseBuffer);
             response.end();
         });
 
         child.on('error', (error) => {
+            finished = true;
             console.error(error);
             response.statusCode = 400;
             response.write(error.message);
             response.end();
         });
+
+        response.on('close', onClientDisconnect);
+        request.on('aborted', onClientDisconnect);
     }
 
     _options_glueSchema(request, response) {

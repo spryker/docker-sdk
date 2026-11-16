@@ -256,6 +256,52 @@ image:
   environment:
         {env_variable}: {env_variable_value}
 ```
+
+#### PHP-FPM access log and process control
+
+The following environment variables configure the PHP-FPM access log and `process_control_timeout` of Spryker applications. PHP-FPM reads them when it starts:
+* Values defined in `image: environment:` are built into the application images, so a change requires the images to be rebuilt.
+* Values passed to the application containers at runtime take effect after the containers are restarted.
+
+* `PHP_FPM_ACCESS_LOG` - enables the PHP-FPM access log, including the peak memory allocated by PHP for the request. Possible values are `off` and `on`. The default value is `off`, which keeps the access log disabled. Any other value, including `true` and `ON`, also keeps the access log disabled, and PHP-FPM logs a `Nothing matches the include pattern` warning on start.
+* `PHP_FPM_ACCESS_LOG_PATH` - defines where the access log is written when it is enabled. The default value is `/proc/self/fd/2`, which writes to the container's stderr together with the other application logs. If the path is empty or not writable, PHP-FPM does not start. Do not use `/proc/self/fd/1`: PHP-FPM redirects its stdout to `/dev/null`, so the log is discarded.
+* `PHP_FPM_PROCESS_CONTROL_TIMEOUT` - defines `process_control_timeout`: how long PHP-FPM waits for workers to finish their current requests on a graceful stop (`SIGQUIT`, the stop signal of the application images) or a graceful reload (`SIGUSR2`) before terminating them. New requests are not served while PHP-FPM waits. The default value is `0`: in-flight requests are terminated immediately. Keep the value below the container stop timeout. On `SIGTERM`, in-flight requests are terminated regardless of this value. Supported values are integers with an optional `s`, `m`, `h`, or `d` unit; without a unit, seconds are used. If the value is empty or invalid, PHP-FPM does not start.
+
+The access log is written as one JSON line per request with the `"log_type":"fpm_access"` marker, which separates it from the other logs of the container:
+
+```json
+{"log_type":"fpm_access","time":"2026-10-01T13:17:53+0000","pool":"worker","pid":57,"method":"GET","status":200,"duration_ms":187.412,"cpu_pct":42.71,"mem_peak_bytes":18874368,"uri":"/en/cart?page=2"}
+```
+
+| Field | Description |
+|---|---|
+| `time` | The time when the request finished. |
+| `pool` | The PHP-FPM pool. |
+| `pid` | The PHP-FPM worker process ID. |
+| `method` | The HTTP method. |
+| `status` | The HTTP response status code. |
+| `duration_ms` | The request duration in PHP-FPM, in milliseconds. |
+| `cpu_pct` | The CPU usage of the request, in percent. |
+| `mem_peak_bytes` | The peak memory allocated by PHP for the request, in bytes. |
+| `uri` | The request URI, including the query string, as sent by the client. |
+
+:::(Warning) (Lines that are not valid JSON)
+PHP-FPM does not escape the logged values, and on PHP 8.4 and older it cuts each line at 1024 bytes. A line is not valid JSON if the URI contains a raw `"` or `\` character, or if it is longer than about 800 bytes. The `uri` field is the last one, so the other fields of such lines stay intact. To include these lines, search for the marker in the raw message, for example, `filter @message like /"log_type":"fpm_access"/` in CloudWatch Logs Insights, instead of relying on the parsed fields only. Treat `uri` as untrusted client input.
+:::
+
+```yaml
+image:
+  environment:
+    PHP_FPM_ACCESS_LOG: 'on'
+    PHP_FPM_PROCESS_CONTROL_TIMEOUT: 10s
+```
+
+:::(Info) ()
+* The access log adds one line per request, which increases log volume and log ingestion costs.
+* `mem_peak_bytes` reports the peak memory allocated by PHP, not the memory of the operating system process.
+* Requests terminated by `request_terminate_timeout` are not logged. Status requests of monitoring agents are logged with `"uri":"-"`.
+* The access log covers the PHP-FPM pool of the application; the Xdebug pool of the debug mode is not covered.
+:::
 ***
 
 ### image: node:
@@ -288,9 +334,12 @@ Defines PHP settings for Spryker applications.
   * `pcov`
   * `tideways`
   * `xhprof`
-  * `otel`
+  * `otel` - enables `opentelemetry`, `grpc`, and `protobuf`.
   * `excimer`
   * `imagick`
+  * `xlswriter`
+  * `xsl`
+  * `protobuf` - enables only `protobuf`. Use it when the application needs Protocol Buffers without OpenTelemetry.
 
 ```yaml
 image:
@@ -306,7 +355,11 @@ image:
             - otel
             - excimer
             - imagick
+            - xlswriter
+            - xsl
+            - protobuf
 ```
+
 ***
 
 ### assets:
@@ -319,7 +372,6 @@ Defines the setting of *Assets*.
 * `assets: compression: engine: static:` - defines a comression mode. Allowed values are `only`, `true`, and `false`.
 * `assets: compression: engine: level:` - defines a compression level. Allowed range is from `1` to `9`.
 * `assets: compression: engine: types:` - defines additional MIME types to be compressed.
-
 ***
 
 ### regions:
@@ -457,6 +509,7 @@ Optional parameters for `application:`:
 * `groups: applications: application: endpoints: endpoint: redirect: request-uri` - preserves or ignores request-uri due to redirect. Allowed values are `true` or `false`.
 
 * `groups: applications: application: endpoints: real-ip: from:` - defines gateway IP addresses to fetch the real IP address.
+* `groups: applications: application: endpoints: real-ip: header:` - defines the request header to fetch the real IP address from. The default value is `X-Forwarded-For`. Set a CDN client IP header, like `True-Client-IP` for Akamai, to make the endpoint accept requests only from the `real-ip: from:` addresses. See [[CLOUD] Use a CDN client IP header](#cloud-use-a-cdn-client-ip-header).
 * `groups: applications: application: endpoints: auth:` - defines the basic auth.
 * `groups: applications: application: endpoints: auth: engine:` - defines an engine for the basic auth. Only one of the following is allowed per an endpoint: `basic` or `whitelist`.
   * Basic auth variables:
@@ -546,7 +599,7 @@ yves_eu:
 ...
 ```
 
-* `groups: applications: application: limits: workers` - defines the maximum number of concurrent child processes a process manager can serve simultaneously.
+* `groups: applications: application: limits: workers` - defines the maximum number of concurrent child processes a process manager can serve simultaneously. Setting this option switches the PHP-FPM process manager of the application to `static` mode with the defined number of child processes. If not specified, the process manager stays in `dynamic` mode with up to 4 child processes.
 > Note: This option isn’t available in Spryker Cloud because we automatically detect and apply the optimal PHP-FPM configuration for each application.
 
 ```yaml
@@ -563,7 +616,7 @@ yves_eu:
 To disable the validation of request body size against this parameter, set it to `0`. We do not recommended disabling it.
 :::
 
-* `groups: applications: application: limits: request-terminate-timeout` - define the timeout for serving a single request after which the worker process will be killed. If not specified, the default values apply:
+* `groups: applications: application: limits: request-terminate-timeout` - define the timeout for serving a single request after which the worker process will be killed. This option does not change the process manager mode. If not specified, the default values apply:
     * `backoffice` - `1m`
     * `merchant-portal` - `1m`
     * `glue-storefront` - `1m`
@@ -758,6 +811,7 @@ docker:
 
  ```
 * `docker: debug: xdebug: enabled:` - defines if Xdebug is enabled.
+* `docker: debug: xdebug: custom_host_ip:` - defines the custom host IP. It can be set as `host.docker.internal` when working in Windows environment with WSL2.
 
 
 ### docker: maintenance:
@@ -817,6 +871,37 @@ groups:
                         <<: *frontend-auth
             ...
 ```
+
+#### [CLOUD] Use a CDN client IP header
+
+When a CDN with several tiers, like Akamai with Site Shield, is in front of an endpoint, `X-Forwarded-For` also contains the addresses of the CDN servers between the tiers. They are not published, so they can't be added to `real-ip: from:`, and the application receives a CDN address instead of the client's. In this case, take the real IP address from the header the CDN sets for the origin, like `True-Client-IP` for Akamai.
+
+Unlike `X-Forwarded-For`, such a header contains only one address, and the load balancer forwards it from any client. To prevent spoofing, an endpoint with `real-ip: header:` accepts requests only if the load balancer received them from a `real-ip: from:` address. Other requests are rejected with `403`. Therefore, `real-ip: from:` must contain both of the following:
+* The AWS VPC network of the load balancer.
+* All addresses the CDN connects to the origin from, like the Akamai Site Shield map.
+
+```yaml
+x-real-ip-akamai: &real-ip-akamai
+    real-ip:
+        header: True-Client-IP
+        from:
+            - 10.0.0.0/8 # AWS VPC network
+            - { Akamai Site Shield map CIDR 1 }
+            - { Akamai Site Shield map CIDR 2 }
+
+groups:
+    EU:
+        region: EU
+        applications:
+            Yves:
+                application: yves
+                endpoints:
+                    www.de.spryker.com:
+                        store: DE
+                        <<: *real-ip-akamai
+```
+
+Apply the header only to the endpoints that are served through the CDN. Other endpoints keep the default `X-Forwarded-For` behavior described in [[CLOUD] Define gateway IP addresses](#cloud-define-gateway-ip-addresses).
 
 #### Define allowlisted IP addresses
 

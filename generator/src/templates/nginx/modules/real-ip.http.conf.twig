@@ -1,0 +1,18 @@
+# Address the load balancer received the request from: the last X-Forwarded-For entry, appended by the load balancer.
+map $http_x_forwarded_for $spryker_realip_lb_peer {
+    default                   "";
+    "~(?<peer>[^,\s]+)\s*$"   $peer;
+}
+{% for realIp in realIpConfigs %}
+
+# {{ realIp['_endpoint'] | raw }}: {{ realIp['header'] }} is honoured only for requests the load balancer received from these addresses.
+geo $spryker_realip_lb_peer ${{ realIp['_trusted-variable'] }} {
+    default      0;
+    127.0.0.1    1;
+{% for ip in (realIp['from'] | unique) %}
+{% if ip != '127.0.0.1' %}
+    {{ ip | raw }}    1;
+{% endif %}
+{% endfor %}
+}
+{% endfor %}

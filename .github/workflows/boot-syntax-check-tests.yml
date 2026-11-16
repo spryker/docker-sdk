@@ -72,3 +72,21 @@ jobs:
 
       - name: Run script
         run: bash ./ci/tests.sh
+
+  config_test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        dev-mode: [ DEV_MODE=0, DEV_MODE=1 ]
+    name: Config test
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Config
+        run: |
+          export ${{ matrix.dev-mode }}
+          chmod +x sdk
+          if [[ $DEV_MODE == 0 ]] ; then ./sdk config ci/deploy.yml; fi
+          if [[ $DEV_MODE == 1 ]] ; then ./sdk config ci/deploy.dev.yml; fi
