@@ -47,6 +47,8 @@ assets.mode:
     string-type:
 assets.compression.*.level:
     integer-type:
+assets.cache.paths:
+    array-type:
 
 # Groups
 groups.*.region:
