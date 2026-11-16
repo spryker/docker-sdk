@@ -334,11 +334,12 @@ Defines PHP settings for Spryker applications.
   * `pcov`
   * `tideways`
   * `xhprof`
-  * `otel`
+  * `otel` - enables `opentelemetry`, `grpc`, and `protobuf`.
   * `excimer`
   * `imagick`
   * `xlswriter`
   * `xsl`
+  * `protobuf` - enables only `protobuf`. Use it when the application needs Protocol Buffers without OpenTelemetry.
 
 ```yaml
 image:
@@ -355,8 +356,17 @@ image:
             - excimer
             - imagick
             - xlswriter
-           - xsl
+            - xsl
 ```
+
+Docker SDK enables each listed extension when it builds the application image: it moves `/usr/local/etc/php/disabled/<extension>.ini` of the base PHP image to `/usr/local/etc/php/conf.d/`. An extension listed more than once is enabled once.
+
+:::(Info) ()
+* `otel` already loads `protobuf`. If both `otel` and `protobuf` are listed, Docker SDK skips `protobuf`, so the extension is not loaded twice.
+* `protobuf` alone requires a `spryker/php` image that ships `protobuf.ini`. With an older image, the build fails with `mv: cannot stat '/usr/local/etc/php/disabled/protobuf.ini'`.
+* Extension names are not validated. A name without a matching `.ini` file in the image fails the build the same way. To list the extensions an image provides, run `docker run --rm spryker/php:8.4 ls /usr/local/etc/php/disabled` with the tag from `image: tag:`.
+* `otel` is not available in the Alpine-based PHP 8.2 images, such as `spryker/php:8.2`: they do not include the `opentelemetry` and `grpc` extensions. `protobuf` is available in all images.
+:::
 ***
 
 ### assets:
