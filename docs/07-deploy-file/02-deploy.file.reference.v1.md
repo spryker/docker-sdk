@@ -359,27 +359,6 @@ image:
             - xsl
 ```
 
-Docker SDK enables each listed extension when it builds the application image: it moves `/usr/local/etc/php/disabled/<extension>.ini` of the base PHP image to `/usr/local/etc/php/conf.d/`. An extension listed more than once is enabled once.
-
-:::(Info) ()
-* `otel` already loads `protobuf`. If both `otel` and `protobuf` are listed, Docker SDK skips `protobuf`, so the extension is not loaded twice.
-* `protobuf` alone requires a `spryker/php` image that ships `protobuf.ini`. With an older image, the build fails with `mv: cannot stat '/usr/local/etc/php/disabled/protobuf.ini'`.
-* Extension names are not validated. A name without a matching `.ini` file in the image fails the build the same way. To list the extensions an image provides, run `docker run --rm spryker/php:8.4 ls /usr/local/etc/php/disabled` with the tag from `image: tag:`.
-* `otel` is not available in the Alpine-based PHP 8.2 images, such as `spryker/php:8.2`: they do not include the `opentelemetry` and `grpc` extensions. `protobuf` is available in all images.
-:::
-***
-
-### assets:
-
-Defines the setting of *Assets*.
-* `assets: image:` - defines a docker image for a front-end container. If not specified, the default value applies:
-`assets: image: nginx:alpine`.
-* `assets: mode:` - defines a mode for running a static build section from the install recipe. Possible values are `production` and `development`. This variable is optional with the default value of `development`.
-* `assets: compression:` - defines an engine for static compressions. Possible values are `gzip` and `brotli`.
-* `assets: compression: engine: static:` - defines a comression mode. Allowed values are `only`, `true`, and `false`.
-* `assets: compression: engine: level:` - defines a compression level. Allowed range is from `1` to `9`.
-* `assets: compression: engine: types:` - defines additional MIME types to be compressed.
-
 ***
 
 ### regions:
