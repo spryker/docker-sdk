@@ -12,6 +12,11 @@ geo $is_whitelisted_ip {
 {% endif %}
 }
 
+{% if _realIpTrusted is not empty %}
+{% include "nginx/modules/real-ip.http.conf.twig" with {
+    realIpConfigs: _realIpTrusted,
+} %}
+{% endif %}
 {% if assets['compression'] is not empty %}
 {% for compressionEngine, compressionData in assets['compression'] %}
 
