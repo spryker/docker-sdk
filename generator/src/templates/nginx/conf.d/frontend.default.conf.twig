@@ -12,6 +12,8 @@ geo $is_whitelisted_ip {
 {% endif %}
 }
 
+{% include "nginx/modules/build-info.http.conf.twig" %}
+
 {% if _realIpTrusted is not empty %}
 {% include "nginx/modules/real-ip.http.conf.twig" with {
     realIpConfigs: _realIpTrusted,
