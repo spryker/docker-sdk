@@ -599,6 +599,34 @@ yves_eu:
 ...
 ```
 
+* `groups: applications: application: endpoints: proxy:` - defines locations that Nginx forwards to an external upstream instead of the application, for example, a CDN, a blog, or a headless CMS. Available for all applications except `static`. Each key is an Nginx `location`, for example, `/blog/` or `~* ^/legacy/`. Each value is either the URL of the upstream or a map with the following parameters:
+* `groups: applications: application: endpoints: proxy: location: url` - defines the URL of the upstream. Required when the value is a map.
+* `groups: applications: application: endpoints: proxy: location: host` - defines the `Host` header sent to the upstream. Accepts an Nginx variable or a hostname. The default value is `$http_host`.
+    * `$http_host` - the host requested by the client. Use it for upstreams that serve your domain.
+    * `$proxy_host` - the host and port from `url`. The port is omitted if it's the default port of the scheme. Use it for upstreams that accept only their own hostname, such as Amazon CloudFront distributions and other CDNs. With `$http_host`, these upstreams respond with `403 Forbidden`.
+    * A hostname, for example, `cdn.example.com` - a fixed host, such as an alternate domain name configured on the upstream.
+
+```yaml
+...
+yves_eu:
+    application: yves
+    endpoints:
+        yves.eu.spryker.local:
+            region: EU
+            proxy:
+                /blog/: "https://blog.example.com"
+                /de/smoke-test/:
+                    url: "https://d111111abcdef8.cloudfront.net"
+                    host: "$proxy_host"
+...
+```
+
+:::(Info) ()
+* A URL string is equivalent to a map with only `url`, so the host requested by the client is forwarded. Existing configurations work without changes.
+* For HTTPS upstreams, the TLS server name (SNI) is always the host from `url`, regardless of `host`.
+* Nginx also sends the `X-Real-IP`, `X-Forwarded-For`, and `X-Forwarded-Proto` headers to the upstream.
+:::
+
 * `groups: applications: application: limits: workers` - defines the maximum number of concurrent child processes a process manager can serve simultaneously. Setting this option switches the PHP-FPM process manager of the application to `static` mode with the defined number of child processes. If not specified, the process manager stays in `dynamic` mode with up to 4 child processes.
 > Note: This option isn’t available in Spryker Cloud because we automatically detect and apply the optimal PHP-FPM configuration for each application.
 

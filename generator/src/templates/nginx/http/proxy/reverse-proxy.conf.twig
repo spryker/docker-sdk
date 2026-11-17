@@ -1,10 +1,13 @@
 {% block proxy %}
-    {% for location, proxy_pass in endpointData['proxy'] %}
+    {% for location, proxy in endpointData['proxy'] %}
+{# An entry is either a URL string, or a map with `url` and an optional `host` (e.g. `$proxy_host` for CDN upstreams). #}
+{% set proxy_pass = proxy is iterable ? proxy['url'] : proxy %}
+{% set proxy_host = (proxy is iterable and proxy['host'] is defined) ? proxy['host'] : '$http_host' %}
 location {{ location }} {
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
-        proxy_set_header Host $http_host;
+        proxy_set_header Host {{ proxy_host | nginx_var }};
         proxy_ssl_server_name on;
 
         proxy_pass {{ proxy_pass }};
