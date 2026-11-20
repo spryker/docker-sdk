@@ -1,0 +1,29 @@
+{% set privateIpListRegex = '~^(?:[ ]*(?:127(?:[.][0-9]{1,3}){3}|10(?:[.][0-9]{1,3}){3}|172[.](?:1[6-9]|2[0-9]|3[01])(?:[.][0-9]{1,3}){2}|192[.]168(?:[.][0-9]{1,3}){2})[ ]*(?:,|$))+$' %}
+# Build info (/build.json, /build.php) is served only to requests that did not pass through a public network:
+# the client address, every X-Forwarded-For entry and X-Real-IP must be private (127/8, 10/8, 172.16/12, 192.168/16).
+# Public traffic in AWS comes from the private address of the load balancer, which appends the public client address
+# to X-Forwarded-For. Requests from inside the VPC and from the local docker/sdk gateway carry only private addresses.
+geo $spryker_build_info_client_is_private {
+    default           0;
+    127.0.0.0/8       1;
+    10.0.0.0/8        1;
+    172.16.0.0/12     1;
+    192.168.0.0/16    1;
+}
+
+map $http_x_forwarded_for $spryker_build_info_forwarded_for_is_private {
+    default    0;
+    ""         1;
+    "{{ privateIpListRegex | raw }}"    1;
+}
+
+map $http_x_real_ip $spryker_build_info_real_ip_is_private {
+    default    0;
+    ""         1;
+    "{{ privateIpListRegex | raw }}"    1;
+}
+
+map "$spryker_build_info_client_is_private$spryker_build_info_forwarded_for_is_private$spryker_build_info_real_ip_is_private" $spryker_build_info_allowed {
+    default    0;
+    "111"      1;
+}

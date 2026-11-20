@@ -1,9 +1,25 @@
+{#
+    Build info is served only to requests that did not pass through a public network,
+    see nginx/modules/build-info.http.conf.twig. Such requests skip the endpoint's own auth.
+#}
     location =/build.json {
+        if ($spryker_build_info_allowed = 0) {
+            return 403;
+        }
+        allow all;
+        auth_basic off;
+
         root /usr/share/nginx/;
         try_files $uri =404;
     }
 
     location =/build.php {
+        if ($spryker_build_info_allowed = 0) {
+            return 403;
+        }
+        allow all;
+        auth_basic off;
+
         root /home/spryker;
         include fastcgi.conf;
 {# Variable is necessary for https://www.nginx.com/blog/dns-service-discovery-nginx-plus/#domain-name-upstream-group #}
