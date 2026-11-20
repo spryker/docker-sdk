@@ -372,6 +372,21 @@ Defines the setting of *Assets*.
 * `assets: compression: engine: static:` - defines a comression mode. Allowed values are `only`, `true`, and `false`.
 * `assets: compression: engine: level:` - defines a compression level. Allowed range is from `1` to `9`.
 * `assets: compression: engine: types:` - defines additional MIME types to be compressed.
+* `assets: cache:` - defines the assets cache used by the `ecr2` image export. The cache is enabled by default: without any `cache` configuration, the export watches the default inputs below and rebuilds assets only when one of them changes; otherwise, the previously built assets are reused. Default inputs: `package.json`, `package-lock.json`, `composer.lock`, `.npmrc`, `.browserslistrc`, `nx.json`, `project.json`, `tsconfig*.json`, `frontend/`, `config/Yves/`, `config/install/`, every `Theme`, `assets` and `Presentation/Components` directory under `src/` (any namespace), the assets mode, the pipeline, the PHP platform image, and the Node.js and npm versions. `node_modules` directories are ignored, and default inputs missing in a project are skipped. `assets: cache: false` is a shorthand for `assets: cache: enabled: false`.
+* `assets: cache: enabled:` - defines whether the assets cache is used. Possible values are `true` and `false`. This variable is optional with the default value of `true`. Set to `false` to rebuild assets on every export. The `SPRYKER_ASSETS_CACHE` environment variable overrides it: `0` disables the cache and `1` enables it.
+* `assets: cache: paths:` - defines files or directories, relative to the project root, that are watched in addition to the default inputs. Use it for front-end sources outside the default locations, so their changes trigger a rebuild. Wildcards, such as `*.config.js`, are expanded; quote an entry that starts with `*`, because YAML reads a leading `*` as an alias. An entry that matches no file or directory is reported as a warning in the build output and is not watched.
+
+```yaml
+assets:
+  mode: production
+  cache:
+    enabled: true
+    paths:
+      - src/Acme/Yves
+      - frontend-custom
+      - "*.config.js"
+```
+
 ***
 
 ### regions:

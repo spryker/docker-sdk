@@ -131,6 +131,10 @@ readonly SPRYKER_COMPOSER_AUTOLOAD="{{ composer.autoload | default('') }}"
 readonly SPRYKER_COMPOSER_VERBOSE="{{ composer.verbose is defined ? composer.verbose : '-vvv' }}"
 readonly SPRYKER_LOG_DIRECTORY="{{ docker['logs']['path'] | default('/var/log/spryker') }}"
 readonly SPRYKER_ASSETS_MODE="{{ assets['mode'] | default('development') }}"
+{% set assetsCache = assets['cache'] ?? true -%}
+{% set assetsCacheEnabled = assetsCache is iterable ? (assetsCache['enabled'] ?? true) : assetsCache -%}
+readonly SPRYKER_ASSETS_CACHE=${SPRYKER_ASSETS_CACHE:-{{ (assetsCacheEnabled is same as(false) or assetsCacheEnabled is same as(0) or assetsCacheEnabled is same as('false') or assetsCacheEnabled is same as('0')) ? '0' : '1' }}}
+declare -a -r SPRYKER_ASSETS_CACHE_PATHS=({{ (assetsCache is iterable ? (assetsCache['paths'] ?? []) : []) | map(path => "'" ~ path ~ "'") | join(' ') | raw }})
 readonly SPRYKER_DB_ENGINE="{{ services['database']['engine'] == 'mysql' ? 'mysql' : 'pgsql' }}"
 readonly SPRYKER_STORES=({{ regions | map((regionData, region) => "'local REGION=" ~ '"' ~ region ~ '"' ~ "; local STORES=(" ~ (regionData['stores'] | keys | join(' ')) ~ ")'") | join(' ') | raw }})
 readonly SPRYKER_DEFAULT_STORE="{{ (regions | first)['stores'] | keys | first }}"
